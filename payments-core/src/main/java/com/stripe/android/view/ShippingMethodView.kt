@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeShippingMethodViewBinding
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.uicore.R as UiCoreR
 
 /**
  * Renders the information related to a shipping method.
@@ -42,7 +43,7 @@ internal class ShippingMethodView @JvmOverloads constructor(
 
         selectedColorInt =
             if (StripeColorUtils.isColorTransparent(rawSelectedColorInt)) {
-                ContextCompat.getColor(context, R.color.stripe_accent_color_default)
+                ContextCompat.getColor(context, UiCoreR.color.stripe_accent_color_default)
             } else {
                 rawSelectedColorInt
             }

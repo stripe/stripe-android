@@ -40,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.camera.R as CameraR
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -321,7 +322,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         when (newState) {
             is CardScanState.NotFound -> {
                 viewFinderBackground
-                    .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
+                    .setBackgroundColor(getColorByRes(CameraR.color.stripeNotFoundBackground))
                 viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_not_found)
                 viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)

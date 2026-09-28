@@ -7,8 +7,6 @@
     <dimen name="stripe_paymentsheet_primary_button_padding">4dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_icon_size">20dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_icon_padding">8dp</dimen>
-    <dimen name="stripe_paymentsheet_paymentoption_card_height">25dp</dimen>
-    <dimen name="stripe_paymentsheet_paymentoption_card_width">35dp</dimen>
     <dimen name="stripe_paymentsheet_loading_container_height">100dp</dimen>
     <dimen name="stripe_paymentsheet_loading_indicator_size">24dp</dimen>
     <dimen name="stripe_paymentsheet_loading_indicator_stroke_width">2dp</dimen>

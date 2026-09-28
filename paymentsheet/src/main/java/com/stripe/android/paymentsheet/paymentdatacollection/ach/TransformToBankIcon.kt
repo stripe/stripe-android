@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.R as UiCoreR
 
 internal object TransformToBankIcon {
     operator fun invoke(
         bankName: String?,
-        fallbackIcon: Int = R.drawable.stripe_ic_fc_bank,
+        fallbackIcon: Int = UiCoreR.drawable.stripe_ic_bank_generic_16,
     ): Int {
         if (bankName == null) {
             return fallbackIcon

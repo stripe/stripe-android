@@ -64,7 +64,6 @@ dependencies {
 
     // Other
     implementation libs.playServicesWallet
-    implementation libs.material
     compileOnly libs.places
 
     // Tooling support (Previews, etc.)

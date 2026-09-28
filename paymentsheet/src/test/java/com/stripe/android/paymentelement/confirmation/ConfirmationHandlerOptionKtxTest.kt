@@ -34,12 +34,12 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Test
+import com.stripe.android.uicore.R as UiCoreR
 
 class ConfirmationHandlerOptionKtxTest {
     @Test
@@ -725,7 +725,7 @@ class ConfirmationHandlerOptionKtxTest {
     ): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
             label = "•••• 4242",
-            iconResource = R.drawable.stripe_ic_paymentsheet_bank,
+            iconResource = UiCoreR.drawable.stripe_ic_bank_generic_16,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
             paymentMethodOptionsParams = null,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,

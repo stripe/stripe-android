@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <drawable name="stripe_google_pay_mark">@drawable/stripe_google_pay_mark_core</drawable>
+    <drawable name="stripe_ic_paymentsheet_close">@drawable/stripe_ic_rounded_close</drawable>
+    <drawable name="stripe_ic_paymentsheet_sepa_day">@drawable/stripe_ic_paymentsheet_pm_sepa_debit</drawable>
+    <drawable name="stripe_ic_paymentsheet_card_visa_day">@drawable/stripe_ic_card_visa</drawable>
+    <drawable name="stripe_link_logo">@drawable/stripe_link_logo_day</drawable>
+    <drawable name="stripe_link_logo_light">@drawable/stripe_link_logo_day</drawable>
+    <drawable name="stripe_onelink_logo">@drawable/stripe_ic_paymentsheet_onelink_day</drawable>
+    <drawable name="stripe_onelink_logo_light">@drawable/stripe_ic_paymentsheet_onelink_day</drawable>
+
     <drawable name="stripe_ic_paymentsheet_link_ref">@drawable/stripe_ic_paymentsheet_link_day</drawable>
     <drawable name="stripe_ic_paymentsheet_onelink_ref">@drawable/stripe_ic_paymentsheet_onelink_day</drawable>
     <drawable name="stripe_ic_paymentsheet_sepa_ref">@drawable/stripe_ic_paymentsheet_sepa_day</drawable>

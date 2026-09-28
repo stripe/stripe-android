@@ -11,10 +11,10 @@ import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
-import com.stripe.android.paymentmethodmessaging.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
 import org.junit.Test
+import com.stripe.android.uicore.R as UiCoreR
 
 class PaymentMethodMessagingContentScreenshotTest {
 
@@ -234,7 +234,7 @@ class PaymentMethodMessagingContentScreenshotTest {
         val crazyAppearance = PaymentMethodMessagingElement.Appearance()
             .font(
                 PaymentMethodMessagingElement.Appearance.Font()
-                    .fontFamily(R.font.cursive)
+                    .fontFamily(UiCoreR.font.cursive)
                     .fontSizeSp(32f)
                     .fontWeight(600)
                     .letterSpacingSp(12f)

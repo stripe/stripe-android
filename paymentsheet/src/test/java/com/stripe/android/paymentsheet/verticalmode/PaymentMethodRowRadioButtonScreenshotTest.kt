@@ -165,7 +165,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 .rowStyle(FlatWithRadio.default)
                 .titleFont(
                     PaymentSheet.Typography.Font(
-                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontFamily = com.stripe.android.uicore.R.font.cursive,
                         fontSizeSp = 20f,
                         fontWeight = 500,
                         letterSpacingSp = 10f
@@ -173,7 +173,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 )
                 .subtitleFont(
                     PaymentSheet.Typography.Font(
-                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontFamily = com.stripe.android.uicore.R.font.cursive,
                         fontSizeSp = 12f,
                         fontWeight = 200,
                         letterSpacingSp = 5f

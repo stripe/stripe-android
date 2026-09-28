@@ -3,10 +3,10 @@ package com.stripe.android.utils.screenshots
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.R as UiCoreR
 
 enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
@@ -21,7 +21,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             ),
             typography = PaymentSheet.Typography(
-                fontResId = R.font.cursive,
+                fontResId = UiCoreR.font.cursive,
                 sizeScaleFactor = 1.75F,
             )
         ),
@@ -76,7 +76,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 fontResId = null,
                 custom = PaymentSheet.Typography.Custom(
                     h1 = PaymentSheet.Typography.Font(
-                        fontFamily = R.font.cursive,
+                        fontFamily = UiCoreR.font.cursive,
                         fontSizeSp = 24f,
                         fontWeight = 700,
                         letterSpacingSp = 0.15f,

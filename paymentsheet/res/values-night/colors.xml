@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="stripe_control_normal_color_default">#e1e1e1</color>
-    <color name="stripe_toolbar_color_default">#1f1f1f</color>
-    <color name="stripe_toolbar_color_default_dark">#000000</color>
-
-    <color name="stripe_text_color_secondary">@android:color/secondary_text_dark</color>
-
     <!-- PaymentSheet -->
-    <color name="stripe_paymentsheet_background">#2e2e2e</color>
     <color name="stripe_paymentsheet_country_chevron_color">#ffffff</color>
     <color name="stripe_paymentsheet_payment_option_unselected_stroke">#1FFFFFFF</color>
     <color name="stripe_paymentsheet_elements_background_default">#474747</color>
     <color name="stripe_paymentsheet_elements_background_disabled">#474747</color>
-    <color name="stripe_paymentsheet_form_border">#3Dffffff</color>
-    <color name="stripe_paymentsheet_toolbar_items_color">#FFFFFF</color>
     <color name="stripe_paymentsheet_googlepay_primary_button_background_color">#FFFFFF</color>
     <color name="stripe_paymentsheet_googlepay_primary_button_tint_color">#1F1F1F</color>
     <!-- CardFormView -->

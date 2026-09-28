@@ -6,4 +6,7 @@
     <color name="stripe_toolbar_color_default_dark">#ff324090</color>
     <color name="stripe_title_text_color">@android:color/white</color>
     <color name="stripe_text_color_secondary">@android:color/secondary_text_light</color>
+    <color name="stripe_paymentsheet_background">#ffffff</color>
+    <color name="stripe_paymentsheet_form_border">#33787880</color>
+    <color name="stripe_paymentsheet_toolbar_items_color">#000000</color>
 </resources>

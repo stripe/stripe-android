@@ -149,7 +149,6 @@ dependencies {
     implementation libs.goDaddyColorPicker
     implementation libs.kotlin.serialization
     implementation libs.loggingInterceptor
-    implementation libs.material
     implementation libs.okio
     implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter

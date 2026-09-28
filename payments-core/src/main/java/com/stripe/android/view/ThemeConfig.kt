@@ -6,6 +6,7 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.stripe.android.R
+import com.stripe.android.uicore.R as UiCoreR
 
 internal class ThemeConfig(context: Context) {
     private val colorUtils = StripeColorUtils(context)
@@ -14,14 +15,14 @@ internal class ThemeConfig(context: Context) {
     private val selectedColorInt = determineColor(
         context,
         colorUtils.colorAccent,
-        R.color.stripe_accent_color_default
+        UiCoreR.color.stripe_accent_color_default
     )
 
     @ColorInt
     private val unselectedColorInt = determineColor(
         context,
         colorUtils.colorControlNormal,
-        R.color.stripe_control_normal_color_default
+        UiCoreR.color.stripe_control_normal_color_default
     )
 
     @ColorInt

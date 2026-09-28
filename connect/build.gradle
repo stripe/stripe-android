@@ -9,6 +9,7 @@ apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(':stripe-core')
+    implementation project(':stripe-ui-core')
     implementation project(':financial-connections')
 
     // Kotlin

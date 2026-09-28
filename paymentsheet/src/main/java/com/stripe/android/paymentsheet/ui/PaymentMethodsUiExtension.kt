@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBank
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
@@ -295,7 +296,7 @@ internal fun PaymentMethod.getLabelIcon(): Int? {
     val iconStyle = LocalIconStyle.current
 
     val bankIcon = when (iconStyle) {
-        IconStyle.Filled -> R.drawable.stripe_ic_paymentsheet_bank
+        IconStyle.Filled -> UiCoreR.drawable.stripe_ic_bank_generic_16
         IconStyle.Outlined -> PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank_outlined
     }
 

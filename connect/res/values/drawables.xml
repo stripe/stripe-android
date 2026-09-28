@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="stripe_connect_close">@drawable/stripe_ic_sdk_close</drawable>
+</resources>

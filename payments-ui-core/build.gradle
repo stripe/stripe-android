@@ -17,7 +17,6 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
-    implementation libs.material
     implementation libs.dagger
     ksp libs.daggerCompiler
 
