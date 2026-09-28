@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -142,6 +143,7 @@ private class CheckoutSessionProjection(
                 previousPaymentOption = state?.let {
                     PreviousPaymentOption(
                         selection = it.paymentSelection,
+                        paymentMethodMetadata = it.paymentMethodMetadata,
                         displayData = session?.paymentOption,
                     )
                 }
@@ -164,6 +166,7 @@ private class CheckoutSessionProjection(
         latestValuePaymentOption = currentState?.let {
             PreviousPaymentOption(
                 selection = it.paymentSelection,
+                paymentMethodMetadata = it.paymentMethodMetadata,
                 displayData = session?.paymentOption,
             )
         }
@@ -201,12 +204,14 @@ private class CheckoutSessionProjection(
             previousPaymentOptions.firstOrNull { previousPaymentOption ->
                 previousPaymentOption != null &&
                     previousPaymentOption.selection == selection &&
+                    previousPaymentOption.paymentMethodMetadata == paymentMethodMetadata &&
                     previousPaymentOption.displayData.hasSameVisibleContentAs(displayData)
             }?.displayData ?: displayData
         }
 
     private data class PreviousPaymentOption(
         val selection: PaymentSelection?,
+        val paymentMethodMetadata: PaymentMethodMetadata,
         val displayData: PaymentOptionDisplayData?,
     )
 }

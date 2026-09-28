@@ -133,22 +133,32 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `session does not emit when metadata changes without changing the payment option`() = testScenario(
+    fun `session emits when metadata changes even if payment option content stays the same`() = testScenario(
         paymentOptionFactory = freshPaymentOptionFactory(),
     ) {
-        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+        val initialMetadata = PaymentMethodMetadataFactory.create()
+        stateHolder.state = committedState(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = initialMetadata,
+        )
 
         stateHolder.session.test {
-            assertThat(awaitItem()?.paymentOption?.label).isEqualTo("Google Pay")
+            val initialSession = awaitItem()
+            assertThat(initialSession?.paymentOption?.label).isEqualTo("Google Pay")
 
-            val currentState = requireNotNull(stateHolder.state)
-            stateHolder.state = currentState.copy(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    paymentMethodOrder = listOf("card"),
-                ),
+            val changedMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodOrder = listOf("card"),
+            )
+            assertThat(changedMetadata).isNotEqualTo(initialMetadata)
+            stateHolder.state = requireNotNull(stateHolder.state).copy(
+                paymentMethodMetadata = changedMetadata,
             )
 
-            expectNoEvents()
+            val updatedSession = awaitItem()
+            assertThat(updatedSession?.paymentOption?.label)
+                .isEqualTo(initialSession?.paymentOption?.label)
+            assertThat(updatedSession?.paymentOption)
+                .isNotSameInstanceAs(initialSession?.paymentOption)
         }
     }
 
