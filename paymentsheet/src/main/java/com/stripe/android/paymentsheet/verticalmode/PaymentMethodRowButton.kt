@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import com.stripe.android.ui.core.elements.PaymentMethodMessagePromotionText
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
@@ -217,7 +218,7 @@ private fun RowButtonFloatingOuterContent(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .then(
-                modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+                modifier.alpha(alpha = enabledStateAlpha(isEnabled))
             ),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
