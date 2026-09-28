@@ -115,10 +115,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                if (!result.hasBeenConfirmed) {
-                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                refreshCheckoutSession(result.checkoutSessionResponse) {
+                    if (!result.hasBeenConfirmed) {
+                        result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                    }
                 }
-                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
@@ -142,7 +143,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                refreshCheckoutSession(result.checkoutSessionResponse) {}
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -158,11 +159,19 @@ internal class CheckoutSheetLauncher @Inject constructor(
         selectionHolder.setSelection(result.selection)
     }
 
-    private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
-        response ?: return
+    private fun refreshCheckoutSession(
+        response: CheckoutSessionResponse?,
+        onRefreshed: () -> Unit,
+    ) {
+        if (response == null) {
+            onRefreshed()
+            return
+        }
         coroutineScope.launch {
             operationCoordinator.runMutation {
                 runCatching { sessionRefresher.refresh(response) }
+            }.onSuccess {
+                onRefreshed()
             }.onFailure {
                 logger.error("Failed to refresh the checkout session after the sheet closed.", it)
             }
