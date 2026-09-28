@@ -29,6 +29,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -221,7 +222,7 @@ private fun EditButton(
     isEnabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val color = MaterialTheme.colors.primary.copy(alpha = if (isEnabled) 1.0f else 0.6f)
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = color,
@@ -241,7 +242,7 @@ private fun ViewMoreButton(
     showChevron: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
-    val color = MaterialTheme.colors.primary.copy(alpha = if (isEnabled) 1.0f else 0.6f)
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
