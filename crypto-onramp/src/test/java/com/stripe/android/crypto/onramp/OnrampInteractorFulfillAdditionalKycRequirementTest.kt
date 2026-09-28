@@ -7,6 +7,7 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
+import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
@@ -42,9 +43,9 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         val response = submissionResponse()
         val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
         val expectedQuestionnaire = questionnaireRequest()
-        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_1")))
-        whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_2")))
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
@@ -61,8 +62,8 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
 
         assertThat(result.getOrThrow()).isSameInstanceAs(response)
         inOrder(cryptoApiRepository) {
-            verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile)
-            verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile)
+            verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
+            verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
             verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
                 liquidityProvider = "swapped",
                 documents = expectedDocuments,
@@ -81,14 +82,14 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         )
 
         assertUnexpectedError<MissingConsumerSecretException>(result.exceptionOrNull())
-        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any())
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
         verifyFulfillmentWasNotRequested()
     }
 
     @Test
     fun `upload failure stops remaining uploads and submission`() = runScenario {
         val uploadError = IllegalStateException("Upload failed")
-        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.failure(uploadError))
 
         val result = interactor.fulfillAdditionalKycRequirement(
@@ -97,13 +98,13 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
 
         val error = assertUnexpectedError<IllegalStateException>(result.exceptionOrNull())
         assertThat(error.underlyingError).isSameInstanceAs(uploadError)
-        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(secondFile)
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
         verifyFulfillmentWasNotRequested()
     }
 
     @Test
     fun `uploaded file without an ID fails before submission`() = runScenario {
-        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = null)))
 
         val result = interactor.fulfillAdditionalKycRequirement(
@@ -124,7 +125,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         val submissionError = IllegalStateException("Submission failed")
         val documents = documentRequests(fileIds = listOf("file_1"))
         val questionnaire = questionnaireRequest()
-        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile))
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(
             cryptoApiRepository.fulfillAdditionalKycRequirement(
@@ -143,15 +144,64 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         assertThat(error.underlyingError).isSameInstanceAs(submissionError)
     }
 
+    @Test
+    fun `missing Link session key fails before uploading`() = runScenario(
+        linkSessionKey = null,
+    ) {
+        val result = interactor.fulfillAdditionalKycRequirement(
+            documentSubmission(files = listOf(firstFile))
+        )
+
+        assertUnexpectedError<MissingLinkSessionKeyException>(result.exceptionOrNull())
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
+        verifyFulfillmentWasNotRequested()
+    }
+
+    @Test
+    fun `blank Link session key fails before uploading`() = runScenario(
+        linkSessionKey = "   ",
+    ) {
+        val result = interactor.fulfillAdditionalKycRequirement(
+            documentSubmission(files = listOf(firstFile))
+        )
+
+        assertUnexpectedError<MissingLinkSessionKeyException>(result.exceptionOrNull())
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
+        verifyFulfillmentWasNotRequested()
+    }
+
+    @Test
+    fun `questionnaire submission does not require a Link session key`() = runScenario(
+        linkSessionKey = null,
+    ) {
+        val response = submissionResponse()
+        whenever(
+            cryptoApiRepository.fulfillAdditionalKycRequirement(
+                liquidityProvider = "swapped",
+                documents = emptyList(),
+                questionnaire = questionnaireRequest(),
+                consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
+            )
+        ).thenReturn(Result.success(response))
+
+        val result = interactor.fulfillAdditionalKycRequirement(
+            documentSubmission(files = emptyList()).copy(documents = emptyList())
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(response)
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
+    }
+
     private fun runScenario(
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
+        linkSessionKey: String? = LINK_SESSION_KEY,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = createApplication()
         val linkController = mock<LinkController>()
         val cryptoApiRepository = mock<CryptoApiRepository>()
         whenever(linkController.state(any())).thenReturn(
-            MutableStateFlow(linkState(consumerSessionClientSecret))
+            MutableStateFlow(linkState(consumerSessionClientSecret, linkSessionKey))
         )
 
         Scenario(
@@ -203,6 +253,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     }
 
     private companion object {
+        const val LINK_SESSION_KEY = "lsk_test_123"
         const val CONSUMER_SESSION_CLIENT_SECRET = "secret_123"
         fun documentRequests(fileIds: List<String>): List<AdditionalKycDocumentSubmissionRequest> {
             return listOf(
@@ -258,14 +309,14 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             )
         }
 
-        fun linkState(consumerSessionClientSecret: String?): LinkController.State {
+        fun linkState(consumerSessionClientSecret: String?, linkSessionKey: String?): LinkController.State {
             return LinkController.State(
                 internalLinkAccount = LinkController.LinkAccount(
                     email = "test@example.com",
                     redactedPhoneNumber = "***-***-1234",
                     sessionState = LinkController.SessionState.LoggedIn,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    linkSessionKey = null,
+                    linkSessionKey = linkSessionKey,
                 ),
                 merchantLogoUrl = null,
                 selectedPaymentMethodPreview = null,
