@@ -153,6 +153,22 @@ internal class IsNfcScanningAvailableTest {
     }
 
     @Test
+    fun `returns available as primary when experiment is unassigned and NFC is preferred over camera scan`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    preferNfcOverCameraScan = true,
+                ),
+            )
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = true)
+        )
+    }
+
+    @Test
     fun `logs experiment exposure when assigned to treatment`() = runTest {
         val eventReporter = FakeEventReporter()
         val isNfcScanningAvailable = createIsNfcScanningAvailable(eventReporter = eventReporter)
@@ -276,11 +292,13 @@ internal class IsNfcScanningAvailableTest {
         isNfcScanningEnabled: Boolean,
         isTapToAddSupported: Boolean = false,
         isStripeCardScanAllowed: Boolean = false,
+        preferNfcOverCameraScan: Boolean = false,
         experimentVariant: String? = null,
     ) = PaymentMethodMetadataFactory.create(
         isNfcScanningEnabled = isNfcScanningEnabled,
         isTapToAddSupported = isTapToAddSupported,
         isStripeCardScanAllowed = isStripeCardScanAllowed,
+        preferNfcOverCameraScan = preferNfcOverCameraScan,
         experimentsData = experimentVariant?.let { variant ->
             ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
