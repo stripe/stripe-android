@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED] Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+
 ## 23.21.0 - 2026-09-28
 
 ### Payments
@@ -11,7 +14,6 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
 * [ADDED] Added support for MB WAY payments.
-* [FIXED] Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
