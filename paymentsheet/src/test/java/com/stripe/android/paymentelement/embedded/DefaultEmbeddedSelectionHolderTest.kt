@@ -181,7 +181,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     }
 
     private class Scenario(
-        val selectionHolder: EmbeddedSelectionHolder,
+        val selectionHolder: DefaultEmbeddedSelectionHolder,
         val savedStateHandle: SavedStateHandle,
     )
 
