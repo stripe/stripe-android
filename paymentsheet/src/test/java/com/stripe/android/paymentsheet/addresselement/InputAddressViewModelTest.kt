@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.LegacyAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -65,7 +66,7 @@ class InputAddressViewModelTest {
             argsFactory(config),
             navigator,
             resultStateHolder,
-            eventReporter,
+            LegacyAddressElementEventReporter(eventReporter),
             placesClient = placesClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
@@ -1302,7 +1303,7 @@ class InputAddressViewModelTest {
             ),
             navigator,
             resultStateHolder,
-            eventReporter,
+            LegacyAddressElementEventReporter(eventReporter),
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
