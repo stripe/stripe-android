@@ -1934,6 +1934,71 @@ class ElementsSessionJsonParserTest {
             .isEqualTo(enabled)
     }
 
+    @Test
+    fun `parse elements_mobile_android_prefer_nfc_over_camera_scan flag when present`() {
+        testPreferNfcOverCameraScanFlag(enabled = true)
+        testPreferNfcOverCameraScanFlag(enabled = false)
+    }
+
+    @Test
+    fun `parse elements_mobile_android_prefer_nfc_over_camera_scan flag when missing`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
+
+        assertThat(
+            session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN)
+        ).isNull()
+    }
+
+    private fun testPreferNfcOverCameraScanFlag(enabled: Boolean) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val json = JSONObject(
+            """
+            {
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "payment_intent": {
+                  "id": "pi_123",
+                  "object": "payment_intent",
+                  "amount": 1099,
+                  "currency": "usd",
+                  "status": "requires_payment_method"
+                },
+                "ordered_payment_method_types": ["card"]
+              },
+              "flags": {
+                "elements_mobile_android_prefer_nfc_over_camera_scan": $enabled
+              }
+            }
+            """.trimIndent()
+        )
+
+        val session = parser.parse(json)
+
+        assertThat(
+            session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN)
+        ).isEqualTo(enabled)
+    }
+
     // region Card Art Merging
 
     @Test
