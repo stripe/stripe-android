@@ -16,6 +16,7 @@ object PaymentSheetNextActionHandlers {
             StripeIntent.NextActionData.DisplayPayNowDetails::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.DisplayPromptPayDetails::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.AwaitAuthorization::class.java to PollingNextActionHandler(),
+            StripeIntent.NextActionData.MbWayAwaitAuthorization::class.java to PollingNextActionHandler(),
         )
     }
 }

@@ -85,9 +85,11 @@ internal class PaymentSheetNextActionTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }

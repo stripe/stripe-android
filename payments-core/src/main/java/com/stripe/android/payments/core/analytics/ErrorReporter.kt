@@ -45,23 +45,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createFallbackInstance(
-            context: Context,
-            productUsage: Set<String> = emptySet(),
-        ): ErrorReporter {
-            return createFallbackInstance(
-                context = context,
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
-                productUsage = productUsage,
-            )
-        }
-
         /**
          * Prefer using an injected version of [ErrorReporter].
          *
@@ -82,6 +65,28 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                     productUsage = productUsage,
                 )
                 .errorReporter
+        }
+
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component and ApiConfiguration.
+         */
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
         }
 
         fun getAdditionalParamsFromError(error: Throwable): Map<String, String> {
@@ -333,6 +338,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED(
             partialEventName = "intent_confirmation_handler.attestation.invoked_when_disabled"
         ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_CLOUD_PROJECT_NUMBER_IS_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.cloud_project_number_is_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_INTEGRITY_TOKEN_PROVIDER_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.integrity_token_provider_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_HASH_TOO_LONG(
+            partialEventName = "intent_confirmation_handler.attestation.request_hash_too_long"
+        ),
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
         ),
@@ -383,6 +397,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
+        ),
+        CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS(
+            partialEventName = "checkout.saved_payment_method.missing_billing_address"
         ),
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"

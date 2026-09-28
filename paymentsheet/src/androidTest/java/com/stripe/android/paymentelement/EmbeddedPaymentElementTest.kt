@@ -23,7 +23,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.paymentsheet.utils.EmbeddedPaymentElementApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.UsBankAccountFormTestUtils
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -52,7 +52,7 @@ internal class EmbeddedPaymentElementTest {
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
 
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
     lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")

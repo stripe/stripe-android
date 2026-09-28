@@ -90,7 +90,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
@@ -105,7 +107,9 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().displayedSavedPaymentMethod).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                "pm_missing",
+            )
 
             expectNoEvents()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
@@ -683,7 +687,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
 
             assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1221,7 +1224,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isNull()
                 }
             }
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1523,7 +1525,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isCurrentScreenSource.value = true
 
             assertThat(selection.value).isEqualTo(verticalModeSelection)
-            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -2078,9 +2079,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsState = walletsState,
             canUpdateCardExpiryAndBillingDetails = stateFlowOf(canUpdateCardExpiryAndBillingDetails),
             canChangeCbc = stateFlowOf(canChangeCbc),
-            updateSelection = { paymentSelection, isFormScreen ->
+            updateSelection = { paymentSelection ->
                 selection.value = paymentSelection
-                updateSelectionTurbine.add(isFormScreen)
             },
             verticalPaymentSelectionHandler = defaultVerticalPaymentSelectionHandler,
             isCurrentScreen = isCurrentScreen,

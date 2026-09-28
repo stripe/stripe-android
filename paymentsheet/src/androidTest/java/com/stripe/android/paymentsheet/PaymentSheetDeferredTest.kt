@@ -73,7 +73,7 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -142,7 +142,7 @@ internal class PaymentSheetDeferredTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -207,10 +207,12 @@ internal class PaymentSheetDeferredTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build()
+                ),
             )
         }
 
@@ -271,10 +273,12 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -357,10 +361,12 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build()
+                ),
             )
         }
 
@@ -421,10 +427,12 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .customer(PaymentSheet.CustomerConfiguration("cus_foobar", TestApiKeys.EPHEMERAL))
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -496,7 +504,7 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -544,7 +552,7 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -589,10 +597,12 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc")
-                    .allowsDelayedPaymentMethods(true)
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc")
+                        .allowsDelayedPaymentMethods(true)
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .build()
+                ),
             )
         }
 
@@ -668,7 +678,7 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -736,7 +746,7 @@ internal class PaymentSheetDeferredTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -791,7 +801,7 @@ internal class PaymentSheetDeferredTest(
                         currency = "usd"
                     )
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 

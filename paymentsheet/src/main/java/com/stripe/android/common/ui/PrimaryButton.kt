@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,8 @@ import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.uicore.stripePrimaryButtonStyle
 import com.stripe.android.ui.core.R as UiCoreR
+
+internal const val PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG = "PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG"
 
 @Composable
 internal fun PrimaryButton(
@@ -128,7 +131,9 @@ private fun PrimaryButtonContent(
             ) {
                 LoadingIndicator(
                     color = MaterialTheme.colors.onPrimary,
-                    modifier = Modifier.align(Alignment.CenterEnd)
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .testTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
                 )
             }
         } else if (displayLockIcon) {

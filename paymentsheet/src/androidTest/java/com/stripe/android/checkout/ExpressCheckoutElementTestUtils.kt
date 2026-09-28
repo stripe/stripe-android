@@ -11,6 +11,8 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivity
@@ -26,6 +28,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -42,16 +45,38 @@ internal fun NetworkRule.enqueueLinkAccountLookup() {
 internal fun enqueueSuccessfulGooglePayPayment(
     paymentMethod: PaymentMethod,
     shippingInformation: ShippingInformation? = null,
+    paymentDataUpdate: GooglePayPaymentDataUpdate? = null,
 ) {
     enqueueGooglePayPaymentResult(
         GooglePayPaymentMethodLauncher.Result.Completed(
             paymentMethod = paymentMethod,
             shippingInformation = shippingInformation,
-        )
+        ),
+        paymentDataUpdate = paymentDataUpdate,
     )
 }
 
-internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: MockResponse) {
+internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response: MockResponse) {
+    createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
+        json.put(
+            "tax_context",
+            JSONObject()
+                .put("automatic_tax_enabled", true)
+                .put("automatic_tax_address_source", "session.shipping")
+        )
+        json.put(
+            "tax_meta",
+            JSONObject()
+                .put("computation_type", "automatic")
+                .put("status", "requires_location_inputs")
+        )
+    }
+}
+
+internal fun createCheckoutInitResponseWithRequiredShippingAddress(
+    response: MockResponse,
+    modify: (JSONObject) -> Unit = {},
+) {
     response.testBodyFromFile("checkout-session-init.json") { json ->
         json.put("customer_email", "checkout@example.com")
         json.put("account_settings", JSONObject().put("country", "US"))
@@ -59,6 +84,7 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddress(response: Moc
             "shipping_address_collection",
             JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))
         )
+        modify(json)
     }
 }
 
@@ -67,20 +93,31 @@ internal fun enqueueFailedGooglePayPayment(error: Throwable) {
         GooglePayPaymentMethodLauncher.Result.Failed(
             error = error,
             errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
-        )
+        ),
+        paymentDataUpdate = null,
     )
 }
 
-private fun enqueueGooglePayPaymentResult(result: GooglePayPaymentMethodLauncher.Result) {
-    intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWith(
-        Instrumentation.ActivityResult(
-            Activity.RESULT_OK,
-            Intent().putExtra(
-                "extra_result",
-                result,
-            ),
-        )
+private fun enqueueGooglePayPaymentResult(
+    result: GooglePayPaymentMethodLauncher.Result,
+    paymentDataUpdate: GooglePayPaymentDataUpdate?,
+) {
+    val activityResult = Instrumentation.ActivityResult(
+        Activity.RESULT_OK,
+        Intent().putExtra(
+            "extra_result",
+            result,
+        ),
     )
+    intending(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)).respondWithFunction { intent ->
+        paymentDataUpdate?.let { update ->
+            val response = runBlocking {
+                googlePayPaymentDataUpdateCallback(intent).onPaymentDataChanged(update)
+            }
+            assertThat(response.error).isNull()
+        }
+        activityResult
+    }
 }
 
 internal fun assertGooglePayCalled() {
@@ -180,6 +217,10 @@ internal fun assertNativeLinkCalledWithRequiredBillingAddress() {
 
 private fun googlePayLauncherArg(name: String): Any? {
     val intent = getIntents().single { hasComponent(GOOGLE_PAY_ACTIVITY_NAME).matches(it) }
+    return googlePayLauncherArg(intent, name)
+}
+
+private fun googlePayLauncherArg(intent: Intent, name: String): Any? {
     val args = intent.extras?.let {
         BundleCompat.getParcelable(it, "extra_args", Parcelable::class.java)
     }
@@ -187,6 +228,18 @@ private fun googlePayLauncherArg(name: String): Any? {
         .getDeclaredField(name)
         .apply { isAccessible = true }
         .get(args)
+}
+
+private fun googlePayPaymentDataUpdateCallback(intent: Intent): GooglePayPaymentDataUpdateCallback {
+    val dynamicCallbackId = requireNotNull(googlePayLauncherArg(intent, "dynamicCallbackId"))
+    val registryClass = Class.forName(
+        "com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallbackRegistry"
+    )
+    val registry = registryClass.getDeclaredField("INSTANCE").get(null)
+    val registeredCallbacks = registryClass.getDeclaredField("registeredCallbacks")
+        .apply { isAccessible = true }
+        .get(registry) as Map<*, *>
+    return requireNotNull(registeredCallbacks[dynamicCallbackId]) as GooglePayPaymentDataUpdateCallback
 }
 
 private const val GOOGLE_PAY_ACTIVITY_NAME =

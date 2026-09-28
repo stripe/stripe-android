@@ -10,6 +10,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
@@ -225,24 +226,77 @@ internal class ExpressCheckoutElementTest {
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
-            val shippingInformation = ShippingInformation(
-                address = Address(
-                    city = "San Francisco",
-                    country = "US",
-                    line1 = "510 Townsend St",
-                    line2 = "Floor 3",
-                    postalCode = "94103",
-                    state = "CA",
-                ),
-                name = "Jenny Rosen",
-                phone = null,
-            )
+            val shippingInformation = createShippingInformation()
 
             enqueueSuccessfulGooglePayPayment(
                 paymentMethod = paymentMethod,
                 shippingInformation = shippingInformation,
             )
 
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+                bodyPart("shipping[name]", "Jenny Rosen"),
+                bodyPart("shipping[address][line1]", "510 Townsend St"),
+                bodyPart("shipping[address][line2]", "Floor 3"),
+                bodyPart("shipping[address][city]", "San Francisco"),
+                bodyPart("shipping[address][state]", "CA"),
+                bodyPart("shipping[address][postal_code]", "94103"),
+                bodyPart("shipping[address][country]", "US"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithShippingAddressParameters(
+            GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = setOf("US", "CA"),
+            )
+        )
+    }
+
+    @Test
+    fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
+
+        runExpressCheckoutElementTest(
+            networkRule = networkRule,
+            initialCheckoutSessionResponseFactory =
+                ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+            },
+        ) {
+            val paymentMethod = PaymentMethodFactory.card()
+            val shippingInformation = createShippingInformation()
+
+            enqueueSuccessfulGooglePayPayment(
+                paymentMethod = paymentMethod,
+                shippingInformation = shippingInformation,
+                paymentDataUpdate = GooglePayPaymentDataUpdate(
+                    callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+                    shippingAddress = GooglePayPaymentDataUpdate.ShippingAddress(
+                        administrativeArea = "California",
+                        countryCode = "US",
+                        locality = "San Francisco",
+                        postalCode = "94103",
+                        iso3166AdministrativeArea = "US-CA",
+                    ),
+                ),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response)
+            }
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -395,4 +449,19 @@ internal class ExpressCheckoutElementTest {
 
         assertNativeLinkCalledWithRequiredBillingAddress()
     }
+}
+
+private fun createShippingInformation(): ShippingInformation {
+    return ShippingInformation(
+        address = Address(
+            city = "San Francisco",
+            country = "US",
+            line1 = "510 Townsend St",
+            line2 = "Floor 3",
+            postalCode = "94103",
+            state = "CA",
+        ),
+        name = "Jenny Rosen",
+        phone = null,
+    )
 }

@@ -24,12 +24,14 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
@@ -61,6 +63,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -217,17 +220,39 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun selectSavedPaymentMethod(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
-        val address = selection.billingDetails?.address?.toCheckoutAddress()
         return withCheckoutState(
             additionalStateMutations = { copy(paymentSelection = selection) },
         ) {
-            address?.let {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                    address = it,
+            stateHolder.state = copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                    selection.paymentMethod.id,
+                ),
+            )
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+            if (address == null) {
+                if (
+                    checkoutSessionTaxRegionUpdater.requiresUpdate(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    )
+                ) {
+                    // Billing-tax filtering should prevent this state from reaching selection.
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+                    )
+                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            }
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = address,
+            ).onFailure {
+                stateHolder.state = stateHolder.state?.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
-            } ?: kotlin.Result.success(checkoutSessionResponse)
+            }
         }
     }
 

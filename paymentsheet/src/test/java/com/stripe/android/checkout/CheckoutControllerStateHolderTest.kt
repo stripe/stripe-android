@@ -16,7 +16,9 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -83,6 +85,24 @@ internal class CheckoutControllerStateHolderTest {
 
             assertThat(stateHolder.session.value).isNotNull()
         }
+    }
+
+    @Test
+    fun `restored pending saved selection is reset to idle`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_restored",
+            ),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -223,6 +243,7 @@ internal class CheckoutControllerStateHolderTest {
         expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,

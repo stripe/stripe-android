@@ -113,7 +113,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canChangeCbc: StateFlow<Boolean>,
-    private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
+    private val updateSelection: (PaymentSelection?) -> Unit,
     private val verticalPaymentSelectionHandler: VerticalPaymentSelectionHandler,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -148,13 +148,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
-            }
-            val updateSelection = { selection: PaymentSelection?, isUserInput: Boolean ->
-                if (isUserInput) {
-                    viewModel.handlePaymentMethodSelected(selection)
-                } else {
-                    viewModel.updateSelection(selection)
-                }
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -193,9 +186,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 canRemove = viewModel.customerStateHolder.canRemove,
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
-                updateSelection = updateSelection,
+                updateSelection = viewModel::updateSelection,
                 verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                    updateSelection = { selection, isUserInput -> updateSelection(selection, isUserInput) },
+                    updateSelection = { selection, isUserInput ->
+                        if (isUserInput) {
+                            viewModel.handlePaymentMethodSelected(selection)
+                        } else {
+                            viewModel.updateSelection(selection)
+                        }
+                    },
                     completionAction = null,
                 ),
                 walletsState = viewModel.walletsState,
@@ -363,7 +362,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         coroutineScope.launch(mainDispatcher) {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
-                    updateSelection(verticalModeScreenSelection.value, false)
+                    updateSelection(verticalModeScreenSelection.value)
                 }
             }
         }
@@ -376,7 +375,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     if (newLinkBrand != null && newLinkBrand != currentSelection.brand) {
                         val updatedSelection = currentSelection.copy(brand = newLinkBrand)
                         _verticalModeScreenSelection.value = updatedSelection
-                        updateSelection(updatedSelection, false)
+                        updateSelection(updatedSelection)
                     }
                 }
             }
