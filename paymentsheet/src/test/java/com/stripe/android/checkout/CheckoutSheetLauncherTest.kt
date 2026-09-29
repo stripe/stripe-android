@@ -30,7 +30,6 @@ import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentelement.embedded.stashNewSelection
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -255,6 +254,64 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `formActivityLauncher invokes immediate action after checkout session refresh`() = testScenario {
+        val releaseRefresh = CompletableDeferred<Unit>()
+        val response = CheckoutSessionResponseFactory.create()
+        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+
+        callback.onActivityResult(result)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+
+        releaseRefresh.complete(Unit)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `formActivityLauncher skips immediate action when checkout session refresh fails`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val expectedError = IllegalStateException("Refresh failed")
+        sessionRefresher.enqueueRefreshAction { throw expectedError }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+
+        callback.onActivityResult(result)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after the sheet closed." to expectedError
+        )
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `formActivityLauncher does not invoke immediate action when the result is confirmed`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
@@ -300,45 +357,36 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher reports checkout session refresh failure after invoking immediate action`() =
-        run {
-            val immediateActionCalls = Turbine<Unit>()
-            testScenario(
-                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
-            ) {
-                val response = CheckoutSessionResponseFactory.create()
-                val expectedError = IllegalStateException("Refresh failed")
-                sessionRefresher.enqueueRefreshAction {
-                    assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
-                    immediateActionCalls.expectNoEvents()
-                    throw expectedError
-                }
-                val selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
-                val result = EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    selection = selection,
-                    hasBeenConfirmed = false,
-                    customerState = null,
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    checkoutSessionResponse = response,
-                    shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
-                )
-
-                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-                assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                runCurrent()
-
-                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-                immediateActionCalls.expectNoEvents()
-                assertRefreshFailureReported(expectedError)
-                assertThat(logger.errorLogs).containsExactly(
-                    "Failed to refresh the checkout session after the sheet closed." to expectedError
-                )
-                assertThat(operationCoordinator.isUpdating.value).isFalse()
-                immediateActionCalls.ensureAllEventsConsumed()
-            }
+    fun `formActivityLauncher does not invoke immediate action when refresh fails`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val expectedError = IllegalStateException("Refresh failed")
+        sessionRefresher.enqueueRefreshAction {
+            assertThat(immediateActionWasInvoked()).isFalse()
+            throw expectedError
         }
+        val selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = selection,
+            hasBeenConfirmed = false,
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after the sheet closed." to expectedError
+        )
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
 
     @Test
     fun `formActivityLauncher does not refresh checkout session when complete result has no response`() = testScenario {
@@ -609,7 +657,6 @@ internal class CheckoutSheetLauncherTest {
                 assertThat(logger.errorLogs).containsExactly(
                     "Failed to refresh the checkout session after the sheet closed." to expectedError,
                 )
-                assertRefreshFailureReported(expectedError)
                 assertThat(operationCoordinator.isUpdating.value).isFalse()
                 immediateActionCalls.ensureAllEventsConsumed()
             }
@@ -990,7 +1037,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `paymentOptionsResult contains checkout session refresh failure`() = testScenario {
+    fun `paymentOptionsResult logs checkout session refresh failure`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
         val expectedError = IllegalStateException("Refresh failed")
         sessionRefresher.enqueueRefreshAction { throw expectedError }
@@ -1014,7 +1061,6 @@ internal class CheckoutSheetLauncherTest {
         assertThat(logger.errorLogs).containsExactly(
             "Failed to refresh the checkout session after the sheet closed." to expectedError
         )
-        assertRefreshFailureReported(expectedError)
         assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 
@@ -1309,15 +1355,6 @@ internal class CheckoutSheetLauncherTest {
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {
             return sessionRefresher.calls.awaitItem()
-        }
-
-        suspend fun assertRefreshFailureReported(expectedError: Throwable) {
-            val call = errorReporter.awaitCall()
-            assertThat(call.errorEvent)
-                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHEET_RESULT_REFRESH_FAILED)
-            assertThat(call.stripeException?.cause).isSameInstanceAs(expectedError)
-            assertThat(errorReporter.getLoggedErrors())
-                .containsExactly("unexpected_error.checkout.sheet_result.refresh_failed")
         }
 
         fun expectNoRefreshCalls() {

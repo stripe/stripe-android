@@ -8,7 +8,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -116,10 +115,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                if (!result.hasBeenConfirmed) {
-                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                refreshCheckoutSession(result.checkoutSessionResponse) {
+                    if (!result.hasBeenConfirmed) {
+                        result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
+                    }
                 }
-                refreshCheckoutSession(result.checkoutSessionResponse) {}
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
@@ -145,7 +145,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse) {}
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -163,7 +163,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun refreshCheckoutSession(
         response: CheckoutSessionResponse?,
-        onRefreshed: () -> Unit,
+        onRefreshed: () -> Unit = {},
     ) {
         if (response == null) {
             onRefreshed()
@@ -176,10 +176,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 onRefreshed()
             }.onFailure {
                 logger.error("Failed to refresh the checkout session after the sheet closed.", it)
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SHEET_RESULT_REFRESH_FAILED,
-                    StripeException.create(it),
-                )
             }
         }
     }
