@@ -1,6 +1,7 @@
 package com.stripe.attestation
 
 import androidx.annotation.RestrictTo
+import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AttestationTokenProvider {
@@ -8,7 +9,7 @@ interface AttestationTokenProvider {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultAttestationTokenProvider(
+class DefaultAttestationTokenProvider @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
 ) : AttestationTokenProvider {
 

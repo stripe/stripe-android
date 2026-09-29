@@ -11,31 +11,32 @@ import com.stripe.attestation.DefaultAttestationWarmer
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
 import com.stripe.attestation.RealStandardIntegrityManagerFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
 @Module
-internal object PaymentsIntegrityModule {
-    @Provides
-    fun provideIntegrityRequestManager(
-        context: Application
-    ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+internal interface PaymentsIntegrityModule {
+    @Binds
+    fun bindAttestationTokenProvider(
+        provider: DefaultAttestationTokenProvider
+    ): AttestationTokenProvider
 
-    @Provides
-    fun provideAttestationWarmer(
-        integrityRequestManager: IntegrityRequestManager
-    ): AttestationWarmer {
-        return DefaultAttestationWarmer(
-            integrityRequestManager = integrityRequestManager,
-            retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
-        )
-    }
+    companion object {
+        @Provides
+        fun provideIntegrityRequestManager(
+            context: Application
+        ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
 
-    @Provides
-    fun provideAttestationTokenProvider(
-        integrityRequestManager: IntegrityRequestManager
-    ): AttestationTokenProvider {
-        return DefaultAttestationTokenProvider(integrityRequestManager)
+        @Provides
+        fun provideAttestationWarmer(
+            integrityRequestManager: IntegrityRequestManager
+        ): AttestationWarmer {
+            return DefaultAttestationWarmer(
+                integrityRequestManager = integrityRequestManager,
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
+            )
+        }
     }
 }
 
