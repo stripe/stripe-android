@@ -96,40 +96,32 @@ internal class CheckoutPaymentElementAnalyticsTest {
             val failure = result as CheckoutController.Result.Failed
             assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
         },
-        checkoutInitResponse = ::savedPaymentMethodCheckoutResponse,
+        checkoutInitResponse = savedPaymentMethodCheckoutResponse(INITIAL_TOTAL),
         setup = { controller ->
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-            )
+            // Configure loads once to resolve the initial selection's tax region, then again after
+            // the tax update.
+            repeat(2) {
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("Checkout"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("Checkout"),
+                )
+            }
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
             )
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94103"),
-                bodyPart("tax_region[line1]", "510 Townsend St"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-                responseFactory = ::savedPaymentMethodCheckoutResponse,
-            )
+            enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodCheckoutResponse(INITIAL_TOTAL))
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         },
     ) { context ->
         contentPage.assertHasSelectedSavedPaymentMethod("pm_12345")
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                json.getJSONArray("checkout_items").getJSONObject(0)
-                    .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                    .put("total", UPDATED_TOTAL)
-            }
-        }
+        // The line item price changes on the server after configure, so the confirm-time tax update
+        // for the same billing address returns a different total.
+        enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodCheckoutResponse(UPDATED_TOTAL))
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.put("account_settings", JSONObject("""{"country":"US"}"""))
@@ -154,13 +146,25 @@ internal class CheckoutPaymentElementAnalyticsTest {
         context.confirm()
     }
 
-    private fun savedPaymentMethodCheckoutResponse(response: MockResponse) {
+    private fun enqueueSavedPaymentMethodTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
+    private fun savedPaymentMethodCheckoutResponse(total: Int): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("account_settings", JSONObject("""{"country":"US"}"""))
             json.getJSONArray("checkout_items").getJSONObject(0)
                 .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                .put("subtotal", INITIAL_TOTAL)
-                .put("total", INITIAL_TOTAL)
+                .put("subtotal", total)
+                .put("total", total)
             json.put(
                 "tax_context",
                 JSONObject(

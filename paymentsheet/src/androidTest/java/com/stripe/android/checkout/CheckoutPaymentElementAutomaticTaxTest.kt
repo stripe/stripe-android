@@ -17,6 +17,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
@@ -80,6 +81,47 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
+    }
+
+    @Test
+    fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
+        var checkoutResult: CheckoutController.Result? = null
+        val savedPaymentMethodTaxResponse = automaticTaxResponse(
+            total = UPDATED_TOTAL,
+            taxStatus = TAX_STATUS_COMPLETE,
+            billingAddressCollection = "auto",
+            hasSavedPaymentMethod = true,
+        )
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_REQUIRES_LOCATION,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
+            ),
+            setup = { controller ->
+                enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) { context ->
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+
+            enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", SAVED_PAYMENT_METHOD_ID),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
     }
 
     @Test
