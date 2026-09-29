@@ -417,7 +417,7 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun getPlatformSettings(
-        cryptoCustomerId: String,
+        cryptoCustomerId: String?,
         countryHint: String?
     ): Result<GetPlatformSettingsResponse> {
         val request = apiRequestFactory.createGet(

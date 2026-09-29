@@ -1277,4 +1277,29 @@ class CryptoApiRepositoryTest {
             .isEqualTo(listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC))
         assertThat(result.carfTinRequired).isFalse()
     }
+
+    @Test
+    fun `platform settings omits absent customer and hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        val result = cryptoApiRepository.getPlatformSettings(null, null)
+
+        assertThat(result.getOrThrow().publishableKey).isEqualTo("pk_platform")
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(mapOf("ui_mode" to "headless"))
+    }
+
+    @Test
+    fun `platform settings includes existing customer`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        cryptoApiRepository.getPlatformSettings("crc_customer", null).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "ui_mode" to "headless")
+        )
+    }
 }
