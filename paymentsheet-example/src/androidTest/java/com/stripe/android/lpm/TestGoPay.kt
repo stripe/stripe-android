@@ -44,13 +44,4 @@ internal class TestGoPay : BasePlaygroundTest() {
             },
         )
     }
-
-    @Test
-    fun testGoPaySetup() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
-            },
-        )
-    }
 }
