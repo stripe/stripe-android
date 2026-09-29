@@ -14,7 +14,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -23,6 +22,7 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ViewActionRecorder
@@ -339,19 +339,26 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `ManageAll isPerformingNetworkOperation maps processing state`() {
-        val interactor = FakeManageScreenInteractor()
-        val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
+    fun `ManageAll isPerformingNetworkOperation is true while a row is pending`() {
+        val idleScreen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
+        assertThat(idleScreen.isPerformingNetworkOperation().value).isFalse()
 
-        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
-
-        val pendingPaymentMethod = PaymentMethodFixtures.createCard().toDisplayableSavedPaymentMethod(
+        val pendingPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethodFixtures.createCard(),
             isSelectionPending = true,
-            shouldShowDefaultBadge = false,
         )
-        interactor.updateState { it.copy(paymentMethods = listOf(pendingPaymentMethod)) }
+        val interactor = FakeManageScreenInteractor(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = listOf(pendingPaymentMethod),
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+            )
+        )
 
-        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
+        assertThat(EmbeddedNavigator.Screen.ManageAll(interactor).isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test

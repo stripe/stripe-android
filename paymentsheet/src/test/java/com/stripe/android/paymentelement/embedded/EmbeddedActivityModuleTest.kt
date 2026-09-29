@@ -58,13 +58,22 @@ internal class EmbeddedActivityModuleTest {
     }
 
     @Test
-    fun `PaymentOptions launch commits selection without invoking tax selector`() = runTest {
-        assertImmediateSelection(EmbeddedLaunchMode.PaymentOptions)
-    }
+    fun `non-Manage launches commit selection without invoking tax selector`() = runTest {
+        listOf(
+            EmbeddedLaunchMode.PaymentOptions,
+            EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ).forEach { launchMode ->
+            val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+            val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
+                launchMode = launchMode,
+                selectionHolder = selectionHolder,
+                sheetSelector = createTaxUpdatingSelector(selectionHolder),
+            )
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
-    @Test
-    fun `Form launch commits selection without invoking tax selector`() = runTest {
-        assertImmediateSelection(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+            assertThat(selector.select(selection).isSuccess).isTrue()
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        }
     }
 
     private fun runScenario(
@@ -96,21 +105,6 @@ internal class EmbeddedActivityModuleTest {
         selectionHolder = selectionHolder,
         sheetActivityStateHolder = FakeSheetActivityStateHolder(),
     )
-
-    private suspend fun assertImmediateSelection(launchMode: EmbeddedLaunchMode) {
-        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
-            launchMode = launchMode,
-            selectionHolder = selectionHolder,
-            sheetSelector = createTaxUpdatingSelector(selectionHolder),
-        )
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
-        val result = selector.select(selection)
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-    }
 
     private data class Scenario(
         val interactor: AutocompleteAddressInteractor,

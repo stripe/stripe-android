@@ -264,9 +264,10 @@ class ManageScreenUITest {
     @Test
     fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
         val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
-            paymentMethod.paymentMethod.toDisplayableSavedPaymentMethod(
+            DisplayableSavedPaymentMethod.create(
+                displayName = paymentMethod.displayName,
+                paymentMethod = paymentMethod.paymentMethod,
                 isSelectionPending = index == 1,
-                shouldShowDefaultBadge = false,
             )
         }
 
@@ -342,10 +343,7 @@ class ManageScreenUITest {
         PaymentMethodFixtures.createCards(3)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .mapIndexed { idx, it ->
-                it.toDisplayableSavedPaymentMethod(
-                    isSelectionPending = false,
-                    shouldShowDefaultBadge = idx == 0,
-                )
+                it.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = idx == 0)
             }
 
     private fun runScenario(

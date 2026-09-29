@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -32,8 +31,6 @@ import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirmi
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -54,7 +51,6 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
-@OptIn(CheckoutSessionPreview::class)
 @Suppress("LargeClass")
 internal class DefaultSheetActivityStateHolderTest {
     @get:Rule
@@ -77,22 +73,6 @@ internal class DefaultSheetActivityStateHolderTest {
             )
             assertThat(state.shouldDisplayLockIcon).isTrue()
         }
-    }
-
-    @Test
-    fun `checkout session response is stored outside UI state`() = testScenario {
-        val initialState = stateHolder.state.value
-        val response = CheckoutSessionResponseFactory.create()
-
-        stateHolder.setCheckoutSessionResponse(response)
-
-        assertThat(stateHolder.checkoutSessionResponse).isEqualTo(response)
-        assertThat(stateHolder.state.value).isEqualTo(initialState)
-
-        stateHolder.setCheckoutSessionResponse(null)
-
-        assertThat(stateHolder.checkoutSessionResponse).isNull()
-        assertThat(stateHolder.state.value).isEqualTo(initialState)
     }
 
     @Test
@@ -331,18 +311,6 @@ internal class DefaultSheetActivityStateHolderTest {
 
             stateHolder.updateMandate("Some new mandate".resolvableString)
             assertThat(awaitItem().mandateText).isEqualTo("Some new mandate".resolvableString)
-        }
-    }
-
-    @Test
-    fun `updateSavedPaymentMethodSelectionState updates savedPaymentMethodSelectionState`() = testScenario {
-        stateHolder.savedPaymentMethodSelectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-
-            val pending = SavedPaymentMethodSelectionState.Pending(CARD_PAYMENT_METHOD.id)
-            stateHolder.updateSavedPaymentMethodSelectionState(pending)
-
-            assertThat(awaitItem()).isEqualTo(pending)
         }
     }
 

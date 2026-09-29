@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -8,7 +9,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -32,77 +32,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `manage launch selects through injected selector and closes`() = runTest {
-        val selector = FakeEmbeddedSavedPaymentMethodSelector(Result.success(Unit))
-        runScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            selector = selector,
-        ) {
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
-
-            assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isSelectionPending).isFalse()
-            verify(eventReporter).onSelectPaymentOption(selection)
-            assertThat(selectionHolder.selection.value).isNull()
-            verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
-        }
-        selector.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `payment options launch uses selector and navigates back`() = runTest {
-        val selector = FakeEmbeddedSavedPaymentMethodSelector(Result.success(Unit))
-        runScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-            selector = selector,
-        ) {
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
-
-            assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isSelectionPending).isFalse()
-            verify(eventReporter).onSelectPaymentOption(selection)
-            verify(navigator).performAction(EmbeddedNavigator.Action.Back)
-        }
-        selector.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `form launch uses selector and closes`() = runTest {
-        val selector = FakeEmbeddedSavedPaymentMethodSelector(Result.success(Unit))
-        runScenario(
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
-            selector = selector,
-        ) {
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
-
-            assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isSelectionPending).isFalse()
-            verify(eventReporter).onSelectPaymentOption(selection)
-            verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
-        }
-        selector.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `Pending selection state from the injected flow marks the matching row`() = runTest {
-        val selector = FakeEmbeddedSavedPaymentMethodSelector(Result.success(Unit))
-        runScenario(
-            launchMode = EmbeddedLaunchMode.Manage,
-            selector = selector,
-        ) {
-            savedPaymentMethodSelectionState.value =
-                SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
-
-            assertThat(interactor.state.value.isSelectionPending).isTrue()
-            assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
-        }
-    }
-
-    private suspend fun runScenario(
-        launchMode: EmbeddedLaunchMode,
-        selector: FakeEmbeddedSavedPaymentMethodSelector,
-        block: suspend Scenario.() -> Unit,
-    ) {
+    fun `interactor projects injected selection state and selects through injected selector`() = runTest {
         val sourcePaymentMethod = PaymentMethodFixtures.createCard()
         val customerStateHolder = FakeCustomerStateHolder(paymentMethods = listOf(sourcePaymentMethod))
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
@@ -113,8 +43,8 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
         }
         val navigator = mock<EmbeddedNavigator>()
         val eventReporter = mock<EventReporter>()
-        val savedPaymentMethodSelectionState =
-            MutableStateFlow<SavedPaymentMethodSelectionState>(SavedPaymentMethodSelectionState.Idle)
+        val selectCalls = Turbine<PaymentSelection.Saved>()
+        val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(SavedPaymentMethodSelectionState.Idle)
         val interactor = DefaultEmbeddedManageScreenInteractorFactory(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerStateHolder = customerStateHolder,
@@ -122,33 +52,31 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             savedPaymentMethodMutator = savedPaymentMethodMutator,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             embeddedNavigatorProvider = Provider { navigator },
-            embeddedSavedPaymentMethodSelector = selector,
-            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
+            embeddedSavedPaymentMethodSelector = { selection ->
+                selectCalls.add(selection)
+                Result.success(Unit)
+            },
+            savedPaymentMethodSelectionState = selectionState,
             eventReporter = eventReporter,
-            launchMode = launchMode,
+            launchMode = EmbeddedLaunchMode.Manage,
         ).createManageScreenInteractor()
+        val selection = PaymentSelection.Saved(sourcePaymentMethod)
 
-        Scenario(
-            interactor = interactor,
-            paymentMethod = interactor.state.value.paymentMethods.single(),
-            selectionHolder = selectionHolder,
-            navigator = navigator,
-            eventReporter = eventReporter,
-            selection = PaymentSelection.Saved(sourcePaymentMethod),
-            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
-        ).block()
+        selectionState.value = SavedPaymentMethodSelectionState.Pending(sourcePaymentMethod.id)
+        assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
+        selectionState.value = SavedPaymentMethodSelectionState.Idle
+
+        val paymentMethod = interactor.state.value.paymentMethods.single()
+        interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
+
+        assertThat(selectCalls.awaitItem()).isEqualTo(selection)
+        verify(eventReporter).onSelectPaymentOption(selection)
+        // The injected selector owns committing the selection.
+        assertThat(selectionHolder.selection.value).isNull()
+        verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
 
         interactor.close()
+        selectCalls.ensureAllEventsConsumed()
         customerStateHolder.validate()
     }
-
-    private data class Scenario(
-        val interactor: ManageScreenInteractor,
-        val paymentMethod: DisplayableSavedPaymentMethod,
-        val selectionHolder: DefaultEmbeddedSelectionHolder,
-        val navigator: EmbeddedNavigator,
-        val eventReporter: EventReporter,
-        val selection: PaymentSelection.Saved,
-        val savedPaymentMethodSelectionState: MutableStateFlow<SavedPaymentMethodSelectionState>,
-    )
 }

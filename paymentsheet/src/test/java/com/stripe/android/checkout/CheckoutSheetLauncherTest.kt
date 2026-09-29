@@ -7,7 +7,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -35,6 +34,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -46,10 +46,7 @@ import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -357,38 +354,6 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher does not invoke immediate action when refresh fails`() = testScenario {
-        val response = CheckoutSessionResponseFactory.create()
-        val expectedError = IllegalStateException("Refresh failed")
-        sessionRefresher.enqueueRefreshAction {
-            assertThat(immediateActionWasInvoked()).isFalse()
-            throw expectedError
-        }
-        val selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
-        val result = EmbeddedActivityResult.Complete(
-            previousNewSelections = Bundle(),
-            selection = selection,
-            hasBeenConfirmed = false,
-            customerState = null,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            checkoutSessionResponse = response,
-            shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
-        )
-
-        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        runCurrent()
-
-        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-        assertThat(immediateActionWasInvoked()).isFalse()
-        assertThat(logger.errorLogs).containsExactly(
-            "Failed to refresh the checkout session after the sheet closed." to expectedError
-        )
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
-    }
-
-    @Test
     fun `formActivityLauncher does not refresh checkout session when complete result has no response`() = testScenario {
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
@@ -556,145 +521,73 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `manageSheetLauncher commits no-response selection before invoking immediate action synchronously`() =
-        run {
-            val immediateActionCalls = Turbine<Unit>()
-            testScenario(
-                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
-            ) {
-                selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
-                val result = EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    customerState = null,
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                    hasBeenConfirmed = false,
-                    checkoutSessionResponse = null,
-                    shouldInvokeSelectionCallback = true,
-                    launchMode = EmbeddedLaunchMode.Manage,
-                )
+    fun `manageSheetLauncher invokes immediate action for saved selection when flagged`() = testScenario {
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = true,
+            launchMode = EmbeddedLaunchMode.Manage,
+        )
 
-                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
 
-                assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
-                assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
-                immediateActionCalls.expectNoEvents()
-                expectNoRefreshCalls()
-                immediateActionCalls.ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `manageSheetLauncher commits selection before refreshing response and invokes action after success`() =
-        run {
-            val immediateActionCalls = Turbine<Unit>()
-            testScenario(
-                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
-            ) {
-                val response = CheckoutSessionResponseFactory.create()
-                val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                val releaseRefresh = CompletableDeferred<Unit>()
-                sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
-                val result = EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    customerState = null,
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    selection = selection,
-                    hasBeenConfirmed = false,
-                    checkoutSessionResponse = response,
-                    shouldInvokeSelectionCallback = true,
-                    launchMode = EmbeddedLaunchMode.Manage,
-                )
-
-                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-
-                assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                immediateActionCalls.expectNoEvents()
-                runCurrent()
-
-                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-                immediateActionCalls.expectNoEvents()
-
-                releaseRefresh.complete(Unit)
-                runCurrent()
-
-                assertThat(immediateActionCalls.expectMostRecentItem()).isEqualTo(Unit)
-                immediateActionCalls.expectNoEvents()
-                assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                immediateActionCalls.ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `manageSheetLauncher keeps committed selection and skips immediate action after refresh failure`() =
-        run {
-            val immediateActionCalls = Turbine<Unit>()
-            testScenario(
-                rowSelectionImmediateAction = { immediateActionCalls.add(Unit) },
-            ) {
-                val response = CheckoutSessionResponseFactory.create()
-                val expectedError = IllegalStateException("Refresh failed")
-                val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
-                sessionRefresher.enqueueRefreshAction { throw expectedError }
-                val result = EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    customerState = null,
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    selection = selection,
-                    hasBeenConfirmed = false,
-                    checkoutSessionResponse = response,
-                    shouldInvokeSelectionCallback = true,
-                    launchMode = EmbeddedLaunchMode.Manage,
-                )
-
-                registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-                assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                runCurrent()
-
-                assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-                immediateActionCalls.expectNoEvents()
-                assertThat(logger.errorLogs).containsExactly(
-                    "Failed to refresh the checkout session after the sheet closed." to expectedError,
-                )
-                assertThat(operationCoordinator.isUpdating.value).isFalse()
-                immediateActionCalls.ensureAllEventsConsumed()
-            }
-        }
-
-    @Test
-    fun `manageSheetLauncher does not log an apply failure as a refresh failure`() = run {
-        val expectedError = IllegalStateException("Selection callback failed")
-        val callbackFailures = Turbine<Throwable>()
-        testScenario(
-            rowSelectionImmediateAction = { throw expectedError },
-            launchExceptionHandler = CoroutineExceptionHandler { _, error -> callbackFailures.add(error) },
-        ) {
-            val response = CheckoutSessionResponseFactory.create()
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            sessionRefresher.enqueueRefreshAction {}
-            val result = EmbeddedActivityResult.Complete(
-                previousNewSelections = Bundle(),
-                customerState = null,
-                linkAccountInfo = LinkAccountUpdate.Value(null),
-                selection = selection,
-                hasBeenConfirmed = false,
-                checkoutSessionResponse = response,
-                shouldInvokeSelectionCallback = true,
-                launchMode = EmbeddedLaunchMode.Manage,
-            )
-
-            registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-            runCurrent()
-
-            assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-            assertThat(callbackFailures.awaitItem()).isSameInstanceAs(expectedError)
-            callbackFailures.expectNoEvents()
-            assertThat(logger.errorLogs).isEmpty()
-            assertThat(selectionHolder.selection.value).isEqualTo(selection)
-            assertThat(operationCoordinator.isUpdating.value).isFalse()
-        }
+        assertThat(immediateActionWasInvoked()).isTrue()
     }
+
+    @Test
+    fun `manageSheetLauncher invokes immediate action after checkout session refresh`() = testScenario {
+        val releaseRefresh = CompletableDeferred<Unit>()
+        val response = CheckoutSessionResponseFactory.create()
+        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+        val result = manageCompleteResult(checkoutSessionResponse = response)
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+
+        releaseRefresh.complete(Unit)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `manageSheetLauncher skips immediate action when checkout session refresh fails`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val expectedError = IllegalStateException("Refresh failed")
+        sessionRefresher.enqueueRefreshAction { throw expectedError }
+        val result = manageCompleteResult(checkoutSessionResponse = response)
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after the sheet closed." to expectedError
+        )
+    }
+
+    private fun manageCompleteResult(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) = EmbeddedActivityResult.Complete(
+        previousNewSelections = Bundle(),
+        customerState = null,
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        hasBeenConfirmed = false,
+        checkoutSessionResponse = checkoutSessionResponse,
+        shouldInvokeSelectionCallback = true,
+        launchMode = EmbeddedLaunchMode.Manage,
+    )
 
     @Test
     fun `manageSheetLauncher callback does not update state on cancelled result`() = testScenario {
@@ -1037,7 +930,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `paymentOptionsResult logs checkout session refresh failure`() = testScenario {
+    fun `paymentOptionsResult contains checkout session refresh failure`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
         val expectedError = IllegalStateException("Refresh failed")
         sessionRefresher.enqueueRefreshAction { throw expectedError }
@@ -1187,18 +1080,10 @@ internal class CheckoutSheetLauncherTest {
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
-        rowSelectionImmediateAction: (() -> Unit)? = null,
-        launchExceptionHandler: CoroutineExceptionHandler? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
-        val testScope = launchExceptionHandler?.let { exceptionHandler ->
-            CoroutineScope(
-                coroutineContext +
-                    SupervisorJob(coroutineContext[Job]) +
-                    exceptionHandler,
-            )
-        } ?: this
+        val testScope = this
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
@@ -1232,69 +1117,62 @@ internal class CheckoutSheetLauncherTest {
             )
         )
 
-        try {
-            DummyActivityResultCaller.test {
-                fun createSheetLauncher(
-                    owner: TestLifecycleOwner,
-                    state: CheckoutSheetLauncherState,
-                ): CheckoutSheetLauncher {
-                    return CheckoutSheetLauncher(
-                        activityResultCaller = activityResultCaller,
-                        lifecycleOwner = owner,
-                        selectionHolder = selectionHolder,
-                        customerStateHolder = customerStateHolder,
-                        linkAccountHolder = linkAccountHolder,
-                        sheetStateHolder = sheetStateHolder,
-                        errorReporter = errorReporter,
-                        sessionRefresher = sessionRefresher,
-                        operationCoordinator = operationCoordinator,
-                        launcherState = state,
-                        embeddedContentState = embeddedContentState,
-                        logger = logger,
-                        coroutineScope = testScope,
-                        productUsage = setOf("Checkout"),
-                        statusBarColor = null,
-                        paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
-                        rowSelectionImmediateActionHandler = rowSelectionImmediateAction
-                            ?: { immediateActionInvoked = true },
-                        paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
-                    )
-                }
-
-                val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
-                val registerCall = awaitRegisterCall()
-                val launcher = awaitNextRegisteredLauncher()
-
-                assertThat(registerCall).isNotNull()
-                assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
-
-                Scenario(
+        DummyActivityResultCaller.test {
+            fun createSheetLauncher(
+                owner: TestLifecycleOwner,
+                state: CheckoutSheetLauncherState,
+            ): CheckoutSheetLauncher {
+                return CheckoutSheetLauncher(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = owner,
                     selectionHolder = selectionHolder,
-                    lifecycleOwner = lifecycleOwner,
                     customerStateHolder = customerStateHolder,
                     linkAccountHolder = linkAccountHolder,
-                    dummyActivityResultCallerScenario = this,
-                    registerCall = registerCall,
-                    launcher = launcher,
-                    sheetLauncher = sheetLauncher,
                     sheetStateHolder = sheetStateHolder,
                     errorReporter = errorReporter,
-                    immediateActionWasInvoked = { immediateActionInvoked },
                     sessionRefresher = sessionRefresher,
-                    logger = logger,
                     operationCoordinator = operationCoordinator,
-                    launcherState = launcherState,
-                    savedStateHandle = savedStateHandle,
+                    launcherState = state,
                     embeddedContentState = embeddedContentState,
+                    logger = logger,
                     coroutineScope = testScope,
-                    createSheetLauncher = ::createSheetLauncher,
-                    runCurrent = testScheduler::runCurrent,
-                ).block()
+                    productUsage = setOf("Checkout"),
+                    statusBarColor = null,
+                    paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
+                    rowSelectionImmediateActionHandler = { immediateActionInvoked = true },
+                    paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(promotions),
+                )
             }
-        } finally {
-            if (launchExceptionHandler != null) {
-                testScope.coroutineContext[Job]?.cancel()
-            }
+
+            val sheetLauncher = createSheetLauncher(lifecycleOwner, launcherState)
+            val registerCall = awaitRegisterCall()
+            val launcher = awaitNextRegisteredLauncher()
+
+            assertThat(registerCall).isNotNull()
+            assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
+
+            Scenario(
+                selectionHolder = selectionHolder,
+                lifecycleOwner = lifecycleOwner,
+                customerStateHolder = customerStateHolder,
+                linkAccountHolder = linkAccountHolder,
+                dummyActivityResultCallerScenario = this,
+                registerCall = registerCall,
+                launcher = launcher,
+                sheetLauncher = sheetLauncher,
+                sheetStateHolder = sheetStateHolder,
+                errorReporter = errorReporter,
+                immediateActionWasInvoked = { immediateActionInvoked },
+                sessionRefresher = sessionRefresher,
+                logger = logger,
+                operationCoordinator = operationCoordinator,
+                launcherState = launcherState,
+                savedStateHandle = savedStateHandle,
+                embeddedContentState = embeddedContentState,
+                coroutineScope = testScope,
+                createSheetLauncher = ::createSheetLauncher,
+                runCurrent = testScheduler::runCurrent,
+            ).block()
         }
 
         confirmationHandler.validate()

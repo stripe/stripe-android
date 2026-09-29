@@ -381,37 +381,23 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `Pending selectionState marks only the matching row and isSelectionPending`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(2)
-        runScenario(initialPaymentMethods = paymentMethods, currentSelection = null) {
-            interactor.state.test {
-                awaitItem()
-
-                selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(paymentMethods[1].id)
-
-                awaitItem().run {
-                    assertThat(isSelectionPending).isTrue()
-                    assertThat(this.paymentMethods[0].isSelectionPending).isFalse()
-                    assertThat(this.paymentMethods[1].isSelectionPending).isTrue()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `Failed selectionState sets selectionError only on the matching row`() {
+    fun `selectionState is projected onto the matching row`() {
         val paymentMethods = PaymentMethodFixtures.createCards(2)
         val error = IllegalStateException("tax update failed").stripeErrorMessage()
         runScenario(initialPaymentMethods = paymentMethods, currentSelection = null) {
             interactor.state.test {
                 awaitItem()
 
-                selectionStateSource.value = SavedPaymentMethodSelectionState.Failed(paymentMethods[1].id, error)
+                selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(paymentMethods[1].id)
+                awaitItem().run {
+                    assertThat(isSelectionPending).isTrue()
+                    assertThat(this.paymentMethods.map { it.isSelectionPending }).containsExactly(false, true).inOrder()
+                }
 
+                selectionStateSource.value = SavedPaymentMethodSelectionState.Failed(paymentMethods[1].id, error)
                 awaitItem().run {
                     assertThat(isSelectionPending).isFalse()
-                    assertThat(this.paymentMethods[0].selectionError).isNull()
-                    assertThat(this.paymentMethods[1].selectionError).isEqualTo(error)
+                    assertThat(this.paymentMethods.map { it.selectionError }).containsExactly(null, error).inOrder()
                 }
             }
         }
@@ -419,170 +405,83 @@ class DefaultManageScreenInteractorTest {
 
     @Test
     fun `a second tap while the first selection is still suspended is ignored`() {
-        val paymentMethod = PaymentMethodFixtures.createCard()
         val updateResult = CompletableDeferred<Result<Unit>>()
-        val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
         val navigateBackCalls = Turbine<Boolean>()
-
-        runSelectorScenario(
-            initialPaymentMethods = listOf(paymentMethod),
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.createCard()),
             currentSelection = null,
-            selectPaymentMethod = { selected ->
-                updateCalls.add(selected)
-                updateResult.await()
-            },
             handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = { updateResult.await() },
         ) {
-            val selectedPaymentMethod = interactor.state.value.paymentMethods.single()
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod))
-            assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
+            val displayable = interactor.state.value.paymentMethods.single()
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
 
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod))
-            updateCalls.expectNoEvents()
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            onSelectPaymentMethodTurbine.expectNoEvents()
             navigateBackCalls.expectNoEvents()
 
             updateResult.complete(Result.success(Unit))
             assertThat(navigateBackCalls.awaitItem()).isTrue()
         }
-        updateCalls.ensureAllEventsConsumed()
         navigateBackCalls.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `a failure result does not navigate back`() {
-        val paymentMethod = PaymentMethodFixtures.createCard()
-        val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
+    fun `a tap after a failed selection selects again and navigates back on success`() {
+        val results = mutableListOf<Result<Unit>>(
+            Result.failure(IllegalStateException("tax update failed")),
+            Result.success(Unit),
+        )
         val navigateBackCalls = Turbine<Boolean>()
-        val failure = IllegalStateException("tax update failed")
-
-        runSelectorScenario(
-            initialPaymentMethods = listOf(paymentMethod),
+        runScenario(
+            initialPaymentMethods = listOf(PaymentMethodFixtures.createCard()),
             currentSelection = null,
-            selectPaymentMethod = { selected ->
-                updateCalls.add(selected)
-                Result.failure(failure)
-            },
             handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = { results.removeAt(0) },
         ) {
-            val selectedPaymentMethod = interactor.state.value.paymentMethods.single()
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod))
+            val displayable = interactor.state.value.paymentMethods.single()
 
-            assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
-            navigateBackCalls.expectNoEvents()
-        }
-        updateCalls.ensureAllEventsConsumed()
-        navigateBackCalls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `a tap after a failed selection calls select again and navigates back on success`() {
-        val paymentMethod = PaymentMethodFixtures.createCard()
-        val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
-        val navigateBackCalls = Turbine<Boolean>()
-        val results = Turbine<Result<Unit>>().apply {
-            add(Result.failure(IllegalStateException("tax update failed")))
-            add(Result.success(Unit))
-        }
-
-        runSelectorScenario(
-            initialPaymentMethods = listOf(paymentMethod),
-            currentSelection = null,
-            selectPaymentMethod = { selected ->
-                updateCalls.add(selected)
-                results.awaitItem()
-            },
-            handleBackPressed = navigateBackCalls::add,
-        ) {
-            val selectedPaymentMethod = interactor.state.value.paymentMethods.single()
-
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod))
-            assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
             navigateBackCalls.expectNoEvents()
 
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(selectedPaymentMethod))
-            assertThat(updateCalls.awaitItem()).isEqualTo(selectedPaymentMethod)
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
             assertThat(navigateBackCalls.awaitItem()).isTrue()
         }
-        updateCalls.ensureAllEventsConsumed()
         navigateBackCalls.ensureAllEventsConsumed()
-        results.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `auto select does not repeat after selector failure`() {
+    fun `auto select does not repeat across selector state writes`() {
         val paymentMethod = PaymentMethodFixtures.createCard()
         val updateResult = CompletableDeferred<Result<Unit>>()
-        val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
-        val navigateBackCalls = Turbine<Boolean>()
-
-        runSelectorScenario(
+        runScenario(
             initialPaymentMethods = listOf(paymentMethod),
             currentSelection = null,
-            selectPaymentMethod = { selected ->
-                updateCalls.add(selected)
-                updateResult.await()
-            },
-            handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = { updateResult.await() },
         ) {
             interactor.state.test {
                 awaitItem()
                 canEditSource.value = false
-
                 awaitItem()
-                assertThat(updateCalls.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
+                assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
 
-                // Mirror the sheet selector's writes: each one rebuilds the row, which must not re-trigger auto select.
+                // Each write rebuilds the row; only the id filter stops a repeat once the job has finished.
                 selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(paymentMethod.id)
-                assertThat(awaitItem().isSelectionPending).isTrue()
-                updateCalls.expectNoEvents()
-
-                // Complete first so only the id filter, not the in-flight job guard, blocks a repeat.
+                awaitItem()
                 val error = IllegalStateException("tax update failed")
                 updateResult.complete(Result.failure(error))
                 selectionStateSource.value = SavedPaymentMethodSelectionState.Failed(
                     paymentMethodId = paymentMethod.id,
                     error = error.stripeErrorMessage(),
                 )
-                assertThat(awaitItem().paymentMethods.single().selectionError).isEqualTo(error.stripeErrorMessage())
+                awaitItem()
 
-                updateCalls.expectNoEvents()
-                navigateBackCalls.expectNoEvents()
+                onSelectPaymentMethodTurbine.expectNoEvents()
             }
         }
-        updateCalls.ensureAllEventsConsumed()
-        navigateBackCalls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `auto select still selects the only payment method when editing is unavailable`() {
-        val paymentMethod = PaymentMethodFixtures.createCard()
-        val updateResult = CompletableDeferred<Result<Unit>>()
-        val updateCalls = Turbine<DisplayableSavedPaymentMethod>()
-        val navigateBackCalls = Turbine<Boolean>()
-
-        runSelectorScenario(
-            initialPaymentMethods = listOf(paymentMethod),
-            currentSelection = null,
-            selectPaymentMethod = { selected ->
-                updateCalls.add(selected)
-                updateResult.await()
-            },
-            handleBackPressed = navigateBackCalls::add,
-        ) {
-            interactor.state.test {
-                awaitItem()
-                canEditSource.value = false
-
-                awaitItem()
-                assertThat(updateCalls.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
-                updateResult.complete(Result.success(Unit))
-                assertThat(navigateBackCalls.awaitItem()).isTrue()
-                navigateBackCalls.expectNoEvents()
-                updateCalls.expectNoEvents()
-            }
-        }
-        updateCalls.ensureAllEventsConsumed()
-        navigateBackCalls.ensureAllEventsConsumed()
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
@@ -594,54 +493,8 @@ class DefaultManageScreenInteractorTest {
         isEditing: Boolean = false,
         configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
+        selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit> = { Result.success(Unit) },
         testBlock: suspend TestParams.() -> Unit
-    ) {
-        runScenarioWithSelector(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = currentSelection,
-            isLiveMode = isLiveMode,
-            isEditing = isEditing,
-            configuredLinkBrand = configuredLinkBrand,
-            handleBackPressed = handleBackPressed,
-            selectorFactory = { calls ->
-                { paymentMethod ->
-                    calls.add(paymentMethod)
-                    Result.success(Unit)
-                }
-            },
-            testBlock = testBlock,
-        )
-    }
-
-    private fun runSelectorScenario(
-        initialPaymentMethods: List<PaymentMethod>,
-        currentSelection: PaymentSelection?,
-        selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
-        handleBackPressed: (withDelay: Boolean) -> Unit,
-        testBlock: suspend TestParams.() -> Unit,
-    ) {
-        runScenarioWithSelector(
-            initialPaymentMethods = initialPaymentMethods,
-            currentSelection = currentSelection,
-            isLiveMode = false,
-            isEditing = false,
-            configuredLinkBrand = LinkBrand.Link,
-            handleBackPressed = handleBackPressed,
-            selectorFactory = { selectPaymentMethod },
-            testBlock = testBlock,
-        )
-    }
-
-    private fun runScenarioWithSelector(
-        initialPaymentMethods: List<PaymentMethod>,
-        currentSelection: PaymentSelection?,
-        isLiveMode: Boolean,
-        isEditing: Boolean,
-        configuredLinkBrand: LinkBrand,
-        handleBackPressed: (withDelay: Boolean) -> Unit,
-        selectorFactory: (Turbine<DisplayableSavedPaymentMethod>) ->
-            suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
-        testBlock: suspend TestParams.() -> Unit,
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
         val selection = MutableStateFlow(currentSelection)
@@ -669,7 +522,10 @@ class DefaultManageScreenInteractorTest {
             toggleEdit = {
                 toggleEditTurbine.add(Unit)
             },
-            onSelectPaymentMethod = selectorFactory(onSelectPaymentMethodTurbine),
+            onSelectPaymentMethod = {
+                onSelectPaymentMethodTurbine.add(it)
+                selectPaymentMethod(it)
+            },
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,

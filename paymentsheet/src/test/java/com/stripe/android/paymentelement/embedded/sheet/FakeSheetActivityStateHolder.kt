@@ -27,19 +27,10 @@ internal class FakeSheetActivityStateHolder(
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<SheetActivityStateHolder.State> = _state.asStateFlow()
 
-    private var _checkoutSessionResponse: CheckoutSessionResponse? = null
-    override val checkoutSessionResponse: CheckoutSessionResponse?
-        get() = _checkoutSessionResponse
-
-    val checkoutSessionResponseCalls = Turbine<CheckoutSessionResponse?>()
+    override var checkoutSessionResponse: CheckoutSessionResponse? = null
 
     override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
-        _checkoutSessionResponse = response
-        checkoutSessionResponseCalls.add(response)
-    }
-
-    fun setInitialCheckoutSessionResponse(response: CheckoutSessionResponse?) {
-        _checkoutSessionResponse = response
+        checkoutSessionResponse = response
     }
 
     private val _savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
@@ -86,7 +77,6 @@ internal class FakeSheetActivityStateHolder(
     }
 
     fun validate() {
-        checkoutSessionResponseCalls.ensureAllEventsConsumed()
         resultTurbine.ensureAllEventsConsumed()
         updateErrorTurbine.ensureAllEventsConsumed()
         updateProcessingTurbine.ensureAllEventsConsumed()

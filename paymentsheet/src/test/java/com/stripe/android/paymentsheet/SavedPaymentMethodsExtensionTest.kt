@@ -42,66 +42,20 @@ class SavedPaymentMethodsExtensionTest {
     }
 
     @Test
-    fun `Idle selectionState marks nothing pending or failed`() {
-        val actual = testSetup(
-            paymentMethodId = "aaa111",
-            defaultPaymentMethodId = null,
-            selectionState = SavedPaymentMethodSelectionState.Idle,
-        )
+    fun `Pending selectionState marks only the matching payment method pending`() {
+        val selectionState = SavedPaymentMethodSelectionState.Pending("aaa111")
 
-        assertFalse(actual.isSelectionPending)
-        assertNull(actual.selectionError)
+        assertTrue(testSetup("aaa111", null, selectionState).isSelectionPending)
+        assertFalse(testSetup("bbb222", null, selectionState).isSelectionPending)
     }
 
     @Test
-    fun `Pending selectionState for the same payment method marks it pending`() {
-        val actual = testSetup(
-            paymentMethodId = "aaa111",
-            defaultPaymentMethodId = null,
-            selectionState = SavedPaymentMethodSelectionState.Pending("aaa111"),
-        )
-
-        assertTrue(actual.isSelectionPending)
-        assertNull(actual.selectionError)
-    }
-
-    @Test
-    fun `Pending selectionState for another payment method does not mark it pending`() {
-        val actual = testSetup(
-            paymentMethodId = "aaa111",
-            defaultPaymentMethodId = null,
-            selectionState = SavedPaymentMethodSelectionState.Pending("bbb222"),
-        )
-
-        assertFalse(actual.isSelectionPending)
-        assertNull(actual.selectionError)
-    }
-
-    @Test
-    fun `Failed selectionState for the same payment method sets selectionError`() {
+    fun `Failed selectionState sets selectionError only on the matching payment method`() {
         val error = "Something went wrong".resolvableString
+        val selectionState = SavedPaymentMethodSelectionState.Failed("aaa111", error)
 
-        val actual = testSetup(
-            paymentMethodId = "aaa111",
-            defaultPaymentMethodId = null,
-            selectionState = SavedPaymentMethodSelectionState.Failed("aaa111", error),
-        )
-
-        assertFalse(actual.isSelectionPending)
-        assertEquals(actual.selectionError, error)
-    }
-
-    @Test
-    fun `Failed selectionState for another payment method does not set selectionError`() {
-        val error = "Something went wrong".resolvableString
-
-        val actual = testSetup(
-            paymentMethodId = "aaa111",
-            defaultPaymentMethodId = null,
-            selectionState = SavedPaymentMethodSelectionState.Failed("bbb222", error),
-        )
-
-        assertNull(actual.selectionError)
+        assertEquals(testSetup("aaa111", null, selectionState).selectionError, error)
+        assertNull(testSetup("bbb222", null, selectionState).selectionError)
     }
 
     private fun testSetup(

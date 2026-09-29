@@ -97,10 +97,7 @@ internal class ManageScreenUIScreenshotTest {
                 interactor = FakeManageScreenInteractor(
                     initialState = ManageScreenInteractor.State(
                         paymentMethods = listOf(
-                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(
-                                isSelectionPending = false,
-                                shouldShowDefaultBadge = false,
-                            )
+                            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
                         ),
                         currentSelection = null,
                         isEditing = true,
@@ -117,12 +114,7 @@ internal class ManageScreenUIScreenshotTest {
         createCard("4000"),
         createUsBank("1001"),
         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
-    ).map {
-        it.toDisplayableSavedPaymentMethod(
-            isSelectionPending = false,
-            shouldShowDefaultBadge = false,
-        )
-    }
+    ).map { it.toDisplayableSavedPaymentMethod() }
 
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()
