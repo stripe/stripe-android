@@ -120,7 +120,16 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val initialSelection = loadInitialSelectionForTax(configurationState, response)
+                val initialSelection = if (
+                    response.collectsTaxFromBillingAddress && !response.customer?.paymentMethods.isNullOrEmpty()
+                ) {
+                    checkoutStateLoader.loadInitialSelection(
+                        configuration = configurationState,
+                        checkoutSessionResponse = response,
+                    )
+                } else {
+                    null
+                }
                 val billingAddress = initialBillingAddress(configurationState, response, initialSelection)
                 val updatedResponse = if (billingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
@@ -244,22 +253,6 @@ class CheckoutController @Inject internal constructor(
                 )
             }
         }
-    }
-
-    private suspend fun loadInitialSelectionForTax(
-        configuration: Configuration.State,
-        checkoutSessionResponse: CheckoutSessionResponse,
-    ): PaymentSelection? {
-        if (
-            !checkoutSessionResponse.collectsTaxFromBillingAddress ||
-            checkoutSessionResponse.customer?.paymentMethods.isNullOrEmpty()
-        ) {
-            return null
-        }
-        return checkoutStateLoader.loadInitialSelection(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
     }
 
     /**
