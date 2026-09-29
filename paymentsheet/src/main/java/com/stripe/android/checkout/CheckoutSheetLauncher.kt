@@ -143,7 +143,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse) {}
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -161,7 +161,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun refreshCheckoutSession(
         response: CheckoutSessionResponse?,
-        onRefreshed: () -> Unit,
+        onRefreshed: () -> Unit = {},
     ) {
         if (response == null) {
             onRefreshed()
