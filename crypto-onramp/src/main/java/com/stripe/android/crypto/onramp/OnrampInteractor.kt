@@ -778,9 +778,6 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun logOut(): OnrampLogOutResult {
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
-                _state.update {
-                    it.copy(cryptoCustomerId = null, platformKeyCache = null, selectedPaymentSource = null)
-                }
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
                 OnrampLogOutResult.Completed()
             }
@@ -1515,6 +1512,10 @@ internal class OnrampInteractor @Inject constructor(
         // Check if we have a valid cached key for the current customer
         if (cachedKey != null && cachedKey.cryptoCustomerId == cryptoCustomerId) {
             return Result.success(cachedKey.publishableKey)
+        }
+
+        if (cryptoCustomerId == null) {
+            return Result.failure(MissingCryptoCustomerException())
         }
 
         // Fetch platform settings if not available or customer changed
