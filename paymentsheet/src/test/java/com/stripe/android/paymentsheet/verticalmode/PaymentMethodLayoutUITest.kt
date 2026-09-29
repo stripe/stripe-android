@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
@@ -78,6 +79,29 @@ internal class PaymentMethodLayoutUITest(
                 PaymentMethodFixtures.displayableCard()
             )
         )
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
+    fun processingDisablesViewMoreAction() = runScenario(
+        initialState = createState(isProcessing = true),
+    ) {
+        val viewMore = composeRule.onNodeWithTag(TEST_TAG_VIEW_MORE)
+        viewMore.assertIsNotEnabled()
+        viewMore.performClick()
+        assertThat(viewActionRecorder.viewActions).isEmpty()
+    }
+
+    @Test
+    fun processingDisablesEditAction() = runScenario(
+        initialState = createState(
+            isProcessing = true,
+            availableSavedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ONE,
+        ),
+    ) {
+        val edit = composeRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD)
+        edit.assertIsNotEnabled()
+        edit.performClick()
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 
