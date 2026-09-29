@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.state.error
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -109,25 +110,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
 
         interactor.state.test {
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isEqualTo(error)
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.selectionError).isNull()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
         }
     }
 
