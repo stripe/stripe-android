@@ -5,6 +5,7 @@ import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
 class GooglePayBillingEmailOverrideProviderTest {
@@ -54,9 +55,11 @@ class GooglePayBillingEmailOverrideProviderTest {
     }
 
     private fun checkoutSessionMetadata(): IntegrationMetadata.CheckoutSession {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
         return IntegrationMetadata.CheckoutSession(
-            id = "cs_test_123",
+            id = checkoutSessionResponse.id,
             instancesKey = "checkout_instances_123",
+            checkoutSessionResponse = checkoutSessionResponse,
         )
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -22,7 +23,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported).isTrue()
+        assertThat(starter.isSupported(DEFAULT_API_CONFIG)).isTrue()
     }
 
     @Test
@@ -34,7 +35,7 @@ internal class TapToAddConnectionStarterTest {
             coroutineContext = testDispatcher,
         )
 
-        assertThat(starter.isSupported).isFalse()
+        assertThat(starter.isSupported(DEFAULT_API_CONFIG)).isFalse()
     }
 
     @Test
@@ -50,13 +51,14 @@ internal class TapToAddConnectionStarterTest {
             merchantDisplayName = "Books & Things",
         )
 
-        starter.start(commonConfiguration)
+        starter.start(commonConfiguration, DEFAULT_API_CONFIG)
         advanceUntilIdle()
 
         assertThat(manager.connectCalls.awaitItem()).isEqualTo(
             FakeTapToAddConnectionManager.ConnectCall(
                 config = TapToAddConnectionManager.ConnectionConfig(
                     merchantDisplayName = "Books & Things",
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ),
             )
         )

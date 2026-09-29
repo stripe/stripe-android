@@ -33,7 +33,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
@@ -43,6 +43,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as CoreR
 
 @Composable
@@ -53,7 +54,7 @@ internal fun CardDetailsEditUI(
     val state by editCardDetailsInteractor.state.collectAsState()
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
-    val hiddenBillingDetailsFields: State<Set<IdentifierSpec>>? = state.billingDetailsForm
+    val hiddenBillingDetailsFields: State<Set<FormFieldId>>? = state.billingDetailsForm
         ?.hiddenElements
         ?.collectAsState()
 
@@ -100,7 +101,7 @@ private fun CardDetailsFormUI(
     paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     dividerHeight: MutableState<Dp>,
-    hiddenBillingDetailsFields: State<Set<IdentifierSpec>>?,
+    hiddenBillingDetailsFields: State<Set<FormFieldId>>?,
     onExpDateChanged: (String) -> Unit,
     nameElementForCardSection: SectionFieldElement?,
 ) {
@@ -182,8 +183,8 @@ private fun rememberValidationMessage(
  * Checks if the billing details form has any fields that are focusable.
  */
 @Composable
-private fun Set<IdentifierSpec>.hasFocusableFields(): Boolean = listOf(
-    IdentifierSpec.PostalCode
+private fun Set<FormFieldId>.hasFocusableFields(): Boolean = listOf(
+    FormFieldId.PostalCode
 ).none { contains(it) }
 
 @Composable
@@ -197,7 +198,10 @@ private fun CardNumberField(
     isFirstField: Boolean,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• ${last4 ?: "••••"}",
+        value = stringResource(
+            PaymentSheetR.string.stripe_paymentsheet_update_card_number,
+            last4 ?: "••••",
+        ),
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         shape = if (isFirstField) {
             MaterialTheme.shapes.small.copy(

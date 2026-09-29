@@ -10,13 +10,13 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.injection.DefaultApiConfigurationResolver
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
@@ -47,7 +47,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 starterArgs.initializationMode.validate()
                 starterArgs.config.asCommonConfiguration().validate(
                     initializationMode = starterArgs.initializationMode,
-                    isLiveMode = PaymentConfiguration.getInstance(this).isLiveMode(),
+                    isLiveMode = DefaultApiConfigurationResolver(this)
+                        .resolve(starterArgs.config.apiConfiguration)
+                        .isLiveMode(),
                     callbackIdentifier = starterArgs.paymentElementCallbackIdentifier,
                 )
             } catch (e: IllegalArgumentException) {
@@ -68,7 +70,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = starterArgs.config.appearance) {
                 val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(

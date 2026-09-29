@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -21,6 +24,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +32,10 @@ import org.junit.runner.RunWith
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 @RunWith(TestParameterInjector::class)
-internal class PreparePaymentMethodTest {
+internal class PreparePaymentMethodTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -46,6 +53,7 @@ internal class PreparePaymentMethodTest {
         val completableShippingAddress = CompletableDeferred<AddressDetails?>()
 
         runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             builder = {
                 preparePaymentMethodHandler { paymentMethod, shippingAddress ->
@@ -73,9 +81,11 @@ internal class PreparePaymentMethodTest {
                             externalId = "external_123",
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                        .shippingDetails(SHIPPING_ADDRESS)
-                        .build()
+                    configuration = apiConfigurationTestType.applyTo(
+                        PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                            .shippingDetails(SHIPPING_ADDRESS)
+                            .build()
+                    )
                 )
             }
 
@@ -103,6 +113,7 @@ internal class PreparePaymentMethodTest {
         val completableFlow = CompletableDeferred<Unit>()
 
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             builder = {
                 preparePaymentMethodHandler { paymentMethod, shippingAddress ->
@@ -133,9 +144,11 @@ internal class PreparePaymentMethodTest {
                             externalId = "external_456",
                         )
                     ),
-                    configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                        .shippingDetails(SHIPPING_ADDRESS)
-                        .build(),
+                    configuration = apiConfigurationTestType.applyTo(
+                        PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                            .shippingDetails(SHIPPING_ADDRESS)
+                            .build()
+                    ),
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -152,7 +165,7 @@ internal class PreparePaymentMethodTest {
 
             val paymentOption = context.configureCallbackTurbine.awaitItem()
 
-            assertThat(paymentOption?.label).endsWith("4242")
+            assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
             composeTestRule.waitForIdle()
@@ -179,6 +192,7 @@ internal class PreparePaymentMethodTest {
 
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             builderInstance = EmbeddedPaymentElement.Builder(
                 preparePaymentMethodHandler = { paymentMethod, shippingAddress ->
                     completablePaymentMethod.complete(paymentMethod)
@@ -192,7 +206,7 @@ internal class PreparePaymentMethodTest {
                 externalId = "external_789",
             )
 
-            context.embeddedPaymentElement.configure(
+            context.configure(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000L,
@@ -204,11 +218,10 @@ internal class PreparePaymentMethodTest {
                         externalId = "external_789",
                     )
                 ),
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                    .shippingDetails(SHIPPING_ADDRESS)
+            ) {
+                shippingDetails(SHIPPING_ADDRESS)
                     .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-                    .build()
-            )
+            }
 
             embeddedContentPage.clickOnLpm(code = "card")
             embeddedFormPage.fillOutCardDetails()

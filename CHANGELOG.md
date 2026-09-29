@@ -1,7 +1,104 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Payments
+* [FIXED][14625](https://github.com/stripe/stripe-android/pull/14625) Fixed an issue where PaymentSheet and `CardNumberEditText` rejected valid card numbers for BINs whose account ranges have different PAN lengths, such as some 16-digit UnionPay cards.
+
+### PaymentSheet
+* [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
+* [ADDED] Added support for MB WAY payments.
+
+### Financial Connections
+* [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
+* [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+
+## 23.20.0 - 2026-09-21
+
+### Payments
+* [FIXED][14643](https://github.com/stripe/stripe-android/pull/14643) Fixed redirects with Alipay+ and the Alipay SDK
+
+### PaymentSheet
+* [ADDED] Added support for Bizum.
+
+### Identity
+* [FIXED][14617](https://github.com/stripe/stripe-android/pull/14617) Updated the top app bar to use the host app background color instead of its primary color.
+
+## 23.19.0 - 2026-09-15
+
+### All SDKs
+* [ADDED] Added Welsh (United Kingdom) localization.
+* [ADDED] Added Arabic (Saudi Arabia) localization.
+
+### PaymentSheet
+* [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
+### CryptoOnramp
+* [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+* [ADDED] Added `presentTermsOfServiceIfNeeded()` to present and record terms of service acceptance during onboarding only when required.
+
+## 23.18.0 - 2026-09-08
+
+### PaymentSheet
+* [ADDED] Added support for SeQura.
+* [ADDED] Added support for PAYCO.
+* [ADDED] Added support for Korean cards.
+* [ADDED] Added support for Naver Pay.
+* [ADDED] Added support for Kakao Pay.
+* [ADDED] Added support for Scalapay.
+
+### AddressElement
+* [CHANGED] Use Stripe-hosted address autocomplete by default.
+
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
+
+## 23.17.1 - 2026-08-31
+
+### PaymentSheet
+* [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+* [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
+* [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
+
+## 23.17.0 - 2026-08-24
+
+### PaymentSheet
+* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
+
+### Payments
+* [ADDED][14089](https://github.com/stripe/stripe-android/pull/14089) Support for Alipay when using `SetupIntent` through the direct APIs.
+
+### Identity
+* [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added guided 3D selfie capture for supported verification sessions, including left and right pose collection.
+
+## 23.16.0 - 2026-08-18
+
+### PaymentSheet
+* [ADDED] Added `PaymentSheet.LinkConfiguration.Display.WalletButtonHidden`, which keeps Link enabled but hides its button from the payment element UI.
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED] Added `OnrampCoordinator.deleteWalletAddress(walletId:)` to delete a registered wallet address.
+
+## 23.15.0 - 2026-08-10
+
+### PaymentSheet
+* [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
+* [ADDED] Added support for the Agrobank, MBSB Bank, and Bank of China FPX banks, and the FPX bank list is now displayed in alphabetical order.
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
+
+### Identity
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
 
 ## 23.14.0 - 2026-08-03
 

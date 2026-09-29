@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.unit.LayoutDirection
 import com.google.common.truth.Truth
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -228,8 +227,8 @@ class DateConfigTest {
     }
 
     @Test
-    fun `Layout direction should be Ltr`() {
-        Truth.assertThat(dateConfig.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+    fun `Date config should enforce Ltr text direction`() {
+        Truth.assertThat(dateConfig.enforceLeftToRightTextDirection).isTrue()
     }
 
     private fun produceInput(month: Int, year: Int): String {

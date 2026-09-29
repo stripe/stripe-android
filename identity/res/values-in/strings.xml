@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Bentuk identifikasi yang diterima antara lain</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Sejajarkan identitas</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Izinkan</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Pengaturan Aplikasi</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Izin kamera</string>
   <string name="stripe_camera_permission_rationale">Aplikasi ini menggunakan kamera untuk memindai dokumen identitas Anda dan mengambil foto untuk memverifikasi identitas Anda.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Tampak depan diambil</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Tampak kiri diambil</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Tampak kanan diambil</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Mengambil gambar...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Anda dapat mencoba lagi atau mengunggah gambar dari perangkat.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Tidak dapat mengambil gambar</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Tolak</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detail tidak terlihat</string>
   <string name="stripe_decrease_lighting_2">Pindah ke tempat yang lebih gelap</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Kami memerlukan izin Anda untuk menggunakan kamera. Harap izinkan akses kamera di pengaturan aplikasi.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Jangan bergerak, memindai</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Jangan bergerak...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Identitas</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">Pengambilan gambar swafoto selesai</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Pengambilan gambar swafoto</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Bagus! Memeriksa gambar Anda....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Dengan seizin Anda, Stripe mungkin menggunakan gambar Anda untuk meningkatkan deteksi penipuan. Penolakan tidak memengaruhi verifikasi Anda.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verifikasikan dengan swafoto</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">Satu swafoto diambil</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Tolehkan kepala ke kiri</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Tolehkan kepala ke kanan</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Mendekat</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Gambar swafoto Anda belum disimpan. Apakah Anda ingin keluar?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Posisikan wajah Anda di dalam bingkai</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Swafoto</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Bantu kami meningkatkan verifikasi</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Beberapa foto akan diambil secara otomatis pada langkah berikutnya untuk memverifikasi diri Anda</string>
   <!-- Title for selfie warmup page -->

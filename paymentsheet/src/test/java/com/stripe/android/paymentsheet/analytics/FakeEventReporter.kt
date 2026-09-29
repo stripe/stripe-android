@@ -48,6 +48,9 @@ internal class FakeEventReporter : EventReporter {
     private val _showNewPaymentOptionsCalls = Turbine<Unit>()
     val showNewPaymentOptionsCalls: ReceiveTurbine<Unit> = _showNewPaymentOptionsCalls
 
+    private val _showExistingPaymentOptionsCalls = Turbine<Unit>()
+    val showExistingPaymentOptionsCalls: ReceiveTurbine<Unit> = _showExistingPaymentOptionsCalls
+
     private val _showManageSavedPaymentMethods = Turbine<Unit>()
     val showManageSavedPaymentMethods: ReceiveTurbine<Unit> = _showManageSavedPaymentMethods
 
@@ -97,8 +100,12 @@ internal class FakeEventReporter : EventReporter {
     val tapToAddAttemptWithUnsupportedDeviceCalls: ReceiveTurbine<Unit> =
         _tapToAddAttemptWithUnsupportedDeviceCalls
 
-    private val _pmmPromotionsFetched = Turbine<Unit>()
-    val pmmPromotionsFetched: ReceiveTurbine<Unit> =
+    private val _billingAddressCompletedCalls = Turbine<BillingAddressCompletedCall>()
+    val billingAddressCompletedCalls: ReceiveTurbine<BillingAddressCompletedCall> =
+        _billingAddressCompletedCalls
+
+    private val _pmmPromotionsFetched = Turbine<String>()
+    val pmmPromotionsFetched: ReceiveTurbine<String> =
         _pmmPromotionsFetched
 
     private val _pmmPromotionsDisplayed = Turbine<Boolean>()
@@ -114,6 +121,7 @@ internal class FakeEventReporter : EventReporter {
         _setAsDefaultPaymentMethodSucceededCalls.ensureAllEventsConsumed()
         _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
         _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _showExistingPaymentOptionsCalls.ensureAllEventsConsumed()
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
@@ -131,17 +139,16 @@ internal class FakeEventReporter : EventReporter {
         _tapToAddConfirmCalls.ensureAllEventsConsumed()
         _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
         _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
+        _billingAddressCompletedCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
-    }
-
-    override fun onInit() {
     }
 
     override fun onDismiss() {
     }
 
     override fun onShowExistingPaymentOptions() {
+        _showExistingPaymentOptionsCalls.add(Unit)
     }
 
     override fun onShowManageSavedPaymentMethods() {
@@ -280,8 +287,22 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
-    override fun onPaymentMethodMessagePromotionsFetchBegin() {
-        _pmmPromotionsFetched.add(Unit)
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        _billingAddressCompletedCalls.add(
+            BillingAddressCompletedCall(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
+    }
+
+    override fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String) {
+        _pmmPromotionsFetched.add(publishableKey)
     }
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
@@ -391,5 +412,11 @@ internal class FakeEventReporter : EventReporter {
 
     data class FormCompletedCall(
         val code: PaymentMethodCode
+    )
+
+    data class BillingAddressCompletedCall(
+        val addressCountryCode: String,
+        val autocompleteResultSelected: Boolean,
+        val editDistance: Int?,
     )
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cardart
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -56,6 +57,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (Nothing) -> Unit,
     ): Unit = Unit
 

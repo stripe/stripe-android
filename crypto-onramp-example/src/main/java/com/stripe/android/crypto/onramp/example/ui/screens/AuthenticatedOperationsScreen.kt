@@ -18,9 +18,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.example.AUTHENTICATED_OPERATIONS_TAG
+import com.stripe.android.crypto.onramp.example.BACK_TO_SIGN_IN_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.LOG_OUT_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.model.KycResidence
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -33,10 +40,17 @@ internal fun AuthenticatedOperationsScreen(
     uiState: OnrampUiState,
     onAuthenticate: (String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit,
+    onGetWalletOwnershipChallenge: (String, CryptoNetwork) -> Unit,
+    onSubmitWalletOwnershipSignature: (String) -> Unit,
+    onWalletOwnershipSignatureChange: (String) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onShowUserAttestation: () -> Unit,
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -44,11 +58,13 @@ internal fun AuthenticatedOperationsScreen(
     onLogOut: () -> Unit,
     onBack: () -> Unit,
     onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
     onKycFirstNameChange: (String) -> Unit,
     onKycLastNameChange: (String) -> Unit,
     onKycBirthCountryChange: (String) -> Unit,
     onKycBirthCityChange: (String) -> Unit,
     onKycNationalitiesChange: (String) -> Unit,
+    onKycResidenceChange: (KycResidence) -> Unit,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
     onIdentifierTypeChange: (Int, String) -> Unit,
     onIdentifierValueChange: (Int, String) -> Unit,
@@ -64,13 +80,16 @@ internal fun AuthenticatedOperationsScreen(
         mutableStateOf(uiState.network ?: CryptoNetwork.Ethereum)
     }
     var isNetworkDropdownExpanded by remember { mutableStateOf(false) }
+    var isWalletOwnershipExpanded by remember { mutableStateOf(false) }
     var isKycExpanded by remember { mutableStateOf(false) }
     var isIdentifierExpanded by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        onRefreshWallets()
+    }
+
     LaunchedEffect(uiState.walletAddress) {
-        if (!uiState.walletAddress.isNullOrBlank()) {
-            walletAddressInput = uiState.walletAddress
-        }
+        walletAddressInput = uiState.walletAddress ?: DEFAULT_WALLET_ADDRESS
     }
 
     LaunchedEffect(uiState.network) {
@@ -79,6 +98,7 @@ internal fun AuthenticatedOperationsScreen(
 
     Column(
         modifier = Modifier
+            .testTag(AUTHENTICATED_OPERATIONS_TAG)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
@@ -103,6 +123,8 @@ internal fun AuthenticatedOperationsScreen(
         AuthenticateSection(onAuthenticate = onAuthenticate)
 
         WalletAddressSection(
+            wallets = uiState.wallets,
+            isLoading = uiState.isWalletsLoading,
             walletAddress = walletAddressInput,
             onWalletAddressChange = { walletAddressInput = it },
             selectedNetwork = selectedNetwork,
@@ -111,6 +133,25 @@ internal fun AuthenticatedOperationsScreen(
             onSelectNetwork = { selectedNetwork = it },
             onRegisterWalletAddress = {
                 onRegisterWalletAddress(walletAddressInput, selectedNetwork)
+            },
+            onDeleteWallet = onDeleteWallet,
+            onRefreshWallets = onRefreshWallets
+        )
+
+        WalletOwnershipSection(
+            isExpanded = isWalletOwnershipExpanded,
+            onExpandedChange = { isWalletOwnershipExpanded = it },
+            challengeId = uiState.walletOwnershipChallengeId,
+            challengeMessage = uiState.walletOwnershipChallengeMessage,
+            challengeExpiresAt = uiState.walletOwnershipChallengeExpiresAt,
+            verifiedOwnership = uiState.walletOwnershipVerified,
+            signatureInput = uiState.walletOwnershipSignatureInput,
+            onSignatureInputChange = onWalletOwnershipSignatureChange,
+            onGetWalletOwnershipChallenge = {
+                onGetWalletOwnershipChallenge(walletAddressInput, selectedNetwork)
+            },
+            onSubmitWalletOwnershipSignature = {
+                onSubmitWalletOwnershipSignature(uiState.walletOwnershipSignatureInput)
             }
         )
 
@@ -127,10 +168,17 @@ internal fun AuthenticatedOperationsScreen(
             onBirthCityChange = onKycBirthCityChange,
             nationalities = uiState.kycNationalities,
             onNationalitiesChange = onKycNationalitiesChange,
+            residence = uiState.kycResidence,
+            onResidenceChange = onKycResidenceChange,
             address = uiState.kycAddress,
             onAddressChange = onKycAddressChange,
             onCollectKyc = onCollectKyc,
             onVerifyKyc = onVerifyKyc
+        )
+
+        PartnerTermsSection(
+            onShowTermsAndConditions = onShowTermsAndConditions,
+            onShowTermsOfService = onShowTermsOfService,
         )
 
         IdentifierSection(
@@ -153,6 +201,9 @@ internal fun AuthenticatedOperationsScreen(
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,
+            samsungPayIsReady = uiState.samsungPayIsReady,
+            sourceCurrency = uiState.sourceCurrency,
+            onSelectSourceCurrency = onSelectSourceCurrency,
             onCollectPayment = onCollectPayment
         )
         CheckoutSection(
@@ -165,6 +216,7 @@ internal fun AuthenticatedOperationsScreen(
         Button(
             onClick = onLogOut,
             modifier = Modifier
+                .testTag(LOG_OUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -173,7 +225,9 @@ internal fun AuthenticatedOperationsScreen(
 
         TextButton(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .testTag(BACK_TO_SIGN_IN_BUTTON_TAG)
+                .fillMaxWidth()
         ) {
             Text("Back to Sign in")
         }

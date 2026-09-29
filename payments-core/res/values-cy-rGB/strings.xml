@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="stripe_acc_label_card_number">Rhif y cerdyn</string>
+  <string name="stripe_acc_label_card_number_node">%s, Rhif y cerdyn</string>
+  <string name="stripe_acc_label_cvc_node">%s, CVC</string>
+  <string name="stripe_acc_label_expiry_date">Dyddiad dod i ben</string>
+  <string name="stripe_acc_label_expiry_date_node">%s, Dyddiad dod i ben</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="stripe_acc_label_zip">Cod ZIP</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="stripe_acc_label_zip_short">ZIP</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_added">Wedi ychwanegu %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="stripe_address_city_required">Rhowch eich dinas</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="stripe_address_country_invalid">Mae eich gwlad yn annilys</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="stripe_address_county_required">Rhowch eich sir</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="stripe_address_label_address_line1_optional">Llinell cyfeiriad 1 (dewisol)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="stripe_address_label_address_line2_optional">Llinell cyfeiriad 2 (dewisol)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="stripe_address_label_address_optional">Cyfeiriad (dewisol)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_apt_optional">Fflat (dewisol)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="stripe_address_label_city_optional">Dinas (dewisol)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="stripe_address_label_county_optional">Sir (dewisol)</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="stripe_address_label_phone_number_optional">Rhif ffôn (dewisol)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="stripe_address_label_postal_code_optional">Cod post (dewisol)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="stripe_address_label_postcode">Cod post</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="stripe_address_label_postcode_optional">Cod post (dewisol)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="stripe_address_label_province_optional">Talaith (dewisol)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="stripe_address_label_region_generic">Talaith / Ardal</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="stripe_address_label_region_generic_optional">Talaith / Ardal (dewisol)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_state_optional">Talaith (dewisol)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="stripe_address_label_zip_code_optional">Cod ZIP (dewisol)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="stripe_address_label_zip_postal_code">Cod Post/ZIP</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="stripe_address_label_zip_postal_code_optional">Cod Post/ZIP (dewisol)</string>
+  <!-- Error text indicating name is required -->
+  <string name="stripe_address_name_required">Rhowch eich enw</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="stripe_address_phone_number_required">Rhowch eich rhif ffôn</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="stripe_address_postcode_invalid">Mae eich cod post yn annilys</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="stripe_address_province_required">Rhowch eich talaith</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="stripe_address_region_generic_required">Rhowch eich Talaith/Ardal</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="stripe_address_required">Rhowch eich cyfeiriad</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="stripe_address_state_required">Rhowch eich talaith</string>
+  <!-- Pay over time with Affirm copy -->
+  <string name="stripe_affirm_buy_now_pay_later">Talu dros amser gyda &lt;img src=\"affirm\"&gt;.</string>
+  <!-- Pay over time with Affirm copy without using logo image within text. -->
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Talu dros amser gydag Affirm.</string>
+  <!-- Label for Name on account field on form -->
+  <string name="stripe_au_becs_account_name">Enw ar y cyfrif</string>
+  <!-- Placeholder for AU BECS BSB number -->
+  <string name="stripe_au_becs_bsb_number">Rhif BSB</string>
+  <!-- Legal text shown when using AUBECS. -->
+  <string name="stripe_au_becs_mandate">Drwy roi manylion eich cyfrif banc a chadarnhau\'r taliad hwn, rydych chi\'n cytuno i\'r Cais Debyd Uniongyrchol hwn ac i &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;gytundeb gwasanaeth y Cais Debyd Uniongyrchol&lt;/a&gt;, ac yn awdurdodi Stripe Payments Australia Pty Ltd ACN 160 180 343 Rhif ID Defnyddiwr y Debyd Uniongyrchol 507156 (“Stripe”) i ddebydu eich cyfrif drwy System Clirio Electronig mewn Swp (BECS) ar ran %s (y \"Masnachwr\") ar gyfer unrhyw symiau y rhoddir gwybod i chi amdanynt ar wahân gan y Masnachwr. Rydych chi\'n ardystio eich bod naill ai\'n ddeiliad cyfrif neu\'n llofnodwr awdurdodedig ar y cyfrif a nodir uchod.</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="stripe_becs_mandate_acceptance">\n    Drwy roi manylion eich cyfrif banc a chadarnhau\'r taliad hwn, rydych chi\'n cytuno i\'r Cais\n    Debyd Uniongyrchol hwn ac i gytundeb gwasanaeth y Cais Debyd Uniongyrchol, ac yn\n    awdurdodi Stripe Payments Australia Pty Ltd ACN 160 180 343 Rhif ID Defnyddiwr y Debyd\n    Uniongyrchol 507156 (“Stripe”) i ddebydu eich cyfrif drwy System Clirio Electronig mewn\n    Swp (BECS) ar ran %1$s (y \"Masnachwr\") ar gyfer unrhyw symiau y rhoddir gwybod i chi \n    amdanynt ar wahân gan y Masnachwr. Rydych chi\'n ardystio eich bod naill ai\'n ddeiliad\n    cyfrif neu\'n llofnodwr awdurdodedig ar y cyfrif a nodir uchod.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="stripe_becs_widget_account_number">Rhif y cyfrif</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">Mae rhif y cyfrif a roddwyd yn anghyflawn.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="stripe_becs_widget_account_number_required">Mae angen rhif eich cyfrif.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="stripe_becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="stripe_becs_widget_bsb_incomplete">Mae\'r BSB a roddwyd yn anghyflawn.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="stripe_becs_widget_bsb_invalid">Mae\'r BSB a roddwyd yn annilys.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="stripe_becs_widget_email">Cyfeiriad E-bost</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="stripe_becs_widget_email_invalid">Mae eich cyfeiriad e-bost yn annilys.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="stripe_becs_widget_email_required">Mae angen eich cyfeiriad e-bost.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="stripe_becs_widget_name">Enw</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="stripe_becs_widget_name_required">Mae angen eich enw.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="stripe_cancel">Canslo</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Dewiswch frand cerdyn</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="stripe_card_declined">Gwrthodwyd eich cerdyn</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="stripe_card_ending_in">%1$s yn gorffen gyda %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Dim ond cardiau credyd sy\'n cael eu derbyn</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Dim ond cardiau credyd a chardiau rhagdaledig sy’n cael eu derbyn</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Dim ond cardiau debyd sy\'n cael eu derbyn</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Dim ond cardiau debyd a chardiau credyd sy\'n cael eu derbyn</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Dim ond cardiau debyd a chardiau rhagdaledig sy’n cael eu derbyn</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Dim ond cardiau rhagdaledig sy\'n cael eu derbyn</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
+  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
+  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
+  <!-- Text for close button -->
+  <string name="stripe_close">Cau</string>
+  <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
+  <string name="stripe_confirming_transaction_status">Wrthi\'n cadarnhau\'r trafodyn</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="stripe_delete_payment_method">Dileu Dull Talu</string>
+  <string name="stripe_delete_payment_method_prompt_title">Dileu dull talu?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">Ni dderbynnir %s</string>
+  <!-- Done button title -->
+  <string name="stripe_done">Wedi gorffen</string>
+  <!-- Button title to enter editing mode -->
+  <string name="stripe_edit">Golygu</string>
+  <!-- Error when the card has already expired -->
+  <string name="stripe_expired_card">Mae eich cerdyn wedi dod i ben</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_expiry_date_hint">MM/BB</string>
+  <string name="stripe_expiry_label_short">Dod i ben</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Rydyn ni\'n cael trafferth cysylltu â\'n darparwr taliadau. Gwnewch yn siŵr eich bod wedi cysylltu â\'r rhyngrwyd a rhoi cynnig arall arni.</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Does dim modd dilysu eich dull talu. Dewiswch ddull talu arall a rhoi cynnig arall arni.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Amser wedi dod i ben wrth ddilysu eich dull talu – rhowch gynnig arall arni</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="stripe_fpx_bank_offline">%s - All-lein</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="stripe_generic_decline">Gwrthodwyd eich dull talu.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Cost heb gynnwys treth</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Cyfanswm wedi’i amcangyfrif (gall y dreth derfynol amrywio)</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Cyfanswm</string>
+  <!-- An error message displayed when the customer has not enough funds for payment. -->
+  <string name="stripe_insufficient_funds">Does dim digon o arian ar eich cerdyn.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_internal_error">Gwall mewnol.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="stripe_invalid_bank_account_iban">Mae\'r IBAN a roddwyd yn annilys.</string>
+  <string name="stripe_invalid_card_number">Mae rhif eich cerdyn yn annilys.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="stripe_invalid_cvc">Mae cod diogelwch eich cerdyn yn annilys.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="stripe_invalid_owner_name">Mae eich enw\'n annilys.</string>
+  <!-- Shipping form error message -->
+  <string name="stripe_invalid_shipping_information">Cyfeiriad Dosbarthu Annilys</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="stripe_invalid_zip">Mae eich cod post yn anghyflawn.</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">Manylion y dull talu</string>
+  <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
+  <string name="stripe_link_simple_secure_payments">Taliadau un-clic syml a diogel</string>
+  <string name="stripe_payment_method_add_new_card">Ychwanegu cerdyn newydd...</string>
+  <string name="stripe_payment_method_add_new_fpx">Dewis Cyfrif Banc (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="stripe_price_free">Am ddim</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="stripe_processing_error">Aeth rhywbeth o\'i le wrth brosesu eich cerdyn – rhowch gynnig arall arni mewn ychydig eiliadau</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="stripe_remove">Tynnu</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="stripe_removed">Wedi tynnu %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Aeth rhywbeth o\'i le. ID y cais: %1$s</string>
+  <string name="stripe_secure_checkout">Talu\'n Ddiogel</string>
+  <string name="stripe_title_add_a_card">Ychwanegu Cerdyn</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="stripe_title_add_an_address">Gosod Cyfeiriad</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="stripe_title_bank_account">Cyfrif Banc</string>
+  <!-- Title for Payment Method screen -->
+  <string name="stripe_title_payment_method">Dull Talu</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="stripe_title_select_shipping_method">Dewis Dull Dosbarthu</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">Diweddaru cerdyn</string>
+  <!-- Title for a button that when tapped, updates a card brand. -->
+  <string name="stripe_update">Diweddaru</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Dilysu eich taliad</string>
+</resources>

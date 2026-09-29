@@ -9,12 +9,12 @@ internal abstract class NfcScanningError : Throwable() {
 
     abstract val userMessage: ResolvableString
 
-    open val parameters: Map<String, String> = emptyMap()
+    open val parameters: Map<String, Any?> = emptyMap()
 }
 
 internal data class GenericNfcScanningError(
     override val errorCode: String,
     override val userMessage: ResolvableString =
-        R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-    override val parameters: Map<String, String> = emptyMap(),
+        R.string.stripe_nfc_try_again_error.resolvableString,
+    override val parameters: Map<String, Any?> = emptyMap(),
 ) : NfcScanningError()

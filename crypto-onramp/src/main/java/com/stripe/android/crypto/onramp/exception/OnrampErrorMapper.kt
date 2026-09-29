@@ -17,11 +17,11 @@ internal fun Throwable.toCryptoOnrampError(
 ): Throwable {
     if (this is StripeCryptoOnrampError) return this
 
-    val diagnosticContext = DiagnosticContext(
-        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
-        operation = operation.value,
-        appPackageName = context.packageName,
-        mode = publishableKey.toMode(),
+    val diagnosticContext = createDiagnosticContext(
+        context = context,
+        operation = operation,
+        publishableKey = publishableKey,
+        additionalSdkVersions = additionalSdkVersions,
     )
 
     if (this is LinkAppAttestationException) {
@@ -46,8 +46,16 @@ internal fun Throwable.toCryptoOnrampError(
         )
     }
 
-    val stripeException = this as? StripeException ?: return this
-    val stripeError = stripeException.stripeError ?: return this
+    val stripeException = this as? StripeException ?: return UnexpectedException(
+        underlyingError = this,
+        diagnosticContext = diagnosticContext,
+        userMessage = context.getString(R.string.stripe_onramp_default_api_error_user_message),
+    )
+    val stripeError = stripeException.stripeError ?: return UnexpectedException(
+        underlyingError = this,
+        diagnosticContext = diagnosticContext,
+        userMessage = context.getString(R.string.stripe_onramp_default_api_error_user_message),
+    )
     val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
 
     val apiErrorContext = APIErrorContext(
@@ -125,6 +133,20 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
     }
+}
+
+internal fun createDiagnosticContext(
+    context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
+    additionalSdkVersions: List<SDKVersion>,
+): DiagnosticContext {
+    return DiagnosticContext(
+        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
+        operation = operation.value,
+        appPackageName = context.packageName,
+        mode = publishableKey.toMode(),
+    )
 }
 
 private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(

@@ -55,7 +55,7 @@ internal data class KycCollectionRequest(
                 firstName = kycInfo.firstName.takeIf { !it.isNullOrEmpty() },
                 lastName = kycInfo.lastName.takeIf { !it.isNullOrEmpty() },
                 idNumber = kycInfo.idNumber.takeIf { !it.isNullOrEmpty() },
-                idType = SOCIAL_SECURITY_NUMBER.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
+                idType = kycInfo.idType.value.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
                 dateOfBirth = kycInfo.dateOfBirth,
                 birthCountry = kycInfo.birthCountry?.value,
                 birthCity = kycInfo.birthCity.takeIf { !it.isNullOrEmpty() },
@@ -69,11 +69,6 @@ internal data class KycCollectionRequest(
                 credentials = credentials
             )
         }
-
-        /**
-         * Currently, we only support SSN for identity verification in the US.
-         */
-        private const val SOCIAL_SECURITY_NUMBER = "social_security_number"
     }
 }
 

@@ -1,7 +1,12 @@
 package com.stripe.android.utils
 
+import android.app.UiAutomation
+import android.os.Build
+import android.os.ParcelFileDescriptor
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -13,16 +18,23 @@ internal object CleanupChromeRule : TestRule {
         return object : Statement() {
             @Throws
             override fun evaluate() {
+                val instrumentation = InstrumentationRegistry.getInstrumentation()
+                val device = UiDevice.getInstance(instrumentation)
+
+                // Stabilize Chrome startup on the API 33 emulator by skipping its first-run
+                // prompts and Vulkan path. Keep GPU compositing enabled because --disable-gpu
+                // causes this Chrome image to abort before opening the authorization page.
+                configureChrome(instrumentation.uiAutomation)
+
                 try {
                     base.evaluate()
                 } finally {
-                    val instrumentation = InstrumentationRegistry.getInstrumentation()
                     val command = "am force-stop com.android.chrome"
                     instrumentation.uiAutomation.executeShellCommand(command).close()
+                    device.wait(Until.gone(By.pkg("com.android.chrome")), CHROME_SHUTDOWN_TIMEOUT_MS)
 
                     // Force-stopping Chrome leaves no window focused; restore focus so the next
                     // test's Espresso RootViewPicker doesn't time out waiting for it.
-                    val device = UiDevice.getInstance(instrumentation)
                     device.wakeUp()
                     device.pressHome()
                     awaitWindowFocus()
@@ -30,4 +42,23 @@ internal object CleanupChromeRule : TestRule {
             }
         }
     }
+
+    private fun configureChrome(uiAutomation: UiAutomation) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return
+        }
+
+        val descriptors = uiAutomation.executeShellCommandRw("sh")
+        ParcelFileDescriptor.AutoCloseOutputStream(descriptors[1]).bufferedWriter().use { writer ->
+            writer.write(
+                "echo chrome --disable-fre --no-default-browser-check " +
+                    "--disable-features=Vulkan " +
+                    "> /data/local/tmp/chrome-command-line"
+            )
+            writer.newLine()
+        }
+        ParcelFileDescriptor.AutoCloseInputStream(descriptors[0]).use { it.readBytes() }
+    }
+
+    private const val CHROME_SHUTDOWN_TIMEOUT_MS = 5_000L
 }

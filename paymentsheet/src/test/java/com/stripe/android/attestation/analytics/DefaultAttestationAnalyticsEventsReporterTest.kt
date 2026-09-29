@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.attestation.AttestationError
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -39,6 +40,24 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
         assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare.failed")
         assertThat(loggedParams).containsEntry("duration", 10f)
         assertThat(loggedParams).containsEntry("error_message", "Test error")
+        assertThat(loggedParams).doesNotContainKey("android_attestation_error_type")
+        assertThat(loggedParams).doesNotContainKey("android_attestation_error_retriable")
+    }
+
+    @Test
+    fun testPrepareFailedWithAttestationError() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.prepare()
+
+        eventsReporter.prepareFailed(
+            error = AttestationError(
+                errorType = AttestationError.ErrorType.API_NOT_AVAILABLE,
+                message = "Attestation API is unavailable"
+            )
+        )
+
+        val loggedParams = fakeAnalyticsRequestExecutor.getExecutedRequests().last().params
+        assertThat(loggedParams).containsEntry("android_attestation_error_type", "API_NOT_AVAILABLE")
+        assertThat(loggedParams).containsEntry("android_attestation_error_retriable", false)
     }
 
     @Test
@@ -96,6 +115,24 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
         assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token.failed")
         assertThat(loggedParams).containsEntry("duration", 12f)
         assertThat(loggedParams).containsEntry("error_message", "Request failed")
+        assertThat(loggedParams).doesNotContainKey("android_attestation_error_type")
+        assertThat(loggedParams).doesNotContainKey("android_attestation_error_retriable")
+    }
+
+    @Test
+    fun testRequestTokenFailedWithAttestationError() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.requestToken()
+
+        eventsReporter.requestTokenFailed(
+            error = AttestationError(
+                errorType = AttestationError.ErrorType.NETWORK_ERROR,
+                message = "Network error"
+            )
+        )
+
+        val loggedParams = fakeAnalyticsRequestExecutor.getExecutedRequests().last().params
+        assertThat(loggedParams).containsEntry("android_attestation_error_type", "NETWORK_ERROR")
+        assertThat(loggedParams).containsEntry("android_attestation_error_retriable", true)
     }
 
     private fun runScenario(

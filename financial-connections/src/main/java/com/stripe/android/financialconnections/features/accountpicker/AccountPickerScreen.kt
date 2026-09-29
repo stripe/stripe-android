@@ -36,6 +36,7 @@ import com.stripe.android.financialconnections.exception.AccountNoneEligibleForP
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
@@ -43,6 +44,7 @@ import com.stripe.android.financialconnections.features.common.NoSupportedPaymen
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -120,7 +122,13 @@ private fun AccountPickerContent(
                         onSelectAnotherBank = onSelectAnotherBank
                     )
 
-                    else -> UnclassifiedErrorContent { onCloseFromErrorClick(error) }
+                    // The server described an error screen for us and the view model is navigating
+                    // to it, so don't flash one of our own on the way out.
+                    else -> if (error.genericErrorPane() != null) {
+                        FullScreenGenericLoading()
+                    } else {
+                        UnclassifiedErrorContent { onCloseFromErrorClick(error) }
+                    }
                 }
             }
 

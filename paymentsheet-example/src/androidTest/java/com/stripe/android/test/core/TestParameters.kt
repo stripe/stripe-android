@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippi
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
@@ -60,7 +61,7 @@ internal data class TestParameters(
             val settings = PlaygroundSettings.createFromDefaults()
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[CustomerSessionSettingsDefinition] = false
-            settings[LinkSettingsDefinition] = false
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Never
             settings[MerchantSettingsDefinition] = Merchant.GB
             settings[CurrencySettingsDefinition] = Currency.EUR
             settings[DefaultShippingAddressSettingsDefinition] = false

@@ -2,12 +2,14 @@ package com.stripe.android.customersheet.utils
 
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -20,13 +22,15 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -50,6 +54,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import org.mockito.kotlin.mock
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -72,14 +77,11 @@ internal interface CustomerSheetTestHelper {
         ),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-            LpmRepositoryTestHelpers.card,
-            LpmRepositoryTestHelpers.usBankAccount,
+            SupportedPaymentMethodFixtures.card,
+            SupportedPaymentMethodFixtures.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
-        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
-        ),
+        apiConfiguration: ApiConfiguration.State = DEFAULT_API_CONFIG,
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable,
@@ -91,6 +93,7 @@ internal interface CustomerSheetTestHelper {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)
@@ -125,21 +128,25 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
+            apiConfigurationProvider = {
+                if (isLiveMode) {
+                    apiConfiguration.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
+                } else {
+                    apiConfiguration
+                }
+            },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }
                 ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentConfiguration = paymentConfiguration,
                     bacsMandateConfirmationLauncherFactory = {
                         FakeBacsMandateConfirmationLauncher()
                     },
                     stripePaymentLauncherAssistedFactory = object : StripePaymentLauncherAssistedFactory {
                         override fun create(
-                            publishableKey: () -> String,
-                            stripeAccountId: () -> String?,
+                            apiConfigurationProvider: Provider<ApiConfiguration.State>,
                             statusBarColor: Int?,
                             includePaymentSheetNextHandlers: Boolean,
                             hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
@@ -149,8 +156,11 @@ internal interface CustomerSheetTestHelper {
                     },
                     googlePayPaymentMethodLauncherFactory = object : InternalGooglePayPaymentMethodLauncherFactory {
                         override fun create(
+                            instanceId: String,
+                            lifecycleOwner: LifecycleOwner,
                             activityResultLauncher:
                             ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+                            onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
                         ): InternalGooglePayPaymentMethodLauncher = mock()
                     },
                     statusBarColor = null,

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -48,6 +49,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (BacsMandateConfirmationResult) -> Unit
     ): BacsMandateConfirmationLauncher {
         return bacsMandateConfirmationLauncherFactory.create(

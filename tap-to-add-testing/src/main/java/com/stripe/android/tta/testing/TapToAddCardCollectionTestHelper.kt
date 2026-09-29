@@ -1,7 +1,5 @@
 package com.stripe.android.tta.testing
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -69,13 +67,16 @@ class TapToAddCardCollectionTestHelper(
         )
     }
 
-    suspend fun assertSuccessfulCardCollection(collect: TapToCollectAssertionInfo) {
+    suspend fun assertSuccessfulCardCollection(
+        collect: TapToCollectAssertionInfo,
+        expectedUxConfiguration: TapToPayUxConfiguration,
+    ) {
         assertIsInitializedCall()
         assertConnectedReaderCall()
         assertSupportsReadersOfTypeCall()
         assertDiscoverCall()
         assertConnectReaderCall(collect.reader)
-        assertSetTapToPayUxConfigurationCall()
+        assertSetTapToPayUxConfigurationCall(expectedUxConfiguration)
         assertRetrieveSetupIntentCall(collect.setupIntentClientSecret)
         assertCollectSetupIntentPaymentMethod(collect.setupIntent)
         assertConfirmSetupIntent(collect.setupIntent)
@@ -117,23 +118,12 @@ class TapToAddCardCollectionTestHelper(
         assertThat(connectionConfiguration.useCase).isInstanceOf(TapUseCase.Verify::class.java)
     }
 
-    private suspend fun assertSetTapToPayUxConfigurationCall() {
+    private suspend fun assertSetTapToPayUxConfigurationCall(
+        expectedUxConfiguration: TapToPayUxConfiguration,
+    ) {
         val uxConfiguration = delegate.awaitSetTapToPayUxConfigurationCall()
 
-        assertThat(uxConfiguration).isEqualTo(
-            TapToPayUxConfiguration.Builder()
-                .darkMode(darkMode = TapToPayUxConfiguration.DarkMode.SYSTEM)
-                .colors(
-                    colors = TapToPayUxConfiguration.ColorScheme.Builder()
-                        .primary(
-                            primary = TapToPayUxConfiguration.Color.Value(
-                                color = Color(PRIMARY_COLOR).toArgb(),
-                            )
-                        )
-                        .build()
-                )
-                .build()
-        )
+        assertThat(uxConfiguration).isEqualTo(expectedUxConfiguration)
     }
 
     private suspend fun assertRetrieveSetupIntentCall(clientSecret: String) {
@@ -173,8 +163,4 @@ class TapToAddCardCollectionTestHelper(
         val cardPaymentMethod: PaymentMethod,
         val setupIntentClientSecret: String,
     )
-
-    private companion object {
-        const val PRIMARY_COLOR = 0xFF007AFF
-    }
 }

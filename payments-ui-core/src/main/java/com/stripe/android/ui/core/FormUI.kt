@@ -20,7 +20,6 @@ import com.stripe.android.ui.core.elements.BsbElement
 import com.stripe.android.ui.core.elements.BsbElementUI
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
-import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
@@ -36,7 +35,7 @@ import com.stripe.android.uicore.LocalSectionSpacing
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.CheckboxFieldUI
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -49,10 +48,10 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun FormUI(
-    hiddenIdentifiersFlow: StateFlow<Set<IdentifierSpec>>,
+    hiddenIdentifiersFlow: StateFlow<Set<FormFieldId>>,
     enabledFlow: StateFlow<Boolean>,
     elementsFlow: StateFlow<List<FormElement>>,
-    lastTextFieldIdentifierFlow: StateFlow<IdentifierSpec?>,
+    lastTextFieldIdentifierFlow: StateFlow<FormFieldId?>,
     modifier: Modifier = Modifier
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState()
@@ -72,10 +71,10 @@ fun FormUI(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun FormUI(
-    hiddenIdentifiers: Set<IdentifierSpec>,
+    hiddenIdentifiers: Set<FormFieldId>,
     enabled: Boolean,
     elements: List<FormElement>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier
 ) {
     val sectionSpacing = LocalSectionSpacing.current
@@ -87,7 +86,7 @@ fun FormUI(
         } ?: Arrangement.Top,
     ) {
         val visibleElements = elements.filter { element ->
-            !hiddenIdentifiers.contains(element.identifier) && element !is EmptyFormElement
+            !hiddenIdentifiers.contains(element.identifier)
         }
 
         visibleElements.forEachIndexed { index, element ->
@@ -112,8 +111,8 @@ private fun FormUIElement(
     maxIndex: Int,
     enabled: Boolean,
     hasVerticalCustomSpacing: Boolean,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
 ) {
     when (element) {
         is SectionElement -> SectionElementUI(

@@ -10,7 +10,8 @@ enum class PaymentMethodType(internal val value: String) {
     Card("card"),
     BankAccount("bank_account"),
     CardAndBankAccount("card_and_bank_account"),
-    GooglePay("google_pay")
+    GooglePay("google_pay"),
+    SamsungPay("samsung_pay"),
 }
 
 /**
@@ -69,5 +70,22 @@ sealed interface PaymentMethodSelection {
         internal val label: String? = null
     ) : PaymentMethodSelection {
         override val type = PaymentMethodType.GooglePay
+    }
+
+    /**
+     * Represents a Samsung Pay payment method selection.
+     *
+     * @param currencyCode The ISO 4217 currency code for the transaction.
+     * @param amount The transaction amount in the currency's minor unit.
+     * @param orderNumber The transaction order number. Characters other than ASCII letters,
+     * digits, and hyphens are replaced with hyphens before presentation.
+     */
+    @ExperimentalCryptoOnramp
+    class SamsungPay(
+        internal val currencyCode: String,
+        internal val amount: Long,
+        internal val orderNumber: String,
+    ) : PaymentMethodSelection {
+        override val type = PaymentMethodType.SamsungPay
     }
 }

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldElementUI
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
@@ -16,8 +16,8 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun CardDetailsElementUI(
     enabled: Boolean,
     controller: CardDetailsController,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     val fields by controller.fields.collectAsState()

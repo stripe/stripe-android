@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -8,6 +10,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -15,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Param
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
@@ -22,10 +26,13 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationFlowTest {
     @Test
     fun `on launch, should persist parameters & launch using launcher as expected`() = runTest {
@@ -37,6 +44,8 @@ class GooglePayConfirmationFlowTest {
                 val mediator = ConfirmationMediator(
                     savedStateHandle = savedStateHandle,
                     definition = GooglePayConfirmationDefinition(
+                        instanceId = "instanceId",
+                        context = ApplicationProvider.getApplicationContext<Context>(),
                         googlePayPaymentMethodLauncherFactory = factory,
                         userFacingLogger = null,
                     ),
@@ -44,6 +53,7 @@ class GooglePayConfirmationFlowTest {
 
                 mediator.register(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = {}
                 )
 
@@ -82,9 +92,10 @@ class GooglePayConfirmationFlowTest {
                     transactionId = "pi_12345",
                     label = null,
                     isElements = true,
-                    publishableKey = null,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     displayItems = emptyList(),
                     billingEmailOverride = null,
+                    shippingAddressParameters = null,
                 )
             }
         }
@@ -95,6 +106,8 @@ class GooglePayConfirmationFlowTest {
         confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = GooglePayConfirmationDefinition(
+            instanceId = "instanceId",
+            context = ApplicationProvider.getApplicationContext<Context>(),
             googlePayPaymentMethodLauncherFactory =
                 RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(mock()),
             userFacingLogger = null,
@@ -103,6 +116,7 @@ class GooglePayConfirmationFlowTest {
         launcherArgs = EmptyConfirmationLauncherArgs,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PAYMENT_METHOD,
                 optionsParams = null,
                 originatedFromWallet = true,

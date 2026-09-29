@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -31,6 +32,17 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
+    init {
+        // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
+        state?.let { restoredState ->
+            if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
+                state = restoredState.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                )
+            }
+        }
+    }
+
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
@@ -59,6 +71,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
+        updatedSelection?.hasAcknowledgedSepaMandate = true
         val previousNewSelections = Bundle(current.previousNewSelections).apply {
             stashNewSelection(updatedSelection)
         }
@@ -83,15 +96,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
         return previousNewSelections.previousNewSelection(code)
-    }
-
-    fun clearSelection() {
-        val current = requireState(operation = "clearSelection") ?: return
-        state = current.copy(
-            paymentSelection = null,
-            temporarySelection = null,
-            previousNewSelections = Bundle(),
-        )
     }
 
     /**

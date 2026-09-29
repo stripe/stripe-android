@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -59,12 +60,39 @@ class VerticalModeInitialScreenFactoryTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
             ),
-            availableWallets = listOf(WalletType.Link)
+            availableWallets = listOf(WalletType.Link),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
     ) {
         assertThat(screens).hasSize(1)
         assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
         assertThat(screens[0].showsWalletsHeader(false).value).isTrue()
+    }
+
+    @Test
+    fun `showsWalletHeader is false for VerticalModeForm if only wallet is Link and WalletButtonHidden`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+            ),
+            availableWallets = listOf(WalletType.Link),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+        )
+    ) {
+        assertThat(screens).hasSize(1)
+        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        assertThat(screens[0].showsWalletsHeader(false).value).isFalse()
     }
 
     @Test

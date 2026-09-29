@@ -85,6 +85,7 @@ internal class DefaultIsCardPaymentMethodForChallengeTest {
     )
 
     private fun savedOption(paymentMethod: PaymentMethod) = PaymentMethodConfirmationOption.Saved(
+        shippingInformation = null,
         paymentMethod = paymentMethod,
         optionsParams = null,
     )

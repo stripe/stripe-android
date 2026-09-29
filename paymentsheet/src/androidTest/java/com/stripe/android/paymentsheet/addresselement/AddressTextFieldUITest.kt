@@ -55,8 +55,13 @@ class AddressTextFieldUITest {
                     controller = AddressTextFieldController(
                         label = resolvableString(UiCoreR.string.stripe_address_label_address),
                         addressInputMode = AddressInputMode.NoAutocomplete(),
+                        inlineAutocompleteHandler = null,
+                        reportsFormValue = false,
+                        initialQuery = "",
+                        showEnterManually = true,
                     ),
                     enabled = enabled,
+                    onSearchActivated = null,
                     onClick = onClick
                 )
             }

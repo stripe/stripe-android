@@ -110,8 +110,6 @@ internal class FaceDetectorAnalyzer(
         const val NORMALIZE_STD = 255f
 
         val INPUT_TENSOR_TYPE: DataType = DataType.FLOAT32
-        val TAG: String = FaceDetectorAnalyzer::class.java.simpleName
-
         const val MODEL_NAME = "face_detector_v1"
     }
 }

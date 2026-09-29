@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.MaybePresentGenericError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -71,6 +72,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val maybePresentGenericError: MaybePresentGenericError,
     private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -228,6 +230,9 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     extraMessage = "Error retrieving accounts",
                     error = it
                 )
+                // This pane renders its errors inline rather than routing them through HandleError,
+                // so it checks for a server-driven error pane itself.
+                maybePresentGenericError(error = it, referrer = PANE)
             },
         )
         onAsync(

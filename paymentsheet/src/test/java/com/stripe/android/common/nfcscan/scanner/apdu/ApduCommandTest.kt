@@ -100,7 +100,6 @@ internal class ApduCommandTest {
 
             val error = result.exceptionOrNull()
             assertThat(error).isInstanceOf<ApduResponseError.Invalid>()
-            assertThat((error as ApduResponseError.Invalid).data.contentEquals(responseData)).isTrue()
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
         }
     }
@@ -119,7 +118,6 @@ internal class ApduCommandTest {
             assertThat(error).isInstanceOf<ApduResponseError.Parsing>()
 
             val parsingError = error as ApduResponseError.Parsing
-            assertThat(parsingError.data.contentEquals(malformedResponseData)).isTrue()
             assertThat(parsingError.cause).isInstanceOf<IndexOutOfBoundsException>()
 
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
@@ -151,6 +149,7 @@ internal class ApduCommandTest {
         override val dataArray: ByteArray? = null,
         private val response: String?,
     ) : ApduCommand<String>() {
+        override val name: String = "test"
         override fun responseData(tlv: Map<String, ByteArray>): String? = response
     }
 }

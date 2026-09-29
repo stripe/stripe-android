@@ -3,6 +3,7 @@ package com.stripe.android.challenge.passive.warmer.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,11 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The warmer has no UI, so keep input focus directed to the host window behind it.
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        )
         super.onCreate(savedInstanceState)
 
         // Check if required args are present, finish gracefully if not

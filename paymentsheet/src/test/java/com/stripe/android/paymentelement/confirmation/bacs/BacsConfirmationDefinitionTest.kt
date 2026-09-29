@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -64,6 +65,7 @@ class BacsConfirmationDefinitionTest {
 
                 definition.createLauncher(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = onResult,
                 )
 

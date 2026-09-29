@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -38,6 +39,7 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage.UnknownValue
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -116,7 +118,8 @@ internal class StripeConnectWebViewContainerViewModel(
         createWebView(
             application = application,
             delegate = delegate,
-            logger = logger
+            logger = logger,
+            coroutineScope = viewModelScope,
         )
 
     /**
@@ -457,7 +460,12 @@ internal class StripeConnectWebViewContainerViewModel(
 }
 
 internal fun interface CreateWebView {
-    operator fun invoke(application: Application, delegate: Delegate, logger: Logger): StripeConnectWebView
+    operator fun invoke(
+        application: Application,
+        delegate: Delegate,
+        logger: Logger,
+        coroutineScope: CoroutineScope,
+    ): StripeConnectWebView
 }
 
 @Suppress("MagicNumber")

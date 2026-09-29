@@ -156,6 +156,10 @@
   <string name="stripe_fpx_bank_offline">%s – offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Twoja metoda płatności została odrzucona.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Koszt bez podatku</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Szacunkowa suma (ostateczny podatek może ulec zmianie)</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Suma całkowita</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

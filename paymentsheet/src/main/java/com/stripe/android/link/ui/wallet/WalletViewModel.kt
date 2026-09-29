@@ -203,7 +203,7 @@ internal class WalletViewModel(
         isAfterAdding: Boolean = false
     ) {
         linkAccountManager.listPaymentDetails(
-            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes()
+            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount.supportedPaymentDetailsTypes)
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
@@ -472,6 +472,7 @@ internal class WalletViewModel(
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
                         publishableKey = linkAccount.consumerPublishableKey!!,
+                        preCollectedConsent = null,
                     )
                 }
                 .fold(

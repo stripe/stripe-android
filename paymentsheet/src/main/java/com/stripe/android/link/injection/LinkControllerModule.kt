@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
 import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
@@ -27,6 +26,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -39,7 +39,6 @@ import javax.inject.Singleton
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentsIntegrityModule::class,
@@ -86,7 +85,7 @@ internal interface LinkControllerModule {
         @Singleton
         @ViewModelScope
         fun provideCoroutineScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
     }
 }

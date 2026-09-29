@@ -27,7 +27,8 @@ internal class RealHandleError @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val logger: Logger,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val maybePresentGenericError: MaybePresentGenericError,
 ) : HandleError {
 
     /**
@@ -64,6 +65,10 @@ internal class RealHandleError @Inject constructor(
              */
             GlobalScope.launch { nativeAuthFlowCoordinator().emit(CloseWithError(cause = error)) }
         } else if (displayErrorScreen) {
+            // The server can hand us a fully-formed error screen, in which case we show that
+            // instead of one of our own.
+            if (maybePresentGenericError(error = error, referrer = pane)) return
+
             // Navigate to error screen
             errorRepository.set(error)
             navigationManager.tryNavigateTo(route = Destination.Error(referrer = pane))

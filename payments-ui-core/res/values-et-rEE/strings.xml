@@ -46,14 +46,14 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Oma makset GCashi kaudu kinnitades lubate ettevõttel %s debiteerida oma GCashi kontot tulevasteks makseteks vastavalt nende tingimustele.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Sisestatud IBAN on puudulik.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">Sisestatud IBAN on kehtetu, \"%s\" ei ole toetatud riigikood.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Teie IBAN peab algama kahetähelise riigikoodiga.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEALi pank</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Teie BLIK-kood on puudulik.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Makske hiljem Klarnaga.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">NICEPAY kaudu makse kinnitamisega lubate ettevõttel %s debiteerida edaspidi makseid sellelt makseviisilt vastavalt nende tingimustele.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nimi kaardil</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Valige, kuidas soovite maksta:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Oma makset kinnitades nõustute, et teie tehingut töötleb Global Stack Services Limited registreeritud kaupmehena ja vastavalt nende <a href=\"%s\">kasutustingimustele</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Oma makset kinnitades nõustute, et teie tehingut töötleb Global Stack Services Limited registreeritud kaupmehena ja vastavalt nende <a href=\"%s\">tingimustele</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -97,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA deebet</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Pärast esitamist suunatakse teid edasi järgmiste sammude turvaliseks lõpuleviimiseks.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Kinnitades oma PayPali makse, lubate ettevõttel %s oma PayPali kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
   <!-- Revolut mandate text -->
@@ -111,14 +121,16 @@
   <string name="stripe_scan_card">Skanni kaart</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Eemalda skannitud kaart</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Määra vaikimisi makseviisiks</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Seadista</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Oma makset Touch \'n Go kaudu kinnitades lubate ettevõttel %s debiteerida oma Touch \'n Go kontot tulevasteks makseteks vastavalt nende tingimustele.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Oma makset TrueMoney kaudu kinnitades lubate ettevõttel %s debiteerida oma TrueMoney kontot tulevasteks makseteks vastavalt nende tingimustele.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Jätkates annate %1$s-le loa debiteerida teie Twinti saldot automaatselt korduva makse alusel vastavalt teie ostu- või kordustellimusplaanile.</string>
   <!-- Label for UPI ID number field on form -->

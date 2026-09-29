@@ -4,7 +4,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 
 internal fun NetworkRule.validateAnalyticsRequest(
     eventName: String,
@@ -14,8 +14,8 @@ internal fun NetworkRule.validateAnalyticsRequest(
     enqueue(
         host("q.stripe.com"),
         method("GET"),
-        query("event", eventName),
-        query("product_usage", productUsage.joinToString(",")),
+        analyticsPayloadField("event", eventName),
+        analyticsPayloadField("product_usage", productUsage.joinToString(",")),
         *requestMatchers,
     ) { response ->
         response.status = "HTTP/1.1 200 OK"

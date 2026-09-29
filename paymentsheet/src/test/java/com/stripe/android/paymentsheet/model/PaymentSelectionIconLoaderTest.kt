@@ -17,13 +17,16 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSelectionIconLoaderTest {
 
     private val workingUrl = "working url"
     private val brokenUrl = "broken url"
+    private val darkUrl = "dark url"
     private val simpleBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+    private val darkBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888)
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
@@ -69,30 +72,121 @@ internal class PaymentSelectionIconLoaderTest {
         assertThat(drawable.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
     }
 
+    @Test
+    fun loadPaymentOptionWithIconUrl_explicitDark_usesDarkIconFromUrl() = runExplicitScenario(
+        iconUrl = workingUrl,
+        darkIconUrl = darkUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_card_unknown_day,
+        iconResNight = R.drawable.stripe_ic_paymentsheet_card_unknown_night,
+        useDarkThemeIcon = true,
+    ) {
+        assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
+        assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(darkBitmap)
+        assertThat(loadedUrl).isEqualTo(darkUrl)
+    }
+
+    @Test
+    fun loadPaymentOptionWithIconUrl_explicitLight_usesLightIconFromUrl() = runExplicitScenario(
+        iconUrl = workingUrl,
+        darkIconUrl = darkUrl,
+        iconRes = R.drawable.stripe_ic_paymentsheet_card_unknown_day,
+        iconResNight = R.drawable.stripe_ic_paymentsheet_card_unknown_night,
+        useDarkThemeIcon = false,
+    ) {
+        assertThat(drawable.current).isInstanceOf<BitmapDrawable>()
+        assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
+        assertThat(loadedUrl).isEqualTo(workingUrl)
+    }
+
+    @Test
+    fun loadPaymentOptionWithoutIconUrl_explicitDark_usesNightResource() = runExplicitScenario(
+        iconUrl = null,
+        darkIconUrl = null,
+        iconRes = R.drawable.stripe_ic_paymentsheet_card_unknown_day,
+        iconResNight = R.drawable.stripe_ic_paymentsheet_card_unknown_night,
+        useDarkThemeIcon = true,
+    ) {
+        assertThat(shadowOf(drawable.current).createdFromResId)
+            .isEqualTo(R.drawable.stripe_ic_paymentsheet_card_unknown_night)
+    }
+
+    @Test
+    fun loadPaymentOptionWithoutIconUrl_explicitLight_usesDayResource() = runExplicitScenario(
+        iconUrl = null,
+        darkIconUrl = null,
+        iconRes = R.drawable.stripe_ic_paymentsheet_card_unknown_day,
+        iconResNight = R.drawable.stripe_ic_paymentsheet_card_unknown_night,
+        useDarkThemeIcon = false,
+    ) {
+        assertThat(shadowOf(drawable.current).createdFromResId)
+            .isEqualTo(R.drawable.stripe_ic_paymentsheet_card_unknown_day)
+    }
+
     private fun runScenario(
         iconUrl: String?,
         iconRes: Int?,
         block: Scenario.() -> Unit,
+    ) = runScenario(
+        iconUrl = iconUrl,
+        darkIconUrl = null,
+        iconRes = iconRes,
+        iconResNight = null,
+        useDarkThemeIcon = null,
+        block = block,
+    )
+
+    private fun runExplicitScenario(
+        iconUrl: String?,
+        darkIconUrl: String?,
+        iconRes: Int?,
+        iconResNight: Int?,
+        useDarkThemeIcon: Boolean,
+        block: Scenario.() -> Unit,
+    ) = runScenario(
+        iconUrl = iconUrl,
+        darkIconUrl = darkIconUrl,
+        iconRes = iconRes,
+        iconResNight = iconResNight,
+        useDarkThemeIcon = useDarkThemeIcon,
+        block = block,
+    )
+
+    private fun runScenario(
+        iconUrl: String?,
+        darkIconUrl: String?,
+        iconRes: Int?,
+        iconResNight: Int?,
+        useDarkThemeIcon: Boolean?,
+        block: Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
-        val drawable = PaymentSelection.IconLoader(
-            resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            imageLoader = FakeStripeImageLoader(
-                loadResultByUrl = mapOf(
-                    workingUrl to Result.success(simpleBitmap),
-                    brokenUrl to Result.failure(Throwable()),
-                ),
+        val imageLoader = FakeStripeImageLoader(
+            loadResultByUrl = mapOf(
+                workingUrl to Result.success(simpleBitmap),
+                darkUrl to Result.success(darkBitmap),
+                brokenUrl to Result.failure(Throwable()),
             ),
-        ).load(
+        )
+        val iconLoader = PaymentSelection.IconLoader(
+            resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            imageLoader = imageLoader,
+        )
+        val drawable = iconLoader.load(
             drawableResourceId = iconRes ?: 0,
-            drawableResourceIdNight = null,
+            drawableResourceIdNight = iconResNight,
             lightThemeIconUrl = iconUrl,
-            darkThemeIconUrl = null,
+            darkThemeIconUrl = darkIconUrl,
+            useDarkThemeIcon = useDarkThemeIcon,
         )
         advanceUntilIdle()
-        Scenario(drawable = drawable).apply { block() }
+
+        val expectedUrl = if (useDarkThemeIcon == true && darkIconUrl != null) darkIconUrl else iconUrl
+        val loadedUrl = expectedUrl?.let { imageLoader.awaitLoadCall().url }
+        Scenario(drawable = drawable, loadedUrl = loadedUrl).apply { block() }
+        imageLoader.ensureAllEventsConsumed()
     }
 
     private class Scenario(
-        val drawable: Drawable
+        val drawable: Drawable,
+        val loadedUrl: String?,
     )
 }

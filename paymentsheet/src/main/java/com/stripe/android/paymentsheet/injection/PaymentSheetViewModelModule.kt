@@ -14,6 +14,8 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -37,9 +39,10 @@ internal class PaymentSheetViewModelModule {
     fun provideCallbackIdentifier(args: PaymentSheetContract.Args): String = args.paymentElementCallbackIdentifier
 
     @Provides
+    @Singleton
     @ViewModelScope
     fun provideViewModelScope(): CoroutineScope {
-        return CoroutineScope(Dispatchers.Main)
+        return CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
 
     @Provides

@@ -13,8 +13,9 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.DefaultPaymen
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -23,9 +24,15 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 
-@Module(includes = [PaymentConfigurationModule::class])
+@Module(
+    includes = [
+        ApiConfigurationFromPaymentConfigurationModule::class,
+        ApiRequestOptionsModule::class,
+    ]
+)
 internal interface PaymentMethodMessagingModule {
 
     @Binds
@@ -78,7 +85,7 @@ internal interface PaymentMethodMessagingModule {
         @Provides
         @ViewModelScope
         fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
@@ -13,6 +14,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -34,6 +36,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,
     private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val timeProvider: () -> Long,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSessionElementsSessionManager {
@@ -90,6 +93,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

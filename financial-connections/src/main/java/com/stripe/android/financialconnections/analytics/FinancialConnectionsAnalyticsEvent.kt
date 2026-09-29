@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPErr
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.attestation.AttestationError
 
@@ -313,7 +314,13 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             else -> "error.unexpected"
         },
         params = (
-            mapOf("pane" to pane.analyticsValue)
+            mapOf(
+                "pane" to pane.analyticsValue,
+                // Lets a dashboard/alert isolate this error path, the same way iOS tags it via
+                // logExpectedError's errorName. Kept separate from error_type/code above, which
+                // describe the underlying API error rather than whether it opted into this pane.
+                "generic_error_pane" to (exception.genericErrorPane() != null).toString(),
+            )
                 .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
@@ -381,6 +388,21 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.prepane.choose_another_bank",
         mapOf("pane" to pane.analyticsValue)
+    )
+
+    /**
+     * The primary CTA of a server-driven error pane was tapped. [action] is the action the server
+     * asked for, or `unknown` when it's one this version of the SDK can't perform.
+     */
+    class GenericErrorClickPrimaryCta(
+        pane: Pane,
+        action: String?,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "click.primary_cta",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "action" to (action ?: "unknown"),
+        )
     )
 
     class AuthSessionOpened(

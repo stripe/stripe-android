@@ -248,33 +248,40 @@ class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
      * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079
      */
     fun toBitmap(renderScript: RenderScript): Bitmap {
-        val yuvTypeBuilder: Type.Builder =
-            Type.Builder(renderScript, Element.U8(renderScript)).setX(nv21Data.size)
-        val yuvType: Type = yuvTypeBuilder.create()
-        val yuvAllocation = Allocation.createTyped(renderScript, yuvType, Allocation.USAGE_SCRIPT)
-        yuvAllocation.copyFrom(nv21Data)
+        var yuvType: Type? = null
+        var yuvAllocation: Allocation? = null
+        var rgbType: Type? = null
+        var rgbAllocation: Allocation? = null
+        var yuvToRgbScript: ScriptIntrinsicYuvToRGB? = null
 
-        val rgbTypeBuilder: Type.Builder =
-            Type.Builder(renderScript, Element.RGBA_8888(renderScript))
-        rgbTypeBuilder.setX(width)
-        rgbTypeBuilder.setY(height)
-        val rgbAllocation = Allocation.createTyped(renderScript, rgbTypeBuilder.create())
+        try {
+            yuvType = Type.Builder(renderScript, Element.U8(renderScript))
+                .setX(nv21Data.size)
+                .create()
+            yuvAllocation = Allocation.createTyped(renderScript, yuvType, Allocation.USAGE_SCRIPT)
+            yuvAllocation.copyFrom(nv21Data)
 
-        val yuvToRgbScript =
-            ScriptIntrinsicYuvToRGB.create(renderScript, Element.RGBA_8888(renderScript))
-        yuvToRgbScript.setInput(yuvAllocation)
-        yuvToRgbScript.forEach(rgbAllocation)
+            rgbType = Type.Builder(renderScript, Element.RGBA_8888(renderScript))
+                .setX(width)
+                .setY(height)
+                .create()
+            rgbAllocation = Allocation.createTyped(renderScript, rgbType)
 
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        rgbAllocation.copyTo(bitmap)
+            yuvToRgbScript =
+                ScriptIntrinsicYuvToRGB.create(renderScript, Element.RGBA_8888(renderScript))
+            yuvToRgbScript.setInput(yuvAllocation)
+            yuvToRgbScript.forEach(rgbAllocation)
 
-        // remove allocated objects
-        yuvType.destroy()
-        yuvAllocation.destroy()
-        rgbAllocation.destroy()
-        yuvToRgbScript.destroy()
-
-        return bitmap
+            return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also {
+                rgbAllocation.copyTo(it)
+            }
+        } finally {
+            yuvToRgbScript?.destroy()
+            rgbAllocation?.destroy()
+            rgbType?.destroy()
+            yuvAllocation?.destroy()
+            yuvType?.destroy()
+        }
     }
 }
 

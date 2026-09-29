@@ -1,23 +1,31 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCallback
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -33,8 +41,10 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -46,11 +56,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as PaymentsCoreR
 
+@Suppress("LargeClass")
+@RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
     @get:Rule
     val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
@@ -89,6 +103,7 @@ class GooglePayConfirmationDefinitionTest {
             DummyActivityResultCaller.test {
                 definition.createLauncher(
                     activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = onResult,
                 )
 
@@ -112,6 +127,33 @@ class GooglePayConfirmationDefinitionTest {
         }
 
     @Test
+    fun `'createLauncher' should pass 'onPaymentDataChangedCallback' to launcher factory`() =
+        RecordingInternalGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val onPaymentDataChangedCallback = mock<GooglePayPaymentDataUpdateCallback>()
+            val definition = createGooglePayConfirmationDefinition(
+                googlePayPaymentMethodLauncherFactory = factory,
+                instanceId = "instanceId",
+                onPaymentDataChangedCallback = onPaymentDataChangedCallback,
+            )
+
+            DummyActivityResultCaller.test {
+                definition.createLauncher(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = fakeLifecycleOwner(),
+                    onResult = {},
+                )
+
+                assertThat(awaitRegisterCall()).isNotNull()
+                assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
+                val createCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+                assertThat(createCall.instanceId).isEqualTo("instanceId")
+                assertThat(createCall.onPaymentDataChangedCallback).isEqualTo(onPaymentDataChangedCallback)
+            }
+        }
+
+    @Test
     fun `'toResult' should return 'NextStep' when 'GooglePayLauncherResult' is 'Completed'`() = runTest {
         val definition = createGooglePayConfirmationDefinition()
 
@@ -128,6 +170,7 @@ class GooglePayConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
+                shippingInformation = SHIPPING_INFORMATION,
             ),
         )
 
@@ -143,6 +186,7 @@ class GooglePayConfirmationDefinitionTest {
 
         assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
         assertThat(savedOption.optionsParams).isNull()
+        assertThat(savedOption.shippingInformation).isEqualTo(SHIPPING_INFORMATION)
         assertThat(savedOption.originatedFromWallet).isTrue()
     }
 
@@ -377,9 +421,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -413,9 +458,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -450,9 +496,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -488,27 +535,26 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
     @Test
-    fun `On 'launch', should pass display items to present`() = runTest {
-        val displayItems = listOf(
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Widget",
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
-            ),
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Tax",
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
-                price = 500L,
-            ),
+    fun `On 'launch', should create display items from payment method metadata`() = runTest {
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(
+                    name = "Widget",
+                    quantity = 2,
+                    unitAmount = 1000L,
+                    subtotal = 2000L,
+                    total = 2000L,
+                )
+            )
         )
-
         val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
         val definition = createGooglePayConfirmationDefinition()
 
@@ -516,12 +562,16 @@ class GooglePayConfirmationDefinitionTest {
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
                     merchantCurrencyCode = "USD",
-                    displayItems = displayItems,
                 ),
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = PAYMENT_INTENT.copy(currency = "USD")
+                    stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
+                    integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        id = checkoutSessionResponse.id,
+                        instancesKey = "GooglePayConfirmationDefinitionTest",
+                        checkoutSessionResponse = checkoutSessionResponse,
+                    ),
                 ),
             ),
             arguments = EmptyConfirmationLauncherArgs,
@@ -538,9 +588,51 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
-            displayItems = displayItems,
+            apiConfiguration = DEFAULT_API_CONFIG,
+            displayItems = GooglePayDisplayItemsFactory.create(
+                checkoutSessionResponse,
+                ApplicationProvider.getApplicationContext(),
+            ),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
+        )
+    }
+
+    @Test
+    fun `On 'launch', should pass shipping address parameters to present`() = runTest {
+        val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
+        val definition = createGooglePayConfirmationDefinition()
+        val shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+            isRequired = true,
+            allowedCountryCodes = setOf("US", "CA"),
+            phoneNumberRequired = true,
+        )
+
+        definition.launch(
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                    shippingAddressParameters = shippingAddressParameters,
+                ),
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            arguments = EmptyConfirmationLauncherArgs,
+            launcher = launcher,
+        )
+
+        verify(launcher).present(
+            currencyCode = "usd",
+            amount = 1000L,
+            config = launcherConfig(),
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
+            clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+            transactionId = "pi_12345",
+            label = null,
+            isElements = true,
+            apiConfiguration = DEFAULT_API_CONFIG,
+            displayItems = emptyList(),
+            billingEmailOverride = null,
+            shippingAddressParameters = shippingAddressParameters,
         )
     }
 
@@ -614,9 +706,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -646,9 +739,10 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
+            shippingAddressParameters = null,
         )
     }
 
@@ -712,11 +806,17 @@ class GooglePayConfirmationDefinitionTest {
     private fun createGooglePayConfirmationDefinition(
         googlePayPaymentMethodLauncherFactory: InternalGooglePayPaymentMethodLauncherFactory =
             RecordingInternalGooglePayPaymentMethodLauncherFactory.noOp(launcher = mock()),
-        userFacingLogger: UserFacingLogger = FakeUserFacingLogger()
+        userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
+        context: Context = ApplicationProvider.getApplicationContext(),
+        instanceId: String = "instanceId",
+        onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback? = null,
     ): GooglePayConfirmationDefinition {
         return GooglePayConfirmationDefinition(
+            instanceId = instanceId,
+            context = context,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             userFacingLogger = userFacingLogger,
+            onPaymentDataChangedCallback = onPaymentDataChangedCallback,
         )
     }
 
@@ -755,5 +855,17 @@ class GooglePayConfirmationDefinitionTest {
 
         private val CONFIRMATION_PARAMETERS =
             com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+
+        private val SHIPPING_INFORMATION = ShippingInformation(
+            name = "Jenny Rosen",
+            phone = "1-800-555-1234",
+            address = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            ),
+        )
     }
 }

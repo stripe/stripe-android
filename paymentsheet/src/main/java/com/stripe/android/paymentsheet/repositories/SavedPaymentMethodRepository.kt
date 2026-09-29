@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Repository for managing saved payment methods. This abstracts over the underlying
@@ -37,6 +39,7 @@ internal interface SavedPaymentMethodRepository {
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : SavedPaymentMethodRepository {
 
     override suspend fun detachPaymentMethod(
@@ -57,6 +60,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -64,6 +68,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
     }
@@ -89,6 +94,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -96,6 +102,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 params = params,
             )
         }
@@ -113,6 +120,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -120,6 +128,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
     }
@@ -138,6 +147,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -145,6 +155,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             )
         }
     }

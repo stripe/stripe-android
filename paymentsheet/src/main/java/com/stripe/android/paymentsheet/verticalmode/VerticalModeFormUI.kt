@@ -23,14 +23,17 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_HEADER_PROMO_BADGE = "TEST_TAG_HEADER_PROMO_BADGE"
 
 @Composable
 internal fun VerticalModeFormUI(
@@ -38,7 +41,7 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
@@ -89,7 +92,7 @@ internal fun VerticalModeFormHeaderUI(
     Row(
         modifier = Modifier
             .padding(bottom = 12.dp)
-            .padding(StripeTheme.getOuterFormInsets()),
+            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {
@@ -118,7 +121,9 @@ internal fun VerticalModeFormHeaderUI(
         if (formHeaderInformation.promoBadge != null) {
             PromoBadge(
                 text = formHeaderInformation.promoBadge,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier
+                    .testTag(TEST_TAG_HEADER_PROMO_BADGE)
+                    .padding(start = 12.dp),
             )
         }
     }

@@ -75,6 +75,7 @@ class CustomerSheetConfirmationInterceptorTest {
         val result = interceptor.intercept(
             intent = SetupIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
             ),

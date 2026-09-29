@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.cpms
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -63,6 +64,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (InternalCustomPaymentMethodResult) -> Unit
     ): ActivityResultLauncher<CustomPaymentMethodInput> {
         return activityResultCaller.registerForActivityResult(

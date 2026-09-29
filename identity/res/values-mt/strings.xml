@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Ix-xorta ta\' dokumenti tal-identità aċċettati</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Żomm id-dokument tal-identità ċatt</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Ippermetti</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Għażliet tal-App</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Permess għall-kamera</string>
   <string name="stripe_camera_permission_rationale">Dil-app tuża l-kamera biex tiskennja d-dokumenti tal-identità tiegħek u tieħu r-ritratti biex tivverifika l-identità tiegħek.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Naħa ta’ quddiem lesta</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Naħa tax-xellug lesta</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Naħa tal-lemin lesta</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Qed nieħdu l-istessi...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Tista\' terġa\' tipprova jew tagħżel li ttella\' ritratt mit-tagħmir tiegħek.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Ma stajniex nieħdu r-ritratt</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Irriġetta</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Id-dettalji ma jidhrux</string>
   <string name="stripe_decrease_lighting_2">Ersaq f\'post iktar mudlam</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Neħtieġu l-permess biex nużaw il-kamera tiegħek. Jekk jogħġbok agħti aċċess għall-kamera mill-għażliet tal-apps.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Tiċċaqlaqx, qed niskennjaw</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Tiċċaqlaqx...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">karta tal-identità</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">L-istessi nġibdu</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Ġbid tal-istessu</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Eċċellenti! Qed niċċekkjaw ir-ritratti tiegħek....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Bil-permess tiegħek, Stripe jista\' juża l-immaġnijiet tiegħek biex itejjeb id-detezzjoni tal-frodi. Li tirrifjuta ma jaffettwax il-verifika tiegħek.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Ivverifika bi stessu</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">ittieħed stessu wieħed</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Dawwar rasek lejn ix-xellug</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Dawwar rasek lejn il-lemin</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Ersaq eqreb</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">L-istessi tiegħek għadhom ma ntrefgħux. Tixtieq toħroġ?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Poġġi wiċċek fil-frejm</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Stessu</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Għinna ntejbu l-verifiki</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Fil-pass li jmiss se niġbdu ftit ritratti awtomatikament biex nivverifikaw li int min qed tgħid li int</string>
   <!-- Title for selfie warmup page -->

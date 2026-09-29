@@ -7,6 +7,8 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -17,8 +19,10 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -55,11 +59,33 @@ class DefaultEventReporterTest {
     )
 
     @Test
-    fun `onInit fires event`() = runScenario {
-        eventReporter.onInit()
+    fun `onExperimentExposure enqueues V2 event`() = runScenario {
+        paymentMethodMetadataStack.push(null)
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_complete_init")
+        eventReporter.onExperimentExposure(
+            LoggableExperiment.LinkHoldback(
+                arbId = "arb_123",
+                group = "treatment",
+                experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+                isReturningLinkUser = false,
+                useLinkNative = true,
+                emailRecognitionSource = null,
+                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
+                    email = false,
+                    name = false,
+                    phone = false,
+                ),
+                spmEnabled = false,
+                integrationShape = "payment_sheet",
+                linkDisplayed = true,
+                elementsSessionId = "elements_session_123",
+                mobileSdkVersion = "1.0.0",
+                mobileSessionId = "mobile_session_123",
+            )
+        )
+
+        val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+        assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
     }
 
     @Test
@@ -70,7 +96,7 @@ class DefaultEventReporterTest {
                 reset = true,
             )
         )
-        eventReporter.onLoadStarted(initializedViaCompose = true)
+        eventReporter.onLoadStarted(initializedViaCompose = true, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_started")
@@ -156,7 +182,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -234,7 +260,7 @@ class DefaultEventReporterTest {
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.milliseconds
 
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -255,7 +281,7 @@ class DefaultEventReporterTest {
             )
         )
         val error = RuntimeException("Test error")
-        eventReporter.onLoadFailed(error = error)
+        eventReporter.onLoadFailed(error = error, publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
@@ -270,15 +296,6 @@ class DefaultEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_elements_session_load_failed")
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
-    }
-
-    @Test
-    fun `onLpmSpecFailure fires event`() = runScenario {
-        eventReporter.onLpmSpecFailure(errorMessage = "Failed to serialize LPM spec")
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "luxe_serialize_failure")
-        assertThat(request.params).containsEntry("error_message", "Failed to serialize LPM spec")
     }
 
     @Test
@@ -601,6 +618,7 @@ class DefaultEventReporterTest {
                     linkBrand = LinkBrand.Link
                 ),
                 googlePay = WalletsState.GooglePay(
+                    apiConfiguration = paymentMethodMetadataWithTestAnalyticsMetadata.apiConfiguration,
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
@@ -661,6 +679,7 @@ class DefaultEventReporterTest {
                     linkBrand = LinkBrand.Link
                 ),
                 googlePay = WalletsState.GooglePay(
+                    apiConfiguration = paymentMethodMetadataWithTestAnalyticsMetadata.apiConfiguration,
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
@@ -1316,6 +1335,33 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentFailure includes local error analytics values`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Checkout,
+                duration = 6.seconds,
+            )
+        )
+        val error = PaymentSheetConfirmationError.Stripe(
+            cause = LocalStripeException(
+                displayMessage = "The estimated total changed.",
+                analyticsValue = "checkoutSessionTotalChanged",
+                errorCode = "checkout_session_total_changed",
+            )
+        )
+
+        eventReporter.onPaymentFailure(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            error = error,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("error_message", "checkoutSessionTotalChanged")
+        assertThat(request.params).containsEntry("error_code", "checkout_session_total_changed")
+    }
+
+    @Test
     fun `onAnalyticsEvent fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
@@ -1395,6 +1441,44 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onBillingAddressCompleted fires event with address data blob`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = "US",
+            autocompleteResultSelected = true,
+            editDistance = 5,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_billing_address_completed")
+        @Suppress("UNCHECKED_CAST")
+        val blob = request.params["address_data_blob"] as Map<String, Any>
+        assertThat(blob).containsEntry("address_country_code", "US")
+        assertThat(blob).containsEntry("auto_complete_result_selected", true)
+        assertThat(blob).containsEntry("edit_distance", 5)
+    }
+
+    @Test
+    fun `onBillingAddressCompleted omits edit distance when null`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onBillingAddressCompleted(
+            addressCountryCode = "CA",
+            autocompleteResultSelected = false,
+            editDistance = null,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_billing_address_completed")
+        @Suppress("UNCHECKED_CAST")
+        val blob = request.params["address_data_blob"] as Map<String, Any>
+        assertThat(blob).containsEntry("address_country_code", "CA")
+        assertThat(blob).containsEntry("auto_complete_result_selected", false)
+        assertThat(blob).doesNotContainKey("edit_distance")
+    }
+
+    @Test
     fun `onPaymentMethodMessagePromotionDisplayed fires event with duration`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.elapsedCalls.push(
@@ -1412,6 +1496,24 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("displayed_successfully", true)
     }
 
+    @Test
+    fun `onPaymentMethodMessagePromotionsFetchBegin uses provided publishable key`() = runScenario {
+        val publishableKey = "pk_test_payment_method_messaging"
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.PaymentMethodMessaging,
+                reset = true,
+            )
+        )
+
+        eventReporter.onPaymentMethodMessagePromotionsFetchBegin(publishableKey)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "payment_method_messaging_fetch_begin")
+        assertThat(request.params).containsEntry("publishable_key", publishableKey)
+    }
+
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
         block: suspend Scenario.() -> Unit
@@ -1422,7 +1524,7 @@ class DefaultEventReporterTest {
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKey = "pk_test_123",
+            publishableKey = DEFAULT_API_CONFIG.publishableKey,
             defaultProductUsageTokens = setOf(""),
         )
 

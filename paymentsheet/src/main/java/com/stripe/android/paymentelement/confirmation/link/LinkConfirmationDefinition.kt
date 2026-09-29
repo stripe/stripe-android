@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.link
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -31,6 +32,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (LinkActivityResult) -> Unit
     ): LinkPaymentLauncher {
         return linkPaymentLauncher.apply {
@@ -85,6 +87,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             is LinkActivityResult.PaymentMethodObtained -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,

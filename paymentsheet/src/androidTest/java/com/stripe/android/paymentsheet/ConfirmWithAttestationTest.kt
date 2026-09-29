@@ -1,11 +1,15 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 
@@ -24,9 +28,14 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.rules.RuleChain
 
-internal class ConfirmWithAttestationTest {
+@RunWith(TestParameterInjector::class)
+internal class ConfirmWithAttestationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val testRules: TestRules = TestRules.create()
 
     @get:Rule
@@ -39,6 +48,7 @@ internal class ConfirmWithAttestationTest {
     @Test
     fun newPaymentMethod_withAttestationEnabled_includesAndroidVerificationObjectInConfirmRequest() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
@@ -49,6 +59,7 @@ internal class ConfirmWithAttestationTest {
     @Test
     fun paymentMethodCreation_withAttestationEnabled_includesAndroidVerificationObjectInCreateRequest() =
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,

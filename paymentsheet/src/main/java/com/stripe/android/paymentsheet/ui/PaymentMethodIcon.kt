@@ -30,7 +30,7 @@ internal fun PaymentMethodIcon(
     contentAlignment: Alignment = Alignment.TopStart,
 ) {
     val isDark = isDark()
-    val colorFilter = remember(iconRequiresTinting) {
+    val colorFilter = remember(iconRequiresTinting, isDark) {
         if (iconRequiresTinting) {
             val tintColor = if (isDark) Color.White else Color.Black
             ColorFilter.tint(tintColor)

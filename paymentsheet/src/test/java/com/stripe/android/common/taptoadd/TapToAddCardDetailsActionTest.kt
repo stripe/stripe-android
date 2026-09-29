@@ -2,17 +2,24 @@ package com.stripe.android.common.taptoadd
 
 import android.os.Build
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -20,11 +27,38 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class TapToAddCardDetailsActionTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    private val composeTestRule = createComposeRule()
+
+    private val composeCleanupRule = createComposeCleanupRule()
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(composeCleanupRule)
+        .around(coroutineScopeCleanupRule)
+
+    @Test
+    fun `shows Tap to add label`() = runTest {
+        FakeTapToAddHelper.test {
+            val action = TapToAddCardDetailsAction(
+                tapToAddHelper = helper,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+
+            composeTestRule.setContent {
+                action.Content(
+                    enabled = true,
+                    onScannedCard = { throw IllegalStateException("Should not be called!") }
+                )
+            }
+
+            composeTestRule.onNodeWithText("Tap to add", substring = true).assertIsDisplayed()
+
+            assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
+        }
+    }
 
     @Test
     fun `clicking button calls startPaymentMethodCollection`() = runTest {
@@ -46,7 +80,7 @@ internal class TapToAddCardDetailsActionTest {
 
             assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
 
-            composeTestRule.onNodeWithText("Tap to add").performClick()
+            composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
 
             assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
         }
@@ -72,7 +106,7 @@ internal class TapToAddCardDetailsActionTest {
 
             assertThat(helper.reportButtonShownCalls.awaitItem()).isNotNull()
 
-            composeTestRule.onNodeWithText("Tap to add").performClick()
+            composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
 
             collectCalls.expectNoEvents()
         }
@@ -110,5 +144,6 @@ internal class TapToAddCardDetailsActionTest {
     private fun fakeController() = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         initialValues = emptyMap(),
+        coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
     )
 }

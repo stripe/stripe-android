@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cvc
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -51,6 +52,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (CvcRecollectionResult) -> Unit
     ): CvcRecollectionLauncher {
         return factory.create(

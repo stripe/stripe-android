@@ -44,15 +44,14 @@ import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLaunc
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -93,7 +92,6 @@ internal class PaymentOptionsActivityTest {
         .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(RetryRule(3))
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
@@ -400,7 +398,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.assertIsDisplayed()
@@ -426,7 +424,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
                 mandateNode.assertIsDisplayed()
@@ -455,7 +453,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.performScrollTo()

@@ -30,6 +30,8 @@ interface AutocompleteAddressInteractor {
 
     fun onEnterManuallyFromInline() = Unit
 
+    fun onSearchActivated() = Unit
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Config(
         val googlePlacesApiKey: String?,
@@ -63,13 +65,13 @@ interface AutocompleteAddressInteractor {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Event {
-        val values: Map<IdentifierSpec, String?>?
+        val values: Map<FormFieldId, String?>?
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class OnExpandForm(override val values: Map<IdentifierSpec, String?>?) : Event
+        data class OnExpandForm(override val values: Map<FormFieldId, String?>?) : Event
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class OnValues(override val values: Map<IdentifierSpec, String?>) : Event
+        data class OnValues(override val values: Map<FormFieldId, String?>) : Event
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

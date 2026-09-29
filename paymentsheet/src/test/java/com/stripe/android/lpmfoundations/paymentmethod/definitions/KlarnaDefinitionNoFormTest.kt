@@ -13,6 +13,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Rule
@@ -89,6 +90,43 @@ class KlarnaDefinitionNoFormTest {
         assertThat(formElements[1].identifier.v1)
             .isEqualTo("billing_details[address][country]_section")
         assertThat(formElements[2].identifier.v1).isEqualTo("mandate")
+    }
+
+    @Test
+    fun `createFormElements uses default billing country before setup intent country`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                    countryCode = "US",
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "CA"),
+                ),
+            )
+        )
+
+        assertThat(formElements).hasSize(3)
+        assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[address][country]_section")
+        val countryElement = (formElements[1] as SectionElement).fields.single() as CountryElement
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `createFormElements uses setup intent country when default billing country is absent`() {
+        val formElements = KlarnaDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFactory.create(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                    countryCode = "US",
+                ),
+            )
+        )
+
+        assertThat(formElements).hasSize(3)
+        assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[address][country]_section")
+        val countryElement = (formElements[1] as SectionElement).fields.single() as CountryElement
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("US")
     }
 
     @Test

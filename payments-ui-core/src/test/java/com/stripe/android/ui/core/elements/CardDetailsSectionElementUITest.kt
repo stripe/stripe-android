@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -11,10 +12,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -41,7 +43,7 @@ internal class CardDetailsSectionElementUITest {
     }
 
     @Test
-    fun `section header hides while scanned card pill is shown and returns after clear`() {
+    fun `section header remains while scanned card pill is shown`() {
         runScenario(cardDetailsAction = null) {
             val cardInformation = context.getString(
                 R.string.stripe_paymentsheet_add_payment_method_card_information
@@ -50,7 +52,7 @@ internal class CardDetailsSectionElementUITest {
                 R.string.stripe_scanned_card_pill_clear_content_description
             )
 
-            composeTestRule.onNodeWithText(cardInformation).assertExists()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
 
             controller.onScannedCard(
                 ScannedCardDetails.Validated(
@@ -61,12 +63,13 @@ internal class CardDetailsSectionElementUITest {
             )
             composeTestRule.waitForIdle()
 
-            composeTestRule.onNodeWithText(cardInformation).assertDoesNotExist()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
+            composeTestRule.onNodeWithText("Expires 06/30").assertIsDisplayed()
 
             composeTestRule.onNodeWithContentDescription(clearScannedCard).performClick()
             composeTestRule.waitForIdle()
 
-            composeTestRule.onNodeWithText(cardInformation).assertExists()
+            composeTestRule.onNodeWithText(cardInformation).assertIsDisplayed()
         }
     }
 
@@ -84,8 +87,12 @@ internal class CardDetailsSectionElementUITest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val controller = CardDetailsSectionController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                context = context,
+                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            ),
             initialValues = emptyMap(),
+            coroutineScope = backgroundScope,
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -100,7 +107,7 @@ internal class CardDetailsSectionElementUITest {
                     enabled = true,
                     controller = controller,
                     hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = IdentifierSpec.PostalCode
+                    lastTextFieldIdentifier = FormFieldId.PostalCode
                 )
             }
         }

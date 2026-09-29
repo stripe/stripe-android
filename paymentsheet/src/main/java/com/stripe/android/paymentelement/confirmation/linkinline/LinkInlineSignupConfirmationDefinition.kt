@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -52,6 +53,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (Result) -> Unit
     ): Launcher {
         return Launcher(onResult)
@@ -202,6 +204,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         savedConfirmationOption: LinkInlineSignupConfirmationOption.Saved?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = savedConfirmationOption?.optionsParams,
             originatedFromWallet = false,
@@ -212,6 +215,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
@@ -253,6 +257,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 shouldSave = saveOption.shouldSave(),
             )
             is LinkInlineSignupConfirmationOption.Saved -> PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = optionsParams,
             )

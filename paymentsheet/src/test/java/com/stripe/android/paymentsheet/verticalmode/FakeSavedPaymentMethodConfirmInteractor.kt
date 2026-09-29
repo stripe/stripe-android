@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class FakeSavedPaymentMethodConfirmInteractor(
     formEnabled: Boolean = false,
 ) : SavedPaymentMethodConfirmInteractor {
+    val closeCalls = Turbine<Unit>()
+
     private val _state = MutableStateFlow(
         SavedPaymentMethodConfirmInteractor.State(
             displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
@@ -40,7 +43,7 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
                     SectionElement.wrap(
                         sectionFieldElements = listOf(
                             SimpleTextElement(
-                                identifier = IdentifierSpec.Generic("Name"),
+                                identifier = FormFieldId.Generic("Name"),
                                 controller = SimpleTextFieldController(
                                     initialValue = "John Doe",
                                     textFieldConfig = SimpleTextFieldConfig(
@@ -56,6 +59,14 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
         )
     )
     override val state: StateFlow<SavedPaymentMethodConfirmInteractor.State> = _state.asStateFlow()
+
+    override fun close() {
+        closeCalls.add(Unit)
+    }
+
+    fun validate() {
+        closeCalls.ensureAllEventsConsumed()
+    }
 
     class Factory : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(

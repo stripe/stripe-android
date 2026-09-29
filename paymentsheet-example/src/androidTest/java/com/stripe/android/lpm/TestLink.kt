@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.LinkTypeSettingsDefinition
@@ -48,7 +49,7 @@ internal class TestLink : BasePlaygroundTest() {
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[MerchantSettingsDefinition] = Merchant.US
-            settings[LinkSettingsDefinition] = true
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
         }
     }
@@ -60,7 +61,7 @@ internal class TestLink : BasePlaygroundTest() {
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[MerchantSettingsDefinition] = Merchant.US
-            settings[LinkSettingsDefinition] = true
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
             settings[LinkTypeSettingsDefinition] = LinkType.Native
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
         }

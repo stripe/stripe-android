@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,6 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.nfcscan.ui.NfcScanningScreen
 import com.stripe.android.common.nfcscan.ui.NfcScanningTheme
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +23,7 @@ import android.graphics.Color as AndroidColor
 
 internal class NfcScanningActivity : AppCompatActivity() {
     private lateinit var args: NfcScanningContract.Args
+    private var isOpeningDeveloperOptions = false
 
     private val viewModel by viewModels<NfcScanningViewModel> {
         NfcScanningViewModel.factory { args }
@@ -40,6 +45,7 @@ internal class NfcScanningActivity : AppCompatActivity() {
             viewModel.event.collectLatest { event ->
                 when (event) {
                     is NfcScanningEvent.CloseWithResult -> finishWithResult(event.result)
+                    is NfcScanningEvent.OpenDeveloperOptions -> openDeveloperOptions()
                     is NfcScanningEvent.TriggerHapticFeedback -> {
                         NfcScanningHapticFeedback.trigger(this@NfcScanningActivity, event.type)
                     }
@@ -47,19 +53,25 @@ internal class NfcScanningActivity : AppCompatActivity() {
             }
         }
 
+        val appearance = args.paymentMethodMetadata.appearance
+        val isDark = appearance.themeMode.isDarkTheme(isSystemDarkTheme())
+        val systemBarStyle = if (isDark) {
+            SystemBarStyle.dark(
+                scrim = AndroidColor.TRANSPARENT,
+            )
+        } else {
+            SystemBarStyle.light(
+                scrim = AndroidColor.TRANSPARENT,
+                darkScrim = AndroidColor.TRANSPARENT,
+            )
+        }
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                scrim = AndroidColor.TRANSPARENT,
-                darkScrim = AndroidColor.TRANSPARENT,
-            ),
-            navigationBarStyle = SystemBarStyle.light(
-                scrim = AndroidColor.TRANSPARENT,
-                darkScrim = AndroidColor.TRANSPARENT,
-            ),
+            statusBarStyle = systemBarStyle,
+            navigationBarStyle = systemBarStyle,
         )
 
         setContent {
-            NfcScanningTheme {
+            NfcScanningTheme(appearance = appearance) {
                 val viewState by viewModel.viewState.collectAsState()
 
                 NfcScanningScreen(
@@ -73,13 +85,19 @@ internal class NfcScanningActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.register(this)
+        isOpeningDeveloperOptions = false
     }
 
     override fun onStop() {
         super.onStop()
-        if (!isFinishing && !isChangingConfigurations) {
+        if (!isFinishing && !isChangingConfigurations && !isOpeningDeveloperOptions) {
             finishWithResult(NfcScanningContract.Result.Canceled)
         }
+    }
+
+    internal fun openDeveloperOptions() {
+        isOpeningDeveloperOptions = true
+        startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
     }
 
     private fun finishWithResult(result: NfcScanningContract.Result) {
@@ -92,6 +110,6 @@ internal class NfcScanningActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        fadeOut()
+        fadeOut(fadeOut = R.anim.stripe_nfc_screen_fade_out)
     }
 }

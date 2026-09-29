@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.isInstanceOf
@@ -170,7 +171,7 @@ internal class PassiveChallengeActivityTest {
 
         private val args = PassiveChallengeArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            publishableKey = "pk_123",
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = listOf("PaymentSheet")
         )
     }

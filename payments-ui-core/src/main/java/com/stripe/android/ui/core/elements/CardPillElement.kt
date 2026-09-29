@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +42,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldComposable
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldValidationController
@@ -54,20 +55,20 @@ import com.stripe.android.R as PaymentsCoreR
 internal class CardPillElement(
     val controller: CardPillController,
 ) : SectionFieldElement {
-    override val identifier: IdentifierSpec = IdentifierSpec.Generic("card_scanned_pill")
+    override val identifier: FormFieldId = FormFieldId.Generic("card_scanned_pill")
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
 
     override fun sectionFieldErrorController(): SectionFieldValidationController = controller
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) {
         // No-op
     }
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> =
         stateFlowOf(emptyList())
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -77,6 +78,7 @@ internal class CardPillElement(
 
 internal class CardPillController(
     val cardNumber: String,
+    val expirationDate: String?,
     private val onDismissPill: () -> Unit,
 ) : SectionFieldValidationController, SectionFieldComposable {
     override val validationMessage: StateFlow<FieldValidationMessage?> = stateFlowOf(null)
@@ -90,13 +92,14 @@ internal class CardPillController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         CardPillElementUI(
             enabled = enabled,
             cardBrand = CardBrand.fromCardNumber(cardNumber),
             lastFourDigits = cardNumber.takeLast(TAKE_LAST_4),
+            expirationDate = expirationDate,
             onDismiss = onDismissPill,
             modifier = modifier,
         )
@@ -113,6 +116,7 @@ fun CardPillElementUI(
     enabled: Boolean,
     cardBrand: CardBrand,
     lastFourDigits: String,
+    expirationDate: String?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -136,9 +140,10 @@ fun CardPillElementUI(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            CardNumberText(
+            CardDetailsText(
                 lastFourDigits = lastFourDigits,
                 cardBrand = cardBrand,
+                expirationDate = expirationDate,
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -162,29 +167,43 @@ private fun CardBrandIcon(
 }
 
 @Composable
-private fun RowScope.CardNumberText(
+private fun RowScope.CardDetailsText(
     cardBrand: CardBrand,
     lastFourDigits: String,
+    expirationDate: String?,
 ) {
     val summaryDescription = stringResource(
         PaymentsCoreR.string.stripe_card_ending_in,
         cardBrand.displayName,
         lastFourDigits,
     )
-    val maskedPan = stringResource(R.string.stripe_scanned_card_pill_masked_last4, lastFourDigits)
+    val maskedPan = stringResource(R.string.stripe_scanned_card_masked_last4, lastFourDigits)
 
-    Text(
-        text = maskedPan,
-        style = MaterialTheme.typography.body1,
-        color = MaterialTheme.stripeColors.onComponent,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier
-            .weight(1f)
-            .semantics {
+    Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = maskedPan,
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.stripeColors.onComponent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics {
                 contentDescription = summaryDescription
             },
-    )
+        )
+
+        if (expirationDate != null) {
+            Text(
+                text = stringResource(
+                    R.string.stripe_scanned_card_pill_expiration_date,
+                    expirationDate,
+                ),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.stripeColors.subtitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
 }
 
 @Composable
@@ -204,16 +223,16 @@ private fun DismissButton(
         tint = dismissColor,
         modifier = Modifier
             .size(8.dp)
-            .clearAndSetSemantics {
-                contentDescription = dismissLabel
-                role = Role.Button
-            }
             .clickable(
                 enabled = enabled,
                 interactionSource = dismissInteractionSource,
                 indication = null,
                 onClick = onDismiss,
-            ),
+            )
+            .clearAndSetSemantics {
+                contentDescription = dismissLabel
+                role = Role.Button
+            },
     )
 }
 

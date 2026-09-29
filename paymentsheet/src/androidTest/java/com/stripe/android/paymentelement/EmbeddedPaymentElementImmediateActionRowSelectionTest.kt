@@ -3,16 +3,22 @@ package com.stripe.android.paymentelement
 import androidx.test.espresso.Espresso
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
@@ -20,7 +26,9 @@ import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private val networkRule = NetworkRule()
 
@@ -31,6 +39,9 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
+
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
@@ -219,7 +230,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -243,7 +254,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -274,7 +285,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
             testContext.consumePaymentOptionEvent("card", "4242")
@@ -305,7 +316,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 
@@ -327,7 +338,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 
@@ -351,7 +362,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         ) { testContext ->
             testContext.configure {
                 embeddedViewDisplaysMandateText(false)
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(PaymentSheet.CustomerConfiguration("cus_123", TestApiKeys.EPHEMERAL))
             }
             testContext.consumePaymentOptionEvent("card", "4242")
 
@@ -424,6 +435,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
         val rowSelectionCalls = Turbine<RowSelectionCall>()
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isEqualTo(expectedShouldSavePaymentMethodValue)
                 CreateIntentResult.Success("pi_example_secret_12345")
@@ -471,7 +483,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     }
 
     private fun getCardLabel(last4: String): String {
-        return "···· $last4"
+        return "···· $last4".withLtrIsolate()
     }
 
     private fun enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage: Boolean = false) {

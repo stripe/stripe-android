@@ -65,7 +65,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                context = applicationContext,
+                apiConfigurationProvider = { error("PaymentAuthWebViewActivity was started without arguments.") },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
                 )
@@ -94,7 +97,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { args.apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
                 )
@@ -138,7 +144,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                applicationContext,
+                apiConfigurationProvider = { requireNotNull(_args).apiConfiguration },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),

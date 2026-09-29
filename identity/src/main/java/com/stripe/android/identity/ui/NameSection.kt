@@ -11,7 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.NameParam
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -42,11 +42,11 @@ internal fun NameSection(
         SectionElement.wrap(
             sectionFieldElements = listOf(
                 SimpleTextElement(
-                    identifier = IdentifierSpec.Generic(FIRST_NAME_SPEC),
+                    identifier = FormFieldId.Generic(FIRST_NAME_SPEC),
                     controller = firstNameController
                 ),
                 SimpleTextElement(
-                    identifier = IdentifierSpec.Generic(LAST_NAME_SPEC),
+                    identifier = FormFieldId.Generic(LAST_NAME_SPEC),
                     controller = lastNameController
                 )
             ),

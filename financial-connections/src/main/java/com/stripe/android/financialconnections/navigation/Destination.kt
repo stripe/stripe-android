@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.error.ErrorScreen
 import com.stripe.android.financialconnections.features.exit.ExitModal
+import com.stripe.android.financialconnections.features.genericerror.GenericErrorScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
@@ -110,13 +111,31 @@ internal sealed class Destination(
     data object PartnerAuthDrawer : Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
         logPaneLaunched = true,
-        composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = true) }
+        composable = {
+            PartnerAuthScreen(
+                pane = Pane.PARTNER_AUTH,
+                inModal = true,
+                autoLaunchAuthSession = false,
+            )
+        }
     )
 
     data object PartnerAuth : Destination(
         route = Pane.PARTNER_AUTH.value,
+        extraArgs = listOf(
+            navArgument(KEY_AUTO_LAUNCH_AUTH_SESSION) {
+                type = NavType.StringType
+                nullable = true
+            }
+        ),
         logPaneLaunched = true,
-        composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = false) }
+        composable = {
+            PartnerAuthScreen(
+                pane = Pane.PARTNER_AUTH,
+                inModal = false,
+                autoLaunchAuthSession = autoLaunchAuthSession(it.arguments),
+            )
+        }
     )
 
     data object AccountPicker : Destination(
@@ -215,10 +234,22 @@ internal sealed class Destination(
         composable = { ErrorScreen() }
     )
 
+    data object GenericError : Destination(
+        route = Pane.GENERIC_ERROR.value,
+        logPaneLaunched = true,
+        composable = { GenericErrorScreen() }
+    )
+
     data object BankAuthRepair : Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
         logPaneLaunched = true,
-        composable = { PartnerAuthScreen(pane = Pane.BANK_AUTH_REPAIR, inModal = false) }
+        composable = {
+            PartnerAuthScreen(
+                pane = Pane.BANK_AUTH_REPAIR,
+                inModal = false,
+                autoLaunchAuthSession = false,
+            )
+        }
     )
 
     data object ManualEntrySuccess : Destination(
@@ -232,8 +263,13 @@ internal sealed class Destination(
             ?.getString(KEY_REFERRER)
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
+        internal fun autoLaunchAuthSession(args: Bundle?): Boolean = args
+            ?.getString(KEY_AUTO_LAUNCH_AUTH_SESSION)
+            .toBoolean()
+
         const val KEY_REFERRER = "referrer"
         const val KEY_NEXT_PANE_ON_DISABLE_NETWORKING = "next_pane_on_disable_networking"
+        const val KEY_AUTO_LAUNCH_AUTH_SESSION = "auto_launch_auth_session"
     }
 }
 

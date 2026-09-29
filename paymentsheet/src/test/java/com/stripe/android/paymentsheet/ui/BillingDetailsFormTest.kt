@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -72,9 +72,9 @@ internal class BillingDetailsFormTest {
         allowedCountries = emptySet()
     ) {
         assertThat(addressSectionElement.fields.size).isEqualTo(1)
-        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+        val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
         assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -85,9 +85,9 @@ internal class BillingDetailsFormTest {
         allowedCountries = setOf("US", "CA")
     ) {
         assertThat(addressSectionElement.fields.size).isEqualTo(1)
-        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+        assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-        val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+        val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
         assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
             "\uD83C\uDDFA\uD83C\uDDF8 United States",

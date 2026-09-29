@@ -38,7 +38,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -48,6 +47,8 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.persistBillingAnalytics
+import com.stripe.android.paymentsheet.analytics.reportBillingAddressCompleted
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -221,9 +222,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) { isLinkAvailable, linkEmail, account, buttonsEnabled, paymentMethodMetadata ->
         val linkBrand = paymentMethodMetadata?.effectiveLinkBrand(account) ?: LinkBrand.Link
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
+            isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata?.shouldShowLinkButton == true,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
+            apiConfiguration = paymentMethodMetadata?.apiConfiguration,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -262,8 +264,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
-
-        eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
@@ -580,13 +580,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             val confirmationOption = withContext(viewModelScope.coroutineContext) {
                 inProgressSelection = paymentSelection
+                savedStateHandle.persistBillingAnalytics(paymentSelection, autocompleteFilledAddress)
 
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
                         cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                        googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
                         googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                             configuration = config.asCommonConfiguration(),
                             paymentMethodMetadata = paymentMethodMetadata,
@@ -658,6 +658,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
                 intentId = intentId,
             )
+            savedStateHandle.reportBillingAddressCompleted(paymentSelection, eventReporter)
         }
 
         // Log out of Link to invalidate the token

@@ -1,16 +1,18 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.utils.LauncherIntegrationType
 import com.stripe.android.googlepaylauncher.utils.runGooglePayPaymentMethodLauncherTest
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.testing.DummyActivityResultCaller
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -46,7 +48,7 @@ class GooglePayPaymentMethodLauncherTest {
             val firedEvents = mutableListOf<String>()
 
             val launcher = GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
@@ -78,7 +80,7 @@ class GooglePayPaymentMethodLauncherTest {
             val firedEvents = mutableListOf<String>()
 
             GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
@@ -95,7 +97,7 @@ class GooglePayPaymentMethodLauncherTest {
             )
 
             GooglePayPaymentMethodLauncher(
-                lifecycleScope = activity.lifecycleScope,
+                lifecycleOwner = activity,
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
@@ -126,6 +128,65 @@ class GooglePayPaymentMethodLauncherTest {
             }
         }
     }
+
+    @Test
+    fun `present() uses explicit publishable key and preserves global stripe account`() = runScenario {
+        launcher.present(
+            currencyCode = "usd",
+            clientAttributionMetadata = null,
+            publishableKey = "pk_passed_in_args",
+        )
+
+        val args = activityResultCaller.awaitLaunchCall() as GooglePayPaymentMethodLauncherContractV2.Args
+        assertThat(args.apiConfiguration.publishableKey).isEqualTo("pk_passed_in_args")
+        assertThat(args.apiConfiguration.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
+    }
+
+    @Test
+    fun `present() uses global configuration when publishable key is not provided`() = runScenario {
+        launcher.present(currencyCode = "usd")
+
+        val args = activityResultCaller.awaitLaunchCall() as GooglePayPaymentMethodLauncherContractV2.Args
+        assertThat(args.apiConfiguration.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        assertThat(args.apiConfiguration.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
+    }
+
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+        val activity = intentsTestRule.activity
+        PaymentConfiguration.init(
+            context = activity,
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
+
+        DummyActivityResultCaller.test {
+            val activityResultLauncher = activityResultCaller.registerForActivityResult(
+                GooglePayPaymentMethodLauncherContractV2()
+            ) { error("No result expected") }
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+
+            val launcher = GooglePayPaymentMethodLauncher(
+                lifecycleOwner = activity,
+                config = CONFIG,
+                readyCallback = { error("Readiness check should be skipped") },
+                activityResultLauncher = activityResultLauncher,
+                skipReadyCheck = true,
+                context = activity,
+                googlePayRepositoryFactory = mock(),
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                analyticsRequestExecutor = {},
+            )
+
+            Scenario(launcher, this).block()
+        }
+    }
+
+    private data class Scenario(
+        val launcher: GooglePayPaymentMethodLauncher,
+        val activityResultCaller: DummyActivityResultCaller.Scenario,
+    )
 
     private companion object {
         val CONFIG = GooglePayPaymentMethodLauncher.Config(

@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -49,6 +50,11 @@ class SavedPaymentMethodMutatorTest {
     fun `paymentOptionsItems uses the Link account brand`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkBrand = LinkBrand.Link,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         ),
         isLinkEnabled = stateFlowOf(true),
         linkAccount = stateFlowOf(
@@ -57,6 +63,28 @@ class SavedPaymentMethodMutatorTest {
     ) {
         assertThat(savedPaymentMethodMutator.paymentOptionsItems.value)
             .contains(PaymentOptionsItem.Link(LinkBrand.Onelink))
+    }
+
+    @Test
+    fun `paymentOptionsItems does not include Link when Display is WalletButtonHidden`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Link,
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+            ),
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        ),
+        isLinkEnabled = stateFlowOf(true),
+        linkAccount = stateFlowOf(
+            LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink))
+        ),
+    ) {
+        assertThat(savedPaymentMethodMutator.paymentOptionsItems.value)
+            .doesNotContain(PaymentOptionsItem.Link(LinkBrand.Onelink))
     }
 
     @Test

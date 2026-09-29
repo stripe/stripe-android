@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -14,11 +15,12 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkAccountInfoOrNull
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -56,8 +58,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
@@ -76,6 +80,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            result.linkAccountInfoOrNull?.let(linkAccountHolder::set)
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
@@ -90,9 +95,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
+                applyCompleteResult(result)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -102,7 +105,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
             }
             is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                applyCustomerState(result.customerState)
                 embeddedResultCallbackHelper.setResult(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
@@ -114,9 +117,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
+                applyCompleteResult(result)
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
@@ -129,9 +130,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-                selectionHolder.setSelection(result.selection)
+                applyCompleteResult(result)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -139,11 +138,21 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
             }
             is EmbeddedActivityResult.Cancelled -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                applyCustomerState(result.customerState)
                 clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
         }
+    }
+
+    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+        applyCustomerState(result.customerState)
+        selectionHolder.setPreviousNewSelections(result.previousNewSelections)
+        selectionHolder.setSelection(result.selection)
+    }
+
+    private fun applyCustomerState(customerState: CustomerState?) {
+        customerState?.let { customerStateHolder.setCustomerState(it) }
     }
 
     private fun clearStaleSelection() {
@@ -179,16 +188,18 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }
@@ -210,13 +221,16 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }
@@ -238,15 +252,16 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            ),
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = emptyList(),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }

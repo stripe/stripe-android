@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.challenge
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -82,7 +83,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             ),
-            publishableKey = "pk_123",
+            apiConfiguration = DEFAULT_API_CONFIG,
             productUsage = setOf("PaymentSheet")
         )
     }
@@ -95,7 +96,6 @@ internal class PassiveChallengeConfirmationFlowTest {
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
-        publishableKeyProvider = { "pk_123" },
         productUsage = setOf("PaymentSheet"),
         isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
     )

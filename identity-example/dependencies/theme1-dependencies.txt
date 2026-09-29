@@ -28,7 +28,7 @@
 |    |    |    |    |    |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21 (c)
 |    |    |    |    |    |    |    +--- androidx.concurrent:concurrent-futures:1.0.0 -> 1.1.0
 |    |    |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    |    |    |    |    \--- com.google.guava:listenablefuture:1.0
+|    |    |    |    |    |    |    |    \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    |    |    |    |    +--- androidx.core:core-viewtree:1.0.0
 |    |    |    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.2.21 (c)
@@ -77,7 +77,7 @@
 |    |    |    |    |    |    |    |         |    |    \--- androidx.tracing:tracing:1.0.0 -> 1.2.0
 |    |    |    |    |    |    |    |         |    |         +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
 |    |    |    |    |    |    |    |         |    |         \--- androidx.tracing:tracing-ktx:1.2.0 (c)
-|    |    |    |    |    |    |    |         |    \--- com.google.guava:listenablefuture:1.0
+|    |    |    |    |    |    |    |         |    \--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    |    |    |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 -> 2.2.21 (*)
 |    |    |    |    |    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 -> 1.10.2
 |    |    |    |    |    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
@@ -100,7 +100,7 @@
 |    |    |    |    |    |    |    +--- androidx.versionedparcelable:versionedparcelable:1.1.1
 |    |    |    |    |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |    |    |    |    |    |    |    |    \--- androidx.collection:collection:1.0.0 -> 1.5.0 (*)
-|    |    |    |    |    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    |    |    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    |    |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
 |    |    |    |    |    |    |    +--- org.jspecify:jspecify:1.0.0
@@ -220,7 +220,7 @@
 |    |    |    |    +--- androidx.concurrent:concurrent-futures:1.0.0 -> 1.1.0 (*)
 |    |    |    |    +--- androidx.core:core:1.10.0 -> 1.17.0 (*)
 |    |    |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
-|    |    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    |    \--- org.jspecify:jspecify:1.0.0
 |    |    |    +--- com.google.dagger:dagger:2.58
 |    |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
@@ -429,7 +429,7 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |    |    +--- androidx.tracing:tracing:1.2.0 (*)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
@@ -454,7 +454,7 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |    |    +--- androidx.tracing:tracing:1.2.0 (*)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    +--- org.jspecify:jspecify:1.0.0
 |    |    |    +--- androidx.camera:camera-core:1.5.3 (c)
 |    |    |    +--- androidx.camera:camera-lifecycle:1.5.3 (c)
@@ -473,7 +473,7 @@
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.21 -> 2.2.21 (*)
 |    |    |    |    \--- androidx.tracing:tracing:1.2.0 (c)
 |    |    |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |    |    +--- org.jspecify:jspecify:1.0.0
 |    |    |    +--- androidx.camera:camera-camera2:1.5.3 (c)
@@ -496,7 +496,7 @@
 |    |         |    +--- androidx.concurrent:concurrent-futures-ktx:1.1.0 (*)
 |    |         |    +--- androidx.core:core:1.1.0 -> 1.17.0 (*)
 |    |         |    +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |         |    +--- com.google.guava:listenablefuture:1.0
+|    |         |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
 |    |         |    +--- org.jspecify:jspecify:1.0.0
 |    |         |    +--- androidx.camera:camera-camera2:1.5.3 (c)
@@ -510,7 +510,7 @@
 |    |         +--- androidx.lifecycle:lifecycle-livedata:2.3.1 -> 2.10.0 (*)
 |    |         +--- androidx.lifecycle:lifecycle-livedata-core:2.3.1 -> 2.10.0 (*)
 |    |         +--- com.google.auto.value:auto-value-annotations:1.6.3
-|    |         +--- com.google.guava:listenablefuture:1.0
+|    |         +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |         +--- org.jspecify:jspecify:1.0.0
 |    |         +--- androidx.camera:camera-camera2:1.5.3 (c)
 |    |         +--- androidx.camera:camera-core:1.5.3 (c)
@@ -1137,6 +1137,43 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
 |    +--- com.google.android.material:material:1.13.0 (*)
+|    +--- com.google.mediapipe:tasks-vision:0.10.35
+|    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    +--- com.google.guava:guava:27.0.1-android
+|    |    |    +--- com.google.guava:failureaccess:1.0.1
+|    |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+|    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+|    |    |    +--- org.checkerframework:checker-compat-qual:2.5.2 -> 2.5.3
+|    |    |    +--- com.google.errorprone:error_prone_annotations:2.2.0 -> 2.15.0
+|    |    |    +--- com.google.j2objc:j2objc-annotations:1.1
+|    |    |    \--- org.codehaus.mojo:animal-sniffer-annotations:1.17
+|    |    \--- com.google.mediapipe:tasks-core:0.10.35
+|    |         +--- com.google.flogger:flogger:0.6
+|    |         |    \--- org.checkerframework:checker-compat-qual:2.5.3
+|    |         +--- com.google.flogger:flogger-system-backend:0.6
+|    |         |    +--- com.google.flogger:flogger:0.6 (*)
+|    |         |    \--- org.checkerframework:checker-compat-qual:2.5.3
+|    |         +--- com.google.guava:guava:27.0.1-android (*)
+|    |         +--- com.google.protobuf:protobuf-javalite:4.26.1
+|    |         +--- com.google.android.datatransport:transport-api:3.0.0
+|    |         |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         +--- com.google.android.datatransport:transport-backend-cct:3.1.0
+|    |         |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |    +--- com.google.android.datatransport:transport-api:3.0.0 (*)
+|    |         |    +--- com.google.android.datatransport:transport-runtime:3.1.0
+|    |         |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |    |    +--- com.google.android.datatransport:transport-api:3.0.0 (*)
+|    |         |    |    +--- com.google.firebase:firebase-encoders:17.0.0
+|    |         |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |    |    +--- com.google.firebase:firebase-encoders-proto:16.0.0
+|    |         |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |    |    |    \--- com.google.firebase:firebase-encoders:17.0.0 (*)
+|    |         |    |    \--- javax.inject:javax.inject:1
+|    |         |    +--- com.google.firebase:firebase-encoders:17.0.0 (*)
+|    |         |    \--- com.google.firebase:firebase-encoders-json:18.0.0
+|    |         |         +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |         \--- com.google.firebase:firebase-encoders:17.0.0 (*)
+|    |         \--- com.google.android.datatransport:transport-runtime:3.1.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
 +--- project :stripe-core (*)
 +--- project :stripe-ui-core (*)

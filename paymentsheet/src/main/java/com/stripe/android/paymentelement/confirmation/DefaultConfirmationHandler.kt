@@ -81,7 +81,11 @@ internal class DefaultConfirmationHandler(
         lifecycleOwner: LifecycleOwner,
     ) {
         mediators.forEach { mediator ->
-            mediator.register(activityResultCaller, ::onResult)
+            mediator.register(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+                onResult = ::onResult,
+            )
         }
 
         lifecycleOwner.lifecycle.addObserver(

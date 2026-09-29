@@ -24,6 +24,7 @@ emerge {
 android {
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
+        minSdkVersion 24
         versionCode 20
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

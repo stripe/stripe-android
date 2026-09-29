@@ -1,39 +1,71 @@
 package com.stripe.android.crypto.onramp.example.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.COLLECT_BANK_ACCOUNT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.COLLECT_SAMSUNG_PAY_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SELECTED_PAYMENT_TYPE_TAG
+import com.stripe.android.crypto.onramp.example.SESSION_STATUS_TAG
+import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
+import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
+import com.stripe.android.crypto.onramp.example.START_IDENTITY_VERIFICATION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_AND_CONDITIONS_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_OF_SERVICE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
+import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
+import com.stripe.android.crypto.onramp.example.deleteWalletButtonTag
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
+import com.stripe.android.crypto.onramp.example.network.CustomerWallet
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
+import com.stripe.android.crypto.onramp.example.ui.components.SamsungPayButton
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+
+private const val WALLET_METADATA_ALPHA = 0.6f
+private val VerifiedWalletColor = Color(0xFF2E7D32)
 
 @Composable
 internal fun OperationsHeader(
@@ -69,7 +101,9 @@ internal fun SessionSummary(
         Text(
             text = "Session Status: ${response.status}",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier
+                .testTag(SESSION_STATUS_TAG)
+                .padding(bottom = 8.dp)
         )
         Text(
             text = "Total Amount: ${response.sourceTotalAmount}",
@@ -122,6 +156,7 @@ internal fun SelectedPaymentSummary(
                 val isSelected = selectedSettlementSpeed == speed
                 Box(
                     modifier = Modifier
+                        .testTag(speed.testTag)
                         .background(
                             if (isSelected) {
                                 MaterialTheme.colors.primary
@@ -151,7 +186,9 @@ internal fun SelectedPaymentSummary(
 
     Text(
         text = "Selected Payment Type: ${paymentData.label}",
-        modifier = Modifier.padding(bottom = 24.dp)
+        modifier = Modifier
+            .testTag(SELECTED_PAYMENT_TYPE_TAG)
+            .padding(bottom = 24.dp)
     )
 
     Text(
@@ -160,8 +197,48 @@ internal fun SelectedPaymentSummary(
     )
 }
 
+private val SettlementSpeed.testTag: String
+    get() = when (this) {
+        SettlementSpeed.INSTANT -> SETTLEMENT_SPEED_INSTANT_TAG
+        SettlementSpeed.STANDARD -> SETTLEMENT_SPEED_STANDARD_TAG
+    }
+
 @Composable
 internal fun WalletAddressSection(
+    wallets: List<CustomerWallet>,
+    isLoading: Boolean,
+    walletAddress: String,
+    onWalletAddressChange: (String) -> Unit,
+    selectedNetwork: CryptoNetwork,
+    isDropdownExpanded: Boolean,
+    onDropdownExpandedChange: (Boolean) -> Unit,
+    onSelectNetwork: (CryptoNetwork) -> Unit,
+    onRegisterWalletAddress: () -> Unit,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit
+) {
+    RegisteredWalletsSection(
+        wallets = wallets,
+        isLoading = isLoading,
+        onDeleteWallet = onDeleteWallet,
+        onRefreshWallets = onRefreshWallets
+    )
+
+    RegisterWalletAddressForm(
+        isLoading = isLoading,
+        walletAddress = walletAddress,
+        onWalletAddressChange = onWalletAddressChange,
+        selectedNetwork = selectedNetwork,
+        isDropdownExpanded = isDropdownExpanded,
+        onDropdownExpandedChange = onDropdownExpandedChange,
+        onSelectNetwork = onSelectNetwork,
+        onRegisterWalletAddress = onRegisterWalletAddress
+    )
+}
+
+@Composable
+private fun RegisterWalletAddressForm(
+    isLoading: Boolean,
     walletAddress: String,
     onWalletAddressChange: (String) -> Unit,
     selectedNetwork: CryptoNetwork,
@@ -183,9 +260,10 @@ internal fun WalletAddressSection(
             readOnly = true,
             label = { Text("Network") },
             trailingIcon = {
-                TextButton(onClick = { onDropdownExpandedChange(true) }) {
-                    Text("▼")
-                }
+                TextButton(
+                    onClick = { onDropdownExpandedChange(true) },
+                    modifier = Modifier.testTag(WALLET_NETWORK_DROPDOWN_TAG),
+                ) { Text("▼") }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -215,18 +293,225 @@ internal fun WalletAddressSection(
         label = { Text("Wallet Address") },
         placeholder = { Text("0x1234567890abcdef...") },
         modifier = Modifier
+            .testTag(WALLET_ADDRESS_TAG)
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     )
 
     Button(
         onClick = onRegisterWalletAddress,
+        enabled = !isLoading,
         modifier = Modifier
             .testTag(REGISTER_WALLET_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
         Text("Register Wallet Address")
+    }
+}
+
+@Composable
+private fun RegisteredWalletsSection(
+    wallets: List<CustomerWallet>,
+    isLoading: Boolean,
+    onDeleteWallet: (CustomerWallet) -> Unit,
+    onRefreshWallets: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Registered Wallets",
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            }
+            TextButton(
+                onClick = onRefreshWallets,
+                enabled = !isLoading
+            ) {
+                Text("Refresh")
+            }
+        }
+    }
+
+    if (wallets.isEmpty() && !isLoading) {
+        Text(
+            text = "No registered wallets",
+            color = MaterialTheme.colors.onSurface.copy(alpha = WALLET_METADATA_ALPHA),
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+    }
+
+    wallets.forEach { wallet ->
+        CustomerWalletRow(
+            wallet = wallet,
+            enabled = !isLoading,
+            onDelete = { onDeleteWallet(wallet) }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+private fun CustomerWalletRow(
+    wallet: CustomerWallet,
+    enabled: Boolean,
+    onDelete: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.05f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = wallet.network.replaceFirstChar { it.uppercase() },
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = wallet.walletAddress,
+                    fontFamily = FontFamily.Monospace,
+                    style = MaterialTheme.typography.caption
+                )
+                Text(
+                    text = "ID: ${wallet.id}",
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = WALLET_METADATA_ALPHA),
+                    style = MaterialTheme.typography.caption
+                )
+                if (wallet.verifiedOwnership) {
+                    Text(
+                        text = "Verified",
+                        color = VerifiedWalletColor,
+                        style = MaterialTheme.typography.caption
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = onDelete,
+                enabled = enabled,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colors.error
+                ),
+                modifier = Modifier.testTag(deleteWalletButtonTag(wallet.id))
+            ) {
+                Text("Delete")
+            }
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+internal fun WalletOwnershipSection(
+    isExpanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    challengeId: String?,
+    challengeMessage: String?,
+    challengeExpiresAt: String?,
+    verifiedOwnership: Boolean?,
+    signatureInput: String,
+    onSignatureInputChange: (String) -> Unit,
+    onGetWalletOwnershipChallenge: () -> Unit,
+    onSubmitWalletOwnershipSignature: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onExpandedChange(!isExpanded) }
+            .padding(vertical = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Wallet Ownership",
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = if (isExpanded) "Hide" else "Show")
+    }
+
+    AnimatedVisibility(visible = isExpanded) {
+        Column {
+            Button(
+                onClick = onGetWalletOwnershipChallenge,
+                modifier = Modifier
+                    .testTag(GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG)
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text("Get Wallet Ownership Challenge")
+            }
+
+            challengeId?.let { id ->
+                Text(
+                    text = "Challenge ID: $id",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            challengeExpiresAt?.let { expiresAt ->
+                Text(
+                    text = "Challenge expires at: $expiresAt",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            challengeMessage?.let { message ->
+                Text(
+                    text = "Challenge message:\n$message",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            verifiedOwnership?.let { verified ->
+                Text(
+                    text = "Verified ownership: $verified",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            OutlinedTextField(
+                value = signatureInput,
+                onValueChange = onSignatureInputChange,
+                label = { Text("Wallet Ownership Signature") },
+                placeholder = { Text("Signature") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
+            Button(
+                onClick = onSubmitWalletOwnershipSignature,
+                enabled = challengeId != null,
+                modifier = Modifier
+                    .testTag(SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG)
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Text("Submit Wallet Ownership Signature")
+            }
+        }
     }
 }
 
@@ -244,6 +529,7 @@ internal fun VerificationSection(
     Button(
         onClick = onStartVerification,
         modifier = Modifier
+            .testTag(START_IDENTITY_VERIFICATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -253,6 +539,7 @@ internal fun VerificationSection(
     Button(
         onClick = onShowUserAttestation,
         modifier = Modifier
+            .testTag(USER_ATTESTATION_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
@@ -261,14 +548,54 @@ internal fun VerificationSection(
 }
 
 @Composable
+internal fun PartnerTermsSection(
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
+) {
+    Text(
+        text = "Partner Terms",
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    Button(
+        onClick = onShowTermsOfService,
+        modifier = Modifier
+            .testTag(TERMS_OF_SERVICE_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    ) {
+        Text("Terms of Service")
+    }
+
+    Button(
+        onClick = onShowTermsAndConditions,
+        modifier = Modifier
+            .testTag(TERMS_AND_CONDITIONS_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text("Terms and Conditions")
+    }
+}
+
+@Composable
 internal fun PaymentSection(
     googlePayIsReady: Boolean,
+    samsungPayIsReady: Boolean,
+    sourceCurrency: SourceCurrency,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit
 ) {
     Text(
         text = "Payment",
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    SourceCurrencySelector(
+        sourceCurrency = sourceCurrency,
+        onSelectSourceCurrency = onSelectSourceCurrency
     )
 
     Button(
@@ -284,6 +611,7 @@ internal fun PaymentSection(
     Button(
         onClick = { onCollectPayment(PaymentMethodSelection.BankAccount()) },
         modifier = Modifier
+            .testTag(COLLECT_BANK_ACCOUNT_BUTTON_TAG)
             .fillMaxWidth()
             .padding(bottom = 8.dp)
     ) {
@@ -304,7 +632,7 @@ internal fun PaymentSection(
         onClick = {
             onCollectPayment(
                 PaymentMethodSelection.GooglePay(
-                    currencyCode = "USD",
+                    currencyCode = sourceCurrency.value.uppercase(),
                     amount = 0L
                 )
             )
@@ -315,7 +643,23 @@ internal fun PaymentSection(
             .padding(bottom = 8.dp)
     )
 
+    SamsungPayButton(
+        enabled = samsungPayIsReady,
+        onClick = { onCollectPayment(samsungPaySelection(sourceCurrency)) },
+        modifier = Modifier
+            .testTag(COLLECT_SAMSUNG_PAY_BUTTON_TAG)
+            .padding(bottom = 8.dp)
+    )
+
     Spacer(modifier = Modifier.height(32.dp))
+}
+
+private fun samsungPaySelection(sourceCurrency: SourceCurrency): PaymentMethodSelection.SamsungPay {
+    return PaymentMethodSelection.SamsungPay(
+        currencyCode = sourceCurrency.value.uppercase(),
+        amount = 199L,
+        orderNumber = "onramp-example-order",
+    )
 }
 
 @Composable
@@ -354,5 +698,41 @@ internal fun CheckoutSection(
             .padding(bottom = 8.dp)
     ) {
         Text(if (hasSession) "Checkout" else "Checkout (Create session first)")
+    }
+}
+
+@Composable
+private fun SourceCurrencySelector(
+    sourceCurrency: SourceCurrency,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
+) {
+    Text(
+        text = "Source Currency",
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
+        SourceCurrency.entries.forEach { currency ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = currency == sourceCurrency,
+                        onClick = { onSelectSourceCurrency(currency) },
+                        role = Role.RadioButton
+                    )
+            ) {
+                RadioButton(
+                    selected = currency == sourceCurrency,
+                    onClick = null
+                )
+                Text(currency.displayName)
+            }
+        }
     }
 }

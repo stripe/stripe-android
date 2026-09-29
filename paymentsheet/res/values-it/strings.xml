@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Conto bancario ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Conto bancario ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Conferma il pagamento Bizum nella tua richiesta di registrazione bancaria su dispositivo mobile entro %s per completare l\'acquisto.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Per completare l\'acquisto, conferma il pagamento nell\'app della tua banca entro %s.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -110,8 +112,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_error_mobile_wallet">I wallet mobili non sono supportati. Prova con una carta fisica.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Tieni la carta dietro al telefono</string>
+  <!-- Error with action to take shown in the NFC scanning flow if an internal SDK error occurs -->
+  <string name="stripe_nfc_scan_internal_error_message">Si è verificato un errore. Prova un\'altra carta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">Carta non supportata. Prova con un\'altra carta.</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_nfc_try_again_error">Riprova.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">oppure inserisci manualmente</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->

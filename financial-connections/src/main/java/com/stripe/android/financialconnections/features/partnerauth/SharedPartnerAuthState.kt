@@ -15,6 +15,12 @@ internal data class SharedPartnerAuthState(
     val viewEffect: ViewEffect? = null,
     val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
     val inModal: Boolean = false,
+    /**
+     * When true, the institution's authentication flow opens as soon as the auth session is
+     * created, skipping the OAuth prepane. Used when a previous pane has already told the user
+     * what to do (ex. the generic error pane's "try again").
+     */
+    val autoLaunchAuthSession: Boolean = false,
 ) {
 
     val isNetworkingRelinkSession: Boolean
@@ -23,6 +29,7 @@ internal data class SharedPartnerAuthState(
     constructor(args: PartnerAuthViewModel.Args) : this(
         pane = args.pane,
         inModal = args.inModal,
+        autoLaunchAuthSession = args.autoLaunchAuthSession,
     )
 
     data class Payload(

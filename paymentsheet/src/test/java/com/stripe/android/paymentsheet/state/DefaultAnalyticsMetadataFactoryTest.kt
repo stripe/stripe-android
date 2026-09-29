@@ -77,6 +77,23 @@ class DefaultAnalyticsMetadataFactoryTest {
     }
 
     @Test
+    fun `create returns ECE configuration analytics metadata`() = runScenario {
+        val commonConfiguration = PaymentElementLoader.Configuration.PaymentSheet(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Test Merchant",
+                paymentMethodOrder = listOf("link", "card"),
+            )
+        ).commonConfiguration
+
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.ExpressCheckoutElement(commonConfiguration)
+        )
+
+        val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
+        assertThat(mpeConfig?.get("payment_method_order")).isEqualTo("link,card")
+    }
+
+    @Test
     fun `create returns expected values for payment intent`() = runScenario {
         val clientSecret = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.clientSecret!!
         val resultMap = createAnalyticsMetadata(
@@ -671,6 +688,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName = "Test Merchant")
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration
@@ -705,6 +723,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 )
                 .build(),
             isRowSelectionImmediateAction = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
         val resultMap = createAnalyticsMetadata(
             configuration = configuration
@@ -809,7 +828,6 @@ class DefaultAnalyticsMetadataFactoryTest {
     ): ElementsSession {
         return ElementsSession(
             linkSettings = linkSettings,
-            paymentMethodSpecs = null,
             externalPaymentMethodData = externalPaymentMethodData,
             stripeIntent = stripeIntent,
             orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
@@ -944,6 +962,8 @@ class DefaultAnalyticsMetadataFactoryTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+                shouldDisplay = true,
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

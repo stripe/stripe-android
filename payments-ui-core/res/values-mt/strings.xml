@@ -46,14 +46,14 @@
   <string name="stripe_eps_bank">Bank EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' GCash, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' GCash tiegħek għal ħlasijiet fil-futur skont ir-regoli tagħhom.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L-IBAN li daħħalt mhux komplut.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">L-IBAN li daħħalt mhux tajjeb, \"%s\" mhux pajjiż li jista\' jintuża.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">L-IBAN tiegħek għandu jibda b\'kodiċi tal-pajjiż magħmul minn żewġ ittri.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">Il-Bank iDEAL</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Il-kodiċi BLIK li ktibt mhux komplut.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +69,16 @@
   <string name="stripe_klarna_pay_later">Ħlas aktar tard bil-Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">Billi tikkonferma l-pagament tiegħek ma\' NICEPAY, int qed tħalli lil %s tiġbor il-ħlas minn dan il-metodu ta\' pagament għal pagamenti futuri skont ir-regoli tagħhom.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">L-isem fuq il-karta</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Agħżel kif trid tħallas:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Meta tikkonferma l-ħlas tiegħek, taqbel li t-tranżazzjoni tiegħek se tiġi ġestita minn Global Stack Services Limited bħala n-negozjant reġistrat u skont it-<a href=\"%s\">termini tal-użu</a> tagħhom]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Meta tikkonferma l-ħlas tiegħek, taqbel li t-tranżazzjoni tiegħek se tiġi ġestita minn Global Stack Services Limited bħala n-negozjant reġistrat u skont it-<a href=\"%s\">termini</a> tagħhom.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -97,6 +105,8 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debitu SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Wara s-sottomissjoni, se tiġi ridirett biex tlesti l-passi li jmiss b\'mod sigur.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
   <!-- Revolut mandate text -->
@@ -111,14 +121,16 @@
   <string name="stripe_scan_card">Skennja l-karta</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Ħassar il-karta skennjata</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Meta tagħti l-informazzjoni tal-pagament tiegħek u tikkonferma dan il-pagament, tkun qed tawtorizza lil (A) %s u lil Stripe, l-operatur tas-servizz tal-pagamenti tagħna, biex jibagħtu struzzjonijiet lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek u (B) lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek skont dawn l-istruzzjonijiet. Bħala parti mid-drittijiet tiegħek, inti għandek dritt għall-ħlas lura mill-bank tiegħek skont ir-regoli u l-kundizzjonijiet tal-ftehim tiegħek mal-bank tiegħek. Ħlas lura għandu jintalab fi żmien 8 ġimgħat, li jibdew jgħoddu mid-data li fiha l-fondi jittieħdu mill-kont tiegħek. Il-jeddijiet tiegħek imfissra fi stqarrija li tista\' tikseb mingħand il-bank tiegħek. Int taqbel li, sa jumejn qabel, tikseb tagħrif kull darba li l-fondi jkunu se jittieħdu mill-kont tiegħek.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Stabilixxi</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' Touch \'n Go, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' Touch \'n Go tiegħek għal ħlasijiet fil-futur skont it-termini tagħhom.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Meta tikkonferma l-ħlas tiegħek permezz ta\' TrueMoney, tkun qed tippermetti lil %s jiġbor il-ħlas mill-kont ta\' TrueMoney tiegħek għal ħlasijiet fil-futur skont it-termini tagħhom.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Billi tkompli, tawtorizza %1$s biex awtomatikament tħallas il-Bilanċ tiegħek ta\' Twint b\'mod ripetut skont il-pjan tax-xiri jew l-abbonament tiegħek.</string>
   <!-- Label for UPI ID number field on form -->

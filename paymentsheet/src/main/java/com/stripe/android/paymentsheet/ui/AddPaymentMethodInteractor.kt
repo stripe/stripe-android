@@ -1,22 +1,24 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -92,10 +94,11 @@ internal class DefaultAddPaymentMethodInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): AddPaymentMethodInteractor {
-            val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Main)
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+                coroutineScope = coroutineScope,
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = LinkInlineHandler.create(),
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
@@ -202,6 +205,14 @@ internal class DefaultAddPaymentMethodInteractor(
             processing.collect {
                 _state.value = _state.value.copy(
                     processing = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            incentive.collect {
+                _state.value = _state.value.copy(
+                    incentive = it
                 )
             }
         }

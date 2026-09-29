@@ -82,6 +82,7 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
     ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = intercept(
     intent = PaymentIntentFactory.create(),
     confirmationOption = PaymentMethodConfirmationOption.Saved(
+        shippingInformation = null,
         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         optionsParams = null,
     ),

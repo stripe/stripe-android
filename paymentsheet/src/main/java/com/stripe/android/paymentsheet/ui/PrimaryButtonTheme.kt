@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -13,12 +14,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.takeOrElse
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getOnBackgroundColor
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
+import com.stripe.android.uicore.stripePrimaryButtonStyle
 
 internal data class PrimaryButtonColors(
     val background: Color = Color.Unspecified,
@@ -66,7 +67,7 @@ internal object PrimaryButtonTheme {
 
     @Composable
     private fun getPrimaryButtonColors(): PrimaryButtonColors {
-        val style = StripeTheme.primaryButtonStyle
+        val style = MaterialTheme.stripePrimaryButtonStyle
         val context = LocalContext.current
         val localColors = LocalPrimaryButtonColors.current
 
@@ -97,7 +98,7 @@ internal object PrimaryButtonTheme {
 
     @Composable
     private fun getPrimaryButtonShape(): PrimaryButtonShape {
-        val style = StripeTheme.primaryButtonStyle
+        val style = MaterialTheme.stripePrimaryButtonStyle
         val localShape = LocalPrimaryButtonShape.current
 
         return remember(style, localShape) {
@@ -117,7 +118,7 @@ internal object PrimaryButtonTheme {
 
     @Composable
     private fun getPrimaryButtonTypography(): PrimaryButtonTypography {
-        val style = StripeTheme.primaryButtonStyle
+        val style = MaterialTheme.stripePrimaryButtonStyle
         val localTypography = LocalPrimaryButtonTypography.current
 
         return remember(style, localTypography) {

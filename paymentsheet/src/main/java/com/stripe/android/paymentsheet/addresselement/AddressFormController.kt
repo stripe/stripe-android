@@ -5,17 +5,17 @@ import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 
 internal class AddressFormController(
-    val initialValues: Map<IdentifierSpec, String?>,
+    val initialValues: Map<FormFieldId, String?>,
     val config: AddressLauncher.Configuration?,
     val interactor: AutocompleteAddressInteractor,
 ) {
     private val autocompleteAddressElement = AutocompleteAddressElement(
-        identifier = IdentifierSpec.Generic("address"),
+        identifier = FormFieldId.Generic("address"),
         initialValues = initialValues,
         countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
         nameConfig = AddressFieldConfiguration.REQUIRED,
@@ -47,5 +47,5 @@ internal class AddressFormController(
         }
         .toMap()
 
-    fun setRawValues(values: Map<IdentifierSpec, String?>) = autocompleteAddressElement.setRawValue(values)
+    fun setRawValues(values: Map<FormFieldId, String?>) = autocompleteAddressElement.setRawValue(values)
 }

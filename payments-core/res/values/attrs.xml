@@ -11,6 +11,7 @@
         <attr name="shouldShowPostalCode" format="boolean" />
         <attr name="shouldRequirePostalCode" format="boolean" />
         <attr name="shouldRequireUsZipCode" format="boolean" />
+        <attr name="isIntegratedInStripeView" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="BecsDebitWidget" tools:ignore="ResourceName">

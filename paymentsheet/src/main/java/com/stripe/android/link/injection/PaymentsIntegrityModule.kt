@@ -3,6 +3,9 @@ package com.stripe.android.link.injection
 import android.app.Application
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
+import com.stripe.attestation.AttestationWarmer
+import com.stripe.attestation.DefaultAttestationWarmer
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
 import com.stripe.attestation.RealStandardIntegrityManagerFactory
@@ -15,6 +18,16 @@ internal object PaymentsIntegrityModule {
     fun provideIntegrityRequestManager(
         context: Application
     ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+
+    @Provides
+    fun provideAttestationWarmer(
+        integrityRequestManager: IntegrityRequestManager
+    ): AttestationWarmer {
+        return DefaultAttestationWarmer(
+            integrityRequestManager = integrityRequestManager,
+            retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
+        )
+    }
 }
 
 // Keep a single instance across the app so prepare() only happens once per process.

@@ -17,5 +17,8 @@ interface InputController : SectionFieldValidationController {
     val showOptionalLabel: Boolean
     val formFieldValue: StateFlow<FormFieldEntry>
 
+    val enforceLeftToRightTextDirection: Boolean
+        get() = false
+
     fun onRawValueChange(rawValue: String)
 }

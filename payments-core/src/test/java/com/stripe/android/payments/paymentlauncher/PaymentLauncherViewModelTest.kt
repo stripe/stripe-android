@@ -47,6 +47,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
@@ -610,13 +611,15 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
             additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
 
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
     }
 
@@ -674,7 +677,8 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
             additionalParams = argThat { params ->
                 params["status"] == expectedStatus
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
     }
 
@@ -687,6 +691,7 @@ class PaymentLauncherViewModelTest {
         verify(analyticsRequestFactory).createRequest(
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
             additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
 
         val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
@@ -698,7 +703,8 @@ class PaymentLauncherViewModelTest {
             eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
             additionalParams = argThat { params ->
                 params.containsKey("duration") && params["duration"] == 1L
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
     }
 
@@ -763,7 +769,8 @@ class PaymentLauncherViewModelTest {
             eq(expectedEvent),
             additionalParams = argThat { params ->
                 params["status"] == expectedStatus
-            }
+            },
+            publishableKeyOverride = isNull(),
         )
 
         // Try to send another result - should be blocked by guard
@@ -775,7 +782,8 @@ class PaymentLauncherViewModelTest {
         // Verify still only one finished event was sent
         verify(analyticsRequestFactory, times(1)).createRequest(
             eq(expectedEvent),
-            additionalParams = any()
+            additionalParams = any(),
+            publishableKeyOverride = isNull(),
         )
     }
 

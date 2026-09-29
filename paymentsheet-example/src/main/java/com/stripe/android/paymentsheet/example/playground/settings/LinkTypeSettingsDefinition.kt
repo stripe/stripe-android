@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 
 internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition<LinkType>,
@@ -22,7 +22,7 @@ internal object LinkTypeSettingsDefinition :
 
         return (
             LinkSettingsDefinition.applicable(configurationData, settings) &&
-                settings[LinkSettingsDefinition] == true
+                settings[LinkSettingsDefinition] != LinkDisplaySetting.Never
             )
     }
 
@@ -38,24 +38,7 @@ internal object LinkTypeSettingsDefinition :
     }
 
     override fun setValue(value: LinkType) {
-        when (value) {
-            LinkType.ServerControlled -> {
-                FeatureFlags.nativeLinkEnabled.reset()
-                FeatureFlags.nativeLinkAttestationEnabled.reset()
-            }
-            LinkType.Native -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-            LinkType.NativeAttest -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(true)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(true)
-            }
-            LinkType.Web -> {
-                FeatureFlags.nativeLinkEnabled.setEnabled(false)
-                FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-            }
-        }
+        value.applyFeatureFlags()
     }
 }
 

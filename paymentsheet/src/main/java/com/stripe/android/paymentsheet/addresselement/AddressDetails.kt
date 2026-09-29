@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -36,22 +36,22 @@ class AddressDetails(
 
 internal fun AddressDetails.toIdentifierMap(
     billingDetails: PaymentSheet.BillingDetails? = null
-): Map<IdentifierSpec, String?> {
+): Map<FormFieldId, String?> {
     return if (billingDetails == null || !billingDetails.isFilledOut()) {
         mapOf(
-            IdentifierSpec.Name to name,
-            IdentifierSpec.Line1 to address?.line1,
-            IdentifierSpec.Line2 to address?.line2,
-            IdentifierSpec.City to address?.city,
-            IdentifierSpec.State to address?.state,
-            IdentifierSpec.PostalCode to address?.postalCode,
-            IdentifierSpec.Country to address?.country,
-            IdentifierSpec.Phone to phoneNumber
+            FormFieldId.Name to name,
+            FormFieldId.Line1 to address?.line1,
+            FormFieldId.Line2 to address?.line2,
+            FormFieldId.City to address?.city,
+            FormFieldId.State to address?.state,
+            FormFieldId.PostalCode to address?.postalCode,
+            FormFieldId.Country to address?.country,
+            FormFieldId.Phone to phoneNumber
         )
             .plus(billingDetails?.address?.toIdentifierMap() ?: emptyMap())
             .plus(
                 mapOf(
-                    IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
+                    FormFieldId.SameAsShipping to isCheckboxSelected?.toString()
                 ).takeIf { isCheckboxSelected != null } ?: emptyMap()
             )
     } else {
@@ -59,14 +59,14 @@ internal fun AddressDetails.toIdentifierMap(
     }
 }
 
-internal fun PaymentSheet.Address.toIdentifierMap(): Map<IdentifierSpec, String?> {
+internal fun PaymentSheet.Address.toIdentifierMap(): Map<FormFieldId, String?> {
     return mapOf(
-        IdentifierSpec.Line1 to line1,
-        IdentifierSpec.Line2 to line2,
-        IdentifierSpec.City to city,
-        IdentifierSpec.State to state,
-        IdentifierSpec.PostalCode to postalCode,
-        IdentifierSpec.Country to country,
+        FormFieldId.Line1 to line1,
+        FormFieldId.Line2 to line2,
+        FormFieldId.City to city,
+        FormFieldId.State to state,
+        FormFieldId.PostalCode to postalCode,
+        FormFieldId.Country to country,
     )
 }
 

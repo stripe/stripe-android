@@ -180,12 +180,30 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     cvc = "505"
                 ),
             )
         )
+    }
+
+    @Test
+    fun `On acknowledged saved selection, should propagate SEPA mandate state`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+        ).also {
+            it.hasAcknowledgedSepaMandate = true
+        }
+
+        val confirmationOption = paymentSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        ) as PaymentMethodConfirmationOption.Saved
+
+        assertThat(confirmationOption.hasAcknowledgedSepaMandate).isTrue()
     }
 
     @Test
@@ -330,64 +348,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(
             confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.additionalEnabledNetworks
         ).isEqualTo(additionalNetworks)
-    }
-
-    @Test
-    fun `On Google Pay selection with displayItems, should return expected option with displayItems`() {
-        val displayItems = listOf(
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Widget",
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
-            ),
-            com.stripe.android.GooglePayJsonFactory.DisplayItem(
-                label = "Tax",
-                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
-                price = 500L,
-            ),
-        )
-
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                        countryCode = "US",
-                        currencyCode = "USD",
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            linkConfiguration = null,
-            cardFundingFilter = DefaultCardFundingFilter,
-            googlePayDisplayItems = displayItems,
-        )
-
-        assertThat(
-            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
-        ).isEqualTo(displayItems)
-    }
-
-    @Test
-    fun `On Google Pay selection without displayItems, should return empty displayItems`() {
-        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                        countryCode = "US",
-                        currencyCode = "USD",
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            linkConfiguration = null,
-            cardFundingFilter = DefaultCardFundingFilter,
-        )
-
-        assertThat(
-            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
-        ).isEmpty()
     }
 
     @Test
@@ -589,6 +549,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )
@@ -609,6 +570,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
             )
@@ -825,6 +787,8 @@ class ConfirmationHandlerOptionKtxTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 }

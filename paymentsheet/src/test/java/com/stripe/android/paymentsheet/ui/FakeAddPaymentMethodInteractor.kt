@@ -5,20 +5,24 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.kotlin.mock
 
 internal class FakeAddPaymentMethodInteractor(
     initialState: AddPaymentMethodInteractor.State,
     private val viewActionRecorder: ViewActionRecorder<AddPaymentMethodInteractor.ViewAction> = ViewActionRecorder(),
+    override val isLiveMode: Boolean = true,
 ) : AddPaymentMethodInteractor {
     override val state: StateFlow<AddPaymentMethodInteractor.State> = stateFlowOf(initialState)
-    override val isLiveMode: Boolean = true
 
     override fun handleViewAction(viewAction: AddPaymentMethodInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
@@ -39,17 +43,22 @@ internal class FakeAddPaymentMethodInteractor(
             ),
             paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes().first(),
             isValidating: Boolean = false,
+            previousPaymentMethodCreateParams: PaymentMethodCreateParams? = null,
+            previousPaymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ): AddPaymentMethodInteractor.State {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
                 metadata = metadata,
             )
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
                 autocompleteAddressInteractorFactory = null,
                 linkInlineHandler = null,
+                paymentMethodCreateParams = previousPaymentMethodCreateParams,
+                paymentMethodExtraParams = previousPaymentMethodExtraParams,
             )
 
             return AddPaymentMethodInteractor.State(

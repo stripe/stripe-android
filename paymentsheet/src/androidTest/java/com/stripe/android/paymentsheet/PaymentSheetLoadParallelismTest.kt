@@ -1,10 +1,15 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -29,8 +34,11 @@ import java.util.concurrent.TimeUnit
  * necessary and intentional, as it will likely lead to an increase in our loading latency.
  *
  */
-@RunWith(JUnit4::class)
-internal class PaymentSheetLoadParallelismTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetLoadParallelismTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
 
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -154,6 +162,7 @@ internal class PaymentSheetLoadParallelismTest {
         defaultEmail: Boolean,
         expectedRequestOrdering: RequestOrdering,
     ) = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
@@ -167,9 +176,11 @@ internal class PaymentSheetLoadParallelismTest {
             testContext.presentPaymentSheet {
                 presentWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = buildConfiguration(
-                        customerType = customerType,
-                        defaultEmail = defaultEmail,
+                    configuration = apiConfigurationTestType.applyTo(
+                        buildConfiguration(
+                            customerType = customerType,
+                            defaultEmail = defaultEmail,
+                        )
                     ),
                 )
             }
@@ -213,7 +224,7 @@ internal class PaymentSheetLoadParallelismTest {
                 CustomerType.Guest -> null
                 CustomerType.LegacyEK -> PaymentSheet.CustomerConfiguration(
                     id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
+                    ephemeralKeySecret = TestApiKeys.EPHEMERAL,
                 )
                 CustomerType.CustomerSession -> PaymentSheet.CustomerConfiguration
                     .createWithCustomerSession(

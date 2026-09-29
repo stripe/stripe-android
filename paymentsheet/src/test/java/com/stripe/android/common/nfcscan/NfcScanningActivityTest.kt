@@ -6,16 +6,23 @@ import android.os.Build
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -37,6 +44,7 @@ import kotlin.use
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class NfcScanningActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -51,7 +59,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `close button returns canceled result`() = test {
-        composeRule.onNodeWithContentDescription("Cancel").performClick()
+        composeRule.onNodeWithTag(NFC_CLOSE_BUTTON_TEST_TAG).performClick()
 
         waitForIdle()
 
@@ -72,6 +80,38 @@ internal class NfcScanningActivityTest {
         waitForIdle()
 
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "notnight")
+    fun `always dark appearance uses light system bar icons in system light`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isFalse()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isFalse()
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q], qualifiers = "night")
+    fun `always light appearance uses dark system bar icons in system dark`() = test(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        ),
+    ) {
+        val insetsController = WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        )
+
+        assertThat(insetsController.isAppearanceLightStatusBars).isTrue()
+        assertThat(insetsController.isAppearanceLightNavigationBars).isTrue()
     }
 
     @Test
@@ -148,9 +188,12 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
+    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test(
+        autoAdvance = false,
+    ) {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card declined. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card declined. Use another card.")
+        assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
 
@@ -160,9 +203,10 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `unsupported card shows error and keeps activity open`() = test {
+    fun `unsupported card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card not supported. Use another card.")
+        assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
 
@@ -172,10 +216,12 @@ internal class NfcScanningActivityTest {
     @Test
     fun `merchant card brand filter rejects visa and keeps activity open`() {
         test(
+            autoAdvance = false,
             paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
         ) {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another card.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Use another card.")
+            assertErrorDisappears()
 
             isoDep.assertSuccess()
 
@@ -184,9 +230,10 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `expired card shows error and keeps activity open`() = test {
+    fun `expired card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
-        assertErrorIsDisplayed(errorText = "Card expired. Try another card.")
+        assertErrorIsDisplayed(errorText = "Card expired. Use another card.")
+        assertErrorDisappears()
 
         isoDep.assertSuccess()
 
@@ -195,7 +242,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `inactivity timeout returns canceled result`() = test {
-        ShadowSystemClock.advanceBy(20.seconds.inWholeSeconds, TimeUnit.SECONDS)
+        ShadowSystemClock.advanceBy(30.seconds.inWholeSeconds, TimeUnit.SECONDS)
         waitForIdle()
 
         assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
@@ -221,18 +268,65 @@ internal class NfcScanningActivityTest {
         assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
             .isEqualTo(AnimationConstants.FADE_IN)
         assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
-            .isEqualTo(AnimationConstants.FADE_OUT)
+            .isEqualTo(R.anim.stripe_nfc_screen_fade_out)
+    }
+
+    @Test
+    fun `insecure device opens developer options and starts scanning after settings are updated`() {
+        developerOptions(enabled = true)
+
+        try {
+            test {
+                composeRule.onNodeWithTag(NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG)
+                    .assertExists()
+                    .performClick()
+
+                waitForIdle()
+
+                assertThat(nfcAdapter?.isInReaderMode).isFalse()
+                assertThat(shadowOf(activity).nextStartedActivity.action)
+                    .isEqualTo(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+
+                developerOptions(enabled = false)
+
+                moveToState(Lifecycle.State.STARTED)
+                moveToState(Lifecycle.State.RESUMED)
+
+                waitForIdle()
+
+                assertThat(nfcAdapter?.isInReaderMode).isTrue()
+                composeRule.onNodeWithTag(NFC_CLOSE_BUTTON_TEST_TAG).assertExists()
+            }
+        } finally {
+            developerOptions(enabled = false)
+        }
     }
 
     private fun test(
+        autoAdvance: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         block: suspend NfcScanningActivityScenario.() -> Unit,
     ) {
         NfcScanningActivityTestHelpers.launchScenario(
             context = context,
             composeRule = composeRule,
+            autoAdvance = autoAdvance,
             paymentMethodMetadata = paymentMethodMetadata,
             block = block,
+        )
+    }
+
+    private fun developerOptions(enabled: Boolean) {
+        val value = if (enabled) {
+            "1"
+        } else {
+            "0"
+        }
+
+        Settings.Global.putString(
+            context.contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            value
         )
     }
 

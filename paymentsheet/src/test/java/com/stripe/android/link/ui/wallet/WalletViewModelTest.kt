@@ -73,13 +73,19 @@ class WalletViewModelTest {
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
 
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
         )
 
         assertThat(linkAccountManager.listPaymentDetailsCalls)
-            .containsExactly(TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet())
+            .containsExactly(setOf(ConsumerPaymentDetails.Card.TYPE))
 
         val state = viewModel.uiState.value
 
@@ -89,7 +95,7 @@ class WalletViewModelTest {
                 email = "email@stripe.com",
                 allowLogOut = true,
                 selectedItemId = null,
-                cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
+                cardBrandFilter = configuration.cardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
                 userSetIsExpanded = false,
@@ -151,9 +157,16 @@ class WalletViewModelTest {
             navScreen = screen
         }
 
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
+
         createViewModel(
             linkAccountManager = linkAccountManager,
-            navigateAndClearStack = ::navigateAndClearStack
+            navigateAndClearStack = ::navigateAndClearStack,
+            configuration = configuration,
         )
 
         assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
@@ -192,6 +205,7 @@ class WalletViewModelTest {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
+                    preCollectedConsent = null,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
@@ -310,9 +324,7 @@ class WalletViewModelTest {
                 linkAccount = account,
                 configuration = configuration.copy(stripeIntent = stripeIntent.copy(linkFundingSources = emptyList()))
             ).uiState.value.addPaymentMethodOptions
-        ).containsExactly(
-            AddPaymentMethodOption.Card, // Card is available by default.
-        )
+        ).isEmpty()
     }
 
     @Test
@@ -964,6 +976,9 @@ class WalletViewModelTest {
             true to resolvableString(R.string.stripe_wallet_prefer_debit_card_hint),
         ).forEach { (enableHint, expectedHint) ->
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                    linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+                ),
                 flags = mapOf("link_show_prefer_debit_card_hint" to enableHint)
             )
 
@@ -1029,10 +1044,17 @@ class WalletViewModelTest {
             ConsumerPaymentDetails(paymentDetails = listOf(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT))
         )
 
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)
+            )
+        )
+
         var navigatedScreen: LinkScreen? = null
 
         createViewModel(
             linkAccountManager = linkAccountManager,
+            configuration = configuration,
             linkLaunchMode = createPaymentMethodSelectionMode(
                 paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             ),

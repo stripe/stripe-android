@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Godkända former av id-handlingar inkluderar</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Se till att id-handlingen ligger rakt</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Tillåt</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Appinställningar</string>
   <!-- Description of back of driver's license image -->
@@ -25,6 +27,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Kamerabehörighet</string>
   <string name="stripe_camera_permission_rationale">Den här appen använder kameran för att skanna dina id-handlingar och tar bilder för att verifiera din identitet.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Bild tagen framsida</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Bild vänstervänd</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Bild högervänd</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Tar bild …</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -43,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">Du kan antingen försöka igen eller ladda upp en bild från din enhet.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Det gick inte att ta bilden</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Neka</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaljer syns inte</string>
   <string name="stripe_decrease_lighting_2">Flytta till en mörkare plats</string>
@@ -138,6 +148,8 @@
   <string name="stripe_grant_camera_permission_text">Vi behöver behörighet att använda din kamera. Tillåt kameraåtkomst i appens inställningar.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Rör dig inte, dokumentet skannas in</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Var stilla...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Id-handling</string>
   <!-- Label for ID number section -->
@@ -224,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">Selfiebilderna har tagits</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Selfiebilder</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Bra! Kontrollerar dina bilder....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Om du tillåter kan Stripe använda dina bilder för att förbättra identifieringen av bedrägerier. Att neka påverkar inte din verifiering.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verifiera med en selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">en tagen selfie</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Vrid huvudet åt vänster</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Vrid huvudet åt höger</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Flytta närmare</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Dina selfies har inte sparats. Vill du avsluta?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Placera ansiktet inom ramen</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Hjälp oss att förbättra verifiering</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Ett par foton kommer att tas automatiskt i nästa steg för att verifiera att det är du</string>
   <!-- Title for selfie warmup page -->

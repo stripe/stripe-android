@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
@@ -11,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -21,8 +26,13 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
-internal class PaymentSheetConfirmationTokenTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetConfirmationTokenTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -76,6 +86,7 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType: PaymentMethodType,
     ) {
         runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             isLiveMode = isLiveMode,
             builder = {
@@ -94,6 +105,7 @@ internal class PaymentSheetConfirmationTokenTest {
     @Test
     fun testSuccessfulSetup() {
         runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             isLiveMode = false,
             builder = {
@@ -157,19 +169,21 @@ internal class PaymentSheetConfirmationTokenTest {
                     },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .also {
-                        if (customerType == CustomerType.ReturningCustomer) {
-                            it.customer(
-                                PaymentSheet.CustomerConfiguration(
-                                    "cus_foobar",
-                                    "ek_test_foobar"
+                configuration = testContext.apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .also {
+                            if (customerType == CustomerType.ReturningCustomer) {
+                                it.customer(
+                                    PaymentSheet.CustomerConfiguration(
+                                        "cus_foobar",
+                                        TestApiKeys.EPHEMERAL
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                    .build()
+                        .build()
+                )
             )
         }
     }

@@ -182,6 +182,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             paymentMethod = paymentMethod,
             initialConfirmationState = ConfirmationHandler.State.Confirming(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
@@ -224,6 +225,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Confirming(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),
@@ -454,6 +456,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Confirming(
                 PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = paymentMethod,
                     optionsParams = null,
                 ),

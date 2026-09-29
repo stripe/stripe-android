@@ -126,6 +126,11 @@ internal object NfcScanningActivityTestFixtures {
         FILE_NOT_FOUND_RESPONSE,
     )
 
+    fun selectApplicationFailureResponses(): List<ByteArray> = listOf(
+        apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+        FILE_NOT_FOUND_RESPONSE,
+    )
+
     fun expiredCardResponses(): List<ByteArray> = listOf(
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
         apduSuccessResponse(EMPTY_PDOL_TEMPLATE),

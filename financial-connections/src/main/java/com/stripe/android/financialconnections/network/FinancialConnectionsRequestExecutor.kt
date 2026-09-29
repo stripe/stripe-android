@@ -32,7 +32,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         APIException::class
     )
     suspend fun execute(request: StripeRequest): String {
-        return executeInternal(request) { body ->
+        return executeInternal(request, emitUserFacingEvents = true) { body ->
             body
         }
     }
@@ -46,7 +46,20 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
     ): Response {
-        return executeInternal(request) { body ->
+        return executeInternal(request, emitUserFacingEvents = true) { body ->
+            json.decodeFromString(responseSerializer, body)
+        }
+    }
+
+    /**
+     * Background telemetry failures must not report errors in the user's connection flow.
+     * The caller still receives the response or exception so it can log the failure.
+     */
+    suspend fun <Response> executeWithoutUserFacingEvents(
+        request: StripeRequest,
+        responseSerializer: KSerializer<Response>
+    ): Response {
+        return executeInternal(request, emitUserFacingEvents = false) { body ->
             json.decodeFromString(responseSerializer, body)
         }
     }
@@ -58,13 +71,16 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
     )
     private suspend fun <Response> executeInternal(
         request: StripeRequest,
+        emitUserFacingEvents: Boolean,
         decodeResponse: (String) -> Response,
     ): Response = runCatching {
         logger.debug("Executing ${request.method.code} request to ${request.url}")
         stripeNetworkClient.executeRequest(request)
     }.fold(
         onSuccess = { response ->
-            eventEmitter.emitIfPresent(response)
+            if (emitUserFacingEvents) {
+                eventEmitter.emitIfPresent(response)
+            }
             when {
                 /**
                  * HTTP_ACCEPTED (202) means the processing hasn't been completed, and API

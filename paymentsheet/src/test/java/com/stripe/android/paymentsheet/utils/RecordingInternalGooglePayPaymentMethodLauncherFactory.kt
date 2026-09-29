@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.InternalGooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
@@ -14,15 +16,21 @@ internal class RecordingInternalGooglePayPaymentMethodLauncherFactory private co
     private val calls = Turbine<Call>()
 
     override fun create(
+        instanceId: String,
+        lifecycleOwner: LifecycleOwner,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+        onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
     ): InternalGooglePayPaymentMethodLauncher {
-        calls.add(Call(activityResultLauncher))
+        calls.add(Call(instanceId, lifecycleOwner, activityResultLauncher, onPaymentDataChangedCallback))
 
         return launcher
     }
 
     data class Call(
+        val instanceId: String,
+        val lifecycleOwner: LifecycleOwner,
         val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
+        val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
     )
 
     class Scenario(

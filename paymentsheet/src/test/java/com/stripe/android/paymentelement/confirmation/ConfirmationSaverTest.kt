@@ -171,6 +171,7 @@ class ConfirmationSaverTest {
             paymentMethod = paymentMethod
         )
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = null,
         )
@@ -200,6 +201,7 @@ class ConfirmationSaverTest {
             paymentMethod = paymentMethod
         )
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = null,
         )
@@ -229,6 +231,7 @@ class ConfirmationSaverTest {
             paymentMethod = paymentMethod
         )
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = null,
         )

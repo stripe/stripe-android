@@ -76,11 +76,17 @@ internal class SavedPaymentMethodMutator(
         ) { paymentMethodMetadata, linkAccount ->
             paymentMethodMetadata?.effectiveLinkBrand(linkAccount)
         }
+        val shouldShowLinkInList = combineAsStateFlow(
+            isLinkEnabled,
+            paymentMethodMetadataFlow,
+        ) { isLinkEnabled, paymentMethodMetadata ->
+            isLinkEnabled == true && paymentMethodMetadata?.shouldShowLinkButton == true
+        }
         PaymentOptionsItemsMapper(
             customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
-            isLinkEnabled = isLinkEnabled,
+            isLinkEnabled = shouldShowLinkInList,
             linkBrand = effectiveLinkBrand,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },

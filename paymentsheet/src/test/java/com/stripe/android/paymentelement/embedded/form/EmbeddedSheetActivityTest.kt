@@ -4,19 +4,27 @@ import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -28,16 +36,23 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createCustomerState
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.FormPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
 internal class EmbeddedSheetActivityTest {
@@ -46,9 +61,10 @@ internal class EmbeddedSheetActivityTest {
     private val networkRule = NetworkRule()
 
     private val formPage = FormPage(composeTestRule)
+    private val billingDetailsPage = BillingDetailsPage(composeTestRule)
     private val primaryButton = composeTestRule.onNode(
         hasTestTag(PRIMARY_BUTTON_TEST_TAG)
-            .and(hasParent(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)))
+            .and(hasParent(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG)))
     )
 
     @get:Rule
@@ -77,6 +93,85 @@ internal class EmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `checkout Continue displays error and keeps form open`() {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+        }
+
+        launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) {
+            val expectedError = applicationContext.getString(PaymentSheetR.string.stripe_something_went_wrong)
+            fillOutCheckoutCard()
+            primaryButton.performScrollTo().assertIsEnabled().performClick()
+
+            composeTestRule.waitUntilWithIdle {
+                composeTestRule.onAllNodes(hasText(expectedError))
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                    .isNotEmpty()
+            }
+            composeTestRule.onNodeWithText(expectedError).performScrollTo().assertIsDisplayed()
+            primaryButton.assertIsEnabled()
+            formPage.waitUntilVisible()
+        }
+    }
+
+    @Test
+    fun `processing shows progress and blocks back on form`() {
+        val requestReceived = CountDownLatch(1)
+        val releaseResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            requestReceived.countDown()
+            check(releaseResponse.await(10, TimeUnit.SECONDS))
+        }
+
+        launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) { scenario ->
+            try {
+                fillOutCheckoutCard()
+                primaryButton.performScrollTo().assertIsEnabled().performClick()
+                val processingLabel = applicationContext.getString(
+                    PaymentSheetR.string.stripe_paymentsheet_primary_button_processing
+                )
+                composeTestRule.waitUntilWithIdle {
+                    composeTestRule.onAllNodes(hasText(processingLabel))
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                        .isNotEmpty()
+                }
+                composeTestRule.waitUntilWithIdle {
+                    requestReceived.count == 0L
+                }
+                composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()
+
+                scenario.onActivity { activity ->
+                    activity.onBackPressedDispatcher.onBackPressed()
+                }
+
+                formPage.waitUntilVisible()
+            } finally {
+                releaseResponse.countDown()
+            }
+        }
+    }
+
+    @Test
+    fun `non-checkout Continue immediately returns without checkout response`() = launch { scenario ->
+        formPage.fillOutCardDetails()
+        primaryButton.performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+
+        onIdle()
+        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
+        val parsedResult = EmbeddedSheetContract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+        assertThat(parsedResult).isInstanceOf<EmbeddedActivityResult.Complete>()
+        val result = parsedResult as EmbeddedActivityResult.Complete
+        assertThat(result.checkoutSessionResponse).isNull()
+        assertThat(result.hasBeenConfirmed).isFalse()
+    }
+
+    @Test
     fun `Primary button label is correctly applied`() = launch(
         configuration = EmbeddedPaymentElement.Configuration
             .Builder("Example, Inc.")
@@ -86,29 +181,28 @@ internal class EmbeddedSheetActivityTest {
         primaryButton.assert(hasText("Hi mom"))
     }
 
-    @Test
-    fun `When SheetActivityStateHolder has result, activity finishes with that result`() = launch { scenario ->
-        scenario.onActivity { activity ->
-            activity.sheetActivityStateHolder.setResult(
-                EmbeddedActivityResult.Complete(
-                    previousNewSelections = Bundle(),
-                    selection = null,
-                    hasBeenConfirmed = true,
-                    customerState = null,
-                    shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form(
-                        selectedPaymentMethodCode = "card",
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
-                )
-            )
-        }
+    private fun fillOutCheckoutCard() {
+        formPage.waitUntilVisible()
+        formPage.fillOutCardDetails()
+        billingDetailsPage.line1.performTextReplacement("510 Townsend St")
+        billingDetailsPage.city.performTextReplacement("San Francisco")
+        billingDetailsPage.state.performScrollTo().performClick()
+        composeTestRule.onNodeWithText("California").performClick()
+        billingDetailsPage.zipCode.performTextReplacement("94103")
+    }
 
-        onIdle()
-
-        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
+    private fun checkoutPaymentMethodMetadata(): PaymentMethodMetadata {
+        val response = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+        return PaymentMethodMetadataFactory.create(
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = response.id,
+                instancesKey = "test_instances_key",
+                checkoutSessionResponse = response,
+            ),
+        )
     }
 
     @Test
@@ -124,7 +218,6 @@ internal class EmbeddedSheetActivityTest {
             .isEqualTo(
                 EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "card",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                 )
             )
     }
@@ -147,7 +240,6 @@ internal class EmbeddedSheetActivityTest {
             .isEqualTo(
                 EmbeddedLaunchMode.Form(
                     selectedPaymentMethodCode = "cashapp",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                 )
             )
     }
@@ -165,16 +257,18 @@ internal class EmbeddedSheetActivityTest {
                 input = EmbeddedActivityArgs(
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = configuration,
+                    productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     selection = null,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
-                    promotion = null,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
                     ),
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
                 ),
             )
         ).use { scenario ->

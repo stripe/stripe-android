@@ -1,7 +1,8 @@
 package com.stripe.android.link.utils
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.CustomerState
 
 /**
  * Determines the best fallback payment selection.
@@ -9,8 +10,11 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
  *
  * @return The best fallback payment selection, or null if no suitable fallback exists
  */
-internal fun PaymentSheetState.Full.determineFallbackPaymentSelectionAfterLinkLogout(): PaymentSelection? {
-    if (customer == null) return null
+internal fun determineFallbackPaymentSelectionAfterLinkLogout(
+    customerState: CustomerState?,
+    paymentMethodMetadata: PaymentMethodMetadata,
+): PaymentSelection? {
+    if (customerState == null) return null
 
     // Check if default payment method feature is enabled
     val isDefaultPaymentMethodEnabled = paymentMethodMetadata
@@ -18,11 +22,11 @@ internal fun PaymentSheetState.Full.determineFallbackPaymentSelectionAfterLinkLo
 
     return if (isDefaultPaymentMethodEnabled) {
         // Use default payment method if available
-        customer.paymentMethods.firstOrNull { paymentMethod ->
-            customer.defaultPaymentMethodId != null && paymentMethod.id == customer.defaultPaymentMethodId
+        customerState.paymentMethods.firstOrNull { paymentMethod ->
+            customerState.defaultPaymentMethodId != null && paymentMethod.id == customerState.defaultPaymentMethodId
         }
     } else {
         // Fall back to first customer payment method (most recently used appears first)
-        customer.paymentMethods.firstOrNull()
+        customerState.paymentMethods.firstOrNull()
     }?.let { PaymentSelection.Saved(it) }
 }

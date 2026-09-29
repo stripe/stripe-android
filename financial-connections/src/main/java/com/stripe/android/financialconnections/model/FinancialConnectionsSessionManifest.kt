@@ -230,6 +230,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "account_update_required")
         ACCOUNT_UPDATE_REQUIRED("account_update_required"),
 
+        @SerialName(value = "generic_error")
+        GENERIC_ERROR("generic_error"),
+
         @SerialName(value = "exit")
         EXIT("exit");
 

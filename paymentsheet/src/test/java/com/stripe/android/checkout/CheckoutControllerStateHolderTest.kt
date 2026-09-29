@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
-import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -14,7 +16,9 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,9 +52,57 @@ internal class CheckoutControllerStateHolderTest {
         testScenario(paymentOptionFactory = factory) {
             stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
 
-            assertThat(stateHolder.session.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
+            assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
         }
+    }
+
+    @Test
+    fun `session builds payment element and express checkout element data with their respective metadata`() {
+        val paymentElementMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodOrder = listOf("card"),
+        )
+        val expressCheckoutElementMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodOrder = listOf("link"),
+        )
+
+        testScenario(
+            paymentOptionFactory = { _, metadata ->
+                assertThat(metadata).isSameInstanceAs(paymentElementMetadata)
+                null
+            },
+            availableExpressButtonTypesFactory = { metadata, _, requiresShippingAddress ->
+                assertThat(metadata).isSameInstanceAs(expressCheckoutElementMetadata)
+                assertThat(requiresShippingAddress).isTrue()
+                emptyList()
+            },
+        ) {
+            stateHolder.state = committedState(
+                paymentMethodMetadata = paymentElementMetadata,
+                expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementMetadata,
+                requiresShippingAddress = true,
+            )
+
+            assertThat(stateHolder.session.value).isNotNull()
+        }
+    }
+
+    @Test
+    fun `restored pending saved selection is reset to idle`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_restored",
+            ),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
     @Test
@@ -64,6 +116,16 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `setSelection acknowledges the SEPA mandate`() = testScenario {
+        stateHolder.state = committedState()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        stateHolder.setSelection(selection)
+
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
     }
 
     @Test
@@ -121,30 +183,6 @@ internal class CheckoutControllerStateHolderTest {
         }
 
     @Test
-    fun `clearSelection resets selection, temporarySelection and previousNewSelections`() = testScenario {
-        stateHolder.state = committedState(
-            paymentSelection = PaymentSelection.GooglePay,
-            temporarySelection = "card",
-            previousNewSelections = Bundle().apply {
-                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            },
-        )
-
-        stateHolder.selection.test {
-            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
-            stateHolder.clearSelection()
-            assertThat(awaitItem()).isNull()
-        }
-
-        val clearedState = requireNotNull(stateHolder.state)
-        assertThat(clearedState.paymentSelection).isNull()
-        assertThat(clearedState.temporarySelection).isNull()
-        assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
-        assertThat(stateHolder.temporarySelection.value).isNull()
-        assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
-    }
-
-    @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
         stateHolder.setSelection(PaymentSelection.GooglePay)
         assertSetBeforeLoadError(operation = "setSelection")
@@ -156,9 +194,6 @@ internal class CheckoutControllerStateHolderTest {
             Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
         )
         assertSetBeforeLoadError(operation = "setPreviousNewSelections")
-
-        stateHolder.clearSelection()
-        assertSetBeforeLoadError(operation = "clearSelection")
 
         assertThat(stateHolder.state).isNull()
         assertThat(stateHolder.selection.value).isNull()
@@ -194,26 +229,31 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
+        requiresShippingAddress: Boolean = false,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-        flagImages = null,
-        collectedDetails = CheckoutCollectedDetails(),
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory("Example, Inc.").create(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            collectedDetails = CheckoutCollectedDetails(),
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            requiresShippingAddress = requiresShippingAddress,
         ),
+        flagImages = null,
+        collectedDetails = CheckoutCollectedDetails(email = null),
+        paymentMethodMetadata = paymentMethodMetadata,
+        expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
+        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = false,
     )
 
     private fun testScenario(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
             CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
+            FakeAvailableExpressButtonTypesFactory(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()
@@ -222,7 +262,7 @@ internal class CheckoutControllerStateHolderTest {
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = errorReporter,
                 paymentOptionFactory = paymentOptionFactory,
-                availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
+                availableExpressButtonTypesFactory = availableExpressButtonTypesFactory,
             ),
             errorReporter = errorReporter,
         ).block()

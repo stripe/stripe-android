@@ -119,6 +119,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
@@ -188,8 +189,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             configuration = TestFactory.LINK_CONFIGURATION,
                             paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
-                            publishableKey = PUBLISHABLE_KEY,
-                            stripeAccountId = null,
+                            apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",

@@ -14,6 +14,7 @@ internal open class FakeIntentConfirmationInterceptorFactory(
         integrationMetadata: IntegrationMetadata,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        isLiveMode: Boolean,
     ): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)
         return interceptor

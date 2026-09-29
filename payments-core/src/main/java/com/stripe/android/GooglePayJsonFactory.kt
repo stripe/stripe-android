@@ -3,8 +3,7 @@ package com.stripe.android
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
@@ -16,7 +15,6 @@ import org.json.JSONObject
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -40,11 +38,11 @@ class GooglePayJsonFactory internal constructor(
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) {
     /**
-     * [PaymentConfiguration] must be instantiated before calling this.
+     * Creates a factory using the provided API configuration.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        context: Context,
+        apiConfiguration: ApiConfiguration.State,
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
@@ -55,7 +53,10 @@ class GooglePayJsonFactory internal constructor(
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
-        googlePayConfig = GooglePayConfig(context),
+        googlePayConfig = GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId
+        ),
         isJcbEnabled = isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
@@ -99,13 +100,15 @@ class GooglePayJsonFactory internal constructor(
 
     @Inject
     internal constructor(
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        apiConfigProvider: ApiConfiguration.State,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         cardBrandFilter: CardBrandFilter,
         cardFundingFilter: CardFundingFilter
     ) : this(
-        googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
+        googlePayConfig = GooglePayConfig(
+            apiConfigProvider.publishableKey,
+            apiConfigProvider.stripeAccountId
+        ),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
@@ -200,6 +203,7 @@ class GooglePayJsonFactory internal constructor(
         merchantInfo: MerchantInfo,
         billingAddressParameters: BillingAddressParameters? = null,
         shippingAddressParameters: ShippingAddressParameters? = null,
+        hasDynamicCallbacks: Boolean = false,
         isEmailRequired: Boolean = false,
         allowCreditCards: Boolean? = null,
     ): JSONObject {
@@ -227,6 +231,19 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
+                if (hasDynamicCallbacks) {
+                    val intents = listOfNotNull(
+                        "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
+                    )
+
+                    if (intents.isNotEmpty()) {
+                        put(
+                            "callbackIntents",
+                            JSONArray(intents)
+                        )
+                    }
+                }
+
                 put(
                     "merchantInfo",
                     JSONObject().apply {
@@ -245,7 +262,7 @@ class GooglePayJsonFactory internal constructor(
             }
     }
 
-    private fun createTransactionInfo(
+    internal fun createTransactionInfo(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
@@ -406,15 +423,23 @@ class GooglePayJsonFactory internal constructor(
 
     @Parcelize
     @Poko
-    class TransactionInfo internal constructor(
-        internal val currencyCode: String,
-        internal val totalPriceStatus: TotalPriceStatus,
-        internal val countryCode: String?,
-        internal val transactionId: String?,
-        internal val totalPrice: Long?,
-        internal val totalPriceLabel: String?,
-        internal val checkoutOption: CheckoutOption?,
-        internal val displayItems: List<DisplayItem> = emptyList(),
+    class TransactionInfo @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val currencyCode: String,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceStatus: TotalPriceStatus,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val countryCode: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val transactionId: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPrice: Long?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceLabel: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val checkoutOption: CheckoutOption?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayItems: List<DisplayItem> = emptyList(),
     ) : Parcelable {
 
         /**

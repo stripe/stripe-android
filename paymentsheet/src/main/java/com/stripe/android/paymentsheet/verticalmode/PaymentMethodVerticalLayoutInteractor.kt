@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -10,10 +11,11 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -25,8 +27,10 @@ import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadat
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -34,7 +38,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -96,6 +99,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
+    savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
@@ -109,18 +113,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canChangeCbc: StateFlow<Boolean>,
-    private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
+    private val updateSelection: (PaymentSelection?) -> Unit,
+    private val verticalPaymentSelectionHandler: VerticalPaymentSelectionHandler,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
-    private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    private val coroutineScope: CoroutineScope,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -133,9 +137,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             bankFormInteractor: BankFormInteractor,
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): PaymentMethodVerticalLayoutInteractor {
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
+            val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+                coroutineScope = formHelperScope,
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = LinkInlineHandler.create(),
+                shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
@@ -144,6 +152,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
+                savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
                 temporarySelection = stateFlowOf(null),
                 selection = viewModel.selection,
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
@@ -177,13 +186,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 canRemove = viewModel.customerStateHolder.canRemove,
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
-                updateSelection = { selection, isUserInput ->
-                    if (isUserInput) {
-                        viewModel.handlePaymentMethodSelected(selection)
-                    } else {
-                        viewModel.updateSelection(selection)
-                    }
-                },
+                updateSelection = viewModel::updateSelection,
+                verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
+                    updateSelection = { selection, isUserInput ->
+                        if (isUserInput) {
+                            viewModel.handlePaymentMethodSelected(selection)
+                        } else {
+                            viewModel.updateSelection(selection)
+                        }
+                    },
+                    completionAction = null,
+                ),
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                     .canUpdateCardExpiryAndBillingDetails,
@@ -206,13 +219,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                 },
                 updateMandateText = viewModel.mandateHandler::updateMandateText,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
+                coroutineScope = coroutineScope,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             )
         }
     }
-
-    private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
     private val verticalModeScreenSelection = _verticalModeScreenSelection
@@ -221,12 +233,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
-        mostRecentlySelectedSavedPaymentMethod
-    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
+        mostRecentlySelectedSavedPaymentMethod,
+        savedPaymentMethodSelectionState,
+    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
         getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
-            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+            isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending,
         )
     }
 
@@ -348,7 +362,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         coroutineScope.launch(mainDispatcher) {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
-                    updateSelection(verticalModeScreenSelection.value, false)
+                    updateSelection(verticalModeScreenSelection.value)
                 }
             }
         }
@@ -361,7 +375,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     if (newLinkBrand != null && newLinkBrand != currentSelection.brand) {
                         val updatedSelection = currentSelection.copy(brand = newLinkBrand)
                         _verticalModeScreenSelection.value = updatedSelection
-                        updateSelection(updatedSelection, false)
+                        updateSelection(updatedSelection)
                     }
                 }
             }
@@ -433,8 +447,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = null,
             onClick = {
-                updateSelection(PaymentSelection.GooglePay, false)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(PaymentSelection.GooglePay, false)
             },
         )
     }
@@ -456,8 +469,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(PaymentSelection.Link(brand = link.linkBrand), false)
             },
         )
     }
@@ -466,6 +478,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
+        isSelectionPending: Boolean,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -473,7 +486,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = paymentMethodMetadata,
-            defaultPaymentMethodId = null
+            defaultPaymentMethodId = null,
+            isSelectionPending = isSelectionPending,
         )
     }
 
@@ -577,9 +591,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
-                val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
-                updateSelection(selection, true)
-                invokeRowSelectionCallback?.invoke()
+                verticalPaymentSelectionHandler.select(
+                    PaymentSelection.Saved(viewAction.savedPaymentMethod),
+                    true,
+                )
             }
             is ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()
@@ -604,7 +619,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
         },
-        dispatcher = dispatcher
+        coroutineScope = coroutineScope,
     )
 
     private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {

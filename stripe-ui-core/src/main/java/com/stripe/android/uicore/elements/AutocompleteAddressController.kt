@@ -13,19 +13,19 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressController(
-    val identifier: IdentifierSpec,
-    val initialValues: Map<IdentifierSpec, String?>,
+    val identifier: FormFieldId,
+    val initialValues: Map<FormFieldId, String?>,
     interactorFactory: AutocompleteAddressInteractor.Factory,
     countryCodes: Set<String> = emptySet(),
     private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        initialValues[IdentifierSpec.Country]
+        initialValues[FormFieldId.Country]
     ),
     private val phoneNumberConfig: AddressFieldConfiguration,
     private val nameConfig: AddressFieldConfiguration,
     private val emailConfig: AddressFieldConfiguration,
     private val sameAsShippingElement: SameAsShippingElement?,
-    private val shippingValuesMap: Map<IdentifierSpec, String?>?,
+    private val shippingValuesMap: Map<FormFieldId, String?>?,
     private val hideCountry: Boolean = false,
 ) : SectionFieldValidationController, SectionFieldComposable {
     private val interactor = interactorFactory.create()
@@ -66,6 +66,10 @@ class AutocompleteAddressController(
                 override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
                     return R.drawable.stripe_google_maps_logo
                 }
+
+                override fun onSearchActivated() {
+                    interactor.onSearchActivated()
+                }
             }
         } else {
             null
@@ -76,7 +80,7 @@ class AutocompleteAddressController(
     private val isValidating = MutableStateFlow(false)
 
     val countryElement = CountryElement(
-        IdentifierSpec.Country,
+        FormFieldId.Country,
         countryDropdownFieldController,
     )
 
@@ -135,7 +139,7 @@ class AutocompleteAddressController(
             val newAddressInputMode = toAddressInputMode(expandForm, newValues)
 
             if (currentValues != newValues || newAddressInputMode != addressElementFlow.value.addressInputMode) {
-                newValues[IdentifierSpec.Country]?.let {
+                newValues[FormFieldId.Country]?.let {
                     countryDropdownFieldController.onRawValueChange(it)
                 }
 
@@ -145,14 +149,19 @@ class AutocompleteAddressController(
         }
     }
 
-    fun setRawValue(values: Map<IdentifierSpec, String?>) {
+    fun setRawValue(values: Map<FormFieldId, String?>) {
         _addressElementFlow.value = createAddressElement(values, toAddressInputMode(expandForm, values))
     }
 
     private fun createAddressElement(
-        values: Map<IdentifierSpec, String?>,
+        values: Map<FormFieldId, String?>,
         addressInputMode: AddressInputMode,
     ): AddressElement {
+        val handler = if (isCountrySupported(values[FormFieldId.Country])) {
+            inlineAutocompleteHandler
+        } else {
+            null
+        }
         return AddressElement(
             _identifier = identifier,
             rawValuesMap = values,
@@ -162,7 +171,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            inlineAutocompleteHandler = inlineAutocompleteHandler,
+            inlineAutocompleteHandler = handler,
         )
     }
 
@@ -174,13 +183,13 @@ class AutocompleteAddressController(
 
     private fun toAddressInputMode(
         expandForm: Boolean,
-        values: Map<IdentifierSpec, String?>
+        values: Map<FormFieldId, String?>
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
-        val countrySupported = isCountrySupported(values[IdentifierSpec.Country])
+        val countrySupported = isCountrySupported(values[FormFieldId.Country])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
-            countrySupported && values[IdentifierSpec.Line1].isNullOrEmpty()
+            countrySupported && values[FormFieldId.Line1].isNullOrEmpty()
         return if (showInline) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
@@ -195,7 +204,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (expandForm || values[IdentifierSpec.Line1] != null) {
+        } else if (expandForm || values[FormFieldId.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
@@ -237,8 +246,8 @@ class AutocompleteAddressController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         val controller by addressController.collectAsState()
 

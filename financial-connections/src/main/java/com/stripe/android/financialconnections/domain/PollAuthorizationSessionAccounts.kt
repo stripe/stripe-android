@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
@@ -73,6 +74,9 @@ private fun StripeException.toDomainException(
     showManualEntry: Boolean
 ): StripeException =
     when {
+        // The server described an error screen for us. Leave the exception untouched so the pane
+        // survives to whoever presents it, instead of getting buried in an AccountLoadError.
+        genericErrorPane() != null -> this
         institution == null -> this
         stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
             AccountNoneEligibleForPaymentMethodError(

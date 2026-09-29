@@ -156,6 +156,10 @@
   <string name="stripe_fpx_bank_offline">%s - Ngoại tuyến</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Phương thức thanh toán của quý vị đã bị từ chối.</string>
+  <!-- Google Pay line item showing the amount before exclusive taxes. -->
+  <string name="stripe_google_pay_cost_excluding_tax">Chi phí không bao gồm thuế</string>
+  <!-- Google Pay total label when the final tax may change with the selected billing address. -->
+  <string name="stripe_google_pay_estimated_total">Tổng số tiền ước tính (chi phí thuế cuối cùng có thể thay đổi)</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Tổng</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

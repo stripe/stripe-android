@@ -45,6 +45,7 @@ import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.hamcrest.Matchers
@@ -1340,6 +1341,95 @@ internal class CardMultilineWidgetTest {
         }
     }
 
+    @Test
+    fun `reportShown is called on attach`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+            assertThat(cardAnalytics.awaitInteraction()).isNotNull()
+        }
+
+    @Test
+    fun `reportInteraction called on text focus`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cardNumberEditText, true)
+                expiryDateEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(expiryDateEditText, true)
+                cvcEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cvcEditText, true)
+                postalCodeEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(postalCodeEditText, true)
+            }
+
+            idleLooper()
+
+            repeat(5) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+        }
+
+    @Test
+    fun `reports form completed when multiline inputs valid`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.setText(VISA_WITH_SPACES)
+                expiryDateEditText.append("12")
+                expiryDateEditText.append("50")
+                cvcEditText.append("123")
+                postalCodeEditText.append("94103")
+            }
+
+            idleLooper()
+
+            repeat(9) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+            repeat(2) { assertThat(cardAnalytics.awaitFormCompleted()).isNotNull() }
+        }
+
+    private data class AnalyticsScenario(
+        val activity: CardMultilineWidgetTestActivity,
+        val cardAnalytics: RecordingCardElementAnalytics,
+        val widgetGroup: WidgetControlGroup,
+    )
+
+    private fun runCardMultilineWidgetAnalyticsTest(
+        block: suspend AnalyticsScenario.() -> Unit,
+    ) {
+        ActivityScenario.launch<CardMultilineWidgetTestActivity>(
+            Intent(context, CardMultilineWidgetTestActivity::class.java).apply {
+                putExtra(
+                    "args",
+                    CardMultilineWidgetTestActivity.Args(
+                        isCbcEligible = false,
+                        useRecordingCardElementAnalytics = true,
+                    ),
+                )
+            }
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                runTest {
+                    activity.setWorkContext(coroutineContext)
+
+                    val cardElementAnalytics = activity.recordingFullCardElementAnalytics
+
+                    idleLooper()
+
+                    block(
+                        AnalyticsScenario(
+                            activity = activity,
+                            cardAnalytics = cardElementAnalytics,
+                            widgetGroup = activity.fullGroup,
+                        )
+                    )
+
+                    cardElementAnalytics.ensureAllEventsConsumed()
+                }
+            }
+        }
+    }
+
     private fun runCardMultilineWidgetTest(
         isCbcEligible: Boolean = false,
         block: TestContext.() -> Unit,
@@ -1406,6 +1496,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
     @Parcelize
     data class Args(
         val isCbcEligible: Boolean,
+        val useRecordingCardElementAnalytics: Boolean = false,
     ) : Parcelable
 
     private val args: Args by lazy {
@@ -1413,8 +1504,24 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         intent.getParcelableExtra("args")!!
     }
 
+    val recordingFullCardElementAnalytics = RecordingCardElementAnalytics()
+
+    val recordingNoZipCardElementAnalytics = RecordingCardElementAnalytics()
+
     private val cardMultilineWidget: CardMultilineWidget by lazy {
-        CardMultilineWidget(this, shouldShowPostalCode = true).apply {
+        val widget = if (args.useRecordingCardElementAnalytics) {
+            CardMultilineWidget(
+                context = this,
+                attrs = null,
+                defStyleAttr = 0,
+                shouldShowPostalCode = true,
+                cardElementAnalytics = recordingFullCardElementAnalytics,
+            )
+        } else {
+            CardMultilineWidget(this, shouldShowPostalCode = true)
+        }
+
+        widget.apply {
             id = VIEW_ID
 
             val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
@@ -1427,7 +1534,19 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
     }
 
     private val noZipCardMultilineWidget: CardMultilineWidget by lazy {
-        CardMultilineWidget(this, shouldShowPostalCode = false).apply {
+        val widget = if (args.useRecordingCardElementAnalytics) {
+            CardMultilineWidget(
+                context = this,
+                attrs = null,
+                defStyleAttr = 0,
+                shouldShowPostalCode = false,
+                cardElementAnalytics = recordingNoZipCardElementAnalytics,
+            )
+        } else {
+            CardMultilineWidget(this, shouldShowPostalCode = false)
+        }
+
+        widget.apply {
             id = NO_ZIP_VIEW_ID
 
             val storeOwner = CardElementTestHelper.createViewModelStoreOwner(

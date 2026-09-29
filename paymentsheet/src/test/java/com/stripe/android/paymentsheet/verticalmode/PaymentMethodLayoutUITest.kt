@@ -100,11 +100,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                        definition = CardDefinition,
-                        sharedDataSpecs = emptyList()
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -132,11 +130,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -167,11 +163,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -203,11 +197,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    KlarnaDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    KlarnaDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                        definition = KlarnaDefinition,
-                        sharedDataSpecs = emptyList()
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -248,11 +240,9 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
                         metadata = metadata,
-                        definition = AffirmDefinition,
-                        sharedDataSpecs = emptyList()
-                    )!!
+                    )
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
@@ -308,7 +298,7 @@ internal class PaymentMethodLayoutUITest(
     ) {
         assertThat(
             composeRule.onNodeWithTag(paymentMethodsTag)
-                .onChildren().fetchSemanticsNodes().size
+                .onChildren().fetchSemanticsNodes(atLeastOneRootRequired = false).size
         ).isEqualTo(allPaymentMethodsChildCount)
 
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertExists()
@@ -377,7 +367,7 @@ internal class PaymentMethodLayoutUITest(
         ) {
             assertThat(
                 composeRule.onNodeWithTag(paymentMethodsTag)
-                    .onChildren().fetchSemanticsNodes().size
+                    .onChildren().fetchSemanticsNodes(atLeastOneRootRequired = false).size
             ).isEqualTo(3)
 
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card")

@@ -44,10 +44,16 @@ internal object OnrampConfigurationFactory {
                     existingPaymentMethodRequired = false
                 )
             )
+            .samsungPayConfig(
+                OnrampConfiguration.SamsungPayConfig(
+                    serviceId = SAMSUNG_PAY_SERVICE_ID,
+                )
+            )
     }
 }
 
 private const val MERCHANT_NAME = "Onramp Example"
+private const val SAMSUNG_PAY_SERVICE_ID = "b8b643b7b90940af8c53cb"
 
 @Suppress("MaxLineLength")
 private const val PUBLISHABLE_KEY =

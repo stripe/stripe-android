@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Param
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -40,6 +41,7 @@ class LinkConfirmationFlowTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {}
         )
 
@@ -104,6 +106,7 @@ class LinkConfirmationFlowTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = onResult
         )
 
@@ -118,6 +121,7 @@ class LinkConfirmationFlowTest {
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.NextStep(
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
                     originatedFromWallet = true,

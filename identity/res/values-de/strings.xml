@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Zulässige Ausweisdokumente sind</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Ausweisdokument gerade halten</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Annehmen</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">App-Einstellungen</string>
   <!-- Description of back of driver's license image -->
@@ -23,6 +25,12 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Kameraberechtigung</string>
   <string name="stripe_camera_permission_rationale">Diese App verwendet die Kamera, um Ihre Ausweisunterlagen zu scannen, und macht Fotos, um Ihre Identität zu bestätigen.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Von vorne aufgenommen</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Von links aufgenommen</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Von rechts aufgenommen</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Aufnahme läuft ...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -41,6 +49,8 @@
   <string name="stripe_could_not_capture_body2">Sie können es noch einmal versuchen oder ein Bild von Ihrem Endgerät hochladen.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Aufnahme nicht möglich</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Ablehnen</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Details sind nicht erkennbar</string>
   <string name="stripe_decrease_lighting_2">Begeben Sie sich in eine dunklere Umgebung</string>
@@ -134,6 +144,8 @@
   <string name="stripe_grant_camera_permission_text">Wir benötigen die Erlaubnis, Ihre Kamera zu verwenden. Bitte gewähren Sie den Kamerazugriff in den App-Einstellungen.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Bitte nicht bewegen, Scanvorgang läuft</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Bitte nicht bewegen...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">Personalausweis</string>
   <!-- Label for ID number section -->
@@ -217,10 +229,28 @@
   <string name="stripe_selfie_capture_complete">Die Selfie-Aufnahmen sind abgeschlossen.</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Selfie-Aufnahmen</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Super! Ihre Bilder werden überprüft …</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">Mit Ihrer Erlaubnis kann Stripe Ihre Bilder verwenden, um die Betrugserkennung zu verbessern. Eine Ablehnung hat keine Auswirkungen auf Ihre Verifizierung.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Mit einem Selfie verifizieren</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">Ein Selfie wurde aufgenommen</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Drehen Sie den Kopf nach links</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Drehen Sie den Kopf nach rechts</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Verringern Sie den Abstand</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Ihre Selfie-Aufnahmen wurden nicht gespeichert. Möchten Sie die Seite verlassen?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Platzieren Sie Ihr Gesicht innerhalb des Rahmens</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Bitte helfen Sie uns dabei, den Verifizierungsprozess zu verbessern</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">Im nächsten Schritt werden automatisch einige Fotos gemacht, um Ihre Identität zu verifizieren</string>
   <!-- Title for selfie warmup page -->

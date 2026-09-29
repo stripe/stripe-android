@@ -1,14 +1,14 @@
 package com.stripe.android.googlepaylauncher
 
-import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -25,14 +25,12 @@ import dagger.assisted.AssistedInject
 @JvmSuppressWildcards
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructor(
+    @Assisted private val instanceId: String,
+    @Assisted private val lifecycleOwner: LifecycleOwner,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-    context: Context,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        PaymentConfiguration.getInstance(context).publishableKey,
-        setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
-    ),
-    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+    @Assisted private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
 ) {
     init {
         if (!GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT) {
@@ -41,6 +39,21 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 paymentAnalyticsRequestFactory.createRequest(
                     PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit
                 )
+            )
+        }
+
+        onPaymentDataChangedCallback?.let { callback ->
+            GooglePayPaymentDataUpdateCallbackRegistry.register(
+                key = instanceId,
+                callback = callback,
+            )
+
+            lifecycleOwner.lifecycle.addObserver(
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        GooglePayPaymentDataUpdateCallbackRegistry.deregister(instanceId)
+                    }
+                }
             )
         }
     }
@@ -56,12 +69,14 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
         transactionId: String?,
         label: String?,
         isElements: Boolean,
-        publishableKey: String?,
+        apiConfiguration: ApiConfiguration.State,
         displayItems: List<GooglePayJsonFactory.DisplayItem>,
         billingEmailOverride: String?,
+        shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
     ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
+                dynamicCallbackId = instanceId.takeIf { onPaymentDataChangedCallback != null },
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
@@ -71,9 +86,10 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
                 cardFundingFilter = cardFundingFilter,
                 clientAttributionMetadata = clientAttributionMetadata,
                 isElements = isElements,
-                publishableKey = publishableKey,
+                apiConfiguration = apiConfiguration,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             )
         )
     }

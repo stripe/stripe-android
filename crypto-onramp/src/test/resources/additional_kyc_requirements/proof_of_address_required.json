@@ -1,0 +1,30 @@
+{
+  "requirements": {
+    "entries": [
+      {
+        "description": "proof_of_address",
+        "requested_by": "swapped",
+        "awaiting_action_from": "user",
+        "errors": [],
+        "document": {
+          "accepted_subtypes": [
+            {
+              "id": "utility_bill",
+              "label": "Utility bill"
+            },
+            {
+              "id": "bank_statement",
+              "label": "Bank statement"
+            }
+          ],
+          "accepted_formats": ["pdf", "jpeg", "png"],
+          "min_documents": 1,
+          "instructions": [
+            "Documents must have your full name and address on them",
+            "Documents must have been issued within the last 12 months"
+          ]
+        }
+      }
+    ]
+  }
+}

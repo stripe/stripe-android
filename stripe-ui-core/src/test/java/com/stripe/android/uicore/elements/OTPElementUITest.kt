@@ -92,7 +92,7 @@ class OTPElementUITest {
 
     private fun testElement(): OTPElement {
         return OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
+            identifier = FormFieldId.Generic("otp"),
             controller = OTPController(),
         )
     }

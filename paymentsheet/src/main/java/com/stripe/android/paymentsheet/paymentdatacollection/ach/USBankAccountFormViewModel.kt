@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -52,7 +52,7 @@ import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
@@ -69,12 +69,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : ViewModel() {
@@ -145,11 +143,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val lastNonAddressTextFieldIdentifier = if (collectingPhone) {
-        IdentifierSpec.Phone
+        FormFieldId.Phone
     } else if (collectingEmail) {
-        IdentifierSpec.Email
+        FormFieldId.Email
     } else if (collectingName) {
-        IdentifierSpec.Name
+        FormFieldId.Name
     } else {
         null
     }
@@ -173,18 +171,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val sameAsShippingElement = args.formArgs.shippingDetails
         ?.toIdentifierMap(defaultBillingDetails)
-        ?.get(IdentifierSpec.SameAsShipping)
+        ?.get(FormFieldId.SameAsShipping)
         ?.toBooleanStrictOrNull()
         ?.let {
             SameAsShippingElement(
-                identifier = IdentifierSpec.SameAsShipping,
+                identifier = FormFieldId.SameAsShipping,
                 controller = SameAsShippingController(it)
             )
         }
 
     private val autocompleteAddressElement = autocompleteAddressInteractorFactory?.let {
         AutocompleteAddressElement(
-            identifier = IdentifierSpec.Generic("billing_details[address]"),
+            identifier = FormFieldId.Generic("billing_details[address]"),
             initialValues = defaultAddress?.asFormFieldValues() ?: emptyMap(),
             countryCodes = collectionConfiguration.allowedBillingCountries,
             sameAsShippingElement = sameAsShippingElement,
@@ -194,7 +192,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     val addressElement = autocompleteAddressElement ?: AddressElement(
-        _identifier = IdentifierSpec.Generic("billing_details[address]"),
+        _identifier = FormFieldId.Generic("billing_details[address]"),
         rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
         countryCodes = collectionConfiguration.allowedBillingCountries,
         sameAsShippingElement = sameAsShippingElement,
@@ -212,7 +210,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    val lastTextFieldIdentifier: StateFlow<IdentifierSpec?> = if (collectingAddress) {
+    val lastTextFieldIdentifier: StateFlow<FormFieldId?> = if (collectingAddress) {
         addressElement.getTextFieldIdentifiers().mapAsStateFlow {
             it.lastOrNull() ?: lastNonAddressTextFieldIdentifier
         }
@@ -556,15 +554,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
         } else {
             collectBankAccountLauncher?.presentWithSetupIntent(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
             )
@@ -675,8 +673,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -686,8 +684,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         } else {
             collectBankAccountLauncher?.presentWithDeferredSetup(
-                publishableKey = lazyPaymentConfig.get().publishableKey,
-                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                publishableKey = args.apiConfiguration.publishableKey,
+                stripeAccountId = args.apiConfiguration.stripeAccountId,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -862,6 +860,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,
         val clientSecret: String?,
+        val apiConfiguration: ApiConfiguration.State,
         val onBehalfOf: String?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
@@ -881,23 +880,23 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 }
 
-internal fun Address.asFormFieldValues(): Map<IdentifierSpec, String?> = mapOf(
-    IdentifierSpec.Line1 to line1,
-    IdentifierSpec.Line2 to line2,
-    IdentifierSpec.City to city,
-    IdentifierSpec.State to state,
-    IdentifierSpec.Country to country,
-    IdentifierSpec.PostalCode to postalCode,
+internal fun Address.asFormFieldValues(): Map<FormFieldId, String?> = mapOf(
+    FormFieldId.Line1 to line1,
+    FormFieldId.Line2 to line2,
+    FormFieldId.City to city,
+    FormFieldId.State to state,
+    FormFieldId.Country to country,
+    FormFieldId.PostalCode to postalCode,
 )
 
-internal fun Address.Companion.fromFormFieldValues(formFieldValues: Map<IdentifierSpec, String?>) =
+internal fun Address.Companion.fromFormFieldValues(formFieldValues: Map<FormFieldId, String?>) =
     Address(
-        line1 = formFieldValues[IdentifierSpec.Line1],
-        line2 = formFieldValues[IdentifierSpec.Line2],
-        city = formFieldValues[IdentifierSpec.City],
-        state = formFieldValues[IdentifierSpec.State],
-        country = formFieldValues[IdentifierSpec.Country],
-        postalCode = formFieldValues[IdentifierSpec.PostalCode],
+        line1 = formFieldValues[FormFieldId.Line1],
+        line2 = formFieldValues[FormFieldId.Line2],
+        city = formFieldValues[FormFieldId.City],
+        state = formFieldValues[FormFieldId.State],
+        country = formFieldValues[FormFieldId.Country],
+        postalCode = formFieldValues[FormFieldId.PostalCode],
     )
 
 internal fun PaymentSheet.Address.asAddressModel() =

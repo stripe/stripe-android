@@ -9,11 +9,14 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
+import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
-import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -25,6 +28,9 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
@@ -39,13 +45,19 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.content.EmbeddedHostProcessing
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -55,6 +67,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -76,8 +89,10 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
@@ -86,6 +101,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
@@ -96,10 +112,12 @@ import javax.inject.Singleton
         CheckoutControllerModule::class,
         CheckoutModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        SepaMandateConfirmationModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
+        CheckoutGooglePayModule::class,
         GooglePayLauncherModule::class,
         TapToAddConnectionStarterModule::class,
         TapToAddConnectionModule::class,
@@ -111,6 +129,9 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
+        ApiRequestOptionsModule::class,
+        ApiConfigurationResolverModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {
@@ -120,9 +141,10 @@ internal interface CheckoutControllerComponent {
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
             @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
+            @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
         ): CheckoutControllerComponent
     }
 }
@@ -198,6 +220,16 @@ internal interface CheckoutControllerModule {
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
 
     @Binds
+    fun bindsEmbeddedRowSelectionImmediateActionHandler(
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
+    ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Binds
+    fun bindsVerticalPaymentSelectionHandler(
+        handler: CheckoutPaymentSelectionHandler,
+    ): VerticalPaymentSelectionHandler
+
+    @Binds
     fun bindsCheckoutPaymentOptionDisplayDataFactory(
         impl: DefaultCheckoutPaymentOptionDisplayDataFactory
     ): CheckoutPaymentOptionDisplayDataFactory
@@ -207,7 +239,17 @@ internal interface CheckoutControllerModule {
         impl: DefaultAvailableExpressButtonTypesFactory
     ): AvailableExpressButtonTypesFactory
 
+    @Binds
+    fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
+
     companion object {
+        @Provides
+        fun provideSavedStateHandle(
+            checkoutControllerSavedState: CheckoutControllerSavedState,
+        ): SavedStateHandle {
+            return checkoutControllerSavedState.handle
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
@@ -218,7 +260,7 @@ internal interface CheckoutControllerModule {
         @Singleton
         @ViewModelScope
         fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
 
         @Provides
@@ -232,16 +274,16 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
-        @MerchantDisplayName
-        fun provideMerchantDisplayName(application: Application): String {
+        @AppName
+        fun provideAppName(application: Application): String {
             return application.applicationInfo.loadLabel(application.packageManager).toString()
         }
 
         @Provides
         fun providesInternalRowSelectionCallback(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+            rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
         ): InternalRowSelectionCallback? {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+            return PaymentElement.RowSelectionBehavior.getImmediateAction(rowSelectionBehavior)
         }
 
         @Provides
@@ -301,6 +343,31 @@ internal interface CheckoutControllerModule {
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<PaymentMethodMetadata?> {
             return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
+        }
+
+        @Provides
+        @CheckoutIsUpdating
+        fun provideIsUpdating(
+            operationCoordinator: CheckoutOperationCoordinator,
+        ): StateFlow<Boolean> {
+            return operationCoordinator.isUpdating
+        }
+
+        @Provides
+        @EmbeddedHostProcessing
+        fun provideHostProcessing(
+            operationCoordinator: CheckoutOperationCoordinator,
+        ): StateFlow<Boolean> {
+            return operationCoordinator.isUpdating
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(
+            stateHolder: CheckoutControllerStateHolder,
+        ): StateFlow<SavedPaymentMethodSelectionState> {
+            return stateHolder.stateFlow.mapAsStateFlow {
+                it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
+            }
         }
     }
 }

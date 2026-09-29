@@ -18,7 +18,7 @@ import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,7 +39,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter
 ) : LinkInlineInteractor {
 
-    override val otpElement = OTPSpec.transform()
+    override val otpElement = OTPElementFactory.create()
 
     override val state: StateFlow<LinkInlineState> = savedStateHandle.getStateFlow(
         key = LINK_EMBEDDED_STATE_KEY,

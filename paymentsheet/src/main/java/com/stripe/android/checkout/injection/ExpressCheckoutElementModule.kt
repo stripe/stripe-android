@@ -2,12 +2,12 @@
 
 package com.stripe.android.checkout.injection
 
-import com.stripe.android.checkout.ece.DefaultExpressCheckoutElementConfirmationPerformer
-import com.stripe.android.checkout.ece.DefaultExpressCheckoutElementEventReporter
-import com.stripe.android.checkout.ece.DefaultExpressCheckoutElementInteractor
-import com.stripe.android.checkout.ece.ExpressCheckoutElementConfirmationPerformer
-import com.stripe.android.checkout.ece.ExpressCheckoutElementEventReporter
-import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
+import com.stripe.android.elements.ece.DefaultExpressCheckoutElementConfirmationPerformer
+import com.stripe.android.elements.ece.DefaultExpressCheckoutElementEventReporter
+import com.stripe.android.elements.ece.DefaultExpressCheckoutElementInteractor
+import com.stripe.android.elements.ece.ExpressCheckoutElementConfirmationPerformer
+import com.stripe.android.elements.ece.ExpressCheckoutElementEventReporter
+import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dagger.Binds
 import dagger.Module

@@ -1,15 +1,19 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
+import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierAlternativeGroup
@@ -21,6 +25,9 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository.Companion.CRYPTO_ONRAMP_API_VERSION
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
@@ -30,9 +37,12 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
+import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
@@ -44,8 +54,12 @@ class CryptoApiRepositoryTest {
     private val cryptoApiRepository = CryptoApiRepository(
         stripeNetworkClient = stripeNetworkClient,
         stripeRepository = stripeRepository,
-        publishableKeyProvider = { "pk_test_vOo1umqsYxSrP5UXfOeL3ecm" },
-        stripeAccountIdProvider = { "TestAccountId" },
+        apiConfigProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm",
+                stripeAccountId = "TestAccountId",
+            )
+        },
         apiVersion = CRYPTO_ONRAMP_API_VERSION,
         sdkVersion = StripeSdkVersion.VERSION,
         appInfo = null,
@@ -53,6 +67,7 @@ class CryptoApiRepositoryTest {
     )
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
@@ -115,6 +130,53 @@ class CryptoApiRepositoryTest {
             assertThat(result.isFailure)
                 .isEqualTo(true)
         }
+    }
+
+    @Test
+    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "requirements": {
+                        "entries": [
+                            {
+                                "description": "proof_of_address",
+                                "requested_by": "swapped",
+                                "awaiting_action_from": "user",
+                                "errors": [],
+                                "document": {
+                                    "accepted_subtypes": [
+                                        {
+                                            "id": "utility_bill",
+                                            "label": "Utility bill"
+                                        }
+                                    ],
+                                    "accepted_formats": ["pdf", "jpeg", "png"],
+                                    "min_documents": 1,
+                                    "instructions": []
+                                }
+                            }
+                        ]
+                    }
+                }
+            """.trimIndent(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
+            consumerSessionClientSecret = "test-secret",
+        )
+
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.GET)
+        assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
+        val response = result.getOrThrow()
+        assertThat(response.requirements.entries.single().description)
+            .isEqualTo("proof_of_address")
     }
 
     @Test
@@ -247,22 +309,22 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveMissingIdentifiers(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
                 .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
 
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow().identifiers)
@@ -397,20 +459,20 @@ class CryptoApiRepositoryTest {
                 emptyMap()
             )
 
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
+            verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+            val apiRequest = stripeRequestArgumentCaptor.firstValue
 
-            assertThat(apiRequest.baseUrl)
+            assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
-            assertThat(apiRequest.params)
-                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+                .isEqualTo("test-secret")
             assertThat(result.getOrThrow().text)
                 .isEqualTo("I confirm this declaration.")
             assertThat(result.getOrThrow().version)
@@ -443,6 +505,140 @@ class CryptoApiRepositoryTest {
                 .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
             assertThat(result.isSuccess).isTrue()
         }
+    }
+
+    @Test
+    fun testRetrievePartnerTermsRequiredSucceeds() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "required": true,
+                    "declaration": {
+                        "id": "copt_decl_123",
+                        "type": "transaction_terms",
+                        "text": "Please accept these terms."
+                    }
+                }
+            """,
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
+            .thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = "test-secret",
+            declarationType = PartnerDeclarationType.TransactionTerms,
+        )
+
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo(
+                "https://api.stripe.com/v1/crypto/internal/partner_terms" +
+                    "?declaration_type=transaction_terms"
+            )
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+            .isEqualTo("test-secret")
+        val terms = result.getOrThrow() as PartnerTerms.Required
+        assertThat(terms.declaration.id).isEqualTo("copt_decl_123")
+        assertThat(terms.declaration.type).isEqualTo(PartnerDeclarationType.TransactionTerms)
+        assertThat(terms.declaration.text).isEqualTo("Please accept these terms.")
+    }
+
+    @Test
+    fun testRetrievePartnerTermsOfServiceRequiredSucceeds() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "required": true,
+                    "partner": "swapped",
+                    "declaration": {
+                        "id": "copt_decl_456",
+                        "type": "terms_of_service",
+                        "text": "Please accept these terms of service."
+                    }
+                }
+            """,
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
+            .thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = "test-secret",
+            declarationType = PartnerDeclarationType.TermsOfService,
+        )
+
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url).isEqualTo(
+            "https://api.stripe.com/v1/crypto/internal/partner_terms" +
+                "?declaration_type=terms_of_service"
+        )
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
+            .isEqualTo("test-secret")
+        val terms = result.getOrThrow() as PartnerTerms.Required
+        assertThat(terms.declaration).isEqualTo(
+            PartnerTerms.Declaration(
+                id = "copt_decl_456",
+                type = PartnerDeclarationType.TermsOfService,
+                text = "Please accept these terms of service.",
+            )
+        )
+    }
+
+    @Test
+    fun testRetrievePartnerTermsNotRequiredSucceeds() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            """
+                {
+                    "required": false
+                }
+            """,
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
+            .thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = "test-secret",
+            declarationType = PartnerDeclarationType.TransactionTerms,
+        )
+
+        assertThat(result.getOrThrow()).isEqualTo(PartnerTerms.NotRequired)
+    }
+
+    @Test
+    fun testConfirmPartnerTermsSucceeds() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            "{}",
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<StripeRequest>()))
+            .thenReturn(stripeResponse)
+
+        val result = cryptoApiRepository.confirmPartnerTerms(
+            consumerSessionClientSecret = "test-secret",
+            declarationId = "copt_decl_123",
+        )
+
+        verify(stripeNetworkClient).executeRequest(stripeRequestArgumentCaptor.capture())
+        val apiRequest = stripeRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/partner_terms")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
+        assertThat(apiRequest.headers["Authorization"])
+            .isEqualTo("Bearer pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        assertThat(apiRequest.postHeaders?.get("Content-Type"))
+            .isEqualTo("application/x-www-form-urlencoded; charset=UTF-8")
+        val body = ByteArrayOutputStream().also(apiRequest::writePostBody).toString("UTF-8")
+        assertThat(body).isEqualTo("declaration_id=copt_decl_123")
+        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
@@ -597,7 +793,7 @@ class CryptoApiRepositoryTest {
             assertThat(params["first_name"]).isEqualTo("Test")
             assertThat(params["last_name"]).isEqualTo("User")
             assertThat(params["id_number_last4"]).isEqualTo("7777")
-            assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+            assertThat(params["id_type"]).isEqualTo("social_security_number")
             assertThat(dobValue["day"]).isEqualTo("1")
             assertThat(dobValue["month"]).isEqualTo("3")
             assertThat(dobValue["year"]).isEqualTo("1975")
@@ -776,6 +972,48 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
+    fun testDeleteWalletAddressSucceeds() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, "{}", emptyMap()))
+
+        val result = cryptoApiRepository.deleteWalletAddress(
+            walletId = "ccw_12345",
+            consumerSessionClientSecret = "test-secret"
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.DELETE)
+        assertThat(apiRequest.baseUrl)
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet")
+        assertThat(apiRequest.url)
+            .startsWith("https://api.stripe.com/v1/crypto/internal/wallet?")
+        assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
+            .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
+        assertThat(apiRequest.params).isEqualTo(
+            mapOf(
+                "wallet_token" to "ccw_12345",
+                "credentials" to mapOf("consumer_session_client_secret" to "test-secret")
+            )
+        )
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun testDeleteWalletAddressFails() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(400, "{}", emptyMap()))
+
+        val result = cryptoApiRepository.deleteWalletAddress(
+            walletId = "ccw_12345",
+            consumerSessionClientSecret = "test-secret"
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
     fun testCollectWalletAddressPreservesTopLevelOnrampErrorFields() {
         runTest {
             val stripeResponse = StripeResponse(
@@ -916,6 +1154,61 @@ class CryptoApiRepositoryTest {
         }
     }
 
+    @Test
+    fun `create Samsung Pay payment method tokenizes credential before creating payment method`() = runTest {
+        val token = Token(
+            id = "tok_samsung_pay",
+            type = Token.Type.Card,
+            created = Date(0),
+            livemode = false,
+            used = false,
+        )
+        val paymentMethod = createCardPaymentMethod()
+        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.success(token))
+        whenever(stripeRepository.createPaymentMethod(any(), any())).thenReturn(Result.success(paymentMethod))
+
+        val result = cryptoApiRepository.createSamsungPayPaymentMethod(
+            paymentCredential = "{\"method\":\"3DS\"}",
+            platformPublishableKey = "pk_platform_samsung_pay",
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(paymentMethod)
+        val tokenParams = argumentCaptor<TokenParams>()
+        val tokenOptions = argumentCaptor<ApiRequest.Options>()
+        verify(stripeRepository).createToken(tokenParams.capture(), tokenOptions.capture())
+        assertThat(tokenOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
+        assertThat(tokenOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
+
+        val paymentMethodParams = argumentCaptor<PaymentMethodCreateParams>()
+        val paymentMethodOptions = argumentCaptor<ApiRequest.Options>()
+        verify(stripeRepository).createPaymentMethod(
+            paymentMethodParams.capture(),
+            paymentMethodOptions.capture(),
+        )
+        assertThat(paymentMethodParams.firstValue.toParamMap()).isEqualTo(
+            mapOf(
+                "type" to "card",
+                "card" to mapOf("token" to "tok_samsung_pay"),
+            ),
+        )
+        assertThat(paymentMethodOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
+        assertThat(paymentMethodOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
+    }
+
+    @Test
+    fun `create Samsung Pay payment method stops when tokenization fails`() = runTest {
+        val error = APIException(message = "Samsung Pay tokenization failed")
+        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.failure(error))
+
+        val result = cryptoApiRepository.createSamsungPayPaymentMethod(
+            paymentCredential = "invalid_credential",
+            platformPublishableKey = "pk_platform_samsung_pay",
+        )
+
+        assertThat(result.exceptionOrNull()).isSameInstanceAs(error)
+        verify(stripeRepository, never()).createPaymentMethod(any(), any())
+    }
+
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
@@ -925,7 +1218,7 @@ class CryptoApiRepositoryTest {
         assertThat(params["first_name"]).isEqualTo("Test")
         assertThat(params["last_name"]).isEqualTo("User")
         assertThat(params["id_number"]).isEqualTo("999-88-7777")
-        assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+        assertThat(params["id_type"]).isEqualTo("social_security_number")
         assertThat(dobValue["day"]).isEqualTo("1")
         assertThat(dobValue["month"]).isEqualTo("3")
         assertThat(dobValue["year"]).isEqualTo("1975")

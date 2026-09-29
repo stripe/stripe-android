@@ -3,6 +3,7 @@ package com.stripe.android.link.theme
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,7 +40,8 @@ internal val AppBarHeight = 70.dp
 internal val HorizontalPadding = 20.dp
 
 @Composable
-internal fun DefaultLinkTheme(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun DefaultLinkTheme(
     appearance: LinkAppearance.State? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
@@ -104,10 +106,15 @@ internal fun DefaultLinkTheme(
 
 @Composable
 internal fun isLinkDarkTheme(appearance: LinkAppearance.State?): Boolean {
-    return when (appearance?.style) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    return appearance?.style.isDarkTheme(isSystemInDarkTheme)
+}
+
+internal fun LinkAppearance.Style?.isDarkTheme(isSystemDarkTheme: Boolean): Boolean {
+    return when (this) {
+        LinkAppearance.Style.AUTOMATIC, null -> isSystemDarkTheme
         LinkAppearance.Style.ALWAYS_LIGHT -> false
         LinkAppearance.Style.ALWAYS_DARK -> true
-        LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
     }
 }
 

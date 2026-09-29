@@ -5,6 +5,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.model.CardBrand
 
 /**
  * Configuration options required to initialize the Onramp flow.
@@ -14,6 +15,7 @@ import com.stripe.android.link.LinkAppearance
  * @property appearance Appearance settings for the PaymentSheet UI.
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
  * @property googlePayConfig The configuration for Google Pay, if Google Pay is supported by the merchant.
+ * @property samsungPayConfig The configuration for Samsung Pay, if Samsung Pay is supported by the merchant.
  * @property additionalSdkVersions Additional wrapper SDK versions to include in developer diagnostics.
  */
 @ExperimentalCryptoOnramp
@@ -23,6 +25,7 @@ class OnrampConfiguration {
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
     private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
+    private var samsungPayConfig: SamsungPayConfig? = null
     private var additionalSdkVersions: List<SDKVersion> = emptyList()
 
     /**
@@ -62,6 +65,38 @@ class OnrampConfiguration {
     }
 
     /**
+     * Sets the Samsung Pay configuration to use if Samsung Pay is supported by the merchant.
+     *
+     * The client application must include Samsung Pay SDK 2.22.00 at runtime. Stripe does not
+     * package or transitively depend on the Samsung Pay SDK.
+     */
+    fun samsungPayConfig(samsungPayConfig: SamsungPayConfig) = apply {
+        this.samsungPayConfig = samsungPayConfig
+    }
+
+    /**
+     * Configuration for collecting a payment method with Samsung Pay.
+     *
+     * @param serviceId The Samsung Pay in-app service ID assigned to the merchant.
+     * @param merchantId An optional merchant identifier supplied to Samsung Pay.
+     * @param merchantName The merchant name shown in the Samsung Pay sheet. When omitted, the
+     * onramp merchant display name is used.
+     * @param allowedCardBrands Card brands that may be selected in Samsung Pay.
+     */
+    @ExperimentalCryptoOnramp
+    class SamsungPayConfig @JvmOverloads constructor(
+        internal val serviceId: String,
+        internal val merchantId: String? = null,
+        internal val merchantName: String? = null,
+        internal val allowedCardBrands: List<CardBrand> = listOf(
+            CardBrand.Visa,
+            CardBrand.MasterCard,
+            CardBrand.AmericanExpress,
+            CardBrand.Discover,
+        ),
+    )
+
+    /**
      * Additional wrapper SDK versions to include in developer diagnostics, such as the
      * Stripe React Native SDK version. Do not include Stripe Android; it is always included
      * automatically.
@@ -77,6 +112,7 @@ class OnrampConfiguration {
         val appearance: LinkAppearance,
         val cryptoCustomerId: String? = null,
         val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null,
+        val samsungPayConfig: SamsungPayConfig?,
         val additionalSdkVersions: List<SDKVersion> = emptyList()
     )
 
@@ -91,6 +127,7 @@ class OnrampConfiguration {
             appearance = (appearance ?: LinkAppearance()).reduceLinkBranding(true),
             cryptoCustomerId = cryptoCustomerId,
             googlePayConfig = googlePayConfig,
+            samsungPayConfig = samsungPayConfig,
             additionalSdkVersions = additionalSdkVersions
         )
     }

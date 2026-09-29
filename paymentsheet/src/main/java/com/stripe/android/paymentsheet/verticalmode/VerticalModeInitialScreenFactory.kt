@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.DefaultFormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -34,7 +35,9 @@ internal object VerticalModeInitialScreenFactory {
                         bankFormInteractor = bankFormInteractor,
                         paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     ),
-                    showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
+                    showsWalletHeader = paymentMethodMetadata.availableWallets.any {
+                        it != WalletType.Link || paymentMethodMetadata.shouldShowLinkButton
+                    },
                 )
             )
         }
@@ -53,9 +56,12 @@ internal object VerticalModeInitialScreenFactory {
             (viewModel.selection.value as? PaymentSelection.New?)?.let { newPaymentSelection ->
                 val paymentMethodCode = newPaymentSelection.paymentMethodCreateParams.typeCode
 
-                val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
+                val formType = DefaultFormDefinitionFactory.create(
+                    viewModel = viewModel,
+                    paymentMethodMetadata = paymentMethodMetadata
+                ).formTypeForCode(paymentMethodCode)
 
-                if (formHelper.formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired) {
+                if (formType == FormHelper.FormType.UserInteractionRequired) {
                     add(
                         PaymentSheetScreen.VerticalModeForm(
                             interactor = DefaultVerticalModeFormInteractor.create(

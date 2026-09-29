@@ -5,13 +5,14 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
+import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
@@ -34,7 +35,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
@@ -42,7 +42,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -67,7 +66,6 @@ internal data class PaymentMethodMetadata(
     val sellerBusinessName: String?,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
-    val sharedDataSpecs: List<SharedDataSpec>,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
@@ -95,16 +93,19 @@ internal data class PaymentMethodMetadata(
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
     val isNfcScanningEnabled: Boolean,
+    val preferNfcOverCameraScan: Boolean,
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
-    val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
+        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
+            ?.checkoutSessionResponse
+            ?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -123,6 +124,24 @@ internal data class PaymentMethodMetadata(
         when (val result = linkStateResult) {
             is LinkState -> result
             is LinkDisabledState, null -> null
+        }
+
+    /**
+     * Canonical source of truth for whether the Link button/row should be rendered in the
+     * payment element UI. Link may remain functionally enabled ([linkState] non-null) even when
+     * [PaymentSheet.LinkConfiguration.Display.WalletButtonHidden] is configured. In that case,
+     * the button is still shown if the load-time lookup found an existing Link user.
+     */
+    val shouldShowLinkButton: Boolean
+        get() {
+            val linkState = linkState ?: return false
+
+            return when (linkConfiguration.display) {
+                PaymentSheet.LinkConfiguration.Display.Automatic -> true
+                PaymentSheet.LinkConfiguration.Display.Never -> false
+                PaymentSheet.LinkConfiguration.Display.WalletButtonHidden ->
+                    linkState.loginState != LinkState.LoginState.LoggedOut
+            }
         }
 
     /**
@@ -197,7 +216,7 @@ internal data class PaymentMethodMetadata(
                 ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
+            definition.uiDefinitionFactory(this).createSupportedPaymentMethod(this)
         }
     }
 
@@ -282,9 +301,6 @@ internal data class PaymentMethodMetadata(
         return paymentMethodTypes.filterNot {
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
-        }.filter { paymentMethodDefinition ->
-            paymentMethodDefinition.uiDefinitionFactory(this)
-                .canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
         }
     }
 
@@ -317,11 +333,10 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formHeaderInformation(
+            definition.uiDefinitionFactory(this).createFormHeaderInformation(
                 metadata = this,
-                definition = definition,
-                sharedDataSpecs = sharedDataSpecs,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = paymentMethodIncentive,
             )
         }
     }
@@ -343,10 +358,8 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory(this).formElements(
+            definition.uiDefinitionFactory(this).createFormElements(
                 metadata = this,
-                definition = definition,
-                sharedDataSpecs = sharedDataSpecs,
                 arguments = uiDefinitionFactoryArgumentsFactory.create(
                     metadata = this,
                     requiresMandate = definition.requiresMandate(this),
@@ -371,7 +384,6 @@ internal data class PaymentMethodMetadata(
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
-            sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
             linkStateResult: LinkStateResult?,
@@ -382,6 +394,7 @@ internal data class PaymentMethodMetadata(
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -407,7 +420,6 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
                 customerMetadata = customerMetadata,
-                sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
@@ -436,17 +448,16 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddAvailable,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && !disableNfcScanning.isEnabled,
+                preferNfcOverCameraScan = elementsSession.preferNfcOverCameraScan,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse =
-                    (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                        ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -454,10 +465,10 @@ internal data class PaymentMethodMetadata(
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
-            sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -480,7 +491,6 @@ internal data class PaymentMethodMetadata(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = customerMetadata,
-                sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
@@ -511,14 +521,15 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = false,
+                preferNfcOverCameraScan = false,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                apiConfiguration = apiConfiguration,
             )
         }
     }

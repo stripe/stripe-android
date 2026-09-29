@@ -6,9 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -19,6 +17,8 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -64,11 +64,8 @@ internal class EmbeddedContentUiTest {
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
-                state.value = EmbeddedContentHelperStateHolder.State(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                    appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                    embeddedViewDisplaysMandateText = true,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                state.value = EmbeddedContentHelperStateFactory.create(
+                    embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 )
                 val content = awaitItem()
                 assertThat(content).isNotNull()
@@ -88,11 +85,8 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            state.value = EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            state.value = EmbeddedContentHelperStateFactory.create(
+                embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -112,11 +106,8 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            state.value = EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                appearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            state.value = EmbeddedContentHelperStateFactory.create(
+                embeddedAppearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -191,11 +182,16 @@ internal class EmbeddedContentUiTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            rowSelectionImmediateActionHandler = immediateActionHandler,
+            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
+                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                completionAction = immediateActionHandler::invoke,
+            ),
             coroutineScope = viewModelScope,
             sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
             linkAccountHolder = linkAccountHolder,
+            hostProcessing = stateFlowOf(false),
+            savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
         )
 
         val embeddedContentHelper =
@@ -203,12 +199,15 @@ internal class EmbeddedContentUiTest {
                 coroutineScope = viewModelScope,
                 state = state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-                sheetStateHolder = sheetStateHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
                 internalRowSelectionCallback = { internalRowSelectionCallback },
-                customerStateHolder = customerStateHolder,
-                selectionHolder = selectionHolder,
-                errorReporter = errorReporter,
+                paymentOptionsPresenter = DefaultEmbeddedPaymentOptionsPresenter(
+                    state = state,
+                    sheetStateHolder = sheetStateHolder,
+                    customerStateHolder = customerStateHolder,
+                    selectionHolder = selectionHolder,
+                    errorReporter = errorReporter,
+                ),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -1,18 +1,26 @@
 package com.stripe.android.common.nfcscan
 
 import android.os.Looper
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso
+import com.stripe.android.common.nfcscan.ui.ERROR_BANNER_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_COIL_CONTACTLESS_ICON_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.testing.waitUntilWithIdle
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowNfcAdapter
 
 internal class NfcScanningActivityScenario(
+    val activity: NfcScanningActivity,
     private val activityScenario: ActivityScenario<NfcScanningActivity>,
     val composeRule: ComposeTestRule,
     val isoDep: FakeIsoDep,
@@ -30,36 +38,53 @@ internal class NfcScanningActivityScenario(
     ) {
         isoDep.setTransceiveResponses(apduResponses)
         nfcAdapter?.dispatchTagDiscovered(isoDep.tag)
-        waitForIdle()
     }
 
     fun waitForUi() {
-        composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
-            waitForIdle()
-            composeRule.onAllNodesWithContentDescription("Cancel")
+        composeRule.waitUntilWithIdle {
+            val closeButtonNodes = composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+            val developerOptionsNodes = composeRule.onAllNodesWithTag(NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+
+            closeButtonNodes.isNotEmpty() || developerOptionsNodes.isNotEmpty()
         }
     }
 
     fun waitForCompleteUi() {
-        composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
-            waitForIdle()
-            composeRule.onAllNodesWithContentDescription("Cancel")
+        composeRule.waitUntilWithIdle {
+            composeRule.onAllNodesWithTag(NFC_CLOSE_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }
 
     fun assertErrorIsDisplayed(errorText: String) {
-        composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
-            waitForIdle()
-            composeRule.onAllNodesWithText(errorText, substring = true)
-                .fetchSemanticsNodes()
+        composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
+            composeRule.onAllNodesWithTag(ERROR_BANNER_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
-        composeRule.onNodeWithText(errorText, substring = true).assertExists()
+        composeRule.onNodeWithTag(ERROR_BANNER_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithText(errorText, substring = true).assertIsDisplayed()
+    }
+
+    fun assertErrorDisappears() {
+        composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
+            composeRule.onAllNodesWithTag(ERROR_BANNER_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeRule.mainClock.advanceTimeUntil(timeoutMillis = ERROR_TIMEOUT_MS) {
+            composeRule.onAllNodesWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
+        }
+
+        composeRule.onNodeWithTag(NFC_COIL_CONTACTLESS_ICON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(ERROR_BANNER_TEST_TAG).assertIsNotDisplayed()
     }
 
     fun getResult(): NfcScanningContract.Result {
@@ -78,6 +103,6 @@ internal class NfcScanningActivityScenario(
     }
 
     private companion object {
-        const val UI_TIMEOUT_MS = 5_000L
+        const val ERROR_TIMEOUT_MS = 10_000L
     }
 }

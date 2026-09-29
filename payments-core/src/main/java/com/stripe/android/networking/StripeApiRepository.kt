@@ -11,6 +11,7 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
@@ -26,7 +27,6 @@ import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
@@ -115,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -136,9 +137,29 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, workContext),
+        DefaultFraudDetectionDataRepository(
+            context = context,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
+            workContext = workContext,
+        ),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
-        DefaultCardAccountRangeRepositoryFactory(context, productUsageTokens, requestSurface, analyticsRequestExecutor),
+        DefaultCardAccountRangeRepositoryFactory(
+            context = context,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKeyProvider(),
+                    stripeAccountId = null,
+                )
+            },
+        ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
@@ -150,7 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -159,11 +180,23 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
+        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
+            context = appContext,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = workContext,
+        ),
+        cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+            context = appContext,
+            productUsageTokens = productUsageTokens,
+            requestSurface = requestSurface,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = apiConfigurationProvider,
+        ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
@@ -875,7 +908,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -888,7 +922,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fireAnalyticsRequest(
                     paymentAnalyticsRequestFactory.createRequest(
                         PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-                        productUsageTokens = productUsageTokens
+                        productUsageTokens = productUsageTokens,
+                        publishableKeyOverride = apiConfiguration.publishableKey
                     )
                 )
             },
@@ -1972,20 +2007,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmPaymentIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }
@@ -1994,20 +2035,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
         options: ApiRequest.Options
     ): Result<ConfirmSetupIntentParams> {
-        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+        if (!options.apiKeyIsUserKey) {
             return Result.success(this)
         }
 
-        // For user key auth, we must create the PM first.
-        val paymentMethodResult = createPaymentMethod(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            options = options,
-        )
+        val paymentMethodIdResult = if (paymentMethodId != null) {
+            Result.success(paymentMethodId)
+        } else if (paymentMethodCreateParams != null) {
+            // New payment method: create the PM first, then build Dashboard params.
+            createPaymentMethod(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                options = options,
+            ).map { it.id }
+        } else {
+            return Result.success(this)
+        }
 
-        return paymentMethodResult.mapCatching { paymentMethod ->
+        return paymentMethodIdResult.mapCatching { paymentMethod ->
             ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
-                paymentMethodId = paymentMethod.id,
+                paymentMethodId = paymentMethod,
                 paymentMethodOptions = paymentMethodOptions,
             )
         }

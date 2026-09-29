@@ -78,14 +78,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
-    class Init(
-        private val mode: EventReporter.Mode,
-    ) : PaymentSheetEvent() {
-
-        override val eventName: String
-            get() = formatEventName(mode, "init")
-    }
-
     class Dismiss : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
     }
@@ -248,13 +240,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     is Failure -> "failure"
                 }
         }
-    }
-
-    class LpmSerializeFailureEvent(
-        val errorMessage: String?
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "luxe_serialize_failure"
-        override val params: Map<String, Any?> = mapOf(FIELD_ERROR_MESSAGE to errorMessage)
     }
 
     class AutofillEvent(
@@ -603,6 +588,21 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    class BillingAddressCompleted(
+        private val addressCountryCode: String,
+        private val autocompleteResultSelected: Boolean,
+        private val editDistance: Int?,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_billing_address_completed"
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_ADDRESS_DATA_BLOB to buildMap<String, Any> {
+                put(FIELD_ADDRESS_COUNTRY_CODE, addressCountryCode)
+                put(FIELD_AUTO_COMPLETE_RESULT_SELECTED, autocompleteResultSelected)
+                editDistance?.let { put(FIELD_EDIT_DISTANCE, it) }
+            }
+        )
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
@@ -656,6 +656,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_VISIBLE_PAYMENT_METHODS = "visible_payment_methods"
         const val FIELD_HIDDEN_PAYMENT_METHODS = "hidden_payment_methods"
         const val FIELD_LOAD_TIMINGS = "load_timings"
+        const val FIELD_ADDRESS_DATA_BLOB = "address_data_blob"
+        const val FIELD_ADDRESS_COUNTRY_CODE = "address_country_code"
+        const val FIELD_AUTO_COMPLETE_RESULT_SELECTED = "auto_complete_result_selected"
+        const val FIELD_EDIT_DISTANCE = "edit_distance"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

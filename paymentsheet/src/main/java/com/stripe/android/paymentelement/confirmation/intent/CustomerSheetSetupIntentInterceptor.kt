@@ -47,6 +47,7 @@ internal class DefaultCustomerSheetSetupIntentInterceptor(
                         .intercept(
                             intent = intent,
                             confirmationOption = PaymentMethodConfirmationOption.Saved(
+                                shippingInformation = null,
                                 paymentMethod = paymentMethod,
                                 optionsParams = null,
                             ),

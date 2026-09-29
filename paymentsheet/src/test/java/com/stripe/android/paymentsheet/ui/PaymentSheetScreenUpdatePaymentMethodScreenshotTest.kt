@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.strings.resolve
@@ -16,7 +17,7 @@ import org.junit.Test
 
 internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(LayoutDirection.entries)
 
     @Test
     fun updatePaymentMethodScreen_forCard() {

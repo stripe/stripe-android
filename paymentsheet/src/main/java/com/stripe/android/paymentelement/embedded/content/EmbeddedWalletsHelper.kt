@@ -25,9 +25,10 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
             linkHandler.linkConfigurationCoordinator.accountFlow,
         ) { isLinkAvailable, linkEmail, linkAccount ->
             WalletsState.create(
-                isLinkAvailable = isLinkAvailable,
+                isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata.shouldShowLinkButton,
                 linkEmail = linkEmail,
                 isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
+                apiConfiguration = paymentMethodMetadata.apiConfiguration,
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.

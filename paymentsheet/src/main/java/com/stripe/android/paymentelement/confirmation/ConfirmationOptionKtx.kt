@@ -19,9 +19,9 @@ internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
     cardFundingFilter: CardFundingFilter,
-    googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
+    googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -33,9 +33,9 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
             cardFundingFilter,
-            googlePayDisplayItems,
             isEmailRequired = googlePayIsEmailRequired,
             billingEmailOverride = googlePayBillingEmailOverride,
+            shippingAddressParameters = googlePayShippingAddressParameters,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
@@ -53,6 +53,7 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
         // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
         // we can just use the already created object here.
         PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
         )
@@ -78,8 +79,10 @@ internal fun PaymentSelection.Saved.toConfirmationOption(
         )
     } else {
         PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
+            hasAcknowledgedSepaMandate = hasAcknowledgedSepaMandate,
         )
     }
 }
@@ -127,9 +130,9 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter,
-    displayItems: List<GooglePayJsonFactory.DisplayItem>,
     isEmailRequired: Boolean,
     billingEmailOverride: String?,
+    shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -144,9 +147,9 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = cardFundingFilter,
-                displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
                 billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             ),
         )
     }

@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.consent.ConsentViewModel
 import com.stripe.android.financialconnections.features.error.ErrorViewModel
 import com.stripe.android.financialconnections.features.exit.ExitViewModel
+import com.stripe.android.financialconnections.features.genericerror.GenericErrorViewModel
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerViewModel
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryViewModel
@@ -54,6 +55,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val attachPaymentViewModelFactory: AttachPaymentViewModel.Factory
     val resetViewModelFactory: ResetViewModel.Factory
     val errorViewModelFactory: ErrorViewModel.Factory
+    val genericErrorViewModelFactory: GenericErrorViewModel.Factory
     val exitViewModelFactory: ExitViewModel.Factory
     val noticeSheetViewModelFactory: NoticeSheetViewModel.Factory
     val networkingLinkSignupViewModelFactory: NetworkingLinkSignupViewModel.Factory

@@ -9,6 +9,7 @@ import com.stripe.android.common.nfcscan.analytics.NfcScanCancellationReason
 import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporter
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
+import com.stripe.android.common.nfcscan.security.IsDeviceSecureForNfc
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
 import com.stripe.android.common.nfcscan.ui.HapticFeedbackType
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,17 +33,20 @@ internal class NfcScanningViewModel @Inject constructor(
     private val cardScanner: NfcCardScanner,
     private val timeoutManager: NfcScanningTimeoutManager,
     private val eventReporter: NfcScanningEventReporter,
+    private val isDeviceSecureForNfc: IsDeviceSecureForNfc,
 ) : ViewModel() {
     private val tapZone = tapZoneResolver.get()
+    private val isInitiallySecure = isDeviceSecureForNfc.get()
 
     private val _event = MutableSharedFlow<NfcScanningEvent>()
     val event = _event.asSharedFlow()
 
     private val _viewState = MutableStateFlow(
-        NfcScanningViewState(
-            tapZone = tapZone,
-            status = NfcScanningStatus.Idle(error = null),
-        )
+        if (isInitiallySecure) {
+            readyState()
+        } else {
+            NfcScanningViewState.NotSecure
+        }
     )
     val viewState: StateFlow<NfcScanningViewState> = _viewState.asStateFlow()
 
@@ -52,7 +57,12 @@ internal class NfcScanningViewModel @Inject constructor(
 
     init {
         eventReporter.onNfcScanStarted()
-        timeoutManager.start()
+
+        if (isInitiallySecure) {
+            timeoutManager.start()
+        } else {
+            eventReporter.onNfcScanBlocked()
+        }
 
         viewModelScope.launch {
             cardScanner.state.collectLatest { state ->
@@ -61,7 +71,7 @@ internal class NfcScanningViewModel @Inject constructor(
                         timeoutManager.reset()
 
                         _viewState.emit(
-                            NfcScanningViewState(
+                            NfcScanningViewState.Ready(
                                 tapZone = tapZone,
                                 status = NfcScanningStatus.Scanning,
                             )
@@ -78,9 +88,9 @@ internal class NfcScanningViewModel @Inject constructor(
                         val error = state.error
 
                         _viewState.emit(
-                            NfcScanningViewState(
+                            NfcScanningViewState.Ready(
                                 tapZone = tapZone,
-                                status = NfcScanningStatus.Idle(error = error.userMessage),
+                                status = NfcScanningStatus.Idle(error.userMessage),
                             )
                         )
 
@@ -92,7 +102,7 @@ internal class NfcScanningViewModel @Inject constructor(
                         _event.emit(NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Success))
 
                         _viewState.emit(
-                            NfcScanningViewState(
+                            NfcScanningViewState.Ready(
                                 tapZone = tapZone,
                                 status = NfcScanningStatus.Scanned,
                             )
@@ -116,7 +126,20 @@ internal class NfcScanningViewModel @Inject constructor(
     }
 
     fun register(activity: AppCompatActivity) {
-        cardScanner.start(activity)
+        val isDeviceSecure = isDeviceSecureForNfc.get()
+
+        _viewState.update { state ->
+            when {
+                !isDeviceSecure -> NfcScanningViewState.NotSecure
+                state is NfcScanningViewState.Ready -> state
+                else -> readyState()
+            }
+        }
+
+        if (isDeviceSecure) {
+            timeoutManager.start()
+            cardScanner.start(activity)
+        }
     }
 
     fun handleViewAction(viewAction: NfcScanningViewAction) {
@@ -124,6 +147,11 @@ internal class NfcScanningViewModel @Inject constructor(
             is NfcScanningViewAction.Close -> {
                 viewModelScope.launch {
                     cancel(NfcScanCancellationReason.UserInitiated)
+                }
+            }
+            is NfcScanningViewAction.OpenDeveloperOptions -> {
+                viewModelScope.launch {
+                    _event.emit(NfcScanningEvent.OpenDeveloperOptions)
                 }
             }
             is NfcScanningViewAction.SuccessShown -> {
@@ -143,6 +171,15 @@ internal class NfcScanningViewModel @Inject constructor(
                                 )
                             )
                         )
+                    }
+                }
+            }
+            is NfcScanningViewAction.ErrorShown -> {
+                _viewState.update { state ->
+                    if (state is NfcScanningViewState.Ready && state.status is NfcScanningStatus.Idle) {
+                        state.copy(status = NfcScanningStatus.Idle())
+                    } else {
+                        state
                     }
                 }
             }
@@ -168,6 +205,11 @@ internal class NfcScanningViewModel @Inject constructor(
         )
         _event.emit(NfcScanningEvent.CloseWithResult(NfcScanningContract.Result.Canceled))
     }
+
+    private fun readyState() = NfcScanningViewState.Ready(
+        tapZone = tapZone,
+        status = NfcScanningStatus.Idle(),
+    )
 
     companion object {
         fun factory(argsSupplier: () -> NfcScanningContract.Args): ViewModelProvider.Factory {

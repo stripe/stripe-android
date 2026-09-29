@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
@@ -110,7 +111,7 @@ internal class TestLatency(
 
         private fun PlaygroundSettings.latencyTestDefaults() {
             this[MerchantSettingsDefinition] = Merchant.US
-            this[LinkSettingsDefinition] = false
+            this[LinkSettingsDefinition] = LinkDisplaySetting.Never
             this[CustomerSettingsDefinition] = CustomerType.GUEST
             this[GooglePaySettingsDefinition] = GooglePayMode.Off
             this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
@@ -153,13 +154,13 @@ internal class TestLatency(
                     testName = "test_link_on_with_no_customer",
                     isReturningCustomer = false,
                 ) { settings: PlaygroundSettings ->
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                 },
                 testConfig(
                     testName = "test_link_on_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                 },
@@ -167,7 +168,7 @@ internal class TestLatency(
                     testName = "test_link_on_with_cs",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                 },
@@ -175,7 +176,7 @@ internal class TestLatency(
                     testName = "test_link_on_with_ek_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
@@ -184,7 +185,7 @@ internal class TestLatency(
                     testName = "test_link_on_with_cs_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
@@ -216,7 +217,7 @@ internal class TestLatency(
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[LinkSettingsDefinition] = true
+                    settings[LinkSettingsDefinition] = LinkDisplaySetting.Automatic
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                 },

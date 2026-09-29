@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
+import kotlin.time.Duration
 
 internal class ComposeButton(
     private val composeTestRule: ComposeTestRule,
@@ -20,12 +21,25 @@ internal class ComposeButton(
     }
 
     fun waitForEnabled(requireClickAction: Boolean = true): ComposeButton {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            val combinedMatcher = if (requireClickAction) {
-                matcher.and(isEnabled()).and(hasClickAction())
-            } else {
-                matcher.and(isEnabled())
-            }
+        return waitForEnabled(
+            requireClickAction = requireClickAction,
+            timeout = DEFAULT_UI_TIMEOUT,
+        )
+    }
+
+    fun waitForEnabled(
+        requireClickAction: Boolean,
+        timeout: Duration,
+    ): ComposeButton {
+        val combinedMatcher = if (requireClickAction) {
+            matcher.and(isEnabled()).and(hasClickAction())
+        } else {
+            matcher.and(isEnabled())
+        }
+        composeTestRule.waitUntil(
+            conditionDescription = "button matching [$combinedMatcher] to become enabled",
+            timeoutMillis = timeout.inWholeMilliseconds,
+        ) {
             composeTestRule.onAllNodes(combinedMatcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
@@ -34,8 +48,11 @@ internal class ComposeButton(
     }
 
     fun waitFor(semanticsMatcher: SemanticsMatcher): ComposeButton {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            val combinedMatcher = matcher.and(semanticsMatcher)
+        val combinedMatcher = matcher.and(semanticsMatcher)
+        composeTestRule.waitUntil(
+            conditionDescription = "node matching [$combinedMatcher] to appear",
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
             composeTestRule
                 .onAllNodes(combinedMatcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

@@ -37,8 +37,14 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             LinkBrand.entries.firstOrNull { it.value == value }
         }
 
+        val supportedPaymentDetailsTypes =
+            consumerSessionJson.optJSONArray(FIELD_SUPPORT_PAYMENT_DETAILS_TYPES)
+                ?.let { array -> (0 until array.length()).map { array.getString(it) } }
+                ?: emptyList()
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
+            linkSessionKey = optString(consumerSessionJson, FIELD_LINK_SESSION_KEY),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
@@ -49,6 +55,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             currentAuthenticationLevel = currentAuthenticationLevel,
             minimumAuthenticationLevel = minimumAuthenticationLevel,
             linkBrand = linkBrand,
+            supportedPaymentDetailsTypes = supportedPaymentDetailsTypes,
         )
     }
 
@@ -74,6 +81,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
 
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
+        private const val FIELD_LINK_SESSION_KEY = "link_session_key"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"
@@ -88,6 +96,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"
 
         private const val FIELD_LINK_BRAND = "link_brand"
+        private const val FIELD_SUPPORT_PAYMENT_DETAILS_TYPES = "support_payment_details_types"
         private const val FIELD_WEBVIEW_REQUIREMENT_TYPE = "webview_requirement_type"
         private const val FIELD_WEBVIEW_OPEN_URL = "webview_open_url"
     }

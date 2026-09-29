@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -39,6 +41,11 @@ internal object PaymentMethodMetadataFixtures {
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
         canUpdateCardExpiryAndBillingDetails = false,
+    )
+
+    internal val DEFAULT_API_CONFIG = ApiConfiguration.State(
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
     )
 
     internal fun getDefaultCustomerMetadata(

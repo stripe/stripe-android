@@ -5,17 +5,23 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
 import com.stripe.android.uicore.strings.resolve
@@ -32,45 +38,58 @@ internal fun ExpiryTextField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val isError = state.shouldShowError()
-    val colors = commonTextFieldColors(
-        shouldShowError = isError,
-        enabled = state.enabled
-    )
-    CommonTextField(
-        modifier = modifier
-            .indicatorLine(
-                enabled = state.enabled,
-                isError = isError && state.enabled,
-                interactionSource = interactionSource,
-                colors = colors
-            )
-            .errorSemanticsWithDefault(
-                isError = isError,
-                errorMessage = state.sectionValidationMessage()?.resolvable?.resolve()
-            ),
-        value = state.text,
-        onValueChange = onValueChange,
-        enabled = state.enabled,
-        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-        ),
-        shouldShowError = isError,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.NumberPassword,
-            imeAction = if (hasNextField) {
-                ImeAction.Next
+    val colors = commonTextFieldColors(shouldShowError = isError, enabled = state.enabled)
+    val textStyle = LocalTextStyle.current
+
+    CompositionLocalProvider(
+        LocalTextStyle provides textStyle.copy(
+            textDirection = TextDirection.Ltr,
+            textAlign = if (
+                LocalLayoutDirection.current == LayoutDirection.Rtl &&
+                textStyle.textAlign == TextAlign.Unspecified
+            ) {
+                TextAlign.End
             } else {
-                ImeAction.Done
+                textStyle.textAlign
             }
-        ),
-        visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
-        colors = colors,
-        keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocus(FocusDirection.Next) },
-            onDone = { keyboardController?.hide() }
         )
-    )
+    ) {
+        CommonTextField(
+            modifier = modifier
+                .indicatorLine(
+                    enabled = state.enabled,
+                    isError = isError && state.enabled,
+                    interactionSource = interactionSource,
+                    colors = colors
+                )
+                .errorSemanticsWithDefault(
+                    isError = isError,
+                    errorMessage = state.sectionValidationMessage()?.resolvable?.resolve()
+                ),
+            value = state.text,
+            onValueChange = onValueChange,
+            enabled = state.enabled,
+            label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
+            shape = MaterialTheme.shapes.small.copy(
+                topStart = ZeroCornerSize,
+                topEnd = ZeroCornerSize,
+                bottomEnd = ZeroCornerSize,
+            ),
+            shouldShowError = isError,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.NumberPassword,
+                imeAction = if (hasNextField) {
+                    ImeAction.Next
+                } else {
+                    ImeAction.Done
+                }
+            ),
+            visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
+            colors = colors,
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Next) },
+                onDone = { keyboardController?.hide() }
+            )
+        )
+    }
 }

@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
@@ -29,7 +31,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -62,6 +63,7 @@ internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
     class State(
+        val appearance: PaymentSheet.Appearance,
         val link2FAState: LinkOtpState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
@@ -101,6 +103,7 @@ internal interface WalletButtonsInteractor {
         @Immutable
         @Stable
         data class GooglePay private constructor(
+            val apiConfiguration: ApiConfiguration.State,
             val googlePayButtonType: GooglePayButtonType,
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
@@ -112,12 +115,14 @@ internal interface WalletButtonsInteractor {
 
             constructor(
                 buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
+                apiConfiguration: ApiConfiguration.State,
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
                 cardFundingFilter: CardFundingFilter,
                 additionalEnabledNetworks: List<String>
             ) : this(
+                apiConfiguration = apiConfiguration,
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
@@ -177,6 +182,7 @@ internal class DefaultWalletButtonsInteractor constructor(
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
                     WalletType.GooglePay -> WalletButton.GooglePay(
+                        apiConfiguration = paymentMethodMetadata.apiConfiguration,
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
@@ -204,7 +210,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
-                                walletsAllowedByMerchant.contains(WalletType.Link)
+                                walletsAllowedByMerchant.contains(WalletType.Link) &&
+                                arguments.paymentMethodMetadata.shouldShowLinkButton
                         }
                     }
                 }
@@ -223,6 +230,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         }
 
         WalletButtonsInteractor.State(
+            appearance = arguments?.appearance ?: ConfigurationDefaults.appearance,
             link2FAState = linkOTPState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
@@ -329,7 +337,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
-            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(arguments.paymentMethodMetadata),
             googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
                 configuration = arguments.configuration,
                 paymentMethodMetadata = arguments.paymentMethodMetadata,

@@ -2,13 +2,25 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
@@ -19,6 +31,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
@@ -27,9 +40,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(
-                billingAddress = configuration.defaultBillingAddress,
-            ),
+            collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
         )
     }
@@ -41,6 +52,11 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = state.collectedDetails,
             carryForward = CarryForward.from(state),
         )
+    }
+
+    fun clear() {
+        stateHolder.state = null
+        customerStateHolder.setCustomerState(null)
     }
 
     private suspend fun commit(
@@ -58,6 +74,7 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
+        embeddedConfig.appearance.parseAppearance()
 
         val commonConfiguration = commonConfigurationFactory.create(
             configuration = configuration,
@@ -65,29 +82,27 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
-        val loaderState = paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = response.id,
-                checkoutSessionResponse = response,
-            ),
-            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                isRowSelectionImmediateAction = false,
-                configuration = embeddedConfig,
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
+        val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        val loadResults = loadPaymentElements(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
+            embeddedConfiguration = embeddedConfig,
+            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
+        )
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
         // previous selection comes from the incoming state, not a separate holder.
         val selection = selectionChooser.choose(
-            paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            paymentMethods = loaderState.customer?.paymentMethods,
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            paymentMethods = loadResults.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
-            newSelection = loaderState.paymentSelection,
+            newSelection = loadResults.paymentSelection,
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
@@ -97,16 +112,68 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
-            paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
-            commonConfiguration = commonConfiguration,
             paymentSelection = selection,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
+            linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
 
-        customerStateHolder.setCustomerState(loaderState.customer)
+        customerStateHolder.setCustomerState(loadResults.customer)
     }
+
+    private suspend fun loadPaymentElements(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        expressCheckoutElementConfiguration: CommonConfiguration?,
+    ): LoadResults = coroutineScope {
+        val metadata = PaymentElementLoader.Metadata(
+            isReloadingAfterProcessDeath = false,
+            initializedViaCompose = false,
+        )
+        val paymentElementStateDeferred = async {
+            paymentElementLoader.load(
+                initializationMode = initializationMode,
+                integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                    isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+                    configuration = embeddedConfiguration,
+                    paymentMethodLayout = paymentMethodLayout,
+                ),
+                metadata = metadata,
+            ).getOrThrow()
+        }
+        val expressCheckoutElementStateDeferred = expressCheckoutElementConfiguration?.let { configuration ->
+            async {
+                paymentElementLoader.load(
+                    initializationMode = initializationMode,
+                    integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                        commonConfiguration = configuration,
+                    ),
+                    metadata = metadata,
+                ).getOrThrow()
+            }
+        }
+
+        val paymentElementResult = paymentElementStateDeferred.await()
+        val expressCheckoutElementResult = expressCheckoutElementStateDeferred?.await()
+        LoadResults(
+            paymentMethodMetadata = paymentElementResult.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementResult?.paymentMethodMetadata,
+            customer = paymentElementResult.customer,
+            paymentSelection = paymentElementResult.paymentSelection,
+        )
+    }
+
+    private data class LoadResults(
+        val paymentMethodMetadata: PaymentMethodMetadata,
+        val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
+        val customer: CustomerState?,
+        val paymentSelection: PaymentSelection?,
+    )
 
     /**
      * The fields carried from the prior state (or fresh defaults) into the next committed state, so a
@@ -118,6 +185,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
+        val linkEagerPresentationSuppressed: Boolean,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -125,6 +193,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
+                linkEagerPresentationSuppressed = false,
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -132,7 +201,25 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = state.paymentSelection,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
+                linkEagerPresentationSuppressed = state.linkEagerPresentationSuppressed,
             )
         }
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutController.Configuration.State.asInitialCollectedDetails(
+    checkoutSessionResponse: CheckoutSessionResponse,
+): CheckoutCollectedDetails {
+    val shippingDetails = defaults.shippingDetails?.takeIf { details ->
+        val shippingAddress = details.address
+        shippingAddressElementConfiguration == null ||
+            shippingAddress == null ||
+            checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess
+    }
+    return CheckoutCollectedDetails(
+        email = defaults.email,
+        shippingName = shippingDetails?.name,
+        shippingAddress = shippingDetails?.address,
+    )
 }

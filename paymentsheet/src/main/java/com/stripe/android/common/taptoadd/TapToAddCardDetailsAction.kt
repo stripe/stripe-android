@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.utils.collectAsState
@@ -27,7 +29,10 @@ internal class TapToAddCardDetailsAction(
             }
         }
 
-        TapToButtonUI(enabled = enabled && isTapToAddEnabled) {
+        TapButtonUI(
+            label = stringResource(R.string.stripe_tap_to_add_card_button_label),
+            enabled = enabled && isTapToAddEnabled,
+        ) {
             tapToAddHelper.startPaymentMethodCollection(paymentMethodMetadata)
         }
     }

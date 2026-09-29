@@ -3,9 +3,9 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
-import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
-import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -14,28 +14,28 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutControllerStateFactory {
     fun create(
-        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
+        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages: Map<String, Bitmap>? = null,
-        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
+        collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration: CommonConfiguration = CheckoutCommonConfigurationFactory(
-            merchantDisplayName = "Example, Inc.",
-        ).create(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = collectedDetails,
-        ),
         paymentSelection: PaymentSelection? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        linkEagerPresentationSuppressed: Boolean = false,
     ): CheckoutControllerState {
         return CheckoutControllerState(
             configuration = configuration,
@@ -43,11 +43,13 @@ internal object CheckoutControllerStateFactory {
             flagImages = flagImages,
             collectedDetails = collectedDetails,
             paymentMethodMetadata = paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
-            commonConfiguration = commonConfiguration,
             paymentSelection = paymentSelection,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
+            linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
         )
     }
 

@@ -20,6 +20,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
@@ -812,6 +813,7 @@ class PaymentSheet internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration.State? = null,
     ) : Parcelable {
 
         @JvmOverloads
@@ -917,6 +919,7 @@ class PaymentSheet internal constructor(
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
             externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
             customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+            apiConfiguration = null,
         )
 
         /**
@@ -952,6 +955,7 @@ class PaymentSheet internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1099,9 +1103,10 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Google Places API key to support autocomplete when collecting billing details
+             * Google Places API key. This is no longer required for address autocomplete.
              */
             @AddressAutocompletePreview
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
@@ -1126,6 +1131,17 @@ class PaymentSheet internal constructor(
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun userOverrideCountry(userOverrideCountry: String?) = apply {
                 this.userOverrideCountry = userOverrideCountry
+            }
+
+            /**
+             * Sets the API credentials to use for PaymentSheet or FlowController.
+             *
+             * When not set, the payment element uses the credentials initialized through
+             * [com.stripe.android.PaymentConfiguration].
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
             }
 
             fun build() = Configuration(
@@ -1153,6 +1169,7 @@ class PaymentSheet internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -1167,7 +1184,7 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
-            AddressAutocompletePreview::class
+            AddressAutocompletePreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1192,8 +1209,14 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
+                @Suppress("DEPRECATION")
                 googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
+                apiConfiguration?.let {
+                    apiConfiguration(
+                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                    )
+                }
             }
     }
 
@@ -3713,6 +3736,7 @@ class PaymentSheet internal constructor(
             get() = when (display) {
                 Display.Automatic -> true
                 Display.Never -> false
+                Display.WalletButtonHidden -> true
             }
 
         class Builder {
@@ -3759,12 +3783,19 @@ class PaymentSheet internal constructor(
             /**
              * Link will never be displayed.
              */
-            Never;
+            Never,
+
+            /**
+             * Link remains enabled, including automatic verification and inline sign-up.
+             * Its button or row is shown when an existing Link user is detected and hidden otherwise.
+             */
+            WalletButtonHidden;
 
             internal val analyticsValue: String
                 get() = when (this) {
                     Automatic -> "automatic"
                     Never -> "never"
+                    WalletButtonHidden -> "wallet_button_hidden"
                 }
         }
     }

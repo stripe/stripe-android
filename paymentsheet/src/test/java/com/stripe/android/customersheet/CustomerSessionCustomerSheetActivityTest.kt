@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage.Companion.assertHasModifyBadge
@@ -448,7 +449,7 @@ class CustomerSessionCustomerSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule
                         .onAllNodes(
                             hasTestTag(FORM_ELEMENT_TEST_TAG)

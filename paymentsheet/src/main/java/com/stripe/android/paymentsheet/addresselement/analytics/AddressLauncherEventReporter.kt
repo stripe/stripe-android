@@ -15,13 +15,13 @@ internal interface AddressLauncherEventReporter {
 
     fun onAutocompleteSuggestionsReturned(
         sessionToken: String,
-        queryLength: Int,
         resultCount: Int,
+        source: String?,
     )
 
     fun onAutocompleteDetailsFetchStarted()
 
-    fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String)
+    fun onAutocompleteSelected(sessionToken: String, queryLength: Int, placeId: String?, source: String?)
 
     fun onAutocompleteError(sessionToken: String, error: Throwable)
 }

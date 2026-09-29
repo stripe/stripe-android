@@ -10,14 +10,15 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
-import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
+import com.stripe.android.paymentsheet.utils.withLtrIsolate
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -73,7 +74,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.presentPaymentSheet {
                     presentWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -95,7 +96,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.configureFlowController {
                     configureWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -108,7 +109,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             override suspend fun confirm() {
                 context.consumePaymentOptionEventForFlowController(
                     paymentMethodType = "card",
-                    label = "···· 4242"
+                    label = "4242"
                 )
 
                 context.flowController.confirm()
@@ -147,15 +148,13 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         override fun clickPrimaryButton() {
-            composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .performScrollTo()
                 .performClick()
 
-            composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            composeTestRule.waitUntilWithIdle {
                 !hasPrimaryButton()
             }
-
-            composeTestRule.waitForIdle()
         }
 
         final override fun openCardForm() {
@@ -166,7 +165,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         override suspend fun confirm() {
             val paymentOption = context.paymentOptionTurbine.awaitItem()
 
-            assertThat(paymentOption?.label).isEqualTo("···· 4242")
+            assertThat(paymentOption?.label).isEqualTo("···· 4242".withLtrIsolate())
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
             context.confirm()
@@ -175,7 +174,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         }
 
         protected fun hasPrimaryButton(): Boolean {
-            return composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+            return composeTestRule.onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }

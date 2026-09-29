@@ -5,7 +5,7 @@ import app.cash.turbine.Turbine
 
 internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
     var predictionsResult: Result<AutocompletePredictionsResult> = Result.success(
-        AutocompletePredictionsResult(predictions = emptyList())
+        AutocompletePredictionsResult(predictions = emptyList(), source = null)
     )
     var detailsResult: Result<PlaceDetailsResult> = Result.failure(NotImplementedError())
     var onBeforeFindAutocompletePredictions: (suspend () -> Unit)? = null

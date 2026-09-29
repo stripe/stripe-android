@@ -3,16 +3,21 @@ package com.stripe.android.checkout
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Bundle
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -20,79 +25,175 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.PrimaryButtonStyle
+import com.stripe.android.uicore.StripeColors
+import com.stripe.android.uicore.StripeShapes
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
-@OptIn(CheckoutSessionPreview::class)
+@OptIn(
+    CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    CardFundingFilteringPrivatePreview::class,
+)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
 
-    @get:Rule
-    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
-
     @Test
-    fun `loadInitial commits state with payment method metadata`() = runScenario {
+    fun `loadInitial commits only payment element metadata when ECE is not configured`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNull()
     }
 
     @Test
-    fun `loadInitial commits common configuration derived from the controller configuration`() = runScenario {
-        loader.loadInitial(
-            configuration = CheckoutController.Configuration()
-                .googlePayConfiguration(GooglePayConfiguration(GooglePayConfiguration.Environment.Test))
-                .build(),
-            checkoutSessionResponse = response(merchantCountry = "US"),
-        )
+    fun `loadInitial commits ECE payment method metadata when ECE is configured`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
 
-        assertThat(stateHolder.state?.commonConfiguration?.googlePay?.countryCode).isEqualTo("US")
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
     @Test
-    fun `loadInitial seeds collected details with default billing address`() = runScenario {
-        val address = CheckoutController.Address()
-            .city(" San Francisco ")
-            .country(" US ")
-            .line1(" 510 Townsend St ")
-            .postalCode(" 94103 ")
-            .state(" CA ")
+    fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
+        paymentElementLoaderDelay = 1.seconds,
+    ) {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
 
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
+    }
+
+    @Test
+    fun `loadInitial reports immediate row selection action to payment element loader`() = runScenario(
+        internalRowSelectionCallback = {},
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        val integrationConfiguration = paymentElementLoader.lastIntegrationConfiguration
+            as PaymentElementLoader.Configuration.Embedded
+        assertThat(integrationConfiguration.isRowSelectionImmediateAction).isTrue()
+    }
+
+    @Test
+    fun `loadInitial applies payment element appearance to the global theme`() = runScenario {
+        val previousTheme = StripeThemeSnapshot()
+        try {
+            loader.loadInitial(
+                configuration = CheckoutController.Configuration()
+                    .paymentElement(
+                        PaymentElement.Configuration().appearance(
+                            PaymentElement.Configuration.Appearance().colorsLight(
+                                PaymentElement.Configuration.Appearance.Colors.light()
+                                    .primary(0xFF123456.toInt())
+                            )
+                        )
+                    )
+                    .build(),
+                checkoutSessionResponse = response(),
+            )
+
+            assertThat(StripeTheme.colorsLightMutable.materialColors.primary.toArgb())
+                .isEqualTo(0xFF123456.toInt())
+        } finally {
+            previousTheme.restore()
+        }
+    }
+
+    @Test
+    fun `loadInitial passes payment method order to payment method metadata`() = runScenario {
         loader.loadInitial(
             configuration = CheckoutController.Configuration()
-                .defaultBillingAddress(address)
+                .paymentElement(
+                    PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
+                )
                 .build(),
             checkoutSessionResponse = response(),
         )
 
-        val billingAddress = requireNotNull(stateHolder.state?.collectedDetails?.billingAddress)
-        assertThat(billingAddress.city).isEqualTo("San Francisco")
-        assertThat(billingAddress.country).isEqualTo("US")
-        assertThat(billingAddress.line1).isEqualTo("510 Townsend St")
-        assertThat(billingAddress.postalCode).isEqualTo("94103")
-        assertThat(billingAddress.state).isEqualTo("CA")
-        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.address?.postalCode)
-            .isEqualTo("94103")
+        assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
+            .isEqualTo(listOf("klarna", "card"))
+    }
+
+    @Test
+    fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .defaults(
+                CheckoutController.Configuration.Defaults()
+                    .shippingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name("John Shipping")
+                            .address(CheckoutController.Address().country("US").city("Seattle")),
+                    )
+                    .email("prefill@example.com"),
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val collected = requireNotNull(stateHolder.state).collectedDetails
+        assertThat(collected).isEqualTo(
+            CheckoutCollectedDetails(
+                email = "prefill@example.com",
+                shippingName = "John Shipping",
+                shippingAddress = CheckoutController.Address().country("US").city("Seattle").build(),
+            ),
+        )
+    }
+
+    @Test
+    fun `loadInitial clears an invalid shipping default from collected details`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .shippingAddressElement(ShippingAddressElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().shippingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("John Shipping")
+                        .address(CheckoutController.Address().country("DE")),
+                ),
+            )
+            .build()
+
+        loader.loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = response(allowedShippingCountries = listOf("US", "CA")),
+        )
+
+        val state = requireNotNull(stateHolder.state)
+        assertThat(state.configuration.defaults.shippingDetails?.name).isEqualTo("John Shipping")
+        assertThat(state.configuration.defaults.shippingDetails?.address?.country).isEqualTo("DE")
+        assertThat(state.collectedDetails.shippingName).isNull()
+        assertThat(state.collectedDetails.shippingAddress).isNull()
     }
 
     @Test
@@ -131,6 +232,19 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `clear removes controller and customer state`() = runScenario(
+        customer = savedCustomer(),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        loader.clear()
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(customerStateHolder.customer.value).isNull()
+        assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+    }
+
+    @Test
     fun `reload routes the selection through the chooser`() = runScenario(
         loaderSelection = PaymentSelection.GooglePay,
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -163,8 +277,6 @@ internal class CheckoutStateLoaderTest {
                     savedStateHandle = savedStateHandle,
                     isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 ),
-                eventReporter = FakeEventReporter(),
-                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null },
             )
         },
@@ -237,6 +349,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload preserves eager Link suppression`() = runScenario {
+        loader.reload(committedState(linkEagerPresentationSuppressed = true))
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isTrue()
+    }
+
+    @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
@@ -253,11 +372,24 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
     }
 
+    @Test
+    fun `loadInitial resets eager Link suppression for a newly configured session`() = runScenario {
+        stateHolder.state = committedState(linkEagerPresentationSuppressed = true)
+
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
+    }
+
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response(
         merchantCountry: String? = "US",
-    ) = CheckoutSessionResponseFactory.create(merchantCountry = merchantCountry)
+        allowedShippingCountries: List<String>? = null,
+    ) = CheckoutSessionResponseFactory.create(
+        merchantCountry = merchantCountry,
+        allowedShippingCountries = allowedShippingCountries,
+    )
 
     private fun savedCustomer() = CustomerState(
         paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -271,21 +403,20 @@ internal class CheckoutStateLoaderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
-        collectedDetails = CheckoutCollectedDetails(),
+        collectedDetails = CheckoutCollectedDetails(email = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        commonConfiguration = CheckoutCommonConfigurationFactory("Example, Inc.").create(
-            configuration = CheckoutController.Configuration().build(),
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = CheckoutCollectedDetails(),
-        ),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
@@ -304,12 +435,13 @@ internal class CheckoutStateLoaderTest {
     )
 
     private fun runScenario(
-        merchantDisplayName: String = "Example, Inc.",
         loaderSelection: PaymentSelection? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
         customer: CustomerState? = null,
+        internalRowSelectionCallback: (() -> Unit)? = null,
+        paymentElementLoaderDelay: Duration = Duration.ZERO,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -332,8 +464,12 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata?.customerMetadata },
+            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata
+            },
+            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata?.customerMetadata
+            },
         )
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
@@ -342,15 +478,17 @@ internal class CheckoutStateLoaderTest {
             shouldFail = shouldFail,
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
+            delay = paymentElementLoaderDelay,
         )
         val loader = CheckoutStateLoader(
-            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
-            commonConfigurationFactory = CheckoutCommonConfigurationFactory(merchantDisplayName),
+            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
+            commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = paymentElementLoader,
             selectionChooser = chooser,
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
         )
 
         Scenario(
@@ -360,6 +498,7 @@ internal class CheckoutStateLoaderTest {
             paymentElementLoader = paymentElementLoader,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            testScheduler = testScheduler,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -372,6 +511,7 @@ internal class CheckoutStateLoaderTest {
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
@@ -398,5 +538,31 @@ internal class CheckoutStateLoaderTest {
             val previousSelection: PaymentSelection?,
             val newSelection: PaymentSelection?,
         )
+    }
+}
+
+internal class StripeThemeSnapshot(
+    private val colorsLight: StripeColors = StripeTheme.colorsLightMutable,
+    private val colorsDark: StripeColors = StripeTheme.colorsDarkMutable,
+    private val shapes: StripeShapes = StripeTheme.shapesMutable,
+    private val typography: StripeTypography = StripeTheme.typographyMutable,
+    private val primaryButtonStyle: PrimaryButtonStyle = StripeTheme.primaryButtonStyle,
+    private val formInsets: FormInsets = StripeTheme.formInsets,
+    private val sectionSpacing: Float? = StripeTheme.customSectionSpacing,
+    private val textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
+    private val iconStyle: IconStyle = StripeTheme.iconStyle,
+    private val verticalModeRowPadding: Float = StripeTheme.verticalModeRowPadding,
+) {
+    fun restore() {
+        StripeTheme.colorsLightMutable = colorsLight
+        StripeTheme.colorsDarkMutable = colorsDark
+        StripeTheme.shapesMutable = shapes
+        StripeTheme.typographyMutable = typography
+        StripeTheme.primaryButtonStyle = primaryButtonStyle
+        StripeTheme.formInsets = formInsets
+        StripeTheme.customSectionSpacing = sectionSpacing
+        StripeTheme.textFieldInsets = textFieldInsets
+        StripeTheme.iconStyle = iconStyle
+        StripeTheme.verticalModeRowPadding = verticalModeRowPadding
     }
 }

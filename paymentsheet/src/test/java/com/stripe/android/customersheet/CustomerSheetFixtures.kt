@@ -83,7 +83,6 @@ internal object CustomerSheetFixtures {
             linkSettings = null,
             externalPaymentMethodData = null,
             customPaymentMethods = emptyList(),
-            paymentMethodSpecs = null,
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = listOf("card"),

@@ -22,8 +22,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -32,6 +30,7 @@ import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -53,7 +52,7 @@ import kotlin.coroutines.CoroutineContext
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
-        PaymentConfigurationModule::class,
+        ApiConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
@@ -104,10 +103,6 @@ internal interface EmbeddedCommonModule {
         fun provideEventReporterMode(): EventReporter.Mode {
             return EventReporter.Mode.Embedded
         }
-
-        @Provides
-        @Named(PRODUCT_USAGE)
-        fun provideProductUsageTokens() = setOf("EmbeddedPaymentElement")
 
         @Provides
         fun provideDurationProvider(): DurationProvider {

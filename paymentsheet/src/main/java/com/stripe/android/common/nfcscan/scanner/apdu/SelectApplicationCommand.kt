@@ -6,6 +6,8 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 internal data class SelectApplicationCommand(
     val aid: ApplicationIdentifier,
 ) : ApduCommand<PdolTemplate>() {
+    override val name = "selectApplication(aid=${aid.value.uppercase()})"
+
     /*
      * Interindustry standardized command for ISO 7816-4
      */

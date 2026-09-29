@@ -5,15 +5,20 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainHeader
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
@@ -35,14 +40,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetTest {
+internal class PaymentSheetTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
+    private val networkRule = NetworkRule()
+
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(IntentsRule())
     }
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -56,6 +65,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -67,7 +77,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -87,6 +97,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulPayByBankPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -98,7 +109,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -118,6 +129,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulLpmPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -129,7 +141,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -149,6 +161,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulUsBankPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -162,10 +175,12 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                    allowsDelayedPaymentMethods = true,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        allowsDelayedPaymentMethods = true,
+                    )
                 ),
             )
         }
@@ -191,6 +206,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
@@ -202,7 +218,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -223,6 +239,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testInsufficientFundsCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
@@ -234,7 +251,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -256,6 +273,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         successTimeoutSeconds = 10L,
@@ -268,7 +286,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -293,6 +311,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFailureWhenSetupRequestsFail() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
@@ -311,13 +330,14 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
 
     @Test
     fun testPaymentIntentWithCardBrandChoiceSuccess_Selector() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -329,7 +349,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -351,6 +371,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentWithCardBrandChoiceSuccess_PreferredBrands_Deselect() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -362,10 +383,12 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                    preferredNetworks = listOf(CardBrand.CartesBancaires)
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        preferredNetworks = listOf(CardBrand.CartesBancaires)
+                    )
                 ),
             )
         }
@@ -385,6 +408,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
@@ -396,7 +420,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
@@ -405,6 +429,7 @@ internal class PaymentSheetTest {
     fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
         repeat(2) {
             runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
                 networkRule = networkRule,
                 integrationType = integrationType,
                 resultCallback = ::assertCompleted,
@@ -416,13 +441,16 @@ internal class PaymentSheetTest {
                 testContext.presentPaymentSheet {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = defaultConfiguration,
+                        configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
                     )
                 }
 
                 networkRule.enqueue(
                     method("GET"),
-                    path("edge-internal/card-metadata")
+                    path("edge-internal/card-metadata"),
+                    header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+                    doesNotContainHeader("Stripe-Account"),
+                    applyDefaultAuthorization = false,
                 ) { response ->
                     response.testBodyFromFile("card-metadata-get.json")
                 }
@@ -447,6 +475,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentWithCvcRecollection() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -470,13 +499,15 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -495,6 +526,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentWithCvcRecollection() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
         builder = {
@@ -535,19 +567,21 @@ internal class PaymentSheetTest {
                     ),
                     requireCvcRecollection = true,
                 ),
-                configuration = defaultConfiguration.newBuilder()
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "cus_1",
-                            clientSecret = "cuss_654321",
+                configuration = apiConfigurationTestType.applyTo(
+                    defaultConfiguration.newBuilder()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                                id = "cus_1",
+                                clientSecret = "cuss_654321",
+                            )
                         )
-                    )
-                    .link(
-                        PaymentSheet.LinkConfiguration.Builder()
-                            .display(PaymentSheet.LinkConfiguration.Display.Never)
-                            .build()
-                    )
-                    .build(),
+                        .link(
+                            PaymentSheet.LinkConfiguration.Builder()
+                                .display(PaymentSheet.LinkConfiguration.Display.Never)
+                                .build()
+                        )
+                        .build()
+                ),
             )
         }
 
@@ -573,6 +607,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedUsBankAccountMandateNotDisplayDuringCardCheckout() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -604,18 +639,20 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -638,6 +675,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedUsBankPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -669,18 +707,20 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -699,6 +739,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedCardPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -730,18 +771,20 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .allowsDelayedPaymentMethods(true)
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
+                        )
+                        .allowsDelayedPaymentMethods(true)
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 
@@ -760,6 +803,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -771,7 +815,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -794,6 +838,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFocusFirstEditBadgeOnEdit() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -817,13 +862,15 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -840,6 +887,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -873,7 +921,7 @@ internal class PaymentSheetTest {
                         setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
                 ),
-                configuration = configurationWithTermsDisplayNever,
+                configuration = apiConfigurationTestType.applyTo(configurationWithTermsDisplayNever),
             )
         }
 
@@ -883,6 +931,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorElementsSessions() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
@@ -894,13 +943,14 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
     }
 
     @Test
     fun testOBO_PassedToElementsSessionCall() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         builder = {
@@ -927,7 +977,7 @@ internal class PaymentSheetTest {
                     ),
                     onBehalfOf = oboMerchantID
                 ),
-                configuration = defaultConfiguration,
+                configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }
 
@@ -938,6 +988,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSavedCard_isDisplayedForDashboard() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -952,27 +1003,36 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             query("type", "card"),
             header("Authorization", "Bearer uk_12345"),
+            applyDefaultAuthorization = false,
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
-        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.USBankAccount.code,
+            applyDefaultAuthorization = false,
+        )
+        networkRule.setupV1PaymentMethodsResponse(
+            type = PaymentMethod.Type.SepaDebit.code,
+            applyDefaultAuthorization = false,
+        )
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(
-                    merchantDisplayName = "Merchant, Inc."
-                )
-                    .customer(
-                        customer = PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = "uk_12345",
-                        )
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(
+                        merchantDisplayName = "Merchant, Inc."
                     )
-                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
-                    .build()
+                        .customer(
+                            customer = PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = "uk_12345",
+                            )
+                        )
+                        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                        .build()
+                )
             )
         }
 

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -52,9 +53,36 @@ class ConfirmCheckoutSessionParamsTest {
         assertThat(params).doesNotContainKey("save_payment_method")
     }
 
+    @Test
+    fun `toParamMap includes shipping information when set`() {
+        val params = createParams(shipping = SHIPPING).toParamMap()
+
+        assertThat(params["shipping"]).isEqualTo(
+            mapOf(
+                "name" to "Jane Doe",
+                "address" to mapOf(
+                    "line1" to "354 Oyster Point Blvd",
+                    "line2" to "Suite 200",
+                    "city" to "South San Francisco",
+                    "state" to "CA",
+                    "postal_code" to "94080",
+                    "country" to "US",
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `toParamMap omits shipping information when null`() {
+        val params = createParams(shipping = null).toParamMap()
+
+        assertThat(params).doesNotContainKey("shipping")
+    }
+
     private fun createParams(
         expectedAmount: Long? = null,
         savePaymentMethod: Boolean? = null,
+        shipping: ConfirmCheckoutSessionParams.Shipping? = null,
     ): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
             paymentMethodId = "pm_test_123",
@@ -62,6 +90,7 @@ class ConfirmCheckoutSessionParamsTest {
             returnUrl = "stripesdk://return_url",
             expectedAmount = expectedAmount,
             savePaymentMethod = savePaymentMethod,
+            shipping = shipping,
         )
     }
 
@@ -71,6 +100,18 @@ class ConfirmCheckoutSessionParamsTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+        )
+
+        val SHIPPING = ConfirmCheckoutSessionParams.Shipping(
+            name = "Jane Doe",
+            address = Address(
+                line1 = "354 Oyster Point Blvd",
+                line2 = "Suite 200",
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94080",
+                country = "US",
+            ),
         )
     }
 }

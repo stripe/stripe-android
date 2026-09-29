@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -14,7 +13,6 @@ internal fun createInlineAutocompletePlacesClient(
     errorReporter: ErrorReporter,
     isPlacesAvailable: Boolean,
 ): PlacesClientProxy? {
-    if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return null
     if (!isPlacesAvailable) return null
     val apiKey = googlePlacesApiKey ?: return null
     return LazyPlacesClientProxy {

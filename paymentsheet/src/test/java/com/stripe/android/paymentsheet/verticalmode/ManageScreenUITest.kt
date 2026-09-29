@@ -47,7 +47,10 @@ class ManageScreenUITest {
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
@@ -90,7 +93,10 @@ class ManageScreenUITest {
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethodsWithDefault.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethodsWithDefault) {
@@ -157,7 +163,10 @@ class ManageScreenUITest {
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {

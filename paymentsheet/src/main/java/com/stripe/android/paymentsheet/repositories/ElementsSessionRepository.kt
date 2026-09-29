@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
@@ -39,36 +38,24 @@ internal interface ElementsSessionRepository {
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
+        apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
 
 internal class RealElementsSessionRepository @Inject constructor(
-    application: Application,
+    private val application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
-
-    private val fraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(application, workContext)
-
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
         sdkVersion = StripeSdkVersion.VERSION,
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
-
-    // The PaymentConfiguration can change after initialization, so this needs to get a new
-    // request options each time requested.
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-        )
 
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -77,9 +64,14 @@ internal class RealElementsSessionRepository @Inject constructor(
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
+        apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
-        fraudDetectionDataRepository.refresh()
+        DefaultFraudDetectionDataRepository(
+            context = application,
+            apiConfigurationProvider = { apiConfiguration },
+            workContext = workContext,
+        ).refresh()
 
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -91,12 +83,15 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val options = requestOptions
-        val elementsSession = retrieveElementsSession(params, options)
+        val requestOptions = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
+        val elementsSession = retrieveElementsSession(params, requestOptions)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
-                fallback(params, elementsSessionFailure)
+                fallback(params, elementsSessionFailure, requestOptions)
             } else {
                 elementsSession
             }
@@ -148,6 +143,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun fallback(
         params: ElementsSessionParams,
         elementsSessionFailure: Throwable,
+        requestOptions: ApiRequest.Options,
     ): Result<ElementsSession> = withContext(workContext) {
         val stripeIntent = when (params) {
             is ElementsSessionParams.PaymentIntentType -> {

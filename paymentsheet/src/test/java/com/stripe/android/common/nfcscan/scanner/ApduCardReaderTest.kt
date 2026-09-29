@@ -155,9 +155,7 @@ internal class ApduCardReaderTest {
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        assertThat(readerError.error).isSameInstanceAs(UNSUPPORTED_CARD_ERROR)
+        assertThat(result).isEqualTo(NfcCardReader.Result.Error(UNSUPPORTED_CARD_ERROR))
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -173,15 +171,19 @@ internal class ApduCardReaderTest {
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        assertThat(readerError.error).isEqualTo(
-            ApduResponseError.Command(
-                apduCommand = SelectPpseCommand,
-                sw1 = 0x6A.toByte(),
-                sw2 = 0x82.toByte(),
-            ),
-        )
+        assertSequenceError(
+            result = result,
+            executedCommands = listOf("selectPpse"),
+        ) {
+            assertThat(cause).isEqualTo(
+                ApduResponseError.Command(
+                    apduCommand = SelectPpseCommand,
+                    sw1 = 0x6A.toByte(),
+                    sw2 = 0x82.toByte(),
+                )
+            )
+        }
+
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
     }
 
@@ -194,22 +196,31 @@ internal class ApduCardReaderTest {
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
+        assertSequenceError(
+            result = result,
+            executedCommands = listOf(
+                "selectPpse",
+                "selectApplication(aid=A0000000031010)",
+            ),
+        ) {
+            assertThat(cause).isInstanceOf<ApduResponseError.Command>()
+            val commandError = cause as ApduResponseError.Command
 
-        assertThat(readerError.error).isInstanceOf<ApduResponseError.Command>()
-        val commandError = readerError.error as ApduResponseError.Command
+            assertThat(commandError.apduCommand).isInstanceOf<SelectApplicationCommand>()
 
-        assertThat(commandError.apduCommand).isInstanceOf<SelectApplicationCommand>()
-        assertThat(commandError.sw1).isEqualTo(0x6A.toByte())
-        assertThat(commandError.sw2).isEqualTo(0x82.toByte())
+            assertThat(commandError.sw1).isEqualTo(0x6A.toByte())
+            assertThat(commandError.sw2).isEqualTo(0x82.toByte())
+
+            assertThat(commandError.parameters[SW1_PARAMETER]).isEqualTo("6A")
+            assertThat(commandError.parameters[SW2_PARAMETER]).isEqualTo("82")
+        }
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
     }
 
     @Test
-    fun `readCard propagates GetProcessingOptions failure`() = runScenario(
+    fun `readCard wraps GetProcessingOptions failure with executed commands`() = runScenario(
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(
@@ -220,13 +231,21 @@ internal class ApduCardReaderTest {
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        val commandError = readerError.error as ApduResponseError.Command
-        assertThat(commandError.errorCode).isEqualTo("nfcCardReadFailed")
-        assertThat(commandError.apduCommand).isInstanceOf<GetProcessingOptionsCommand>()
-        assertThat(commandError.sw1).isEqualTo(0x6A.toByte())
-        assertThat(commandError.sw2).isEqualTo(0x82.toByte())
+        assertSequenceError(
+            result = result,
+            executedCommands = listOf(
+                "selectPpse",
+                "selectApplication(aid=A0000000031010)",
+                "getProcessingOptions",
+            ),
+        ) {
+            assertThat(cause).isInstanceOf<ApduResponseError.Command>()
+            val commandError = cause as ApduResponseError.Command
+
+            assertThat(commandError.apduCommand).isInstanceOf<GetProcessingOptionsCommand>()
+            assertThat(commandError.sw1).isEqualTo(0x6A.toByte())
+            assertThat(commandError.sw2).isEqualTo(0x82.toByte())
+        }
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -239,65 +258,81 @@ internal class ApduCardReaderTest {
     }
 
     @Test
-    fun `readCard returns transceiver io error when open fails`() = runScenario(
+    fun `readCard wraps transceiver io error when open fails`() = runScenario(
         openException = IOException("open failed"),
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        val scanningError = readerError.error as GenericNfcScanningError
-        assertThat(scanningError.errorCode).isEqualTo("nfcTransceiverIoError")
-        assertThat(scanningError.userMessage).isEqualTo(
-            R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-        )
+        assertSequenceError(
+            result = result,
+            executedCommands = emptyList(),
+        ) {
+            assertThat(cause)
+                .isEqualTo(GenericNfcScanningError(TRANSCEIVER_IO_ERROR_CODE))
+        }
     }
 
     @Test
-    fun `readCard returns transceiver io error when transceive fails`() = runScenario(
+    fun `readCard wraps transceiver io error when transceive fails`() = runScenario(
         transceiveException = IOException("transceive failed"),
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        val scanningError = readerError.error as GenericNfcScanningError
-        assertThat(scanningError.errorCode).isEqualTo("nfcTransceiverIoError")
-        assertThat(scanningError.userMessage).isEqualTo(
-            R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-        )
+        assertSequenceError(
+            result = result,
+            executedCommands = listOf("selectPpse"),
+        ) {
+            assertThat(cause)
+                .isEqualTo(GenericNfcScanningError(TRANSCEIVER_IO_ERROR_CODE))
+        }
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
     }
 
     @Test
-    fun `readCard returns transceiver security error when open fails with SecurityException`() = runScenario(
+    fun `readCard wraps transceiver security error when open fails with SecurityException`() = runScenario(
         openException = SecurityException("NFC access denied"),
     ) {
         val result = cardReader.readCard(transceiver)
 
-        assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
-        val readerError = result as NfcCardReader.Result.Error
-        val scanningError = readerError.error as GenericNfcScanningError
-        assertThat(scanningError.errorCode).isEqualTo("nfcTransceiverSecurityError")
-        assertThat(scanningError.userMessage).isEqualTo(
-            R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-        )
+        assertSequenceError(
+            result = result,
+            executedCommands = emptyList(),
+        ) {
+            assertThat(cause)
+                .isEqualTo(GenericNfcScanningError(TRANSCEIVER_SECURITY_ERROR_CODE))
+        }
     }
 
     @Test
-    fun `readCard returns unknown error for unrecognized throwable`() = runScenario(
+    fun `readCard wraps unknown error for unrecognized throwable`() = runScenario(
         openException = RuntimeException("unexpected"),
     ) {
         val result = cardReader.readCard(transceiver)
 
+        assertSequenceError(
+            result = result,
+            executedCommands = emptyList(),
+        ) {
+            assertThat(cause)
+                .isEqualTo(GenericNfcScanningError(UNKNOWN_NFC_ERROR_CODE))
+        }
+    }
+
+    private fun assertSequenceError(
+        result: NfcCardReader.Result,
+        executedCommands: List<String>,
+        block: NfcReadingSequenceError.() -> Unit = {},
+    ) {
         assertThat(result).isInstanceOf<NfcCardReader.Result.Error>()
         val readerError = result as NfcCardReader.Result.Error
-        val scanningError = readerError.error as GenericNfcScanningError
-        assertThat(scanningError.errorCode).isEqualTo("unknownNfcError")
-        assertThat(scanningError.userMessage).isEqualTo(
-            R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-        )
+
+        assertThat(readerError.error).isInstanceOf<NfcReadingSequenceError>()
+        val sequenceError = readerError.error as NfcReadingSequenceError
+
+        block(sequenceError)
+
+        assertThat(sequenceError.parameters[EXECUTED_COMMANDS_PARAMETER]).isEqualTo(executedCommands)
     }
 
     private fun runScenario(
@@ -357,6 +392,14 @@ internal class ApduCardReaderTest {
     )
 
     private companion object {
+        const val EXECUTED_COMMANDS_PARAMETER = "executed_commands"
+        const val SW1_PARAMETER = "sw1"
+        const val SW2_PARAMETER = "sw2"
+
+        const val TRANSCEIVER_IO_ERROR_CODE = "nfcTransceiverIoError"
+        const val TRANSCEIVER_SECURITY_ERROR_CODE = "nfcTransceiverSecurityError"
+        const val UNKNOWN_NFC_ERROR_CODE = "unknownNfcError"
+
         val UNSUPPORTED_CARD_ERROR = GenericNfcScanningError(
             errorCode = "cardUnsupportedByNfc",
             userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,

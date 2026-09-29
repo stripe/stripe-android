@@ -24,6 +24,7 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
+    private val defaultMatcher: RequestMatcher,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -33,7 +34,11 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout)
+    ) : this(
+        hostsToTrack.map { it.hostFromUrl() }.toSet(),
+        validationTimeout,
+        RequestMatchers.stripeApiKey(),
+    )
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -49,10 +54,12 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { response ->
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        mockWebServer.dispatcher.enqueue(*matchers) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
@@ -62,14 +69,27 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        applyDefaultAuthorization: Boolean = true,
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        mockWebServer.dispatcher.enqueue(*requestMatcher) { request, response ->
+        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        mockWebServer.dispatcher.enqueue(*matchers) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
                 assertResponseBodyIsValidJson(response)
             }
+        }
+    }
+
+    private fun withDefaultAuthorization(
+        requestMatcher: Array<out RequestMatcher>,
+        applyDefaultAuthorization: Boolean,
+    ): Array<out RequestMatcher> {
+        return if (applyDefaultAuthorization) {
+            arrayOf(defaultMatcher, *requestMatcher)
+        } else {
+            requestMatcher
         }
     }
 

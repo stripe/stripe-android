@@ -18,4 +18,6 @@ interface InlineAutocompleteHandler {
     fun onEnterManually()
 
     fun getAttributionDrawable(isDarkTheme: Boolean): Int?
+
+    fun onSearchActivated()
 }

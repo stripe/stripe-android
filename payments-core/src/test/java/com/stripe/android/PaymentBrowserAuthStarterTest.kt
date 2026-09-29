@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
@@ -147,7 +148,7 @@ class PaymentBrowserAuthStarterTest {
             url = "https://hooks.stripe.com/",
             returnUrl = "stripe://payment-auth",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }

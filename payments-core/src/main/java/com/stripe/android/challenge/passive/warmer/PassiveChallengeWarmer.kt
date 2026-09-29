@@ -2,6 +2,7 @@ package com.stripe.android.challenge.passive.warmer
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -21,12 +22,12 @@ interface PassiveChallengeWarmer {
      * activity result launcher.
      *
      * @param passiveCaptchaParams The parameters for the passive captcha challenge
-     * @param publishableKey The publishable key for Stripe API
+     * @param apiConfiguration The API configuration for Stripe requests
      * @param productUsage Set of product usage strings for analytics
      */
     fun start(
         passiveCaptchaParams: PassiveCaptchaParams,
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         productUsage: Set<String>
     )
 

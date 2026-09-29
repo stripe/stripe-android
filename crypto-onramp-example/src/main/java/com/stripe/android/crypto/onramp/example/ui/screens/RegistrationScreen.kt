@@ -15,8 +15,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.example.REGISTRATION_COUNTRY_TAG
+import com.stripe.android.crypto.onramp.example.REGISTRATION_FULL_NAME_TAG
+import com.stripe.android.crypto.onramp.example.REGISTRATION_PHONE_TAG
+import com.stripe.android.crypto.onramp.example.REGISTRATION_REGISTER_BUTTON_TAG
 
 @Composable
 internal fun RegistrationScreen(
@@ -82,6 +87,7 @@ private fun RegistrationFields(
         placeholder = { Text("+1234567890") },
         singleLine = true,
         modifier = Modifier
+            .testTag(REGISTRATION_PHONE_TAG)
             .fillMaxWidth()
             .padding(bottom = 12.dp)
     )
@@ -93,6 +99,7 @@ private fun RegistrationFields(
         placeholder = { Text("US") },
         singleLine = true,
         modifier = Modifier
+            .testTag(REGISTRATION_COUNTRY_TAG)
             .fillMaxWidth()
             .padding(bottom = 12.dp)
     )
@@ -103,6 +110,7 @@ private fun RegistrationFields(
         label = { Text("Full Name (optional)") },
         singleLine = true,
         modifier = Modifier
+            .testTag(REGISTRATION_FULL_NAME_TAG)
             .fillMaxWidth()
             .padding(bottom = 20.dp)
     )
@@ -126,7 +134,9 @@ private fun RegistrationButtons(
 
         Button(
             onClick = onRegister,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .testTag(REGISTRATION_REGISTER_BUTTON_TAG)
+                .weight(1f)
         ) {
             Text("Register")
         }

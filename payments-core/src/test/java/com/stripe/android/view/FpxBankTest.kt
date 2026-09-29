@@ -17,24 +17,27 @@ class FpxBankTest {
     @Test
     fun testOrder() {
         val expected = listOf(
-            "Maybank2U",
-            "CIMB Clicks",
-            "Public Bank",
-            "RHB Bank",
-            "Hong Leong Bank",
-            "AmBank",
             "Affin Bank",
+            "Agrobank",
             "Alliance Bank",
+            "AmBank",
             "Bank Islam",
             "Bank Muamalat",
+            "Bank of China",
             "Bank Rakyat",
             "BSN",
+            "CIMB Clicks",
+            "Hong Leong Bank",
             "HSBC Bank",
             "KFH",
             "Maybank2E",
+            "Maybank2U",
+            "MBSB Bank",
             "OCBC Bank",
+            "Public Bank",
+            "RHB Bank",
             "Standard Chartered",
-            "UOB"
+            "UOB Bank"
         )
         val actual = FpxBank.entries.map { it.displayName }
         assertThat(expected)

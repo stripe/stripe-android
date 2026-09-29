@@ -2,14 +2,17 @@ package com.stripe.android.common.taptoadd
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.core.ApiConfiguration
 
 internal class FakeTapToAddConnectionManager private constructor(
-    override val isSupported: Boolean,
+    private val isSupported: Boolean,
     connectResults: List<Result<Unit>>,
 ) : TapToAddConnectionManager {
     private val queuedConnectResults = connectResults.toMutableList()
 
     val connectCalls = Turbine<ConnectCall>()
+
+    override fun isSupported(apiConfiguration: ApiConfiguration.State): Boolean = isSupported
 
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         connectCalls.add(ConnectCall(config))

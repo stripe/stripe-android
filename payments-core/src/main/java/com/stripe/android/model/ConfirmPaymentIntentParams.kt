@@ -10,6 +10,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIR
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
@@ -397,7 +398,6 @@ constructor(
     }
 
     companion object {
-        private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         private const val PARAM_RECEIPT_EMAIL = "receipt_email"
         private const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         private const val PARAM_SHIPPING = "shipping"
@@ -611,9 +611,6 @@ constructor(
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                // return_url is no longer used by is still required by the backend
-                // TODO(smaskell): remove this when no longer required
-                returnUrl = "stripe://return_url",
                 paymentMethodCode = PaymentMethod.Type.Alipay.code,
             )
         }

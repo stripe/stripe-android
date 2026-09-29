@@ -2,13 +2,13 @@ package com.stripe.android.paymentelement.confirmation.attestation
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.AndroidVerificationObject
@@ -18,9 +18,10 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.attestation.IntegrityRequestManager
+import com.stripe.attestation.AttestationWarmer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,11 +30,10 @@ import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
-    private val integrityRequestManager: IntegrityRequestManager,
+    private val attestationWarmer: AttestationWarmer,
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(APPLICATION_ID) private val appId: String,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
@@ -53,13 +53,13 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (paymentMethodMetadata.attestOnIntentConfirmation.not()) return
         coroutineScope.launch(workContext) {
             attestationAnalyticsEventsReporter.prepare()
-            integrityRequestManager.prepare()
+            attestationWarmer.start()
                 .onSuccess {
                     attestationAnalyticsEventsReporter.prepareSucceeded()
                 }.onFailure { error ->
                     attestationAnalyticsEventsReporter.prepareFailed(error)
                     errorReporter.report(
-                        UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                        ExpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
                         stripeException = StripeException.create(error)
                     )
                 }
@@ -109,6 +109,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (AttestationActivityResult) -> Unit
     ): ActivityResultLauncher<AttestationActivityContract.Args> {
         return activityResultCaller.registerForActivityResult(AttestationActivityContract(), onResult)
@@ -130,7 +131,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
-                    publishableKey = publishableKeyProvider(),
+                    apiConfiguration = confirmationArgs.paymentMethodMetadata.apiConfiguration,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

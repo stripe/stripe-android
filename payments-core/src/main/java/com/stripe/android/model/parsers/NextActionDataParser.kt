@@ -31,9 +31,25 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
             StripeIntent.NextActionType.SwishRedirect -> SwishRedirectParser()
+            StripeIntent.NextActionType.AwaitAuthorization -> AwaitAuthorizationParser()
+            StripeIntent.NextActionType.MbWayAwaitAuthorization -> MbWayAwaitAuthorizationParser()
             null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
+    }
+
+    private class AwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.AwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.AwaitAuthorization {
+            return StripeIntent.NextActionData.AwaitAuthorization
+        }
+    }
+
+    private class MbWayAwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.MbWayAwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.MbWayAwaitAuthorization {
+            return StripeIntent.NextActionData.MbWayAwaitAuthorization
+        }
     }
 
     private class DisplayOxxoDetailsJsonParser :
@@ -156,10 +172,10 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         override fun parse(
             json: JSONObject
         ): StripeIntent.NextActionData.AlipayRedirect {
-            return StripeIntent.NextActionData.AlipayRedirect(
-                json.getString(FIELD_NATIVE_DATA),
-                json.getString(FIELD_URL),
-                optString(json, FIELD_RETURN_URL)
+            return StripeIntent.NextActionData.AlipayRedirect.create(
+                data = optString(json, FIELD_NATIVE_DATA),
+                webViewUrl = json.getString(FIELD_URL),
+                returnUrl = optString(json, FIELD_RETURN_URL),
             )
         }
 

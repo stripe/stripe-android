@@ -8,6 +8,11 @@ import com.stripe.android.common.nfcscan.scanner.NfcTagTransceiver
  */
 internal abstract class ApduCommand<TResponseData> {
     /**
+     * Human-readable name for debugging and analytics.
+     */
+    abstract val name: String
+
+    /**
      * Instruction class - indicates the type of command
      */
     protected abstract val classByte: Byte
@@ -85,10 +90,10 @@ internal abstract class ApduCommand<TResponseData> {
             onSuccess = { tlv ->
                 responseData(tlv)?.let { responseData ->
                     Result.success(responseData)
-                } ?: Result.failure(ApduResponseError.Invalid(rawData))
+                } ?: Result.failure(ApduResponseError.Invalid())
             },
             onFailure = { cause ->
-                Result.failure(ApduResponseError.Parsing(rawData, cause))
+                Result.failure(ApduResponseError.Parsing(cause))
             }
         )
     }

@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
@@ -58,8 +58,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+                waitForLinkedBankAccount()
             }
         )
     }
@@ -79,8 +78,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
             },
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+                waitForLinkedBankAccount()
             }
         )
     }
@@ -96,8 +94,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
             },
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+                waitForLinkedBankAccount()
             }
         )
 
@@ -111,7 +108,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("6789", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -128,8 +125,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
             },
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+                waitForLinkedBankAccount()
             }
         )
 
@@ -143,7 +139,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("6789", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -159,8 +155,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                     it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
                 },
             afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+                waitForLinkedBankAccount()
             }
         )
     }
@@ -174,12 +169,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
             afterAuthorization = { _, _ ->
-                rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-                    rules.compose
-                        .onAllNodesWithTag(TEST_TAG_ACCOUNT_DETAILS)
-                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                        .isNotEmpty()
-                }
+                waitForLinkedBankAccount()
 
                 // Briefly switch to another payment method
                 val cardSelection = PaymentSelection(rules.compose, "card")
@@ -201,12 +191,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
             afterAuthorization = { _, populator ->
-                rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-                    rules.compose
-                        .onAllNodesWithTag(TEST_TAG_ACCOUNT_DETAILS)
-                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                        .isNotEmpty()
-                }
+                waitForLinkedBankAccount()
 
                 // We actually want to confirm with a card
                 val cardSelection = PaymentSelection(rules.compose, "card")
@@ -223,9 +208,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+            afterAuthorization = { selectors, _ ->
+                selectors.buyButton.waitProcessingComplete()
             }
         )
     }
@@ -240,10 +224,24 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 }.copy(
                     authorizationAction = AuthorizeAction.Cancel,
                 ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
+            afterAuthorization = { selectors, _ ->
+                selectors.buyButton.waitProcessingComplete()
             }
         )
+    }
+
+    private fun waitForLinkedBankAccount() {
+        rules.compose.waitUntil(
+            conditionDescription = "linked US bank account details to appear",
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        ) {
+            rules.compose
+                .onAllNodesWithTag(TEST_TAG_ACCOUNT_DETAILS)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+
+        ComposeButton(rules.compose, hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
+            .waitFor(isEnabled())
     }
 }

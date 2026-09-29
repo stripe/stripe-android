@@ -79,11 +79,13 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
+import com.stripe.android.uicore.stripePrimaryButtonStyle
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 
@@ -336,7 +338,7 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
@@ -378,7 +380,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(horizontalPadding)
                     .padding(bottom = 8.dp)
-                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
+                    .testTag(SHEET_MANDATE_TEST_TAG),
             )
         }
 
@@ -388,7 +390,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(horizontalPadding)
                     .padding(top = 2.dp, bottom = 8.dp)
-                    .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
+                    .testTag(SHEET_ERROR_TEST_TAG),
             )
         }
     }
@@ -402,7 +404,7 @@ private fun PaymentSheetContent(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .padding(horizontalPadding)
-                    .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
+                    .testTag(SHEET_MANDATE_TEST_TAG),
             )
         }
     }
@@ -419,7 +421,7 @@ internal fun Wallet(
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
-    val padding = StripeTheme.getOuterFormInsets()
+    val padding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
         WalletHeader(
@@ -469,6 +471,7 @@ private fun WalletHeader(
             when (wallet) {
                 is WalletsState.GooglePay -> {
                     GooglePayButton(
+                        apiConfiguration = wallet.apiConfiguration,
                         state = PrimaryButton.State.Ready,
                         allowCreditCards = wallet.allowCreditCards,
                         buttonType = wallet.buttonType,
@@ -498,8 +501,8 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
-        .padding(StripeTheme.getOuterFormInsets())
-        .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+        .testTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
 
@@ -513,6 +516,9 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     }
 
     val context = LocalContext.current
+    val primaryButtonStyle = MaterialTheme.stripePrimaryButtonStyle
+    val primaryButtonTextStyle = primaryButtonStyle.getComposeTextStyle()
+    val isDark = MaterialTheme.stripeThemeIsDark
 
     Box {
         AndroidViewBinding(
@@ -521,13 +527,14 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 val primaryButton = binding.primaryButton
                 button = primaryButton
                 primaryButton.setAppearanceConfiguration(
-                    StripeTheme.primaryButtonStyle,
+                    primaryButtonStyle = primaryButtonStyle,
+                    labelTextStyle = primaryButtonTextStyle,
                     tintList = ColorStateList.valueOf(
-                        if (context.isSystemDarkTheme()) {
+                        if (isDark) {
                             viewModel.config.appearance.primaryButton.colorsDark.background
                         } else {
                             viewModel.config.appearance.primaryButton.colorsLight.background
-                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
+                        } ?: primaryButtonStyle.getBackgroundColor(context)
                     )
                 )
                 binding
@@ -541,7 +548,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
             Box(
                 Modifier
-                    .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
+                    .testTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
                     .matchParentSize()
                     .pointerInput(Unit) {
                         detectTapGestures { uiState?.onDisabledClick?.invoke() }
@@ -571,10 +578,4 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
-const val PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG = "PRIMARY_BUTTON_DISABLED_OVERLAY"
-const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
-const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG = "PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

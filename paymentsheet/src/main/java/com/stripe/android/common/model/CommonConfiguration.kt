@@ -3,6 +3,7 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -42,6 +43,7 @@ internal data class CommonConfiguration(
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val apiConfiguration: ApiConfiguration.State? = null,
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
@@ -94,11 +96,6 @@ internal data class CommonConfiguration(
             throw IllegalArgumentException(
                 "configuration.customer must not be set when using CheckoutSession initialization mode. " +
                     "Customer information is provided by the checkout session."
-            )
-        }
-        if (defaultBillingDetails?.email == null) {
-            throw IllegalArgumentException(
-                "configuration.defaultBillingDetails.email must be set when using CheckoutSession initialization mode."
             )
         }
         if (externalPaymentMethods.isNotEmpty()) {
@@ -251,6 +248,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -276,6 +274,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -308,6 +307,10 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+    apiConfiguration = ApiConfiguration.State(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+    ),
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
