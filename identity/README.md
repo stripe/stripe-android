@@ -11,6 +11,7 @@ The Stripe Identity Android SDK makes it quick and easy to verify your user's id
 * [Getting started](#getting-started)
   * [Integration](#integration)
   * [Example](#example)
+* [Third-party licenses](#third-party-licenses)
 
 <!--te-->
 
@@ -53,3 +54,9 @@ To do so, configure your app's dependency on stripe identity as follows.
 ### Example
 
 [identity-example](../identity-example) – This example demonstrates how to capture your users' ID documents on Android and securely send them to Stripe Identity for identity verification.
+
+## Third-party licenses
+
+The Identity SDK bundles the [MediaPipe](https://github.com/google-ai-edge/mediapipe) Face Landmarker model, licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0). Its attribution and license text ship in the SDK's assets as `stripe_identity_third_party_notices.txt`. Include this attribution in your app's open source notices.
+
+The Identity SDK also depends on the MediaPipe Tasks libraries (`com.google.mediapipe:tasks-vision`), also licensed under the Apache License, Version 2.0.
