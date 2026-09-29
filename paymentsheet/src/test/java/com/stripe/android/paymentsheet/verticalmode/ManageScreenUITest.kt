@@ -13,8 +13,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -48,8 +51,6 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
-            isProcessing = false,
-            selectionError = null,
         )
     ) {
         assertThat(
@@ -78,8 +79,6 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -98,8 +97,6 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
-            isProcessing = false,
-            selectionError = null,
         )
     ) {
         assertThat(
@@ -133,8 +130,6 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -155,8 +150,6 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -174,8 +167,6 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
-            isProcessing = false,
-            selectionError = null,
         )
     ) {
         assertThat(
@@ -201,8 +192,6 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -226,8 +215,6 @@ class ManageScreenUITest {
                 isEditing = true,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -250,8 +237,6 @@ class ManageScreenUITest {
             isEditing = false,
             canEdit = true,
             linkBrand = LinkBrand.Link,
-            isProcessing = false,
-            selectionError = null,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -269,8 +254,6 @@ class ManageScreenUITest {
             isEditing = true,
             canEdit = true,
             linkBrand = LinkBrand.Link,
-            isProcessing = false,
-            selectionError = null,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
@@ -294,8 +277,6 @@ class ManageScreenUITest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = true,
-                selectionError = null,
             )
         ) {
             pendingPaymentMethods.forEach {
@@ -316,6 +297,30 @@ class ManageScreenUITest {
             }
             composeRule.onAllNodesWithTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG, useUnmergedTree = true)
                 .assertCountEquals(1)
+        }
+    }
+
+    @Test
+    fun errorMessageComesFromTheFailedRowsSelectionError() {
+        val error = "Something went wrong".resolvableString
+        val paymentMethodsWithError = displayableSavedPaymentMethods.mapIndexed { index, displayable ->
+            DisplayableSavedPaymentMethod.create(
+                displayName = displayable.displayName,
+                paymentMethod = displayable.paymentMethod,
+                selectionError = error.takeIf { index == 1 },
+            )
+        }
+
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = paymentMethodsWithError,
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+            )
+        ) {
+            composeRule.onNodeWithText(error.resolve(ApplicationProvider.getApplicationContext())).assertExists()
         }
     }
 

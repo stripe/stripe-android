@@ -44,8 +44,6 @@ internal class ManageScreenUITransitionScreenshotTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         )
 
@@ -61,7 +59,6 @@ internal class ManageScreenUITransitionScreenshotTest {
                                 shouldShowDefaultBadge = false,
                             )
                         },
-                        isProcessing = true,
                     )
                 }
             }

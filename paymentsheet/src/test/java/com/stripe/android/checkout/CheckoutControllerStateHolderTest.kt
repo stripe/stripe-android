@@ -110,7 +110,8 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `setSelection with the current selection keeps a saved selection failure`() = testScenario {
         val failure = SavedPaymentMethodSelectionState.Failed(
-            IllegalStateException("Selection failed").stripeErrorMessage(),
+            paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            error = IllegalStateException("Selection failed").stripeErrorMessage(),
         )
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
             savedPaymentMethodSelectionState = failure,
@@ -125,7 +126,8 @@ internal class CheckoutControllerStateHolderTest {
     fun `setSelection with a different selection resets a saved selection failure to idle`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                IllegalStateException("Selection failed").stripeErrorMessage(),
+                paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+                error = IllegalStateException("Selection failed").stripeErrorMessage(),
             ),
         )
 
@@ -143,7 +145,8 @@ internal class CheckoutControllerStateHolderTest {
         val error = APIConnectionException()
         holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                error.stripeErrorMessage(),
+                paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+                error = error.stripeErrorMessage(),
             ),
         )
 
@@ -151,7 +154,12 @@ internal class CheckoutControllerStateHolderTest {
 
         assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(restored.state?.savedPaymentMethodSelectionState)
-            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+            .isEqualTo(
+                SavedPaymentMethodSelectionState.Failed(
+                    paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+                    error = error.stripeErrorMessage(),
+                )
+            )
     }
 
     @Test

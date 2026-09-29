@@ -2,10 +2,12 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -23,7 +25,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -97,6 +104,104 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
             assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(initialResponse)
             sheetActivityStateHolder.checkoutSessionResponseCalls.expectNoEvents()
         }
+    }
+
+    @Test
+    fun `selection without tax update never marks pending and ends idle`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        initialResponse = null,
+    ) {
+        sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            val result = selector.select(selection)
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(sheetActivityStateHolder.checkoutSessionResponseCalls.awaitItem()).isNull()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `successful tax update marks pending during update then idle`() = runTest {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
+            setSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
+        }
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        val updateGate = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        val selector = DefaultSheetSavedPaymentMethodSelector(
+            taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> updateGate.await() }),
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            selectionHolder = selectionHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+        )
+
+        sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            var result: Result<Unit>? = null
+            val job = launch(start = CoroutineStart.UNDISPATCHED) {
+                result = selector.select(selection)
+            }
+
+            assertThat(awaitItem()).isEqualTo(
+                SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id)
+            )
+
+            val refreshedResponse = CheckoutSessionResponseFactory.create(id = "refreshed_response")
+            updateGate.complete(Result.success(refreshedResponse))
+            advanceUntilIdle()
+
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            assertThat(job.isCompleted).isTrue()
+            assertThat(result?.isSuccess).isTrue()
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(refreshedResponse)
+            sheetActivityStateHolder.checkoutSessionResponseCalls.awaitItem()
+            expectNoEvents()
+        }
+        sheetActivityStateHolder.validate()
+    }
+
+    @Test
+    fun `failed tax update marks failed and leaves selection and response unchanged`() = runTest {
+        val initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val initialResponse = CheckoutSessionResponseFactory.create(id = "previous_response")
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
+            setSelection(initialSelection)
+        }
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder().apply {
+            setInitialCheckoutSessionResponse(initialResponse)
+        }
+        val error = RuntimeException("Tax region update failed")
+        val selector = DefaultSheetSavedPaymentMethodSelector(
+            taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> Result.failure(error) }),
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            selectionHolder = selectionHolder,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+        )
+
+        sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            val result = selector.select(selection)
+
+            assertThat(awaitItem()).isEqualTo(
+                SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id)
+            )
+            assertThat(awaitItem()).isEqualTo(
+                SavedPaymentMethodSelectionState.Failed(selection.paymentMethod.id, error.stripeErrorMessage())
+            )
+            assertThat(result.isFailure).isTrue()
+            assertThat(selectionHolder.selection.value).isEqualTo(initialSelection)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(initialResponse)
+            expectNoEvents()
+        }
+        sheetActivityStateHolder.validate()
     }
 
     private fun runScenario(

@@ -14,6 +14,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -310,8 +311,6 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -331,8 +330,6 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
-                isProcessing = false,
-                selectionError = null,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -348,7 +345,11 @@ internal class EmbeddedNavigatorTest {
 
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
 
-        interactor.updateState { it.copy(isProcessing = true) }
+        val pendingPaymentMethod = PaymentMethodFixtures.createCard().toDisplayableSavedPaymentMethod(
+            isSelectionPending = true,
+            shouldShowDefaultBadge = false,
+        )
+        interactor.updateState { it.copy(paymentMethods = listOf(pendingPaymentMethod)) }
 
         assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }

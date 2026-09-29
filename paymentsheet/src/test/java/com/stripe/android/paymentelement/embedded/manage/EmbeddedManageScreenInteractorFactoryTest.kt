@@ -13,9 +13,11 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -39,7 +41,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
 
             assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.isSelectionPending).isFalse()
             verify(eventReporter).onSelectPaymentOption(selection)
             assertThat(selectionHolder.selection.value).isNull()
             verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
@@ -57,7 +59,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
 
             assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.isSelectionPending).isFalse()
             verify(eventReporter).onSelectPaymentOption(selection)
             verify(navigator).performAction(EmbeddedNavigator.Action.Back)
         }
@@ -74,11 +76,26 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
 
             assertThat(selector.selectCalls.awaitItem()).isEqualTo(selection)
-            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.isSelectionPending).isFalse()
             verify(eventReporter).onSelectPaymentOption(selection)
             verify(navigator).performAction(EmbeddedNavigator.Action.Close(true))
         }
         selector.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Pending selection state from the injected flow marks the matching row`() = runTest {
+        val selector = FakeEmbeddedSavedPaymentMethodSelector(Result.success(Unit))
+        runScenario(
+            launchMode = EmbeddedLaunchMode.Manage,
+            selector = selector,
+        ) {
+            savedPaymentMethodSelectionState.value =
+                SavedPaymentMethodSelectionState.Pending(paymentMethod.paymentMethod.id)
+
+            assertThat(interactor.state.value.isSelectionPending).isTrue()
+            assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
+        }
     }
 
     private suspend fun runScenario(
@@ -96,6 +113,8 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
         }
         val navigator = mock<EmbeddedNavigator>()
         val eventReporter = mock<EventReporter>()
+        val savedPaymentMethodSelectionState =
+            MutableStateFlow<SavedPaymentMethodSelectionState>(SavedPaymentMethodSelectionState.Idle)
         val interactor = DefaultEmbeddedManageScreenInteractorFactory(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerStateHolder = customerStateHolder,
@@ -104,6 +123,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             embeddedNavigatorProvider = Provider { navigator },
             embeddedSavedPaymentMethodSelector = selector,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             eventReporter = eventReporter,
             launchMode = launchMode,
         ).createManageScreenInteractor()
@@ -115,6 +135,7 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             navigator = navigator,
             eventReporter = eventReporter,
             selection = PaymentSelection.Saved(sourcePaymentMethod),
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
         ).block()
 
         interactor.close()
@@ -128,5 +149,6 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
         val navigator: EmbeddedNavigator,
         val eventReporter: EventReporter,
         val selection: PaymentSelection.Saved,
+        val savedPaymentMethodSelectionState: MutableStateFlow<SavedPaymentMethodSelectionState>,
     )
 }

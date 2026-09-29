@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -330,6 +331,18 @@ internal class DefaultSheetActivityStateHolderTest {
 
             stateHolder.updateMandate("Some new mandate".resolvableString)
             assertThat(awaitItem().mandateText).isEqualTo("Some new mandate".resolvableString)
+        }
+    }
+
+    @Test
+    fun `updateSavedPaymentMethodSelectionState updates savedPaymentMethodSelectionState`() = testScenario {
+        stateHolder.savedPaymentMethodSelectionState.test {
+            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+            val pending = SavedPaymentMethodSelectionState.Pending(CARD_PAYMENT_METHOD.id)
+            stateHolder.updateSavedPaymentMethodSelectionState(pending)
+
+            assertThat(awaitItem()).isEqualTo(pending)
         }
     }
 

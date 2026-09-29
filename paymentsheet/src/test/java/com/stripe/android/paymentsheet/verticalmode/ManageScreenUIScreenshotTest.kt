@@ -33,8 +33,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
@@ -52,8 +50,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
@@ -71,8 +67,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
@@ -90,8 +84,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
@@ -114,8 +106,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
@@ -154,8 +144,6 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
-                        isProcessing = false,
-                        selectionError = null,
                     )
                 ),
             )
