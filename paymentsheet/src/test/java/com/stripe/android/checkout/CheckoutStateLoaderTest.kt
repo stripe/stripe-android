@@ -258,21 +258,34 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial offers the initial selection to the chooser as the previous selection`() = runScenario(
-        loaderSelection = PaymentSelection.GooglePay,
-        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-    ) {
+    fun `loadInitial offers the initial selection to the chooser as the previous selection`() = runScenario {
         loader.loadInitial(
             configuration = defaultConfiguration(),
             checkoutSessionResponse = response(),
             initialSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         )
 
-        assertThat(stateHolder.state?.paymentSelection)
-            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        val call = chooser.lastCall
-        assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(chooser.lastCall?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `loadInitialSelection returns the chosen selection without committing state`() = runScenario(
+        loaderSelection = PaymentSelection.GooglePay,
+        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+    ) {
+        val selection = loader.loadInitialSelection(
+            configuration = defaultConfiguration(),
+            checkoutSessionResponse = response(),
+        )
+
+        assertThat(selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(chooser.lastCall).isEqualTo(
+            RecordingSelectionChooser.Call(
+                previousSelection = null,
+                newSelection = PaymentSelection.GooglePay,
+            )
+        )
+        assertThat(stateHolder.state).isNull()
     }
 
     @Test
