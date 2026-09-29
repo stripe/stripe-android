@@ -204,7 +204,7 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        if (selectionJob?.isActive == true) {
+        if (selectionJob?.isActive == true || hasNavigatedBack.get()) {
             return
         }
 
