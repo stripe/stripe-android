@@ -532,7 +532,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             null,
             is LinkLaunchMode.Authentication,
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full,
+            is LinkLaunchMode.Full,
             is LinkLaunchMode.PaymentMethodSelection -> {
                 linkAccount
                     // If we already have an account, return it.

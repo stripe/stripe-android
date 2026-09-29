@@ -159,7 +159,7 @@ internal class LinkActivityTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkExpressMode = linkExpressMode,
                 navigationManager = TestNavigationManager(),
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
                 addPaymentMethodOptionsFactory = mock()

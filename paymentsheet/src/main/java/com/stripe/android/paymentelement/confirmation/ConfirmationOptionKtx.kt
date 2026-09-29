@@ -166,7 +166,7 @@ private fun PaymentSelection.Link.toConfirmationOption(
                 // If a payment is included in the confirmation option, launch confirmation right away
                 selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
                 // If a payment is not included, launch the link flow regularly
-                else -> LinkLaunchMode.Full
+                else -> LinkLaunchMode.Full(showSecondaryButton = true)
             },
         )
     }
