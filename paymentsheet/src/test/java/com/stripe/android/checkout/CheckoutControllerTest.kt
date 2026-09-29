@@ -21,6 +21,7 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -222,13 +223,7 @@ internal class CheckoutControllerTest {
                             .address(CheckoutController.Address().country("DE"))
                     )
                 ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -247,13 +242,7 @@ internal class CheckoutControllerTest {
                         .address(CheckoutController.Address().country("DE"))
                 )
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -276,18 +265,16 @@ internal class CheckoutControllerTest {
                 )
             )
         ),
+        initModifier = automaticTaxFor("billing"),
         networkSetup = {
-            networkRule.checkoutInit(
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
-            )
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94103"),
-                bodyPart("tax_region[line1]", "510 Townsend St"),
-                bodyPart("tax_region[line2]", "Suite 100"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            networkRule.taxRegionUpdate(
+                country = "US",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                line1 = "510 Townsend St",
+                line2 = "Suite 100",
+                isAggregationExpected = true,
                 responseFactory = successResponseFactory(automaticTaxFor("billing")),
             )
         },
@@ -300,9 +287,6 @@ internal class CheckoutControllerTest {
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
-        networkSetup = {
-            networkRule.checkoutInit(responseFactory = ::successResponse)
-        },
     ) {
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
@@ -355,13 +339,7 @@ internal class CheckoutControllerTest {
             configuration = CheckoutController.Configuration().paymentElement(
                 PaymentElement.Configuration()
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory { json ->
-                        json.put("billing_address_collection", "required")
-                    },
-                )
-            },
+            initModifier = { json -> json.put("billing_address_collection", "required") },
         ) {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
@@ -660,9 +638,7 @@ internal class CheckoutControllerTest {
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 5099).put("subtotal", 5099)
-            },
+            responseFactory = successResponseFactory(withTotal(5099)),
         )
 
         val result = controller.updateCurrency("usd")
@@ -852,14 +828,14 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[city]", "Denver"),
-                bodyPart("tax_region[state]", "CO"),
-                bodyPart("tax_region[postal_code]", "80202"),
-                bodyPart("tax_region[line1]", "123 Main St"),
-                bodyPart("tax_region[line2]", "Apt 4"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            networkRule.taxRegionUpdate(
+                country = "US",
+                city = "Denver",
+                state = "CO",
+                postalCode = "80202",
+                line1 = "123 Main St",
+                line2 = "Apt 4",
+                isAggregationExpected = true,
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
@@ -877,13 +853,10 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateShippingAddress omits empty fields from tax_region request`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[postal_code]", "80202"),
-                not(hasBodyPart("tax_region[city]")),
-                not(hasBodyPart("tax_region[state]")),
-                not(hasBodyPart("tax_region[line1]")),
-                not(hasBodyPart("tax_region[line2]")),
+            networkRule.taxRegionUpdate(
+                country = "US",
+                postalCode = "80202",
+                assertAbsentOptionalAddressFields = true,
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
@@ -964,9 +937,7 @@ internal class CheckoutControllerTest {
 
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 8000).put("subtotal", 8000)
-            },
+            responseFactory = successResponseFactory(withTotal(8000)),
         )
 
         val result = controller.runServerUpdate { Result.success(Unit) }
@@ -1157,9 +1128,9 @@ internal class CheckoutControllerTest {
         runMutationScenario(
             initModifier = combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
         ) {
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            networkRule.taxRegionUpdate(
+                country = "US",
+                isAggregationExpected = true,
                 responseFactory = successResponseFactory(
                     combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
                 ),
@@ -1250,16 +1221,50 @@ internal class CheckoutControllerTest {
         checkoutInit(responseFactory = ::successResponse)
     }
 
+    private fun NetworkRule.taxRegionUpdate(
+        country: String,
+        city: String? = null,
+        state: String? = null,
+        postalCode: String? = null,
+        line1: String? = null,
+        line2: String? = null,
+        isAggregationExpected: Boolean = false,
+        assertAbsentOptionalAddressFields: Boolean = false,
+        responseFactory: (MockResponse) -> Unit,
+    ) {
+        val matchers = buildList<RequestMatcher> {
+            add(bodyPart("tax_region[country]", country))
+            city?.let { add(bodyPart("tax_region[city]", it)) }
+            state?.let { add(bodyPart("tax_region[state]", it)) }
+            postalCode?.let { add(bodyPart("tax_region[postal_code]", it)) }
+            line1?.let { add(bodyPart("tax_region[line1]", it)) }
+            line2?.let { add(bodyPart("tax_region[line2]", it)) }
+
+            if (assertAbsentOptionalAddressFields) {
+                if (city == null) add(not(hasBodyPart("tax_region[city]")))
+                if (state == null) add(not(hasBodyPart("tax_region[state]")))
+                if (postalCode == null) add(not(hasBodyPart("tax_region[postal_code]")))
+                if (line1 == null) add(not(hasBodyPart("tax_region[line1]")))
+                if (line2 == null) add(not(hasBodyPart("tax_region[line2]")))
+            }
+            if (isAggregationExpected) {
+                add(bodyPart("elements_session_client[is_aggregation_expected]", "true"))
+            }
+        }
+
+        checkoutUpdate(*matchers.toTypedArray(), responseFactory = responseFactory)
+    }
+
     private fun NetworkRule.savedPaymentMethodTaxUpdate(
         responseFactory: (MockResponse) -> Unit,
     ) {
-        checkoutUpdate(
-            bodyPart("tax_region[country]", "US"),
-            bodyPart("tax_region[city]", "San Francisco"),
-            bodyPart("tax_region[state]", "CA"),
-            bodyPart("tax_region[postal_code]", "94111"),
-            bodyPart("tax_region[line1]", "1234 Main Street"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+        taxRegionUpdate(
+            country = "US",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94111",
+            line1 = "1234 Main Street",
+            isAggregationExpected = true,
             responseFactory = responseFactory,
         )
     }
@@ -1425,6 +1430,10 @@ internal class CheckoutControllerTest {
     private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
         .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
+    private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
+        checkoutItemJson(json).put("total", amount).put("subtotal", amount)
+    }
+
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,
         integrationName: String,
@@ -1460,10 +1469,16 @@ internal class CheckoutControllerTest {
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
         configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
-        networkSetup: () -> Unit = { networkRule.defaultInit() },
+        initModifier: ((JSONObject) -> Unit)? = null,
+        networkSetup: (() -> Unit)? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        networkSetup()
+        if (initModifier != null) {
+            networkRule.checkoutInit(responseFactory = successResponseFactory(initModifier))
+        } else if (networkSetup == null) {
+            networkRule.defaultInit()
+        }
+        networkSetup?.invoke()
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val result = setup.controller.configure(clientSecret, configuration)
