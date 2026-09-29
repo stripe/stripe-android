@@ -153,7 +153,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun updateLinkWalletBillingEmail(
         paymentMethod: PaymentMethod,
     ): Result<Unit> {
-        if (paymentMethod.card?.wallet?.walletType != Wallet.Type.Link) {
+        if (paymentMethod.type != PaymentMethod.Type.Link) {
             return Result.success(Unit)
         }
         val email = paymentMethod.billingDetails?.email ?: return Result.success(Unit)
