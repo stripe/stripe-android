@@ -141,7 +141,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 "pm_missing",
             )
 
-            expectNoEvents()
+            val state = awaitItem()
+            assertThat(state.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending("pm_missing"))
+            assertThat(state.displayedSavedPaymentMethod).isNull()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
         }
     }
