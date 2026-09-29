@@ -473,7 +473,7 @@ class DefaultManageScreenInteractorTest {
                 awaitItem()
                 assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
 
-                // Each write rebuilds the row; only the id filter stops a repeat once the job has finished.
+                // Each write re-emits state; only the Idle check stops a retry once the job has finished.
                 selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(paymentMethod.id)
                 awaitItem()
                 val error = IllegalStateException("tax update failed")

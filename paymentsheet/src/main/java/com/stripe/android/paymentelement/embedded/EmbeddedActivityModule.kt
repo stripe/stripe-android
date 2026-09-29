@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -166,17 +167,15 @@ internal interface EmbeddedActivityModule {
         ): EmbeddedSavedPaymentMethodSelector = when (launchMode) {
             is EmbeddedLaunchMode.Manage -> sheetSelector
             EmbeddedLaunchMode.PaymentOptions,
-            is EmbeddedLaunchMode.Form -> EmbeddedSavedPaymentMethodSelector { selection ->
-                selectionHolder.setSelection(selection)
-                Result.success(Unit)
-            }
-        }
+            is EmbeddedLaunchMode.Form -> object : EmbeddedSavedPaymentMethodSelector {
+                override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
+                    stateFlowOf(SavedPaymentMethodSelectionState.Idle)
 
-        @Provides
-        fun provideSavedPaymentMethodSelectionState(
-            sheetActivityStateHolder: SheetActivityStateHolder,
-        ): StateFlow<SavedPaymentMethodSelectionState> {
-            return sheetActivityStateHolder.savedPaymentMethodSelectionState
+                override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+                    selectionHolder.setSelection(selection)
+                    return Result.success(Unit)
+                }
+            }
         }
 
         @Provides

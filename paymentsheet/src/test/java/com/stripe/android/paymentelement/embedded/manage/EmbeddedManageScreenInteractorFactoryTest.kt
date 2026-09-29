@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -44,7 +45,9 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
         val navigator = mock<EmbeddedNavigator>()
         val eventReporter = mock<EventReporter>()
         val selectCalls = Turbine<PaymentSelection.Saved>()
-        val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(SavedPaymentMethodSelectionState.Idle)
+        val selectionStateSource = MutableStateFlow<SavedPaymentMethodSelectionState>(
+            SavedPaymentMethodSelectionState.Idle,
+        )
         val interactor = DefaultEmbeddedManageScreenInteractorFactory(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerStateHolder = customerStateHolder,
@@ -52,19 +55,22 @@ internal class EmbeddedManageScreenInteractorFactoryTest {
             savedPaymentMethodMutator = savedPaymentMethodMutator,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             embeddedNavigatorProvider = Provider { navigator },
-            embeddedSavedPaymentMethodSelector = { selection ->
-                selectCalls.add(selection)
-                Result.success(Unit)
+            embeddedSavedPaymentMethodSelector = object : EmbeddedSavedPaymentMethodSelector {
+                override val selectionState: StateFlow<SavedPaymentMethodSelectionState> = selectionStateSource
+
+                override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+                    selectCalls.add(selection)
+                    return Result.success(Unit)
+                }
             },
-            savedPaymentMethodSelectionState = selectionState,
             eventReporter = eventReporter,
             launchMode = EmbeddedLaunchMode.Manage,
         ).createManageScreenInteractor()
         val selection = PaymentSelection.Saved(sourcePaymentMethod)
 
-        selectionState.value = SavedPaymentMethodSelectionState.Pending(sourcePaymentMethod.id)
+        selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(sourcePaymentMethod.id)
         assertThat(interactor.state.value.paymentMethods.single().isSelectionPending).isTrue()
-        selectionState.value = SavedPaymentMethodSelectionState.Idle
+        selectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
         val paymentMethod = interactor.state.value.paymentMethods.single()
         interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))

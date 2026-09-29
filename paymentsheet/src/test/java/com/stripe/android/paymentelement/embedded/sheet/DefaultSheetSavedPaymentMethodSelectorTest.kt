@@ -29,7 +29,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         updateTaxRegion = { error("Tax update should not run") },
     ) {
-        sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+        selector.selectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
             assertThat(selector.select(selection).isSuccess).isTrue()
@@ -47,7 +47,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
             updateTaxRegion = { update.await() },
         ) {
-            sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+            selector.selectionState.test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 val result = testScope.async(start = CoroutineStart.UNDISPATCHED) { selector.select(selection) }
@@ -74,7 +74,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
             updateTaxRegion = { Result.failure(error) },
             initialResponse = initialResponse,
         ) {
-            sheetActivityStateHolder.savedPaymentMethodSelectionState.test {
+            selector.selectionState.test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
                 assertThat(selector.select(selection).isFailure).isTrue()

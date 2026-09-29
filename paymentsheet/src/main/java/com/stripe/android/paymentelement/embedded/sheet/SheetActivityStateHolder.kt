@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -43,9 +42,7 @@ internal interface SheetActivityStateHolder {
     val result: SharedFlow<EmbeddedActivityResult>
     val validationRequested: SharedFlow<Unit>
     val checkoutSessionResponse: CheckoutSessionResponse?
-    val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>
     fun setCheckoutSessionResponse(response: CheckoutSessionResponse?)
-    fun updateSavedPaymentMethodSelectionState(selectionState: SavedPaymentMethodSelectionState)
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
@@ -96,18 +93,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     override var checkoutSessionResponse: CheckoutSessionResponse? = null
         private set
 
-    private val _savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-        SavedPaymentMethodSelectionState.Idle,
-    )
-    override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
-        _savedPaymentMethodSelectionState
-
     override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
         checkoutSessionResponse = response
-    }
-
-    override fun updateSavedPaymentMethodSelectionState(selectionState: SavedPaymentMethodSelectionState) {
-        _savedPaymentMethodSelectionState.value = selectionState
     }
 
     private val _result = MutableSharedFlow<EmbeddedActivityResult>()

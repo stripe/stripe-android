@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -25,9 +24,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
@@ -129,35 +125,31 @@ internal class DefaultManageScreenInteractor(
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
     private var selectionJob: Job? = null
 
-    private val displayableSavedPaymentMethodsAndSelectionState =
+    private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
         combineAsStateFlow(
             paymentMethods,
             defaultPaymentMethodId,
             selectionState,
         ) { paymentMethods, defaultPaymentMethodId, selectionState ->
-            val displayableSavedPaymentMethods = paymentMethods.map {
+            paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
                     paymentMethodMetadata = paymentMethodMetadata,
                     defaultPaymentMethodId = defaultPaymentMethodId,
                     selectionState = selectionState,
                 )
             }
-            displayableSavedPaymentMethods to selectionState
         }
-
-    private val displayableSavedPaymentMethods = displayableSavedPaymentMethodsAndSelectionState
-        .mapAsStateFlow { it.first }
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
-        displayableSavedPaymentMethodsAndSelectionState,
+        displayableSavedPaymentMethods,
         selection,
         editing,
         canEdit,
         linkAccount,
-    ) { displayableSavedPaymentMethodsAndSelectionState, paymentSelection, editing, canEdit, linkAccount ->
-        val (displayablePaymentMethods, selectionState) = displayableSavedPaymentMethodsAndSelectionState
+        selectionState,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, selectionState ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -176,16 +168,14 @@ internal class DefaultManageScreenInteractor(
 
     init {
         coroutineScope.launch {
-            combine(displayableSavedPaymentMethods, editing, canEdit) { paymentMethods, isEditing, canEdit ->
-                if (!isEditing && !canEdit) {
-                    paymentMethods.singleOrNull()
-                } else {
-                    null
+            state.collect { state ->
+                // Idle only: a failed selection must not retry itself on the next state emission.
+                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1 &&
+                    state.selectionState == SavedPaymentMethodSelectionState.Idle
+                ) {
+                    handlePaymentMethodSelected(state.paymentMethods.first())
                 }
             }
-                .distinctUntilChangedBy { it?.paymentMethod?.id }
-                .filterNotNull()
-                .collect(::handlePaymentMethodSelected)
         }
 
         coroutineScope.launch {
