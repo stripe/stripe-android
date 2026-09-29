@@ -37,43 +37,49 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ) {
-        loadInitial(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-        ) { response, _ -> response }
-    }
-
-    suspend fun loadInitial(
-        configuration: CheckoutController.Configuration.State,
-        checkoutSessionResponse: CheckoutSessionResponse,
-        initialSelectionResponseUpdater: suspend (
-            CheckoutSessionResponse,
-            PaymentSelection?,
-        ) -> CheckoutSessionResponse,
-    ) {
-        val initialState = prepare(
+        commit(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
         )
-        val updatedResponse = initialSelectionResponseUpdater(
-            initialState.state.checkoutSessionResponse,
-            initialState.state.paymentSelection,
+    }
+
+    /**
+     * Resolves the initial selection for [checkoutSessionResponse] as [loadInitial] would choose it,
+     * without committing checkout state.
+     */
+    suspend fun loadInitialSelection(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): PaymentSelection? {
+        val collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse)
+        val embeddedConfig = embeddedConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
         )
-        val finalState = if (updatedResponse === initialState.state.checkoutSessionResponse) {
-            initialState
-        } else {
-            // The tax updater returns the original response when no server update is needed. A new
-            // response must be fully reloaded so all response-derived metadata stays consistent.
-            prepare(
+        val loadResults = loadPaymentElements(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                checkoutSessionResponse.id,
+                checkoutSessionResponse,
+            ),
+            embeddedConfiguration = embeddedConfig,
+            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            expressCheckoutElementConfiguration = null,
+        )
+        return selectionChooser.choose(
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            paymentMethods = loadResults.customer?.paymentMethods,
+            previousSelection = null,
+            newSelection = loadResults.paymentSelection,
+            newConfiguration = commonConfigurationFactory.create(
                 configuration = configuration,
-                response = updatedResponse,
-                collectedDetails = initialState.state.collectedDetails,
-                carryForward = CarryForward.from(initialState.state),
-            )
-        }
-        publish(finalState)
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            ),
+            formSheetAction = embeddedConfig.formSheetAction,
+        )
     }
 
     suspend fun reload(state: CheckoutControllerState) {
@@ -96,22 +102,6 @@ internal class CheckoutStateLoader @Inject constructor(
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
     ) {
-        publish(
-            prepare(
-                configuration = configuration,
-                response = response,
-                collectedDetails = collectedDetails,
-                carryForward = carryForward,
-            )
-        )
-    }
-
-    private suspend fun prepare(
-        configuration: CheckoutController.Configuration.State,
-        response: CheckoutSessionResponse,
-        collectedDetails: CheckoutCollectedDetails,
-        carryForward: CarryForward,
-    ): PreparedState {
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
@@ -154,34 +144,23 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        return PreparedState(
-            state = CheckoutControllerState(
-                configuration = configuration,
-                checkoutSessionResponse = response,
-                flagImages = flagImages,
-                collectedDetails = collectedDetails,
-                paymentMethodMetadata = loadResults.paymentMethodMetadata,
-                expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
-                embeddedConfiguration = embeddedConfig,
-                paymentSelection = selection,
-                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-                temporarySelection = carryForward.temporarySelection,
-                previousNewSelections = carryForward.previousNewSelections,
-                linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
-            ),
-            customer = loadResults.customer,
+        stateHolder.state = CheckoutControllerState(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            flagImages = flagImages,
+            collectedDetails = collectedDetails,
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
+            embeddedConfiguration = embeddedConfig,
+            paymentSelection = selection,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+            temporarySelection = carryForward.temporarySelection,
+            previousNewSelections = carryForward.previousNewSelections,
+            linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
-    }
 
-    private fun publish(preparedState: PreparedState) {
-        stateHolder.state = preparedState.state
-        customerStateHolder.setCustomerState(preparedState.customer)
+        customerStateHolder.setCustomerState(loadResults.customer)
     }
-
-    private data class PreparedState(
-        val state: CheckoutControllerState,
-        val customer: CustomerState?,
-    )
 
     private suspend fun loadPaymentElements(
         initializationMode: PaymentElementLoader.InitializationMode,

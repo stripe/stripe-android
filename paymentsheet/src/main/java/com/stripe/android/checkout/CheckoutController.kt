@@ -120,12 +120,12 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
+                val billingAddress = initialBillingAddress(configurationState, response)
+                if (billingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = defaultBillingAddress,
+                        address = billingAddress,
                     ).getOrThrow()
                 } else {
                     response
@@ -134,7 +134,6 @@ class CheckoutController @Inject internal constructor(
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
-                    initialSelectionResponseUpdater = ::updateInitialSelectionResponse,
                 )
             }
         }
@@ -230,9 +229,12 @@ class CheckoutController @Inject internal constructor(
                     selection.paymentMethod.id,
                 ),
             )
-            updateSavedPaymentMethodTaxRegion(
+            val address = savedPaymentMethodBillingAddress(checkoutSessionResponse, selection)
+                ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
-                selection = selection,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = address,
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
@@ -243,43 +245,47 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    private suspend fun updateInitialSelectionResponse(
+    /**
+     * The initial saved payment method's billing address takes precedence over the default billing
+     * address because confirmation reconciles tax against the payment method's billing address.
+     */
+    private suspend fun initialBillingAddress(
+        configuration: Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-        paymentSelection: PaymentSelection?,
-    ): CheckoutSessionResponse {
-        val selection = paymentSelection as? PaymentSelection.Saved
-            ?: return checkoutSessionResponse
-        return updateSavedPaymentMethodTaxRegion(
+    ): Address.State? {
+        val defaultBillingAddress = configuration.defaults.billingDetails?.address
+        if (
+            !checkoutSessionResponse.collectsTaxFromBillingAddress ||
+            checkoutSessionResponse.customer?.paymentMethods.isNullOrEmpty()
+        ) {
+            return defaultBillingAddress
+        }
+        val selection = checkoutStateLoader.loadInitialSelection(
+            configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
-            selection = selection,
-        ).getOrThrow()
+        ) as? PaymentSelection.Saved ?: return defaultBillingAddress
+        return savedPaymentMethodBillingAddress(checkoutSessionResponse, selection) ?: defaultBillingAddress
     }
 
-    private suspend fun updateSavedPaymentMethodTaxRegion(
+    private fun savedPaymentMethodBillingAddress(
         checkoutSessionResponse: CheckoutSessionResponse,
         selection: PaymentSelection.Saved,
-    ): kotlin.Result<CheckoutSessionResponse> {
+    ): Address.State? {
         val address = selection.billingDetails?.address?.toCheckoutAddress()
-        if (address == null) {
-            if (
-                checkoutSessionTaxRegionUpdater.requiresUpdate(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                )
-            ) {
-                // Billing-tax filtering should prevent this state from reaching selection.
-                errorReporter.report(
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent
-                        .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
-                )
-            }
-            return kotlin.Result.success(checkoutSessionResponse)
+        if (
+            address == null &&
+            checkoutSessionTaxRegionUpdater.requiresUpdate(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+        ) {
+            // Billing-tax filtering should prevent this state from reaching selection.
+            errorReporter.report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent
+                    .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+            )
         }
-        return checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            address = address,
-        )
+        return address
     }
 
     /**

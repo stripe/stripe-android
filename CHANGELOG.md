@@ -3,9 +3,6 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
-### PaymentSheet
-* [FIXED] Updated Automatic Tax when Checkout initially selects a saved payment method.
-
 ## 23.21.0 - 2026-09-28
 
 ### Payments

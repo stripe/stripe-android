@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -31,6 +32,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -272,6 +274,126 @@ internal class CheckoutControllerTest {
             val selection = requireNotNull(committedState).paymentSelection
             assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
             assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_saved_card")
+        }
+
+    @Test
+    fun `configure sends only the initial saved payment method billing address over the default`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultBillingAddress(),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94111"),
+                    bodyPart("tax_region[line1]", "1234 Main Street"),
+                    not(hasBodyPart("tax_region[line2]")),
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val selection = requireNotNull(committedState).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_saved_card")
+        }
+
+    @Test
+    fun `configure sends the billing address of the initially selected saved payment method rather than the first`() =
+        runConfigureScenario(
+            networkSetup = {
+                applicationContext
+                    .getSharedPreferences(DefaultPrefsRepository.PREF_FILE, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("guest", "payment_method:pm_second_card:false")
+                    .commit()
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithTwoCards(),
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "Seattle"),
+                    bodyPart("tax_region[state]", "WA"),
+                    bodyPart("tax_region[postal_code]", "98109"),
+                    bodyPart("tax_region[line1]", "400 Broad St"),
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithTwoCards(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val selection = requireNotNull(committedState).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_second_card")
+        }
+
+    @Test
+    fun `configure sends the default billing address when the initial selection is not a saved payment method`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultBillingAddress(),
+            networkSetup = {
+                // Billing-tax filtering drops a saved payment method without a billing address, so
+                // the initial selection is not a saved payment method.
+                val customerWithoutBillingAddress: (JSONObject) -> Unit = { json ->
+                    json.put(
+                        "customer",
+                        savedCustomerJson(
+                            paymentMethod = savedCardPaymentMethodJson().apply { remove("billing_details") },
+                        ),
+                    )
+                }
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            customerWithoutBillingAddress,
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "San Francisco"),
+                    bodyPart("tax_region[state]", "CA"),
+                    bodyPart("tax_region[postal_code]", "94103"),
+                    bodyPart("tax_region[line1]", "510 Townsend St"),
+                    bodyPart("tax_region[line2]", "Suite 100"),
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            customerWithoutBillingAddress,
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(requireNotNull(committedState).paymentSelection)
+                .isNotInstanceOf(PaymentSelection.Saved::class.java)
         }
 
     @Test
@@ -1410,8 +1532,48 @@ internal class CheckoutControllerTest {
         ).invoke(response)
     }
 
+    private fun configurationWithDefaultBillingAddress(): CheckoutController.Configuration {
+        return CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
+        )
+    }
+
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
         json.put("customer", savedCustomerJson())
+    }
+
+    private fun savedCustomerWithTwoCards(): (JSONObject) -> Unit = { json ->
+        val secondCard = savedCardPaymentMethodJson()
+            .put("id", "pm_second_card")
+            .put(
+                "billing_details",
+                JSONObject().put(
+                    "address",
+                    JSONObject()
+                        .put("line1", "400 Broad St")
+                        .put("city", "Seattle")
+                        .put("state", "WA")
+                        .put("postal_code", "98109")
+                        .put("country", "US")
+                )
+            )
+        json.put(
+            "customer",
+            savedCustomerJson().put(
+                "payment_methods",
+                JSONArray().put(savedCardPaymentMethodJson()).put(secondCard),
+            ),
+        )
     }
 
     private fun savedCustomerWithSepaDebit(): (JSONObject) -> Unit = { json ->
