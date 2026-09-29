@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import androidx.test.espresso.intent.Intents.getIntents
-import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.google.common.truth.Truth.assertThat
@@ -121,7 +120,9 @@ private fun enqueueGooglePayPaymentResult(
 }
 
 internal fun assertGooglePayCalled() {
-    intended(hasComponent(GOOGLE_PAY_ACTIVITY_NAME))
+    assertThat(
+        getIntents().filter(hasComponent(GOOGLE_PAY_ACTIVITY_NAME)::matches)
+    ).hasSize(1)
 }
 
 internal fun assertGooglePayCalledWithShippingAddressParameters(
@@ -197,7 +198,9 @@ private fun enqueueNativeLinkPaymentResult(result: LinkActivityResult) {
 }
 
 internal fun assertNativeLinkCalled() {
-    intended(hasComponent(LinkActivity::class.java.name))
+    assertThat(
+        getIntents().filter(hasComponent(LinkActivity::class.java.name)::matches)
+    ).hasSize(1)
 }
 
 internal fun assertNativeLinkCalledWithRequiredBillingAddress() {
