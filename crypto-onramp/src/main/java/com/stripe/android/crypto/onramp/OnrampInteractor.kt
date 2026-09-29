@@ -471,22 +471,22 @@ internal class OnrampInteractor @Inject constructor(
         )
     }
 
-    suspend fun fulfillAdditionalKycRequirement(
+    suspend fun fulfillKycRequirements(
         submission: AdditionalKycSubmission,
     ): Result<Unit> {
         val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
         val linkAccount = storedLinkAccount?.takeIf { !it.linkSessionKey.isNullOrBlank() }
             ?: linkController.state(application).value.internalLinkAccount
         val linkSessionKey = linkAccount?.linkSessionKey?.takeIf { it.isNotBlank() }
-            ?: return fulfillAdditionalKycRequirementFailure(MissingLinkSessionKeyException())
+            ?: return fulfillKycRequirementsFailure(MissingLinkSessionKeyException())
 
         if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
-            return fulfillAdditionalKycRequirementFailure(LinkAccountNotVerifiedException())
+            return fulfillKycRequirementsFailure(LinkAccountNotVerifiedException())
         }
 
         val requirements = submission.requirements.mapValues { (_, requirement) ->
             val documents = uploadAdditionalKycDocuments(requirement.documents, linkSessionKey)
-                .getOrElse { error -> return fulfillAdditionalKycRequirementFailure(error) }
+                .getOrElse { error -> return fulfillKycRequirementsFailure(error) }
 
             val additionalRequirements = requirement.questionnaire?.let { questionnaire ->
                 AdditionalKycCollectionSubmissionRequest(
@@ -508,12 +508,12 @@ internal class OnrampInteractor @Inject constructor(
             )
         }
 
-        return cryptoApiRepository.fulfillAdditionalKycRequirement(
+        return cryptoApiRepository.fulfillKycRequirements(
             requirements = requirements,
             linkSessionKey = linkSessionKey,
         ).fold(
             onSuccess = { response -> Result.success(response) },
-            onFailure = { error -> fulfillAdditionalKycRequirementFailure(error) },
+            onFailure = { error -> fulfillKycRequirementsFailure(error) },
         )
     }
 
@@ -541,9 +541,9 @@ internal class OnrampInteractor @Inject constructor(
         return Result.success(requests)
     }
 
-    private fun <T> fulfillAdditionalKycRequirementFailure(error: Throwable): Result<T> {
-        val mappedError = mapError(Operation.FulfillAdditionalKycRequirement, error)
-        trackError(Operation.FulfillAdditionalKycRequirement, mappedError)
+    private fun <T> fulfillKycRequirementsFailure(error: Throwable): Result<T> {
+        val mappedError = mapError(Operation.FulfillKycRequirements, error)
+        trackError(Operation.FulfillKycRequirements, mappedError)
         return Result.failure(mappedError)
     }
 

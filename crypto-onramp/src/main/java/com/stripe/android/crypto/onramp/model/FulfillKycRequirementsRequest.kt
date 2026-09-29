@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
-internal data class FulfillAdditionalKycRequirementRequest(
+internal data class FulfillKycRequirementsRequest(
     val requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
 ) {
     fun toParamMap(): Map<String, *> {

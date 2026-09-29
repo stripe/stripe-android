@@ -31,7 +31,7 @@ import java.net.URLDecoder
 class CryptoApiRepositoryAdditionalKycTest {
     @Test
     fun `keyed requirements use Link authentication and accept an empty response`() = runScenario {
-        val result = repository.fulfillAdditionalKycRequirement(
+        val result = repository.fulfillKycRequirements(
             requirements = mapOf(
                 "proof_of_address" to requirement(
                     documents = listOf(document("utility_provider", "file_poa")),
@@ -54,7 +54,7 @@ class CryptoApiRepositoryAdditionalKycTest {
 
     @Test
     fun `document subtype is included and optional additional requirements are omitted`() = runScenario {
-        val result = repository.fulfillAdditionalKycRequirement(
+        val result = repository.fulfillKycRequirements(
             requirements = mapOf(
                 "proof_of_address" to requirement(documents = listOf(document("utility_provider", "file_1")))
             ),
@@ -79,7 +79,7 @@ class CryptoApiRepositoryAdditionalKycTest {
 
     @Test
     fun `questionnaire-only submission omits documents from the request body`() = runScenario {
-        val result = repository.fulfillAdditionalKycRequirement(
+        val result = repository.fulfillKycRequirements(
             requirements = mapOf("source_of_funds" to requirement(emptyList(), questionnaire())),
             linkSessionKey = LINK_SESSION_KEY,
         )
@@ -99,7 +99,7 @@ class CryptoApiRepositoryAdditionalKycTest {
     fun `unknown success metadata is ignored`() = runScenario {
         network.response = StripeResponse(200, """{"submitted_at":1723264800}""")
 
-        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        val result = repository.fulfillKycRequirements(emptyMap(), LINK_SESSION_KEY)
         network.requests.awaitItem()
 
         assertThat(result.getOrThrow()).isEqualTo(Unit)
@@ -112,7 +112,7 @@ class CryptoApiRepositoryAdditionalKycTest {
             """{"error":{"message":"Invalid file","type":"invalid_request_error"}}""",
         )
 
-        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        val result = repository.fulfillKycRequirements(emptyMap(), LINK_SESSION_KEY)
         network.requests.awaitItem()
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
@@ -123,7 +123,7 @@ class CryptoApiRepositoryAdditionalKycTest {
     fun `malformed fulfillment response fails parsing`() = runScenario {
         network.response = StripeResponse(200, "not JSON")
 
-        val result = repository.fulfillAdditionalKycRequirement(emptyMap(), LINK_SESSION_KEY)
+        val result = repository.fulfillKycRequirements(emptyMap(), LINK_SESSION_KEY)
         network.requests.awaitItem()
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)

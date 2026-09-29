@@ -38,7 +38,7 @@ import org.robolectric.RuntimeEnvironment
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
-class OnrampInteractorFulfillAdditionalKycRequirementTest {
+class OnrampInteractorFulfillKycRequirementsTest {
     @Test
     fun `documents are uploaded in order before submission`() = runScenario {
         val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
@@ -48,13 +48,13 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_2")))
         whenever(
-            cryptoApiRepository.fulfillAdditionalKycRequirement(
+            cryptoApiRepository.fulfillKycRequirements(
                 requirements = requirementRequests(expectedDocuments, expectedQuestionnaire),
                 linkSessionKey = LINK_SESSION_KEY,
             )
         ).thenReturn(Result.success(Unit))
 
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile, secondFile))
         )
 
@@ -62,7 +62,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         inOrder(cryptoApiRepository) {
             verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
             verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
-            verify(cryptoApiRepository).fulfillAdditionalKycRequirement(
+            verify(cryptoApiRepository).fulfillKycRequirements(
                 requirements = requirementRequests(expectedDocuments, expectedQuestionnaire),
                 linkSessionKey = LINK_SESSION_KEY,
             )
@@ -98,16 +98,16 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
             .thenReturn(Result.success(StripeFile(id = "file_poa")))
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_sof")))
-        whenever(cryptoApiRepository.fulfillAdditionalKycRequirement(expectedRequirements, LINK_SESSION_KEY))
+        whenever(cryptoApiRepository.fulfillKycRequirements(expectedRequirements, LINK_SESSION_KEY))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.fulfillAdditionalKycRequirement(submission)
+        val result = interactor.fulfillKycRequirements(submission)
 
         assertThat(result.getOrThrow()).isEqualTo(Unit)
         inOrder(cryptoApiRepository) {
             verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
             verify(cryptoApiRepository).uploadAdditionalKycDocument(secondFile, LINK_SESSION_KEY)
-            verify(cryptoApiRepository).fulfillAdditionalKycRequirement(expectedRequirements, LINK_SESSION_KEY)
+            verify(cryptoApiRepository).fulfillKycRequirements(expectedRequirements, LINK_SESSION_KEY)
         }
     }
 
@@ -115,7 +115,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     fun `unverified Link account fails before uploading`() = runScenario(
         linkSessionState = LinkController.SessionState.NeedsVerification,
     ) {
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile))
         )
 
@@ -130,7 +130,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.failure(uploadError))
 
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile, secondFile))
         )
 
@@ -145,7 +145,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = null)))
 
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile))
         )
 
@@ -166,13 +166,13 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
             .thenReturn(Result.success(StripeFile(id = "file_1")))
         whenever(
-            cryptoApiRepository.fulfillAdditionalKycRequirement(
+            cryptoApiRepository.fulfillKycRequirements(
                 requirements = requirementRequests(documents, questionnaire),
                 linkSessionKey = LINK_SESSION_KEY,
             )
         ).thenReturn(Result.failure(submissionError))
 
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile))
         )
 
@@ -184,7 +184,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     fun `missing Link session key fails before uploading`() = runScenario(
         linkSessionKey = null,
     ) {
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile))
         )
 
@@ -197,7 +197,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     fun `blank Link session key fails before uploading`() = runScenario(
         linkSessionKey = "   ",
     ) {
-        val result = interactor.fulfillAdditionalKycRequirement(
+        val result = interactor.fulfillKycRequirements(
             documentSubmission(files = listOf(firstFile))
         )
 
@@ -210,7 +210,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
     fun `questionnaire submission requires a Link session key`() = runScenario(
         linkSessionKey = null,
     ) {
-        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
+        val result = interactor.fulfillKycRequirements(questionnaireSubmission())
 
         assertUnexpectedError<MissingLinkSessionKeyException>(result.exceptionOrNull())
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
@@ -222,13 +222,13 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         consumerSessionClientSecret = null,
     ) {
         val requirements = requirementRequests(emptyList(), questionnaireRequest())
-        whenever(cryptoApiRepository.fulfillAdditionalKycRequirement(requirements, LINK_SESSION_KEY))
+        whenever(cryptoApiRepository.fulfillKycRequirements(requirements, LINK_SESSION_KEY))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.fulfillAdditionalKycRequirement(questionnaireSubmission())
+        val result = interactor.fulfillKycRequirements(questionnaireSubmission())
 
         assertThat(result.getOrThrow()).isEqualTo(Unit)
-        verify(cryptoApiRepository).fulfillAdditionalKycRequirement(requirements, LINK_SESSION_KEY)
+        verify(cryptoApiRepository).fulfillKycRequirements(requirements, LINK_SESSION_KEY)
         verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
     }
 
@@ -268,7 +268,7 @@ class OnrampInteractorFulfillAdditionalKycRequirementTest {
         val secondFile: File,
     ) {
         suspend fun verifyFulfillmentWasNotRequested() {
-            verify(cryptoApiRepository, never()).fulfillAdditionalKycRequirement(
+            verify(cryptoApiRepository, never()).fulfillKycRequirements(
                 requirements = any(),
                 linkSessionKey = any(),
             )

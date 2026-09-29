@@ -27,7 +27,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.DeleteWalletRequestParams
-import com.stripe.android.crypto.onramp.model.FulfillAdditionalKycRequirementRequest
+import com.stripe.android.crypto.onramp.model.FulfillKycRequirementsRequest
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
@@ -134,17 +134,17 @@ internal class CryptoApiRepository @Inject constructor(
     /**
      * Submits the data collected for an additional KYC requirement.
      */
-    suspend fun fulfillAdditionalKycRequirement(
+    suspend fun fulfillKycRequirements(
         requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
         linkSessionKey: String,
     ): Result<Unit> {
-        val request = FulfillAdditionalKycRequirementRequest(
+        val request = FulfillKycRequirementsRequest(
             requirements = requirements,
         )
 
         return execute(
             request = apiRequestFactory.createPost(
-                url = fulfillAdditionalKycRequirementUrl,
+                url = fulfillKycRequirementsUrl,
                 options = ApiRequest.Options(
                     apiKey = linkSessionKey,
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
@@ -718,7 +718,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/fulfill_kyc_requirements`
          */
-        internal val fulfillAdditionalKycRequirementUrl: String
+        internal val fulfillKycRequirementsUrl: String
             get() = getApiUrl("crypto/internal/fulfill_kyc_requirements")
 
         /**
