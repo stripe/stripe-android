@@ -175,6 +175,21 @@ internal fun createPaymentMethodWithBillingAddress(): PaymentMethod {
     )
 }
 
+internal fun createShippingInformation(): ShippingInformation {
+    return ShippingInformation(
+        address = Address(
+            city = "San Francisco",
+            country = "US",
+            line1 = "510 Townsend St",
+            line2 = "Floor 3",
+            postalCode = "94103",
+            state = "CA",
+        ),
+        name = "Jenny Rosen",
+        phone = null,
+    )
+}
+
 internal fun enqueueFailedNativeLinkPayment(error: Throwable) {
     enqueueNativeLinkPaymentResult(
         LinkActivityResult.Failed(
