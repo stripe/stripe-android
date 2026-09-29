@@ -137,7 +137,9 @@ internal class LinkConfirmationDefinition @Inject constructor(
 private fun PaymentMethod.withBillingEmail(
     email: String?,
 ): PaymentMethod {
-    email ?: return this
+    if (email == null || billingDetails?.email != null) {
+        return this
+    }
     val existingBillingDetails = billingDetails
     return copy(
         billingDetails = PaymentMethod.BillingDetails(

@@ -306,20 +306,37 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept with web Link payment method updates its billing email before confirming`() = runScenario {
+    fun `intercept with web Link payment method sends billing email as collected information`() = runScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
             billingDetails = PaymentMethod.BillingDetails(email = "customer@example.com"),
             card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
                 wallet = Wallet.LinkWallet(dynamicLast4 = null),
             ),
         )
-        networkRule.checkoutUpdate(
-            bodyPart("payment_method_to_update[payment_method_id]", paymentMethod.id),
-            bodyPart("payment_method_to_update[billing_details][email]", "customer@example.com"),
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "customer@example.com"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
-        networkRule.checkoutConfirm { response ->
+
+        val result = interceptSavedPm(paymentMethod = paymentMethod)
+
+        assertThat(result)
+            .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `intercept omits collected email when Checkout Session already has an email`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            customerEmail = "checkout@example.com",
+        )
+    ) {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = PaymentMethod.BillingDetails(email = "payment-method@example.com"),
+        )
+        networkRule.checkoutConfirm(
+            not(hasBodyPart("collected_information[email]")),
+        ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
 

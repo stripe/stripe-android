@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -235,7 +236,7 @@ internal class LinkConfirmationDefinitionTest {
                 )
             )
         )
-        val paymentMethod = PaymentMethodFactory.card().copy(
+        val paymentMethod = PaymentMethodFactory.card().asWebLinkPaymentMethod().copy(
             billingDetails = PaymentMethod.BillingDetails(
                 name = "Jenny Rosen",
             )
@@ -252,6 +253,30 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(savedOption.paymentMethod.billingDetails?.email)
             .isEqualTo(checkoutConfirmationOption.configuration.customerInfo.email)
         assertThat(savedOption.paymentMethod.billingDetails?.name).isEqualTo("Jenny Rosen")
+    }
+
+    @Test
+    fun `'toResult' should preserve the obtained payment method email`() = test {
+        val checkoutConfirmationOption = LINK_CONFIRMATION_OPTION.copy(
+            configuration = LINK_CONFIRMATION_OPTION.configuration.copy(
+                clientAttributionMetadata = LINK_CONFIRMATION_OPTION.configuration.clientAttributionMetadata.copy(
+                    checkoutSessionId = "cs_123",
+                )
+            )
+        )
+        val paymentMethod = PaymentMethodFactory.card().asWebLinkPaymentMethod().copy(
+            billingDetails = PaymentMethod.BillingDetails(email = "link-account@example.com")
+        )
+
+        val result = createLinkConfirmationDefinition().toResult(
+            confirmationOption = checkoutConfirmationOption,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
+            result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
+        )
+
+        val savedOption = result.asNextStep().confirmationOption.asSaved()
+        assertThat(savedOption.paymentMethod.billingDetails?.email).isEqualTo("link-account@example.com")
     }
 
     @Test
@@ -429,4 +454,10 @@ internal class LinkConfirmationDefinitionTest {
             linkExpressMode = LinkExpressMode.ENABLED,
         )
     }
+}
+
+private fun PaymentMethod.asWebLinkPaymentMethod(): PaymentMethod {
+    return copy(
+        card = card?.copy(wallet = Wallet.LinkWallet(dynamicLast4 = null))
+    )
 }

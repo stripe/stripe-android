@@ -13,10 +13,8 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -121,10 +119,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun maybeUpdateBillingDetailsForCheckoutSession(
         paymentMethod: PaymentMethod,
     ): Result<Unit> {
-        updateLinkWalletBillingEmail(paymentMethod).getOrElse { error ->
-            return Result.failure(error)
-        }
-
         val billingDetails = paymentMethod.billingDetails
         val checkoutSessionResponse = integrationMetadata.checkoutSessionResponse
         val initialEstimatedTotal = checkoutSessionResponse.amount
@@ -150,42 +144,36 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         return Result.success(Unit)
     }
 
-    private suspend fun updateLinkWalletBillingEmail(
-        paymentMethod: PaymentMethod,
-    ): Result<Unit> {
-        if (paymentMethod.type != PaymentMethod.Type.Link) {
-            return Result.success(Unit)
-        }
-        val email = paymentMethod.billingDetails?.email ?: return Result.success(Unit)
-        return checkoutSessionRepository.updatePaymentMethod(
-            sessionId = integrationMetadata.id,
-            paymentMethodId = paymentMethod.id,
-            params = PaymentMethodUpdateParams.createCard(
-                billingDetails = PaymentMethod.BillingDetails(email = email),
-            ),
-        ).map { Unit }
-    }
-
     private fun createConfirmParams(
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
-    ): ConfirmCheckoutSessionParams = when (intent) {
-        is PaymentIntent -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            expectedAmount = intent.amount,
-            savePaymentMethod = savePaymentMethod,
-            shipping = shipping,
-        )
-        else -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            shipping = shipping,
-        )
+    ): ConfirmCheckoutSessionParams {
+        // Match iOS by sending independently collected email to Checkout confirmation. When the
+        // Session already has an email, the server-owned value remains authoritative.
+        val collectedInformation = paymentMethod.billingDetails?.email
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.customerEmail == null }
+            ?.let(ConfirmCheckoutSessionParams::CollectedInformation)
+
+        return when (intent) {
+            is PaymentIntent -> ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                expectedAmount = intent.amount,
+                savePaymentMethod = savePaymentMethod,
+                shipping = shipping,
+                collectedInformation = collectedInformation,
+            )
+            else -> ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                shipping = shipping,
+                collectedInformation = collectedInformation,
+            )
+        }
     }
 
     private suspend fun confirmCheckoutSession(
