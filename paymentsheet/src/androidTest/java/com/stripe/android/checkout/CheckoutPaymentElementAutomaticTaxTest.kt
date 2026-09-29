@@ -230,6 +230,16 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
                 scenario.immediateActionCalls.add(Unit)
             },
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = INITIAL_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        billingAddressCollection = "auto",
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
             holdTaxUpdateResponse = true,
         ) {
             scenario = this
@@ -452,12 +462,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
         rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
         rowSelectionBehavior = rowSelectionBehavior,
+        configureNetworkSetup = configureNetworkSetup,
         holdTaxUpdateResponse = holdTaxUpdateResponse,
         block = block,
     )
@@ -466,6 +478,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
         rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
@@ -476,6 +489,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             rowSelectionBehavior = rowSelectionBehavior,
             setup = { configuredController ->
                 controller = configuredController
+                configureNetworkSetup()
                 configuredController.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,

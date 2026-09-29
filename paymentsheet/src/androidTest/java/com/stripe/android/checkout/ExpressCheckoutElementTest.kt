@@ -11,8 +11,6 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
-import com.stripe.android.model.Address
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -449,19 +447,4 @@ internal class ExpressCheckoutElementTest {
 
         assertNativeLinkCalledWithRequiredBillingAddress()
     }
-}
-
-private fun createShippingInformation(): ShippingInformation {
-    return ShippingInformation(
-        address = Address(
-            city = "San Francisco",
-            country = "US",
-            line1 = "510 Townsend St",
-            line2 = "Floor 3",
-            postalCode = "94103",
-            state = "CA",
-        ),
-        name = "Jenny Rosen",
-        phone = null,
-    )
 }

@@ -11,6 +11,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -94,57 +96,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             val failure = result as CheckoutController.Result.Failed
             assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
         },
-        checkoutInitResponse = { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("account_settings", JSONObject("""{"country":"US"}"""))
-                json.getJSONArray("checkout_items").getJSONObject(0)
-                    .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                    .put("subtotal", INITIAL_TOTAL)
-                    .put("total", INITIAL_TOTAL)
-                json.put(
-                    "tax_context",
-                    JSONObject(
-                        """
-                        {
-                            "automatic_tax_enabled": true,
-                            "automatic_tax_address_source": "billing"
-                        }
-                        """.trimIndent()
-                    )
-                )
-                json.put(
-                    "customer",
-                    JSONObject(
-                        """
-                        {
-                            "id": "cus_123",
-                            "payment_methods": [{
-                                "id": "pm_12345",
-                                "object": "payment_method",
-                                "type": "card",
-                                "billing_details": {
-                                    "address": {
-                                        "line1": "510 Townsend St",
-                                        "city": "San Francisco",
-                                        "state": "CA",
-                                        "country": "US",
-                                        "postal_code": "94103"
-                                    }
-                                },
-                                "card": {
-                                    "brand": "visa",
-                                    "exp_month": 12,
-                                    "exp_year": 2034,
-                                    "last4": "4242"
-                                }
-                            }],
-                            "can_detach_payment_method": true
-                        }
-                        """.trimIndent()
-                    )
-                )
-            }
-        },
+        checkoutInitResponse = ::savedPaymentMethodCheckoutResponse,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
@@ -157,6 +109,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = ::savedPaymentMethodCheckoutResponse,
             )
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         },
@@ -191,6 +152,58 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
 
         context.confirm()
+    }
+
+    private fun savedPaymentMethodCheckoutResponse(response: MockResponse) {
+        response.testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("account_settings", JSONObject("""{"country":"US"}"""))
+            json.getJSONArray("checkout_items").getJSONObject(0)
+                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .put("subtotal", INITIAL_TOTAL)
+                .put("total", INITIAL_TOTAL)
+            json.put(
+                "tax_context",
+                JSONObject(
+                    """
+                    {
+                        "automatic_tax_enabled": true,
+                        "automatic_tax_address_source": "billing"
+                    }
+                    """.trimIndent()
+                )
+            )
+            json.put(
+                "customer",
+                JSONObject(
+                    """
+                    {
+                        "id": "cus_123",
+                        "payment_methods": [{
+                            "id": "pm_12345",
+                            "object": "payment_method",
+                            "type": "card",
+                            "billing_details": {
+                                "address": {
+                                    "line1": "510 Townsend St",
+                                    "city": "San Francisco",
+                                    "state": "CA",
+                                    "country": "US",
+                                    "postal_code": "94103"
+                                }
+                            },
+                            "card": {
+                                "brand": "visa",
+                                "exp_month": 12,
+                                "exp_year": 2034,
+                                "last4": "4242"
+                            }
+                        }],
+                        "can_detach_payment_method": true
+                    }
+                    """.trimIndent()
+                )
+            )
+        }
     }
 
     @Test

@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+
 ## 23.21.0 - 2026-09-28
 
 ### Payments
@@ -15,6 +18,9 @@ NEXT_VERSION_BUMP: PATCH
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+
+### Payments
+* [ADDED] Added API bindings for Pix.
 
 ## 23.20.0 - 2026-09-21
 

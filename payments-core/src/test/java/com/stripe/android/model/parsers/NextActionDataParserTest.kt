@@ -12,6 +12,83 @@ import kotlin.test.Test
 internal class NextActionDataParserTest {
 
     @Test
+    fun `parse with pix display qr code type should create DisplayPixDetails`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "data": "pix-copy-and-paste-data",
+                    "image_url_png": "https://qr.stripe.com/pix.png",
+                    "image_url_svg": "https://qr.stripe.com/pix.svg",
+                    "expires_at": 1700000000,
+                    "hosted_instructions_url": "https://payments.stripe.com/pix/instructions/test"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(
+            StripeIntent.NextActionData.DisplayPixDetails(
+                data = "pix-copy-and-paste-data",
+                imageUrlPng = "https://qr.stripe.com/pix.png",
+                imageUrlSvg = "https://qr.stripe.com/pix.svg",
+                expiresAt = 1_700_000_000,
+                hostedInstructionsUrl = "https://payments.stripe.com/pix/instructions/test",
+            )
+        )
+    }
+
+    @Test
+    fun `parse with pix display qr code missing hosted instructions should return null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "data": "pix-copy-and-paste-data"
+                }
+            }
+            """.trimIndent()
+        )
+
+        assertThat(NextActionDataParser().parse(nextActionJson)).isNull()
+    }
+
+    @Test
+    fun `parse with null Pix expiration should preserve null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "expires_at": null,
+                    "hosted_instructions_url": "https://payments.stripe.com/pix/instructions/test"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val details = NextActionDataParser().parse(nextActionJson)
+            as StripeIntent.NextActionData.DisplayPixDetails
+
+        assertThat(details.expiresAt).isNull()
+    }
+
+    @Test
+    fun `Pix display details redacts copy and paste data from toString`() {
+        val details = StripeIntent.NextActionData.DisplayPixDetails(
+            data = "sensitive-pix-data",
+            hostedInstructionsUrl = "https://payments.stripe.com/pix/instructions/test",
+        )
+
+        assertThat(details.toString()).contains("data=<redacted>")
+        assertThat(details.toString()).doesNotContain("sensitive-pix-data")
+    }
+
+    @Test
     fun `parse with await_authorization type should create AwaitAuthorization`() {
         val nextActionJson = JSONObject(
             """
