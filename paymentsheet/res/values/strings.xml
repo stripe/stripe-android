@@ -106,10 +106,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Log out of %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Confirm the payment in your MB WAY app within %s to complete the purchase.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">For security, developer options must be off to use Tap to add.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Open settings</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Turn off Developer options</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Card expired. Try another card.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Tap card</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Card declined. Use another card.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -281,6 +291,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Card brand was not updated. Please try again.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Confirm the payment in your bank or payment app within %s to complete the purchase.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Complete the payment using Pix to finish the purchase.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Set as default payment method</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

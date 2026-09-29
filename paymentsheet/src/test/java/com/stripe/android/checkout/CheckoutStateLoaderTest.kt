@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
@@ -30,6 +31,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
@@ -295,6 +297,23 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `reload clears a saved selection failure`() = runScenario(
+        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+    ) {
+        loader.reload(
+            committedState(
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                    "Selection failed".resolvableString,
+                ),
+            )
+        )
+
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
     fun `loadInitial commits state that exposes the checkout session`() = runScenario {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
@@ -399,6 +418,8 @@ internal class CheckoutStateLoaderTest {
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
@@ -412,6 +433,7 @@ internal class CheckoutStateLoaderTest {
         expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

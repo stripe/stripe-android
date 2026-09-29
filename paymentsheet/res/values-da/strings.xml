@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Log ud af Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Log ud af %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Bekræft betalingen i din MB WAY-app inden for %s for at fuldføre købet.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Der opstod en fejl. Kontrollér din forbindelse, og prøv igen.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Af sikkerhedsmæssige årsager skal udviklerindstillinger være slået fra for at bruge Tap til at tilføje.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Åbn indstillinger</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Slå udviklerindstillinger fra</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kort udløbet. Prøv et andet kort.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Tap kort</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kort afvist. Prøv et andet kort.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kortbrandet blev ikke opdateret. Prøv igen.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Bekræft betalingen i din bank- eller betalingsapp inden for %s for at gennemføre købet.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Gennemfør betalingen med Pix for at afslutte købet.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Angiv som standardbetalingsmetode</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

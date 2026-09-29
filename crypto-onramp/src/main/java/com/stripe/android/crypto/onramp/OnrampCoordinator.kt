@@ -289,6 +289,28 @@ class OnrampCoordinator @Inject internal constructor(
         fun fulfillAdditionalKycRequirement() {
             coordinator.fulfillAdditionalKycRequirement()
         }
+
+        /**
+         * Presents the current terms and conditions when acceptance is required.
+         * Requires an authenticated Link user.
+         * Call this before checkout.
+         * The result will be delivered through the terms and conditions callback provided in
+         * [OnrampCallbacks].
+         */
+        fun presentTermsAndConditionsIfNeeded() {
+            coordinator.presentTermsAndConditionsIfNeeded()
+        }
+
+        /**
+         * Presents the current terms of service when acceptance is required.
+         * Requires an authenticated Link user.
+         * Call this during onboarding after Link authentication.
+         * The result will be delivered through the terms of service callback provided in
+         * [OnrampCallbacks].
+         */
+        fun presentTermsOfServiceIfNeeded() {
+            coordinator.presentTermsOfServiceIfNeeded()
+        }
     }
 
     /**

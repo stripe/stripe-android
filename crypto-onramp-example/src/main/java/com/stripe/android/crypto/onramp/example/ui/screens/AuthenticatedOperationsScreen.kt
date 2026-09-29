@@ -50,6 +50,8 @@ internal fun AuthenticatedOperationsScreen(
     onFulfillAdditionalKycRequirement: () -> Unit,
     onStartVerification: () -> Unit,
     onShowUserAttestation: () -> Unit,
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -174,6 +176,11 @@ internal fun AuthenticatedOperationsScreen(
             onCollectKyc = onCollectKyc,
             onVerifyKyc = onVerifyKyc,
             onFulfillAdditionalKycRequirement = onFulfillAdditionalKycRequirement,
+        )
+
+        PartnerTermsSection(
+            onShowTermsAndConditions = onShowTermsAndConditions,
+            onShowTermsOfService = onShowTermsOfService,
         )
 
         IdentifierSection(

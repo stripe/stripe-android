@@ -29,7 +29,7 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+    private val paymentElementCallbackIdentifier: String,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
@@ -45,7 +45,8 @@ internal class DefaultPaymentSheetLauncher(
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
             PaymentSheetContract()
@@ -56,6 +57,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -63,7 +65,8 @@ internal class DefaultPaymentSheetLauncher(
     constructor(
         activity: ComponentActivity,
         signal: UnregisterSignal,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String
     ) : this(
         activityResultLauncher = registerForReactNativeActivityResult(
             activity,
@@ -76,11 +79,13 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = activity,
         application = activity.application,
         callback = callback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
     )
 
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContract()
@@ -91,13 +96,15 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
     )
 
     @TestOnly
     constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContract(),
@@ -109,6 +116,7 @@ internal class DefaultPaymentSheetLauncher(
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
         callback = callback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
     )
 
     override fun present(

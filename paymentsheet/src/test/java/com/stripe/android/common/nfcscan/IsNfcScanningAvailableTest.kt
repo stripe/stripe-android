@@ -82,7 +82,7 @@ internal class IsNfcScanningAvailableTest {
     }
 
     @Test
-    fun `returns unavailable when device is not secure`() {
+    fun `returns available when device is not secure`() {
         val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
         )
@@ -91,7 +91,9 @@ internal class IsNfcScanningAvailableTest {
             isNfcScanningAvailable.get(
                 metadata = createMetadata(isNfcScanningEnabled = true),
             )
-        ).isEqualTo(NfcScanningAvailability.Unavailable)
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
     }
 
     @Test
@@ -147,6 +149,22 @@ internal class IsNfcScanningAvailableTest {
             )
         ).isEqualTo(
             NfcScanningAvailability.Available(shouldBePrimaryScanningOption = false)
+        )
+    }
+
+    @Test
+    fun `returns available as primary when experiment is unassigned and NFC is preferred over camera scan`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    preferNfcOverCameraScan = true,
+                ),
+            )
+        ).isEqualTo(
+            NfcScanningAvailability.Available(shouldBePrimaryScanningOption = true)
         )
     }
 
@@ -274,11 +292,13 @@ internal class IsNfcScanningAvailableTest {
         isNfcScanningEnabled: Boolean,
         isTapToAddSupported: Boolean = false,
         isStripeCardScanAllowed: Boolean = false,
+        preferNfcOverCameraScan: Boolean = false,
         experimentVariant: String? = null,
     ) = PaymentMethodMetadataFactory.create(
         isNfcScanningEnabled = isNfcScanningEnabled,
         isTapToAddSupported = isTapToAddSupported,
         isStripeCardScanAllowed = isStripeCardScanAllowed,
+        preferNfcOverCameraScan = preferNfcOverCameraScan,
         experimentsData = experimentVariant?.let { variant ->
             ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",

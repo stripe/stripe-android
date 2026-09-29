@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan
 
 internal sealed interface NfcScanningViewAction {
     data object Close : NfcScanningViewAction
+    data object OpenDeveloperOptions : NfcScanningViewAction
     data object SuccessShown : NfcScanningViewAction
     data object ErrorShown : NfcScanningViewAction
 }

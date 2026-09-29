@@ -68,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Potvrďte informácie</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Posledné 4 číslice SSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Zmluvné podmienky</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Podmienky služby</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Prihlásiť sa alebo zaregistrovať</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -275,6 +279,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Značka karty nebola aktualizovaná. Skúste to znova.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Dokončite nákup potvrdením platby v banke alebo platobnej aplikácii v priebehu %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Na dokončenie nákupu zrealizujte platbu pomocou služby Pix.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Nastaviť ako predvolený spôsob platby</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

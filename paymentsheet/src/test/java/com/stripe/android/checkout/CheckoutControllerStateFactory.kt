@@ -14,6 +14,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
 
 @OptIn(CheckoutSessionPreview::class)
@@ -30,6 +31,8 @@ internal object CheckoutControllerStateFactory {
         embeddedConfiguration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection: PaymentSelection? = null,
+        savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =
+            SavedPaymentMethodSelectionState.Idle,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
@@ -43,6 +46,7 @@ internal object CheckoutControllerStateFactory {
             expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
             embeddedConfiguration = embeddedConfiguration,
             paymentSelection = paymentSelection,
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
             linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,

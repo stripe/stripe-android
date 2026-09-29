@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -62,8 +63,6 @@ internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
 internal const val TEST_TAG_CURRENCY_OPTION_PREFIX = "TEST_TAG_CURRENCY_OPTION_"
 
 internal const val TEST_TAG_CURRENCY_SELECTOR_ERROR = "TEST_TAG_CURRENCY_SELECTOR_ERROR"
-
-private const val DISABLED_ALPHA = 0.6f
 
 internal sealed interface FlagContent {
     data class Emoji(val emoji: String) : FlagContent
@@ -121,7 +120,7 @@ internal fun CurrencySelectorToggle(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .alpha(if (isEnabled) 1f else DISABLED_ALPHA)
+                .alpha(enabledStateAlpha(isEnabled))
                 .clip(shape)
                 .background(trackBackground)
                 .border(

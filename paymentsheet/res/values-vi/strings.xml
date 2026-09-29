@@ -68,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Xác nhận thông tin của bạn</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 chữ số cuối của SSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Điều khoản và Điều kiện</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Điều khoản dịch vụ</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Đăng nhập hoặc đăng ký</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -100,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Đăng xuất khỏi Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Đăng xuất khỏi %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Xác nhận thanh toán trong ứng dụng MB WAY của bạn trong vòng %s để hoàn tất giao dịch mua.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Đã xảy ra lỗi. Hãy kiểm tra kết nối của bạn và thử lại.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Để bảo mật, tùy chọn nhà phát triển phải được tắt để sử dụng Chạm để thêm.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Mở cài đặt</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Tắt tùy chọn Nhà phát triển</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Thẻ đã hết hạn. Thử thẻ khác.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Chạm thẻ</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Thẻ bị từ chối. Thử một thẻ khác.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -275,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Thương hiệu thẻ chưa được cập nhật. Vui lòng thử lại.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Xác nhận thanh toán tại ngân hàng hoặc trong ứng dụng thanh toán của bạn trong vòng %s để hoàn tất giao dịch mua.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Hoàn tất thanh toán bằng Pix để hoàn thành giao dịch mua.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Đặt làm phương thức thanh toán mặc định</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

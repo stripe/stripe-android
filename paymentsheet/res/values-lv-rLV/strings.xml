@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Izrakstīties no Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Iziet no %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Apstipriniet maksājumu savā MB WAY lietotnē %s laikā, lai pabeigtu pirkumu.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Radās kļūda. Pārbaudiet savu savienojumu un mēģiniet vēlreiz.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Drošības nolūkos izstrādātāja opcijām jābūt izslēgtām, lai izmantotu Pieskarties, lai pievienotu.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Atveriet iestatījumus</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Izslēgt Izstrādātāja opcijas</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kartes derīguma termiņš ir beidzies. Mēģiniet izmantot citu karti.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Pieskarieties ar karti</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Karte noraidīta. Mēģiniet citu karti.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kartes zīmols netika atjaunināts. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Apstipriniet maksājumu savā bankā vai maksājumu programmā %s laikā, lai pabeigtu pirkumu.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Veiciet maksājumu, izmantojot Pix, lai pabeigtu pirkumu.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Iestatīt kā noklusējuma maksājuma veidu</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
