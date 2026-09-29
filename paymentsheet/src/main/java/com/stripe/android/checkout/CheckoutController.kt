@@ -229,7 +229,7 @@ class CheckoutController @Inject internal constructor(
                     selection.paymentMethod.id,
                 ),
             )
-            val address = savedPaymentMethodBillingAddress(checkoutSessionResponse, selection)
+            val address = savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, selection)
                 ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -264,10 +264,10 @@ class CheckoutController @Inject internal constructor(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
         ) as? PaymentSelection.Saved ?: return defaultBillingAddress
-        return savedPaymentMethodBillingAddress(checkoutSessionResponse, selection) ?: defaultBillingAddress
+        return savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, selection) ?: defaultBillingAddress
     }
 
-    private fun savedPaymentMethodBillingAddress(
+    private fun savedPaymentMethodBillingAddressForTax(
         checkoutSessionResponse: CheckoutSessionResponse,
         selection: PaymentSelection.Saved,
     ): Address.State? {
