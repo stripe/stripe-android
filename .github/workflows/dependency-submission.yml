@@ -1,0 +1,27 @@
+name: Dependency submission
+# Submits the resolved Gradle dependency graph to GitHub,
+# which enables Dependabot security alerts for Maven packages and SBOM export from the dependency graph.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  dependency-submission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      # Not using stripe_setup: dependency-submission configures Gradle itself.
+      - run: mkdir -p ~/.gradle ; cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - uses: gradle/actions/dependency-submission@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          # Shipped (release runtime) deps only; widen to test/build configs if we want alerts on tooling too.
+          dependency-graph-include-configurations: '.*[rR]eleaseRuntimeClasspath'
