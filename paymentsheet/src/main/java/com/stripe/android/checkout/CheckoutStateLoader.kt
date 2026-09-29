@@ -53,13 +53,33 @@ internal class CheckoutStateLoader @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): PaymentSelection? {
-        return load(
+        val collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse)
+        val embeddedConfig = embeddedConfigurationFactory.create(
             configuration = configuration,
-            response = checkoutSessionResponse,
-            collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+        )
+        val loadResults = loadPaymentElements(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                checkoutSessionResponse.id,
+                checkoutSessionResponse,
+            ),
+            embeddedConfiguration = embeddedConfig,
+            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            expressCheckoutElementConfiguration = null,
+        )
+        return selectionChooser.choose(
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            paymentMethods = loadResults.customer?.paymentMethods,
             previousSelection = null,
-            loadExpressCheckoutElement = false,
-        ).paymentSelection
+            newSelection = loadResults.paymentSelection,
+            newConfiguration = commonConfigurationFactory.create(
+                configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            ),
+            formSheetAction = embeddedConfig.formSheetAction,
+        )
     }
 
     suspend fun reload(state: CheckoutControllerState) {
@@ -76,13 +96,16 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(null)
     }
 
-    private suspend fun load(
+    private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-        previousSelection: PaymentSelection?,
-        loadExpressCheckoutElement: Boolean,
-    ): LoadResults {
+        carryForward: CarryForward,
+    ) {
+        // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
+        // reused when the currencies haven't changed.
+        val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
+
         val embeddedConfig = embeddedConfigurationFactory.create(
             configuration = configuration,
             checkoutSessionResponse = response,
@@ -100,7 +123,7 @@ internal class CheckoutStateLoader @Inject constructor(
             configuration = configuration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
-        )?.takeIf { loadExpressCheckoutElement }
+        )
 
         val loadResults = loadPaymentElements(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
@@ -115,31 +138,10 @@ internal class CheckoutStateLoader @Inject constructor(
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loadResults.paymentMethodMetadata,
             paymentMethods = loadResults.customer?.paymentMethods,
-            previousSelection = previousSelection,
+            previousSelection = carryForward.previousSelection,
             newSelection = loadResults.paymentSelection,
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
-        )
-
-        return loadResults.copy(paymentSelection = selection)
-    }
-
-    private suspend fun commit(
-        configuration: CheckoutController.Configuration.State,
-        response: CheckoutSessionResponse,
-        collectedDetails: CheckoutCollectedDetails,
-        carryForward: CarryForward,
-    ) {
-        // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
-        // reused when the currencies haven't changed.
-        val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
-
-        val loadResults = load(
-            configuration = configuration,
-            response = response,
-            collectedDetails = collectedDetails,
-            previousSelection = carryForward.previousSelection,
-            loadExpressCheckoutElement = true,
         )
 
         stateHolder.state = CheckoutControllerState(
@@ -149,8 +151,8 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loadResults.paymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
-            embeddedConfiguration = loadResults.embeddedConfiguration,
-            paymentSelection = loadResults.paymentSelection,
+            embeddedConfiguration = embeddedConfig,
+            paymentSelection = selection,
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
@@ -196,7 +198,6 @@ internal class CheckoutStateLoader @Inject constructor(
         val paymentElementResult = paymentElementStateDeferred.await()
         val expressCheckoutElementResult = expressCheckoutElementStateDeferred?.await()
         LoadResults(
-            embeddedConfiguration = embeddedConfiguration,
             paymentMethodMetadata = paymentElementResult.paymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementResult?.paymentMethodMetadata,
             customer = paymentElementResult.customer,
@@ -205,7 +206,6 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     private data class LoadResults(
-        val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
         val customer: CustomerState?,
