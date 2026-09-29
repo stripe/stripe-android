@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+* [FIXED] Matched the Link wallet button height to the Google Pay button height at larger font scales.
 
 ## 23.21.0 - 2026-09-28
 

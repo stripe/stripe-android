@@ -3,11 +3,14 @@
 package com.stripe.android.elements.ece
 
 import android.content.Context
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -118,16 +121,22 @@ internal class ExpressCheckoutElementContentTest {
         )
 
         composeRule.setContent {
-            ExpressCheckoutElementContent(interactor = interactor)
+            CompositionLocalProvider(
+                LocalDensity provides Density(
+                    density = LocalDensity.current.density,
+                    fontScale = 2f,
+                ),
+            ) {
+                ExpressCheckoutElementContent(interactor = interactor)
+            }
         }
 
-        val googlePayPosition = composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
-            .fetchSemanticsNode().positionInRoot
-        val linkPosition = composeRule.onNodeWithTag(LinkButtonTestTag)
-            .fetchSemanticsNode().positionInRoot
+        val googlePayNode = composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).fetchSemanticsNode()
+        val linkNode = composeRule.onNodeWithTag(LinkButtonTestTag).fetchSemanticsNode()
 
-        assertThat(googlePayPosition.y).isEqualTo(linkPosition.y)
-        assertThat(googlePayPosition.x).isNotEqualTo(linkPosition.x)
+        assertThat(googlePayNode.positionInRoot.y).isEqualTo(linkNode.positionInRoot.y)
+        assertThat(googlePayNode.positionInRoot.x).isNotEqualTo(linkNode.positionInRoot.x)
+        assertThat(googlePayNode.size.height).isEqualTo(linkNode.size.height)
     }
 
     @Test
