@@ -27,6 +27,7 @@ internal class FakeSheetActivityStateHolder(
     override val state: StateFlow<SheetActivityStateHolder.State> = _state.asStateFlow()
 
     override var checkoutSessionResponse: CheckoutSessionResponse? = null
+        private set
 
     override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
         checkoutSessionResponse = response

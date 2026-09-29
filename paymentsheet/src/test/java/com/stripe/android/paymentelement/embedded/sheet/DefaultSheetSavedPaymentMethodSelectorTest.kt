@@ -66,13 +66,11 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `failed tax update marks the payment method failed and keeps prior selection and response`() {
+    fun `failed tax update marks the selection failed and keeps prior selection`() {
         val error = IllegalStateException("Tax region update failed")
-        val initialResponse = CheckoutSessionResponseFactory.create(id = "previous_response")
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
             updateTaxRegion = { Result.failure(error) },
-            initialResponse = initialResponse,
         ) {
             selector.selectionState.test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
@@ -85,22 +83,19 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
                 )
             }
             assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
-            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(initialResponse)
+            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isNull()
         }
     }
 
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata,
         updateTaxRegion: suspend () -> Result<CheckoutSessionResponse>,
-        initialResponse: CheckoutSessionResponse? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(INITIAL_SELECTION)
         }
-        val sheetActivityStateHolder = FakeSheetActivityStateHolder().apply {
-            checkoutSessionResponse = initialResponse
-        }
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val selector = DefaultSheetSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> updateTaxRegion() }),
             paymentMethodMetadata = paymentMethodMetadata,

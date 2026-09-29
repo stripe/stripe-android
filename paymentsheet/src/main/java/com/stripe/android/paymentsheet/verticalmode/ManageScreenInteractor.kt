@@ -125,31 +125,24 @@ internal class DefaultManageScreenInteractor(
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
     private var selectionJob: Job? = null
 
-    private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        combineAsStateFlow(
-            paymentMethods,
-            defaultPaymentMethodId,
-            selectionState,
-        ) { paymentMethods, defaultPaymentMethodId, selectionState ->
-            paymentMethods.map {
-                it.toDisplayableSavedPaymentMethod(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    defaultPaymentMethodId = defaultPaymentMethodId,
-                    selectionState = selectionState,
-                )
-            }
-        }
-
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
-        displayableSavedPaymentMethods,
+        paymentMethods,
+        defaultPaymentMethodId,
         selection,
         editing,
         canEdit,
         linkAccount,
         selectionState,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, selectionState ->
+    ) { paymentMethods, defaultPaymentMethodId, paymentSelection, editing, canEdit, linkAccount, selectionState ->
+        val displayablePaymentMethods = paymentMethods.map {
+            it.toDisplayableSavedPaymentMethod(
+                paymentMethodMetadata = paymentMethodMetadata,
+                defaultPaymentMethodId = defaultPaymentMethodId,
+                selectionState = selectionState,
+            )
+        }
         val currentSelection = if (editing) {
             null
         } else {

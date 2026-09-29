@@ -478,9 +478,7 @@ class DefaultManageScreenInteractorTest {
                 awaitItem()
                 val error = IllegalStateException("tax update failed")
                 updateResult.complete(Result.failure(error))
-                selectionStateSource.value = SavedPaymentMethodSelectionState.Failed(
-                    error = error.stripeErrorMessage(),
-                )
+                selectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
                 awaitItem()
 
                 onSelectPaymentMethodTurbine.expectNoEvents()

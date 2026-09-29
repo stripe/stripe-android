@@ -46,7 +46,6 @@ import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
@@ -228,23 +227,26 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     fun testSavedPaymentMethodTaxUpdateFromManageSheetShowsPendingSelectionUntilResponse() {
         runAutomaticTaxTest(
             paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
-            checkoutInitResponse = automaticTaxResponseWithSavedCards(
+            checkoutInitResponse = automaticTaxResponse(
                 total = INITIAL_TOTAL,
                 taxStatus = TAX_STATUS_COMPLETE,
-                defaultPaymentMethodId = FIRST_SAVED_PAYMENT_METHOD_ID,
+                hasSavedPaymentMethod = true,
             ),
             holdTaxUpdateResponse = true,
         ) {
             enqueueSavedPaymentMethodTaxUpdate { response ->
                 taxUpdateRequests.add(Unit)
-                automaticTaxResponseWithSavedCards(
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
                     total = UPDATED_TOTAL,
                     taxStatus = TAX_STATUS_COMPLETE,
-                    defaultPaymentMethodId = SECOND_SAVED_PAYMENT_METHOD_ID,
+                    hasSavedPaymentMethod = true,
                 )(response)
             }
 
-            contentPage.assertHasSelectedSavedPaymentMethod(FIRST_SAVED_PAYMENT_METHOD_ID)
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
             contentPage.clickViewMore()
             managePage.waitUntilVisible()
 
@@ -252,7 +254,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 managePage.selectPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
                 taxUpdateRequests.awaitItem()
 
-                val firstRow = savedPaymentMethodRow(FIRST_SAVED_PAYMENT_METHOD_ID)
+                val firstRow = savedPaymentMethodRow(SAVED_PAYMENT_METHOD_ID)
                 val secondRow = savedPaymentMethodRow(SECOND_SAVED_PAYMENT_METHOD_ID)
                 firstRow.assertIsSelected()
                     .assertIsNotEnabled()
@@ -723,7 +725,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         taxStatus: String,
         billingAddressCollection: String = "required",
         hasSavedPaymentMethod: Boolean = false,
-        jsonModifier: (JSONObject) -> Unit = {},
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -776,6 +777,25 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                                     "exp_year": 2034,
                                     "last4": "4242"
                                 }
+                            }, {
+                                "id": "$SECOND_SAVED_PAYMENT_METHOD_ID",
+                                "object": "payment_method",
+                                "type": "card",
+                                "billing_details": {
+                                    "address": {
+                                        "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                                        "city": "$SAVED_BILLING_ADDRESS_CITY",
+                                        "state": "$SAVED_BILLING_ADDRESS_STATE",
+                                        "country": "US",
+                                        "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                                    }
+                                },
+                                "card": {
+                                    "brand": "visa",
+                                    "exp_month": 12,
+                                    "exp_year": 2034,
+                                    "last4": "5555"
+                                }
                             }],
                             "can_detach_payment_method": true
                         }
@@ -783,60 +803,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     )
                 )
             }
-            jsonModifier(json)
         }
     }
-
-    private fun automaticTaxResponseWithSavedCards(
-        total: Long,
-        taxStatus: String,
-        defaultPaymentMethodId: String,
-    ): (MockResponse) -> Unit = automaticTaxResponse(
-        total = total,
-        taxStatus = taxStatus,
-        jsonModifier = { json ->
-            json.put("account_settings", JSONObject("""{"country":"US"}"""))
-            json.put(
-                "customer",
-                JSONObject()
-                    .put("id", "cus_saved_cards")
-                    .put(
-                        "payment_methods",
-                        JSONArray()
-                            .put(savedCard(FIRST_SAVED_PAYMENT_METHOD_ID, "4242"))
-                            .put(savedCard(SECOND_SAVED_PAYMENT_METHOD_ID, "5555")),
-                    )
-                    .put("can_detach_payment_method", true),
-            )
-            json.getJSONObject("server_built_elements_session_params")
-                .put("client_default_payment_method", defaultPaymentMethodId)
-        },
-    )
-
-    private fun savedCard(id: String, last4: String): JSONObject = JSONObject(
-        """
-        {
-            "id": "$id",
-            "object": "payment_method",
-            "type": "card",
-            "billing_details": {
-                "address": {
-                    "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
-                    "city": "$SAVED_BILLING_ADDRESS_CITY",
-                    "state": "$SAVED_BILLING_ADDRESS_STATE",
-                    "country": "US",
-                    "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
-                }
-            },
-            "card": {
-                "brand": "visa",
-                "exp_month": 12,
-                "exp_year": 2034,
-                "last4": "$last4"
-            }
-        }
-        """.trimIndent()
-    )
 
     private fun savedPaymentMethodRow(paymentMethodId: String) = testRules.compose.onNodeWithTag(
         "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId",
@@ -848,7 +816,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
         const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
-        const val FIRST_SAVED_PAYMENT_METHOD_ID = "pm_first"
         const val SECOND_SAVED_PAYMENT_METHOD_ID = "pm_second"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"

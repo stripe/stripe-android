@@ -823,7 +823,7 @@ internal class CheckoutControllerTest {
             ).isEqualTo(before)
             assertThat(committedState().savedPaymentMethodSelectionState).isEqualTo(
                 SavedPaymentMethodSelectionState.Failed(
-                    error = R.string.stripe_something_went_wrong.resolvableString,
+                    R.string.stripe_something_went_wrong.resolvableString,
                 ),
             )
         }
