@@ -138,7 +138,7 @@ internal class DefaultCreateLinkStateTest {
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
         assertThat((result as LinkDisabledState).linkDisabledReasons)
-            .containsExactly(LinkDisabledReason.BillingDetailsCollection)
+            .containsExactly(LinkDisabledReason.CheckoutSessionsRequiresEmail)
     }
 
     @Test
