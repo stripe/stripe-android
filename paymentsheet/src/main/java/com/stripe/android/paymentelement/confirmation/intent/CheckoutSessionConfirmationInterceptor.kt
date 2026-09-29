@@ -13,8 +13,10 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -119,6 +121,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun maybeUpdateBillingDetailsForCheckoutSession(
         paymentMethod: PaymentMethod,
     ): Result<Unit> {
+        updateLinkWalletBillingEmail(paymentMethod).getOrElse { error ->
+            return Result.failure(error)
+        }
+
         val billingDetails = paymentMethod.billingDetails
         val checkoutSessionResponse = integrationMetadata.checkoutSessionResponse
         val initialEstimatedTotal = checkoutSessionResponse.amount
@@ -142,6 +148,22 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             return Result.failure(error)
         }
         return Result.success(Unit)
+    }
+
+    private suspend fun updateLinkWalletBillingEmail(
+        paymentMethod: PaymentMethod,
+    ): Result<Unit> {
+        if (paymentMethod.card?.wallet?.walletType != Wallet.Type.Link) {
+            return Result.success(Unit)
+        }
+        val email = paymentMethod.billingDetails?.email ?: return Result.success(Unit)
+        return checkoutSessionRepository.updatePaymentMethod(
+            sessionId = integrationMetadata.id,
+            paymentMethodId = paymentMethod.id,
+            params = PaymentMethodUpdateParams.createCard(
+                billingDetails = PaymentMethod.BillingDetails(email = email),
+            ),
+        ).map { Unit }
     }
 
     private fun createConfirmParams(

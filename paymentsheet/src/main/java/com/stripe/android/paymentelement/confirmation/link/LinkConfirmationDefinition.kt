@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -85,10 +86,15 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
         return when (result) {
             is LinkActivityResult.PaymentMethodObtained -> {
+                val paymentMethod = result.paymentMethod.withBillingEmail(
+                    confirmationOption.configuration.customerInfo.email.takeIf {
+                        confirmationOption.configuration.clientAttributionMetadata.checkoutSessionId != null
+                    }
+                )
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = PaymentMethodConfirmationOption.Saved(
                         shippingInformation = null,
-                        paymentMethod = result.paymentMethod,
+                        paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
                     ),
@@ -126,4 +132,19 @@ internal class LinkConfirmationDefinition @Inject constructor(
             LinkAccountUpdate.None -> Unit
         }
     }
+}
+
+private fun PaymentMethod.withBillingEmail(
+    email: String?,
+): PaymentMethod {
+    email ?: return this
+    val existingBillingDetails = billingDetails
+    return copy(
+        billingDetails = PaymentMethod.BillingDetails(
+            address = existingBillingDetails?.address,
+            email = email,
+            name = existingBillingDetails?.name,
+            phone = existingBillingDetails?.phone,
+        )
+    )
 }

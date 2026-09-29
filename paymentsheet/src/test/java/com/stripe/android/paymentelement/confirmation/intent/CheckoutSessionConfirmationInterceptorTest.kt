@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -302,6 +303,30 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
             .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `intercept with web Link payment method updates its billing email before confirming`() = runScenario {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = PaymentMethod.BillingDetails(email = "customer@example.com"),
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                wallet = Wallet.LinkWallet(dynamicLast4 = null),
+            ),
+        )
+        networkRule.checkoutUpdate(
+            bodyPart("payment_method_to_update[payment_method_id]", paymentMethod.id),
+            bodyPart("payment_method_to_update[billing_details][email]", "customer@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptSavedPm(paymentMethod = paymentMethod)
+
+        assertThat(result)
+            .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
     }
 
     @Test
@@ -633,11 +658,13 @@ class CheckoutSessionConfirmationInterceptorTest {
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingInformation: ShippingInformation? = null,
             shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
+            paymentMethod: PaymentMethod = SAVED_PM_OPTION.paymentMethod,
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
                 intent = intent,
                 confirmationOption = SAVED_PM_OPTION.copy(
                     shippingInformation = shippingInformation,
+                    paymentMethod = paymentMethod,
                 ),
                 shippingValues = shippingValues,
             )

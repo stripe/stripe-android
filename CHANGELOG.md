@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+* [FIXED] Fixed web Link payments failing in Checkout Sessions when the selected payment method was missing the Checkout email.
 
 ## 23.21.0 - 2026-09-28
 
