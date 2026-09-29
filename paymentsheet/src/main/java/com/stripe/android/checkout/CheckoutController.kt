@@ -120,8 +120,9 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val billingAddress = initialBillingAddress(configurationState, response)
-                if (billingAddress != null) {
+                val initialSelection = loadInitialSelectionForTax(configurationState, response)
+                val billingAddress = initialBillingAddress(configurationState, response, initialSelection)
+                val updatedResponse = if (billingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
@@ -130,10 +131,10 @@ class CheckoutController @Inject internal constructor(
                 } else {
                     response
                 }
-            }.mapCatching { response ->
                 checkoutStateLoader.loadInitial(
                     configuration = configurationState,
-                    checkoutSessionResponse = response,
+                    checkoutSessionResponse = updatedResponse,
+                    initialSelection = initialSelection,
                 )
             }
         }
@@ -245,26 +246,35 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    /**
-     * The initial saved payment method's billing address takes precedence over the default billing
-     * address because confirmation reconciles tax against the payment method's billing address.
-     */
-    private suspend fun initialBillingAddress(
+    private suspend fun loadInitialSelectionForTax(
         configuration: Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-    ): Address.State? {
-        val defaultBillingAddress = configuration.defaults.billingDetails?.address
+    ): PaymentSelection? {
         if (
             !checkoutSessionResponse.collectsTaxFromBillingAddress ||
             checkoutSessionResponse.customer?.paymentMethods.isNullOrEmpty()
         ) {
-            return defaultBillingAddress
+            return null
         }
-        val selection = checkoutStateLoader.loadInitialSelection(
+        return checkoutStateLoader.loadInitialSelection(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
-        ) as? PaymentSelection.Saved ?: return defaultBillingAddress
-        return savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, selection) ?: defaultBillingAddress
+        )
+    }
+
+    /**
+     * The initial saved payment method's billing address takes precedence over the default billing
+     * address because confirmation reconciles tax against the payment method's billing address.
+     */
+    private fun initialBillingAddress(
+        configuration: Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        initialSelection: PaymentSelection?,
+    ): Address.State? {
+        val savedPaymentMethodAddress = (initialSelection as? PaymentSelection.Saved)?.let {
+            savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, it)
+        }
+        return savedPaymentMethodAddress ?: configuration.defaults.billingDetails?.address
     }
 
     private fun savedPaymentMethodBillingAddressForTax(

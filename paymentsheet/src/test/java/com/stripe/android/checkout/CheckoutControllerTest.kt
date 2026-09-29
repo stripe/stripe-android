@@ -316,11 +316,7 @@ internal class CheckoutControllerTest {
     fun `configure sends the billing address of the initially selected saved payment method rather than the first`() =
         runConfigureScenario(
             networkSetup = {
-                applicationContext
-                    .getSharedPreferences(DefaultPrefsRepository.PREF_FILE, Context.MODE_PRIVATE)
-                    .edit()
-                    .putString("guest", "payment_method:pm_second_card:false")
-                    .commit()
+                persistSavedSelection("pm_second_card")
                 networkRule.checkoutInit(
                     responseFactory = successResponseFactory(
                         combine(
@@ -349,6 +345,42 @@ internal class CheckoutControllerTest {
             val selection = requireNotNull(committedState).paymentSelection
             assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
             assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_second_card")
+        }
+
+    @Test
+    fun `configure commits the saved payment method whose billing address synchronized tax`() =
+        runConfigureScenario(
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithTwoCards(),
+                        ),
+                    ),
+                )
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[postal_code]", "94111"),
+                    bodyPart("tax_region[line1]", "1234 Main Street"),
+                    responseFactory = { response ->
+                        // Changing the persisted selection between the two loads would move an
+                        // unpinned initial selection to the second card.
+                        persistSavedSelection("pm_second_card")
+                        successResponseFactory(
+                            combine(
+                                automaticTaxFor("billing"),
+                                savedCustomerWithTwoCards(),
+                            ),
+                        ).invoke(response)
+                    },
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val selection = requireNotNull(committedState).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat((selection as PaymentSelection.Saved).paymentMethod.id).isEqualTo("pm_saved_card")
         }
 
     @Test
@@ -1564,6 +1596,15 @@ internal class CheckoutControllerTest {
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
         json.put("customer", savedCustomerJson())
+    }
+
+    // Checkout has no customer configuration, so the loader reads the guest saved selection.
+    private fun persistSavedSelection(paymentMethodId: String) {
+        applicationContext
+            .getSharedPreferences(DefaultPrefsRepository.PREF_FILE, Context.MODE_PRIVATE)
+            .edit()
+            .putString("guest", "payment_method:$paymentMethodId:false")
+            .commit()
     }
 
     private fun savedCustomerWithoutBillingAddress(): (JSONObject) -> Unit = { json ->

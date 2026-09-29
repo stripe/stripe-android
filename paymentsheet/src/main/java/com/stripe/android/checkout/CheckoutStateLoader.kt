@@ -33,15 +33,20 @@ internal class CheckoutStateLoader @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
+    /**
+     * @param initialSelection kept when still valid, so the committed selection matches the one
+     * [loadInitialSelection] resolved before [checkoutSessionResponse] was updated.
+     */
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
+        initialSelection: PaymentSelection?,
     ) {
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
-            carryForward = CarryForward.initial(),
+            carryForward = CarryForward.initial(previousSelection = initialSelection),
         )
     }
 
@@ -225,9 +230,9 @@ internal class CheckoutStateLoader @Inject constructor(
         val linkEagerPresentationSuppressed: Boolean,
     ) {
         companion object {
-            fun initial() = CarryForward(
+            fun initial(previousSelection: PaymentSelection?) = CarryForward(
                 cachedFlagImages = null,
-                previousSelection = null,
+                previousSelection = previousSelection,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,
