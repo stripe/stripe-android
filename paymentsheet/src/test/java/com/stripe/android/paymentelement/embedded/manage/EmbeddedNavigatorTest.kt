@@ -22,11 +22,13 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
@@ -310,6 +312,7 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -329,6 +332,7 @@ internal class EmbeddedNavigatorTest {
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
@@ -338,9 +342,27 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `ManageAll isPerformingNetworkOperation returns false`() {
-        val screen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
-        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
+    fun `ManageAll isPerformingNetworkOperation is true while a row is pending`() {
+        val idleScreen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
+        assertThat(idleScreen.isPerformingNetworkOperation().value).isFalse()
+
+        val pendingPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethodFixtures.createCard(),
+            isSelectionPending = true,
+        )
+        val interactor = FakeManageScreenInteractor(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = listOf(pendingPaymentMethod),
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Pending(pendingPaymentMethod.paymentMethod.id),
+            )
+        )
+
+        assertThat(EmbeddedNavigator.Screen.ManageAll(interactor).isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test

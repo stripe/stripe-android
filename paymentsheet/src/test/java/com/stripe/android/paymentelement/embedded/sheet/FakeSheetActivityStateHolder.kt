@@ -4,6 +4,8 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +26,22 @@ internal class FakeSheetActivityStateHolder(
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<SheetActivityStateHolder.State> = _state.asStateFlow()
+
+    override var checkoutSessionResponse: CheckoutSessionResponse? = null
+
+    override fun setCheckoutSessionResponse(response: CheckoutSessionResponse?) {
+        checkoutSessionResponse = response
+    }
+
+    private val _savedPaymentMethodSelectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
+        SavedPaymentMethodSelectionState.Idle,
+    )
+    override val savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState> =
+        _savedPaymentMethodSelectionState.asStateFlow()
+
+    override fun updateSavedPaymentMethodSelectionState(selectionState: SavedPaymentMethodSelectionState) {
+        _savedPaymentMethodSelectionState.value = selectionState
+    }
 
     fun updateState(transform: (SheetActivityStateHolder.State) -> SheetActivityStateHolder.State) {
         _state.update(transform)

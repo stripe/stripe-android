@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
@@ -34,6 +35,7 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConf
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
@@ -54,6 +56,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLa
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -153,6 +156,27 @@ internal interface EmbeddedActivityModule {
                 eventReporter = eventReporter,
                 initialBackStack = initialScreenFactory.create(),
             )
+        }
+
+        @Provides
+        fun provideEmbeddedSavedPaymentMethodSelector(
+            launchMode: EmbeddedLaunchMode,
+            selectionHolder: EmbeddedSelectionHolder,
+            sheetSelector: DefaultSheetSavedPaymentMethodSelector,
+        ): EmbeddedSavedPaymentMethodSelector = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> sheetSelector
+            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.Form -> EmbeddedSavedPaymentMethodSelector { selection ->
+                selectionHolder.setSelection(selection)
+                Result.success(Unit)
+            }
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(
+            sheetActivityStateHolder: SheetActivityStateHolder,
+        ): StateFlow<SavedPaymentMethodSelectionState> {
+            return sheetActivityStateHolder.savedPaymentMethodSelectionState
         }
 
         @Provides

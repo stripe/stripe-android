@@ -304,7 +304,7 @@ internal class CheckoutStateLoaderTest {
             committedState(
                 paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
-                    "Selection failed".resolvableString,
+                    error = "Selection failed".resolvableString,
                 ),
             )
         )

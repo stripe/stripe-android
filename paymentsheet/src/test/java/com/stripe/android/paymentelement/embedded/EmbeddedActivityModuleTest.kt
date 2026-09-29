@@ -1,16 +1,24 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
+import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedActivityModuleTest {
 
     @Test
@@ -35,6 +43,39 @@ internal class EmbeddedActivityModuleTest {
             assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
         }
 
+    @Test
+    fun `Manage launch provides tax updating selector`() {
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        val taxUpdatingSelector = createTaxUpdatingSelector(selectionHolder)
+
+        val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
+            launchMode = EmbeddedLaunchMode.Manage,
+            selectionHolder = selectionHolder,
+            sheetSelector = taxUpdatingSelector,
+        )
+
+        assertThat(selector).isSameInstanceAs(taxUpdatingSelector)
+    }
+
+    @Test
+    fun `non-Manage launches commit selection without invoking tax selector`() = runTest {
+        listOf(
+            EmbeddedLaunchMode.PaymentOptions,
+            EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ).forEach { launchMode ->
+            val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+            val selector = EmbeddedActivityModule.provideEmbeddedSavedPaymentMethodSelector(
+                launchMode = launchMode,
+                selectionHolder = selectionHolder,
+                sheetSelector = createTaxUpdatingSelector(selectionHolder),
+            )
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+            assertThat(selector.select(selection).isSuccess).isTrue()
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        }
+    }
+
     private fun runScenario(
         shouldUseAutocompleteProxyEndpoints: Boolean,
         block: suspend Scenario.() -> Unit,
@@ -53,6 +94,17 @@ internal class EmbeddedActivityModuleTest {
 
         eventReporter.validate()
     }
+
+    private fun createTaxUpdatingSelector(
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+    ): DefaultSheetSavedPaymentMethodSelector = DefaultSheetSavedPaymentMethodSelector(
+        taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
+            error("Tax update is not invoked by this selector test")
+        },
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selectionHolder = selectionHolder,
+        sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+    )
 
     private data class Scenario(
         val interactor: AutocompleteAddressInteractor,
