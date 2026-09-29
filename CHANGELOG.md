@@ -2,6 +2,7 @@
 
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+* [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
 
 ## 23.21.0 - 2026-09-28
 

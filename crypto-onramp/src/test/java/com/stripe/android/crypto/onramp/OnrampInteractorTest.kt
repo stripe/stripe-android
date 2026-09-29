@@ -136,6 +136,50 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `platform settings can be resolved and cached before authentication`() = runTest {
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+
+        verify(cryptoApiRepository).getPlatformSettings(null, null)
+    }
+
+    @Test
+    fun `customer arrival replaces the pre-auth platform key`() = runTest {
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_authenticated")))
+
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_authenticated")
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", null)
+    }
+
+    @Test
+    fun `logout clears customer platform key and selected wallet`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_authenticated")))
+        interactor.getOrFetchPlatformKey().getOrThrow()
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+        assertThat(interactor.state.value.selectedPaymentSource).isNotNull()
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+
+        assertThat(interactor.logOut()).isInstanceOf(OnrampLogOutResult.Completed::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(interactor.state.value.platformKeyCache).isNull()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
     fun testConfigureIsSuccessful() = runTest {
         val application = RuntimeEnvironment.getApplication()
         PaymentConfiguration.init(application, "pk_before_configure", "acct_before_configure")
