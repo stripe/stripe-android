@@ -252,6 +252,7 @@ class CheckoutController @Inject internal constructor(
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                        paymentMethodId = selection.paymentMethod.id,
                         error = it.stripeErrorMessage(),
                     ),
                 )

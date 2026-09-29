@@ -175,7 +175,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
-                return interactor.state.mapAsStateFlow { it.isProcessing }
+                return interactor.state.mapAsStateFlow { it.isSelectionPending }
             }
 
             @Composable

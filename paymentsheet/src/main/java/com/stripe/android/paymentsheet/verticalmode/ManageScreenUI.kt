@@ -35,7 +35,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 linkBrand = state.linkBrand,
-                isEnabled = !state.isProcessing,
+                isEnabled = !state.isSelectionPending,
                 isSelected = isSelected,
                 onClick = {
                     rowOnClick(
@@ -56,7 +56,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 }
             )
         }
-        state.selectionError?.let {
+        state.paymentMethods.firstNotNullOfOrNull { it.selectionError }?.let {
             ErrorMessage(error = it.resolve())
         }
     }

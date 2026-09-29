@@ -9,8 +9,10 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -26,6 +28,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val embeddedSavedPaymentMethodSelector: EmbeddedSavedPaymentMethodSelector,
+    private val savedPaymentMethodSelectionState: StateFlow<@JvmSuppressWildcards SavedPaymentMethodSelectionState>,
     private val eventReporter: EventReporter,
     private val launchMode: EmbeddedLaunchMode,
 ) : EmbeddedManageScreenInteractorFactory {
@@ -53,6 +56,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            selectionState = savedPaymentMethodSelectionState,
         )
     }
 }

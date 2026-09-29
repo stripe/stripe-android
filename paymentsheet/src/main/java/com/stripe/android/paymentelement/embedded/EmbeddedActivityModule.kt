@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLa
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -169,6 +170,13 @@ internal interface EmbeddedActivityModule {
                 selectionHolder.setSelection(selection)
                 Result.success(Unit)
             }
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(
+            sheetActivityStateHolder: SheetActivityStateHolder,
+        ): StateFlow<SavedPaymentMethodSelectionState> {
+            return sheetActivityStateHolder.savedPaymentMethodSelectionState
         }
 
         @Provides

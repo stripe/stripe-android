@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -13,18 +12,17 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
-import com.stripe.android.paymentsheet.state.error
-import com.stripe.android.paymentsheet.state.isPendingFor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -48,11 +46,13 @@ internal interface ManageScreenInteractor {
         val isEditing: Boolean,
         val canEdit: Boolean,
         val linkBrand: LinkBrand,
-        val isProcessing: Boolean,
-        val selectionError: ResolvableString?,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
+        }
+
+        val isSelectionPending: Boolean by lazy {
+            paymentMethods.any { it.isSelectionPending }
         }
 
         private val manageTitle: ResolvableString
@@ -119,22 +119,26 @@ internal class DefaultManageScreenInteractor(
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
+    private val selectionState: StateFlow<SavedPaymentMethodSelectionState>,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
-    private val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
-        SavedPaymentMethodSelectionState.Idle,
-    )
+    private var selectionJob: Job? = null
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
+        combineAsStateFlow(
+            paymentMethods,
+            defaultPaymentMethodId,
+            selectionState,
+        ) { paymentMethods, defaultPaymentMethodId, selectionState ->
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
-                    paymentMethodMetadata,
-                    defaultPaymentMethodId
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    defaultPaymentMethodId = defaultPaymentMethodId,
+                    selectionState = selectionState,
                 )
             }
         }
@@ -147,17 +151,7 @@ internal class DefaultManageScreenInteractor(
         editing,
         canEdit,
         linkAccount,
-        selectionState,
-    ) { displayableSavedPaymentMethods, paymentSelection, editing, canEdit, linkAccount, selectionState ->
-        val displayablePaymentMethods = displayableSavedPaymentMethods.map {
-            DisplayableSavedPaymentMethod.create(
-                displayName = it.displayName,
-                paymentMethod = it.paymentMethod,
-                isSelectionPending = selectionState.isPendingFor(it.paymentMethod.id),
-                shouldShowDefaultBadge = it.shouldShowDefaultBadge,
-            )
-        }
-
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkAccount, ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -170,8 +164,6 @@ internal class DefaultManageScreenInteractor(
             isEditing = editing,
             canEdit = canEdit,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
-            isProcessing = selectionState is SavedPaymentMethodSelectionState.Pending,
-            selectionError = selectionState.error,
         )
     }
 
@@ -212,26 +204,14 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        if (selectionState.value is SavedPaymentMethodSelectionState.Pending) {
+        if (selectionJob?.isActive == true) {
             return
         }
 
-        val job = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            onSelectPaymentMethod(paymentMethod).fold(
-                onSuccess = {
-                    safeNavigateBack(true)
-                },
-                onFailure = { error ->
-                    selectionState.value = SavedPaymentMethodSelectionState.Failed(
-                        error.stripeErrorMessage(),
-                    )
-                },
-            )
-        }
-        if (job.isActive) {
-            selectionState.value = SavedPaymentMethodSelectionState.Pending(
-                paymentMethod.paymentMethod.id,
-            )
+        selectionJob = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            onSelectPaymentMethod(paymentMethod).onSuccess {
+                safeNavigateBack(true)
+            }
         }
     }
 
@@ -271,6 +251,7 @@ internal class DefaultManageScreenInteractor(
                 },
                 defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
+                selectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
             )
         }
 
