@@ -70,6 +70,67 @@ class CryptoApiRepositoryTest {
     private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
+    fun `platform settings sends country hint alongside customer`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        cryptoApiRepository.getPlatformSettings("crc_customer", "GB").getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "country_hint" to "GB", "ui_mode" to "headless")
+        )
+    }
+
+    @Test
+    fun `payment token sends country hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"id":"cpt_token"}""", emptyMap()))
+
+        cryptoApiRepository.createPaymentToken("crc_customer", "pm_wallet", "GB").getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf(
+                "crypto_customer_id" to "crc_customer", "payment_method" to "pm_wallet",
+                "country_hint" to "GB", "ui_mode" to "headless"
+            )
+        )
+    }
+
+    @Test
+    fun `payment token omits absent hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"id":"cpt_token"}""", emptyMap()))
+
+        cryptoApiRepository.createPaymentToken("crc_customer", "pm_wallet", null).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "payment_method" to "pm_wallet", "ui_mode" to "headless")
+        )
+    }
+
+    @Test
+    fun `platform settings preserves unsupported country API error`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(
+            StripeResponse(
+                400,
+                """{"error": {
+                    "type":"invalid_request_error",
+                    "code":"crypto_onramp_transactions_unavailable_in_country"
+                }}""",
+                emptyMap()
+            )
+        )
+
+        val error = cryptoApiRepository.getPlatformSettings("crc_customer", "ZZ").exceptionOrNull()
+
+        assertThat((error as APIException).stripeError?.code)
+            .isEqualTo("crypto_onramp_transactions_unavailable_in_country")
+    }
+
+    @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
