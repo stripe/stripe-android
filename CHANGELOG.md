@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED] Prefilled the merchant-provided billing address when Link collects missing billing details for a saved payment method.
+
 ## 23.21.0 - 2026-09-28
 
 ### Payments

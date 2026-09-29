@@ -77,10 +77,16 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
         effectiveAddress?.countryCode == current.countryCode &&
             effectiveAddress?.postalCode == current.postalCode
     } == true
-    // Prefer effective address when current is missing or addresses are compatible,
-    // otherwise keep the current address to avoid data conflicts
+    val shouldUseDefaultForFullAddress = effectiveAddress != null &&
+        configuration.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full &&
+        billingAddress.isIncomplete()
+    // Prefer the merchant-provided default when collecting a full address and the saved
+    // address is incomplete. The saved address may only contain the postal code and country,
+    // and those values should not prevent the complete defaults from prefilling the form.
+    // Otherwise, only replace an existing address when the addresses are compatible to avoid
+    // overwriting complete saved billing details with a different address.
     val effectiveBillingAddress = when {
-        billingAddress == null || addressesAreCompatible -> effectiveAddress
+        billingAddress == null || addressesAreCompatible || shouldUseDefaultForFullAddress -> effectiveAddress
         else -> billingAddress
     }
 

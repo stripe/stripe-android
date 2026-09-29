@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -137,6 +138,50 @@ class UpdateCardScreenViewModelTest {
         val state = viewModel.state.value
         assertThat(state.paymentDetailsId).isEqualTo(card.id)
         assertThat(state.isBillingDetailsUpdateFlow).isFalse()
+    }
+
+    @Test
+    fun `billing details update flow prefills merchant default address`() = runTest(dispatcher) {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val defaultAddress = PaymentSheet.Address(
+            line1 = "510 Townsend St",
+            line2 = "Floor 5",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94103",
+            country = "US",
+        )
+        val linkAccountManager = FakeLinkAccountManager().apply {
+            setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+            setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    name = "Jenny Rosen",
+                    address = defaultAddress,
+                ),
+            ),
+            paymentDetailsId = card.id,
+            billingDetailsUpdateFlow = BillingDetailsUpdateFlow(),
+        )
+
+        val billingDetails = requireNotNull(
+            requireNotNull(viewModel.interactor.value).state.value.payload.billingDetails
+        )
+
+        assertThat(billingDetails.name).isEqualTo("Jenny Rosen")
+        assertThat(billingDetails.address?.line1).isEqualTo(defaultAddress.line1)
+        assertThat(billingDetails.address?.line2).isEqualTo(defaultAddress.line2)
+        assertThat(billingDetails.address?.city).isEqualTo(defaultAddress.city)
+        assertThat(billingDetails.address?.state).isEqualTo(defaultAddress.state)
+        assertThat(billingDetails.address?.postalCode).isEqualTo(defaultAddress.postalCode)
+        assertThat(billingDetails.address?.country).isEqualTo(defaultAddress.country)
     }
 
     @Test

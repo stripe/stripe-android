@@ -343,6 +343,52 @@ class LinkBillingDetailsUtilsTest {
     }
 
     @Test
+    fun `withEffectiveBillingDetails uses default address when current address is incomplete`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = null,
+                line1 = null,
+                locality = null,
+                postalCode = "11111",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = null
+            )
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = AddressCollectionMode.Full
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Default Name",
+                address = PaymentSheet.Address(
+                    line1 = "Default Line 1",
+                    line2 = "Default Line 2",
+                    city = "Default City",
+                    state = "CA",
+                    postalCode = "22222",
+                    country = "US"
+                )
+            )
+        )
+
+        val result = card.withEffectiveBillingDetails(configuration, linkAccount)
+
+        assertThat(result.billingAddress).isEqualTo(
+            ConsumerPaymentDetails.BillingAddress(
+                name = "Default Name",
+                line1 = "Default Line 1",
+                line2 = "Default Line 2",
+                locality = "Default City",
+                administrativeArea = "CA",
+                postalCode = "22222",
+                countryCode = CountryCode.US,
+            )
+        )
+    }
+
+    @Test
     fun `withEffectiveBillingDetails preserves original address when different country or postcode`() {
         val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             billingAddress = ConsumerPaymentDetails.BillingAddress(
