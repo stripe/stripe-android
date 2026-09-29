@@ -277,7 +277,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `configure sends only the initial saved payment method billing address over the default`() =
+    fun `configure prefers the initial saved payment method billing address over the default`() =
         runConfigureScenario(
             configuration = configurationWithDefaultBillingAddress(),
             networkSetup = {
@@ -358,19 +358,11 @@ internal class CheckoutControllerTest {
             networkSetup = {
                 // Billing-tax filtering drops a saved payment method without a billing address, so
                 // the initial selection is not a saved payment method.
-                val customerWithoutBillingAddress: (JSONObject) -> Unit = { json ->
-                    json.put(
-                        "customer",
-                        savedCustomerJson(
-                            paymentMethod = savedCardPaymentMethodJson().apply { remove("billing_details") },
-                        ),
-                    )
-                }
                 networkRule.checkoutInit(
                     responseFactory = successResponseFactory(
                         combine(
                             automaticTaxFor("billing"),
-                            customerWithoutBillingAddress,
+                            savedCustomerWithoutBillingAddress(),
                         ),
                     ),
                 )
@@ -384,7 +376,27 @@ internal class CheckoutControllerTest {
                     responseFactory = successResponseFactory(
                         combine(
                             automaticTaxFor("billing"),
-                            customerWithoutBillingAddress,
+                            savedCustomerWithoutBillingAddress(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(requireNotNull(committedState).paymentSelection)
+                .isNotInstanceOf(PaymentSelection.Saved::class.java)
+        }
+
+    @Test
+    fun `configure skips the billing tax update when neither the initial selection nor defaults have an address`() =
+        runConfigureScenario(
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithoutBillingAddress(),
                         ),
                     ),
                 )
@@ -476,19 +488,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
-                        .city("San Francisco")
-                        .country("US")
-                        .line1("510 Townsend St")
-                        .line2("Suite 100")
-                        .postalCode("94103")
-                        .state("CA")
-                )
-            )
-        ),
+        configuration = configurationWithDefaultBillingAddress(),
         networkSetup = {
             networkRule.checkoutInit(
                 responseFactory = successResponseFactory(automaticTaxFor("billing")),
@@ -934,6 +934,7 @@ internal class CheckoutControllerTest {
                 automaticTaxFor("billing"),
                 savedCustomerWithBillingAddress(),
             ),
+            configureNetworkSetup = ::enqueueInitialSavedPaymentMethodTaxUpdate,
             paymentSelection = PaymentSelection.GooglePay,
             assertLoadingConsumed = true,
         ) {
@@ -1017,6 +1018,7 @@ internal class CheckoutControllerTest {
                 automaticTaxFor("billing"),
                 savedCustomerWithBillingAddress(),
             ),
+            configureNetworkSetup = ::enqueueInitialSavedPaymentMethodTaxUpdate,
             paymentSelection = PaymentSelection.GooglePay,
         ) {
             networkRule.checkoutUpdate { response ->
@@ -1463,6 +1465,18 @@ internal class CheckoutControllerTest {
         checkoutInit(responseFactory = ::successResponse)
     }
 
+    // Configure syncs tax for the initially selected saved payment method before mutation tests run.
+    private fun enqueueInitialSavedPaymentMethodTaxUpdate() {
+        networkRule.savedPaymentMethodTaxUpdate(
+            responseFactory = successResponseFactory(
+                combine(
+                    automaticTaxFor("billing"),
+                    savedCustomerWithBillingAddress(),
+                ),
+            ),
+        )
+    }
+
     private fun NetworkRule.savedPaymentMethodTaxUpdate(
         responseFactory: (MockResponse) -> Unit,
     ) {
@@ -1550,6 +1564,15 @@ internal class CheckoutControllerTest {
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
         json.put("customer", savedCustomerJson())
+    }
+
+    private fun savedCustomerWithoutBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.put(
+            "customer",
+            savedCustomerJson(
+                paymentMethod = savedCardPaymentMethodJson().apply { remove("billing_details") },
+            ),
+        )
     }
 
     private fun savedCustomerWithTwoCards(): (JSONObject) -> Unit = { json ->
@@ -1741,6 +1764,7 @@ internal class CheckoutControllerTest {
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
+        configureNetworkSetup: () -> Unit = {},
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -1753,6 +1777,7 @@ internal class CheckoutControllerTest {
                 jsonModifier = initModifier,
             )
         )
+        configureNetworkSetup()
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
