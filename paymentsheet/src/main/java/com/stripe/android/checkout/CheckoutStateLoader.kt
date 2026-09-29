@@ -76,6 +76,54 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(null)
     }
 
+    private suspend fun load(
+        configuration: CheckoutController.Configuration.State,
+        response: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+        previousSelection: PaymentSelection?,
+        loadExpressCheckoutElement: Boolean,
+    ): LoadResults {
+        val embeddedConfig = embeddedConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+        embeddedConfig.appearance.parseAppearance()
+
+        val commonConfiguration = commonConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )?.takeIf { loadExpressCheckoutElement }
+
+        val loadResults = loadPaymentElements(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
+            embeddedConfiguration = embeddedConfig,
+            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
+        )
+
+        // Preserve the customer's existing selection across reloads when it's still valid, rather
+        // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
+        // previous selection comes from the incoming state, not a separate holder.
+        val selection = selectionChooser.choose(
+            paymentMethodMetadata = loadResults.paymentMethodMetadata,
+            paymentMethods = loadResults.customer?.paymentMethods,
+            previousSelection = previousSelection,
+            newSelection = loadResults.paymentSelection,
+            newConfiguration = commonConfiguration,
+            formSheetAction = embeddedConfig.formSheetAction,
+        )
+
+        return loadResults.copy(paymentSelection = selection)
+    }
+
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
@@ -110,58 +158,6 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         customerStateHolder.setCustomerState(loadResults.customer)
-    }
-
-    private suspend fun load(
-        configuration: CheckoutController.Configuration.State,
-        response: CheckoutSessionResponse,
-        collectedDetails: CheckoutCollectedDetails,
-        previousSelection: PaymentSelection?,
-        loadExpressCheckoutElement: Boolean,
-    ): LoadResults {
-        val embeddedConfig = embeddedConfigurationFactory.create(
-            configuration = configuration,
-            checkoutSessionResponse = response,
-            collectedDetails = collectedDetails,
-        )
-        embeddedConfig.appearance.parseAppearance()
-
-        val commonConfiguration = commonConfigurationFactory.create(
-            configuration = configuration,
-            checkoutSessionResponse = response,
-            collectedDetails = collectedDetails,
-        )
-
-        val expressCheckoutElementConfiguration = if (loadExpressCheckoutElement) {
-            commonConfigurationFactory.createForExpressCheckoutElement(
-                configuration = configuration,
-                checkoutSessionResponse = response,
-                collectedDetails = collectedDetails,
-            )
-        } else {
-            null
-        }
-
-        val loadResults = loadPaymentElements(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
-            embeddedConfiguration = embeddedConfig,
-            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
-            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
-        )
-
-        // Preserve the customer's existing selection across reloads when it's still valid, rather
-        // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-        // previous selection comes from the caller, not a separate holder.
-        return loadResults.copy(
-            paymentSelection = selectionChooser.choose(
-                paymentMethodMetadata = loadResults.paymentMethodMetadata,
-                paymentMethods = loadResults.customer?.paymentMethods,
-                previousSelection = previousSelection,
-                newSelection = loadResults.paymentSelection,
-                newConfiguration = commonConfiguration,
-                formSheetAction = embeddedConfig.formSheetAction,
-            ),
-        )
     }
 
     private suspend fun loadPaymentElements(
