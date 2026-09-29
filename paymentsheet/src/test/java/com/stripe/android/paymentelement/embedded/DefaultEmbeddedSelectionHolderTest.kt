@@ -76,41 +76,6 @@ internal class DefaultEmbeddedSelectionHolderTest {
     }
 
     @Test
-    fun `setting initial selection fills an empty savedStateHandle`() = testScenario {
-        val initialSelection = PaymentSelection.GooglePay
-
-        selectionHolder.setInitialSelectionIfNeeded(initialSelection)
-
-        assertThat(selectionHolder.selection.value).isEqualTo(initialSelection)
-        assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
-            .isEqualTo(initialSelection)
-    }
-
-    @Test
-    fun `setting initial selection preserves a restored value`() = testScenario(
-        setup = {
-            set(EMBEDDED_SELECTION_KEY, PaymentSelection.GooglePay)
-        },
-    ) {
-        val initialSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
-        selectionHolder.setInitialSelectionIfNeeded(initialSelection)
-
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
-    }
-
-    @Test
-    fun `setting initial selection preserves a restored null`() = testScenario(
-        setup = {
-            set<PaymentSelection?>(EMBEDDED_SELECTION_KEY, null)
-        },
-    ) {
-        selectionHolder.setInitialSelectionIfNeeded(PaymentSelection.GooglePay)
-
-        assertThat(selectionHolder.selection.value).isNull()
-    }
-
-    @Test
     fun `initializing with previousNewSelections in savedStateHandle sets initial value`() = testScenario(
         setup = {
             set(
@@ -181,7 +146,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     }
 
     private class Scenario(
-        val selectionHolder: DefaultEmbeddedSelectionHolder,
+        val selectionHolder: EmbeddedSelectionHolder,
         val savedStateHandle: SavedStateHandle,
     )
 

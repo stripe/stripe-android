@@ -12,8 +12,6 @@ import javax.inject.Singleton
 internal class DefaultEmbeddedSelectionHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : EmbeddedSelectionHolder {
-    private var isSelectionInitialized = savedStateHandle.contains(EMBEDDED_SELECTION_KEY)
-
     override val selection: StateFlow<PaymentSelection?> =
         savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
     override val temporarySelection: StateFlow<String?> =
@@ -23,15 +21,8 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
             savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = it
         }
 
-    fun setInitialSelectionIfNeeded(initialSelection: PaymentSelection?) {
-        if (!isSelectionInitialized) {
-            setSelection(initialSelection)
-        }
-    }
-
     override fun setSelection(updatedSelection: PaymentSelection?) {
         savedStateHandle[EMBEDDED_SELECTION_KEY] = updatedSelection
-        isSelectionInitialized = true
         previousNewSelections.stashNewSelection(updatedSelection)
         savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections
     }
