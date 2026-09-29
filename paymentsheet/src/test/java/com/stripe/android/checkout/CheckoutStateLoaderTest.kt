@@ -72,25 +72,24 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial commits ECE payment method metadata when ECE is configured`() = runScenario {
-        val configuration = CheckoutController.Configuration()
+    fun `loadInitial commits ECE payment method metadata when ECE is configured`() = runScenario(
+        configuration = CheckoutController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-            .build()
-
-        loadInitial(configuration = configuration)
+            .build(),
+    ) {
+        loadInitial()
 
         assertThat(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
     @Test
     fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
+        configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build(),
         paymentElementLoaderDelay = 1.seconds,
     ) {
-        val configuration = CheckoutController.Configuration()
-            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-            .build()
-
-        loadInitial(configuration = configuration)
+        loadInitial()
 
         assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
     }
@@ -107,22 +106,21 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial applies payment element appearance to the global theme`() = runScenario {
+    fun `loadInitial applies payment element appearance to the global theme`() = runScenario(
+        configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().appearance(
+                    PaymentElement.Configuration.Appearance().colorsLight(
+                        PaymentElement.Configuration.Appearance.Colors.light()
+                            .primary(0xFF123456.toInt())
+                    )
+                )
+            )
+            .build(),
+    ) {
         val previousTheme = StripeThemeSnapshot()
         try {
-            loadInitial(
-                configuration = CheckoutController.Configuration()
-                    .paymentElement(
-                        PaymentElement.Configuration().appearance(
-                            PaymentElement.Configuration.Appearance().colorsLight(
-                                PaymentElement.Configuration.Appearance.Colors.light()
-                                    .primary(0xFF123456.toInt())
-                            )
-                        )
-                    )
-                    .build(),
-                checkoutSessionResponse = response(),
-            )
+            loadInitial()
 
             assertThat(StripeTheme.colorsLightMutable.materialColors.primary.toArgb())
                 .isEqualTo(0xFF123456.toInt())
@@ -132,23 +130,22 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial passes payment method order to payment method metadata`() = runScenario {
-        loadInitial(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
-                )
-                .build(),
-            checkoutSessionResponse = response(),
-        )
+    fun `loadInitial passes payment method order to payment method metadata`() = runScenario(
+        configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
+            )
+            .build(),
+    ) {
+        loadInitial()
 
         assertThat(stateHolder.state?.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 
     @Test
-    fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario {
-        val configuration = CheckoutController.Configuration()
+    fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario(
+        configuration = CheckoutController.Configuration()
             .defaults(
                 CheckoutController.Configuration.Defaults()
                     .shippingDetails(
@@ -158,9 +155,9 @@ internal class CheckoutStateLoaderTest {
                     )
                     .email("prefill@example.com"),
             )
-            .build()
-
-        loadInitial(configuration = configuration)
+            .build(),
+    ) {
+        loadInitial()
 
         val collected = requireNotNull(stateHolder.state).collectedDetails
         assertThat(collected).isEqualTo(
@@ -173,8 +170,8 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial clears an invalid shipping default from collected details`() = runScenario {
-        val configuration = CheckoutController.Configuration()
+    fun `loadInitial clears an invalid shipping default from collected details`() = runScenario(
+        configuration = CheckoutController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().shippingDetails(
@@ -183,12 +180,9 @@ internal class CheckoutStateLoaderTest {
                         .address(CheckoutController.Address().country("DE")),
                 ),
             )
-            .build()
-
-        loadInitial(
-            configuration = configuration,
-            checkoutSessionResponse = response(allowedShippingCountries = listOf("US", "CA")),
-        )
+            .build(),
+    ) {
+        loadInitial(checkoutSessionResponse = response(allowedShippingCountries = listOf("US", "CA")))
 
         val state = requireNotNull(stateHolder.state)
         assertThat(state.configuration.defaults.shippingDetails?.name).isEqualTo("John Shipping")
@@ -399,16 +393,6 @@ internal class CheckoutStateLoaderTest {
         assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isFalse()
     }
 
-    private suspend fun Scenario.loadInitial(
-        configuration: CheckoutController.Configuration.State = defaultConfiguration(),
-        checkoutSessionResponse: CheckoutSessionResponse = response(),
-    ) {
-        loader.loadInitial(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
-    }
-
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response(
@@ -465,6 +449,7 @@ internal class CheckoutStateLoaderTest {
     )
 
     private fun runScenario(
+        configuration: CheckoutController.Configuration.State = defaultConfiguration(),
         loaderSelection: PaymentSelection? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
@@ -523,6 +508,8 @@ internal class CheckoutStateLoaderTest {
 
         Scenario(
             loader = loader,
+            configuration = configuration,
+            defaultCheckoutSessionResponse = { response() },
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             paymentElementLoader = paymentElementLoader,
@@ -536,13 +523,24 @@ internal class CheckoutStateLoaderTest {
 
     private class Scenario(
         val loader: CheckoutStateLoader,
+        private val configuration: CheckoutController.Configuration.State,
+        private val defaultCheckoutSessionResponse: () -> CheckoutSessionResponse,
         val stateHolder: CheckoutControllerStateHolder,
         val customerStateHolder: CustomerStateHolder,
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
         val testScheduler: TestCoroutineScheduler,
-    )
+    ) {
+        suspend fun loadInitial(
+            checkoutSessionResponse: CheckoutSessionResponse = defaultCheckoutSessionResponse(),
+        ) {
+            loader.loadInitial(
+                configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
+            )
+        }
+    }
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
     // so tests can verify the loader threads the state's previous selection and the loader's new
