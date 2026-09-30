@@ -48,6 +48,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal const val TITLE_TAG = "Title"
+internal const val SUBTITLE_TAG = "Subtitle"
 internal const val CONSENT_HEADER_TAG = "ConsentHeader"
 internal const val PRIVACY_POLICY_TAG = "PrivacyPolicy"
 internal const val ACCEPT_BUTTON_TAG = "Accept"
@@ -157,6 +158,7 @@ private fun SuccessUI(
                 modifier = Modifier.testTag(CONSENT_HEADER_TAG),
                 merchantLogoUri = merchantLogoUri,
                 title = consentPage.title,
+                subtitle = consentPage.subtitle,
                 showLogos = !hideBrandingHeader && !visitedIndividualWelcomePage,
                 showStripeLogo = showStripeLogo
             )
@@ -260,6 +262,7 @@ internal fun ConsentPreview() {
                 declineButtonText = "Decline",
                 scrollToContinueButtonText = "scroll to button",
                 title = "Tora's cat food works with Stripe to verify your identity",
+                subtitle = "Complete a one-time identity check to enable withdrawals.",
                 privacyPolicy = "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • " +
                     "<a href='https://tora.me'>Tora's cat food Privacy Policy</a>",
                 lines = listOf(
