@@ -884,19 +884,28 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
+    fun onGooglePayPresented(platformPublishableKey: String) {
+        savedStateHandle[KEY_GOOGLE_PAY_PLATFORM_KEY] = platformPublishableKey
+    }
+
     fun handleGooglePayPaymentResult(
         result: GooglePayPaymentMethodLauncher.Result
-    ): OnrampCollectPaymentMethodResult = when (result) {
-        is GooglePayPaymentMethodLauncher.Result.Completed -> {
-            val kycInfo = result.paymentMethod.googlePayKycInfo()
-
-            handleGooglePayPaymentMethod(result.paymentMethod) { displayData ->
-                OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
+    ): OnrampCollectPaymentMethodResult {
+        val platformPublishableKey = savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
+        return when (result) {
+            is GooglePayPaymentMethodLauncher.Result.Completed -> {
+                val kycInfo = result.paymentMethod.googlePayKycInfo()
+                if (platformPublishableKey == null) {
+                    collectPaymentMethodFailure(IllegalStateException("Google Pay completed without a platform key"))
+                } else {
+                    handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
+                        OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
+                    }
+                }
             }
+            is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
+            is GooglePayPaymentMethodLauncher.Result.Canceled -> OnrampCollectPaymentMethodResult.Cancelled()
         }
-        is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
-        is GooglePayPaymentMethodLauncher.Result.Canceled ->
-            OnrampCollectPaymentMethodResult.Cancelled()
     }
 
     internal fun collectPaymentMethodFailure(error: Throwable): OnrampCollectPaymentMethodResult.Failed {
@@ -923,7 +932,7 @@ internal class OnrampInteractor @Inject constructor(
                     platformPublishableKey = platformPublishableKey,
                 ).fold(
                     onSuccess = { paymentMethod ->
-                        handleSamsungPayPaymentMethod(paymentMethod) { displayData ->
+                        handleSamsungPayPaymentMethod(paymentMethod, platformPublishableKey) { displayData ->
                             OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo = null)
                         }
                     },
@@ -1046,6 +1055,7 @@ internal class OnrampInteractor @Inject constructor(
 
     private fun handleGooglePayPaymentMethod(
         paymentMethod: PaymentMethod,
+        platformPublishableKey: String,
         buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
     ): OnrampCollectPaymentMethodResult {
         analyticsService?.track(
@@ -1057,7 +1067,8 @@ internal class OnrampInteractor @Inject constructor(
         _state.update { state ->
             state.copy(
                 selectedPaymentSource = SelectedPaymentSource.GooglePay(
-                    paymentMethod.id
+                    paymentMethodId = paymentMethod.id,
+                    platformPublishableKey = platformPublishableKey,
                 )
             )
         }
@@ -1067,6 +1078,7 @@ internal class OnrampInteractor @Inject constructor(
 
     private fun handleSamsungPayPaymentMethod(
         paymentMethod: PaymentMethod,
+        platformPublishableKey: String,
         buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
     ): OnrampCollectPaymentMethodResult {
         analyticsService?.track(
@@ -1079,6 +1091,7 @@ internal class OnrampInteractor @Inject constructor(
             state.copy(
                 selectedPaymentSource = SelectedPaymentSource.SamsungPay(
                     paymentMethodId = paymentMethod.id,
+                    platformPublishableKey = platformPublishableKey,
                 ),
             )
         }
@@ -1544,6 +1557,8 @@ internal class OnrampInteractor @Inject constructor(
     }
 }
 
+private const val KEY_GOOGLE_PAY_PLATFORM_KEY = "onramp_google_pay_platform_key"
+
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
 private const val KEY_LAUNCHED_NEXT_ACTION = "onramp_launched_next_action"
 
@@ -1596,15 +1611,22 @@ internal sealed interface SelectedPaymentSource {
         override val analyticsValue: String = "link"
     }
 
-    data class GooglePay(
+    sealed interface Wallet : SelectedPaymentSource {
         val paymentMethodId: String
-    ) : SelectedPaymentSource {
+        val platformPublishableKey: String
+    }
+
+    data class GooglePay(
+        override val paymentMethodId: String,
+        override val platformPublishableKey: String,
+    ) : Wallet {
         override val analyticsValue: String = "google_pay"
     }
 
     data class SamsungPay(
-        val paymentMethodId: String,
-    ) : SelectedPaymentSource {
+        override val paymentMethodId: String,
+        override val platformPublishableKey: String,
+    ) : Wallet {
         override val analyticsValue: String = "samsung_pay"
     }
 }

@@ -136,6 +136,23 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Google Pay completion uses the presentation key after configuration changes`() = runTest {
+        interactor.onGooglePayPresented("pk_us")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        interactor.getOrFetchPlatformKey().getOrThrow()
+
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_us")
+    }
+
+    @Test
     fun testConfigureIsSuccessful() = runTest {
         val application = RuntimeEnvironment.getApplication()
         PaymentConfiguration.init(application, "pk_before_configure", "acct_before_configure")
@@ -1227,6 +1244,7 @@ class OnrampInteractorTest {
             code = "card"
         )
 
+        interactor.onGooglePayPresented("pk_platform_123")
         interactor.handleGooglePayPaymentResult(
             GooglePayPaymentMethodLauncher.Result.Completed(pm)
         )
@@ -1281,7 +1299,7 @@ class OnrampInteractorTest {
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
         assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
         assertThat(interactor.state.value.selectedPaymentSource)
-            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id))
+            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
         verify(cryptoApiRepository).createSamsungPayPaymentMethod(
             paymentCredential = "{\"method\":\"3DS\"}",
