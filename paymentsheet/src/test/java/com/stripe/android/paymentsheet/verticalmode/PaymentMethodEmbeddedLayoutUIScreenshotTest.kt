@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -343,7 +344,9 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    selectionError = R.string.stripe_something_went_wrong.resolvableString,
+                ),
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                    R.string.stripe_something_went_wrong.resolvableString,
                 ),
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,

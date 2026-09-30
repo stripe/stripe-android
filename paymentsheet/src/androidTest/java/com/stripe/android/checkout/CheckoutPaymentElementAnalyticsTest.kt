@@ -21,7 +21,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.Rule
@@ -229,8 +231,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
             )
             runBlocking {
-                controller.selectSavedPaymentMethod(PaymentSelection.Saved(addresslessPaymentMethod))
-                    .getOrThrow()
+                withContext(Dispatchers.Main) {
+                    controller.selectSavedPaymentMethod(PaymentSelection.Saved(addresslessPaymentMethod))
+                        .getOrThrow()
+                }
             }
             context.markTestSucceeded()
         }
