@@ -798,16 +798,23 @@ class PaymentElement @Inject internal constructor(
                         private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
                         private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
                         private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
-                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var additionalVerticalInsetsDp =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
                         private var colorsLight = Colors.light()
                         private var colorsDark = Colors.dark()
 
-                        fun separatorThicknessDp(value: Float): FlatWithRadio = apply { separatorThicknessDp = value }
-                        fun startSeparatorInsetDp(value: Float): FlatWithRadio = apply { startSeparatorInsetDp = value }
+                        fun separatorThicknessDp(value: Float): FlatWithRadio = apply {
+                            separatorThicknessDp = value
+                        }
+                        fun startSeparatorInsetDp(value: Float): FlatWithRadio = apply {
+                            startSeparatorInsetDp = value
+                        }
                         fun endSeparatorInsetDp(value: Float): FlatWithRadio = apply { endSeparatorInsetDp = value }
                         fun topSeparatorEnabled(value: Boolean): FlatWithRadio = apply { topSeparatorEnabled = value }
-                        fun bottomSeparatorEnabled(value: Boolean): FlatWithRadio = apply { bottomSeparatorEnabled = value }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithRadio = apply {
+                            bottomSeparatorEnabled = value
+                        }
                         fun additionalVerticalInsetsDp(value: Float): FlatWithRadio = apply {
                             additionalVerticalInsetsDp = value
                         }
@@ -885,16 +892,27 @@ class PaymentElement @Inject internal constructor(
                         private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
                         private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
                         private var checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp
-                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var additionalVerticalInsetsDp =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
                         private var colorsLight = Colors.light()
                         private var colorsDark = Colors.dark()
 
-                        fun separatorThicknessDp(value: Float): FlatWithCheckmark = apply { separatorThicknessDp = value }
-                        fun startSeparatorInsetDp(value: Float): FlatWithCheckmark = apply { startSeparatorInsetDp = value }
-                        fun endSeparatorInsetDp(value: Float): FlatWithCheckmark = apply { endSeparatorInsetDp = value }
-                        fun topSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply { topSeparatorEnabled = value }
-                        fun bottomSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply { bottomSeparatorEnabled = value }
+                        fun separatorThicknessDp(value: Float): FlatWithCheckmark = apply {
+                            separatorThicknessDp = value
+                        }
+                        fun startSeparatorInsetDp(value: Float): FlatWithCheckmark = apply {
+                            startSeparatorInsetDp = value
+                        }
+                        fun endSeparatorInsetDp(value: Float): FlatWithCheckmark = apply {
+                            endSeparatorInsetDp = value
+                        }
+                        fun topSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply {
+                            topSeparatorEnabled = value
+                        }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply {
+                            bottomSeparatorEnabled = value
+                        }
                         fun checkmarkInsetDp(value: Float): FlatWithCheckmark = apply { checkmarkInsetDp = value }
                         fun additionalVerticalInsetsDp(value: Float): FlatWithCheckmark = apply {
                             additionalVerticalInsetsDp = value
@@ -988,16 +1006,27 @@ class PaymentElement @Inject internal constructor(
                         private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
                         private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
                         private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
-                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var additionalVerticalInsetsDp =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
                         private var colorsLight = Colors.light()
                         private var colorsDark = Colors.dark()
 
-                        fun separatorThicknessDp(value: Float): FlatWithDisclosure = apply { separatorThicknessDp = value }
-                        fun startSeparatorInsetDp(value: Float): FlatWithDisclosure = apply { startSeparatorInsetDp = value }
-                        fun endSeparatorInsetDp(value: Float): FlatWithDisclosure = apply { endSeparatorInsetDp = value }
-                        fun topSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply { topSeparatorEnabled = value }
-                        fun bottomSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply { bottomSeparatorEnabled = value }
+                        fun separatorThicknessDp(value: Float): FlatWithDisclosure = apply {
+                            separatorThicknessDp = value
+                        }
+                        fun startSeparatorInsetDp(value: Float): FlatWithDisclosure = apply {
+                            startSeparatorInsetDp = value
+                        }
+                        fun endSeparatorInsetDp(value: Float): FlatWithDisclosure = apply {
+                            endSeparatorInsetDp = value
+                        }
+                        fun topSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply {
+                            topSeparatorEnabled = value
+                        }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply {
+                            bottomSeparatorEnabled = value
+                        }
                         fun additionalVerticalInsetsDp(value: Float): FlatWithDisclosure = apply {
                             additionalVerticalInsetsDp = value
                         }
@@ -1037,7 +1066,8 @@ class PaymentElement @Inject internal constructor(
                             companion object {
                                 fun light() = Colors(
                                     separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
-                                    disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb(),
+                                    disclosureColor =
+                                        StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb(),
                                 )
 
                                 fun dark() = Colors(
