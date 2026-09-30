@@ -895,12 +895,8 @@ internal class OnrampInteractor @Inject constructor(
         return when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 val kycInfo = result.paymentMethod.googlePayKycInfo()
-                if (platformPublishableKey == null) {
-                    collectPaymentMethodFailure(IllegalStateException("Google Pay completed without a platform key"))
-                } else {
-                    handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
-                        OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
-                    }
+                handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
+                    OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
                 }
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
@@ -1055,7 +1051,7 @@ internal class OnrampInteractor @Inject constructor(
 
     private fun handleGooglePayPaymentMethod(
         paymentMethod: PaymentMethod,
-        platformPublishableKey: String,
+        platformPublishableKey: String?,
         buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
     ): OnrampCollectPaymentMethodResult {
         analyticsService?.track(
@@ -1613,12 +1609,12 @@ internal sealed interface SelectedPaymentSource {
 
     sealed interface Wallet : SelectedPaymentSource {
         val paymentMethodId: String
-        val platformPublishableKey: String
+        val platformPublishableKey: String?
     }
 
     data class GooglePay(
         override val paymentMethodId: String,
-        override val platformPublishableKey: String,
+        override val platformPublishableKey: String?,
     ) : Wallet {
         override val analyticsValue: String = "google_pay"
     }

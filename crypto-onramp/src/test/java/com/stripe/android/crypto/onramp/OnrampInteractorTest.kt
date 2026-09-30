@@ -136,6 +136,71 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Google Pay completion without presentation key preserves collected payment method`() {
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isNull()
+    }
+
+    @Test
+    @Suppress("RestrictedApi")
+    fun `Google Pay collection key survives saved state restoration and is consumed on success`() {
+        interactor.onGooglePayPresented("pk_collection")
+        val restoredHandle = SavedStateHandle.createHandle(savedStateHandle.savedStateProvider().saveState(), null)
+        val restoredInteractor = createInteractor(
+            cryptoApiRepository = cryptoApiRepository,
+            savedStateHandle = restoredHandle,
+        )
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = restoredInteractor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = restoredInteractor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_collection")
+        assertThat(restoredHandle.contains("onramp_google_pay_platform_key")).isFalse()
+    }
+
+    @Test
+    fun `Google Pay cancellation clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `Google Pay failure clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                error = IllegalStateException("Wallet failed"),
+                errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
     fun `Google Pay completion uses the presentation key after configuration changes`() = runTest {
         interactor.onGooglePayPresented("pk_us")
         whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
