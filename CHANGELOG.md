@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [ADDED] Allow clearing Checkout shipping details by passing a null address to `updateShippingAddress`.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28

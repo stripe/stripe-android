@@ -158,19 +158,23 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Sets the shipping address for this checkout.
+     * Sets or clears the shipping address for this checkout.
      *
      * The address is stored locally and used when presenting payment UI. If automatic tax is
      * enabled and the tax address source is shipping, the address is also sent to the server
-     * to compute updated tax amounts.
+     * to compute updated tax amounts. Clearing the address retains its previous country for tax
+     * calculation when shipping is the tax address source.
      *
-     * @param name The recipient's name.
-     * @param address The shipping address.
+     * @param name The recipient's name. Ignored when [address] is `null`.
+     * @param address The shipping address, or `null` to clear the shipping name and address.
      */
     suspend fun updateShippingAddress(
         name: String?,
-        address: Address,
+        address: Address?,
     ): kotlin.Result<Unit> {
+        if (address == null) {
+            return clearShippingAddress()
+        }
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
@@ -297,6 +301,29 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
+            )
+        }
+    }
+
+    private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = null,
+                    shippingAddress = null,
+                ),
+            )
+        },
+    ) {
+        val previousAddress = collectedDetails.shippingAddress
+        if (previousAddress == null) {
+            kotlin.Result.success(checkoutSessionResponse)
+        } else {
+            // The tax region endpoint requires a country, so retain the previous country only.
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = Address().country(previousAddress.country).build(),
             )
         }
     }

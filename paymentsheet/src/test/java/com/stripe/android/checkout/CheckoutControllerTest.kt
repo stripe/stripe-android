@@ -907,6 +907,85 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `updateShippingAddress clears shipping locally when tax is disabled`() =
+        runMutationScenario {
+            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+
+            val result = controller.updateShippingAddress(name = "Ignored", address = null)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isNull()
+            assertThat(state.collectedDetails.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `updateShippingAddress sends country only when clearing shipping tax`() =
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("tax_region[line1]", "123 Main St"),
+                bodyPart("tax_region[line2]", "Apt 4"),
+                responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+            )
+            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+            assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                not(hasBodyPart("tax_region[city]")),
+                not(hasBodyPart("tax_region[state]")),
+                not(hasBodyPart("tax_region[postal_code]")),
+                not(hasBodyPart("tax_region[line1]")),
+                not(hasBodyPart("tax_region[line2]")),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+            )
+            val result = controller.updateShippingAddress(name = null, address = null)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isNull()
+            assertThat(state.collectedDetails.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `updateShippingAddress keeps details when clearing tax fails`() =
+        runMutationScenario(initModifier = automaticTaxFor("shipping")) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("tax_region[line1]", "123 Main St"),
+                bodyPart("tax_region[line2]", "Apt 4"),
+                responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+            )
+            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                not(hasBodyPart("tax_region[city]")),
+                not(hasBodyPart("tax_region[state]")),
+                not(hasBodyPart("tax_region[postal_code]")),
+                not(hasBodyPart("tax_region[line1]")),
+                not(hasBodyPart("tax_region[line2]")),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+            val result = controller.updateShippingAddress(name = null, address = null)
+
+            assertThat(result.isFailure).isTrue()
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+        }
+
+    @Test
     fun `updateShippingAddress does not store address on failure`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate { response ->
