@@ -20,6 +20,7 @@ import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.PlatformPayAccountChangedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
@@ -70,7 +71,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
-import com.stripe.android.crypto.onramp.model.googlePayKycInfo
+import com.stripe.android.crypto.onramp.model.platformPayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
@@ -735,11 +736,14 @@ internal class OnrampInteractor @Inject constructor(
         }
 
         // Get the platform publishable key
-        return getOrFetchPlatformKey()
+        // KYC can change the account even when the customer ID has not changed.
+        return getPlatformKey(forceRefresh = _state.value.selectedPaymentSource is SelectedPaymentSource.Wallet)
             // Create a PaymentMethod + Crypto PaymentToken
             .flatMapCatching { platformPublishableKey ->
                 val selected = _state.value.selectedPaymentSource
                     ?: throw IllegalStateException("No selected payment source")
+
+                validateWalletAccount(selected, platformPublishableKey)
 
                 val paymentMethodId = when (selected) {
                     SelectedPaymentSource.Link -> {
@@ -761,7 +765,7 @@ internal class OnrampInteractor @Inject constructor(
                 cryptoApiRepository.createPaymentToken(
                     cryptoCustomerId = cryptoCustomerId,
                     paymentMethod = paymentMethodId,
-                    countryHint = null,
+                    countryHint = _state.value.configurationState?.countryHint,
                 )
             }
             .fold(
@@ -781,9 +785,22 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
+    private fun validateWalletAccount(selected: SelectedPaymentSource, platformPublishableKey: String) {
+        // A missing collection key cannot establish account ownership. Never replace it with the current key.
+        if (selected is SelectedPaymentSource.Wallet && selected.platformPublishableKey != platformPublishableKey) {
+            throw PlatformPayAccountChangedException(
+                application.getString(OnrampR.string.stripe_onramp_platform_pay_account_changed)
+            )
+        }
+    }
+
     suspend fun logOut(): OnrampLogOutResult {
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
+                savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
+                _state.update {
+                    it.copy(cryptoCustomerId = null, platformKeyCache = null, selectedPaymentSource = null)
+                }
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
                 OnrampLogOutResult.Completed()
             }
@@ -894,7 +911,7 @@ internal class OnrampInteractor @Inject constructor(
         val platformPublishableKey = savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
         return when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
-                val kycInfo = result.paymentMethod.googlePayKycInfo()
+                val kycInfo = result.paymentMethod.platformPayKycInfo()
                 handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
                     OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
                 }
@@ -929,7 +946,9 @@ internal class OnrampInteractor @Inject constructor(
                 ).fold(
                     onSuccess = { paymentMethod ->
                         handleSamsungPayPaymentMethod(paymentMethod, platformPublishableKey) { displayData ->
-                            OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo = null)
+                            OnrampCollectPaymentMethodResult.Completed(
+                                displayData, kycInfo = paymentMethod.platformPayKycInfo()
+                            )
                         }
                     },
                     onFailure = { failure ->
@@ -1520,25 +1539,25 @@ internal class OnrampInteractor @Inject constructor(
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    internal suspend fun getOrFetchPlatformKey(): Result<String> {
+    internal suspend fun getOrFetchPlatformKey(): Result<String> = getPlatformKey(forceRefresh = false)
+
+    private suspend fun getPlatformKey(forceRefresh: Boolean): Result<String> {
         val state = _state.value
         val cryptoCustomerId = state.cryptoCustomerId
+        val countryHint = state.configurationState?.countryHint
         val merchantPublishableKey = state.configurationState?.publishableKey
         val cachedKey = state.platformKeyCache
 
         // Check if we have a valid cached key for the current customer
-        if (cachedKey != null && cachedKey.matches(cryptoCustomerId, null, merchantPublishableKey)) {
+        val cacheMatches = cachedKey?.matches(cryptoCustomerId, countryHint, merchantPublishableKey) == true
+        if (!forceRefresh && cachedKey != null && cacheMatches) {
             return Result.success(cachedKey.publishableKey)
-        }
-
-        if (cryptoCustomerId == null) {
-            return Result.failure(MissingCryptoCustomerException())
         }
 
         // Fetch platform settings if not available or customer changed
         return cryptoApiRepository.getPlatformSettings(
             cryptoCustomerId = cryptoCustomerId,
-            countryHint = null
+            countryHint = countryHint
         )
             .map { it.publishableKey }
             .onSuccess { platformPublishableKey ->
@@ -1548,7 +1567,7 @@ internal class OnrampInteractor @Inject constructor(
                         platformKeyCache = PlatformKeyCache(
                             publishableKey = platformPublishableKey,
                             cryptoCustomerId = cryptoCustomerId,
-                            countryHint = null,
+                            countryHint = countryHint,
                             merchantPublishableKey = merchantPublishableKey,
                         )
                     )

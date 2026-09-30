@@ -103,7 +103,12 @@ internal class OnrampViewModel(
         get() = savedStateHandle[KEY_UI_STATE]
 
     private val _uiState = MutableStateFlow(
-        savedUiState ?: OnrampUiState(kycResidence = KycResidence.UnitedStates)
+        savedUiState ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletRawPhone = null,
+            kycResidence = KycResidence.UnitedStates,
+        )
     )
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
@@ -297,6 +302,9 @@ internal class OnrampViewModel(
 
         _uiState.value = savedUser?.let {
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletRawPhone = null,
                 email = it.email,
                 authToken = it.authToken,
                 screen = Screen.SeamlessSignIn,
@@ -305,6 +313,9 @@ internal class OnrampViewModel(
                 kycResidence = KycResidence.UnitedStates,
             )
         } ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletRawPhone = null,
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
             samsungPayIsReady = samsungPayIsReady,
@@ -397,7 +408,9 @@ internal class OnrampViewModel(
                 _message.value = "Payment selection completed"
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
+                        walletEmail = result.kycInfo?.email,
+                        walletPhone = result.kycInfo?.phone,
+                        walletRawPhone = result.kycInfo?.rawPhone,
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
@@ -421,7 +434,6 @@ internal class OnrampViewModel(
                     _message.value = "Payment selection failed: ${result.error.message}"
                     _uiState.update {
                         it.copy(
-                            screen = Screen.AuthenticatedOperations,
                             loadingMessage = null
                         )
                     }
@@ -1386,6 +1398,9 @@ internal class OnrampViewModel(
 
         _uiState.update { currentState ->
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletRawPhone = null,
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,
                 samsungPayIsReady = currentState.samsungPayIsReady,

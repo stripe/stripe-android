@@ -22,6 +22,10 @@ import kotlinx.parcelize.Parcelize
  * @property birthCountry The country where the user was born.
  * @property birthCity The city where the user was born.
  * @property nationalities The user's nationalities.
+ * @property email Wallet email for prefilling Link registration or merchant UI. Not submitted with KYC.
+ * @property phone Wallet phone normalized to E.164, or null when unavailable or invalid.
+ * Can be passed to Link registration. Not submitted with KYC.
+ * @property rawPhone Original wallet phone string for merchant UI or manual correction. Not submitted with KYC.
  */
 @ExperimentalCryptoOnramp
 @Poko
@@ -34,7 +38,10 @@ class KycInfo @JvmOverloads constructor(
     val address: PaymentSheet.Address?,
     val birthCountry: CountryCode? = null,
     val birthCity: String? = null,
-    val nationalities: List<CountryCode>? = null
+    val nationalities: List<CountryCode>? = null,
+    val email: String? = null,
+    val phone: String? = null,
+    val rawPhone: String? = null,
 ) {
     constructor(
         firstName: String?,
@@ -54,7 +61,10 @@ class KycInfo @JvmOverloads constructor(
         address = address,
         birthCountry = birthCountry,
         birthCity = birthCity,
-        nationalities = nationalities
+        nationalities = nationalities,
+        email = null,
+        phone = null,
+        rawPhone = null,
     )
 
     constructor(
@@ -72,7 +82,10 @@ class KycInfo @JvmOverloads constructor(
         address = address,
         birthCountry = null,
         birthCity = null,
-        nationalities = null
+        nationalities = null,
+        email = null,
+        phone = null,
+        rawPhone = null,
     )
 }
 

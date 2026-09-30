@@ -3,7 +3,9 @@ package com.stripe.android.crypto.onramp.example.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -27,17 +29,26 @@ import com.stripe.android.crypto.onramp.example.LOGIN_EMAIL_TAG
 import com.stripe.android.crypto.onramp.example.LOGIN_LOGIN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.LOGIN_PASSWORD_TAG
 import com.stripe.android.crypto.onramp.example.LOGIN_REGISTER_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.PREAUTH_GOOGLE_PAY_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.PREAUTH_SELECTED_PAYMENT_TAG
+import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
 
 @Composable
 internal fun LoginSignupScreen(
     onRegister: (String, String) -> Unit,
-    onLogin: (String, String) -> Unit
+    onLogin: (String, String) -> Unit,
+    onCollectGooglePay: () -> Unit,
+    googlePayIsReady: Boolean,
+    selectedPaymentLabel: String?,
+    walletEmail: String?,
 ) {
-    var email by remember { mutableStateOf("") }
+    var email by remember(walletEmail) { mutableStateOf(walletEmail.orEmpty()) }
     var password by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        PreAuthGooglePaySection(onCollectGooglePay, googlePayIsReady, selectedPaymentLabel)
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -61,21 +72,7 @@ internal fun LoginSignupScreen(
                 }
         )
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            modifier = Modifier
-                .testTag(LOGIN_PASSWORD_TAG)
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
+        LoginPasswordField(password = password, onPasswordChange = { password = it })
 
         Button(
             onClick = { onLogin(email, password) },
@@ -96,4 +93,43 @@ internal fun LoginSignupScreen(
             Text("Register")
         }
     }
+}
+
+@Composable
+private fun PreAuthGooglePaySection(
+    onCollectGooglePay: () -> Unit,
+    googlePayIsReady: Boolean,
+    selectedPaymentLabel: String?,
+) {
+    GooglePayButton(
+        onClick = onCollectGooglePay,
+        enabled = googlePayIsReady,
+        modifier = Modifier.testTag(PREAUTH_GOOGLE_PAY_BUTTON_TAG),
+    )
+    Text(
+        text = selectedPaymentLabel?.let { "$it selected. Continue with login or registration." }
+            ?: "You can select Google Pay before signing in to Link.",
+        modifier = Modifier
+            .testTag(PREAUTH_SELECTED_PAYMENT_TAG)
+            .padding(vertical = 16.dp),
+    )
+}
+
+@Composable
+private fun LoginPasswordField(password: String, onPasswordChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        label = { Text("Password") },
+        singleLine = true,
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        modifier = Modifier
+            .testTag(LOGIN_PASSWORD_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    )
 }

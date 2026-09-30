@@ -58,7 +58,13 @@ internal fun OnrampScreen(
             Screen.LoginSignup -> {
                 LoginSignupScreen(
                     onRegister = viewModel::registerUser,
-                    onLogin = viewModel::loginUser
+                    onLogin = viewModel::loginUser,
+                    onCollectGooglePay = {
+                        onCollectPayment(PaymentMethodSelection.GooglePay(currencyCode = "USD", amount = 0L))
+                    },
+                    googlePayIsReady = uiState.googlePayIsReady,
+                    selectedPaymentLabel = uiState.selectedPaymentData?.label,
+                    walletEmail = uiState.walletEmail,
                 )
             }
             Screen.Loading -> {

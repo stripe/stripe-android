@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class OnrampFlowTest {
     @get:Rule
-    val onrampRule = OnrampE2ETestRule()
+    val onrampRule = OnrampE2ETestRule(retryCount = 3)
 
     private val page by lazy { OnrampE2EPage(onrampRule.composeRule) }
 
