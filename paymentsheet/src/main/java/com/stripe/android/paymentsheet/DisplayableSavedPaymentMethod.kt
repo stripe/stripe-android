@@ -11,7 +11,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
     val isSelectionPending: Boolean = false,
-    val selectionError: ResolvableString? = null,
     val shouldShowDefaultBadge: Boolean = false,
 ) {
     val isCard: Boolean
@@ -103,7 +102,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
             isSelectionPending: Boolean = false,
-            selectionError: ResolvableString? = null,
             shouldShowDefaultBadge: Boolean = false,
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
@@ -133,7 +131,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 paymentMethod = paymentMethod,
                 savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
                 isSelectionPending = isSelectionPending,
-                selectionError = selectionError,
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
             )
         }

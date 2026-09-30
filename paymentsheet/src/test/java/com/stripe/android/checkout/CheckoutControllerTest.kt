@@ -222,13 +222,7 @@ internal class CheckoutControllerTest {
                             .address(CheckoutController.Address().country("DE"))
                     )
                 ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -247,13 +241,7 @@ internal class CheckoutControllerTest {
                         .address(CheckoutController.Address().country("DE"))
                 )
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -276,10 +264,8 @@ internal class CheckoutControllerTest {
                 )
             )
         ),
+        initModifier = automaticTaxFor("billing"),
         networkSetup = {
-            networkRule.checkoutInit(
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
-            )
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "San Francisco"),
@@ -300,9 +286,6 @@ internal class CheckoutControllerTest {
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
-        networkSetup = {
-            networkRule.checkoutInit(responseFactory = ::successResponse)
-        },
     ) {
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
@@ -355,13 +338,7 @@ internal class CheckoutControllerTest {
             configuration = CheckoutController.Configuration().paymentElement(
                 PaymentElement.Configuration()
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory { json ->
-                        json.put("billing_address_collection", "required")
-                    },
-                )
-            },
+            initModifier = { json -> json.put("billing_address_collection", "required") },
         ) {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
@@ -660,9 +637,7 @@ internal class CheckoutControllerTest {
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 5099).put("subtotal", 5099)
-            },
+            responseFactory = successResponseFactory(withTotal(5099)),
         )
 
         val result = controller.updateCurrency("usd")
@@ -964,9 +939,7 @@ internal class CheckoutControllerTest {
 
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 8000).put("subtotal", 8000)
-            },
+            responseFactory = successResponseFactory(withTotal(8000)),
         )
 
         val result = controller.runServerUpdate { Result.success(Unit) }
@@ -1246,13 +1219,17 @@ internal class CheckoutControllerTest {
 
     // endregion
 
-    private fun NetworkRule.defaultInit() {
-        checkoutInit(responseFactory = ::successResponse)
+    private fun NetworkRule.enqueueSuccessfulInit(
+        jsonModifier: (JSONObject) -> Unit = {},
+    ) {
+        checkoutInit(responseFactory = successResponseFactory(jsonModifier))
     }
 
-    private fun NetworkRule.savedPaymentMethodTaxUpdate(
-        responseFactory: (MockResponse) -> Unit,
-    ) {
+    private fun NetworkRule.defaultInit() {
+        enqueueSuccessfulInit()
+    }
+
+    private fun NetworkRule.taxRegionUpdate(responseFactory: (MockResponse) -> Unit) {
         checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[city]", "San Francisco"),
@@ -1262,6 +1239,12 @@ internal class CheckoutControllerTest {
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             responseFactory = responseFactory,
         )
+    }
+
+    private fun NetworkRule.savedPaymentMethodTaxUpdate(
+        responseFactory: (MockResponse) -> Unit,
+    ) {
+        taxRegionUpdate(responseFactory)
     }
 
     // The base fixture omits customer_email. Inject one for standard success paths; a test can
@@ -1425,6 +1408,10 @@ internal class CheckoutControllerTest {
     private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
         .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
+    private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
+        checkoutItemJson(json).put("total", amount).put("subtotal", amount)
+    }
+
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,
         integrationName: String,
@@ -1460,10 +1447,16 @@ internal class CheckoutControllerTest {
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
         configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
-        networkSetup: () -> Unit = { networkRule.defaultInit() },
+        initModifier: ((JSONObject) -> Unit)? = null,
+        networkSetup: (() -> Unit)? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        networkSetup()
+        if (initModifier != null) {
+            networkRule.enqueueSuccessfulInit(initModifier)
+        } else if (networkSetup == null) {
+            networkRule.defaultInit()
+        }
+        networkSetup?.invoke()
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val result = setup.controller.configure(clientSecret, configuration)
@@ -1495,11 +1488,7 @@ internal class CheckoutControllerTest {
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
-        networkRule.checkoutInit(
-            responseFactory = successResponseFactory(
-                jsonModifier = initModifier,
-            )
-        )
+        networkRule.enqueueSuccessfulInit(initModifier)
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
