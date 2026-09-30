@@ -29,7 +29,7 @@ import kotlinx.parcelize.Parcelize
  */
 @ExperimentalCryptoOnramp
 @Poko
-class KycInfo @JvmOverloads constructor(
+class KycInfo(
     val firstName: String?,
     val lastName: String?,
     val idNumber: String?,
@@ -43,6 +43,33 @@ class KycInfo @JvmOverloads constructor(
     val phone: String? = null,
     val rawPhone: String? = null,
 ) {
+    // Preserve the original JVM constructors, including Kotlin's default-argument constructor.
+    @JvmOverloads
+    constructor(
+        firstName: String?,
+        lastName: String?,
+        idNumber: String?,
+        idType: IdType,
+        dateOfBirth: DateOfBirth?,
+        address: PaymentSheet.Address?,
+        birthCountry: CountryCode? = null,
+        birthCity: String? = null,
+        nationalities: List<CountryCode>? = null,
+    ) : this(
+        firstName = firstName,
+        lastName = lastName,
+        idNumber = idNumber,
+        idType = idType,
+        dateOfBirth = dateOfBirth,
+        address = address,
+        birthCountry = birthCountry,
+        birthCity = birthCity,
+        nationalities = nationalities,
+        email = null,
+        phone = null,
+        rawPhone = null,
+    )
+
     constructor(
         firstName: String?,
         lastName: String?,

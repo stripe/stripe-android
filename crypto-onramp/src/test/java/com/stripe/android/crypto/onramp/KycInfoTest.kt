@@ -1,13 +1,48 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.model.DateOfBirth
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
 class KycInfoTest {
+    @Test
+    fun `original Kotlin default argument constructor remains callable`() {
+        val constructor = KycInfo::class.java.getConstructor(
+            String::class.java,
+            String::class.java,
+            String::class.java,
+            IdType::class.java,
+            DateOfBirth::class.java,
+            PaymentSheet.Address::class.java,
+            CountryCode::class.java,
+            String::class.java,
+            List::class.java,
+            Int::class.javaPrimitiveType,
+            Class.forName("kotlin.jvm.internal.DefaultConstructorMarker"),
+        )
+        // Bits 6, 7, and 8 select the original optional birth and nationality defaults.
+        val info = constructor.newInstance(
+            "First", "Last", null, IdType.SocialSecurityNumber, null, null,
+            CountryCode.US, "Ignored", listOf(CountryCode.US), 0x1C0, null,
+        )
+
+        assertThat(info.firstName).isEqualTo("First")
+        assertThat(info.lastName).isEqualTo("Last")
+        assertThat(info.idType).isEqualTo(IdType.SocialSecurityNumber)
+        assertThat(info.birthCountry).isNull()
+        assertThat(info.birthCity).isNull()
+        assertThat(info.nationalities).isNull()
+        assertThat(info.email).isNull()
+        assertThat(info.phone).isNull()
+        assertThat(info.rawPhone).isNull()
+    }
+
     @Test
     fun `primary constructor contact fields default to null`() {
         val info = KycInfo(null, null, null, IdType.SocialSecurityNumber, null, null)

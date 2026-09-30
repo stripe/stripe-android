@@ -169,27 +169,3 @@ delivered through the existing `OnrampCollectPaymentMethodResult.Failed` callbac
 ### Example
 
 [CryptoOnramp Example](../crypto-onramp-example) – This example demonstrates an end-to-end headless onramp flow (Link authentication, KYC and identity verification, wallet selection, payment method collection, and checkout) using a demo backend.
-
-### Platform Pay E2E tests
-
-`OnrampPlatformPayFlowTest` in `crypto-onramp-example` drives the real Google Pay sheet before
-Link authentication. It covers a returning user through Link OTP and a fresh user through
-registration, OTP, KYC, and identity verification, then creates a token from the originally collected
-wallet. It also checks the wallet contact fields and that token creation fails before authentication.
-A third test exercises the headless new-user path: Google Pay → `registerLinkUser` →
-`attachKycInfo` → `createCryptoPaymentToken`, without authorization, OTP, a second wallet collection,
-or any activity launch after Google Pay returns. It uses the wallet phone, name, and address directly.
-For repeatability, it derives a unique email alias from the wallet email and asserts that the alias has
-no existing Link account before registration. This tests contact-driven registration, but does not
-register the exact, unchanged Google account email on every run. KYC here means submitting the wallet
-name/address; this test does not complete identity verification or a purchase.
-
-Use an online Google Play device signed into a Google account, with Google Pay test cards and a
-complete US billing contact (including a valid phone number). The device must have network access
-to the example backend. The tests fail if Google Pay is unavailable; they do not substitute a fake
-wallet result or silently skip the flow.
-
-```shell
-./gradlew :crypto-onramp-example:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.crypto.onramp.example.OnrampPlatformPayFlowTest
-```
