@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ internal fun ConsentWelcomeHeader(
     modifier: Modifier = Modifier,
     merchantLogoUri: Uri,
     title: String?,
+    subtitle: String?,
     showLogos: Boolean = true,
     showStripeLogo: Boolean = true
 ) {
@@ -117,6 +119,17 @@ internal fun ConsentWelcomeHeader(
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center
     )
+    if (subtitle != null) {
+        Text(
+            text = subtitle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
+                .semantics { testTag = SUBTITLE_TAG },
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Preview
@@ -129,6 +142,7 @@ internal fun ConsentWelcomeHeaderPreview() {
                 modifier = Modifier,
                 merchantLogoUri = Uri.EMPTY,
                 title = "TEST TITLE",
+                subtitle = null,
                 showLogos = true
             )
         }
