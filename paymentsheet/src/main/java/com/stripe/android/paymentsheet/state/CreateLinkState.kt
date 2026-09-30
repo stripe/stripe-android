@@ -145,6 +145,12 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
+        val requiresCheckoutSessionEmail =
+            initializationMode.requiresEmailAddress() && configuration.defaultBillingDetails?.email == null
+        if (requiresCheckoutSessionEmail && useWebLink) {
+            add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
+        }
+
         when (initializationMode.walletsDisabledReason()) {
             WalletsDisabledReason.AutomaticTaxBillingAddress -> {
                 add(LinkDisabledReason.AutomaticTaxBillingAddress)

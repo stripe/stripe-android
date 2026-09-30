@@ -65,6 +65,7 @@ import com.stripe.android.utils.filterNotNullValues
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -417,7 +418,7 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun getPlatformSettings(
-        cryptoCustomerId: String,
+        cryptoCustomerId: String?,
         countryHint: String?
     ): Result<GetPlatformSettingsResponse> {
         val request = apiRequestFactory.createGet(
@@ -439,14 +440,16 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun createPaymentToken(
         cryptoCustomerId: String,
         paymentMethod: String,
+        countryHint: String?,
     ): Result<CreatePaymentTokenResponse> {
         val params = CreatePaymentTokenRequest(
             cryptoCustomerId = cryptoCustomerId,
             paymentMethod = paymentMethod,
+            countryHint = countryHint,
         )
         return executePost(
             url = paymentToken,
-            paramsJson = json.encodeToJsonElement(params).jsonObject,
+            paramsJson = JsonObject(json.encodeToJsonElement(params).jsonObject.filterValues { it != JsonNull }),
             responseSerializer = CreatePaymentTokenResponse.serializer()
         )
     }

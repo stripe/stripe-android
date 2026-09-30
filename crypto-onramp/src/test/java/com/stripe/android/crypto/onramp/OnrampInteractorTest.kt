@@ -1171,7 +1171,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         interactor.handlePresentPaymentMethodsResult(
@@ -1211,7 +1213,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val pm = PaymentMethod(
@@ -1260,6 +1264,7 @@ class OnrampInteractorTest {
             cryptoApiRepository.createPaymentToken(
                 cryptoCustomerId = "cpt_123",
                 paymentMethod = paymentMethod.id,
+                countryHint = null,
             ),
         ).thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
 
@@ -1285,6 +1290,7 @@ class OnrampInteractorTest {
         verify(cryptoApiRepository).createPaymentToken(
             cryptoCustomerId = "cpt_123",
             paymentMethod = paymentMethod.id,
+            countryHint = null,
         )
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.CollectPaymentMethodCompleted(PaymentMethodType.SamsungPay),

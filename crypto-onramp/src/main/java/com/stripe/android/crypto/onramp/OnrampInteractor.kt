@@ -761,6 +761,7 @@ internal class OnrampInteractor @Inject constructor(
                 cryptoApiRepository.createPaymentToken(
                     cryptoCustomerId = cryptoCustomerId,
                     paymentMethod = paymentMethodId,
+                    countryHint = null,
                 )
             }
             .fold(
