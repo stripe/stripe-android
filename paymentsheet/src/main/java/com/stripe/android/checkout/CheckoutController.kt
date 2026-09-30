@@ -120,23 +120,28 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val initialState = checkoutStateLoader.loadInitial(
+                val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val billingAddress = initialState.paymentSelection
+                val billingAddress = initialLoad.state.paymentSelection
                     ?.billingDetails?.address?.toCheckoutAddress()
                     ?: configurationState.defaults.billingDetails?.address
-                val updatedResponse = if (billingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                val requiresTaxUpdate = checkoutSessionTaxRegionUpdater.requiresUpdate(
+                    checkoutSessionResponse = response,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
+                if (billingAddress != null && requiresTaxUpdate) {
+                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                         address = billingAddress,
                     ).getOrThrow()
+                    // The updated totals change payment method metadata, so rebuild it before publishing.
+                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
                 } else {
-                    response
+                    checkoutStateLoader.publish(initialLoad)
                 }
-                checkoutStateLoader.reload(initialState.copy(checkoutSessionResponse = updatedResponse))
             }
         }
     }

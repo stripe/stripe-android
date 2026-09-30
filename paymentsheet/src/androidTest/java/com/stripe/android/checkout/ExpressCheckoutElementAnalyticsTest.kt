@@ -305,7 +305,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: () -> Unit,
     ) {
-        enqueueLoadingRequests(linkEnabled = linkEnabled, loadCount = 4)
+        enqueueLoadingRequests(linkEnabled = linkEnabled)
         validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
 
         runExpressCheckoutElementTest(
@@ -319,8 +319,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
         }
     }
 
-    private fun enqueueLoadingRequests(linkEnabled: Boolean, loadCount: Int = 2) {
-        repeat(loadCount) {
+    private fun enqueueLoadingRequests(linkEnabled: Boolean) {
+        // We load twice, once for PE and once for ECE. So all these requests are made twice.
+        repeat(2) {
             if (linkEnabled) {
                 networkRule.enqueueLinkAccountLookup()
                 validateLinkAccountLookupAnalyticsRequest()

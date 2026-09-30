@@ -51,16 +51,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
     fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementTest(
         networkRule = networkRule,
         setup = { controller ->
-            repeat(2) {
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
-            }
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("Checkout"),
+            )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
@@ -105,16 +103,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
-                repeat(2) {
-                    networkRule.validateAnalyticsRequest(
-                        eventName = "mc_load_started",
-                        productUsage = setOf("Checkout"),
-                    )
-                    networkRule.validateAnalyticsRequest(
-                        eventName = "mc_load_succeeded",
-                        productUsage = setOf("Checkout"),
-                    )
-                }
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("Checkout"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("Checkout"),
+                )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
@@ -182,16 +178,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             setup = { configuredController ->
                 controller = configuredController
-                repeat(2) {
-                    networkRule.validateAnalyticsRequest(
-                        eventName = "mc_load_started",
-                        productUsage = setOf("Checkout"),
-                    )
-                    networkRule.validateAnalyticsRequest(
-                        eventName = "mc_load_succeeded",
-                        productUsage = setOf("Checkout"),
-                    )
-                }
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("Checkout"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("Checkout"),
+                )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
