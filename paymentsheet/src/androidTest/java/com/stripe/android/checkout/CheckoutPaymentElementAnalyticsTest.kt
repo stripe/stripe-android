@@ -1,11 +1,18 @@
 package com.stripe.android.checkout
 
+import androidx.test.espresso.intent.rule.IntentsRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -15,6 +22,7 @@ import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +39,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(AdvancedFraudSignalsTestRule())
             .around(GooglePayRepositoryTestRule())
+            .around(IntentsRule())
     }
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
@@ -81,6 +90,71 @@ internal class CheckoutPaymentElementAnalyticsTest {
         contentPage.clickOnLpm("card")
         formPage.waitUntilVisible()
         context.markTestSucceeded()
+    }
+
+    @Test
+    fun testGooglePayTotalChangeFailureSendsAnalyticsErrorCode() {
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
+                val failure = result as CheckoutController.Result.Failed
+                assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
+            },
+            checkoutInitResponse = ::billingTaxCheckoutInitResponse,
+            setup = { controller ->
+                repeat(2) {
+                    networkRule.validateAnalyticsRequest(
+                        eventName = "mc_load_started",
+                        productUsage = setOf("Checkout"),
+                    )
+                    networkRule.validateAnalyticsRequest(
+                        eventName = "mc_load_succeeded",
+                        productUsage = setOf("Checkout"),
+                    )
+                }
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_initial_displayed_payment_methods",
+                    productUsage = setOf("Checkout"),
+                )
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            },
+        ) { context ->
+            // Google Pay returns a new payment method, so its billing address is only synced to
+            // the Checkout Session during confirmation.
+            enqueueSuccessfulGooglePayPayment(paymentMethod = createPaymentMethodWithBillingAddress())
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                    json.getJSONArray("checkout_items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .put("total", UPDATED_TOTAL)
+                }
+            }
+            networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_embedded_payment_failure",
+                productUsage = setOf("Checkout"),
+                analyticsPayloadField("selected_lpm", "google_pay"),
+                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
+                analyticsPayloadField("error_code", "checkout_session_total_changed"),
+            )
+            // The Checkout Session is refreshed after confirmation fails.
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("Checkout"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("Checkout"),
+            )
+
+            contentPage.clickOnLpm("google_pay")
+            context.confirm()
+        }
+
+        assertGooglePayCalled()
     }
 
     @Test
@@ -162,7 +236,22 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
+    private fun billingTaxCheckoutInitResponse(response: MockResponse) {
+        response.testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("customer_email", "checkout@example.com")
+            json.put("account_settings", JSONObject().put("country", "US"))
+            json.getJSONObject("elements_session").remove("link_settings")
+            json.put(
+                "tax_context",
+                JSONObject()
+                    .put("automatic_tax_enabled", true)
+                    .put("automatic_tax_address_source", "billing"),
+            )
+        }
+    }
+
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
+        const val UPDATED_TOTAL = 5399
     }
 }
