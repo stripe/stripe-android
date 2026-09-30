@@ -19,7 +19,7 @@ class OnrampErrorMapperTest {
 
         val result = underlyingError.toCryptoOnrampError(
             context = createContext(),
-            operation = Operation.FulfillAdditionalKycRequirement,
+            operation = Operation.FulfillKycRequirements,
             publishableKey = "pk_test_123",
         )
 
