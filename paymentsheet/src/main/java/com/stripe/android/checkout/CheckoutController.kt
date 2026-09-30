@@ -97,9 +97,9 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Loads the Checkout Session identified by [clientSecret] and prepares the payment UI.
-     * For billing-tax sessions with saved payment methods, the initial session is published after
-     * its first payment UI load. If the subsequent billing-address tax update fails, this method
-     * returns failure while leaving that session observable.
+     * The initial session is published after its first payment UI load. If the subsequent
+     * billing-address tax update fails, this method returns failure while leaving that session
+     * observable.
      *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
@@ -122,22 +122,14 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val stateLoadedBeforeTaxUpdate = if (
-                    response.collectsTaxFromBillingAddress && !response.customer?.paymentMethods.isNullOrEmpty()
-                ) {
-                    checkoutStateLoader.loadInitial(
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                    )
-                    requireNotNull(stateHolder.state)
-                } else {
-                    null
-                }
-                val billingAddress = initialBillingAddress(
-                    configurationState,
-                    response,
-                    stateLoadedBeforeTaxUpdate?.paymentSelection,
+                checkoutStateLoader.loadInitial(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
                 )
+                val initialState = requireNotNull(stateHolder.state)
+                val billingAddress = initialState.paymentSelection
+                    ?.billingDetails?.address?.toCheckoutAddress()
+                    ?: configurationState.defaults.billingDetails?.address
                 val updatedResponse = if (billingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
@@ -147,16 +139,7 @@ class CheckoutController @Inject internal constructor(
                 } else {
                     response
                 }
-                if (stateLoadedBeforeTaxUpdate == null) {
-                    checkoutStateLoader.loadInitial(
-                        configuration = configurationState,
-                        checkoutSessionResponse = updatedResponse,
-                    )
-                } else if (updatedResponse !== response) {
-                    checkoutStateLoader.reload(
-                        stateLoadedBeforeTaxUpdate.copy(checkoutSessionResponse = updatedResponse),
-                    )
-                }
+                checkoutStateLoader.reload(initialState.copy(checkoutSessionResponse = updatedResponse))
             }
         }
     }
@@ -251,8 +234,22 @@ class CheckoutController @Inject internal constructor(
                     selection.paymentMethod.id,
                 ),
             )
-            val address = savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, selection)
-                ?: return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+            if (address == null) {
+                if (
+                    checkoutSessionTaxRegionUpdater.requiresUpdate(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    )
+                ) {
+                    // Billing-tax filtering should prevent this state from reaching selection.
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+                    )
+                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            }
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
@@ -265,42 +262,6 @@ class CheckoutController @Inject internal constructor(
                 )
             }
         }
-    }
-
-    /**
-     * The initial saved payment method's billing address takes precedence over the default billing
-     * address because confirmation reconciles tax against the payment method's billing address.
-     */
-    private fun initialBillingAddress(
-        configuration: Configuration.State,
-        checkoutSessionResponse: CheckoutSessionResponse,
-        initialSelection: PaymentSelection?,
-    ): Address.State? {
-        val savedPaymentMethodAddress = (initialSelection as? PaymentSelection.Saved)?.let {
-            savedPaymentMethodBillingAddressForTax(checkoutSessionResponse, it)
-        }
-        return savedPaymentMethodAddress ?: configuration.defaults.billingDetails?.address
-    }
-
-    private fun savedPaymentMethodBillingAddressForTax(
-        checkoutSessionResponse: CheckoutSessionResponse,
-        selection: PaymentSelection.Saved,
-    ): Address.State? {
-        val address = selection.billingDetails?.address?.toCheckoutAddress()
-        if (
-            address == null &&
-            checkoutSessionTaxRegionUpdater.requiresUpdate(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            )
-        ) {
-            // Billing-tax filtering should prevent this state from reaching selection.
-            errorReporter.report(
-                errorEvent = ErrorReporter.UnexpectedErrorEvent
-                    .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
-            )
-        }
-        return address
     }
 
     /**

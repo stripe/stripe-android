@@ -35,8 +35,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
-        // This is called twice during load - once for ECE, once for PE
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -74,8 +73,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulNativeLinkPayment() {
-        // This is called twice during load - once for ECE, once for PE
-        repeat (2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -107,8 +105,10 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePayOnlyLoad() {
-        // This is called for PE, but we skip this account lookup for ECE since its Link config sets display to never.
-        networkRule.enqueueLinkAccountLookup()
+        // Link is disabled in ECE, so only the payment element looks up the account on each load.
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
 
         runExpressCheckoutElementTest(
             networkRule = networkRule,
@@ -133,7 +133,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testFailedGooglePayPayment() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -161,7 +161,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testFailedNativeLinkPayment() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -189,7 +189,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testLinkIsHiddenWhenShippingAddressIsRequired() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -212,7 +212,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredShippingAddress() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -258,7 +258,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -322,7 +322,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredBillingAddress() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -421,7 +421,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testNativeLinkCollectsAndConfirmsRequiredBillingAddress() {
-        repeat(2) {
+        repeat(4) {
             networkRule.enqueueLinkAccountLookup()
         }
 
