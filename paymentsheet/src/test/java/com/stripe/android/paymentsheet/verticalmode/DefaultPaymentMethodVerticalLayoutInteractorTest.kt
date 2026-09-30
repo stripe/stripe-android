@@ -112,9 +112,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(
-                error,
-            )
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
@@ -124,9 +122,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
-            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(
-                error,
-            )
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 

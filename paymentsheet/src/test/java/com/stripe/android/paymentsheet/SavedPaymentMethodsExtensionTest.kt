@@ -1,12 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class SavedPaymentMethodsExtensionTest {
     @Test
@@ -39,25 +36,12 @@ class SavedPaymentMethodsExtensionTest {
         assertEquals(actual.shouldShowDefaultBadge, true)
     }
 
-    @Test
-    fun `Pending selectionState marks only the matching payment method pending`() {
-        val selectionState = SavedPaymentMethodSelectionState.Pending("aaa111")
-
-        assertTrue(testSetup("aaa111", null, selectionState).isSelectionPending)
-        assertFalse(testSetup("bbb222", null, selectionState).isSelectionPending)
-    }
-
-    private fun testSetup(
-        paymentMethodId: String,
-        defaultPaymentMethodId: String?,
-        selectionState: SavedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
-    ): DisplayableSavedPaymentMethod {
+    private fun testSetup(paymentMethodId: String, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
         val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
 
         return paymentMethod.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = null,
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            selectionState = selectionState,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
 }

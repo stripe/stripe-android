@@ -140,7 +140,8 @@ internal class DefaultManageScreenInteractor(
             it.toDisplayableSavedPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 defaultPaymentMethodId = defaultPaymentMethodId,
-                selectionState = selectionState,
+                isSelectionPending = selectionState is SavedPaymentMethodSelectionState.Pending &&
+                    selectionState.paymentMethodId == it.id,
             )
         }
         val currentSelection = if (editing) {

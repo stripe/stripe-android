@@ -235,13 +235,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
-        savedPaymentMethodSelectionState,
-    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
+    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod ->
         getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
-            selectionState = selectionState,
         )
     }
 
@@ -316,7 +314,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
-            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod?.withSelectionPending(
+                isSelectionPending = savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending,
+            ),
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
@@ -481,7 +481,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
         mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
-        selectionState: SavedPaymentMethodSelectionState,
     ): DisplayableSavedPaymentMethod? {
         val paymentMethodToDisplay = getPaymentMethodToDisplay(
             paymentMethods = paymentMethods,
@@ -490,7 +489,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return paymentMethodToDisplay?.toDisplayableSavedPaymentMethod(
             paymentMethodMetadata = paymentMethodMetadata,
             defaultPaymentMethodId = null,
-            selectionState = selectionState,
         )
     }
 
