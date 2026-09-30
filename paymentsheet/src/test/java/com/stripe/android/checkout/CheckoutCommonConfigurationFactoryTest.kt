@@ -264,7 +264,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .paymentElement(
                 PaymentElement.Configuration()
                     .googlePayConfiguration(
-                        PaymentElement.Configuration.GooglePayConfiguration()
+                        PaymentElement.Configuration.GooglePayConfiguration(
+                            PaymentElement.Configuration.GooglePayConfiguration.Environment.Production
+                        )
                             .label("PE total")
                             .buttonType(PaymentElement.Configuration.GooglePayConfiguration.ButtonType.Buy)
                     )

@@ -5,6 +5,7 @@ import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePa
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
+import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PeGooglePayConfiguration
 
 @OptIn(CheckoutSessionPreview::class)
 internal class GooglePayConfigurationMapperTest {
@@ -50,6 +51,32 @@ internal class GooglePayConfigurationMapperTest {
             merchantCountry = "US",
             liveMode = true,
             isDebugBuild = true,
+        )
+
+        assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
+    }
+
+    @Test
+    fun `payment element production environment maps to production`() {
+        val mapped = PeGooglePayConfiguration(
+            PeGooglePayConfiguration.Environment.Production
+        ).build().asPaymentSheet(
+            merchantCountry = "US",
+            liveMode = false,
+            isDebugBuild = true,
+        )
+
+        assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+    }
+
+    @Test
+    fun `payment element test environment maps to test`() {
+        val mapped = PeGooglePayConfiguration(
+            PeGooglePayConfiguration.Environment.Test
+        ).build().asPaymentSheet(
+            merchantCountry = "US",
+            liveMode = true,
+            isDebugBuild = false,
         )
 
         assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)

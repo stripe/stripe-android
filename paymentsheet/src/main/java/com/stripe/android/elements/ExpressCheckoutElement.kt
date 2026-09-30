@@ -246,6 +246,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             internal fun build(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
+                environment = CheckoutGooglePayConfiguration.Environment.Automatic,
                 display = display.asCheckout(),
                 label = label,
                 buttonType = buttonType.asCheckout(),

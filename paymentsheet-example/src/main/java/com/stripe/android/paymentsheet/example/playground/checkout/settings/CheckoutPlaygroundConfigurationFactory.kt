@@ -190,7 +190,9 @@ private fun CheckoutPlaygroundSettings.Snapshot.primaryButtonColors(
 private fun CheckoutPlaygroundSettings.Snapshot.paymentGooglePayConfiguration():
     PaymentElement.Configuration.GooglePayConfiguration {
     val definitions = Controller.payment.googlePay
-    return PaymentElement.Configuration.GooglePayConfiguration()
+    return PaymentElement.Configuration.GooglePayConfiguration(
+        environment = PaymentElement.Configuration.GooglePayConfiguration.Environment.Test,
+    )
         .display(this[definitions.display])
         .buttonType(this[definitions.buttonType])
         .additionalEnabledNetworks(this[definitions.additionalNetworks])

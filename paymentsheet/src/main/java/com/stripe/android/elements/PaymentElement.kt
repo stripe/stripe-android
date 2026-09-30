@@ -97,7 +97,7 @@ class PaymentElement @Inject internal constructor(
         private var cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
         private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
         private var appearance: Appearance = Appearance()
-        private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
+        private var googlePayConfiguration: GooglePayConfiguration? = null
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
 
         /**
@@ -197,10 +197,31 @@ class PaymentElement @Inject internal constructor(
 
         /**
          * Configuration related to Google Pay.
+         *
+         * @param environment The Google Pay environment to use.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @CheckoutSessionPreview
-        class GooglePayConfiguration {
+        class GooglePayConfiguration(
+            private val environment: Environment,
+        ) {
+
+            /**
+             * The Google Pay environment to use.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Environment {
+                /**
+                 * Use the Google Pay production environment.
+                 */
+                Production,
+
+                /**
+                 * Use the Google Pay test environment.
+                 */
+                Test,
+            }
 
             /**
              * Display configuration for Google Pay.
@@ -318,6 +339,7 @@ class PaymentElement @Inject internal constructor(
             }
 
             internal fun build(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
+                environment = environment.asCheckout(),
                 display = display.asCheckout(),
                 label = label,
                 buttonType = buttonType.asCheckout(),
@@ -396,7 +418,7 @@ class PaymentElement @Inject internal constructor(
             cardBrandAcceptance = cardBrandAcceptance,
             termsDisplay = termsDisplay,
             appearance = appearance.build(),
-            googlePayConfiguration = googlePayConfiguration.build(),
+            googlePayConfiguration = googlePayConfiguration?.build() ?: CheckoutGooglePayConfiguration.default(),
             linkConfiguration = linkConfiguration.build(),
         )
 

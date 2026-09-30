@@ -1,5 +1,6 @@
 package com.stripe.android.elements
 
+import android.os.Parcel
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -35,6 +36,8 @@ internal class PaymentElementTest {
     fun `configuration builds default Google Pay values`() {
         val googlePayConfiguration = PaymentElement.Configuration().build().googlePayConfiguration
 
+        assertThat(googlePayConfiguration.environment)
+            .isEqualTo(CheckoutGooglePayConfiguration.Environment.Automatic)
         assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Automatic)
         assertThat(googlePayConfiguration.label).isNull()
         assertThat(googlePayConfiguration.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Pay)
@@ -45,7 +48,7 @@ internal class PaymentElementTest {
     fun `configuration builds requested Google Pay values`() {
         val googlePayConfiguration = PaymentElement.Configuration()
             .googlePayConfiguration(
-                GooglePayConfiguration()
+                GooglePayConfiguration(GooglePayConfiguration.Environment.Production)
                     .display(GooglePayConfiguration.Display.Never)
                     .label("Complete your purchase")
                     .buttonType(GooglePayConfiguration.ButtonType.Checkout)
@@ -54,11 +57,39 @@ internal class PaymentElementTest {
             .build()
             .googlePayConfiguration
 
+        assertThat(googlePayConfiguration.environment)
+            .isEqualTo(CheckoutGooglePayConfiguration.Environment.Production)
         assertThat(googlePayConfiguration.display).isEqualTo(CheckoutGooglePayConfiguration.Display.Never)
         assertThat(googlePayConfiguration.label).isEqualTo("Complete your purchase")
         assertThat(googlePayConfiguration.buttonType)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
         assertThat(googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
+    }
+
+    @Test
+    fun `configuration builds test Google Pay environment`() {
+        val googlePayConfiguration = PaymentElement.Configuration()
+            .googlePayConfiguration(
+                GooglePayConfiguration(GooglePayConfiguration.Environment.Test)
+            )
+            .build()
+            .googlePayConfiguration
+
+        assertThat(googlePayConfiguration.environment)
+            .isEqualTo(CheckoutGooglePayConfiguration.Environment.Test)
+    }
+
+    @Test
+    fun `Google Pay environment survives parceling`() {
+        val configuration = GooglePayConfiguration(GooglePayConfiguration.Environment.Test).build()
+        val parcel = Parcel.obtain()
+
+        configuration.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+        val restored = CheckoutGooglePayConfiguration.CREATOR.createFromParcel(parcel)
+        parcel.recycle()
+
+        assertThat(restored.environment).isEqualTo(CheckoutGooglePayConfiguration.Environment.Test)
     }
 
     @Test

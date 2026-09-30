@@ -9,14 +9,31 @@ import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfigu
 
 @Parcelize
 internal data class CheckoutGooglePayConfiguration(
+    val environment: Environment,
     val display: Display,
     val label: String?,
     val buttonType: PaymentSheet.GooglePayConfiguration.ButtonType,
     val additionalEnabledNetworks: List<String>,
 ) : Parcelable {
+    enum class Environment {
+        Production,
+        Test,
+        Automatic,
+    }
+
     enum class Display {
         Automatic,
         Never,
+    }
+
+    companion object {
+        fun default(): CheckoutGooglePayConfiguration = CheckoutGooglePayConfiguration(
+            environment = Environment.Automatic,
+            display = Display.Automatic,
+            label = null,
+            buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            additionalEnabledNetworks = emptyList(),
+        )
     }
 }
 
@@ -25,6 +42,13 @@ internal fun EceGooglePayConfiguration.Display.asCheckout(): CheckoutGooglePayCo
     EceGooglePayConfiguration.Display.Automatic -> CheckoutGooglePayConfiguration.Display.Automatic
     EceGooglePayConfiguration.Display.Never -> CheckoutGooglePayConfiguration.Display.Never
 }
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun PeGooglePayConfiguration.Environment.asCheckout(): CheckoutGooglePayConfiguration.Environment =
+    when (this) {
+        PeGooglePayConfiguration.Environment.Production -> CheckoutGooglePayConfiguration.Environment.Production
+        PeGooglePayConfiguration.Environment.Test -> CheckoutGooglePayConfiguration.Environment.Test
+    }
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun PeGooglePayConfiguration.Display.asCheckout(): CheckoutGooglePayConfiguration.Display = when (this) {

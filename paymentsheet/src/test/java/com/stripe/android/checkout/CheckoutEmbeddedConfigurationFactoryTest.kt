@@ -126,7 +126,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().googlePayConfiguration(
-                    PaymentElementGooglePayConfiguration()
+                    PaymentElementGooglePayConfiguration(
+                        PaymentElementGooglePayConfiguration.Environment.Test
+                    )
                         .label("PE total")
                         .buttonType(PaymentElementGooglePayConfiguration.ButtonType.Buy)
                         .additionalEnabledNetworks(listOf("INTERAC"))
@@ -237,7 +239,9 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             configuration = CheckoutController.Configuration()
                 .paymentElement(
                     PaymentElement.Configuration().googlePayConfiguration(
-                        PaymentElementGooglePayConfiguration()
+                        PaymentElementGooglePayConfiguration(
+                            PaymentElementGooglePayConfiguration.Environment.Production
+                        )
                             .display(PaymentElementGooglePayConfiguration.Display.Never)
                     )
                 )

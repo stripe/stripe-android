@@ -10,10 +10,16 @@ internal fun CheckoutGooglePayConfiguration.asPaymentSheet(
     liveMode: Boolean,
     isDebugBuild: Boolean,
 ): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
-    environment = if (liveMode && !isDebugBuild) {
-        PaymentSheet.GooglePayConfiguration.Environment.Production
-    } else {
-        PaymentSheet.GooglePayConfiguration.Environment.Test
+    environment = when (environment) {
+        CheckoutGooglePayConfiguration.Environment.Production ->
+            PaymentSheet.GooglePayConfiguration.Environment.Production
+        CheckoutGooglePayConfiguration.Environment.Test ->
+            PaymentSheet.GooglePayConfiguration.Environment.Test
+        CheckoutGooglePayConfiguration.Environment.Automatic -> if (liveMode && !isDebugBuild) {
+            PaymentSheet.GooglePayConfiguration.Environment.Production
+        } else {
+            PaymentSheet.GooglePayConfiguration.Environment.Test
+        }
     },
     countryCode = merchantCountry,
     label = label,
