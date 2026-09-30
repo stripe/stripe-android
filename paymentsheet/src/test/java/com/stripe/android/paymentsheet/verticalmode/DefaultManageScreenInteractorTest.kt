@@ -407,20 +407,26 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun `a second tap while the first selection is still suspended is ignored`() {
+    fun `a second tap while the first selection is pending is ignored`() {
         val updateResult = CompletableDeferred<Unit>()
         val navigateBackCalls = Turbine<Boolean>()
+        lateinit var selectorState: MutableStateFlow<SavedPaymentMethodSelectionState>
         runScenario(
-            initialPaymentMethods = listOf(PaymentMethodFixtures.createCard()),
+            initialPaymentMethods = PaymentMethodFixtures.createCards(2),
             currentSelection = null,
             handleBackPressed = navigateBackCalls::add,
-            selectPaymentMethod = { updateResult.await() },
+            selectPaymentMethod = {
+                selectorState.value = SavedPaymentMethodSelectionState.Pending(it.paymentMethod.id)
+                updateResult.await()
+                selectorState.value = SavedPaymentMethodSelectionState.Idle
+            },
         ) {
-            val displayable = interactor.state.value.paymentMethods.single()
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
-            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
+            selectorState = selectionStateSource
+            val (first, second) = interactor.state.value.paymentMethods
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(first))
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(first)
 
-            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(second))
             onSelectPaymentMethodTurbine.expectNoEvents()
             navigateBackCalls.expectNoEvents()
 
