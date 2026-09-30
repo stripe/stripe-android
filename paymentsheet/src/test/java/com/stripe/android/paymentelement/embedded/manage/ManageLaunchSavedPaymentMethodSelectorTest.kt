@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.sheet
+package com.stripe.android.paymentelement.embedded.manage
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -22,7 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
-internal class DefaultSheetSavedPaymentMethodSelectorTest {
+internal class ManageLaunchSavedPaymentMethodSelectorTest {
 
     @Test
     fun `selection without tax update commits selection without entering pending`() = runScenario(
@@ -37,7 +38,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
             expectNoEvents()
         }
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        assertThat(sheetActivityStateHolder.checkoutSessionResponse).isNull()
+        assertThat(selector.checkoutSessionResponse).isNull()
     }
 
     @Test
@@ -60,7 +61,7 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
                 assertThat(result.await().isSuccess).isTrue()
                 assertThat(selectionHolder.selection.value).isEqualTo(selection)
-                assertThat(sheetActivityStateHolder.checkoutSessionResponse).isEqualTo(response)
+                assertThat(selector.checkoutSessionResponse).isEqualTo(response)
             }
         }
     }
@@ -83,7 +84,53 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
                 )
             }
             assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
-            assertThat(sheetActivityStateHolder.checkoutSessionResponse).isNull()
+            assertThat(selector.checkoutSessionResponse).isNull()
+        }
+    }
+
+    @Test
+    fun `clearError resets a failed selection to idle`() {
+        val error = IllegalStateException("Tax region update failed")
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { Result.failure(error) },
+        ) {
+            assertThat(selector.select(selection).isFailure).isTrue()
+
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(
+                    SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
+                )
+
+                selector.clearError()
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            }
+            assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+        }
+    }
+
+    @Test
+    fun `clearError keeps a pending selection pending`() {
+        val update = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { update.await() },
+        ) {
+            val result = testScope.async(start = CoroutineStart.UNDISPATCHED) { selector.select(selection) }
+
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
+
+                selector.clearError()
+
+                expectNoEvents()
+
+                update.complete(Result.success(CheckoutSessionResponseFactory.create()))
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            }
+            assertThat(result.await().isSuccess).isTrue()
         }
     }
 
@@ -95,28 +142,23 @@ internal class DefaultSheetSavedPaymentMethodSelectorTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(INITIAL_SELECTION)
         }
-        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
-        val selector = DefaultSheetSavedPaymentMethodSelector(
+        val selector = ManageLaunchSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> updateTaxRegion() }),
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
-            sheetActivityStateHolder = sheetActivityStateHolder,
         )
 
         Scenario(
             testScope = this,
             selector = selector,
             selectionHolder = selectionHolder,
-            sheetActivityStateHolder = sheetActivityStateHolder,
         ).block()
-        sheetActivityStateHolder.validate()
     }
 
     private class Scenario(
         val testScope: TestScope,
-        val selector: DefaultSheetSavedPaymentMethodSelector,
+        val selector: ManageLaunchSavedPaymentMethodSelector,
         val selectionHolder: DefaultEmbeddedSelectionHolder,
-        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
     ) {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }

@@ -25,7 +25,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val linkAccountHolder: LinkAccountHolder,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
-    private val embeddedSavedPaymentMethodSelector: EmbeddedSavedPaymentMethodSelector,
+    private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
     private val eventReporter: EventReporter,
     private val launchMode: EmbeddedLaunchMode,
 ) : EmbeddedManageScreenInteractorFactory {
@@ -36,11 +36,14 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             selection = selectionHolder.selection,
             editing = savedPaymentMethodMutator.editing,
             canEdit = savedPaymentMethodMutator.canEdit,
-            toggleEdit = savedPaymentMethodMutator::toggleEditing,
+            toggleEdit = {
+                savedPaymentMethodSelector.clearError()
+                savedPaymentMethodMutator.toggleEditing()
+            },
             onSelectPaymentMethod = { displayableSavedPaymentMethod ->
                 val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
                 eventReporter.onSelectPaymentOption(selection)
-                embeddedSavedPaymentMethodSelector.select(selection)
+                savedPaymentMethodSelector.select(selection)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
@@ -53,7 +56,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
-            selectionState = embeddedSavedPaymentMethodSelector.selectionState,
+            selectionState = savedPaymentMethodSelector.selectionState,
         )
     }
 }

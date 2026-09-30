@@ -27,15 +27,15 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
-import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
-import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherE
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -71,6 +72,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -160,22 +162,15 @@ internal interface EmbeddedActivityModule {
         }
 
         @Provides
-        fun provideEmbeddedSavedPaymentMethodSelector(
+        @Singleton
+        fun provideManageScreenSavedPaymentMethodSelector(
             launchMode: EmbeddedLaunchMode,
             selectionHolder: EmbeddedSelectionHolder,
-            sheetSelector: DefaultSheetSavedPaymentMethodSelector,
-        ): EmbeddedSavedPaymentMethodSelector = when (launchMode) {
-            is EmbeddedLaunchMode.Manage -> sheetSelector
+            manageLaunchSelector: Provider<ManageLaunchSavedPaymentMethodSelector>,
+        ): ManageScreenSavedPaymentMethodSelector = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> manageLaunchSelector.get()
             EmbeddedLaunchMode.PaymentOptions,
-            is EmbeddedLaunchMode.Form -> object : EmbeddedSavedPaymentMethodSelector {
-                override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
-                    stateFlowOf(SavedPaymentMethodSelectionState.Idle)
-
-                override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
-                    selectionHolder.setSelection(selection)
-                    return Result.success(Unit)
-                }
-            }
+            is EmbeddedLaunchMode.Form -> ImmediateSavedPaymentMethodSelector(selectionHolder)
         }
 
         @Provides
@@ -303,4 +298,20 @@ internal interface EmbeddedActivityModule {
             eventReporter
         )
     }
+}
+
+private class ImmediateSavedPaymentMethodSelector(
+    private val selectionHolder: EmbeddedSelectionHolder,
+) : ManageScreenSavedPaymentMethodSelector {
+    override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
+        stateFlowOf(SavedPaymentMethodSelectionState.Idle)
+
+    override val checkoutSessionResponse: CheckoutSessionResponse? = null
+
+    override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+        selectionHolder.setSelection(selection)
+        return Result.success(Unit)
+    }
+
+    override fun clearError() = Unit
 }
