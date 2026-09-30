@@ -10,7 +10,7 @@ internal interface AddressElementEventReporter {
     )
 }
 
-internal class LegacyAddressElementEventReporter(
+internal class StandaloneAddressElementEventReporter(
     private val addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : AddressElementEventReporter {
     override fun onShown(country: String?) {

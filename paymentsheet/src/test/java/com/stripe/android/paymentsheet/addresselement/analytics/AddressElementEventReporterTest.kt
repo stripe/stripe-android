@@ -51,7 +51,7 @@ internal class AddressElementEventReporterTest {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
 
         Scenario(
-            reporter = LegacyAddressElementEventReporter(addressLauncherEventReporter),
+            reporter = StandaloneAddressElementEventReporter(addressLauncherEventReporter),
             addressLauncherEventReporter = addressLauncherEventReporter,
         ).block()
 

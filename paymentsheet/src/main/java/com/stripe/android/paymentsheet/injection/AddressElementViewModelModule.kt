@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.LegacyAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -66,7 +66,7 @@ internal class AddressElementViewModelModule {
     @Provides
     internal fun provideAddressElementEventReporter(
         addressLauncherEventReporter: AddressLauncherEventReporter,
-    ): AddressElementEventReporter = LegacyAddressElementEventReporter(addressLauncherEventReporter)
+    ): AddressElementEventReporter = StandaloneAddressElementEventReporter(addressLauncherEventReporter)
 
     @Provides
     @Singleton
