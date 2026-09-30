@@ -64,6 +64,116 @@ class AppearanceMapperTest {
     }
 
     @Test
+    fun `configured appearance maps shapes and typography`() {
+        val appearance = PaymentElement.Configuration.Appearance()
+            .shapes(
+                PaymentElement.Configuration.Appearance.Shapes()
+                    .cornerRadiusDp(12f)
+                    .borderStrokeWidthDp(2f)
+            )
+            .typography(
+                PaymentElement.Configuration.Appearance.Typography()
+                    .sizeScaleFactor(1.5f)
+                    .fontResId(123)
+            )
+
+        val mapped = appearance.build().asPaymentSheet()
+
+        assertThat(mapped.shapes.cornerRadiusDp).isEqualTo(12f)
+        assertThat(mapped.shapes.borderStrokeWidthDp).isEqualTo(2f)
+        assertThat(mapped.typography.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(mapped.typography.fontResId).isEqualTo(123)
+    }
+
+    @Test
+    fun `configured appearance maps embedded row styles`() {
+        val appearance = PaymentElement.Configuration.Appearance()
+            .embeddedAppearance(
+                PaymentElement.Configuration.Appearance.Embedded().rowStyle(
+                    PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithRadio()
+                        .separatorThicknessDp(1f)
+                        .startSeparatorInsetDp(2f)
+                        .endSeparatorInsetDp(3f)
+                        .topSeparatorEnabled(false)
+                        .bottomSeparatorEnabled(true)
+                        .additionalVerticalInsetsDp(4f)
+                        .horizontalInsetsDp(5f)
+                        .colorsLight(
+                            PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithRadio.Colors.light()
+                                .separatorColor(Color.Red)
+                                .selectedColor(Color.Green)
+                                .unselectedColor(Color.Blue)
+                        )
+                )
+            )
+
+        val mapped = appearance.build().asPaymentSheet().embeddedAppearance.style
+            as PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
+
+        assertThat(mapped.separatorThicknessDp).isEqualTo(1f)
+        assertThat(mapped.startSeparatorInsetDp).isEqualTo(2f)
+        assertThat(mapped.endSeparatorInsetDp).isEqualTo(3f)
+        assertThat(mapped.topSeparatorEnabled).isFalse()
+        assertThat(mapped.bottomSeparatorEnabled).isTrue()
+        assertThat(mapped.additionalVerticalInsetsDp).isEqualTo(4f)
+        assertThat(mapped.horizontalInsetsDp).isEqualTo(5f)
+        assertThat(mapped.colorsLight.separatorColor).isEqualTo(Color.Red.toArgb())
+        assertThat(mapped.colorsLight.selectedColor).isEqualTo(Color.Green.toArgb())
+        assertThat(mapped.colorsLight.unselectedColor).isEqualTo(Color.Blue.toArgb())
+    }
+
+    @Test
+    fun `configured appearance maps embedded checkmark style`() {
+        val style = PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithCheckmark()
+            .checkmarkInsetDp(6f)
+            .colorsDark(
+                PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors.dark()
+                    .checkmarkColor(Color.Red)
+            )
+
+        val mapped = PaymentElement.Configuration.Appearance()
+            .embeddedAppearance(PaymentElement.Configuration.Appearance.Embedded().rowStyle(style))
+            .build().asPaymentSheet().embeddedAppearance.style
+            as PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+
+        assertThat(mapped.checkmarkInsetDp).isEqualTo(6f)
+        assertThat(mapped.colorsDark.checkmarkColor).isEqualTo(Color.Red.toArgb())
+    }
+
+    @Test
+    fun `configured appearance maps embedded floating button style`() {
+        val style = PaymentElement.Configuration.Appearance.Embedded.RowStyle.FloatingButton()
+            .spacingDp(7f)
+            .additionalInsetsDp(8f)
+
+        val mapped = PaymentElement.Configuration.Appearance()
+            .embeddedAppearance(PaymentElement.Configuration.Appearance.Embedded().rowStyle(style))
+            .build().asPaymentSheet().embeddedAppearance.style
+            as PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+
+        assertThat(mapped.spacingDp).isEqualTo(7f)
+        assertThat(mapped.additionalInsetsDp).isEqualTo(8f)
+    }
+
+    @Test
+    fun `configured appearance maps embedded disclosure style`() {
+        val style = PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithDisclosure()
+            .horizontalInsetsDp(9f)
+            .colorsLight(
+                PaymentElement.Configuration.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors.light()
+                    .disclosureColor(Color.Blue)
+            )
+
+        val mapped = PaymentElement.Configuration.Appearance()
+            .embeddedAppearance(PaymentElement.Configuration.Appearance.Embedded().rowStyle(style))
+            .build().asPaymentSheet().embeddedAppearance.style
+            as PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
+
+        assertThat(mapped.horizontalInsetsDp).isEqualTo(9f)
+        assertThat(mapped.colorsLight.disclosureColor).isEqualTo(Color.Blue.toArgb())
+    }
+
+    @Test
     fun `configuration stores its supplied appearance`() {
         val appearance = PaymentElement.Configuration.Appearance()
             .colorsLight(

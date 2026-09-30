@@ -1,4 +1,5 @@
 @file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class)
 
 package com.stripe.android.checkout
 
@@ -11,7 +12,10 @@ internal fun Appearance.State.asPaymentSheet(): PaymentSheet.Appearance {
         .colorsLight(colorsLight.asPaymentSheet())
         .colorsDark(colorsDark.asPaymentSheet())
         .themeMode(themeMode.asPaymentSheet())
+        .shapes(shapes.asPaymentSheet())
+        .typography(typography.asPaymentSheet())
         .primaryButton(primaryButton.asPaymentSheet())
+        .embeddedAppearance(embeddedAppearance.asPaymentSheet())
         .formInsetValues(formInsetValues.asPaymentSheet())
         .build()
 }
@@ -31,6 +35,85 @@ private fun Appearance.Colors.State.asPaymentSheet(): PaymentSheet.Colors = Paym
     componentDivider = componentDivider, onComponent = onComponent, onSurface = onSurface,
     subtitle = subtitle, placeholderText = placeholderText, appBarIcon = appBarIcon, error = error,
 )
+
+private fun Appearance.Shapes.State.asPaymentSheet(): PaymentSheet.Shapes = PaymentSheet.Shapes.Builder()
+    .cornerRadiusDp(cornerRadiusDp)
+    .borderStrokeWidthDp(borderStrokeWidthDp)
+    .build()
+
+private fun Appearance.Typography.State.asPaymentSheet(): PaymentSheet.Typography = PaymentSheet.Typography.Builder()
+    .sizeScaleFactor(sizeScaleFactor)
+    .fontResId(fontResId)
+    .build()
+
+private fun Appearance.Embedded.State.asPaymentSheet(): PaymentSheet.Appearance.Embedded =
+    PaymentSheet.Appearance.Embedded.Builder()
+        .rowStyle(rowStyle.asPaymentSheet())
+        .build()
+
+private fun Appearance.Embedded.RowStyle.State.asPaymentSheet(): PaymentSheet.Appearance.Embedded.RowStyle = when (this) {
+    is Appearance.Embedded.RowStyle.FlatWithRadioState ->
+        PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Builder()
+            .separatorThicknessDp(separatorThicknessDp)
+            .startSeparatorInsetDp(startSeparatorInsetDp)
+            .endSeparatorInsetDp(endSeparatorInsetDp)
+            .topSeparatorEnabled(topSeparatorEnabled)
+            .bottomSeparatorEnabled(bottomSeparatorEnabled)
+            .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+            .horizontalInsetsDp(horizontalInsetsDp)
+            .colorsLight(colorsLight.asPaymentSheet())
+            .colorsDark(colorsDark.asPaymentSheet())
+            .build()
+    is Appearance.Embedded.RowStyle.FlatWithCheckmarkState ->
+        PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Builder()
+            .separatorThicknessDp(separatorThicknessDp)
+            .startSeparatorInsetDp(startSeparatorInsetDp)
+            .endSeparatorInsetDp(endSeparatorInsetDp)
+            .topSeparatorEnabled(topSeparatorEnabled)
+            .bottomSeparatorEnabled(bottomSeparatorEnabled)
+            .checkmarkInsetDp(checkmarkInsetDp)
+            .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+            .horizontalInsetsDp(horizontalInsetsDp)
+            .colorsLight(colorsLight.asPaymentSheet())
+            .colorsDark(colorsDark.asPaymentSheet())
+            .build()
+    is Appearance.Embedded.RowStyle.FloatingButtonState ->
+        PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
+            .spacingDp(spacingDp)
+            .additionalInsetsDp(additionalInsetsDp)
+            .build()
+    is Appearance.Embedded.RowStyle.FlatWithDisclosureState ->
+        PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Builder()
+            .separatorThicknessDp(separatorThicknessDp)
+            .startSeparatorInsetDp(startSeparatorInsetDp)
+            .endSeparatorInsetDp(endSeparatorInsetDp)
+            .topSeparatorEnabled(topSeparatorEnabled)
+            .bottomSeparatorEnabled(bottomSeparatorEnabled)
+            .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+            .horizontalInsetsDp(horizontalInsetsDp)
+            .colorsLight(colorsLight.asPaymentSheet())
+            .colorsDark(colorsDark.asPaymentSheet())
+            .build()
+}
+
+private fun Appearance.Embedded.RowStyle.FlatWithRadio.Colors.State.asPaymentSheet() =
+    PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors.Builder.light()
+        .separatorColor(separatorColor)
+        .selectedColor(selectedColor)
+        .unselectedColor(unselectedColor)
+        .build()
+
+private fun Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors.State.asPaymentSheet() =
+    PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors.Builder.light()
+        .separatorColor(separatorColor)
+        .checkmarkColor(checkmarkColor)
+        .build()
+
+private fun Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors.State.asPaymentSheet() =
+    PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors.Builder.light()
+        .separatorColor(separatorColor)
+        .disclosureColor(disclosureColor)
+        .build()
 
 private fun Appearance.PrimaryButton.State.asPaymentSheet(): PaymentSheet.PrimaryButton = PaymentSheet.PrimaryButton(
     colorsLight = colorsLight.asPaymentSheet(), colorsDark = colorsDark.asPaymentSheet(),

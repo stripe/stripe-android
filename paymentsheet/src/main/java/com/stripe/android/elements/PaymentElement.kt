@@ -485,7 +485,10 @@ class PaymentElement @Inject internal constructor(
             private var colorsLight = Colors.light()
             private var colorsDark = Colors.dark()
             private var themeMode = ThemeMode.Automatic
+            private var shapes = Shapes()
+            private var typography = Typography()
             private var primaryButton = PrimaryButton()
+            private var embeddedAppearance = Embedded()
             private var formInsetValues = Insets.defaultFormInsetValues
 
             /** Sets the colors used in light mode. */
@@ -497,8 +500,19 @@ class PaymentElement @Inject internal constructor(
             /** Sets the color mode used by the Payment Element. */
             fun themeMode(themeMode: ThemeMode): Appearance = apply { this.themeMode = themeMode }
 
+            /** Sets the appearance of shapes. */
+            fun shapes(shapes: Shapes): Appearance = apply { this.shapes = shapes }
+
+            /** Sets the typography used for text. */
+            fun typography(typography: Typography): Appearance = apply { this.typography = typography }
+
             /** Sets the appearance of the primary button. */
             fun primaryButton(primaryButton: PrimaryButton): Appearance = apply { this.primaryButton = primaryButton }
+
+            /** Sets the appearance of embedded payment method rows. */
+            fun embeddedAppearance(embeddedAppearance: Embedded): Appearance = apply {
+                this.embeddedAppearance = embeddedAppearance
+            }
 
             /** Sets the insets used by forms. */
             fun formInsetValues(insets: Insets): Appearance = apply { formInsetValues = insets }
@@ -508,7 +522,10 @@ class PaymentElement @Inject internal constructor(
                 val colorsLight: Colors.State,
                 val colorsDark: Colors.State,
                 val themeMode: ThemeMode,
+                val shapes: Shapes.State,
+                val typography: Typography.State,
                 val primaryButton: PrimaryButton.State,
+                val embeddedAppearance: Embedded.State,
                 val formInsetValues: Insets.State,
             ) : Parcelable
 
@@ -516,7 +533,10 @@ class PaymentElement @Inject internal constructor(
                 colorsLight = colorsLight.build(),
                 colorsDark = colorsDark.build(),
                 themeMode = themeMode,
+                shapes = shapes.build(),
+                typography = typography.build(),
                 primaryButton = primaryButton.build(),
+                embeddedAppearance = embeddedAppearance.build(),
                 formInsetValues = formInsetValues.build(),
             )
 
@@ -698,6 +718,348 @@ class PaymentElement @Inject internal constructor(
 
                 internal companion object {
                     val defaultFormInsetValues = Insets(20f, 0f, 20f, 40f)
+                }
+            }
+
+            /** Configures the appearance of shapes. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Shapes {
+                private var cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius
+                private var borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
+
+                /** Sets the corner radius, in dp. */
+                fun cornerRadiusDp(value: Float): Shapes = apply { cornerRadiusDp = value }
+
+                /** Sets the border stroke width, in dp. */
+                fun borderStrokeWidthDp(value: Float): Shapes = apply { borderStrokeWidthDp = value }
+
+                @Parcelize
+                internal data class State(
+                    val cornerRadiusDp: Float,
+                    val borderStrokeWidthDp: Float,
+                ) : Parcelable
+
+                internal fun build(): State = State(cornerRadiusDp, borderStrokeWidthDp)
+            }
+
+            /** Configures the typography used for text. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Typography {
+                private var sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier
+
+                @FontRes
+                private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
+
+                /** Sets the scale factor applied to all fonts. */
+                fun sizeScaleFactor(value: Float): Typography = apply { sizeScaleFactor = value }
+
+                /** Sets the font resource used for text. */
+                fun fontResId(@FontRes value: Int?): Typography = apply { fontResId = value }
+
+                @Parcelize
+                internal data class State(
+                    val sizeScaleFactor: Float,
+                    @FontRes val fontResId: Int?,
+                ) : Parcelable
+
+                internal fun build(): State = State(sizeScaleFactor, fontResId)
+            }
+
+            /** Configures the appearance of embedded payment method rows. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Embedded {
+                private var rowStyle: RowStyle = RowStyle.FlatWithRadio()
+
+                /** Sets the style used for payment method rows. */
+                fun rowStyle(value: RowStyle): Embedded = apply { rowStyle = value }
+
+                @Parcelize
+                internal data class State(
+                    val rowStyle: RowStyle.State,
+                ) : Parcelable
+
+                internal fun build(): State = State(rowStyle.build())
+
+                /** Styles available for embedded payment method rows. */
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                sealed class RowStyle {
+                    internal abstract fun build(): State
+
+                    internal sealed interface State : Parcelable
+
+                    /** Displays flat rows with radio selection controls. */
+                    class FlatWithRadio : RowStyle() {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors.light()
+                        private var colorsDark = Colors.dark()
+
+                        fun separatorThicknessDp(value: Float): FlatWithRadio = apply { separatorThicknessDp = value }
+                        fun startSeparatorInsetDp(value: Float): FlatWithRadio = apply { startSeparatorInsetDp = value }
+                        fun endSeparatorInsetDp(value: Float): FlatWithRadio = apply { endSeparatorInsetDp = value }
+                        fun topSeparatorEnabled(value: Boolean): FlatWithRadio = apply { topSeparatorEnabled = value }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithRadio = apply { bottomSeparatorEnabled = value }
+                        fun additionalVerticalInsetsDp(value: Float): FlatWithRadio = apply {
+                            additionalVerticalInsetsDp = value
+                        }
+                        fun horizontalInsetsDp(value: Float): FlatWithRadio = apply { horizontalInsetsDp = value }
+                        fun colorsLight(value: Colors): FlatWithRadio = apply { colorsLight = value }
+                        fun colorsDark(value: Colors): FlatWithRadio = apply { colorsDark = value }
+
+                        internal override fun build(): FlatWithRadioState = FlatWithRadioState(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                        )
+
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var selectedColor: Int,
+                            @ColorInt private var unselectedColor: Int,
+                        ) {
+                            fun separatorColor(@ColorInt value: Int): Colors = apply { separatorColor = value }
+                            fun separatorColor(value: Color): Colors = separatorColor(value.toArgb())
+                            fun selectedColor(@ColorInt value: Int): Colors = apply { selectedColor = value }
+                            fun selectedColor(value: Color): Colors = selectedColor(value.toArgb())
+                            fun unselectedColor(@ColorInt value: Int): Colors = apply { unselectedColor = value }
+                            fun unselectedColor(value: Color): Colors = unselectedColor(value.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val selectedColor: Int,
+                                @ColorInt val unselectedColor: Int,
+                            ) : Parcelable
+
+                            internal fun build() = State(separatorColor, selectedColor, unselectedColor)
+
+                            companion object {
+                                fun light() = Colors(
+                                    separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb(),
+                                )
+
+                                fun dark() = Colors(
+                                    separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb(),
+                                )
+                            }
+                        }
+                    }
+
+                    @Parcelize
+                    internal data class FlatWithRadioState(
+                        val separatorThicknessDp: Float,
+                        val startSeparatorInsetDp: Float,
+                        val endSeparatorInsetDp: Float,
+                        val topSeparatorEnabled: Boolean,
+                        val bottomSeparatorEnabled: Boolean,
+                        val additionalVerticalInsetsDp: Float,
+                        val horizontalInsetsDp: Float,
+                        val colorsLight: FlatWithRadio.Colors.State,
+                        val colorsDark: FlatWithRadio.Colors.State,
+                    ) : State
+
+                    /** Displays flat rows with checkmark selection controls. */
+                    class FlatWithCheckmark : RowStyle() {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors.light()
+                        private var colorsDark = Colors.dark()
+
+                        fun separatorThicknessDp(value: Float): FlatWithCheckmark = apply { separatorThicknessDp = value }
+                        fun startSeparatorInsetDp(value: Float): FlatWithCheckmark = apply { startSeparatorInsetDp = value }
+                        fun endSeparatorInsetDp(value: Float): FlatWithCheckmark = apply { endSeparatorInsetDp = value }
+                        fun topSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply { topSeparatorEnabled = value }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithCheckmark = apply { bottomSeparatorEnabled = value }
+                        fun checkmarkInsetDp(value: Float): FlatWithCheckmark = apply { checkmarkInsetDp = value }
+                        fun additionalVerticalInsetsDp(value: Float): FlatWithCheckmark = apply {
+                            additionalVerticalInsetsDp = value
+                        }
+                        fun horizontalInsetsDp(value: Float): FlatWithCheckmark = apply { horizontalInsetsDp = value }
+                        fun colorsLight(value: Colors): FlatWithCheckmark = apply { colorsLight = value }
+                        fun colorsDark(value: Colors): FlatWithCheckmark = apply { colorsDark = value }
+
+                        internal override fun build(): FlatWithCheckmarkState = FlatWithCheckmarkState(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            checkmarkInsetDp = checkmarkInsetDp,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                        )
+
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var checkmarkColor: Int,
+                        ) {
+                            fun separatorColor(@ColorInt value: Int): Colors = apply { separatorColor = value }
+                            fun separatorColor(value: Color): Colors = separatorColor(value.toArgb())
+                            fun checkmarkColor(@ColorInt value: Int): Colors = apply { checkmarkColor = value }
+                            fun checkmarkColor(value: Color): Colors = checkmarkColor(value.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val checkmarkColor: Int,
+                            ) : Parcelable
+
+                            internal fun build() = State(separatorColor, checkmarkColor)
+
+                            companion object {
+                                fun light() = Colors(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb(),
+                                )
+
+                                fun dark() = Colors(
+                                    separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb(),
+                                )
+                            }
+                        }
+                    }
+
+                    @Parcelize
+                    internal data class FlatWithCheckmarkState(
+                        val separatorThicknessDp: Float,
+                        val startSeparatorInsetDp: Float,
+                        val endSeparatorInsetDp: Float,
+                        val topSeparatorEnabled: Boolean,
+                        val bottomSeparatorEnabled: Boolean,
+                        val checkmarkInsetDp: Float,
+                        val additionalVerticalInsetsDp: Float,
+                        val horizontalInsetsDp: Float,
+                        val colorsLight: FlatWithCheckmark.Colors.State,
+                        val colorsDark: FlatWithCheckmark.Colors.State,
+                    ) : State
+
+                    /** Displays rows as separate floating buttons. */
+                    class FloatingButton : RowStyle() {
+                        private var spacingDp = StripeThemeDefaults.floating.spacing
+                        private var additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+
+                        fun spacingDp(value: Float): FloatingButton = apply { spacingDp = value }
+                        fun additionalInsetsDp(value: Float): FloatingButton = apply { additionalInsetsDp = value }
+
+                        internal override fun build(): FloatingButtonState = FloatingButtonState(
+                            spacingDp,
+                            additionalInsetsDp,
+                        )
+                    }
+
+                    @Parcelize
+                    internal data class FloatingButtonState(
+                        val spacingDp: Float,
+                        val additionalInsetsDp: Float,
+                    ) : State
+
+                    /** Displays flat rows with disclosure controls. */
+                    class FlatWithDisclosure : RowStyle() {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors.light()
+                        private var colorsDark = Colors.dark()
+
+                        fun separatorThicknessDp(value: Float): FlatWithDisclosure = apply { separatorThicknessDp = value }
+                        fun startSeparatorInsetDp(value: Float): FlatWithDisclosure = apply { startSeparatorInsetDp = value }
+                        fun endSeparatorInsetDp(value: Float): FlatWithDisclosure = apply { endSeparatorInsetDp = value }
+                        fun topSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply { topSeparatorEnabled = value }
+                        fun bottomSeparatorEnabled(value: Boolean): FlatWithDisclosure = apply { bottomSeparatorEnabled = value }
+                        fun additionalVerticalInsetsDp(value: Float): FlatWithDisclosure = apply {
+                            additionalVerticalInsetsDp = value
+                        }
+                        fun horizontalInsetsDp(value: Float): FlatWithDisclosure = apply { horizontalInsetsDp = value }
+                        fun colorsLight(value: Colors): FlatWithDisclosure = apply { colorsLight = value }
+                        fun colorsDark(value: Colors): FlatWithDisclosure = apply { colorsDark = value }
+
+                        internal override fun build(): FlatWithDisclosureState = FlatWithDisclosureState(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                        )
+
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var disclosureColor: Int,
+                        ) {
+                            fun separatorColor(@ColorInt value: Int): Colors = apply { separatorColor = value }
+                            fun separatorColor(value: Color): Colors = separatorColor(value.toArgb())
+                            fun disclosureColor(@ColorInt value: Int): Colors = apply { disclosureColor = value }
+                            fun disclosureColor(value: Color): Colors = disclosureColor(value.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val disclosureColor: Int,
+                            ) : Parcelable
+
+                            internal fun build() = State(separatorColor, disclosureColor)
+
+                            companion object {
+                                fun light() = Colors(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb(),
+                                )
+
+                                fun dark() = Colors(
+                                    separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb(),
+                                )
+                            }
+                        }
+                    }
+
+                    @Parcelize
+                    internal data class FlatWithDisclosureState(
+                        val separatorThicknessDp: Float,
+                        val startSeparatorInsetDp: Float,
+                        val endSeparatorInsetDp: Float,
+                        val topSeparatorEnabled: Boolean,
+                        val bottomSeparatorEnabled: Boolean,
+                        val additionalVerticalInsetsDp: Float,
+                        val horizontalInsetsDp: Float,
+                        val colorsLight: FlatWithDisclosure.Colors.State,
+                        val colorsDark: FlatWithDisclosure.Colors.State,
+                    ) : State
                 }
             }
 
