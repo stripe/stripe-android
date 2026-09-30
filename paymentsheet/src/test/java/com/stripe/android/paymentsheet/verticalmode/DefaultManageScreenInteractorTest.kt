@@ -486,6 +486,37 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `auto select runs once while the selector writes pending and idle`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val updateResult = CompletableDeferred<Unit>()
+        val navigateBackCalls = Turbine<Boolean>()
+        lateinit var selectorState: MutableStateFlow<SavedPaymentMethodSelectionState>
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = {
+                selectorState.value = SavedPaymentMethodSelectionState.Pending(it.paymentMethod.id)
+                updateResult.await()
+                selectorState.value = SavedPaymentMethodSelectionState.Idle
+                Result.success(Unit)
+            },
+        ) {
+            selectorState = selectionStateSource
+            canEditSource.value = false
+            assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
+            navigateBackCalls.expectNoEvents()
+
+            updateResult.complete(Unit)
+
+            assertThat(navigateBackCalls.awaitItem()).isTrue()
+            onSelectPaymentMethodTurbine.expectNoEvents()
+            navigateBackCalls.expectNoEvents()
+        }
+        navigateBackCalls.ensureAllEventsConsumed()
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
