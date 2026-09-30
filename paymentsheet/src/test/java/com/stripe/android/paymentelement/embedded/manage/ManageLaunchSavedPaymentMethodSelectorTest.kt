@@ -66,20 +66,27 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `failed tax update commits selection without a response`() = runScenario(
-        paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-        updateTaxRegion = { Result.failure(IllegalStateException("Tax region update failed")) },
-    ) {
-        selector.selectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    fun `failed tax update is pending until it fails, then commits selection without a response`() {
+        val update = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { update.await() },
+        ) {
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-            selector.select(selection)
+                val result = testScope.async(start = CoroutineStart.UNDISPATCHED) { selector.select(selection) }
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
+                assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
 
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                update.complete(Result.failure(IllegalStateException("Tax region update failed")))
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                result.await()
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                assertThat(selector.checkoutSessionResponse).isNull()
+            }
         }
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        assertThat(selector.checkoutSessionResponse).isNull()
     }
 
     private fun runScenario(
