@@ -4227,13 +4227,13 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = activity,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
-                initializeCallbacks(storeViewModel.flowControllerCallbackIdentifier)
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
+                initializeCallbacks(storeViewModel.paymentElementCallbackIdentifier)
                 return FlowControllerFactory(
                     activity = activity,
                     paymentOptionResultCallback = paymentOptionResultCallback,
                     paymentResultCallback = resultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4246,13 +4246,13 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = fragment,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
-                initializeCallbacks(storeViewModel.flowControllerCallbackIdentifier)
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
+                initializeCallbacks(storeViewModel.paymentElementCallbackIdentifier)
                 return FlowControllerFactory(
                     fragment = fragment,
                     paymentOptionResultCallback = paymentOptionResultCallback,
                     paymentResultCallback = resultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4317,12 +4317,12 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = activity,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 return FlowControllerFactory(
                     activity = activity,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4358,9 +4358,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = activity,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
@@ -4369,7 +4369,7 @@ class PaymentSheet internal constructor(
                     activity = activity,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4402,9 +4402,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = activity,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .build()
@@ -4413,7 +4413,7 @@ class PaymentSheet internal constructor(
                     activity = activity,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4452,9 +4452,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = activity,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -4464,7 +4464,7 @@ class PaymentSheet internal constructor(
                     activity = activity,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4491,12 +4491,12 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = fragment,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 return FlowControllerFactory(
                     fragment = fragment,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4530,9 +4530,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = fragment,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
                         .build()
@@ -4541,7 +4541,7 @@ class PaymentSheet internal constructor(
                     fragment = fragment,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4574,9 +4574,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = fragment,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .build()
@@ -4585,7 +4585,7 @@ class PaymentSheet internal constructor(
                     fragment = fragment,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
 
@@ -4624,9 +4624,9 @@ class PaymentSheet internal constructor(
                 val storeViewModel = ViewModelProvider.create(
                     owner = fragment,
                     factory = StoreViewModel.Factory,
-                )[StoreViewModel::class]
+                )[FLOW_CONTROLLER_STORE_KEY, StoreViewModel::class]
                 setFlowControllerCallbacks(
-                    storeViewModel.flowControllerCallbackIdentifier,
+                    storeViewModel.paymentElementCallbackIdentifier,
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -4636,7 +4636,7 @@ class PaymentSheet internal constructor(
                     fragment = fragment,
                     paymentOptionResultCallback = paymentOptionCallback.toResultCallback(),
                     paymentResultCallback = paymentResultCallback,
-                    paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+                    paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
                 ).create()
             }
         }
@@ -4646,20 +4646,14 @@ class PaymentSheet internal constructor(
         private val savedStateHandle: SavedStateHandle
     ) : ViewModel() {
         val paymentElementCallbackIdentifier: String
-            get() = getOrCreateCallbackIdentifier(PAYMENT_SHEET_ID_KEY)
-
-        val flowControllerCallbackIdentifier: String
-            get() = getOrCreateCallbackIdentifier(FLOW_CONTROLLER_ID_KEY)
-
-        private fun getOrCreateCallbackIdentifier(key: String): String {
-            val storeId = savedStateHandle.get<String>(key) ?: UUID.randomUUID().toString()
-            savedStateHandle[key] = storeId
-            return storeId
-        }
+            get() {
+                val storeId = savedStateHandle.get<String>(ID_KEY) ?: UUID.randomUUID().toString()
+                savedStateHandle[ID_KEY] = storeId
+                return storeId
+            }
 
         companion object {
-            private const val PAYMENT_SHEET_ID_KEY = "PAYMENTSHEET_ID"
-            private const val FLOW_CONTROLLER_ID_KEY = "FLOW_CONTROLLER_ID"
+            private const val ID_KEY = "PAYMENTSHEET_ID"
 
             val Factory = viewModelFactory {
                 initializer {

@@ -156,7 +156,7 @@ internal fun internalRememberPaymentSheetFlowController(
         factory = PaymentSheet.StoreViewModel.Factory,
     )
 
-    UpdateCallbacks(storeViewModel.flowControllerCallbackIdentifier, callbacks)
+    UpdateCallbacks(storeViewModel.paymentElementCallbackIdentifier, callbacks)
 
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
@@ -176,7 +176,7 @@ internal fun internalRememberPaymentSheetFlowController(
             statusBarColor = { StatusBarCompat.color(activity) },
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
-            paymentElementCallbackIdentifier = storeViewModel.flowControllerCallbackIdentifier,
+            paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()
     }

@@ -103,7 +103,7 @@ internal class FlowControllerTest {
     }
 
     @Test
-    fun `PaymentSheet and FlowController share a store with distinct callback identifiers`() {
+    fun `PaymentSheet and FlowController use separate stores with distinct callback identifiers`() {
         val controller = Robolectric.buildActivity(FragmentActivity::class.java).create()
         val activity = controller.get()
         PaymentConfiguration.init(activity, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -116,20 +116,25 @@ internal class FlowControllerTest {
             val fragment = Fragment()
             activity.supportFragmentManager.beginTransaction().add(fragment, "flow-controller").commitNow()
             Construction.ActivityBuilder.create(activity, fragment, flowControllerCallback)
-            val store = ViewModelProvider.create(
+            val storeProvider = ViewModelProvider.create(
                 owner = activity,
                 factory = PaymentSheet.StoreViewModel.Factory,
-            )[PaymentSheet.StoreViewModel::class]
+            )
+            val sheetStore = storeProvider[PaymentSheet.StoreViewModel::class]
+            val flowControllerStore = storeProvider[FLOW_CONTROLLER_STORE_KEY, PaymentSheet.StoreViewModel::class]
+            val sheetIdentifier = sheetStore.paymentElementCallbackIdentifier
+            val flowControllerIdentifier = flowControllerStore.paymentElementCallbackIdentifier
 
-            assertThat(store.flowControllerCallbackIdentifier).isNotEqualTo(store.paymentElementCallbackIdentifier)
-            assertThat(PaymentElementCallbackReferences[store.flowControllerCallbackIdentifier]?.createIntentCallback)
+            assertThat(flowControllerStore).isNotSameInstanceAs(sheetStore)
+            assertThat(flowControllerIdentifier).isNotEqualTo(sheetIdentifier)
+            assertThat(PaymentElementCallbackReferences[flowControllerIdentifier]?.createIntentCallback)
                 .isSameInstanceAs(flowControllerCallback)
-            assertThat(PaymentElementCallbackReferences[store.paymentElementCallbackIdentifier]?.createIntentCallback)
+            assertThat(PaymentElementCallbackReferences[sheetIdentifier]?.createIntentCallback)
                 .isSameInstanceAs(sheetCallback)
             controller.start().resume()
             paymentSheet.presentWithPaymentIntent("pi_secret")
             val args = requireNotNull(PaymentSheetContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
-            assertThat(args.paymentElementCallbackIdentifier).isEqualTo(store.paymentElementCallbackIdentifier)
+            assertThat(args.paymentElementCallbackIdentifier).isEqualTo(sheetIdentifier)
         } finally {
             controller.pause().stop().destroy()
         }
@@ -144,7 +149,7 @@ internal class FlowControllerTest {
             val fragmentIdentifier = ViewModelProvider.create(
                 owner = fragment,
                 factory = PaymentSheet.StoreViewModel.Factory,
-            )[PaymentSheet.StoreViewModel::class].flowControllerCallbackIdentifier
+            )[FLOW_CONTROLLER_STORE_KEY, PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
 
             assertThat(fragmentIdentifier).isNotEqualTo(callbackIdentifier)
             assertThat(PaymentElementCallbackReferences[fragmentIdentifier]?.createIntentCallback)
@@ -178,7 +183,7 @@ internal class FlowControllerTest {
         val callbackIdentifier = ViewModelProvider.create(
             owner = owner,
             factory = PaymentSheet.StoreViewModel.Factory,
-        )[PaymentSheet.StoreViewModel::class].flowControllerCallbackIdentifier
+        )[FLOW_CONTROLLER_STORE_KEY, PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
         val viewModel = ViewModelProvider.create(owner = owner)[
             "FlowControllerViewModel(instance = $callbackIdentifier)",
             FlowControllerViewModel::class,
