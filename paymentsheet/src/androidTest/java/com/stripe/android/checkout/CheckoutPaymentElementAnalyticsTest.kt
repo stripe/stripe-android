@@ -126,6 +126,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
             // the Checkout Session during confirmation.
             enqueueSuccessfulGooglePayPayment(paymentMethod = createPaymentMethodWithBillingAddress())
             networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[line2]", "Floor 3"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
                 bodyPart("tax_region[postal_code]", "94103"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
@@ -156,7 +161,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             context.confirm()
         }
 
-        assertGooglePayCalled()
+        assertGooglePayCalledWithRequiredBillingAddress()
     }
 
     @Test
@@ -245,11 +250,19 @@ internal class CheckoutPaymentElementAnalyticsTest {
             json.put("customer_email", "checkout@example.com")
             json.put("account_settings", JSONObject().put("country", "US"))
             json.getJSONObject("elements_session").remove("link_settings")
+            // Google Pay only returns a full billing address when billing collection is required.
+            json.put("billing_address_collection", "required")
             json.put(
                 "tax_context",
                 JSONObject()
                     .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "billing"),
+                    .put("automatic_tax_address_source", "session.billing"),
+            )
+            json.put(
+                "tax_meta",
+                JSONObject()
+                    .put("computation_type", "automatic")
+                    .put("status", "requires_location_inputs"),
             )
         }
     }
