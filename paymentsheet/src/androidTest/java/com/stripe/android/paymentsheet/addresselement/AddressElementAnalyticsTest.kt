@@ -6,6 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.model.Address
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -33,7 +36,7 @@ internal class AddressElementAnalyticsTest {
     private val page = AddressElementPage(testRules.compose)
 
     @Test
-    fun completingMerchantProvidedAddressSendsCompletionAnalytics() {
+    fun completingMerchantProvidedAddressDoesNotReportAutocompleteSelection() {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_address_show",
             productUsage = productUsage,
@@ -41,6 +44,11 @@ internal class AddressElementAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_address_completed",
             productUsage = productUsage,
+            analyticsPayloadField(
+                "address_data_blob[auto_complete_result_selected]",
+                "false",
+            ),
+            not(hasQueryParam("address_data_blob[edit_distance]")),
         )
 
         runAddressElementTest(page) {
@@ -62,7 +70,7 @@ internal class AddressElementAnalyticsTest {
     }
 
     @Test
-    fun completingAddressFromAutocompleteSendsCompletionAnalytics() {
+    fun completingAddressFromAutocompleteReportsTheSelectedResult() {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_address_show",
             productUsage = productUsage,
@@ -70,6 +78,14 @@ internal class AddressElementAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_address_completed",
             productUsage = productUsage,
+            analyticsPayloadField(
+                "address_data_blob[auto_complete_result_selected]",
+                "true",
+            ),
+            analyticsPayloadField(
+                "address_data_blob[edit_distance]",
+                "0",
+            ),
         )
         placesClientProxyTestRule.enqueueFindAutocompletePredictionsResponse(
             Result.success(
