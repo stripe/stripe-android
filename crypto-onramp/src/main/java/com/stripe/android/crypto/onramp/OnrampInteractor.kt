@@ -1512,11 +1512,13 @@ internal class OnrampInteractor @Inject constructor(
      * Returns null if fetch fails or key is null.
      */
     internal suspend fun getOrFetchPlatformKey(): Result<String> {
-        val cryptoCustomerId = _state.value.cryptoCustomerId
-        val cachedKey = _state.value.platformKeyCache
+        val state = _state.value
+        val cryptoCustomerId = state.cryptoCustomerId
+        val merchantPublishableKey = state.configurationState?.publishableKey
+        val cachedKey = state.platformKeyCache
 
         // Check if we have a valid cached key for the current customer
-        if (cachedKey != null && cachedKey.cryptoCustomerId == cryptoCustomerId) {
+        if (cachedKey != null && cachedKey.matches(cryptoCustomerId, null, merchantPublishableKey)) {
             return Result.success(cachedKey.publishableKey)
         }
 
@@ -1536,7 +1538,9 @@ internal class OnrampInteractor @Inject constructor(
                     it.copy(
                         platformKeyCache = PlatformKeyCache(
                             publishableKey = platformPublishableKey,
-                            cryptoCustomerId = cryptoCustomerId
+                            cryptoCustomerId = cryptoCustomerId,
+                            countryHint = null,
+                            merchantPublishableKey = merchantPublishableKey,
                         )
                     )
                 }
@@ -1579,14 +1583,6 @@ internal data class OnrampState(
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
     val selectedPaymentSource: SelectedPaymentSource? = null
-)
-
-/**
- * Caches the platform publishable key along with the consumer session it was fetched for.
- */
-internal data class PlatformKeyCache(
-    val publishableKey: String,
-    val cryptoCustomerId: String?
 )
 
 internal sealed interface SelectedPaymentSource {
