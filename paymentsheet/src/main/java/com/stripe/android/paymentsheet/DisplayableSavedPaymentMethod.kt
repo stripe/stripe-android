@@ -97,10 +97,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         return paymentMethod.id == defaultPaymentMethodId
     }
 
-    fun withSelectionPending(isSelectionPending: Boolean): DisplayableSavedPaymentMethod {
-        return copy(isSelectionPending = isSelectionPending)
-    }
-
     companion object {
         fun create(
             displayName: ResolvableString,
