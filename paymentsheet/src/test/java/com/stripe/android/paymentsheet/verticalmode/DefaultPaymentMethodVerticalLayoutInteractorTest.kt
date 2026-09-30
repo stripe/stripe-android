@@ -95,11 +95,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(expectMostRecentItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            // Emits twice: once through displayedSavedPaymentMethod, then from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(expectMostRecentItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
@@ -114,21 +117,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isNull()
+            // Entering or leaving Pending emits twice: once through displayedSavedPaymentMethod, then
+            // from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isNull()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
         }
     }
 
