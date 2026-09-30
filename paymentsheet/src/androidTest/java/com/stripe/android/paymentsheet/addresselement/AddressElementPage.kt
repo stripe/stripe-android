@@ -44,6 +44,15 @@ internal class AddressElementPage(
         composeTestRule.onNodeWithText("Massachusetts").performScrollTo().assertIsDisplayed()
     }
 
+    fun enterAutocompleteQuery(query: String) {
+        composeTestRule.replaceText("Address", query)
+    }
+
+    fun selectAutocompletePrediction(primaryText: String) {
+        composeTestRule.waitForText(primaryText)
+        composeTestRule.onNodeWithText(primaryText).performClick()
+    }
+
     fun clickSave() {
         composeTestRule.waitForNode(hasText("Save address").and(isEnabled()))
         composeTestRule.onNodeWithText("Save address").performScrollTo().performClick()
