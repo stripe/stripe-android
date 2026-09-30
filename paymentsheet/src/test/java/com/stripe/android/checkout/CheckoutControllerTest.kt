@@ -213,22 +213,22 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `configure keeps the initial session when the saved payment method tax update fails`() =
+    fun `configure does not emit session when the saved payment method tax update fails`() =
         runConfigureScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
                 savedCustomerWithBillingAddress(),
             ),
             networkSetup = {
-                networkRule.checkoutUpdate { response ->
+                networkRule.savedPaymentMethodTaxUpdate { response ->
                     response.setResponseCode(400)
                     response.setBody("""{"error":{"message":"Invalid tax region"}}""")
                 }
             },
         ) {
             assertThat(result.isFailure).isTrue()
-            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
-            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
         }
 
     @Test
@@ -368,22 +368,20 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure keeps the initial session when the default billing address tax update fails`() =
+    fun `configure does not emit session when the default billing address tax update fails`() =
         runConfigureScenario(
             configuration = configurationWithDefaultBillingAddress(),
             initModifier = automaticTaxFor("billing"),
             networkSetup = {
-                networkRule.checkoutUpdate(
-                    bodyPart("tax_region[postal_code]", "94103"),
-                ) { response ->
+                networkRule.defaultBillingAddressTaxUpdate { response ->
                     response.setResponseCode(400)
                     response.setBody("""{"error":{"message":"Invalid tax region"}}""")
                 }
             },
         ) {
             assertThat(result.isFailure).isTrue()
-            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(committedState?.checkoutSessionResponse?.amount).isEqualTo(5099L)
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
         }
 
     @Test

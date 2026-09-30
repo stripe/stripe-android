@@ -75,7 +75,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
     /**
-     * The latest [Session] data, or `null` until [configure] has loaded the initial payment UI.
+     * The latest [Session] data, or `null` until [configure] has completed successfully.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session
@@ -96,10 +96,8 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Loads the Checkout Session identified by [clientSecret] and prepares the payment UI.
-     * The initial session is published after its first payment UI load. If the subsequent
-     * billing-address tax update fails, this method returns failure while leaving that session
-     * observable.
+     * Loads the Checkout Session identified by [clientSecret] and prepares the
+     * payment UI, populating [session] on success.
      *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.

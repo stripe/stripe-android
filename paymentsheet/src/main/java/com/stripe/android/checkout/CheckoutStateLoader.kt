@@ -33,24 +33,30 @@ internal class CheckoutStateLoader @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
+    /**
+     * Loads the initial state without committing it, so [CheckoutController.configure] can finish
+     * its tax update before the session becomes observable. Commit it with [reload].
+     */
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): CheckoutControllerState {
-        return commit(
+        return load(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
             carryForward = CarryForward.initial(),
+            publish = false,
         )
     }
 
     suspend fun reload(state: CheckoutControllerState) {
-        commit(
+        load(
             configuration = state.configuration,
             response = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
             carryForward = CarryForward.from(state),
+            publish = true,
         )
     }
 
@@ -59,11 +65,12 @@ internal class CheckoutStateLoader @Inject constructor(
         customerStateHolder.setCustomerState(null)
     }
 
-    private suspend fun commit(
+    private suspend fun load(
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
+        publish: Boolean,
     ): CheckoutControllerState {
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
@@ -121,9 +128,10 @@ internal class CheckoutStateLoader @Inject constructor(
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
-        stateHolder.state = state
-
-        customerStateHolder.setCustomerState(loadResults.customer)
+        if (publish) {
+            stateHolder.state = state
+            customerStateHolder.setCustomerState(loadResults.customer)
+        }
         return state
     }
 
