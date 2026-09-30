@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -32,7 +33,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         selector.selectionState.test {
             assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-            selector.select(selection)
+            assertThat(selector.select(selection).isSuccess).isTrue()
 
             expectNoEvents()
         }
@@ -58,7 +59,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
                 update.complete(Result.success(response))
 
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
-                result.await()
+                assertThat(result.await().isSuccess).isTrue()
                 assertThat(selectionHolder.selection.value).isEqualTo(selection)
                 assertThat(selector.checkoutSessionResponse).isEqualTo(response)
             }
@@ -66,20 +67,71 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `failed tax update commits selection without a response`() = runScenario(
-        paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-        updateTaxRegion = { Result.failure(IllegalStateException("Tax region update failed")) },
-    ) {
-        selector.selectionState.test {
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    fun `failed tax update marks the selection failed and keeps prior selection`() {
+        val error = IllegalStateException("Tax region update failed")
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { Result.failure(error) },
+        ) {
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-            selector.select(selection)
+                assertThat(selector.select(selection).isFailure).isTrue()
 
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-            assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
+                assertThat(awaitItem()).isEqualTo(
+                    SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
+                )
+            }
+            assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+            assertThat(selector.checkoutSessionResponse).isNull()
         }
-        assertThat(selectionHolder.selection.value).isEqualTo(selection)
-        assertThat(selector.checkoutSessionResponse).isNull()
+    }
+
+    @Test
+    fun `clearError resets a failed selection to idle`() {
+        val error = IllegalStateException("Tax region update failed")
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { Result.failure(error) },
+        ) {
+            assertThat(selector.select(selection).isFailure).isTrue()
+
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(
+                    SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
+                )
+
+                selector.clearError()
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            }
+            assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+        }
+    }
+
+    @Test
+    fun `clearError keeps a pending selection pending`() {
+        val update = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { update.await() },
+        ) {
+            val result = testScope.async(start = CoroutineStart.UNDISPATCHED) { selector.select(selection) }
+
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
+
+                selector.clearError()
+
+                expectNoEvents()
+
+                update.complete(Result.success(CheckoutSessionResponseFactory.create()))
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            }
+            assertThat(result.await().isSuccess).isTrue()
+        }
     }
 
     private fun runScenario(

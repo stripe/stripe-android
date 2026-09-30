@@ -9,5 +9,7 @@ internal interface ManageScreenSavedPaymentMethodSelector {
     val selectionState: StateFlow<SavedPaymentMethodSelectionState>
     val checkoutSessionResponse: CheckoutSessionResponse?
 
-    suspend fun select(selection: PaymentSelection.Saved)
+    suspend fun select(selection: PaymentSelection.Saved): Result<Unit>
+
+    fun clearError()
 }

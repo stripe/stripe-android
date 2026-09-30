@@ -308,7 +308,10 @@ private class ImmediateSavedPaymentMethodSelector(
 
     override val checkoutSessionResponse: CheckoutSessionResponse? = null
 
-    override suspend fun select(selection: PaymentSelection.Saved) {
+    override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         selectionHolder.setSelection(selection)
+        return Result.success(Unit)
     }
+
+    override fun clearError() = Unit
 }
