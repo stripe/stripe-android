@@ -32,6 +32,13 @@ private const val MB_WAY_INITIAL_DELAY_IN_SECONDS = 5
 private const val DEFAULT_POLLING_INTERVAL_IN_SECONDS = 1
 private const val MILLIS_PER_SECOND = 1000L
 
+private data class DefaultPollingConfig(
+    val timeLimitInSeconds: Int,
+    val initialDelayInSeconds: Int,
+    val ctaText: Int,
+    val qrCodeUrl: String?,
+)
+
 internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
@@ -78,96 +85,77 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         requestOptions: ApiRequest.Options,
         currentTimeMillis: Long,
     ): PollingContract.Args {
-        return when (
-            val paymentMethodType = requireNotNull(actionable.paymentMethod?.type) {
-                "Received null payment method type in PollingAuthenticator"
-            }
-        ) {
-            PaymentMethod.Type.Blik ->
-                createArgsWithDefaultPollingInterval(
-                    actionable = actionable,
-                    statusBarColor = statusBarColor,
-                    timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_blik_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = null,
-                    paymentMethodType = paymentMethodType,
-                )
-            PaymentMethod.Type.PayNow ->
-                createArgsWithDefaultPollingInterval(
-                    actionable = actionable,
-                    statusBarColor = statusBarColor,
-                    timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = getQrCodeForPayNow(actionable),
-                    paymentMethodType = paymentMethodType,
-                )
-            PaymentMethod.Type.PromptPay ->
-                createArgsWithDefaultPollingInterval(
-                    actionable = actionable,
-                    statusBarColor = statusBarColor,
-                    timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = getQrCodeForPromptPay(actionable),
-                    paymentMethodType = paymentMethodType,
-                )
+        val paymentMethodType = requireNotNull(actionable.paymentMethod?.type) {
+            "Received null payment method type in PollingAuthenticator"
+        }
+
+        return when (paymentMethodType) {
             PaymentMethod.Type.Pix -> getArgsForPix(actionable, statusBarColor, requestOptions, currentTimeMillis)
-            PaymentMethod.Type.Bizum ->
-                createArgsWithDefaultPollingInterval(
-                    actionable = actionable,
-                    statusBarColor = statusBarColor,
-                    timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_bizum_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = null,
-                    paymentMethodType = paymentMethodType,
-                )
-            PaymentMethod.Type.MbWay ->
-                createArgsWithDefaultPollingInterval(
-                    actionable = actionable,
-                    statusBarColor = statusBarColor,
-                    timeLimitInSeconds = MB_WAY_TIME_LIMIT_IN_SECONDS,
-                    initialDelayInSeconds = MB_WAY_INITIAL_DELAY_IN_SECONDS,
-                    ctaText = R.string.stripe_mb_way_confirm_payment,
-                    requestOptions = requestOptions,
-                    qrCodeUrl = null,
-                    paymentMethodType = paymentMethodType,
-                )
-            else ->
-                error(
-                    "Received invalid payment method type " +
-                        "${paymentMethodType.code} in PollingAuthenticator"
-                )
+            else -> createArgsWithDefaultPollingInterval(
+                actionable = actionable,
+                statusBarColor = statusBarColor,
+                requestOptions = requestOptions,
+                paymentMethodType = paymentMethodType,
+            )
         }
     }
 
     private fun createArgsWithDefaultPollingInterval(
         actionable: StripeIntent,
         statusBarColor: Int?,
-        timeLimitInSeconds: Int,
-        initialDelayInSeconds: Int,
-        ctaText: Int,
         requestOptions: ApiRequest.Options,
-        qrCodeUrl: String?,
         paymentMethodType: PaymentMethod.Type,
     ): PollingContract.Args {
+        val config = getDefaultPollingConfig(actionable, paymentMethodType)
+
         return PollingContract.Args(
             clientSecret = requireNotNull(actionable.clientSecret),
             statusBarColor = statusBarColor,
-            timeLimitInSeconds = timeLimitInSeconds,
-            initialDelayInSeconds = initialDelayInSeconds,
+            timeLimitInSeconds = config.timeLimitInSeconds,
+            initialDelayInSeconds = config.initialDelayInSeconds,
             pollingIntervalInSeconds = DEFAULT_POLLING_INTERVAL_IN_SECONDS,
-            ctaText = ctaText,
+            ctaText = config.ctaText,
             requestOptions = requestOptions,
-            qrCodeUrl = qrCodeUrl,
+            qrCodeUrl = config.qrCodeUrl,
             paymentMethodType = paymentMethodType.code,
         )
+    }
+
+    private fun getDefaultPollingConfig(
+        actionable: StripeIntent,
+        paymentMethodType: PaymentMethod.Type,
+    ): DefaultPollingConfig = when (paymentMethodType) {
+        PaymentMethod.Type.Blik -> DefaultPollingConfig(
+            timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_blik_confirm_payment,
+            qrCodeUrl = null,
+        )
+        PaymentMethod.Type.PayNow -> DefaultPollingConfig(
+            timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+            qrCodeUrl = getQrCodeForPayNow(actionable),
+        )
+        PaymentMethod.Type.PromptPay -> DefaultPollingConfig(
+            timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+            qrCodeUrl = getQrCodeForPromptPay(actionable),
+        )
+        PaymentMethod.Type.Bizum -> DefaultPollingConfig(
+            timeLimitInSeconds = BIZUM_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = BIZUM_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_bizum_confirm_payment,
+            qrCodeUrl = null,
+        )
+        PaymentMethod.Type.MbWay -> DefaultPollingConfig(
+            timeLimitInSeconds = MB_WAY_TIME_LIMIT_IN_SECONDS,
+            initialDelayInSeconds = MB_WAY_INITIAL_DELAY_IN_SECONDS,
+            ctaText = R.string.stripe_mb_way_confirm_payment,
+            qrCodeUrl = null,
+        )
+        else -> error("Received invalid payment method type ${paymentMethodType.code} in PollingAuthenticator")
     }
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {
