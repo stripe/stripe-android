@@ -78,7 +78,7 @@ class InputAddressViewModelTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `onScreenShown fires onShow with initial country`() {
+    fun `onScreenShown fires onShow with the form country from the initial address`() {
         val viewModel = createViewModel(
             address = AddressDetails(address = PaymentSheet.Address(country = "US"))
         )
@@ -87,10 +87,25 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `onScreenShown fires onShow with empty string when no initial country`() {
+    fun `onScreenShown fires onShow with the form default when no initial country`() {
         val viewModel = createViewModel()
+        assertThat(viewModel.addressFormController.getCurrentFormValues()[FormFieldId.Country]?.value)
+            .isEqualTo("US")
         viewModel.onScreenShown()
-        verify(eventReporter).onShow(eq(""))
+        verify(eventReporter).onShow(eq("US"))
+    }
+
+    @Test
+    fun `onScreenShown fires onShow with the allowed form country`() {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("CA"))
+                .build(),
+        )
+        assertThat(viewModel.addressFormController.getCurrentFormValues()[FormFieldId.Country]?.value)
+            .isEqualTo("CA")
+        viewModel.onScreenShown()
+        verify(eventReporter).onShow(eq("CA"))
     }
 
     @Test

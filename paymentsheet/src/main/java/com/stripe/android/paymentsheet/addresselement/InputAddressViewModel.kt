@@ -132,7 +132,7 @@ internal class InputAddressViewModel @Inject constructor(
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
     fun onScreenShown() {
-        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+        eventReporter.onShow(getCurrentAddress().address?.country.orEmpty())
     }
 
     init {
