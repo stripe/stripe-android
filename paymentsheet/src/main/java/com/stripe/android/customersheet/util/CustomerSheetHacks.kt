@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * but can't be serialized, or objects that can't be injected where they are used.
  */
 internal object CustomerSheetHacks {
+    private var hasInitializedSession: Boolean = false
+
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
     val initializationDataSource: Single<CustomerSheetInitializationDataSource>
         get() = _initializationDataSource.asSingle()
@@ -42,6 +44,10 @@ internal object CustomerSheetHacks {
         lifecycleOwner: LifecycleOwner,
         integration: CustomerSheetIntegration,
     ) {
+        if (hasInitializedSession) {
+            throw IllegalStateException()
+        }
+
         when (integration) {
             is CustomerSheetIntegration.Adapter -> {
                 val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
@@ -78,6 +84,8 @@ internal object CustomerSheetHacks {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
+                    hasInitializedSession = false
+
                     val isChangingConfigurations = when (owner) {
                         is ComponentActivity -> owner.isChangingConfigurations
                         is Fragment -> owner.activity?.isChangingConfigurations ?: false
