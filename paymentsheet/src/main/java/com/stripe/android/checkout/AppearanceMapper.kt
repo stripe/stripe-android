@@ -1,5 +1,7 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
-@file:OptIn(com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class)
+@file:OptIn(
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+)
 
 package com.stripe.android.checkout
 

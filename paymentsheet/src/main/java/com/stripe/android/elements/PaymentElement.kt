@@ -792,6 +792,8 @@ class PaymentElement @Inject internal constructor(
                     internal sealed interface State : Parcelable
 
                     /** Displays flat rows with radio selection controls. */
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithRadio : RowStyle() {
                         private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
@@ -834,6 +836,8 @@ class PaymentElement @Inject internal constructor(
                             colorsDark = colorsDark.build(),
                         )
 
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var selectedColor: Int,
@@ -885,6 +889,8 @@ class PaymentElement @Inject internal constructor(
                     ) : State
 
                     /** Displays flat rows with checkmark selection controls. */
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithCheckmark : RowStyle() {
                         private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
@@ -934,6 +940,8 @@ class PaymentElement @Inject internal constructor(
                             colorsDark = colorsDark.build(),
                         )
 
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var checkmarkColor: Int,
@@ -980,6 +988,8 @@ class PaymentElement @Inject internal constructor(
                     ) : State
 
                     /** Displays rows as separate floating buttons. */
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FloatingButton : RowStyle() {
                         private var spacingDp = StripeThemeDefaults.floating.spacing
                         private var additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
@@ -1000,6 +1010,8 @@ class PaymentElement @Inject internal constructor(
                     ) : State
 
                     /** Displays flat rows with disclosure controls. */
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class FlatWithDisclosure : RowStyle() {
                         private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
                         private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
@@ -1046,6 +1058,8 @@ class PaymentElement @Inject internal constructor(
                             colorsDark = colorsDark.build(),
                         )
 
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                         class Colors private constructor(
                             @ColorInt private var separatorColor: Int,
                             @ColorInt private var disclosureColor: Int,
