@@ -95,11 +95,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(expectMostRecentItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(expectMostRecentItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
 
@@ -114,21 +114,21 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
+            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
+            assertThat(expectMostRecentItem().savedPaymentMethodSelectionState.error).isNull()
         }
     }
 
