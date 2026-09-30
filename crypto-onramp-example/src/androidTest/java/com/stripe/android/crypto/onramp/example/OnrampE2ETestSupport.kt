@@ -1,8 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
 import android.content.Context
-import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -23,6 +21,8 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
@@ -30,23 +30,14 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.example.model.OnrampUiState
-import com.stripe.android.crypto.onramp.example.model.Screen
 import com.stripe.android.crypto.onramp.example.store.ONRAMP_PREFS_NAME
-import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
-import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
-import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
-import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.RetryRule
 import kotlinx.coroutines.runBlocking
@@ -59,7 +50,7 @@ import java.util.UUID
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-internal class OnrampE2ETestRule(private val retryCount: Int) : TestRule {
+internal class OnrampE2ETestRule : TestRule {
     val composeRule = createEmptyComposeRule()
 
     private val activityRule: ActivityScenarioRule<OnrampActivity> = activityScenarioRule()
@@ -81,7 +72,7 @@ internal class OnrampE2ETestRule(private val retryCount: Int) : TestRule {
         return RuleChain.emptyRuleChain()
             .around(composeRule)
             .around(attestationFeatureFlagTestRule)
-            .around(RetryRule(retryCount))
+            .around(RetryRule(3))
             .around(fixtureRule)
             .around(activityRule)
             .apply(base, description)
@@ -114,43 +105,7 @@ internal class OnrampE2ETestRule(private val retryCount: Int) : TestRule {
         assertThat(wallet.verifiedOwnership).isTrue()
     }
 
-    fun clearLinkSession() = runBlocking {
-        assertThat(onrampCoordinator().logOut()).isInstanceOf(OnrampLogOutResult.Completed::class.java)
-    }
-
-    fun assertWalletCollectedBeforeAuthentication() = runBlocking {
-        val state = uiState()
-        assertThat(state.screen).isEqualTo(Screen.LoginSignup)
-        assertThat(state.authToken).isNull()
-        assertThat(state.selectedPaymentData?.type).isEqualTo(PaymentMethodDisplayData.Type.GooglePay)
-        assertThat(state.walletEmail).isNotEmpty()
-        assertThat(state.walletPhone).matches("\\+[1-9][0-9]{1,14}")
-        assertThat(state.walletRawPhone).isNotEmpty()
-        assertThat(state.kycAddress.country).isNotEmpty()
-
-        val result = onrampCoordinator().createCryptoPaymentToken()
-        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
-        val error = (result as OnrampCreateCryptoPaymentTokenResult.Failed).error
-        assertThat((error as StripeCryptoOnrampError).underlyingError)
-            .isInstanceOf(MissingCryptoCustomerException::class.java)
-    }
-
-    fun assertGooglePayTokenCreated() {
-        val state = uiState()
-        assertThat(state.screen).isEqualTo(Screen.AuthenticatedOperations)
-        assertThat(state.selectedPaymentData?.type).isEqualTo(PaymentMethodDisplayData.Type.GooglePay)
-        assertThat(state.cryptoPaymentToken).isNotEmpty()
-    }
-
-    fun uiState(): OnrampUiState {
-        lateinit var state: OnrampUiState
-        activityRule.scenario.onActivity { activity ->
-            state = ViewModelProvider(activity)[OnrampViewModel::class.java].uiState.value
-        }
-        return state
-    }
-
-    fun onrampCoordinator(): OnrampCoordinator {
+    private fun onrampCoordinator(): OnrampCoordinator {
         lateinit var coordinator: OnrampCoordinator
         activityRule.scenario.onActivity { activity ->
             coordinator = ViewModelProvider(activity)[OnrampViewModel::class.java].onrampCoordinator
@@ -165,26 +120,6 @@ internal class OnrampE2EPage(
 ) {
     private val defaultTimeout: Duration = 30.seconds
     private val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-
-    fun waitForLogin() {
-        waitForTag(LOGIN_EMAIL_TAG)
-    }
-
-    fun collectGooglePayBeforeAuthentication() {
-        clickTag(PREAUTH_GOOGLE_PAY_BUTTON_TAG)
-        assertThat(
-            device.wait(Until.hasObject(By.pkg(GOOGLE_PAY_PACKAGE)), defaultTimeout.inWholeMilliseconds)
-        ).isTrue()
-        val payButton = device.wait(
-            Until.findObject(By.pkg(GOOGLE_PAY_PACKAGE).clazz("android.widget.Button").text("Pay")),
-            defaultTimeout.inWholeMilliseconds,
-        )
-        checkNotNull(payButton) { "Google Pay did not show the expected Pay button" }.click()
-
-        waitForTaggedText(PREAUTH_SELECTED_PAYMENT_TAG, "Google Pay selected")
-        composeRule.onNodeWithTag(LOGIN_LOGIN_BUTTON_TAG).assertExists()
-        composeRule.onNodeWithTag(AUTHENTICATED_OPERATIONS_TAG).assertDoesNotExist()
-    }
 
     fun loginAndAuthenticateWithOtp() {
         loginAndAuthenticateWithOtp(E2E_EMAIL, E2E_PASSWORD)
@@ -754,5 +689,3 @@ private const val TEST_NEW_CARD_CVC = "123"
 private const val TEST_CARD_POSTAL_CODE = "94111"
 private const val TEST_SOLANA_WALLET_ADDRESS = "bufoH37MTiMTNAfBS4VEZ94dCEwMsmeSijD2vZRShuV"
 private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
-
-private const val GOOGLE_PAY_PACKAGE = "com.google.android.gms"
