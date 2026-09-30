@@ -424,7 +424,7 @@ class InputAddressViewModelTest {
                         country = "US",
                     )
                 ),
-                eventReporter = eventReporter,
+                eventReporter = StandaloneAddressElementEventReporter(eventReporter),
                 placesClient = placesClient,
             )
 
@@ -465,7 +465,7 @@ class InputAddressViewModelTest {
                         state = "CA",
                     )
                 ),
-                eventReporter = eventReporter,
+                eventReporter = StandaloneAddressElementEventReporter(eventReporter),
                 placesClient = placesClient,
             )
 
@@ -498,7 +498,7 @@ class InputAddressViewModelTest {
             )
             val eventReporter = FakeAddressLauncherEventReporter()
             val viewModel = createViewModel(
-                eventReporter = eventReporter,
+                eventReporter = StandaloneAddressElementEventReporter(eventReporter),
                 placesClient = placesClient,
             )
             val editedAddress = AddressDetails(
