@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
@@ -376,7 +376,7 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `mandate text is shown below primary button when showAbove is false`() {
+    fun `mandate text is shown below error when showAbove is false`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -385,15 +385,16 @@ internal class PaymentOptionsActivityTest {
                 val viewModel = activity.viewModel
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
-                val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                val errorNode = composeTestRule.onNodeWithTag(SHEET_ERROR_TEST_TAG)
 
+                viewModel.onError("error".resolvableString)
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
+                mandateNode.performScrollTo()
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
-                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
-                assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
+                val errorPosition = errorNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isGreaterThan(errorPosition)
 
                 viewModel.mandateHandler.updateMandateText(null, false)
                 mandateNode.assertDoesNotExist()
@@ -402,7 +403,7 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `mandate text is shown above primary button when showAbove is true`() {
+    fun `mandate text is shown above error when showAbove is true`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -411,15 +412,16 @@ internal class PaymentOptionsActivityTest {
                 val viewModel = activity.viewModel
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
-                val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                val errorNode = composeTestRule.onNodeWithTag(SHEET_ERROR_TEST_TAG)
 
+                viewModel.onError("error".resolvableString)
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
+                mandateNode.performScrollTo()
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
-                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
-                assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+                val errorPosition = errorNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isLessThan(errorPosition)
 
                 viewModel.mandateHandler.updateMandateText(null, true)
                 mandateNode.assertDoesNotExist()
@@ -441,7 +443,7 @@ internal class PaymentOptionsActivityTest {
                 val text = "some text"
                 val mandateNode = composeTestRule.onNode(hasText(text))
                 val primaryButtonNode = composeTestRule
-                    .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                    .onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
                 viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
                 mandateNode.performScrollTo()

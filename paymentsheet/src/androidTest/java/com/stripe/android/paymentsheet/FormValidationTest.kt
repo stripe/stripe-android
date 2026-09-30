@@ -15,8 +15,8 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -140,7 +140,7 @@ internal class FormValidationTest(
     private fun clickPrimaryButton() {
         composeTestRule.waitUntilWithIdle {
             composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
+                .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 

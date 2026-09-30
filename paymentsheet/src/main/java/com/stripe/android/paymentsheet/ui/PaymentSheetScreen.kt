@@ -43,11 +43,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.onClick
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.CardBrandFilter
@@ -499,24 +494,8 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val processingState = buyButtonState.convert()
     val isEnabled = uiState?.enabled == true && processingState is PrimaryButtonProcessingState.Idle
 
-    val modifier = Modifier
-        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-        .testTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-        .semantics {
-            role = Role.Button
-
-            if (!isEnabled) {
-                disabled()
-            } else {
-                onClick {
-                    uiState?.onClick?.invoke()
-                    true
-                }
-            }
-        }
-
     Box {
-        Box(modifier = modifier) {
+        Box(modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())) {
             uiState?.let { state ->
                 PrimaryButton(
                     label = state.label.resolve(),

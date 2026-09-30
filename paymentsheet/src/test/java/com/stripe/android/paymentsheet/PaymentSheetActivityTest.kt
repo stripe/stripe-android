@@ -92,7 +92,6 @@ import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
@@ -951,7 +950,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.assertIsDisplayed()
@@ -974,7 +973,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, true)
             mandateNode.assertIsDisplayed()
@@ -1002,7 +1001,7 @@ internal class PaymentSheetActivityTest {
             val text = "some text"
             val mandateNode = composeTestRule.onNode(hasText(text))
             val primaryButtonNode = composeTestRule
-                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
             mandateNode.performScrollTo()
@@ -1155,7 +1154,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity {
             composeTestRule
-                .onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
                 .performClick()
 
             composeTestRule.waitForIdle()
@@ -1186,7 +1185,7 @@ internal class PaymentSheetActivityTest {
             scenario.onActivity {
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(initialSelection)
-                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
 
@@ -1195,13 +1194,13 @@ internal class PaymentSheetActivityTest {
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
 
                 viewModel.transitionToAddPaymentScreen()
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isNull()
-                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<AddAnotherPaymentMethod>()
 
@@ -1209,7 +1208,7 @@ internal class PaymentSheetActivityTest {
 
                 composeTestRule.waitForIdle()
                 assertThat(viewModel.selection.value).isEqualTo(newSelection)
-                composeTestRule.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
                 assertThat(viewModel.navigationHandler.currentScreen.value)
                     .isInstanceOf<SelectSavedPaymentMethods>()
             }

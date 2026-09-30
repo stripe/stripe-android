@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -231,7 +230,7 @@ internal class PaymentSheetPage(
 
         composeTestRule.waitUntilWithIdle("sheet primary button to disappear") {
             composeTestRule
-                .onAllNodesWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .onAllNodesWithTag(PRIMARY_BUTTON_TEST_TAG)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
@@ -242,11 +241,11 @@ internal class PaymentSheetPage(
     fun clickPrimaryButtonWithoutWaitingForDismissal() {
         composeTestRule.waitUntilWithIdle("enabled sheet primary button to appear") {
             composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
+                .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
+        composeTestRule.onNode(hasTestTag(PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
     }
@@ -431,7 +430,7 @@ internal class PaymentSheetPage(
     fun waitUntilVisible() {
         composeTestRule.waitUntilWithIdle {
             composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
@@ -440,7 +439,7 @@ internal class PaymentSheetPage(
     fun waitUntilMissing() {
         composeTestRule.waitUntilWithIdle {
             composeTestRule
-                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
