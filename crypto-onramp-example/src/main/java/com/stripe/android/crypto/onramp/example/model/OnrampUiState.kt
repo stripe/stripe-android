@@ -18,6 +18,8 @@ internal const val KEY_UI_STATE = "onramp_ui_state"
 internal data class OnrampUiState(
     val walletEmail: String?,
     val walletPhone: String?,
+    val walletCountry: String?,
+    val walletFullName: String?,
     val walletRawPhone: String?,
     val screen: Screen = Screen.Loading,
     val email: String = "",

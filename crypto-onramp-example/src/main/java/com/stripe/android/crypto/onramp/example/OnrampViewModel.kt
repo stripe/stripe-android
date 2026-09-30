@@ -106,6 +106,8 @@ internal class OnrampViewModel(
         savedUiState ?: OnrampUiState(
             walletEmail = null,
             walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
             walletRawPhone = null,
             kycResidence = KycResidence.UnitedStates,
         )
@@ -304,6 +306,8 @@ internal class OnrampViewModel(
             OnrampUiState(
                 walletEmail = null,
                 walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
                 walletRawPhone = null,
                 email = it.email,
                 authToken = it.authToken,
@@ -315,6 +319,8 @@ internal class OnrampViewModel(
         } ?: OnrampUiState(
             walletEmail = null,
             walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
             walletRawPhone = null,
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
@@ -410,6 +416,11 @@ internal class OnrampViewModel(
                     it.copy(
                         walletEmail = result.kycInfo?.email,
                         walletPhone = result.kycInfo?.phone,
+                        walletCountry = result.kycInfo?.address?.country,
+                        walletFullName = listOfNotNull(result.kycInfo?.firstName, result.kycInfo?.lastName)
+                            .filter { it.isNotBlank() }
+                            .joinToString(" ")
+                            .takeIf { it.isNotEmpty() },
                         walletRawPhone = result.kycInfo?.rawPhone,
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
@@ -1400,6 +1411,8 @@ internal class OnrampViewModel(
             OnrampUiState(
                 walletEmail = null,
                 walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
                 walletRawPhone = null,
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,

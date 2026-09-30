@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,13 +34,16 @@ import com.stripe.android.crypto.onramp.example.LOGIN_REGISTER_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.PREAUTH_GOOGLE_PAY_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.PREAUTH_SELECTED_PAYMENT_TAG
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
+import com.stripe.android.crypto.onramp.example.ui.components.SamsungPayButton
 
 @Composable
 internal fun LoginSignupScreen(
     onRegister: (String, String) -> Unit,
     onLogin: (String, String) -> Unit,
     onCollectGooglePay: () -> Unit,
+    onCollectSamsungPay: () -> Unit,
     googlePayIsReady: Boolean,
+    samsungPayIsReady: Boolean,
     selectedPaymentLabel: String?,
     walletEmail: String?,
 ) {
@@ -47,8 +52,6 @@ internal fun LoginSignupScreen(
     val focusManager = LocalFocusManager.current
 
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        PreAuthGooglePaySection(onCollectGooglePay, googlePayIsReady, selectedPaymentLabel)
-
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -92,27 +95,45 @@ internal fun LoginSignupScreen(
         ) {
             Text("Register")
         }
+
+        PreAuthPlatformPaySection(
+            onCollectGooglePay = onCollectGooglePay,
+            onCollectSamsungPay = onCollectSamsungPay,
+            googlePayIsReady = googlePayIsReady,
+            samsungPayIsReady = samsungPayIsReady,
+            selectedPaymentLabel = selectedPaymentLabel,
+        )
     }
 }
 
 @Composable
-private fun PreAuthGooglePaySection(
+private fun PreAuthPlatformPaySection(
     onCollectGooglePay: () -> Unit,
+    onCollectSamsungPay: () -> Unit,
     googlePayIsReady: Boolean,
+    samsungPayIsReady: Boolean,
     selectedPaymentLabel: String?,
 ) {
+    Divider(modifier = Modifier.padding(vertical = 24.dp))
+    Text(text = "Platform Pay", style = MaterialTheme.typography.h6)
+    Text(
+        text = selectedPaymentLabel?.let { "$it selected. Continue with login or registration." }
+            ?: "Select a wallet payment method before signing in to Link.",
+        modifier = Modifier
+            .testTag(PREAUTH_SELECTED_PAYMENT_TAG)
+            .padding(vertical = 16.dp),
+    )
     GooglePayButton(
         onClick = onCollectGooglePay,
         enabled = googlePayIsReady,
         modifier = Modifier.testTag(PREAUTH_GOOGLE_PAY_BUTTON_TAG),
     )
-    Text(
-        text = selectedPaymentLabel?.let { "$it selected. Continue with login or registration." }
-            ?: "You can select Google Pay before signing in to Link.",
-        modifier = Modifier
-            .testTag(PREAUTH_SELECTED_PAYMENT_TAG)
-            .padding(vertical = 16.dp),
-    )
+    if (samsungPayIsReady) {
+        SamsungPayButton(
+            onClick = onCollectSamsungPay,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
 }
 
 @Composable
