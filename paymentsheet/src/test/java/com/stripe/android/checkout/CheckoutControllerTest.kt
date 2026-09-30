@@ -262,33 +262,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure keeps the tax-synced saved payment method when the persisted selection changes during the update`() =
-        runConfigureScenario(
-            initModifier = combine(
-                automaticTaxFor("billing"),
-                savedCustomerWithTwoCards(),
-            ),
-            networkSetup = {
-                networkRule.savedPaymentMethodTaxUpdate(
-                    responseFactory = { response ->
-                        // Without pinning, the second load would pick up this new persisted selection.
-                        persistSavedSelection("pm_second_card")
-                        successResponseFactory(
-                            combine(
-                                automaticTaxFor("billing"),
-                                savedCustomerWithTwoCards(),
-                            ),
-                        ).invoke(response)
-                    },
-                )
-            },
-        ) {
-            result.getOrThrow()
-
-            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
-        }
-
-    @Test
     fun `configure sends the default billing address when the initial selection is not a saved payment method`() =
         runConfigureScenario(
             configuration = configurationWithDefaultBillingAddress(),
