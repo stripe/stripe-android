@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
 import com.stripe.android.testing.createComposeCleanupRule
@@ -488,6 +489,7 @@ internal class PaymentMethodLayoutUITest(
             isProcessing = isProcessing,
             selection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
             linkBrand = LinkBrand.Link,
