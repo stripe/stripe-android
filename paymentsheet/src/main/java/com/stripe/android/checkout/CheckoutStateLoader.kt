@@ -36,8 +36,8 @@ internal class CheckoutStateLoader @Inject constructor(
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-    ) {
-        commit(
+    ): CheckoutControllerState {
+        return commit(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
@@ -64,7 +64,7 @@ internal class CheckoutStateLoader @Inject constructor(
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
-    ) {
+    ): CheckoutControllerState {
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
@@ -107,7 +107,7 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = CheckoutControllerState(
+        val state = CheckoutControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
@@ -121,8 +121,10 @@ internal class CheckoutStateLoader @Inject constructor(
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
+        stateHolder.state = state
 
         customerStateHolder.setCustomerState(loadResults.customer)
+        return state
     }
 
     private suspend fun loadPaymentElements(

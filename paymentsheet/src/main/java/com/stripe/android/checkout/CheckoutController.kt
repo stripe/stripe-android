@@ -122,11 +122,10 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                checkoutStateLoader.loadInitial(
+                val initialState = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val initialState = requireNotNull(stateHolder.state)
                 val billingAddress = initialState.paymentSelection
                     ?.billingDetails?.address?.toCheckoutAddress()
                     ?: configurationState.defaults.billingDetails?.address
