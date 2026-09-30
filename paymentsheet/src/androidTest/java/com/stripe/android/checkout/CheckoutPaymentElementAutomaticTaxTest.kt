@@ -275,7 +275,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             configureNetworkSetup = {
                 enqueueSavedPaymentMethodTaxUpdate(
                     automaticTaxResponse(
-                        total = INITIAL_TOTAL,
+                        total = UPDATED_TOTAL,
                         taxStatus = TAX_STATUS_COMPLETE,
                         billingAddressCollection = "auto",
                         hasSavedPaymentMethod = true,
@@ -286,6 +286,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         ) {
             scenario = this
             try {
+                assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 selectCashAppAndAwaitCallback()
                 block()
 
