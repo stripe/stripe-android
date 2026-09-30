@@ -16,9 +16,7 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.model.ConfirmPartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
@@ -29,7 +27,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.DeleteWalletRequestParams
-import com.stripe.android.crypto.onramp.model.FulfillAdditionalKycRequirementRequest
+import com.stripe.android.crypto.onramp.model.FulfillKycRequirementsRequest
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
@@ -67,6 +65,7 @@ import com.stripe.android.utils.filterNotNullValues
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -136,23 +135,25 @@ internal class CryptoApiRepository @Inject constructor(
     /**
      * Submits the data collected for an additional KYC requirement.
      */
-    suspend fun fulfillAdditionalKycRequirement(
-        liquidityProvider: String,
-        documents: List<AdditionalKycDocumentSubmissionRequest>,
-        questionnaire: AdditionalKycQuestionnaireSubmissionRequest?,
-        consumerSessionClientSecret: String,
-    ): Result<AdditionalKycSubmissionResponse> {
-        val request = FulfillAdditionalKycRequirementRequest(
-            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret),
-            liquidityProvider = liquidityProvider,
-            documents = documents,
-            questionnaire = questionnaire,
+    suspend fun fulfillKycRequirements(
+        requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
+        linkSessionKey: String,
+    ): Result<Unit> {
+        val request = FulfillKycRequirementsRequest(
+            requirements = requirements,
         )
 
-        return executePost(
-            url = fulfillAdditionalKycRequirementUrl,
-            paramsJson = Json.encodeToJsonElement(request).jsonObject,
-            responseSerializer = AdditionalKycSubmissionResponse.serializer(),
+        return execute(
+            request = apiRequestFactory.createPost(
+                url = fulfillKycRequirementsUrl,
+                options = ApiRequest.Options(
+                    apiKey = linkSessionKey,
+                    stripeAccount = apiConfigProvider.get().stripeAccountId,
+                    idempotencyKey = null,
+                ),
+                params = request.toParamMap(),
+            ),
+            responseSerializer = Unit.serializer(),
         )
     }
 
@@ -417,7 +418,7 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun getPlatformSettings(
-        cryptoCustomerId: String,
+        cryptoCustomerId: String?,
         countryHint: String?
     ): Result<GetPlatformSettingsResponse> {
         val request = apiRequestFactory.createGet(
@@ -439,14 +440,16 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun createPaymentToken(
         cryptoCustomerId: String,
         paymentMethod: String,
+        countryHint: String?,
     ): Result<CreatePaymentTokenResponse> {
         val params = CreatePaymentTokenRequest(
             cryptoCustomerId = cryptoCustomerId,
             paymentMethod = paymentMethod,
+            countryHint = countryHint,
         )
         return executePost(
             url = paymentToken,
-            paramsJson = json.encodeToJsonElement(params).jsonObject,
+            paramsJson = JsonObject(json.encodeToJsonElement(params).jsonObject.filterValues { it != JsonNull }),
             responseSerializer = CreatePaymentTokenResponse.serializer()
         )
     }
@@ -716,10 +719,10 @@ internal class CryptoApiRepository @Inject constructor(
             get() = getApiUrl("crypto/internal/kyc_requirements")
 
         /**
-         * @return `https://api.stripe.com/v1/crypto/internal/fulfill_additional_kyc_requirement`
+         * @return `https://api.stripe.com/v1/crypto/internal/fulfill_kyc_requirements`
          */
-        internal val fulfillAdditionalKycRequirementUrl: String
-            get() = getApiUrl("crypto/internal/fulfill_additional_kyc_requirement")
+        internal val fulfillKycRequirementsUrl: String
+            get() = getApiUrl("crypto/internal/fulfill_kyc_requirements")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`

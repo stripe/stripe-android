@@ -95,10 +95,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
+            // Emits twice: once through displayedSavedPaymentMethod, then from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
         }
     }
@@ -120,10 +123,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
+            // Entering or leaving Pending emits twice: once through displayedSavedPaymentMethod, then
+            // from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
             assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
