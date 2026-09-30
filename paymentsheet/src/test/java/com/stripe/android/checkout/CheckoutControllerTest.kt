@@ -213,7 +213,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `configure fails without committing state when the initial saved payment method tax update fails`() =
+    fun `configure keeps the initial session when the saved payment method tax update fails`() =
         runConfigureScenario(
             initModifier = combine(
                 automaticTaxFor("billing"),
@@ -227,8 +227,8 @@ internal class CheckoutControllerTest {
             },
         ) {
             assertThat(result.isFailure).isTrue()
-            assertThat(committedState).isNull()
-            assertThat(controller.session.value).isNull()
+            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
 
     @Test

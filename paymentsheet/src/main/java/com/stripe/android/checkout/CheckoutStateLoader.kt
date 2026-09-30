@@ -33,57 +33,15 @@ internal class CheckoutStateLoader @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
-    /**
-     * @param initialSelection kept when still valid, so the committed selection matches the one
-     * [loadInitialSelection] resolved before [checkoutSessionResponse] was updated.
-     */
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-        initialSelection: PaymentSelection?,
     ) {
         commit(
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
-            carryForward = CarryForward.initial(previousSelection = initialSelection),
-        )
-    }
-
-    /**
-     * Resolves the initial selection for [checkoutSessionResponse] as [loadInitial] would choose it,
-     * without committing checkout state.
-     */
-    suspend fun loadInitialSelection(
-        configuration: CheckoutController.Configuration.State,
-        checkoutSessionResponse: CheckoutSessionResponse,
-    ): PaymentSelection? {
-        val collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse)
-        val embeddedConfig = embeddedConfigurationFactory.create(
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedDetails = collectedDetails,
-        )
-        val loadResults = loadPaymentElements(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                checkoutSessionResponse.id,
-                checkoutSessionResponse,
-            ),
-            embeddedConfiguration = embeddedConfig,
-            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
-            expressCheckoutElementConfiguration = null,
-        )
-        return selectionChooser.choose(
-            paymentMethodMetadata = loadResults.paymentMethodMetadata,
-            paymentMethods = loadResults.customer?.paymentMethods,
-            previousSelection = null,
-            newSelection = loadResults.paymentSelection,
-            newConfiguration = commonConfigurationFactory.create(
-                configuration = configuration,
-                checkoutSessionResponse = checkoutSessionResponse,
-                collectedDetails = collectedDetails,
-            ),
-            formSheetAction = embeddedConfig.formSheetAction,
+            carryForward = CarryForward.initial(),
         )
     }
 
@@ -230,9 +188,9 @@ internal class CheckoutStateLoader @Inject constructor(
         val linkEagerPresentationSuppressed: Boolean,
     ) {
         companion object {
-            fun initial(previousSelection: PaymentSelection?) = CarryForward(
+            fun initial() = CarryForward(
                 cachedFlagImages = null,
-                previousSelection = previousSelection,
+                previousSelection = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,

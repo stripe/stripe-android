@@ -75,7 +75,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
 ) {
     /**
-     * The latest [Session] data, or `null` until [configure] has completed successfully.
+     * The latest [Session] data, or `null` until [configure] has loaded the initial payment UI.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session
@@ -96,8 +96,10 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Loads the Checkout Session identified by [clientSecret] and prepares the
-     * payment UI, populating [session] on success.
+     * Loads the Checkout Session identified by [clientSecret] and prepares the payment UI.
+     * For billing-tax sessions with saved payment methods, the initial session is published after
+     * its first payment UI load. If the subsequent billing-address tax update fails, this method
+     * returns failure while leaving that session observable.
      *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
@@ -120,17 +122,22 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val initialSelection = if (
+                val stateLoadedBeforeTaxUpdate = if (
                     response.collectsTaxFromBillingAddress && !response.customer?.paymentMethods.isNullOrEmpty()
                 ) {
-                    checkoutStateLoader.loadInitialSelection(
+                    checkoutStateLoader.loadInitial(
                         configuration = configurationState,
                         checkoutSessionResponse = response,
                     )
+                    requireNotNull(stateHolder.state)
                 } else {
                     null
                 }
-                val billingAddress = initialBillingAddress(configurationState, response, initialSelection)
+                val billingAddress = initialBillingAddress(
+                    configurationState,
+                    response,
+                    stateLoadedBeforeTaxUpdate?.paymentSelection,
+                )
                 val updatedResponse = if (billingAddress != null) {
                     checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
@@ -140,11 +147,16 @@ class CheckoutController @Inject internal constructor(
                 } else {
                     response
                 }
-                checkoutStateLoader.loadInitial(
-                    configuration = configurationState,
-                    checkoutSessionResponse = updatedResponse,
-                    initialSelection = initialSelection,
-                )
+                if (stateLoadedBeforeTaxUpdate == null) {
+                    checkoutStateLoader.loadInitial(
+                        configuration = configurationState,
+                        checkoutSessionResponse = updatedResponse,
+                    )
+                } else if (updatedResponse !== response) {
+                    checkoutStateLoader.reload(
+                        stateLoadedBeforeTaxUpdate.copy(checkoutSessionResponse = updatedResponse),
+                    )
+                }
             }
         }
     }
