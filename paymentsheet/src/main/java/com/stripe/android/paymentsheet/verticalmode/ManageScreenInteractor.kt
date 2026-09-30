@@ -111,7 +111,7 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val onSelectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Result<Unit>,
+    private val onSelectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
@@ -163,10 +163,7 @@ internal class DefaultManageScreenInteractor(
     init {
         coroutineScope.launch {
             state.collect { state ->
-                // Idle only: a failed selection must not retry itself on the next state emission.
-                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1 &&
-                    state.selectionState == SavedPaymentMethodSelectionState.Idle
-                ) {
+                if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
                 }
             }
@@ -200,9 +197,8 @@ internal class DefaultManageScreenInteractor(
         }
 
         selectionJob = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            onSelectPaymentMethod(paymentMethod).onSuccess {
-                safeNavigateBack(true)
-            }
+            onSelectPaymentMethod(paymentMethod)
+            safeNavigateBack(true)
         }
     }
 
@@ -230,7 +226,6 @@ internal class DefaultManageScreenInteractor(
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                     viewModel.updateSelection(savedPmSelection)
                     viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
-                    Result.success(Unit)
                 },
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->

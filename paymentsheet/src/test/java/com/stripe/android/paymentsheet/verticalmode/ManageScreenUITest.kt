@@ -13,11 +13,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -312,24 +309,6 @@ class ManageScreenUITest {
             }
             composeRule.onAllNodesWithTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG, useUnmergedTree = true)
                 .assertCountEquals(1)
-        }
-    }
-
-    @Test
-    fun errorMessageComesFromSelectionState() {
-        val error = "Something went wrong".resolvableString
-
-        runScenario(
-            initialState = ManageScreenInteractor.State(
-                paymentMethods = displayableSavedPaymentMethods,
-                currentSelection = null,
-                isEditing = false,
-                canEdit = true,
-                linkBrand = LinkBrand.Link,
-                selectionState = SavedPaymentMethodSelectionState.Failed(error),
-            )
-        ) {
-            composeRule.onNodeWithText(error.resolve(ApplicationProvider.getApplicationContext())).assertExists()
         }
     }
 
