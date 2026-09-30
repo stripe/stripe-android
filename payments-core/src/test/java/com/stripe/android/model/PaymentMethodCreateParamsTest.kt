@@ -148,6 +148,12 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createGoPay() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createGoPay().toParamMap())
+            .containsExactly("type", "gopay")
+    }
+
+    @Test
     fun `createKakaoPay() without billing details creates expected map`() {
         assertThat(PaymentMethodCreateParams.createKakaoPay().toParamMap())
             .isEqualTo(mapOf("type" to "kakao_pay"))
