@@ -158,15 +158,14 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Sets or clears the shipping address for this checkout.
+     * Sets the shipping address for this checkout.
      *
      * The address is stored locally and used when presenting payment UI. If automatic tax is
      * enabled and the tax address source is shipping, the address is also sent to the server
-     * to compute updated tax amounts. Clearing the address retains its previous country for tax
-     * calculation when shipping is the tax address source.
+     * to compute updated tax amounts.
      *
-     * @param name The recipient's name. Ignored when [address] is `null`.
-     * @param address The shipping address, or `null` to clear the shipping name and address.
+     * @param name The recipient's name.
+     * @param address The shipping address.
      */
     suspend fun updateShippingAddress(
         name: String?,
