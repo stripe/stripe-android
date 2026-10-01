@@ -37,13 +37,22 @@ internal class SamsungPaySheetFactory(
         )
     }
 
-    fun buildPaymentInfo(presentation: SamsungPayPresentation): Any {
+    fun buildPaymentInfo(presentation: SamsungPayPresentation, onSheetUpdated: (Any) -> Unit): Any {
         val customSheet = reflection.newInstance(SamsungPaySdkClassNames.CUSTOM_SHEET)
         reflection.invoke(
             customSheet,
             "addControl",
             reflection.loadClass(SamsungPaySdkClassNames.SHEET_CONTROL) to buildAmountControl(presentation),
         )
+
+        if (configuration.collectContactInformation) {
+            reflection.invoke(
+                customSheet,
+                "addControl",
+                reflection.loadClass(SamsungPaySdkClassNames.SHEET_CONTROL) to
+                    SamsungPayContactInfo(reflection).buildControl(onSheetUpdated),
+            )
+        }
 
         val builder = reflection.newInstance(SamsungPaySdkClassNames.CUSTOM_SHEET_PAYMENT_INFO_BUILDER)
         configuration.merchantId?.let { merchantId ->
@@ -59,7 +68,10 @@ internal class SamsungPaySheetFactory(
             builder,
             "setAddressInPaymentSheet",
             reflection.loadClass(SamsungPaySdkClassNames.ADDRESS_IN_PAYMENT_SHEET) to
-                reflection.enumConstant(SamsungPaySdkClassNames.ADDRESS_IN_PAYMENT_SHEET, "DO_NOT_SHOW"),
+                reflection.enumConstant(
+                    SamsungPaySdkClassNames.ADDRESS_IN_PAYMENT_SHEET,
+                    if (configuration.collectContactInformation) "NEED_BILLING_SPAY" else "DO_NOT_SHOW",
+                ),
         )
         reflection.invoke(builder, "setAllowedCardBrands", List::class.java to allowedCardBrands())
         reflection.invoke(
