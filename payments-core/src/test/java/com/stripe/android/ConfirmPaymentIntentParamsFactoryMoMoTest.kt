@@ -1,8 +1,10 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryMoMoTest {
@@ -12,6 +14,21 @@ class ConfirmPaymentIntentParamsFactoryMoMoTest {
             paymentMethodType = PaymentMethod.Type.MoMo,
             requiresMandateFromCreateParams = true,
             optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when payment method options are for future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.MoMo,
+            requiresMandateFromCreateParams = false,
+            optionsParams = PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.MoMo,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            ),
             intentConfigSetupFutureUsage = null,
         )
 
