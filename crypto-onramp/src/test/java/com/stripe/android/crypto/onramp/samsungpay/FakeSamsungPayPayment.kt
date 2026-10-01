@@ -16,7 +16,10 @@ class CustomSheetPaymentInfo private constructor(
     val customSheet: CustomSheet?,
     val extraPaymentInfo: Bundle?,
 ) {
+    var paymentShippingAddress: FakeSamsungContactAddress? = null
+
     enum class AddressInPaymentSheet {
+        NEED_SHIPPING_SPAY,
         DO_NOT_SHOW,
     }
 

@@ -48,7 +48,7 @@ internal object OnrampConfigurationFactory {
             .samsungPayConfig(
                 OnrampConfiguration.SamsungPayConfig(
                     serviceId = SAMSUNG_PAY_SERVICE_ID,
-                )
+                ).collectContactInformation(true)
             )
     }
 }

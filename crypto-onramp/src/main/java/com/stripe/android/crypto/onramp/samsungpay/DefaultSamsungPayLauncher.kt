@@ -32,7 +32,7 @@ internal class DefaultSamsungPayLauncherFactory(
 
 internal class DefaultSamsungPayLauncher(
     private val context: Context,
-    configuration: OnrampConfiguration.SamsungPayConfig,
+    private val configuration: OnrampConfiguration.SamsungPayConfig,
     merchantDisplayName: String,
     private val trackAnalyticsEvent: (OnrampAnalyticsEvent) -> Unit,
     classProvider: SamsungPayClassProvider,
@@ -135,7 +135,6 @@ internal class DefaultSamsungPayLauncher(
             return
         }
         val active = ActivePresentation(callback).also { activePresentation = it }
-
         reflection.runOperation("presenting Samsung Pay") {
             sheetFactory.validateConfiguration()
             val paymentManager = reflection.newInstance(
@@ -155,7 +154,9 @@ internal class DefaultSamsungPayLauncher(
                 paymentManager,
                 "startInAppPayWithCustomSheet",
                 reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET_PAYMENT_INFO) to
-                    sheetFactory.buildPaymentInfo(presentation),
+                    sheetFactory.buildPaymentInfo(presentation) { sheet ->
+                        updateSheet(paymentManager, sheet)
+                    },
                 listenerClass to listener,
             )
             trackAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayPresented)
@@ -275,6 +276,14 @@ internal class DefaultSamsungPayLauncher(
         )
     }
 
+    private fun updateSheet(paymentManager: Any, sheet: Any) {
+        reflection.invoke(
+            paymentManager,
+            "updateSheet",
+            reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET) to sheet,
+        )
+    }
+
     private fun handlePaymentSuccess(
         active: ActivePresentation,
         arguments: Array<out Any?>?,
@@ -288,7 +297,12 @@ internal class DefaultSamsungPayLauncher(
             )
         }
         trackAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
-        completePresentation(active, SamsungPayResult.Completed(credential))
+        val kycInfo = if (configuration.collectContactInformation) {
+            arguments?.getOrNull(0)?.let { SamsungPayContactInfo(reflection).read(it) }
+        } else {
+            null
+        }
+        completePresentation(active, SamsungPayResult.Completed(credential, kycInfo))
     }
 
     private fun handlePaymentFailure(

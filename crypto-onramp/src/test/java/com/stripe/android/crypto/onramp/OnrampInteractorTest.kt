@@ -37,6 +37,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -312,7 +313,7 @@ class OnrampInteractorTest {
         interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
         whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_us"))
             .thenReturn(Result.success(createCardPaymentMethod()))
-        interactor.handleSamsungPayPaymentResult(SamsungPayResult.Completed("credential"), "pk_us")
+        interactor.handleSamsungPayPaymentResult(SamsungPayResult.Completed("credential", kycInfo = null), "pk_us")
         whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
             .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
 
@@ -444,7 +445,7 @@ class OnrampInteractorTest {
             .thenReturn(Result.success(paymentMethod))
 
         val result = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("credential"), "pk_platform"
+            SamsungPayResult.Completed("credential", kycInfo = null), "pk_platform"
         ) as OnrampCollectPaymentMethodResult.Completed
 
         assertThat(result.kycInfo?.email).isEqualTo("user@example.com")
@@ -1586,7 +1587,7 @@ class OnrampInteractorTest {
 
         val platformPublishableKey = interactor.getOrFetchPlatformKey().getOrThrow()
         val collectionResult = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("{\"method\":\"3DS\"}"),
+            SamsungPayResult.Completed("{\"method\":\"3DS\"}", kycInfo = null),
             platformPublishableKey = platformPublishableKey,
         )
         val tokenResult = interactor.createCryptoPaymentToken()
@@ -1617,6 +1618,23 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Samsung Pay contact data reaches the client independently of PaymentMethod billing details`() = runTest {
+        val contact = KycInfo(
+            firstName = "Wallet", lastName = "Tester", idNumber = null,
+            idType = IdType.SocialSecurityNumber, dateOfBirth = null, address = null,
+            email = "wallet@example.com", phone = "+12125551234", rawPhone = "(212) 555-1234",
+        )
+        whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_platform"))
+            .thenReturn(Result.success(createCardPaymentMethod()))
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("credential", kycInfo = contact), "pk_platform",
+        ) as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(result.kycInfo).isSameInstanceAs(contact)
+    }
+
+    @Test
     fun `Samsung Pay cancellation returns canceled without creating PaymentMethod`() = runTest {
         val result = interactor.handleSamsungPayPaymentResult(
             SamsungPayResult.Canceled,
@@ -1631,7 +1649,7 @@ class OnrampInteractorTest {
     @Test
     fun `Samsung Pay completion without platform key fails without creating PaymentMethod`() = runTest {
         val result = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("credential"),
+            SamsungPayResult.Completed("credential", kycInfo = null),
             platformPublishableKey = null,
         )
 
@@ -1686,7 +1704,7 @@ class OnrampInteractorTest {
         ).thenReturn(Result.failure(backendError))
 
         val result = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("credential"),
+            SamsungPayResult.Completed("credential", kycInfo = null),
             platformPublishableKey = "pk_platform_123",
         )
 

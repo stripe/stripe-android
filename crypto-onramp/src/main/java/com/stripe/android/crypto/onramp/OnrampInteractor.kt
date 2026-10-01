@@ -947,7 +947,7 @@ internal class OnrampInteractor @Inject constructor(
                     onSuccess = { paymentMethod ->
                         handleSamsungPayPaymentMethod(paymentMethod, platformPublishableKey) { displayData ->
                             OnrampCollectPaymentMethodResult.Completed(
-                                displayData, kycInfo = paymentMethod.platformPayKycInfo()
+                                displayData, kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo()
                             )
                         }
                     },

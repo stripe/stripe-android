@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Crypto Onramp
+* [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
 * [Changed] Crypto Onramp wallet collection returns contact-only `KycInfo` when available, including email, validated E.164 phone, and the original phone string.
 * [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
 * [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.

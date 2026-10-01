@@ -104,7 +104,19 @@ class OnrampConfiguration {
             CardBrand.AmericanExpress,
             CardBrand.Discover,
         ),
-    )
+    ) {
+        internal var collectContactInformation: Boolean = false
+            private set
+
+        /**
+         * Requests name, address, email, and phone through Samsung Pay's shipping contact control.
+         * Returned fields are optional prefill data in [KycInfo], not verified billing or KYC data.
+         * Disabled by default.
+         */
+        fun collectContactInformation(enabled: Boolean) = apply {
+            collectContactInformation = enabled
+        }
+    }
 
     /**
      * Additional wrapper SDK versions to include in developer diagnostics, such as the

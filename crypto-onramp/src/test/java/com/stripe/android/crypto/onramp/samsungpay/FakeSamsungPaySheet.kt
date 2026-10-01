@@ -45,3 +45,35 @@ class AmountConstants private constructor() {
         const val FORMAT_TOTAL_PRICE_ONLY = "_price_only_"
     }
 }
+
+class AddressControl(val id: String, val type: SheetItemType) : SheetControl() {
+    var displayOption: Int = 0
+    var sheetUpdatedListener: SheetUpdatedListener? = null
+}
+
+enum class SheetItemType { SHIPPING_ADDRESS }
+
+fun interface SheetUpdatedListener {
+    fun onResult(controlId: String, sheet: CustomSheet)
+}
+
+class AddressConstants private constructor() {
+    companion object {
+        const val DISPLAY_OPTION_ADDRESSEE = 1
+        const val DISPLAY_OPTION_ADDRESS = 2
+        const val DISPLAY_OPTION_PHONE_NUMBER = 4
+        const val DISPLAY_OPTION_EMAIL = 8
+    }
+}
+
+class FakeSamsungContactAddress(
+    val addressee: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val countryCode: String? = null,
+    val addressLine1: String? = null,
+    val addressLine2: String? = null,
+    val city: String? = null,
+    val state: String? = null,
+    val postalCode: String? = null,
+)

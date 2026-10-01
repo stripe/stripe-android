@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.samsungpay
 import android.content.Context
 import androidx.annotation.MainThread
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 
 internal interface SamsungPayLauncher {
@@ -60,7 +61,7 @@ internal sealed interface SamsungPayStatus {
 }
 
 internal sealed interface SamsungPayResult {
-    data class Completed(val paymentCredential: String) : SamsungPayResult
+    data class Completed(val paymentCredential: String, val kycInfo: KycInfo?) : SamsungPayResult
 
     data object Canceled : SamsungPayResult
 

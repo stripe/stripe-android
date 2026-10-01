@@ -88,9 +88,14 @@ normalize national phone numbers. In `OnrampCollectPaymentMethodResult.Completed
 - Name and billing address continue to be returned when available. Contact-only responses now
   produce `KycInfo`; a response without any usable fields still returns `null`.
 
-Contact fields are optional and are not included in `attachKycInfo` submissions. Samsung Pay uses
-this same mapping if its resulting PaymentMethod contains billing details; its credential exchange
-does not request contact fields, so callers must handle absent information.
+Email and phone fields are optional and are not included in `attachKycInfo` submissions.
+For Samsung Pay, opt in with `SamsungPayConfig(...).collectContactInformation(true)`.
+This adds Samsung's shipping contact control to request name, address, email, and phone for prefill.
+The returned contact is not a verified billing address or proof of KYC. Samsung country codes are
+converted to two-letter codes and phone numbers use the same E.164/raw-phone contract as Google Pay.
+Fields may be absent; collect missing information in your own UI. Contact collection is disabled
+by default, preserving the existing payment sheet. Without a returned contact, any billing details
+on the resulting PaymentMethod are still mapped.
 
 After wallet collection, use the returned email with `hasLinkAccount`. For a new user, collect any
 missing required details and call `registerLinkUser(LinkUserInfo(...))`, followed by the required KYC
