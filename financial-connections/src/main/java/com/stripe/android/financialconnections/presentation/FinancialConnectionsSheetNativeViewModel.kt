@@ -349,7 +349,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                 when {
                     session.isCustomManualEntryError() -> {
-                        eventTracker.emitEvent(Name.MANUAL_ENTRY_INITIATED, Metadata())
+                        eventTracker.emitEvent(Name.MANUAL_ENTRY_INITIATED)
                         finishWithResult(
                             Failed(error = CustomManualEntryRequiredError())
                         )
@@ -368,7 +368,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
 
                     else -> {
-                        eventTracker.emitEvent(Name.CANCEL, Metadata())
+                        eventTracker.emitEvent(Name.CANCEL)
                         finishWithResult(Canceled)
                     }
                 }

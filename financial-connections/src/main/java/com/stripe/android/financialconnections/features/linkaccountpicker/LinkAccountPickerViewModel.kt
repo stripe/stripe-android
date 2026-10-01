@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -279,7 +278,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         )
         val nextPane = response.nextPane ?: SUCCESS
 
-        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED, metadata = Metadata())
+        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED)
         navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 

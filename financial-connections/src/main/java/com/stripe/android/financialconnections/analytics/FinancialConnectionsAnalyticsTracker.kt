@@ -18,8 +18,11 @@ import kotlinx.coroutines.launch
  * Event tracker for Financial Connections.
  */
 internal interface FinancialConnectionsAnalyticsTracker {
+    /** Records an SDK diagnostic event that is not exposed to the merchant. */
     fun track(event: FinancialConnectionsAnalyticsEvent)
-    fun emitEvent(name: Name, metadata: Metadata)
+
+    /** Emits a merchant-facing event and records the corresponding delivery analytics. */
+    fun emitEvent(name: Name, metadata: Metadata? = null)
 }
 
 internal fun FinancialConnectionsAnalyticsTracker.logError(
@@ -90,8 +93,8 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
         }
     }
 
-    override fun emitEvent(name: Name, metadata: Metadata) {
-        eventEmitter.emit(name, metadata)
+    override fun emitEvent(name: Name, metadata: Metadata?) {
+        eventEmitter.emit(name, metadata ?: Metadata())
     }
 
     internal companion object {

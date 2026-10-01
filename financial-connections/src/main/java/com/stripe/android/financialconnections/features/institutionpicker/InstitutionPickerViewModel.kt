@@ -180,7 +180,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                         resultCount = result.data.count()
                     )
                 )
-                eventTracker.emitEvent(Name.SEARCH_INITIATED, Metadata())
+                eventTracker.emitEvent(Name.SEARCH_INITIATED)
                 result
             } else {
                 InstitutionResponse(

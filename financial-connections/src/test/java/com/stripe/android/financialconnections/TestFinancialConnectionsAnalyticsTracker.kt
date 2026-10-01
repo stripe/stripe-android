@@ -16,8 +16,8 @@ internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAn
         sentEvents += event
     }
 
-    override fun emitEvent(name: Name, metadata: Metadata) {
-        publicEvents.add(PublicEvent(name, metadata))
+    override fun emitEvent(name: Name, metadata: Metadata?) {
+        publicEvents.add(PublicEvent(name, metadata ?: Metadata()))
     }
 
     data class PublicEvent(val name: Name, val metadata: Metadata)

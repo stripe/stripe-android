@@ -216,8 +216,7 @@ internal class FinancialConnectionsOnEventIntegrationTest {
                 nativeAuthFlowCoordinator = NativeAuthFlowCoordinator(),
                 initialState = FinancialConnectionsSheetState(ForData(configuration), null).copy(
                     manifest = restoredManifest
-                ),
-                ioDispatcher = dispatcher
+                )
             ).also(viewModelStoreRule::track)
             testScheduler.runCurrent()
             Scenario(viewModel, networkClient, analyticsSender, publicEvents).block()

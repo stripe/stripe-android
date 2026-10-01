@@ -1045,7 +1045,6 @@ class FinancialConnectionsSheetViewModelTest {
             integrityRequestManager = integrityRequestManager,
             integrityVerdictManager = mock(),
             logger = Logger.noop(),
-            ioDispatcher = testDispatcher,
         ).also { viewModelStoreRule.track(it) }
     }
 }

@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickChooseAnotherBank
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PrepaneClickContinue
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -454,7 +453,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             } else {
                 AccountPicker(referrer = pane)
             }
-            eventTracker.emitEvent(Name.INSTITUTION_AUTHORIZED, Metadata())
+            eventTracker.emitEvent(Name.INSTITUTION_AUTHORIZED)
             navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(

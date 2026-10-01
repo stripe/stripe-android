@@ -34,7 +34,10 @@ internal class FinancialConnectionsEventEmitter @Inject constructor(
         // Preserve the event's session even if the cached manifest changes before delivery.
         GlobalScope.launch(workContext) {
             runCatching {
-                analyticsSender.send(FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event), manifest)
+                analyticsSender.send(
+                    FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, manifest.nextPane),
+                    manifest
+                )
             }.onFailure {
                 // Analytics failures are not failures of the user's connection flow.
                 logger.error("Error recording public Financial Connections event", it)

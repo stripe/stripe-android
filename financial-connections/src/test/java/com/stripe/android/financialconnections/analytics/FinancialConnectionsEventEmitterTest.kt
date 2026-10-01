@@ -104,6 +104,8 @@ internal class FinancialConnectionsEventEmitterTest {
                 """{"institutionName":"Test Bank","manualEntry":false,"errorCode":"no_eligible_accounts"}"""
             )
         )
+        assertThat(call.event.params?.get("context_source")).isEqualTo("native_sdk")
+        assertThat(call.event.params?.get("context_pane")).isEqualTo(call.manifest.nextPane.value)
     }
 
     @Test

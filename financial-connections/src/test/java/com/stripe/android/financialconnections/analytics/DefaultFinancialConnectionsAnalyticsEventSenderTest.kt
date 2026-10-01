@@ -30,7 +30,10 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         val manifest = ApiKeyFixtures.sessionManifest().copy(id = "fcsess_analytics")
         val event = FinancialConnectionsEvent(Name.OPEN, Metadata(), manifest.id)
 
-        sender.send(FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event), manifest)
+        sender.send(
+            FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, manifest.nextPane),
+            manifest
+        )
 
         val request = requests.awaitItem()
         assertThat(request.eventName).isEqualTo("linked_accounts.external_on_event.emitted")
@@ -44,6 +47,8 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         val payload = Json.parseToJsonElement(params.getValue("event_payload").jsonPrimitive.content).jsonObject
         assertThat(payload.getValue("name").jsonPrimitive.content).isEqualTo("open")
         assertThat(payload.getValue("financialConnectionsSessionId").jsonPrimitive.content).isEqualTo(manifest.id)
+        assertThat(params.getValue("context_source").jsonPrimitive.content).isEqualTo("native_sdk")
+        assertThat(params.getValue("context_pane").jsonPrimitive.content).isEqualTo(manifest.nextPane.value)
         requests.ensureAllEventsConsumed()
     }
 

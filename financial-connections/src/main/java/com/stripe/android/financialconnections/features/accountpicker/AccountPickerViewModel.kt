@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -305,7 +304,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
         }
-        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED, metadata = Metadata())
+        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
                 submitAccounts(

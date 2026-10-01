@@ -63,9 +63,6 @@ import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
 import com.stripe.android.financialconnections.utils.InstantDebitsResultBuilder
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -88,7 +85,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val initialState: FinancialConnectionsSheetState,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -187,7 +183,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
             )
         } else {
-            analyticsTracker.emitEvent(name = Name.OPEN, metadata = Metadata())
+            analyticsTracker.emitEvent(name = Name.OPEN)
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(
@@ -202,7 +198,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     )
                 }
             } else {
-                analyticsTracker.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER, metadata = Metadata())
+                analyticsTracker.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
                 setState {
                     copy(
                         manifest = manifest,
@@ -525,8 +521,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // Native emits its own events before finishing.
         if (fromNative.not()) {
             when (result) {
-                is Completed -> analyticsTracker.emitEvent(Name.SUCCESS, Metadata())
-                is Canceled -> analyticsTracker.emitEvent(Name.CANCEL, Metadata())
+                is Completed -> analyticsTracker.emitEvent(Name.SUCCESS)
+                is Canceled -> analyticsTracker.emitEvent(Name.CANCEL)
                 is Failed -> analyticsTracker.emitEvent(
                     name = Name.ERROR,
                     metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
@@ -536,14 +532,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 
-    @Suppress("OPT_IN_USAGE")
     private fun reportResult(result: FinancialConnectionsSheetActivityResult) {
         val sessionId = eventContext.manifest?.id ?: return
-        // We use the global scope to make sure that we can finish sending the event
-        // even if the ViewModel is cleared.
-        GlobalScope.launch(ioDispatcher) {
-            eventReporter.onResult(sessionId, result)
-        }
+        eventReporter.onResult(sessionId, result)
     }
 
     /**

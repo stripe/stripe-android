@@ -24,7 +24,8 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
 
     class ExternalOnEventEmitted(
-        event: FinancialConnectionsEvent
+        event: FinancialConnectionsEvent,
+        pane: Pane,
     ) : FinancialConnectionsAnalyticsEvent(
         name = "external_on_event.emitted",
         params = mapOf(
@@ -36,7 +37,9 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
                     put("manualEntry", event.metadata.manualEntry)
                     put("errorCode", event.metadata.errorCode?.value)
                 }
-            }.toString()
+            }.toString(),
+            "context_source" to "native_sdk",
+            "context_pane" to pane.value,
         )
     )
 
