@@ -70,7 +70,7 @@ internal class SamsungPaySheetFactory(
             reflection.loadClass(SamsungPaySdkClassNames.ADDRESS_IN_PAYMENT_SHEET) to
                 reflection.enumConstant(
                     SamsungPaySdkClassNames.ADDRESS_IN_PAYMENT_SHEET,
-                    if (configuration.collectContactInformation) "NEED_SHIPPING_SPAY" else "DO_NOT_SHOW",
+                    if (configuration.collectContactInformation) "NEED_BILLING_SPAY" else "DO_NOT_SHOW",
                 ),
         )
         reflection.invoke(builder, "setAllowedCardBrands", List::class.java to allowedCardBrands())

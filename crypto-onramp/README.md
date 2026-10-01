@@ -90,8 +90,8 @@ normalize national phone numbers. In `OnrampCollectPaymentMethodResult.Completed
 
 Email and phone fields are optional and are not included in `attachKycInfo` submissions.
 For Samsung Pay, opt in with `SamsungPayConfig(...).collectContactInformation(true)`.
-This adds Samsung's shipping contact control to request name, address, email, and phone for prefill.
-The returned contact is not a verified billing address or proof of KYC. Samsung country codes are
+This adds Samsung's billing address control and uses the returned address and any available name,
+email, and phone for prefill. The returned contact is not proof of KYC. Samsung country codes are
 converted to two-letter codes and phone numbers use the same E.164/raw-phone contract as Google Pay.
 Fields may be absent; collect missing information in your own UI. Contact collection is disabled
 by default, preserving the existing payment sheet. Without a returned contact, any billing details

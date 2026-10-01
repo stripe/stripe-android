@@ -109,8 +109,8 @@ class OnrampConfiguration {
             private set
 
         /**
-         * Requests name, address, email, and phone through Samsung Pay's shipping contact control.
-         * Returned fields are optional prefill data in [KycInfo], not verified billing or KYC data.
+         * Requests Samsung Pay's billing address and any available name, email, and phone.
+         * Returned fields are optional prefill data in [KycInfo], not verified identity data.
          * Disabled by default.
          */
         fun collectContactInformation(enabled: Boolean) = apply {

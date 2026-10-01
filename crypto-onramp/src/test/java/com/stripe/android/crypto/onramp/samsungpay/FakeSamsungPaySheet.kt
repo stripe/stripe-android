@@ -5,6 +5,9 @@ open class SheetControl
 class CustomSheet {
     val controls = mutableListOf<SheetControl>()
 
+    fun getSheetControl(id: String): SheetControl? =
+        controls.filterIsInstance<AddressControl>().firstOrNull { it.id == id }
+
     fun addControl(control: SheetControl) {
         controls += control
     }
@@ -47,23 +50,14 @@ class AmountConstants private constructor() {
 }
 
 class AddressControl(val id: String, val type: SheetItemType) : SheetControl() {
-    var displayOption: Int = 0
+    var address: FakeSamsungContactAddress? = null
     var sheetUpdatedListener: SheetUpdatedListener? = null
 }
 
-enum class SheetItemType { SHIPPING_ADDRESS }
+enum class SheetItemType { BILLING_ADDRESS }
 
 fun interface SheetUpdatedListener {
     fun onResult(controlId: String, sheet: CustomSheet)
-}
-
-class AddressConstants private constructor() {
-    companion object {
-        const val DISPLAY_OPTION_ADDRESSEE = 1
-        const val DISPLAY_OPTION_ADDRESS = 2
-        const val DISPLAY_OPTION_PHONE_NUMBER = 4
-        const val DISPLAY_OPTION_EMAIL = 8
-    }
 }
 
 class FakeSamsungContactAddress(

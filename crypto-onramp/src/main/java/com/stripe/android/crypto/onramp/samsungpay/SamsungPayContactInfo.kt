@@ -6,19 +6,15 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import java.util.Locale
 
-/** Samsung's shipping contact is used only for prefill, never as verified card billing details. */
+/** Samsung's billing contact is used only for prefill, never as verified identity. */
 internal class SamsungPayContactInfo(private val reflection: SamsungPayReflection) {
     fun buildControl(onSheetUpdated: (Any) -> Unit): Any {
         val control = reflection.newInstance(
             SamsungPaySdkClassNames.ADDRESS_CONTROL,
             String::class.java to CONTACT_CONTROL_ID,
             reflection.loadClass(SamsungPaySdkClassNames.SHEET_ITEM_TYPE) to
-                reflection.enumConstant(SamsungPaySdkClassNames.SHEET_ITEM_TYPE, "SHIPPING_ADDRESS"),
+                reflection.enumConstant(SamsungPaySdkClassNames.SHEET_ITEM_TYPE, "BILLING_ADDRESS"),
         )
-        val options = listOf(
-            "DISPLAY_OPTION_ADDRESSEE", "DISPLAY_OPTION_ADDRESS", "DISPLAY_OPTION_PHONE_NUMBER", "DISPLAY_OPTION_EMAIL",
-        ).fold(0) { value, field -> value or reflection.staticInt(SamsungPaySdkClassNames.ADDRESS_CONSTANTS, field) }
-        reflection.invoke(control, "setDisplayOption", Int::class.javaPrimitiveType!! to options)
         val listenerClass = reflection.loadClass(SamsungPaySdkClassNames.SHEET_UPDATED_LISTENER)
         val listener = reflection.createProxy(listenerClass) { proxy, method, arguments ->
             if (method.name == "onResult") {
@@ -33,7 +29,13 @@ internal class SamsungPayContactInfo(private val reflection: SamsungPayReflectio
     }
 
     fun read(paymentInfo: Any): KycInfo? {
-        val contact = reflection.invoke(paymentInfo, "getPaymentShippingAddress") ?: return null
+        val sheet = reflection.invoke(paymentInfo, "getCustomSheet") ?: return null
+        val control = reflection.invoke(
+            sheet,
+            "getSheetControl",
+            String::class.java to CONTACT_CONTROL_ID,
+        ) ?: return null
+        val contact = reflection.invoke(control, "getAddress") ?: return null
         val country = contact.string("getCountryCode")?.uppercase(Locale.ROOT)?.let { code ->
             // Samsung may return ISO 3166 alpha-3; phone normalization and Link expect alpha-2.
             Locale.getISOCountries().firstOrNull {

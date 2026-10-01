@@ -210,21 +210,17 @@ class DefaultSamsungPayLauncherTest {
     }
 
     @Test
-    fun `opt in requests all contact fields and updates the Samsung sheet`() = runScenario(
+    fun `opt in requests billing address and updates the Samsung sheet`() = runScenario(
         configuration = createConfiguration().collectContactInformation(true),
     ) {
         assertThat(getStatus()).isEqualTo(SamsungPayStatus.Ready)
         launchPayment()
         val info = requireNotNull(FakeSamsungPaySdkState.paymentInfo)
         assertThat(info.addressInPaymentSheet)
-            .isEqualTo(CustomSheetPaymentInfo.AddressInPaymentSheet.NEED_SHIPPING_SPAY)
+            .isEqualTo(CustomSheetPaymentInfo.AddressInPaymentSheet.NEED_BILLING_SPAY)
         val sheet = requireNotNull(info.customSheet)
         val control = sheet.controls.filterIsInstance<AddressControl>().single()
-        assertThat(control.type).isEqualTo(SheetItemType.SHIPPING_ADDRESS)
-        assertThat(control.displayOption).isEqualTo(
-            AddressConstants.DISPLAY_OPTION_ADDRESSEE or AddressConstants.DISPLAY_OPTION_ADDRESS or
-                AddressConstants.DISPLAY_OPTION_PHONE_NUMBER or AddressConstants.DISPLAY_OPTION_EMAIL
-        )
+        assertThat(control.type).isEqualTo(SheetItemType.BILLING_ADDRESS)
         requireNotNull(control.sheetUpdatedListener).onResult(control.id, sheet)
         assertThat(FakeSamsungPaySdkState.updatedSheets.awaitItem()).isSameInstanceAs(sheet)
     }
@@ -293,7 +289,8 @@ class DefaultSamsungPayLauncherTest {
         var result: SamsungPayResult? = null
         launchPayment { result = it }
         val info = requireNotNull(FakeSamsungPaySdkState.paymentInfo)
-        info.paymentShippingAddress = FakeSamsungContactAddress(
+        val control = requireNotNull(info.customSheet).controls.filterIsInstance<AddressControl>().single()
+        control.address = FakeSamsungContactAddress(
             addressee = "Wallet Tester",
             email = " wallet@example.com ",
             phoneNumber = "(212) 555-1234",
@@ -333,6 +330,45 @@ class DefaultSamsungPayLauncherTest {
             requireNotNull(FakeSamsungPaySdkState.paymentInfo), PAYMENT_CREDENTIAL, Bundle(),
         )
         assertThat((result as SamsungPayResult.Completed).kycInfo).isNull()
+        assertAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
+    }
+
+    @Test
+    fun `partial billing address is returned without inventing contact fields`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        val results = Turbine<SamsungPayResult>()
+        launchPayment(callback = results::add)
+        val info = requireNotNull(FakeSamsungPaySdkState.paymentInfo)
+        val control = requireNotNull(info.customSheet).controls.filterIsInstance<AddressControl>().single()
+        control.address = FakeSamsungContactAddress(countryCode = "USA", postalCode = "10001")
+
+        requireNotNull(FakeSamsungPaySdkState.paymentListener).onSuccess(info, PAYMENT_CREDENTIAL, Bundle())
+
+        val contact = requireNotNull((results.awaitItem() as SamsungPayResult.Completed).kycInfo)
+        assertThat(contact.address?.postalCode).isEqualTo("10001")
+        assertThat(contact.address?.country).isEqualTo("US")
+        assertThat(contact.firstName).isNull()
+        assertThat(contact.email).isNull()
+        assertThat(contact.phone).isNull()
+        results.ensureAllEventsConsumed()
+        assertAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
+    }
+
+    @Test
+    fun `missing billing control does not fail successful payment`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        val results = Turbine<SamsungPayResult>()
+        launchPayment(callback = results::add)
+        val response = CustomSheetPaymentInfo.Builder().setCustomSheet(CustomSheet()).build()
+
+        requireNotNull(FakeSamsungPaySdkState.paymentListener).onSuccess(response, PAYMENT_CREDENTIAL, Bundle())
+
+        assertThat((results.awaitItem() as SamsungPayResult.Completed).kycInfo).isNull()
+        results.ensureAllEventsConsumed()
         assertAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
     }
 

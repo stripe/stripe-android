@@ -25,7 +25,6 @@ private val fakeSamsungPaySdkClasses: Map<String, Class<*>> = mapOf(
     SamsungPaySdkClassNames.SHEET_CONTROL to SheetControl::class.java,
     SamsungPaySdkClassNames.AMOUNT_BOX_CONTROL to AmountBoxControl::class.java,
     SamsungPaySdkClassNames.ADDRESS_CONTROL to AddressControl::class.java,
-    SamsungPaySdkClassNames.ADDRESS_CONSTANTS to AddressConstants::class.java,
     SamsungPaySdkClassNames.SHEET_ITEM_TYPE to SheetItemType::class.java,
     SamsungPaySdkClassNames.SHEET_UPDATED_LISTENER to SheetUpdatedListener::class.java,
     SamsungPaySdkClassNames.AMOUNT_CONSTANTS to AmountConstants::class.java,
