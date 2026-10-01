@@ -25,7 +25,7 @@ internal fun LoadingButton(
     onClick: () -> Unit
 ) {
     Box(modifier = modifier) {
-        IdentityButton(
+        IdentityPrimaryButton(
             text = text,
             uppercase = uppercase,
             onClick = onClick,
@@ -55,7 +55,7 @@ internal fun LoadingTextButton(
     onClick: () -> Unit
 ) {
     Box(modifier = modifier) {
-        IdentityOutlinedButton(
+        IdentitySecondaryButton(
             text = text,
             uppercase = uppercase,
             onClick = onClick,

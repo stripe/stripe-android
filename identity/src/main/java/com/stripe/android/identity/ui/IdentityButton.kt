@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-internal fun IdentityButton(
+internal fun IdentityPrimaryButton(
     text: String,
     uppercase: Boolean,
     onClick: () -> Unit,
@@ -29,7 +29,7 @@ internal fun IdentityButton(
 }
 
 @Composable
-internal fun IdentityOutlinedButton(
+internal fun IdentitySecondaryButton(
     text: String,
     uppercase: Boolean,
     onClick: () -> Unit,
