@@ -78,7 +78,8 @@ class PaymentManager(
     }
 
     fun updateSheet(customSheet: CustomSheet) {
-        FakeSamsungPaySdkState.updatedSheet = customSheet
+        FakeSamsungPaySdkState.updatedSheets.add(customSheet)
+        FakeSamsungPaySdkState.updateSheetError?.let { throw it }
     }
 
     interface CustomSheetTransactionInfoListener {

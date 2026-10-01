@@ -155,7 +155,7 @@ internal class DefaultSamsungPayLauncher(
                 "startInAppPayWithCustomSheet",
                 reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET_PAYMENT_INFO) to
                     sheetFactory.buildPaymentInfo(presentation) { sheet ->
-                        updateSheet(paymentManager, sheet)
+                        handleSheetUpdated(active, paymentManager, sheet)
                     },
                 listenerClass to listener,
             )
@@ -269,11 +269,18 @@ internal class DefaultSamsungPayLauncher(
                 reason = Reason.PresentationFailed,
                 errorCode = null,
             )
-        reflection.invoke(
-            paymentManager,
-            "updateSheet",
-            reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET) to customSheet,
-        )
+        updateSheet(paymentManager, customSheet)
+    }
+
+    private fun handleSheetUpdated(active: ActivePresentation, paymentManager: Any, sheet: Any) {
+        runOnMain {
+            if (destroyed || activePresentation !== active) return@runOnMain
+            reflection.runOperation("updating Samsung Pay contact sheet") {
+                updateSheet(paymentManager, sheet)
+            }.onFailure { error ->
+                completePresentation(active, SamsungPayResult.Failed(error))
+            }
+        }
     }
 
     private fun updateSheet(paymentManager: Any, sheet: Any) {

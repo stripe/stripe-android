@@ -206,7 +206,7 @@ class DefaultSamsungPayLauncherTest {
         requireNotNull(FakeSamsungPaySdkState.paymentListener)
             .onCardInfoUpdated(CardInfo(), customSheet)
 
-        assertThat(FakeSamsungPaySdkState.updatedSheet).isSameInstanceAs(customSheet)
+        assertThat(FakeSamsungPaySdkState.updatedSheets.awaitItem()).isSameInstanceAs(customSheet)
     }
 
     @Test
@@ -226,7 +226,63 @@ class DefaultSamsungPayLauncherTest {
                 AddressConstants.DISPLAY_OPTION_PHONE_NUMBER or AddressConstants.DISPLAY_OPTION_EMAIL
         )
         requireNotNull(control.sheetUpdatedListener).onResult(control.id, sheet)
-        assertThat(FakeSamsungPaySdkState.updatedSheet).isSameInstanceAs(sheet)
+        assertThat(FakeSamsungPaySdkState.updatedSheets.awaitItem()).isSameInstanceAs(sheet)
+    }
+
+    @Test
+    fun `contact update failure is delivered through result callback`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        val results = Turbine<SamsungPayResult>()
+        launchPayment(callback = results::add)
+        FakeSamsungPaySdkState.updateSheetError = IllegalStateException("Sheet update failed")
+        val sheet = requireNotNull(FakeSamsungPaySdkState.paymentInfo?.customSheet)
+        val control = sheet.controls.filterIsInstance<AddressControl>().single()
+
+        requireNotNull(control.sheetUpdatedListener).onResult(control.id, sheet)
+
+        assertThat(FakeSamsungPaySdkState.updatedSheets.awaitItem()).isSameInstanceAs(sheet)
+        assertThat(results.awaitItem()).isInstanceOf(SamsungPayResult.Failed::class.java)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `contact update received off main is dispatched to main`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        launchPayment()
+        val sheet = requireNotNull(FakeSamsungPaySdkState.paymentInfo?.customSheet)
+        val control = sheet.controls.filterIsInstance<AddressControl>().single()
+        val executor = Executors.newSingleThreadExecutor()
+        try {
+            executor.submit {
+                requireNotNull(control.sheetUpdatedListener).onResult(control.id, sheet)
+            }.get()
+            FakeSamsungPaySdkState.updatedSheets.expectNoEvents()
+            shadowOf(Looper.getMainLooper()).idle()
+            assertThat(FakeSamsungPaySdkState.updatedSheets.awaitItem()).isSameInstanceAs(sheet)
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `contact updates after destroy are ignored`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        val results = Turbine<SamsungPayResult>()
+        launchPayment(callback = results::add)
+        val sheet = requireNotNull(FakeSamsungPaySdkState.paymentInfo?.customSheet)
+        val control = sheet.controls.filterIsInstance<AddressControl>().single()
+        launcher.destroy()
+
+        requireNotNull(control.sheetUpdatedListener).onResult(control.id, sheet)
+
+        FakeSamsungPaySdkState.updatedSheets.expectNoEvents()
+        results.ensureAllEventsConsumed()
     }
 
     @Test
@@ -409,6 +465,7 @@ class DefaultSamsungPayLauncherTest {
 
         launcher.destroy()
         analyticsEvents.ensureAllEventsConsumed()
+        FakeSamsungPaySdkState.updatedSheets.ensureAllEventsConsumed()
     }
 
     private class Scenario(
