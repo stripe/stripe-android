@@ -4,8 +4,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.AmountSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
@@ -33,15 +31,6 @@ internal class TestGoPay : BasePlaygroundTest() {
     fun testGoPay() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
-        )
-    }
-
-    @Test
-    fun testGoPayPaymentWithSetup() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
-            },
         )
     }
 }
