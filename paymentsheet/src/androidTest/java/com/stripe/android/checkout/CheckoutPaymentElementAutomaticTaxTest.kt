@@ -33,7 +33,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -705,10 +705,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private fun clickPaymentOptionsPrimaryButton() {
         testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(
-                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
+                hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
-        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+        testRules.compose.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
             .performScrollTo()
             .performClick()
     }
