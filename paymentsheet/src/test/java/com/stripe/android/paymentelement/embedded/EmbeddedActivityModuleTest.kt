@@ -76,7 +76,7 @@ internal class EmbeddedActivityModuleTest {
             )
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
-            selector.select(selection)
+            assertThat(selector.select(selection).isSuccess).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
             assertThat(selector.checkoutSessionResponse).isNull()
         }
