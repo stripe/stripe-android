@@ -1,15 +1,16 @@
-+--- androidx.databinding:viewbinding:8.13.2
-|    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1
-|         \--- androidx.annotation:annotation-jvm:1.9.1
-|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21
-|                   \--- org.jetbrains:annotations:13.0 -> 23.0.0
-+--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-+--- project :identity
-|    +--- androidx.databinding:viewbinding:8.13.2 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21
+|    \--- org.jetbrains:annotations:13.0 -> 23.0.0
++--- androidx.databinding:viewbinding:9.4.0
+|    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1
+|    |    \--- androidx.annotation:annotation-jvm:1.9.1
+|    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:2.2.10 -> 2.2.21 (*)
++--- project ':identity'
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    +--- project :camera-core
+|    +--- androidx.databinding:viewbinding:9.4.0 (*)
+|    +--- project ':camera-core'
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    +--- project :stripe-core
+|    |    +--- project ':stripe-core'
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
 |    |    |    +--- androidx.browser:browser:1.9.0
 |    |    |    |    +--- androidx.activity:activity:1.9.0 -> 1.12.4
@@ -222,7 +223,7 @@
 |    |    |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
 |    |    |    |    +--- com.google.guava:listenablefuture:1.0 -> 9999.0-empty-to-avoid-conflict-with-guava
 |    |    |    |    \--- org.jspecify:jspecify:1.0.0
-|    |    |    +--- com.google.dagger:dagger:2.58
+|    |    |    +--- com.google.dagger:dagger:2.59
 |    |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    |    |    +--- javax.inject:javax.inject:1
 |    |    |    |    \--- org.jspecify:jspecify:1.0.0
@@ -516,10 +517,10 @@
 |    |         +--- androidx.camera:camera-core:1.5.3 (c)
 |    |         +--- androidx.camera:camera-lifecycle:1.5.3 (c)
 |    |         \--- androidx.camera:camera-video:1.5.3 (c)
-|    +--- project :stripe-core (*)
-|    +--- project :stripe-ui-core
+|    +--- project ':stripe-core' (*)
+|    +--- project ':stripe-ui-core'
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    +--- project :stripe-core (*)
+|    |    +--- project ':stripe-core' (*)
 |    |    +--- androidx.activity:activity-ktx:1.12.4 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- androidx.core:core-ktx:1.17.0 (*)
@@ -925,10 +926,10 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
-|    |    +--- com.google.dagger:dagger:2.58 (*)
+|    |    +--- com.google.dagger:dagger:2.59 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
-|    +--- project :ml-core:default
-|    |    +--- project :ml-core:base
+|    +--- project ':ml-core:default'
+|    |    +--- project ':ml-core:base'
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
 |    |    |    \--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- com.google.ai.edge.litert:litert-support:1.4.1
@@ -1133,7 +1134,7 @@
 |    +--- androidx.compose.runtime:runtime:1.10.6 (*)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0 (*)
 |    +--- androidx.compose.ui:ui-tooling-preview:1.10.6 (*)
-|    +--- com.google.dagger:dagger:2.58 (*)
+|    +--- com.google.dagger:dagger:2.59 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
 |    +--- com.google.android.material:material:1.13.0 (*)
@@ -1175,8 +1176,8 @@
 |    |         |         \--- com.google.firebase:firebase-encoders:17.0.0 (*)
 |    |         \--- com.google.android.datatransport:transport-runtime:3.1.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
-+--- project :stripe-core (*)
-+--- project :stripe-ui-core (*)
++--- project ':stripe-core' (*)
++--- project ':stripe-ui-core' (*)
 +--- com.google.accompanist:accompanist-themeadapter-material:0.36.0 (*)
 +--- androidx.appcompat:appcompat:1.7.1 (*)
 +--- androidx.browser:browser:1.9.0 (*)

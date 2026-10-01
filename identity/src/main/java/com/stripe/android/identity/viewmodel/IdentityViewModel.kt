@@ -311,7 +311,19 @@ internal class IdentityViewModel(
     /**
      * Wrapper for both page and model
      */
-    val pageAndModelFiles = object : MediatorLiveData<Resource<PageAndModelFiles>>() {
+    val pageAndModelFiles: LiveData<Resource<PageAndModelFiles>> = PageAndModelFilesLiveData(
+        verificationPage = verificationPage,
+        idDetectorModelFile = idDetectorModelFile,
+        faceDetectorModelFile = faceDetectorModelFile,
+        isTfLiteInitialized = isTfLiteInitialized
+    )
+
+    private class PageAndModelFilesLiveData(
+        verificationPage: LiveData<Resource<VerificationPage>>,
+        idDetectorModelFile: LiveData<Resource<File>>,
+        faceDetectorModelFile: LiveData<Resource<File>>,
+        isTfLiteInitialized: LiveData<Boolean>
+    ) : MediatorLiveData<Resource<PageAndModelFiles>>() {
         private var page: VerificationPage? = null
         private var idDetectorModel: File? = null
         private var faceDetectorModel: File? = null
