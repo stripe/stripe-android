@@ -154,6 +154,7 @@ internal class SignUpBodyTest {
                     requiresNameCollection = requiresNameCollection,
                     canEditEmail = canEditEmail,
                     linkBrand = linkBrand,
+                    authenticationContent = null,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),

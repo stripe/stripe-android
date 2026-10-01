@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkController
 import com.stripe.android.link.ui.signup.SignUpState.InputtingPrimaryField
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
 import com.stripe.android.model.LinkBrand
@@ -15,6 +16,8 @@ internal data class SignUpScreenState(
     val requiresNameCollection: Boolean,
     val canEditEmail: Boolean,
     val linkBrand: LinkBrand,
+    /** Replaces the header's copy when an integration authenticates with its own. */
+    val authenticationContent: LinkController.AuthenticationContent?,
     val signUpState: SignUpState = InputtingPrimaryField,
     val isSubmitting: Boolean = false,
     val errorMessage: ResolvableString? = null,
@@ -28,6 +31,7 @@ internal data class SignUpScreenState(
         fun create(
             configuration: LinkConfiguration,
             customerInfo: LinkConfiguration.CustomerInfo?,
+            authenticationContent: LinkController.AuthenticationContent?,
         ): SignUpScreenState {
             val showKeyboardOnOpen = customerInfo == null || customerInfo.email.isNullOrBlank()
             val signUpState = if (showKeyboardOnOpen) InputtingPrimaryField else InputtingRemainingFields
@@ -39,6 +43,7 @@ internal data class SignUpScreenState(
                 requiresNameCollection = configuration.requiresNameCollection,
                 canEditEmail = configuration.allowUserEmailEdits,
                 linkBrand = configuration.linkBrand,
+                authenticationContent = authenticationContent,
                 signUpState = signUpState,
             )
         }

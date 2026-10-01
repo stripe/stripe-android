@@ -53,6 +53,10 @@ internal sealed interface LinkLaunchMode : Parcelable {
     @Parcelize
     data class Authentication(
         val existingOnly: Boolean = false,
+        /**
+         * Replaces the sign-up screen's copy and consent action, for integrations like Identity.
+         */
+        val content: LinkController.AuthenticationContent? = null,
     ) : LinkLaunchMode
 
     /**

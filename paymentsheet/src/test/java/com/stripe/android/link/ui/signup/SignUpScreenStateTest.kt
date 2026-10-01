@@ -22,6 +22,7 @@ class SignUpScreenStateTest {
         val result = SignUpScreenState.create(
             configuration = makeLinkConfiguration(customerInfo),
             customerInfo = customerInfo,
+            authenticationContent = null,
         )
 
         assertThat(result.signUpEnabled).isFalse()
@@ -38,6 +39,7 @@ class SignUpScreenStateTest {
         val result = SignUpScreenState.create(
             configuration = makeLinkConfiguration(customerInfo),
             customerInfo = customerInfo,
+            authenticationContent = null,
         )
 
         assertThat(result.signUpEnabled).isFalse()
@@ -56,6 +58,7 @@ class SignUpScreenStateTest {
         val result = SignUpScreenState.create(
             configuration = makeLinkConfiguration(customerInfo),
             customerInfo = customerInfo,
+            authenticationContent = null,
         )
 
         assertThat(result.signUpEnabled).isFalse()
@@ -74,6 +77,7 @@ class SignUpScreenStateTest {
         val result = SignUpScreenState.create(
             configuration = makeLinkConfiguration(customerInfo),
             customerInfo = customerInfo,
+            authenticationContent = null,
         )
 
         assertThat(result.signUpEnabled).isTrue()

@@ -10,6 +10,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
@@ -264,6 +265,34 @@ internal class SignUpViewModelTest {
         assertThat(linkAccountManager.signUpCalls).hasSize(1)
         val call = linkAccountManager.signUpCalls.first()
         assertThat(call.consentAction).isEqualTo(SignUpConsentAction.Implied)
+    }
+
+    @Test
+    fun `signUp sends the consent action from the authentication content`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = object : SignUpLinkEventsReporter() {
+                override fun onSignupCompleted(isInline: Boolean) = Unit
+            },
+            linkLaunchMode = LinkLaunchMode.Authentication(content = AUTHENTICATION_CONTENT),
+        )
+
+        viewModel.performValidSignup()
+
+        assertThat(linkAccountManager.signUpCalls.single().consentAction)
+            .isEqualTo(SignUpConsentAction.EnteredPhoneNumberEmailClickedSaveWithLinkIdentity)
+    }
+
+    @Test
+    fun `authentication content is exposed for the header`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Authentication(content = AUTHENTICATION_CONTENT),
+        )
+
+        assertThat(viewModel.contentState.authenticationContent).isEqualTo(AUTHENTICATION_CONTENT)
     }
 
     @Test
@@ -979,3 +1008,9 @@ private open class SignUpLinkEventsReporter : FakeLinkEventsReporter() {
 
     override fun onSignupCompleted(isInline: Boolean) = Unit
 }
+
+private val AUTHENTICATION_CONTENT = LinkController.AuthenticationContent(
+    title = "Continue with Link",
+    subtitle = "Sign in or create an account to get started.",
+    consentAction = LinkController.RegisterConsumerConsentAction.NetworkedIdentity,
+)
