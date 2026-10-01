@@ -8,8 +8,9 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
     val startCalls = Turbine<StartCall>()
     val confirmCalls = Turbine<ConfirmCall>()
     val documentCalls = Turbine<DocumentCall>()
-    val associationTokenCalls = Turbine<AssociationTokenCall>()
     val logoutCalls = Turbine<LogoutCall>()
+    val tokenCalls = Turbine<TokenCall>()
+    val saveTokenCalls = Turbine<SaveTokenCall>()
     val unsupportedCalls = Turbine<String>()
 
     override suspend fun lookup(email: String, authSessionSecrets: List<String>): Result<NetworkedIdentityLookup> {
@@ -72,8 +73,8 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         credentials: NetworkedIdentityCredentials,
         documentId: String
     ): Result<NetworkedIdentityAssociationToken> {
-        val call = AssociationTokenCall(credentials, documentId, CompletableDeferred())
-        associationTokenCalls.add(call)
+        val call = TokenCall(credentials, documentId, CompletableDeferred())
+        tokenCalls.add(call)
         return call.response.await()
     }
 
@@ -81,8 +82,9 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         credentials: NetworkedIdentityCredentials,
         verificationSessionId: String
     ): Result<NetworkedIdentityAssociationToken> {
-        unsupportedCalls.add("createSaveAssociationToken")
-        return Result.failure(IllegalStateException("Unexpected save association token"))
+        val call = SaveTokenCall(credentials, verificationSessionId, CompletableDeferred())
+        saveTokenCalls.add(call)
+        return call.response.await()
     }
 
     override suspend fun extendSession(
@@ -97,8 +99,9 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         startCalls.ensureAllEventsConsumed()
         confirmCalls.ensureAllEventsConsumed()
         documentCalls.ensureAllEventsConsumed()
-        associationTokenCalls.ensureAllEventsConsumed()
         logoutCalls.ensureAllEventsConsumed()
+        tokenCalls.ensureAllEventsConsumed()
+        saveTokenCalls.ensureAllEventsConsumed()
         unsupportedCalls.ensureAllEventsConsumed()
     }
 
@@ -125,12 +128,17 @@ internal class FakeNetworkedIdentityRepository : NetworkedIdentityRepository {
         val credentials: NetworkedIdentityCredentials,
         val response: CompletableDeferred<Result<List<NetworkedIdentityDocument>>>
     )
-    data class AssociationTokenCall(
+    data class LogoutCall(val credentials: NetworkedIdentityCredentials, val authSessionSecrets: List<String>)
+    data class SaveTokenCall(
+        val credentials: NetworkedIdentityCredentials,
+        val verificationSessionId: String,
+        val response: CompletableDeferred<Result<NetworkedIdentityAssociationToken>>
+    )
+    data class TokenCall(
         val credentials: NetworkedIdentityCredentials,
         val documentId: String,
         val response: CompletableDeferred<Result<NetworkedIdentityAssociationToken>>
     )
-    data class LogoutCall(val credentials: NetworkedIdentityCredentials, val authSessionSecrets: List<String>)
 }
 
 internal fun niSession(

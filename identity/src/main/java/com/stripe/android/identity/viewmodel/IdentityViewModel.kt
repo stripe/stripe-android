@@ -1,6 +1,7 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -25,8 +26,6 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.identity.BuildConfig
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.AnalyticsState
@@ -44,35 +43,29 @@ import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
 import com.stripe.android.identity.ml.MediaPipeFaceDetectorUnavailableException
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
+import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
 import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.IndividualDestination
-import com.stripe.android.identity.navigation.NetworkedIdentityDestination
+import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.navigateOnVerificationPageData
-import com.stripe.android.identity.navigation.navigateReplacingIdentityStack
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
-import com.stripe.android.identity.navigation.nextNetworkedIdentityDestination
 import com.stripe.android.identity.navigation.routeToScreenName
-import com.stripe.android.identity.networked.DefaultNetworkedIdentityActions
-import com.stripe.android.identity.networked.DefaultNetworkedIdentityRepository
-import com.stripe.android.identity.networked.NetworkedIdentityCoordinator
-import com.stripe.android.identity.networked.NetworkedIdentityDocumentRequirements
-import com.stripe.android.identity.networked.NetworkedIdentityEntry
-import com.stripe.android.identity.networked.NetworkedIdentityEntryPolicy
-import com.stripe.android.identity.networked.NetworkedIdentityHostEvent
-import com.stripe.android.identity.networked.NetworkedIdentityViewModel
+import com.stripe.android.identity.networked.NetworkedIdentityLinkHost
+import com.stripe.android.identity.networked.SeededDocumentsIdentityRepository
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Resource.Companion.DUMMY_RESOURCE
+import com.stripe.android.identity.networking.SUPPORTS_NETWORKED_IDENTITY
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.Status
@@ -85,6 +78,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.FaceFrameDataParam
+import com.stripe.android.identity.networking.models.NetworkedIdentityRoute
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
@@ -97,9 +91,11 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.needsFallback
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.submittedAndClosed
+import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
+import com.stripe.android.identity.networking.models.networkedIdentityRoute
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -107,22 +103,16 @@ import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.mlcore.base.InterpreterInitializer
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.Locale
-import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -141,170 +131,8 @@ internal class IdentityViewModel(
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext,
-    private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit,
-    networkedIdentityPreviewEnabled: Boolean
+    private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit
 ) : AndroidViewModel(application) {
-
-    private val networkedIdentityEntryPolicy = NetworkedIdentityEntryPolicy(networkedIdentityPreviewEnabled)
-    private var networkedIdentityAttempt: Any? = null
-    private var networkedIdentityFallbackRequirements: List<Requirement> = emptyList()
-    private val mutableNetworkedIdentityEvent = MutableStateFlow<NetworkedIdentityHostEvent?>(null)
-    internal val networkedIdentityEvent: StateFlow<NetworkedIdentityHostEvent?> = mutableNetworkedIdentityEvent
-    internal var networkedIdentityViewModel: NetworkedIdentityViewModel? = null
-        private set
-    internal var hasEnteredNetworkedIdentity: Boolean = false
-        private set
-    private val networkedIdentityNavigation = MutableStateFlow<NavController?>(null)
-    private var networkedIdentityNavigationManaged = false
-    private var networkedIdentityResumePending = false
-
-    internal fun attachNetworkedIdentityNavigation(navController: NavController) {
-        networkedIdentityNavigationManaged = true
-        networkedIdentityNavigation.value = navController
-    }
-
-    internal fun detachNetworkedIdentityNavigation(navController: NavController) {
-        networkedIdentityNavigationManaged = true
-        if (networkedIdentityNavigation.value === navController) networkedIdentityNavigation.value = null
-    }
-
-    private suspend fun currentNetworkedIdentityNavigation(fallback: NavController): NavController =
-        if (networkedIdentityNavigationManaged) networkedIdentityNavigation.filterNotNull().first() else fallback
-
-    /** Re-evaluate after consent and document fallback using the most recent server response. */
-    internal fun tryNavigateToNetworkedIdentity(
-        page: VerificationPage,
-        update: VerificationPageData?,
-        navController: NavController
-    ): Boolean {
-        if (networkedIdentityResumePending) return true
-        when (networkedIdentityEntryPolicy.enter(page, update)) {
-            null -> return false
-            NetworkedIdentityEntry.Submit -> {
-                hasEnteredNetworkedIdentity = true
-                networkedIdentityResumePending = true
-                viewModelScope.launch(uiContext) {
-                    try {
-                        submitAndNavigate(navController, NetworkedIdentityDestination.ROUTE.route)
-                    } finally {
-                        networkedIdentityResumePending = false
-                    }
-                }
-            }
-            NetworkedIdentityEntry.Reuse -> {
-                hasEnteredNetworkedIdentity = true
-                val attempt = Any()
-                networkedIdentityAttempt = attempt
-                networkedIdentityFallbackRequirements = update?.requirements?.missings ?: page.requirements.missing
-                fun deliver(event: NetworkedIdentityHostEvent) {
-                    if (networkedIdentityAttempt === attempt) mutableNetworkedIdentityEvent.value = event
-                }
-                networkedIdentityViewModel = NetworkedIdentityViewModel(
-                    NetworkedIdentityCoordinator(
-                        repository = DefaultNetworkedIdentityRepository.create(
-                            merchantRequestOptions = ApiRequest.Options(
-                                apiKey = requireNotNull(page.merchantPublishableKey)
-                            ),
-                            workContext = workContext,
-                        ),
-                        documentRequirements = NetworkedIdentityDocumentRequirements.fromVerificationPage(page),
-                        locale = Locale.getDefault().toLanguageTag(),
-                        initialAuthSessionSecrets = emptyList(),
-                        currentTimeSeconds = { System.currentTimeMillis() / MILLISECONDS_PER_SECOND },
-                        dispatcher = uiContext[ContinuationInterceptor] as? CoroutineDispatcher
-                            ?: Dispatchers.Main.immediate,
-                        onCancel = { deliver(NetworkedIdentityHostEvent.Cancelled) },
-                        onFallback = { deliver(NetworkedIdentityHostEvent.Fallback) },
-                        actions = DefaultNetworkedIdentityActions.create(
-                            verificationSessionId = verificationArgs.verificationSessionId,
-                            ephemeralKey = verificationArgs.ephemeralKeySecret,
-                        ),
-                        onComplete = { deliver(NetworkedIdentityHostEvent.Completed(it)) },
-                    )
-                )
-                navController.navigateReplacingIdentityStack(NetworkedIdentityDestination)
-            }
-        }
-        return true
-    }
-
-    internal fun consumeNetworkedIdentityEvent(
-        event: NetworkedIdentityHostEvent,
-        navController: NavController
-    ) {
-        if (mutableNetworkedIdentityEvent.value !== event) return
-        mutableNetworkedIdentityEvent.value = null
-        networkedIdentityAttempt = null
-        when (event) {
-            NetworkedIdentityHostEvent.Cancelled -> {
-                identityAnalyticsRequestFactory.verificationCanceled(
-                    isFromFallbackUrl = false,
-                    requireSelfie = verificationPage.value?.data?.requireSelfie(),
-                    lastScreenName = NETWORKED_IDENTITY_SCREEN_NAME,
-                )
-                finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Canceled)
-            }
-            NetworkedIdentityHostEvent.Fallback -> navController.navigateReplacingIdentityStack(
-                networkedIdentityFallbackRequirements.nextNetworkedIdentityDestination(getApplication())
-            )
-            is NetworkedIdentityHostEvent.Completed -> viewModelScope.launch(uiContext) {
-                continueAfterNetworkedIdentity(event.result, currentNetworkedIdentityNavigation(navController))
-            }
-        }
-    }
-
-    /** Server-owned attachments must no longer be treated as uncollected fields in clear_data. */
-    internal suspend fun continueAfterNetworkedIdentity(
-        result: Result<VerificationPageData>,
-        navController: NavController
-    ) {
-        val data = result.getOrElse {
-            errorCause.value = it
-            navController.navigateToFinalErrorScreen(getApplication())
-            return
-        }
-        val page = _verificationPage.value?.data
-        if (data.id != verificationArgs.verificationSessionId || page == null) {
-            errorCause.value = IllegalStateException("Networked Identity response does not match the current session.")
-            navController.navigateToFinalErrorScreen(getApplication())
-            return
-        }
-        if (data.hasError()) {
-            errorCause.value = IllegalStateException("Networked Identity update requires correction.")
-            navController.navigateToErrorScreenWithRequirementError(
-                NetworkedIdentityDestination.ROUTE.route,
-                data.requirements.errors.first(),
-                onError = { logError(it) },
-            )
-            return
-        }
-        val missing = data.requirements.missings ?: if (data.submittedAndClosed()) emptyList() else null
-        val writable = !data.closed && data.status == VerificationPageData.Status.REQUIRESINPUT &&
-            (!data.submitted || !missing.isNullOrEmpty())
-        if (missing == null ||
-            data.status == VerificationPageData.Status.CANCELED || (!data.submittedAndClosed() && !writable)
-        ) {
-            errorCause.value = IllegalStateException("Networked Identity session is not writable.")
-            navController.navigateToFinalErrorScreen(getApplication())
-            return
-        }
-        _verificationPage.value = Resource.success(
-            page.copy(
-                requirements = VerificationPageRequirements(missing)
-            )
-        )
-        _missingRequirements.updateStateAndSave { missing.toSet() }
-        _collectedData.updateStateAndSave { collected ->
-            missing.fold(collected) { updated, field -> updated.clearData(field) }
-        }
-        if (data.submittedAndClosed()) {
-            result.checkSubmitStatusAndNavigate(NetworkedIdentityDestination.ROUTE.route, navController)
-        } else if (missing.isEmpty()) {
-            submitAndNavigate(navController, NetworkedIdentityDestination.ROUTE.route)
-        } else {
-            navController.navigateReplacingIdentityStack(missing.nextNetworkedIdentityDestination(getApplication()))
-        }
-    }
 
     /**
      * StateFlow to track the upload status of high/low resolution image for front of document.
@@ -585,10 +413,6 @@ internal class IdentityViewModel(
     }
 
     override fun onCleared() {
-        networkedIdentityAttempt = null
-        networkedIdentityViewModel?.abandon()
-        networkedIdentityViewModel = null
-        networkedIdentityNavigation.value = null
         super.onCleared()
         errorCause.removeObserver(errorCauseObServer)
     }
@@ -1311,9 +1135,6 @@ internal class IdentityViewModel(
      * Retrieve the VerificationPage data and post its value to [verificationPage]
      */
     fun retrieveAndBufferVerificationPage(shouldRetrieveModel: Boolean = true) {
-        // This ViewModel survives Activity recreation. Retain the current server attachment baseline;
-        // a fresh process receives a new ViewModel and still performs the initial bootstrap.
-        if (hasEnteredNetworkedIdentity) return
         _verificationPage.postValue(Resource.loading())
         viewModelScope.launch {
             runCatching {
@@ -1474,12 +1295,9 @@ internal class IdentityViewModel(
                     _missingRequirements.updateStateAndSave {
                         newMissings.toSet()
                     }
-                    val page = _verificationPage.value?.data
-                    if (page == null ||
-                        !tryNavigateToNetworkedIdentity(page, submittedVerificationPageData, navController)
-                    ) {
-                        navController.navigateTo(newMissings.nextDestination(getApplication()))
-                    }
+                    navController.navigateTo(
+                        newMissings.nextDestination(getApplication())
+                    )
                 }
                 /**
                  * Only navigates to success when both submitted and closed are true.
@@ -1496,19 +1314,11 @@ internal class IdentityViewModel(
 
                 else -> {
                     errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
-                    navigateAfterSubmitFailure(fromRoute, navController)
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
                 }
             }
         }.onFailure {
             errorCause.postValue(it)
-            navigateAfterSubmitFailure(fromRoute, navController)
-        }
-    }
-
-    private fun navigateAfterSubmitFailure(fromRoute: String, navController: NavController) {
-        if (fromRoute == NetworkedIdentityDestination.ROUTE.route) {
-            navController.navigateToFinalErrorScreen(getApplication())
-        } else {
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
     }
@@ -1760,15 +1570,12 @@ internal class IdentityViewModel(
             collectedDataParam = collectedDataParam,
             fromRoute = fromRoute
         ) { verificationPageData ->
-            val page = _verificationPage.value?.data
-            if (page == null || !tryNavigateToNetworkedIdentity(page, verificationPageData, navController)) {
-                navController.navigateOnVerificationPageData(
-                    verificationPageData = verificationPageData,
-                    onMissingOtp = onMissingPhoneOtp,
-                    onMissingBack = onMissingBack,
-                    onReadyToSubmit = onReadyToSubmit
-                )
-            }
+            navController.navigateOnVerificationPageData(
+                verificationPageData = verificationPageData,
+                onMissingOtp = onMissingPhoneOtp,
+                onMissingBack = onMissingBack,
+                onReadyToSubmit = onReadyToSubmit
+            )
         }
     }
 
@@ -1790,6 +1597,151 @@ internal class IdentityViewModel(
     }
 
     /**
+     * Networked Identity: the user shared a saved ID from Link, or chose manual capture, on the consent screen,
+     * which also accepts consent. [attached] becomes the requirement baseline first, so recording consent doesn't
+     * clear files attached or retained by the action; the consent response's requirements then decide what's next.
+     */
+    suspend fun saveConsentAfterNetworkedIdentity(attached: VerificationPageData, navController: NavController) {
+        val fromRoute = ConsentDestination.ROUTE.route
+        if (!acceptNetworkedIdentityUpdate(Result.success(attached), navController, fromRoute)) return
+        postVerificationPageData(
+            navController = navController,
+            collectedDataParam = CollectedDataParam(biometricConsent = true),
+            fromRoute = fromRoute
+        ) { data ->
+            continueAfterNetworkedIdentity(Result.success(data), navController, fromRoute)
+        }
+    }
+
+    /**
+     * Whether a Networked Identity action reported the verification as submitted and closed, so dismissing the
+     * flow completes it instead of cancelling.
+     */
+    internal var isVerificationPageSubmitted = false
+        private set
+
+    /**
+     * Networked Identity: a verification whose saved ID was attached, or whose save was prepared, in an earlier
+     * presentation still needs the ordinary submit; empty requirements alone don't mean it succeeded.
+     * Returns false when there's nothing to resume.
+     */
+    suspend fun resumeNetworkedIdentity(navController: NavController): Boolean {
+        val page = _verificationPage.value?.data ?: return false
+        val resumable = page.networkedIdentityRoute.let {
+            it == NetworkedIdentityRoute.ResumeReuse || it == NetworkedIdentityRoute.ResumeSave
+        }
+        val unsubmitted = page.status == VerificationPage.Status.REQUIRESINPUT && !page.submitted &&
+            page.requirements.missing.isEmpty()
+        val enabled = SUPPORTS_NETWORKED_IDENTITY &&
+            NetworkedIdentityLinkHost.isEnabled(verificationArgs.networkedIdentity)
+        if (!enabled || !resumable || !unsubmitted) {
+            return false
+        }
+        continueAfterNetworkedIdentity(
+            Result.success(
+                VerificationPageData(
+                    id = page.id,
+                    objectType = "identity.verification_page_data",
+                    requirements = VerificationPageDataRequirements(errors = emptyList(), missings = emptyList()),
+                    status = VerificationPageData.Status.REQUIRESINPUT,
+                    submitted = false,
+                    closed = false,
+                )
+            ),
+            navController,
+            InitialLoadingDestination.ROUTE.route,
+        )
+        return true
+    }
+
+    internal suspend fun continueAfterNetworkedIdentity(
+        result: Result<VerificationPageData>,
+        navController: NavController,
+        fromRoute: String,
+    ) {
+        if (!acceptNetworkedIdentityUpdate(result, navController, fromRoute)) return
+        val data = result.getOrThrow()
+        val missing = data.requirements.missings.orEmpty()
+        if (data.submittedAndClosed()) {
+            result.checkSubmitStatusAndNavigate(fromRoute, navController)
+        } else if (missing.isEmpty()) {
+            submitAndNavigate(navController, fromRoute)
+        } else {
+            navController.navigateTo(missing.nextNetworkedIdentityDestination(getApplication()))
+        }
+    }
+
+    /**
+     * Makes a committed Networked Identity update the requirement baseline, without navigating: server-owned
+     * attachments must no longer be treated as uncollected fields in clear_data. Updates for another session or
+     * one that can't be written are ignored.
+     */
+    fun recordNetworkedIdentityUpdate(data: VerificationPageData) {
+        val page = _verificationPage.value?.data ?: return
+        if (data.id != verificationArgs.verificationSessionId || !data.canApplyNetworkedIdentityUpdate()) return
+        isVerificationPageSubmitted = data.submittedAndClosed()
+        val missing = data.requirements.missings ?: emptyList()
+        _verificationPage.value = Resource.success(page.copy(requirements = VerificationPageRequirements(missing)))
+        _missingRequirements.updateStateAndSave { missing.toSet() }
+        _collectedData.updateStateAndSave { collected ->
+            missing.fold(collected) { updated, field -> updated.clearData(field) }
+        }
+    }
+
+    /**
+     * Checks a verification update made by a Networked Identity action and records it with
+     * [recordNetworkedIdentityUpdate]. Returns false after navigating to an error.
+     */
+    private fun acceptNetworkedIdentityUpdate(
+        result: Result<VerificationPageData>,
+        navController: NavController,
+        fromRoute: String,
+    ): Boolean {
+        val data = result.getOrElse {
+            errorCause.value = it
+            navController.navigateToFinalErrorScreen(getApplication())
+            return false
+        }
+        if (data.id != verificationArgs.verificationSessionId || _verificationPage.value?.data == null) {
+            errorCause.value = IllegalStateException("Networked Identity response does not match the current session.")
+            navController.navigateToFinalErrorScreen(getApplication())
+            return false
+        }
+        if (data.hasError()) {
+            errorCause.value = IllegalStateException("Networked Identity update requires correction.")
+            navController.navigateToErrorScreenWithRequirementError(
+                fromRoute,
+                data.requirements.errors.first(),
+                onError = { logError(it) },
+            )
+            return false
+        }
+        if (!data.canApplyNetworkedIdentityUpdate()) {
+            errorCause.value = IllegalStateException("Networked Identity session is not writable.")
+            navController.navigateToFinalErrorScreen(getApplication())
+            return false
+        }
+        recordNetworkedIdentityUpdate(data)
+        return true
+    }
+
+    private fun VerificationPageData.canApplyNetworkedIdentityUpdate(): Boolean {
+        val missing = requirements.missings ?: if (submittedAndClosed()) emptyList() else return false
+        val writable = !closed && status == VerificationPageData.Status.REQUIRESINPUT &&
+            (!submitted || missing.isNotEmpty())
+        return !hasError() && status != VerificationPageData.Status.CANCELED && (submittedAndClosed() || writable)
+    }
+
+    /** Phone-only remainders go straight to their screens; everything else follows the usual order. */
+    private fun List<Requirement>.nextNetworkedIdentityDestination(context: Context): IdentityTopLevelDestination =
+        when {
+            isNotEmpty() && all { it == Requirement.PHONE_OTP } -> OTPDestination
+            Requirement.PHONE_NUMBER in this && all { it == Requirement.PHONE_NUMBER || it == Requirement.PHONE_OTP } ->
+                IndividualDestination
+            else -> nextDestination(context)
+        }
+
+    /**
      * Submit the verification and navigate based on result.
      */
     internal suspend fun submitAndNavigate(
@@ -1804,14 +1756,7 @@ internal class IdentityViewModel(
                 verificationArgs.verificationSessionId,
                 verificationArgs.ephemeralKeySecret
             )
-        }.checkSubmitStatusAndNavigate(
-            fromRoute,
-            if (fromRoute == NetworkedIdentityDestination.ROUTE.route) {
-                currentNetworkedIdentityNavigation(navController)
-            } else {
-                navController
-            }
-        )
+        }.checkSubmitStatusAndNavigate(fromRoute, navController)
     }
 
     /**
@@ -2627,7 +2572,12 @@ internal class IdentityViewModel(
             return IdentityViewModel(
                 applicationSupplier(),
                 subcomponent.verificationArgs,
-                subcomponent.identityRepository,
+                // Debug-only: sample saved documents simulate reuse and saving for the playground.
+                if (subcomponent.verificationArgs.networkedIdentity?.debugSeedSavedDocuments == true) {
+                    SeededDocumentsIdentityRepository(subcomponent.identityRepository)
+                } else {
+                    subcomponent.identityRepository
+                },
                 subcomponent.identityModelFetcher,
                 subcomponent.identityIO,
                 subcomponent.identityAnalyticsRequestFactory,
@@ -2637,15 +2587,12 @@ internal class IdentityViewModel(
                 savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier(),
-                finishWithResult,
-                BuildConfig.NETWORKED_IDENTITY_PREVIEW
+                finishWithResult
             ) as T
         }
     }
 
     internal companion object {
-        private const val MILLISECONDS_PER_SECOND = 1000L
-        internal const val NETWORKED_IDENTITY_SCREEN_NAME = "networked_identity"
         val TAG: String = IdentityViewModel::class.java.simpleName
         const val FRONT = "front"
         const val BACK = "back"

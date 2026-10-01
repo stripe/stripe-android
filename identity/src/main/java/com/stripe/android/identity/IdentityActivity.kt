@@ -37,6 +37,7 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHO
 import com.stripe.android.identity.navigation.IdentityNavGraph
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
+import com.stripe.android.identity.networked.NetworkedIdentityLinkHost
 import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -121,6 +122,10 @@ internal class IdentityActivity :
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.initializeTfLite()
         identityViewModel.registerActivityResultCaller(this)
+        if (NetworkedIdentityLinkHost.isEnabled(starterArgs.networkedIdentity)) {
+            // Link's own screens register for activity results, which must happen before the page loads.
+            NetworkedIdentityLinkHost.of(this).attach(this)
+        }
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {

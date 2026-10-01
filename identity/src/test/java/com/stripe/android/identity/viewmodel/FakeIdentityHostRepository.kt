@@ -12,7 +12,9 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
 
-internal class FakeIdentityHostRepository : IdentityRepository {
+internal class FakeIdentityHostRepository(
+    private val page: VerificationPage? = null,
+) : IdentityRepository {
     val dataCalls = Turbine<DataCall>()
     val submitCalls = Turbine<SubmitCall>()
     val unexpectedCalls = Turbine<String>()
@@ -35,7 +37,7 @@ internal class FakeIdentityHostRepository : IdentityRepository {
     }
 
     override suspend fun retrieveVerificationPage(id: String, ephemeralKey: String): VerificationPage =
-        unexpected("retrieveVerificationPage")
+        page ?: unexpected("retrieveVerificationPage")
 
     override suspend fun verifyTestVerificationSession(
         id: String,

@@ -37,6 +37,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -165,6 +166,15 @@ internal fun ExampleScreen(
                             submissionState.copy(threeDFaceCaptureEnabled = it)
                         )
                     }
+                )
+                val networkedIdentityState by viewModel.networkedIdentity.collectAsState()
+                NetworkedIdentitySettingsUI(
+                    state = networkedIdentityState,
+                    onStateChanged = viewModel::updateNetworkedIdentity,
+                    onSendCode = viewModel::sendLinkCode,
+                    onVerify = viewModel::confirmLinkCode,
+                    onClear = viewModel::clearHandoff,
+                    onCreateAccount = viewModel::createLinkAccount,
                 )
                 when (submissionState.verificationType) {
                     VerificationType.DOCUMENT -> DocumentUI(
@@ -506,6 +516,8 @@ private fun SubmitView(
         vsId = verificationSessionId
         when (submissionState.integrationType) {
             NATIVE -> {
+                // Read at present() time, so Link sign-in and the debug options don't need a new sheet.
+                configuration.networkedIdentity = viewModel.networkedIdentityOptions()
                 identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
             }
 

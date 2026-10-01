@@ -75,7 +75,8 @@ class ConfirmationScreenTest {
             ConfirmationScreen(
                 mockNavController,
                 mockIdentityViewModel,
-                mockVerificationFlowFinishable
+                mockVerificationFlowFinishable,
+                null
             )
         }
         with(composeTestRule, testBlock)

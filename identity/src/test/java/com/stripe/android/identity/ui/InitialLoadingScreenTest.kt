@@ -92,6 +92,7 @@ class InitialLoadingScreenTest {
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageData
+        onBlocking { resumeNetworkedIdentity(any()) } doReturn false
     }
     private val mockNavController = mock<NavController>()
 

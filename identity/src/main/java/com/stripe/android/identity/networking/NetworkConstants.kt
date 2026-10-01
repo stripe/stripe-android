@@ -2,8 +2,15 @@ package com.stripe.android.identity.networking
 
 internal const val BASE_URL = "https://api.stripe.com/v1"
 internal const val IDENTITY_VERIFICATION_PAGES = "identity/verification_pages"
+
+/** The VerificationPages API version used to make all API requests. */
+internal const val IDENTITY_CLIENT_API_VERSION = 8
+
 internal const val IDENTITY_STRIPE_API_VERSION_WITH_BETA_HEADER =
-    "2020-08-27;identity_client_api=v8"
+    "2020-08-27;identity_client_api=v$IDENTITY_CLIENT_API_VERSION"
+
+/** Networked Identity actions and routes need the v8 VerificationPages API. */
+internal const val SUPPORTS_NETWORKED_IDENTITY = IDENTITY_CLIENT_API_VERSION >= 8
 
 internal const val SUBMIT = "submit"
 internal const val DATA = "data"
