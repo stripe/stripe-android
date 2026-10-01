@@ -158,7 +158,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(activity)]
 
             assertThat(paymentSheetCallbacks?.createIntentCallback).isEqualTo(createIntentCallback)
         }
@@ -178,7 +178,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(fragment)]
 
             assertThat(paymentSheetCallbacks?.createIntentCallback).isEqualTo(createIntentCallback)
         }
@@ -198,7 +198,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(activity)]
 
             assertThat(paymentSheetCallbacks?.externalPaymentMethodConfirmHandler)
                 .isEqualTo(externalPaymentMethodConfirmHandler)
@@ -219,7 +219,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(fragment)]
 
             assertThat(paymentSheetCallbacks?.externalPaymentMethodConfirmHandler)
                 .isEqualTo(externalPaymentMethodConfirmHandler)
@@ -242,7 +242,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(activity)]
 
             assertThat(paymentSheetCallbacks?.createIntentCallback).isEqualTo(createIntentCallback)
             assertThat(paymentSheetCallbacks?.externalPaymentMethodConfirmHandler)
@@ -266,7 +266,7 @@ internal class PaymentElementBuilderTest {
 
             assertThat(paymentSheet).isNotNull()
 
-            val paymentSheetCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            val paymentSheetCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(fragment)]
 
             assertThat(paymentSheetCallbacks?.externalPaymentMethodConfirmHandler)
                 .isEqualTo(externalPaymentMethodConfirmHandler)
@@ -306,7 +306,7 @@ internal class PaymentElementBuilderTest {
 
         assertThat(flowController).isNotNull()
 
-        val flowControllerCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+        val flowControllerCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(activity)]
 
         assertThat(flowControllerCallbacks?.createIntentCallback).isEqualTo(createIntentCallback)
         assertThat(flowControllerCallbacks?.externalPaymentMethodConfirmHandler)
@@ -347,7 +347,7 @@ internal class PaymentElementBuilderTest {
 
         assertThat(flowController).isNotNull()
 
-        val flowControllerCallbacks = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+        val flowControllerCallbacks = PaymentElementCallbackReferences[flowControllerCallbackIdentifier(fragment)]
 
         assertThat(flowControllerCallbacks?.createIntentCallback).isEqualTo(createIntentCallback)
         assertThat(flowControllerCallbacks?.externalPaymentMethodConfirmHandler)
@@ -383,6 +383,13 @@ internal class PaymentElementBuilderTest {
             owner = owner,
             factory = PaymentSheet.StoreViewModel.Factory,
         )[PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
+    }
+
+    private fun flowControllerCallbackIdentifier(owner: ViewModelStoreOwner): String {
+        return ViewModelProvider.create(
+            owner = owner,
+            factory = PaymentSheet.StoreViewModel.Factory,
+        )[FLOW_CONTROLLER_STORE_KEY, PaymentSheet.StoreViewModel::class].paymentElementCallbackIdentifier
     }
 
     private fun testWithActivity(test: (ComponentActivity) -> Unit) = runTest {
