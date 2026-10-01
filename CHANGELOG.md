@@ -6,7 +6,6 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
-* [FIXED][14790](https://github.com/stripe/stripe-android/pull/14790) Kept Checkout Session tax amounts in sync when selecting a saved payment method with a different billing address from the `View more` sheet.
 
 ## 23.21.0 - 2026-09-28
 
