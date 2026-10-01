@@ -274,6 +274,15 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 taxStatus = TAX_STATUS_COMPLETE,
                 hasSavedPaymentMethod = true,
             ),
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = INITIAL_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
             holdTaxUpdateResponse = true,
         ) {
             enqueueSavedPaymentMethodTaxUpdate { response ->
