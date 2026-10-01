@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.FormPage
 import org.junit.Rule
@@ -103,7 +104,7 @@ internal class EmbeddedSheetActivityTest {
             fillOutCheckoutCard()
             primaryButton.performScrollTo().assertIsEnabled().performClick()
 
-            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.waitUntilWithIdle {
                 composeTestRule.onAllNodes(hasText(expectedError))
                     .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isNotEmpty()
@@ -132,12 +133,12 @@ internal class EmbeddedSheetActivityTest {
                 val processingLabel = applicationContext.getString(
                     PaymentSheetR.string.stripe_paymentsheet_primary_button_processing
                 )
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodes(hasText(processingLabel))
                         .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     requestReceived.count == 0L
                 }
                 composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()

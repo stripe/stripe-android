@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.testing.waitUntilWithIdle
 
 class TapToAddErrorPage(
     private val composeTestRule: ComposeTestRule,
@@ -13,7 +14,7 @@ class TapToAddErrorPage(
         expectedTitle: String,
         expectedAction: String
     ) {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onNode(hasText(expectedTitle)).isDisplayed()
         }
         composeTestRule.onNode(hasText(expectedTitle)).assertIsDisplayed()

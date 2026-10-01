@@ -2,9 +2,6 @@
 
 package com.stripe.android.paymentsheet.ui
 
-import android.content.res.ColorStateList
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -41,19 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.ui.BottomSheetScaffold
@@ -63,7 +54,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -79,13 +69,9 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
-import com.stripe.android.uicore.getBackgroundColor
-import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
-import com.stripe.android.uicore.stripePrimaryButtonStyle
-import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 
@@ -471,6 +457,7 @@ private fun WalletHeader(
             when (wallet) {
                 is WalletsState.GooglePay -> {
                     GooglePayButton(
+                        apiConfiguration = wallet.apiConfiguration,
                         state = PrimaryButton.State.Ready,
                         allowCreditCards = wallet.allowCreditCards,
                         buttonType = wallet.buttonType,
@@ -498,83 +485,62 @@ private fun WalletHeader(
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
+    val buyButtonState = if (viewModel is PaymentSheetViewModel) {
+        val buyButtonState by viewModel.buyButtonState.collectAsState()
+        buyButtonState
+    } else {
+        null
+    }
+    val processingState = buyButtonState.convert()
 
-    val modifier = Modifier
-        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-        .testTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
-        .semantics {
-            role = Role.Button
-
-            if (uiState?.enabled != true) {
-                disabled()
+    Box {
+        Box(modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())) {
+            uiState?.let { state ->
+                PrimaryButton(
+                    label = state.label.resolve(),
+                    locked = state.lockVisible,
+                    enabled = state.enabled && processingState is PrimaryButtonProcessingState.Idle,
+                    subduedWhileProcessing = false,
+                    modifier = Modifier.padding(
+                        top = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing)
+                    ),
+                    processingState = processingState,
+                    onProcessingCompleted = buyButtonState.onProcessingCompleted,
+                    onClick = state.onClick,
+                )
             }
         }
 
-    var button by remember {
-        mutableStateOf<PrimaryButton?>(null)
-    }
-
-    val context = LocalContext.current
-    val primaryButtonStyle = MaterialTheme.stripePrimaryButtonStyle
-    val primaryButtonTextStyle = primaryButtonStyle.getComposeTextStyle()
-    val isDark = MaterialTheme.stripeThemeIsDark
-
-    Box {
-        AndroidViewBinding(
-            factory = { inflater: LayoutInflater, parent: ViewGroup, attachToParent: Boolean ->
-                val binding = StripeFragmentPrimaryButtonContainerBinding.inflate(inflater, parent, attachToParent)
-                val primaryButton = binding.primaryButton
-                button = primaryButton
-                primaryButton.setAppearanceConfiguration(
-                    primaryButtonStyle = primaryButtonStyle,
-                    labelTextStyle = primaryButtonTextStyle,
-                    tintList = ColorStateList.valueOf(
-                        if (isDark) {
-                            viewModel.config.appearance.primaryButton.colorsDark.background
-                        } else {
-                            viewModel.config.appearance.primaryButton.colorsLight.background
-                        } ?: primaryButtonStyle.getBackgroundColor(context)
-                    )
-                )
-                binding
-            },
-            update = {
-                button?.updateUiState(uiState)
-            },
-            modifier = modifier,
-        )
-
-        if (uiState?.canClickWhileDisabled == true && uiState?.enabled != true) {
+        val state = uiState
+        if (state?.canClickWhileDisabled == true && !state.enabled) {
             Box(
                 Modifier
                     .testTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
                     .matchParentSize()
                     .pointerInput(Unit) {
-                        detectTapGestures { uiState?.onDisabledClick?.invoke() }
+                        detectTapGestures { state.onDisabledClick() }
                     }
             )
         }
     }
-
-    LaunchedEffect(viewModel, button) {
-        (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
-            button?.updateState(state?.convert())
-        }
-    }
 }
 
-internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
+internal fun PaymentSheetViewState?.convert(): PrimaryButtonProcessingState {
     return when (this) {
         is PaymentSheetViewState.Reset -> {
-            PrimaryButton.State.Ready
+            PrimaryButtonProcessingState.Idle(null)
         }
         is PaymentSheetViewState.StartProcessing -> {
-            PrimaryButton.State.StartProcessing
+            PrimaryButtonProcessingState.Processing
         }
         is PaymentSheetViewState.FinishProcessing -> {
-            PrimaryButton.State.FinishProcessing(this.onComplete)
+            PrimaryButtonProcessingState.Completed
         }
+        null -> PrimaryButtonProcessingState.Idle(null)
     }
 }
+
+private val PaymentSheetViewState?.onProcessingCompleted: () -> Unit
+    get() = (this as? PaymentSheetViewState.FinishProcessing)?.onComplete ?: {}
 
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

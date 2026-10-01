@@ -75,6 +75,7 @@ internal class PaymentSheetNextActionTest(
     ) = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         successTimeoutSeconds = 10L,
         resultCallback = resultCallback,
     ) { testContext ->
@@ -85,9 +86,11 @@ internal class PaymentSheetNextActionTest(
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Example, Inc.",
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -134,7 +137,7 @@ internal class PaymentSheetNextActionTest(
             }
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         waitForBrowserAuthToLaunch()
 

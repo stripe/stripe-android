@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -27,6 +28,7 @@ internal interface AutocompleteLauncher {
     fun launch(
         country: String,
         googlePlacesApiKey: String,
+        apiConfiguration: ApiConfiguration.State,
         resultHandler: AutocompleteLauncherResultHandler
     )
 
@@ -175,6 +177,7 @@ internal class DefaultAutocompleteLauncher(
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
+        apiConfiguration: ApiConfiguration.State,
         resultHandler: AutocompleteLauncherResultHandler
     ) {
         val id = UUID.randomUUID().toString()
@@ -186,6 +189,7 @@ internal class DefaultAutocompleteLauncher(
                 id = id,
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                apiConfiguration = apiConfiguration,
                 appearanceContext = appearanceContext,
             )
         )

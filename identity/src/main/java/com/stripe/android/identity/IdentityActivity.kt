@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -13,10 +14,14 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.luminance
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -104,6 +109,7 @@ internal class IdentityActivity :
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         injectWithFallback(
             starterArgs.injectorKey,
             this.applicationContext
@@ -179,6 +185,13 @@ internal class IdentityActivity :
                 mutableStateOf(IdentityTopBarState.GO_BACK)
             }
             IdentityTheme(brandColor = starterArgs.brandColor) {
+                val statusBarBackground = MaterialTheme.colors.background
+                val useDarkStatusBarIcons =
+                    statusBarBackground.luminance() > LIGHT_STATUS_BAR_LUMINANCE_THRESHOLD
+                SideEffect {
+                    WindowCompat.getInsetsController(window, window.decorView)
+                        .isAppearanceLightStatusBars = useDarkStatusBarIcons
+                }
                 IdentityNavGraph(
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = this,
@@ -284,6 +297,8 @@ internal class IdentityActivity :
             "IdentityActivity was started without arguments"
 
         const val KEY_PRESENTED = "presented"
+
+        const val LIGHT_STATUS_BAR_LUMINANCE_THRESHOLD = 0.5f
     }
 }
 

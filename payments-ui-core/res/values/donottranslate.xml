@@ -31,6 +31,7 @@
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>
     <string name="stripe_paymentsheet_payment_method_bizum">Bizum</string>
+    <string name="stripe_paymentsheet_payment_method_mb_way">MB WAY</string>
     <string name="stripe_paymentsheet_payment_method_alipay">Alipay</string>
     <string name="stripe_paymentsheet_payment_method_oxxo">OXXO</string>
     <string name="stripe_paymentsheet_payment_method_twint">TWINT</string>
@@ -51,6 +52,6 @@
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
     <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
     <string name="stripe_paymentsheet_payment_method_gopay">GoPay</string>
-    <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
     <string name="stripe_paymentsheet_payment_method_gcash">GCash</string>
+    <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
 </resources>

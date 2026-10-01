@@ -6,15 +6,10 @@ import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.parcelize.Parcelize
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 
 /**
  * A class representing a Stripe API or Analytics request.
@@ -27,8 +22,7 @@ data class ApiRequest internal constructor(
     val options: Options,
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
-    private val sdkVersion: String = StripeSdkVersion.VERSION,
-    override val shouldCache: Boolean = false
+    private val sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
 
@@ -115,22 +109,6 @@ data class ApiRequest internal constructor(
         val apiKeyIsLiveMode: Boolean
             get() = !apiKey.contains("test")
 
-        /**
-         * Dedicated constructor for injection.
-         *
-         * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, whenever required, a new
-         * [ApiRequest.Options] instance is created with the latest values.
-         * Should always be used with [Provider] or [Lazy].
-         */
-        @Inject
-        constructor(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
-        ) : this(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider()
-        )
-
         init {
             ApiKeyValidator().requireValid(apiKey)
         }
@@ -150,8 +128,7 @@ data class ApiRequest internal constructor(
         fun createGet(
             url: String,
             options: Options,
-            params: Map<String, *>? = null,
-            shouldCache: Boolean = false,
+            params: Map<String, *>? = null
         ): ApiRequest {
             return ApiRequest(
                 method = Method.GET,
@@ -160,16 +137,14 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion,
-                shouldCache = shouldCache
+                sdkVersion = sdkVersion
             )
         }
 
         fun createPost(
             url: String,
             options: Options,
-            params: Map<String, *>? = null,
-            shouldCache: Boolean = false,
+            params: Map<String, *>? = null
         ): ApiRequest {
             return ApiRequest(
                 method = Method.POST,
@@ -178,8 +153,7 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion,
-                shouldCache = shouldCache
+                sdkVersion = sdkVersion
             )
         }
 

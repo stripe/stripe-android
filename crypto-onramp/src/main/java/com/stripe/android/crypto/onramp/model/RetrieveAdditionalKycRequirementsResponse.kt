@@ -24,12 +24,13 @@ internal data class RetrieveAdditionalKycRequirementsResponse(
     val requirements: AdditionalKycRequirementsResponse,
 )
 
+@JvmInline
 @Serializable
-internal data class AdditionalKycRequirementsResponse(
-    val entries: List<AdditionalKycRequirementResponse>,
+internal value class AdditionalKycRequirementsResponse(
+    val entries: Map<String, AdditionalKycRequirementResponse>,
 ) {
     fun toAdditionalKycRequirements(): AdditionalKycRequirements {
-        val requirements = entries.map { it.toAdditionalKycRequirement() }
+        val requirements = entries.map { (name, requirement) -> requirement.toAdditionalKycRequirement(name) }
         return AdditionalKycRequirements(
             userActionRequired = requirements.filter { it.awaitingActionFrom == USER },
             pendingPartnerAction = requirements.filter { it.awaitingActionFrom == PARTNER },
@@ -50,7 +51,6 @@ internal data class AdditionalKycRequirementsResponse(
 
 @Serializable
 internal data class AdditionalKycRequirementResponse(
-    val description: String,
     @SerialName("requested_by")
     val requestedBy: String,
     @SerialName("awaiting_action_from")
@@ -58,12 +58,15 @@ internal data class AdditionalKycRequirementResponse(
     val errors: List<AdditionalKycRequirementErrorResponse>,
     @Serializable(with = EmptyArrayAsNullDocumentRequirementSerializer::class)
     val document: AdditionalKycDocumentRequirementResponse? = null,
+    @SerialName("additional_requirements")
+    @Serializable(with = EmptyArrayAsNullCollectionRequirementsSerializer::class)
+    val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
 )
 
 @Serializable
 internal data class AdditionalKycRequirementErrorResponse(
     val code: String,
-    val message: String,
+    val description: String,
 )
 
 @Serializable
@@ -72,18 +75,22 @@ internal data class AdditionalKycDocumentRequirementResponse(
     val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse>,
     @SerialName("accepted_formats")
     val acceptedFormats: List<String>,
-    @SerialName("min_documents")
-    val minDocuments: Int,
+    @SerialName("max_file_size_bytes")
+    val maxFileSizeBytes: Long,
+    @SerialName("min_document_types")
+    val minDocumentTypes: Int,
+    @SerialName("max_document_types")
+    val maxDocumentTypes: Int,
+    @SerialName("file_requirements")
+    val fileRequirements: String,
     val instructions: List<String>,
-    @SerialName("additional_requirements")
-    @Serializable(with = EmptyArrayAsNullCollectionRequirementsSerializer::class)
-    val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
 )
 
 @Serializable
 internal data class AdditionalKycDocumentSubtypeResponse(
     val id: String,
     val label: String,
+    val description: String? = null,
 )
 
 @Serializable
@@ -106,19 +113,19 @@ internal data class AdditionalKycQuestionResponse(
     val required: Boolean,
 )
 
-private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(): AdditionalKycRequirement {
+private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(name: String): AdditionalKycRequirement {
     return AdditionalKycRequirement(
-        description = description,
+        description = name,
         requestedBy = requestedBy,
         awaitingActionFrom = awaitingActionFrom,
         errors = errors.map { error ->
             AdditionalKycRequirementError(
                 code = error.code,
-                developerMessage = error.message,
+                developerMessage = error.description,
             )
         },
         document = document?.toAdditionalKycDocumentRequirement(),
-        questionnaire = document?.additionalRequirements?.questionnaire?.toAdditionalKycQuestionnaire(),
+        questionnaire = additionalRequirements?.questionnaire?.toAdditionalKycQuestionnaire(),
     )
 }
 
@@ -129,10 +136,14 @@ private fun AdditionalKycDocumentRequirementResponse.toAdditionalKycDocumentRequ
             AdditionalKycDocumentSubtype(
                 id = subtype.id,
                 label = subtype.label,
+                description = subtype.description,
             )
         },
         acceptedFormats = acceptedFormats,
-        minDocuments = minDocuments,
+        minDocumentTypes = minDocumentTypes,
+        maxDocumentTypes = maxDocumentTypes,
+        maxFileSizeBytes = maxFileSizeBytes,
+        fileRequirements = fileRequirements,
         instructions = instructions,
     )
 }

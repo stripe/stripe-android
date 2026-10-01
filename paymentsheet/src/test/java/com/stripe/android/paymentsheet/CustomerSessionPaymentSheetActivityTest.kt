@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
@@ -368,10 +369,10 @@ internal class CustomerSessionPaymentSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 2_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule
                         .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                        .fetchSemanticsNodes()
+                        .fetchSemanticsNodes(atLeastOneRootRequired = false)
                         .isNotEmpty()
                 }
 

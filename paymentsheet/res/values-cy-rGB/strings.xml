@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Cyfrif banc···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Cyfrif banc ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Cadarnhewch y taliad Bizum yn eich ap bancio symudol o fewn %s i gwblhau’r pryniant.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Prynu nawr neu dalu wedyn gyda Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -60,6 +62,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Cadarnhewch eich manylion</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 digid olaf yr SSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Telerau ac Amodau</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Telerau Gwasanaeth</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Mewngofnodi neu gofrestru</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -90,8 +96,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Allgofnodi o Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Allgofnodi o %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Cadarnhewch y taliad yn eich ap MB WAY o fewn %s i gwblhau’r pryniant.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Er diogelwch, rhaid i opsiynau datblygwr fod wedi’u diffodd er mwyn defnyddio Tapio i ychwanegu.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Agor y Gosodiadau</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Diffodd yr opsiynau Datblygwr</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Cerdyn wedi dod i ben. Rhowch gynnig ar gerdyn arall.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Tapiwch y cerdyn</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Cerdyn wedi’i wrthod. Rhowch gynnig ar gerdyn arall.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -251,6 +267,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Heb ddiweddaru brand y cerdyn. Rhowch gynnig arall arni.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Cadarnhewch y taliad yn eich ap bancio neu dalu o fewn %s i gwblhau\'r pryniant.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Cwblhewch y taliad gan ddefnyddio Pix i orffen y pryniant.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Gosod fel dull talu diofyn</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

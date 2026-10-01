@@ -45,6 +45,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -88,6 +89,7 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
@@ -110,6 +112,7 @@ import javax.inject.Singleton
         CheckoutControllerModule::class,
         CheckoutModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        SepaMandateConfirmationModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ElementsSessionClientParamsModule::class,
@@ -222,7 +225,6 @@ internal interface CheckoutControllerModule {
     ): EmbeddedRowSelectionImmediateActionHandler
 
     @Binds
-    @Singleton
     fun bindsVerticalPaymentSelectionHandler(
         handler: CheckoutPaymentSelectionHandler,
     ): VerticalPaymentSelectionHandler
@@ -344,11 +346,28 @@ internal interface CheckoutControllerModule {
         }
 
         @Provides
+        @CheckoutIsUpdating
+        fun provideIsUpdating(
+            operationCoordinator: CheckoutOperationCoordinator,
+        ): StateFlow<Boolean> {
+            return operationCoordinator.isUpdating
+        }
+
+        @Provides
         @EmbeddedHostProcessing
         fun provideHostProcessing(
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
             return operationCoordinator.isUpdating
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(
+            stateHolder: CheckoutControllerStateHolder,
+        ): StateFlow<SavedPaymentMethodSelectionState> {
+            return stateHolder.stateFlow.mapAsStateFlow {
+                it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
+            }
         }
     }
 }

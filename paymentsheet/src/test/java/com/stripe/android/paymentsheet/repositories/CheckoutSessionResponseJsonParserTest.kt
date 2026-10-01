@@ -38,6 +38,18 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `null shipping address collection does not require a shipping address`() {
+        val json = base().put(
+            "shipping_address_collection",
+            null,
+        )
+
+        val result = parse(json)
+
+        assertThat(result?.requiresShippingAddress).isFalse()
+    }
+
+    @Test
     fun `unit amount override takes precedence and decimal is retained`() {
         val json = base()
         val item = item(json)

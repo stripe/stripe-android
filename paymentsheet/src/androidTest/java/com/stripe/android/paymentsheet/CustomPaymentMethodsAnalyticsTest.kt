@@ -51,6 +51,7 @@ internal class CustomPaymentMethodsAnalyticsTest(
     fun testSuccessful() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = IntegrationType.Compose,
         builder = {
             confirmCustomPaymentMethodCallback { _, _ ->
@@ -83,19 +84,21 @@ internal class CustomPaymentMethodsAnalyticsTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
-                    .customPaymentMethods(
-                        listOf(
-                            PaymentSheet.CustomPaymentMethod(
-                                id = "cpmt_123",
-                                subtitle = "Pay now",
-                                disableBillingDetailCollection = true,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                        .customPaymentMethods(
+                            listOf(
+                                PaymentSheet.CustomPaymentMethod(
+                                    id = "cpmt_123",
+                                    subtitle = "Pay now",
+                                    disableBillingDetailCollection = true,
+                                )
                             )
                         )
-                    )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .paymentMethodOrder(listOf("cpmt_123", "card"))
-                    .build()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .paymentMethodOrder(listOf("cpmt_123", "card"))
+                        .build()
+                )
             )
         }
 

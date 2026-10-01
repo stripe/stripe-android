@@ -53,6 +53,7 @@ internal data class LinkConfiguration(
     val clientAttributionMetadata: ClientAttributionMetadata,
     val linkBrand: LinkBrand,
     val apiConfiguration: ApiConfiguration.State,
+    val shouldDisplay: Boolean,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?

@@ -18,4 +18,5 @@
   <string name="stripe_onramp_default_api_error_user_message">Something went wrong. Please try again later.</string>
   <!-- App-user message when Samsung Pay cannot complete an operation. -->
   <string name="stripe_onramp_samsung_pay_error_user_message">Samsung Pay couldn\'t be used. Please choose another payment method or try again.</string>
+    <string name="stripe_onramp_platform_pay_account_changed">Please select your wallet payment method again.</string>
 </resources>

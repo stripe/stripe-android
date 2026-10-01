@@ -13,6 +13,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -28,9 +29,15 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -54,6 +61,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -179,6 +187,108 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure syncs tax from the initial saved payment method rather than the default billing address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultBillingAddress(),
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            networkSetup = {
+                networkRule.savedPaymentMethodTaxUpdate(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithBillingAddress(),
+                            withTotal(6099),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
+            assertThat(requireNotNull(committedState).checkoutSessionResponse.amount).isEqualTo(6099L)
+        }
+
+    @Test
+    fun `configure does not emit session when the saved payment method tax update fails`() =
+        runConfigureScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            networkSetup = {
+                networkRule.savedPaymentMethodTaxUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
+            },
+        ) {
+            assertThat(result.isFailure).isTrue()
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
+        }
+
+    @Test
+    fun `configure syncs tax with the persisted saved payment method rather than the first`() {
+        persistSavedSelection("pm_second_card")
+        runConfigureScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithTwoCards(),
+            ),
+            networkSetup = {
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "US"),
+                    bodyPart("tax_region[city]", "Seattle"),
+                    bodyPart("tax_region[state]", "WA"),
+                    bodyPart("tax_region[postal_code]", "98109"),
+                    bodyPart("tax_region[line1]", "400 Broad St"),
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithTwoCards(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_second_card")
+        }
+    }
+
+    @Test
+    fun `configure sends the default billing address when the initial selection is not a saved payment method`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultBillingAddress(),
+            // Billing-tax filtering drops a saved payment method without a billing address, so the
+            // initial selection is not a saved payment method.
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithoutBillingAddress(),
+            ),
+            networkSetup = {
+                networkRule.defaultBillingAddressTaxUpdate(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("billing"),
+                            savedCustomerWithoutBillingAddress(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(requireNotNull(committedState).paymentSelection)
+                .isNotInstanceOf(PaymentSelection.Saved::class.java)
+        }
+
+    @Test
     fun `configure keeps a valid default shipping address in session when SAE is configured`() =
         runConfigureScenario(
             configuration = CheckoutController.Configuration()
@@ -217,13 +327,7 @@ internal class CheckoutControllerTest {
                             .address(CheckoutController.Address().country("DE"))
                     )
                 ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -242,13 +346,7 @@ internal class CheckoutControllerTest {
                         .address(CheckoutController.Address().country("DE"))
                 )
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory(
-                        allowedShippingCountries(listOf("US", "CA")),
-                    ),
-                )
-            },
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
             result.getOrThrow()
 
@@ -258,31 +356,10 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends default billing address when automatic tax targets billing`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
-                        .city("San Francisco")
-                        .country("US")
-                        .line1("510 Townsend St")
-                        .line2("Suite 100")
-                        .postalCode("94103")
-                        .state("CA")
-                )
-            )
-        ),
+        configuration = configurationWithDefaultBillingAddress(),
+        initModifier = automaticTaxFor("billing"),
         networkSetup = {
-            networkRule.checkoutInit(
-                responseFactory = successResponseFactory(automaticTaxFor("billing")),
-            )
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94103"),
-                bodyPart("tax_region[line1]", "510 Townsend St"),
-                bodyPart("tax_region[line2]", "Suite 100"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            networkRule.defaultBillingAddressTaxUpdate(
                 responseFactory = successResponseFactory(automaticTaxFor("billing")),
             )
         },
@@ -291,13 +368,27 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure does not emit session when the default billing address tax update fails`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultBillingAddress(),
+            initModifier = automaticTaxFor("billing"),
+            networkSetup = {
+                networkRule.defaultBillingAddressTaxUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
+            },
+        ) {
+            assertThat(result.isFailure).isTrue()
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
+        }
+
+    @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
-        networkSetup = {
-            networkRule.checkoutInit(responseFactory = ::successResponse)
-        },
     ) {
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
@@ -350,13 +441,7 @@ internal class CheckoutControllerTest {
             configuration = CheckoutController.Configuration().paymentElement(
                 PaymentElement.Configuration()
             ),
-            networkSetup = {
-                networkRule.checkoutInit(
-                    responseFactory = successResponseFactory { json ->
-                        json.put("billing_address_collection", "required")
-                    },
-                )
-            },
+            initModifier = { json -> json.put("billing_address_collection", "required") },
         ) {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
@@ -655,9 +740,7 @@ internal class CheckoutControllerTest {
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "usd"),
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 5099).put("subtotal", 5099)
-            },
+            responseFactory = successResponseFactory(withTotal(5099)),
         )
 
         val result = controller.updateCurrency("usd")
@@ -708,6 +791,143 @@ internal class CheckoutControllerTest {
 
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
     }
+
+    @Test
+    fun `selectSavedPaymentMethod refreshes tax and commits response and selection together`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            configureNetworkSetup = ::enqueueInitialSavedPaymentMethodTaxUpdate,
+            paymentSelection = PaymentSelection.GooglePay,
+            assertLoadingConsumed = true,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val before = committedState()
+            val requestReceived = CountDownLatch(1)
+            val releaseResponse = CountDownLatch(1)
+            networkRule.savedPaymentMethodTaxUpdate { response ->
+                requestReceived.countDown()
+                check(releaseResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the saved payment method tax response."
+                }
+                successfulSavedPaymentMethodResponse(response)
+            }
+
+            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+
+            val result = async { controller.selectSavedPaymentMethod(selection) }
+            try {
+                testScheduler.advanceUntilIdle()
+
+                assertThat(requestReceived.await(10, TimeUnit.SECONDS)).isTrue()
+                assertThat(isUpdatingTurbine.awaitItem()).isTrue()
+                assertThat(committedState()).isEqualTo(
+                    before.copy(
+                        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                            selection.paymentMethod.id,
+                        ),
+                    )
+                )
+
+                releaseResponse.countDown()
+                result.await().getOrThrow()
+
+                assertThat(isUpdatingTurbine.awaitItem()).isFalse()
+                val state = committedState()
+                assertThat(state.checkoutSessionResponse.livemode).isTrue()
+                assertThat(state.paymentSelection).isEqualTo(selection)
+                assertThat(state.savedPaymentMethodSelectionState)
+                    .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            } finally {
+                releaseResponse.countDown()
+            }
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod acknowledges the SEPA mandate`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithSepaDebit(),
+                { json ->
+                    val elementsSession = json.getJSONObject("elements_session")
+                    elementsSession.getJSONArray("ordered_payment_method_types_and_wallets")
+                        .put("sepa_debit")
+                    elementsSession.getJSONObject("payment_method_preference")
+                        .getJSONArray("ordered_payment_method_types")
+                        .put("sepa_debit")
+                    json.getJSONObject("server_built_elements_session_params")
+                        .getJSONObject("deferred_intent")
+                        .getJSONArray("payment_method_types")
+                        .put("sepa_debit")
+                },
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+            controller.selectSavedPaymentMethod(selection).getOrThrow()
+
+            assertThat(committedState().paymentSelection).isEqualTo(selection)
+            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+            assertThat(committedState().savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod preserves prior state and records failure when tax update fails`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+            ),
+            configureNetworkSetup = ::enqueueInitialSavedPaymentMethodTaxUpdate,
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            networkRule.checkoutUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+            val before = committedState()
+            val selection = loadedSavedPaymentMethodSelection()
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(
+                committedState().copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
+                ),
+            ).isEqualTo(before)
+            assertThat(committedState().savedPaymentMethodSelectionState).isEqualTo(
+                SavedPaymentMethodSelectionState.Failed(
+                    R.string.stripe_something_went_wrong.resolvableString,
+                ),
+            )
+        }
+
+    @Test
+    fun `selectSavedPaymentMethod skips tax update when automatic tax targets shipping`() =
+        runMutationScenario(
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
+            ),
+            paymentSelection = PaymentSelection.GooglePay,
+        ) {
+            val selection = loadedSavedPaymentMethodSelection()
+            val before = committedState().checkoutSessionResponse
+            assertThat(selection.paymentMethod.billingDetails?.address).isNotNull()
+
+            val result = controller.selectSavedPaymentMethod(selection)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
+            assertThat(state.paymentSelection).isEqualTo(selection)
+        }
 
     @Test
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
@@ -824,9 +1044,7 @@ internal class CheckoutControllerTest {
 
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
-            responseFactory = successResponseFactory { json ->
-                checkoutItemJson(json).put("total", 8000).put("subtotal", 8000)
-            },
+            responseFactory = successResponseFactory(withTotal(8000)),
         )
 
         val result = controller.runServerUpdate { Result.success(Unit) }
@@ -1106,8 +1324,57 @@ internal class CheckoutControllerTest {
 
     // endregion
 
+    private fun NetworkRule.enqueueSuccessfulInit(
+        jsonModifier: (JSONObject) -> Unit = {},
+    ) {
+        checkoutInit(responseFactory = successResponseFactory(jsonModifier))
+    }
+
     private fun NetworkRule.defaultInit() {
-        checkoutInit(responseFactory = ::successResponse)
+        enqueueSuccessfulInit()
+    }
+
+    // Configure syncs tax for the initially selected saved payment method before mutation tests run.
+    private fun enqueueInitialSavedPaymentMethodTaxUpdate() {
+        networkRule.savedPaymentMethodTaxUpdate(
+            responseFactory = successResponseFactory(
+                combine(
+                    automaticTaxFor("billing"),
+                    savedCustomerWithBillingAddress(),
+                ),
+            ),
+        )
+    }
+
+    private fun NetworkRule.taxRegionUpdate(responseFactory: (MockResponse) -> Unit) {
+        checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94111"),
+            bodyPart("tax_region[line1]", "1234 Main Street"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
+    private fun NetworkRule.savedPaymentMethodTaxUpdate(
+        responseFactory: (MockResponse) -> Unit,
+    ) {
+        taxRegionUpdate(responseFactory)
+    }
+
+    private fun NetworkRule.defaultBillingAddressTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[line2]", "Suite 100"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
     }
 
     // The base fixture omits customer_email. Inject one for standard success paths; a test can
@@ -1153,6 +1420,125 @@ internal class CheckoutControllerTest {
                 .put("automatic_tax_enabled", true)
                 .put("automatic_tax_address_source", source),
         )
+    }
+
+    private fun successfulSavedPaymentMethodResponse(response: MockResponse) {
+        successResponseFactory(
+            combine(
+                automaticTaxFor("billing"),
+                savedCustomerWithBillingAddress(),
+                { json -> json.put("livemode", true) },
+            )
+        ).invoke(response)
+    }
+
+    private fun configurationWithDefaultBillingAddress(): CheckoutController.Configuration {
+        return CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
+        )
+    }
+
+    private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.put("customer", savedCustomerJson())
+    }
+
+    // Checkout has no customer configuration, so the loader reads the guest saved selection.
+    private fun persistSavedSelection(paymentMethodId: String) {
+        DefaultPrefsRepository(
+            context = applicationContext,
+            customerId = null,
+            workContext = EmptyCoroutineContext,
+        ).setSavedSelection(SavedSelection.PaymentMethod(paymentMethodId))
+    }
+
+    private fun savedCustomerWithoutBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.put(
+            "customer",
+            savedCustomerJson(
+                paymentMethod = savedCardPaymentMethodJson().apply { remove("billing_details") },
+            ),
+        )
+    }
+
+    private fun savedCustomerWithTwoCards(): (JSONObject) -> Unit = { json ->
+        val secondCard = savedCardPaymentMethodJson()
+            .put("id", "pm_second_card")
+            .put(
+                "billing_details",
+                JSONObject().put(
+                    "address",
+                    JSONObject()
+                        .put("line1", "400 Broad St")
+                        .put("city", "Seattle")
+                        .put("state", "WA")
+                        .put("postal_code", "98109")
+                        .put("country", "US")
+                )
+            )
+        json.put(
+            "customer",
+            savedCustomerJson().put(
+                "payment_methods",
+                JSONArray().put(savedCardPaymentMethodJson()).put(secondCard),
+            ),
+        )
+    }
+
+    private fun savedCustomerWithSepaDebit(): (JSONObject) -> Unit = { json ->
+        json.put(
+            "customer",
+            savedCustomerJson(
+                paymentMethod = JSONObject(PaymentMethodFixtures.SEPA_DEBIT_JSON.toString()),
+            ),
+        )
+    }
+
+    private fun savedCustomerJson(
+        paymentMethod: JSONObject = savedCardPaymentMethodJson(),
+    ): JSONObject {
+        return JSONObject()
+            .put("id", "cus_saved_customer")
+            .put("payment_methods", JSONArray().put(paymentMethod))
+            .put("can_detach_payment_method", true)
+    }
+
+    private fun savedCardPaymentMethodJson(): JSONObject {
+        return JSONObject()
+            .put("id", "pm_saved_card")
+            .put("object", "payment_method")
+            .put("created", 1)
+            .put("livemode", false)
+            .put("type", "card")
+            .put(
+                "card",
+                JSONObject()
+                    .put("brand", "visa")
+                    .put("exp_month", 8)
+                    .put("exp_year", 2029)
+                    .put("last4", "4242")
+            )
+            .put(
+                "billing_details",
+                JSONObject().put(
+                    "address",
+                    JSONObject()
+                        .put("line1", "1234 Main Street")
+                        .put("city", "San Francisco")
+                        .put("state", "CA")
+                        .put("postal_code", "94111")
+                        .put("country", "US")
+                )
+            )
     }
 
     @Suppress("RestrictedApi")
@@ -1210,6 +1596,10 @@ internal class CheckoutControllerTest {
     private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
         .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
+    private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
+        checkoutItemJson(json).put("total", amount).put("subtotal", amount)
+    }
+
     private fun createControllerSetup(
         savedStateHandle: SavedStateHandle,
         integrationName: String,
@@ -1231,6 +1621,7 @@ internal class CheckoutControllerTest {
             controller = controller,
             stateHolder = CheckoutControllerStateFactory.createStateHolder(controllerSavedState.handle),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
+            savedStateHandle = controllerSavedState.handle,
         )
     }
 
@@ -1238,15 +1629,22 @@ internal class CheckoutControllerTest {
         val controller: CheckoutController,
         val stateHolder: CheckoutControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
+        val savedStateHandle: SavedStateHandle,
     )
 
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
         configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
-        networkSetup: () -> Unit = { networkRule.defaultInit() },
+        initModifier: ((JSONObject) -> Unit)? = null,
+        networkSetup: (() -> Unit)? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        networkSetup()
+        if (initModifier != null) {
+            networkRule.enqueueSuccessfulInit(initModifier)
+        } else if (networkSetup == null) {
+            networkRule.defaultInit()
+        }
+        networkSetup?.invoke()
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val result = setup.controller.configure(clientSecret, configuration)
@@ -1261,6 +1659,9 @@ internal class CheckoutControllerTest {
     ) {
         val committedState: CheckoutControllerState?
             get() = stateHolder.state
+
+        val committedSavedPaymentMethodId: String?
+            get() = (stateHolder.state?.paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.id
     }
 
     // Configures a controller from a fresh init, seeds the requested scenario state, then hands it
@@ -1271,6 +1672,7 @@ internal class CheckoutControllerTest {
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
+        configureNetworkSetup: () -> Unit = {},
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -1278,11 +1680,8 @@ internal class CheckoutControllerTest {
         assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
-        networkRule.checkoutInit(
-            responseFactory = successResponseFactory(
-                jsonModifier = initModifier,
-            )
-        )
+        networkRule.enqueueSuccessfulInit(initModifier)
+        configureNetworkSetup()
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
@@ -1300,6 +1699,7 @@ internal class CheckoutControllerTest {
                 MutationScenario(
                     controller = controller,
                     stateHolder = setup.stateHolder,
+                    savedStateHandle = setup.savedStateHandle,
                     testScope = this@runTest,
                     isUpdatingTurbine = isUpdatingTurbine,
                 )
@@ -1315,6 +1715,7 @@ internal class CheckoutControllerTest {
     private class MutationScenario(
         val controller: CheckoutController,
         private val stateHolder: CheckoutControllerStateHolder,
+        private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,
         val isUpdatingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
@@ -1331,6 +1732,14 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
+
+        fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
+            val customerState: CustomerState = requireNotNull(
+                savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER]
+            )
+            val paymentMethod = customerState.paymentMethods.single()
+            return PaymentSelection.Saved(paymentMethod)
+        }
     }
 
     private companion object {

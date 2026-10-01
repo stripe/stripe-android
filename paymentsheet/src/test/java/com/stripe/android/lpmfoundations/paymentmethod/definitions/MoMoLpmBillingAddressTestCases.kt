@@ -16,12 +16,10 @@ private val moMoFullRawValues = mapOf(
     FormFieldId.Country to "US",
 )
 
-private fun moMoNoBillingDetailsExpectedPaymentMethodParams(
-    requiresMandate: Boolean,
-) = PaymentMethodCreateParams.createWithOverride(
+private fun moMoNoBillingDetailsExpectedPaymentMethodParams() = PaymentMethodCreateParams.createWithOverride(
     code = PaymentMethod.Type.MoMo.code,
     billingDetails = null,
-    requiresMandate = requiresMandate,
+    requiresMandate = false,
     overrideParamMap = mapOf(
         "type" to PaymentMethod.Type.MoMo.code,
     ),
@@ -30,9 +28,7 @@ private fun moMoNoBillingDetailsExpectedPaymentMethodParams(
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
-private fun moMoWithBillingAddressExpectedPaymentMethodParams(
-    requiresMandate: Boolean,
-) = PaymentMethodCreateParams.createWithOverride(
+private fun moMoWithBillingAddressExpectedPaymentMethodParams() = PaymentMethodCreateParams.createWithOverride(
     code = PaymentMethod.Type.MoMo.code,
     billingDetails = PaymentMethod.BillingDetails(
         address = Address(
@@ -44,7 +40,7 @@ private fun moMoWithBillingAddressExpectedPaymentMethodParams(
             postalCode = "94103",
         ),
     ),
-    requiresMandate = requiresMandate,
+    requiresMandate = false,
     overrideParamMap = mapOf(
         "type" to PaymentMethod.Type.MoMo.code,
         "billing_details" to mapOf(
@@ -63,53 +59,50 @@ private fun moMoWithBillingAddressExpectedPaymentMethodParams(
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
-internal val moMoTestCases = LpmBillingAddressTestConfiguration.IntentScenario.entries.flatMap { intentScenario ->
-    val requiresMandate = intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-    listOf(
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "MoMo $intentScenario Never",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.MoMo,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = moMoFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = moMoNoBillingDetailsExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+internal val moMoTestCases = listOf(
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "MoMo PaymentIntent Never",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MoMo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         ),
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "MoMo $intentScenario Automatic without tax",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.MoMo,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = moMoFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = moMoNoBillingDetailsExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+        rawValues = moMoFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = moMoNoBillingDetailsExpectedPaymentMethodParams(),
+            optionsParams = null,
+            extraParams = null,
         ),
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "MoMo $intentScenario Full",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.MoMo,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = moMoFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = moMoWithBillingAddressExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "MoMo PaymentIntent Automatic without tax",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MoMo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         ),
-    )
-}
+        rawValues = moMoFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = moMoNoBillingDetailsExpectedPaymentMethodParams(),
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "MoMo PaymentIntent Full",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.MoMo,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = moMoFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = moMoWithBillingAddressExpectedPaymentMethodParams(),
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+)

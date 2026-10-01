@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
+import com.stripe.android.testing.waitUntilWithIdle
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FormPage(
@@ -56,7 +57,7 @@ class FormPage(
     }
 
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

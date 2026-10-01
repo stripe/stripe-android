@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -61,6 +62,9 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
+        )?.withSepaMandateAcknowledgement(
+            hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
+                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
         ) ?: return null
 
         return ConfirmationHandler.Args(
@@ -68,5 +72,15 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
+    }
+
+    private fun ConfirmationHandler.Option.withSepaMandateAcknowledgement(
+        hasAcknowledgedSepaMandate: Boolean,
+    ): ConfirmationHandler.Option {
+        return if (this is PaymentMethodConfirmationOption.Saved) {
+            copy(hasAcknowledgedSepaMandate = hasAcknowledgedSepaMandate)
+        } else {
+            this
+        }
     }
 }

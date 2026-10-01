@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -16,21 +17,36 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+internal class ExpressCheckoutElementTestRunnerContext(
+    private val countDownLatch: CountDownLatch,
+) {
+    /**
+     * Normally a test succeeds when [CheckoutController.ResultCallback] is invoked. Tests that
+     * intentionally do not confirm should call this after making their assertions.
+     */
+    fun markTestSucceeded() {
+        countDownLatch.countDown()
+    }
+}
+
 internal fun runExpressCheckoutElementTest(
     networkRule: NetworkRule,
+    initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
     },
     successTimeoutSeconds: Long = 5L,
-    assertions: (CheckoutController) -> Unit,
-    block: () -> Unit,
+    assertions: (CheckoutController) -> Unit = {},
+    configurationUpdates: (ExpressCheckoutElement.Configuration) -> ExpressCheckoutElement.Configuration = { it },
+    block: (ExpressCheckoutElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    networkRule.checkoutInit(responseFactory = CheckoutInitResponseFactory::create)
+    networkRule.checkoutInit(responseFactory = initialCheckoutSessionResponseFactory)
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -52,7 +68,11 @@ internal fun runExpressCheckoutElementTest(
             controller.configure(
                 DEFAULT_CLIENT_SECRET,
                 configuration = CheckoutController.Configuration()
-                    .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                    .expressCheckoutElement(
+                        configurationUpdates(
+                            ExpressCheckoutElement.Configuration()
+                        )
+                    )
             ).getOrThrow()
         }
         assertions(controller)
@@ -67,7 +87,9 @@ internal fun runExpressCheckoutElementTest(
         scenario.moveToState(Lifecycle.State.RESUMED)
 
         try {
-            block()
+            block(
+                ExpressCheckoutElementTestRunnerContext(countDownLatch)
+            )
 
             val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
             assertThat(didCompleteSuccessfully).isTrue()

@@ -436,7 +436,7 @@ internal class Selectors(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodes(
                 hasContentDescription("Expiration date", true)
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
     }

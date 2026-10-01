@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Pankkitili ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Pankkitili ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Vahvista Bizum-maksu mobiilipankkisovelluksessasi %s sisällä viedäksesi ostoksen loppuun.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Suorita osto vahvistamalla maksu pankkisi sovelluksessa %s.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -66,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Vahvista tietosi</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN:n 4 viimeistä numeroa</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Ehdot</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Palveluehdot</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Kirjaudu sisään tai rekisteröidy</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Kirjaudu ulos Link-palvelusta</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Kirjaudu ulos kohteesta %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Vahvista maksu MB WAY -sovelluksessasi %s sisällä viedäksesi ostoksen loppuun.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Tapahtui virhe. Tarkasta yhteys ja yritä uudelleen.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Turvallisuussyistä ohjelmoija-asetusten on oltava pois päältä, jotta voit käyttää Napauta lisätäksesi -ominaisuutta.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Avaa asetukset</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Ota Ohjelmoija-asetukset pois päältä</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kortti on vanhentunut. Kokeile toista korttia.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Napauta korttia</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kortti hylätty. Kokeile toista korttia.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -273,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Automerkkiä ei päivitetty. Yritä uudestaan.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Vahvista maksu pankissa tai maksusovelluksessa %s kuluessa suorittaaksesi oston.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Viimeistele osto suorittamalla maksu Pixillä.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Aseta oletusmaksutavaksi</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

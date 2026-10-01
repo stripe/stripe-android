@@ -31,28 +31,30 @@ open class AnalyticsRequestFactory(
      */
     open fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, Any?>,
+        publishableKeyOverride: String? = null,
     ): AnalyticsRequest {
         return AnalyticsRequest(
-            params = createParams(event) + additionalParams,
+            params = createParams(event, publishableKeyOverride) + additionalParams,
             headers = RequestHeadersFactory.Analytics.create()
         )
     }
 
     private fun createParams(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        publishableKeyOverride: String?
     ): Map<String, Any> {
-        return standardParams() + appDataParams() + event.params()
+        return standardParams(publishableKeyOverride) + appDataParams() + event.params()
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
         return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
-    private fun standardParams(): Map<String, Any> = mapOf(
+    private fun standardParams(publishableKeyOverride: String?): Map<String, Any> = mapOf(
         AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
         AnalyticsFields.PUBLISHABLE_KEY to runCatching {
-            val publishableKey = publishableKeyProvider.get()
+            val publishableKey = publishableKeyOverride ?: publishableKeyProvider.get()
             if (publishableKey.startsWith("uk_")) {
                 "[REDACTED_LIVE_KEY]"
             } else {

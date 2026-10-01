@@ -9,15 +9,20 @@ import javax.inject.Inject
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
 ) {
+    fun requiresUpdate(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+    ): Boolean {
+        return checkoutSessionResponse.automaticTaxEnabled &&
+            checkoutSessionResponse.taxAddressSource == addressSource
+    }
+
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
         address: CheckoutController.Address.State,
     ): Result<CheckoutSessionResponse> {
-        val shouldUpdate = checkoutSessionResponse.automaticTaxEnabled &&
-            checkoutSessionResponse.taxAddressSource == addressSource
-
-        return if (shouldUpdate) {
+        return if (requiresUpdate(checkoutSessionResponse, addressSource)) {
             checkoutSessionRepository.updateTaxRegion(
                 sessionId = checkoutSessionResponse.id,
                 address = address,

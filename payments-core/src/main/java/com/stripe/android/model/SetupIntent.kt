@@ -124,6 +124,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -135,6 +138,7 @@ constructor(
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.SwishRedirect,
             is StripeIntent.NextActionData.AwaitAuthorization,
+            is StripeIntent.NextActionData.MbWayAwaitAuthorization,
             is StripeIntent.NextActionData.DisplayPayNowDetails,
             is StripeIntent.NextActionData.DisplayPromptPayDetails,
             null -> {

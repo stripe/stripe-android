@@ -28,7 +28,8 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private val apiRequestFactory = mock<ApiRequest.Factory>()
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        preCollectedConsent = null,
     )
     private val authSessionId = "AuthSessionId"
 
@@ -82,8 +83,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any(),
-                shouldCache = eq(false)
+                params = any()
             )
         ).thenReturn(mock)
         given(

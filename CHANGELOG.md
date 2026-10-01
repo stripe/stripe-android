@@ -1,12 +1,50 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
-* [Added] GoPay support in PaymentSheet.
-* [Added] MoMo support in PaymentSheet.
-* [Added] GCash support in PaymentSheet.
+### Crypto Onramp
+* [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
+* [Changed] Crypto Onramp wallet collection returns contact-only `KycInfo` when available, including email, validated E.164 phone, and the original phone string.
+* [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
+* [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
+* [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+
+### Payments
+* [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
+
+### PaymentSheet
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support for PaymentIntents and SetupIntents.
+* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
+* [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+
+## 23.21.0 - 2026-09-28
+
+### Payments
+* [FIXED][14625](https://github.com/stripe/stripe-android/pull/14625) Fixed an issue where PaymentSheet and `CardNumberEditText` rejected valid card numbers for BINs whose account ranges have different PAN lengths, such as some 16-digit UnionPay cards.
+
+### PaymentSheet
+* [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
+* [ADDED] Added support for MB WAY payments.
+
+### Financial Connections
+* [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
+* [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+
+### Payments
+* [ADDED] Added API bindings for Pix.
+
+## 23.20.0 - 2026-09-21
+
+### Payments
+* [FIXED][14643](https://github.com/stripe/stripe-android/pull/14643) Fixed redirects with Alipay+ and the Alipay SDK
+
+### PaymentSheet
 * [ADDED] Added support for Bizum.
+
+### Identity
+* [FIXED][14617](https://github.com/stripe/stripe-android/pull/14617) Updated the top app bar to use the host app background color instead of its primary color.
 
 ## 23.19.0 - 2026-09-15
 
@@ -16,6 +54,10 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
+### CryptoOnramp
+* [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+* [ADDED] Added `presentTermsOfServiceIfNeeded()` to present and record terms of service acceptance during onboarding only when required.
 
 ## 23.18.0 - 2026-09-08
 
@@ -30,15 +72,15 @@ NEXT_VERSION_BUMP: PATCH
 ### AddressElement
 * [CHANGED] Use Stripe-hosted address autocomplete by default.
 
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
+
 ## 23.17.1 - 2026-08-31
 
 ### PaymentSheet
 * [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
 * [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
 * [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
-
-### CryptoOnramp
-* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
 
 ## 23.17.0 - 2026-08-24
 

@@ -164,6 +164,7 @@ internal class PaymentSheetLoadParallelismTest(
     ) = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
     ) { testContext ->
@@ -176,9 +177,11 @@ internal class PaymentSheetLoadParallelismTest(
             testContext.presentPaymentSheet {
                 presentWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = buildConfiguration(
-                        customerType = customerType,
-                        defaultEmail = defaultEmail,
+                    configuration = apiConfigurationTestType.applyTo(
+                        buildConfiguration(
+                            customerType = customerType,
+                            defaultEmail = defaultEmail,
+                        )
                     ),
                 )
             }

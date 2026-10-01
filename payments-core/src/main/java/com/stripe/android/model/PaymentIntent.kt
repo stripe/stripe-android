@@ -164,6 +164,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayPromptPayDetails -> {
                 StripeIntent.NextActionType.DisplayPromptPayDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -178,6 +181,9 @@ constructor(
             }
             is StripeIntent.NextActionData.AwaitAuthorization -> {
                 StripeIntent.NextActionType.AwaitAuthorization
+            }
+            is StripeIntent.NextActionData.MbWayAwaitAuthorization -> {
+                StripeIntent.NextActionType.MbWayAwaitAuthorization
             }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,

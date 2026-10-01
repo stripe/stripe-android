@@ -8,6 +8,7 @@ import com.stripe.android.FakeFraudDetectionDataRepository
 import com.stripe.android.FileFactory
 import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionData
@@ -1240,7 +1241,8 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
@@ -1252,8 +1254,8 @@ internal class StripeApiRepositoryTest {
             )
 
         verifyAnalyticsRequest(
-            PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-            null
+            event = PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+            publishableKey = API_CONFIGURATION.publishableKey,
         )
     }
 
@@ -1297,7 +1299,8 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
@@ -3297,7 +3300,8 @@ internal class StripeApiRepositoryTest {
     private fun verifyAnalyticsRequest(
         event: PaymentAnalyticsEvent,
         productUsage: String? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        publishableKey: String? = null,
     ) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
@@ -3308,6 +3312,9 @@ internal class StripeApiRepositoryTest {
         assertThat(analyticsParams["event"]).isEqualTo(event.toString())
         assertThat(analyticsParams["product_usage"]).isEqualTo(productUsage)
         assertThat(analyticsParams["error_message"]).isEqualTo(errorMessage)
+        publishableKey?.let {
+            assertThat(analyticsParams["publishable_key"]).isEqualTo(it)
+        }
     }
 
     @Test
@@ -3458,6 +3465,10 @@ internal class StripeApiRepositoryTest {
             CardParams("4242424242424242", 1, 2050, "123")
 
         private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
 
         private val DEFAULT_API_REQUEST_FACTORY = ApiRequest.Factory()
         private const val APP_ID = "com.app.id"

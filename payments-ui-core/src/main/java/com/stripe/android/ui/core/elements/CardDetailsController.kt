@@ -60,6 +60,10 @@ internal class CardDetailsController(
             CardPillElement(
                 controller = CardPillController(
                     cardNumber = initialCardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = initialValues[FormFieldId.CardExpMonth]?.toIntOrNull(),
+                        expirationYear = initialValues[FormFieldId.CardExpYear]?.toIntOrNull(),
+                    ),
                     onDismissPill = ::dismissCardPill,
                 )
             )
@@ -138,6 +142,10 @@ internal class CardDetailsController(
             cardPillElement.value = CardPillElement(
                 controller = CardPillController(
                     cardNumber = scannedCardDetails.cardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = scannedCardDetails.expirationMonth,
+                        expirationYear = scannedCardDetails.expirationYear,
+                    ),
                     onDismissPill = ::dismissCardPill,
                 )
             )
@@ -258,7 +266,25 @@ internal class CardDetailsController(
         return "%02d%02d".format(expirationMonth, expirationYear % YEAR_REMAINDER)
     }
 
+    private fun formatExpirationDateForDisplay(
+        expirationMonth: Int?,
+        expirationYear: Int?,
+    ): String? {
+        if (expirationMonth == null || expirationYear == null) {
+            return null
+        }
+
+        return buildString {
+            append(expirationMonth.toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0'))
+            append('/')
+            append(
+                (expirationYear % YEAR_REMAINDER).toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0')
+            )
+        }
+    }
+
     private companion object {
+        const val EXPIRATION_DATE_PART_LENGTH = 2
         const val YEAR_REMAINDER = 100
     }
 }
