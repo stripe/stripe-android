@@ -305,7 +305,10 @@ internal class DefaultSamsungPayLauncher(
         }
         trackAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
         val kycInfo = if (configuration.collectContactInformation) {
-            arguments?.getOrNull(0)?.let { SamsungPayContactInfo(reflection).read(it) }
+            arguments?.getOrNull(0)?.let { paymentInfo ->
+                // Optional prefill must not discard a valid payment credential.
+                runCatching { SamsungPayContactInfo(reflection).read(paymentInfo) }.getOrNull()
+            }
         } else {
             null
         }

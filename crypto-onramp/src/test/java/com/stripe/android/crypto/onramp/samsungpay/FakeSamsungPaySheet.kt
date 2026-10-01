@@ -50,7 +50,12 @@ class AmountConstants private constructor() {
 }
 
 class AddressControl(val id: String, val type: SheetItemType) : SheetControl() {
+    var addressReadError: Throwable? = null
     var address: FakeSamsungContactAddress? = null
+        get() {
+            addressReadError?.let { throw it }
+            return field
+        }
     var sheetUpdatedListener: SheetUpdatedListener? = null
 }
 

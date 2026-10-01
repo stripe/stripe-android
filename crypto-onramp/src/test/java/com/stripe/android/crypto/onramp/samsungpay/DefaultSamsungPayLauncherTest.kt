@@ -334,6 +334,28 @@ class DefaultSamsungPayLauncherTest {
     }
 
     @Test
+    fun `throwing optional contact preserves successful payment credential`() = runScenario(
+        configuration = createConfiguration().collectContactInformation(true),
+    ) {
+        getStatus()
+        val results = Turbine<SamsungPayResult>()
+        launchPayment(callback = results::add)
+        val info = requireNotNull(FakeSamsungPaySdkState.paymentInfo)
+        val control = requireNotNull(info.customSheet).controls.filterIsInstance<AddressControl>().single()
+        control.addressReadError = IllegalStateException("Unexpected billing address response")
+
+        requireNotNull(FakeSamsungPaySdkState.paymentListener).onSuccess(info, PAYMENT_CREDENTIAL, Bundle())
+
+        val result = results.awaitItem()
+        assertThat(result).isInstanceOf(SamsungPayResult.Completed::class.java)
+        val completed = result as SamsungPayResult.Completed
+        assertThat(completed.paymentCredential).isEqualTo(PAYMENT_CREDENTIAL)
+        assertThat(completed.kycInfo).isNull()
+        results.ensureAllEventsConsumed()
+        assertAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
+    }
+
+    @Test
     fun `partial billing address is returned without inventing contact fields`() = runScenario(
         configuration = createConfiguration().collectContactInformation(true),
     ) {
