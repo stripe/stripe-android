@@ -136,6 +136,88 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Google Pay completion without presentation key preserves collected payment method`() {
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isNull()
+    }
+
+    @Test
+    @Suppress("RestrictedApi")
+    fun `Google Pay collection key survives saved state restoration and is consumed on success`() {
+        interactor.onGooglePayPresented("pk_collection")
+        val restoredHandle = SavedStateHandle.createHandle(savedStateHandle.savedStateProvider().saveState(), null)
+        val restoredInteractor = createInteractor(
+            cryptoApiRepository = cryptoApiRepository,
+            savedStateHandle = restoredHandle,
+        )
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = restoredInteractor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = restoredInteractor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_collection")
+        assertThat(restoredHandle.contains("onramp_google_pay_platform_key")).isFalse()
+    }
+
+    @Test
+    fun `Google Pay cancellation clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `Google Pay failure clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                error = IllegalStateException("Wallet failed"),
+                errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `Google Pay completion uses the presentation key after configuration changes`() = runTest {
+        interactor.onGooglePayPresented("pk_us")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        interactor.getOrFetchPlatformKey().getOrThrow()
+
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_us")
+    }
+
+    @Test
     fun testConfigureIsSuccessful() = runTest {
         val application = RuntimeEnvironment.getApplication()
         PaymentConfiguration.init(application, "pk_before_configure", "acct_before_configure")
@@ -1171,7 +1253,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         interactor.handlePresentPaymentMethodsResult(
@@ -1211,7 +1295,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val pm = PaymentMethod(
@@ -1223,6 +1309,7 @@ class OnrampInteractorTest {
             code = "card"
         )
 
+        interactor.onGooglePayPresented("pk_platform_123")
         interactor.handleGooglePayPaymentResult(
             GooglePayPaymentMethodLauncher.Result.Completed(pm)
         )
@@ -1260,6 +1347,7 @@ class OnrampInteractorTest {
             cryptoApiRepository.createPaymentToken(
                 cryptoCustomerId = "cpt_123",
                 paymentMethod = paymentMethod.id,
+                countryHint = null,
             ),
         ).thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
 
@@ -1276,7 +1364,7 @@ class OnrampInteractorTest {
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
         assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
         assertThat(interactor.state.value.selectedPaymentSource)
-            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id))
+            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
         verify(cryptoApiRepository).createSamsungPayPaymentMethod(
             paymentCredential = "{\"method\":\"3DS\"}",
@@ -1285,6 +1373,7 @@ class OnrampInteractorTest {
         verify(cryptoApiRepository).createPaymentToken(
             cryptoCustomerId = "cpt_123",
             paymentMethod = paymentMethod.id,
+            countryHint = null,
         )
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.CollectPaymentMethodCompleted(PaymentMethodType.SamsungPay),

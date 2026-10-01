@@ -69,22 +69,25 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     @Test
     fun `failed tax update marks the selection failed and keeps prior selection`() {
         val error = IllegalStateException("Tax region update failed")
+        val update = CompletableDeferred<Result<CheckoutSessionResponse>>()
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-            updateTaxRegion = { Result.failure(error) },
+            updateTaxRegion = { update.await() },
         ) {
             selector.selectionState.test {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
 
-                assertThat(selector.select(selection).isFailure).isTrue()
-
+                val result = testScope.async(start = CoroutineStart.UNDISPATCHED) { selector.select(selection) }
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
-                )
+                assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+
+                update.complete(Result.failure(error))
+
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+                assertThat(result.await().isFailure).isTrue()
+                assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+                assertThat(selector.checkoutSessionResponse).isNull()
             }
-            assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
-            assertThat(selector.checkoutSessionResponse).isNull()
         }
     }
 
@@ -98,9 +101,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             assertThat(selector.select(selection).isFailure).isTrue()
 
             selector.selectionState.test {
-                assertThat(awaitItem()).isEqualTo(
-                    SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
-                )
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
 
                 selector.clearError()
 

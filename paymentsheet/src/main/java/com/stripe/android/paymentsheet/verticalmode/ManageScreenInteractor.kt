@@ -20,7 +20,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
@@ -123,7 +122,6 @@ internal class DefaultManageScreenInteractor(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
-    private var selectionJob: Job? = null
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
@@ -163,7 +161,7 @@ internal class DefaultManageScreenInteractor(
     init {
         coroutineScope.launch {
             state.collect { state ->
-                // Idle only: a failed selection must not retry itself on the next state emission.
+                // A failed selection must not retry itself on a subsequent state emission.
                 if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1 &&
                     state.selectionState == SavedPaymentMethodSelectionState.Idle
                 ) {
@@ -195,11 +193,12 @@ internal class DefaultManageScreenInteractor(
     }
 
     private fun handlePaymentMethodSelected(paymentMethod: DisplayableSavedPaymentMethod) {
-        if (selectionJob?.isActive == true || hasNavigatedBack.get()) {
+        if (hasNavigatedBack.get() || selectionState.value is SavedPaymentMethodSelectionState.Pending) {
             return
         }
 
-        selectionJob = coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        // Undispatched so the selector publishes Pending before another tap or auto-select can arrive.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             onSelectPaymentMethod(paymentMethod).onSuccess {
                 safeNavigateBack(true)
             }
