@@ -5,7 +5,7 @@ NEXT_VERSION_BUMP: PATCH
 
 ### PaymentSheet
 * [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and support for payments, including setup future usage, in PaymentSheet.
-* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents and PaymentIntents with setup future usage.
+* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28

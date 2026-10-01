@@ -577,7 +577,7 @@ constructor(
             "momo",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = true,
+            requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),

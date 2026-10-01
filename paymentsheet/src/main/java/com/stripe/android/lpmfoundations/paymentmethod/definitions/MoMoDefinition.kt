@@ -16,10 +16,10 @@ internal object MoMoDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetupIntent,
+        AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata

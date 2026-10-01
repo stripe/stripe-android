@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -10,10 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
 
-@RunWith(RobolectricTestParameterInjector::class)
 internal class MoMoDefinitionTest {
     @Test
     fun `does not require the merchant delayed payment setting`() {
@@ -26,21 +22,25 @@ internal class MoMoDefinitionTest {
     }
 
     @Test
-    fun `supports PaymentIntents without native authorization or mandate UI`(
-        @TestParameter hasSetupFutureUsage: Boolean,
-    ) {
-        val intentScenario = if (hasSetupFutureUsage) {
-            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage
-        } else {
-            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-        }
+    fun `supports PaymentIntents without native authorization or mandate UI`() {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.MoMo),
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.MoMo),
         )
 
         assertThat(MoMoDefinition.isSupported(metadata)).isTrue()
         assertThat(MoMoDefinition.formElements(metadata)).isEmpty()
-        assertThat(MoMoDefinition.requiresMandate(metadata)).isEqualTo(hasSetupFutureUsage)
+        assertThat(MoMoDefinition.requiresMandate(metadata)).isFalse()
+    }
+
+    @Test
+    fun `does not support PaymentIntents with setup future usage`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage
+                .stripeIntent(PaymentMethod.Type.MoMo),
+        )
+
+        assertThat(MoMoDefinition.isSupported(metadata)).isFalse()
     }
 
     @Test
@@ -54,9 +54,9 @@ internal class MoMoDefinitionTest {
     }
 
     @Test
-    fun `requirements exclude SetupIntents`() {
+    fun `requirements exclude intents with setup`() {
         assertThat(MoMoDefinition.requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup = false))
-            .containsExactly(AddPaymentMethodRequirement.UnsupportedForSetupIntent)
+            .containsExactly(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
     @Test
