@@ -33,7 +33,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 linkBrand = state.linkBrand,
-                isEnabled = true,
+                isEnabled = !state.isSelectionPending,
                 isSelected = isSelected,
                 onClick = {
                     rowOnClick(

@@ -2,8 +2,12 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import app.cash.turbine.Turbine
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -17,6 +21,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
@@ -29,13 +34,16 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
+import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -60,6 +68,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
+    private val managePage = ManagePage(testRules.compose)
     private val verticalModePage = VerticalModePage(testRules.compose)
 
     @After
@@ -80,6 +89,47 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
+    }
+
+    @Test
+    fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
+        var checkoutResult: CheckoutController.Result? = null
+        val savedPaymentMethodTaxResponse = automaticTaxResponse(
+            total = UPDATED_TOTAL,
+            taxStatus = TAX_STATUS_COMPLETE,
+            billingAddressCollection = "auto",
+            hasSavedPaymentMethod = true,
+        )
+        runCheckoutPaymentElementTest(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_REQUIRES_LOCATION,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
+            ),
+            setup = { controller ->
+                enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) { context ->
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+
+            enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", SAVED_PAYMENT_METHOD_ID),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            context.confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
     }
 
     @Test
@@ -215,6 +265,70 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         }
     }
 
+    @Test
+    fun testSavedPaymentMethodTaxUpdateFromManageSheetShowsPendingSelectionUntilResponse() {
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_COMPLETE,
+                hasSavedPaymentMethod = true,
+            ),
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = INITIAL_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
+            holdTaxUpdateResponse = true,
+        ) {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            contentPage.clickViewMore()
+            managePage.waitUntilVisible()
+
+            try {
+                managePage.selectPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+                taxUpdateRequests.awaitItem()
+
+                val firstRow = savedPaymentMethodRow(SAVED_PAYMENT_METHOD_ID)
+                val secondRow = savedPaymentMethodRow(SECOND_SAVED_PAYMENT_METHOD_ID)
+                firstRow.assertIsSelected()
+                    .assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
+                secondRow.assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)).not())
+                testRules.compose.onAllNodesWithTag(
+                    SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                    useUnmergedTree = true,
+                ).assertCountEquals(1)
+            } finally {
+                releaseTaxUpdateResponse.countDown()
+            }
+
+            managePage.waitUntilNotVisible()
+            contentPage.assertHasSelectedSavedPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            markTestSucceeded()
+        }
+    }
+
     private fun runSavedPaymentMethodSelectionFromCashAppScenario(
         block: suspend Scenario.() -> Unit,
     ) {
@@ -230,10 +344,22 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
                 scenario.immediateActionCalls.add(Unit)
             },
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = UPDATED_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        billingAddressCollection = "auto",
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
             holdTaxUpdateResponse = true,
         ) {
             scenario = this
             try {
+                assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
                 selectCashAppAndAwaitCallback()
                 block()
 
@@ -452,12 +578,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
         checkoutInitResponse: (MockResponse) -> Unit,
         rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runAutomaticTaxTest(
         configuration = checkoutConfiguration(paymentMethodLayout),
         checkoutInitResponse = checkoutInitResponse,
         rowSelectionBehavior = rowSelectionBehavior,
+        configureNetworkSetup = configureNetworkSetup,
         holdTaxUpdateResponse = holdTaxUpdateResponse,
         block = block,
     )
@@ -466,6 +594,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         configuration: CheckoutController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
         rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
@@ -476,6 +605,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             rowSelectionBehavior = rowSelectionBehavior,
             setup = { configuredController ->
                 controller = configuredController
+                configureNetworkSetup()
                 configuredController.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
@@ -714,6 +844,25 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                                     "exp_year": 2034,
                                     "last4": "4242"
                                 }
+                            }, {
+                                "id": "$SECOND_SAVED_PAYMENT_METHOD_ID",
+                                "object": "payment_method",
+                                "type": "card",
+                                "billing_details": {
+                                    "address": {
+                                        "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                                        "city": "$SAVED_BILLING_ADDRESS_CITY",
+                                        "state": "$SAVED_BILLING_ADDRESS_STATE",
+                                        "country": "US",
+                                        "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                                    }
+                                },
+                                "card": {
+                                    "brand": "visa",
+                                    "exp_month": 12,
+                                    "exp_year": 2034,
+                                    "last4": "5555"
+                                }
                             }],
                             "can_detach_payment_method": true
                         }
@@ -724,11 +873,17 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         }
     }
 
+    private fun savedPaymentMethodRow(paymentMethodId: String) = testRules.compose.onNodeWithTag(
+        "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId",
+        useUnmergedTree = true,
+    )
+
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
         const val UPDATED_TOTAL = 5_399L
         const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
+        const val SECOND_SAVED_PAYMENT_METHOD_ID = "pm_second"
         const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
         const val BILLING_ADDRESS_CITY = "San Francisco"
         const val BILLING_ADDRESS_STATE = "CA"

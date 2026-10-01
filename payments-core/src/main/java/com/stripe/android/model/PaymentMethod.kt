@@ -569,7 +569,7 @@ constructor(
             "gopay",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = true,
+            requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
