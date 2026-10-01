@@ -11,7 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.state.error
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -53,6 +56,9 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 }
             )
+        }
+        state.selectionState.error?.let {
+            ErrorMessage(error = it.resolve())
         }
     }
 }

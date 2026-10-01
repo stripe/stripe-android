@@ -10,7 +10,6 @@ import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -43,8 +42,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            params = paramsCaptor.capture()
         )
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
@@ -67,8 +65,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            params = paramsCaptor.capture()
         )
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
@@ -79,8 +76,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any(),
-                shouldCache = eq(false)
+                params = any()
             )
         ).thenReturn(request)
         whenever(requestExecutor.execute(any(), any<KSerializer<*>>())).thenReturn(
