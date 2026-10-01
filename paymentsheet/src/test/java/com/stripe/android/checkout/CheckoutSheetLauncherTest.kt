@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -478,6 +479,57 @@ internal class CheckoutSheetLauncherTest {
 
         assertThat(immediateActionWasInvoked()).isTrue()
     }
+
+    @Test
+    fun `manageSheetLauncher invokes immediate action before checkout session refresh completes`() = testScenario {
+        val releaseRefresh = CompletableDeferred<Unit>()
+        val response = CheckoutSessionResponseFactory.create()
+        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+        val result = manageCompleteResult(checkoutSessionResponse = response)
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isTrue()
+
+        releaseRefresh.complete(Unit)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `manageSheetLauncher invokes immediate action when checkout session refresh fails`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val expectedError = IllegalStateException("Refresh failed")
+        sessionRefresher.enqueueRefreshAction { throw expectedError }
+        val result = manageCompleteResult(checkoutSessionResponse = response)
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isTrue()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after the sheet closed." to expectedError
+        )
+    }
+
+    private fun manageCompleteResult(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) = EmbeddedActivityResult.Complete(
+        previousNewSelections = Bundle(),
+        customerState = null,
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        hasBeenConfirmed = false,
+        checkoutSessionResponse = checkoutSessionResponse,
+        shouldInvokeSelectionCallback = true,
+        launchMode = EmbeddedLaunchMode.Manage,
+    )
 
     @Test
     fun `manageSheetLauncher callback does not update state on cancelled result`() = testScenario {

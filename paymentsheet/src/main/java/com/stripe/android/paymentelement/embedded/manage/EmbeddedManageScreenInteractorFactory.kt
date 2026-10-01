@@ -24,8 +24,9 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val linkAccountHolder: LinkAccountHolder,
-    private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
+    private val eventReporter: EventReporter,
     private val launchMode: EmbeddedLaunchMode,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
@@ -36,10 +37,10 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             editing = savedPaymentMethodMutator.editing,
             canEdit = savedPaymentMethodMutator.canEdit,
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
-            onSelectPaymentMethod = {
-                val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                selectionHolder.setSelection(savedPmSelection)
-                eventReporter.onSelectPaymentOption(savedPmSelection)
+            onSelectPaymentMethod = { displayableSavedPaymentMethod ->
+                val selection = PaymentSelection.Saved(displayableSavedPaymentMethod.paymentMethod)
+                eventReporter.onSelectPaymentOption(selection)
+                savedPaymentMethodSelector.select(selection)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {
@@ -52,6 +53,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            selectionState = savedPaymentMethodSelector.selectionState,
         )
     }
 }

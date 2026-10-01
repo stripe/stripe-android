@@ -8,7 +8,6 @@
     <ID>ConstructorParameterNaming:PaymentOption.kt:PaymentOption$private val _shippingDetails: AddressDetails?</ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt:CustomerSheetViewModel$fun handleViewAction</ID>
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt:internal fun transformBankIconCodeToBankIcon: Int</ID>
-    <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt:PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt:VerticalModeFormUITest.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun PaymentSheetTopBar_Preview</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun TestModeBadge_Preview</ID>

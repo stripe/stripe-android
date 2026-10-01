@@ -120,21 +120,24 @@ class CheckoutController @Inject internal constructor(
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                        checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = defaultBillingAddress,
-                    ).getOrThrow()
-                } else {
-                    response
-                }
-            }.mapCatching { response ->
-                checkoutStateLoader.loadInitial(
+                val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
+                val billingAddress = initialLoad.state.paymentSelection
+                    ?.billingDetails?.address?.toCheckoutAddress()
+                    ?: configurationState.defaults.billingDetails?.address
+                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = billingAddress,
+                    ).getOrThrow()
+                    // The updated totals change payment method metadata, so rebuild it before publishing.
+                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
+                } else {
+                    checkoutStateLoader.publish(initialLoad)
+                }
             }
         }
     }

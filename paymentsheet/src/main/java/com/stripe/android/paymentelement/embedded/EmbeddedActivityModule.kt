@@ -28,7 +28,9 @@ import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageSc
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
@@ -52,8 +54,11 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -67,6 +72,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -153,6 +159,18 @@ internal interface EmbeddedActivityModule {
                 eventReporter = eventReporter,
                 initialBackStack = initialScreenFactory.create(),
             )
+        }
+
+        @Provides
+        @Singleton
+        fun provideManageScreenSavedPaymentMethodSelector(
+            launchMode: EmbeddedLaunchMode,
+            selectionHolder: EmbeddedSelectionHolder,
+            manageLaunchSelector: Provider<ManageLaunchSavedPaymentMethodSelector>,
+        ): ManageScreenSavedPaymentMethodSelector = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> manageLaunchSelector.get()
+            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.Form -> ImmediateSavedPaymentMethodSelector(selectionHolder)
         }
 
         @Provides
@@ -279,5 +297,18 @@ internal interface EmbeddedActivityModule {
             promotions,
             eventReporter
         )
+    }
+}
+
+private class ImmediateSavedPaymentMethodSelector(
+    private val selectionHolder: EmbeddedSelectionHolder,
+) : ManageScreenSavedPaymentMethodSelector {
+    override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
+        stateFlowOf(SavedPaymentMethodSelectionState.Idle)
+
+    override val checkoutSessionResponse: CheckoutSessionResponse? = null
+
+    override suspend fun select(selection: PaymentSelection.Saved) {
+        selectionHolder.setSelection(selection)
     }
 }

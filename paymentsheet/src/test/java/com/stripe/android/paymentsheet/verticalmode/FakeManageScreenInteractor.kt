@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import app.cash.turbine.Turbine
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
@@ -22,6 +23,7 @@ internal class FakeManageScreenInteractor(
                 isEditing = false,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         )
 

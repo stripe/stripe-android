@@ -11,7 +11,8 @@ NEXT_VERSION_BUMP: MINOR
 * [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
 
 ### PaymentSheet
-* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and support for payments, including setup future usage, in PaymentSheet.
+* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28

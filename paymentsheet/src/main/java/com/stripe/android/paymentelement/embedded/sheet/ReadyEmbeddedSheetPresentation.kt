@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
@@ -50,6 +51,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
 ) : EmbeddedSheetPresentation {
     override fun register() {
         sheetActivityRegistrar.registerAndBootstrap(
@@ -130,7 +132,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            checkoutSessionResponse = null,
+            checkoutSessionResponse = savedPaymentMethodSelector.checkoutSessionResponse,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
         )
