@@ -104,6 +104,19 @@ class PrimaryButtonScreenshotTest {
     }
 
     @Test
+    fun testProcessingNotSubdued() {
+        customThemePaparazziRule.snapshotWithCustomTheme {
+            PrimaryButton(
+                label = "Pay $50.99",
+                processingState = PrimaryButtonProcessingState.Processing,
+                locked = false,
+                enabled = false,
+                subduedWhileProcessing = false,
+            ) {}
+        }
+    }
+
+    @Test
     fun testCompleted() {
         paparazziRule.snapshot {
             PrimaryButton(

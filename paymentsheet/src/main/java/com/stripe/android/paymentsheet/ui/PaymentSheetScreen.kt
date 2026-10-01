@@ -492,7 +492,6 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         null
     }
     val processingState = buyButtonState.convert()
-    val isEnabled = uiState?.enabled == true && processingState is PrimaryButtonProcessingState.Idle
 
     Box {
         Box(modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())) {
@@ -500,7 +499,8 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 PrimaryButton(
                     label = state.label.resolve(),
                     locked = state.lockVisible,
-                    enabled = isEnabled,
+                    enabled = state.enabled && processingState is PrimaryButtonProcessingState.Idle,
+                    subduedWhileProcessing = false,
                     modifier = Modifier.padding(
                         top = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing)
                     ),
