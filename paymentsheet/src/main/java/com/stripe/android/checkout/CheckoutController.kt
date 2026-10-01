@@ -172,8 +172,11 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun updateShippingAddress(
         name: String?,
-        address: Address,
+        address: Address?,
     ): kotlin.Result<Unit> {
+        if (address == null) {
+            return clearShippingAddress()
+        }
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
@@ -300,6 +303,31 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
+            )
+        }
+    }
+
+    private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = null,
+                    shippingAddress = null,
+                ),
+            )
+        },
+    ) {
+        val previousAddress = collectedDetails.shippingAddress
+        if (previousAddress == null) {
+            kotlin.Result.success(checkoutSessionResponse)
+        } else {
+            // The tax region endpoint requires a country, so retain the previous country only.
+            // Follow-up tracked in MOBILESDK-4944: https://jira.corp.stripe.com/browse/MOBILESDK-4944
+            // Send null once CheckoutClient supports clearing tax_region on the server.
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = Address().country(previousAddress.country).build(),
             )
         }
     }
