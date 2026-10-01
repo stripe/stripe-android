@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
+
 ### PaymentSheet
 * [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and support for payments, including setup future usage, in PaymentSheet.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
