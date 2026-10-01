@@ -45,6 +45,7 @@ internal class PaymentSheetAddressAutocompleteTest(
     fun testUnfilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
     ) { context ->
         enqueueAutocompletePredictions()
@@ -85,6 +86,7 @@ internal class PaymentSheetAddressAutocompleteTest(
     fun testPrefilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
     ) { context ->
         enqueueAutocompletePredictions()
