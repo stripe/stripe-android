@@ -7,11 +7,13 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 
 internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
     paymentMethodMetadata: PaymentMethodMetadata?,
-    defaultPaymentMethodId: String?
+    defaultPaymentMethodId: String?,
+    isSelectionPending: Boolean = false,
 ): DisplayableSavedPaymentMethod {
     return DisplayableSavedPaymentMethod.create(
         displayName = paymentMethodMetadata?.displayNameForCode(type?.code).orEmpty(),
         paymentMethod = this,
+        isSelectionPending = isSelectionPending,
         shouldShowDefaultBadge = id == defaultPaymentMethodId,
     )
 }

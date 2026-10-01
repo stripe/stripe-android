@@ -29,6 +29,7 @@ class CardPillElementScreenshotTest {
                 enabled = true,
                 cardBrand = CardBrand.Visa,
                 lastFourDigits = "4242",
+                expirationDate = "06/30",
                 onDismiss = {},
             )
         }
@@ -41,6 +42,7 @@ class CardPillElementScreenshotTest {
                 enabled = false,
                 cardBrand = CardBrand.Visa,
                 lastFourDigits = "4242",
+                expirationDate = "06/30",
                 onDismiss = {},
             )
         }
@@ -53,6 +55,7 @@ class CardPillElementScreenshotTest {
                 enabled = true,
                 cardBrand = CardBrand.MasterCard,
                 lastFourDigits = "4444",
+                expirationDate = "12/29",
                 onDismiss = {},
             )
         }

@@ -10,15 +10,15 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.withLtrIsolate
-import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -74,7 +74,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.presentPaymentSheet {
                     presentWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -96,7 +96,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 context.configureFlowController {
                     configureWithIntentConfiguration(
                         intentConfiguration = intentConfiguration,
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -152,11 +152,9 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 .performScrollTo()
                 .performClick()
 
-            composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            composeTestRule.waitUntilWithIdle {
                 !hasPrimaryButton()
             }
-
-            composeTestRule.waitForIdle()
         }
 
         final override fun openCardForm() {

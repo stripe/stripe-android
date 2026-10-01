@@ -44,13 +44,4 @@ internal class TestMoMo : BasePlaygroundTest() {
             },
         )
     }
-
-    @Test
-    fun testMoMoSetup() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
-            },
-        )
-    }
 }

@@ -34,6 +34,11 @@ internal class BottomSheetViewModel : ViewModel() {
     }
 
     fun dismissBottomSheet() {
+        // Keep the content mounted until the sheet finishes its hide animation.
+        _bottomSheetState.update { it.copy(shouldShow = false) }
+    }
+
+    fun onBottomSheetHidden() {
         _bottomSheetState.update { INITIAL_STATE }
     }
 

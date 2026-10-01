@@ -1222,7 +1222,7 @@ internal class PlaygroundTestDriver(
             try {
                 composeTestRule
                     .onAllNodesWithText("Approve payment")
-                    .fetchSemanticsNodes()
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isEmpty()
             } catch (_: IllegalStateException) {
                 // PollingActivity was closed

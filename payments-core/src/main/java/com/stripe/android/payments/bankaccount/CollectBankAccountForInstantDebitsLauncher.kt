@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
@@ -29,10 +30,24 @@ class CollectBankAccountForInstantDebitsLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 financialConnectionsAvailability = financialConnectionsAvailability,
-                attachToIntent = true
+                attachToIntent = true,
+                preCollectedConsent = null,
             )
         )
     }
+
+    override fun presentWithPaymentIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) = presentWithPaymentIntent(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+    )
 
     override fun presentWithSetupIntent(
         publishableKey: String,
@@ -48,10 +63,24 @@ class CollectBankAccountForInstantDebitsLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 financialConnectionsAvailability = financialConnectionsAvailability,
-                attachToIntent = true
+                attachToIntent = true,
+                preCollectedConsent = null,
             )
         )
     }
+
+    override fun presentWithSetupIntent(
+        publishableKey: String,
+        stripeAccountId: String?,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) = presentWithSetupIntent(
+        publishableKey = publishableKey,
+        stripeAccountId = stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+    )
 
     override fun presentWithDeferredPayment(
         publishableKey: String,

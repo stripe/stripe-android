@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Τραπεζικός λογαριασμός ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Τραπεζικός λογαριασμός ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Επιβεβαιώστε την πληρωμή Bizum στην εφαρμογή τραπεζικών υπηρεσιών μέσω κινητού τηλεφώνου εντός %s για να ολοκληρώσετε την αγορά</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή της τράπεζάς σας μέσα σε %s για την ολοκλήρωση της αγοράς.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -66,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Επιβεβαίωση των στοιχείων σας</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 τελευταία ψηφία SSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Όροι και Προϋποθέσεις</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Όροι παροχής υπηρεσιών</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Σύνδεση ή εγγραφή</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Αποσύνδεση από το Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Αποσύνδεση από %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή MB WAY εντός %s για να ολοκληρώσετε την αγορά.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Προέκυψε σφάλμα. Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Για λόγους ασφαλείας, οι επιλογές προγραμματιστή πρέπει να είναι απενεργοποιημένες για να χρησιμοποιήσετε το Άγγιγμα για προσθήκη.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Ανοιχτές ρυθμίσεις</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Απενεργοποιήστε τις επιλογές Προγραμματιστή</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Η κάρτα έχει λήξει. Δοκιμάστε άλλη κάρτα.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Ακουμπήστε την κάρτα</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Η κάρτα απορρίφθηκε. Δοκιμάστε άλλη κάρτα.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -273,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Η επωνυμία κάρτας δεν ενημερώθηκε. Δοκιμάστε ξανά.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή τράπεζας ή πληρωμής εντός %s για να ολοκληρώσετε την αγορά.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Ολοκληρώστε την πληρωμή χρησιμοποιώντας το Pix για να ολοκληρώσετε την αγορά.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Ορισμός ως προεπιλεγμένη μέθοδος πληρωμής</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

@@ -471,6 +471,7 @@ private fun WalletHeader(
             when (wallet) {
                 is WalletsState.GooglePay -> {
                     GooglePayButton(
+                        apiConfiguration = wallet.apiConfiguration,
                         state = PrimaryButton.State.Ready,
                         allowCreditCards = wallet.allowCreditCards,
                         buttonType = wallet.buttonType,

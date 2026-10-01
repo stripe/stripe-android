@@ -308,6 +308,7 @@ internal object TestFactory {
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         linkBrand = LinkBrand.Link,
         apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        shouldDisplay = true,
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(

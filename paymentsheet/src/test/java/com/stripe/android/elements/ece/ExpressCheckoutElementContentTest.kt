@@ -3,6 +3,8 @@
 package com.stripe.android.elements.ece
 
 import android.content.Context
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -61,8 +63,28 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsEnabled()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsEnabled()
         assertThat(viewActionRecorder.viewActions)
             .containsExactly(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+    }
+
+    @Test
+    fun `disables wallet buttons when state is disabled`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create(enabled = false)
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsNotEnabled()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsNotEnabled()
     }
 
     @Test

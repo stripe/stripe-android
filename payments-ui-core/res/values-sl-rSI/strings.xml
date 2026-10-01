@@ -46,12 +46,16 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Banka FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">S potrditvijo plačila z GCash dovoljujete, da %s bremeni vaš račun GCash za prihodnja plačila v skladu z njihovimi pogoji.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Vnesena koda IBAN ni popolna.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">Vnesena koda IBAN ni veljavna. \"%s\" ni podprta koda države.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Identifikacijska številka, ki ste jo vnesli, ni popolna.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Vaša koda BLIK ni popolna.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -73,6 +77,10 @@
   <string name="stripe_name_on_card">Ime na kartici</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Izberite, kako želite plačati:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[S potrditvijo plačila se strinjate, da bo vašo transakcijo obdelalo podjetje Global Stack Services Limited kot uradni trgovec in v skladu z njihovimi <a href=\"%s\">pogoji uporabe</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[S potrditvijo plačila se strinjate, da bo vašo transakcijo obdelalo podjetje Global Stack Services Limited kot uradni trgovec in v skladu z njihovimi <a href=\"%s\">pogoji</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Obremenitev SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Po oddaji boste preusmerjeni, da varno zaključite naslednje korake.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">S potrditvijo plačila s storitvijo PayPal pooblaščate podjetje %s, da bremeni vaš račun za PayPal s prihodnjimi plačili v skladu s pogoji podjetja.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[To je mednarodni nakup in ne vključuje 3,5-% pristojbine IOF. Z nadaljevanjem potrjujete in sprejemate <terms>Pogoje in določila družbe Ebanx</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">S potrditvijo plačila s storitvijo RevolutPay pooblaščate podjetje %s, da bremeni vaš račun za RevolutPay s prihodnjimi plačili v skladu s pogoji podjetja.</string>
   <!-- Satispay mandate text -->
@@ -113,12 +125,18 @@
   <string name="stripe_scan_card">Optično preberi kartico</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Počisti skenirano kartico</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Poteče %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastavi kot privzeti način plačila</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastavi</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">S potrditvijo plačila s Touch \'n Go dovoljujete, da %s bremeni vaš račun Touch \'n Go za prihodnja plačila v skladu z njihovimi pogoji.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">S potrditvijo plačila s TrueMoney dovoljujete, da %s bremeni vaš račun TrueMoney za prihodnja plačila v skladu z njihovimi pogoji.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Z nadaljevanjem pooblaščate podjetje %1$s, da samodejno bremeni vaše stanje Twint na ponavljajoči se osnovi v skladu z vašim nakupom ali naročnino.</string>
   <!-- Label for UPI ID number field on form -->

@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">الحساب البنكي ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">الحساب البنكي ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">أكّد دفعة Bizum في تطبيق الخدمات المصرفية عبر الهاتف المحمول خلال %s لإكمال عملية الشراء.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">أكّد الدفع في تطبيق البنك خلال %s لإكمال الشراء.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -68,6 +70,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">أكّد معلوماتك</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">آخر 4 أرقام من رقم الضمان الاجتماعي (SSN)</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">الشروط والأحكام</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">شروط الخدمة</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">تسجيل الدخول أو تسجيل حساب</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -100,10 +106,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">تسجيل الخروج من Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">تسجيل الخروج من %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">أكّد الدفع في تطبيق MB WAY خلال %s لإكمال الشراء.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">حدث خطأ ما. تحقق من اتصالك وحاول مرة أخرى.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">لأسباب أمنية، يجب إيقاف تشغيل خيارات المطور لتتمكن من استخدام ميزة \"النقر لإضافة طريقة دفع\".</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">فتح الإعدادات</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">أوقِف تشغيل خيارات المطور</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">انتهت صلاحية البطاقة. جرّب بطاقة أخرى.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">بطاقة الدفع بالنقر</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">تم رفض البطاقة. جرّب بطاقة أخرى.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -275,6 +291,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">لم يتم تحديث العلامة التجارية للبطاقة. يُرجى المحاولة مرة أخرى.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">قم بتأكيد الدفع في البنك الذي تتعامل معه أو تطبيق الدفع خلال %s لإكمال عملية الشراء.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">أكمل الدفع باستخدام Pix لإتمام عملية الشراء.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">تعيين كطريقة دفع افتراضية</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

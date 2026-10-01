@@ -90,6 +90,7 @@ internal abstract class BaseSheetViewModel(
 
     private val paymentElementAutocompleteFactory = PaymentElementAutocompleteAddressInteractor.Factory(
         launcher = autocompleteLauncher,
+        apiConfigurationProvider = { requireNotNull(_paymentMethodMetadata.value).apiConfiguration },
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = config.googlePlacesApiKey,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,

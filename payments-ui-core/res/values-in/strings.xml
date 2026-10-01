@@ -46,12 +46,16 @@
   <string name="stripe_eps_bank">Bank EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Dengan mengonfirmasi pembayaran Anda dengan GCash, Anda mengizinkan %s untuk men-charge akun GCash Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">IBAN yang Anda masukkan tidak lengkap.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">IBAN yang Anda masukkan tidak valid. \"%s\" bukan kode negara yang didukung.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBAN Anda harus diawali dengan kode negara dua-huruf.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Nomor identifikasi yang Anda masukkan tidak lengkap.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Kode BLIK Anda tidak lengkap.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -73,6 +77,10 @@
   <string name="stripe_name_on_card">Nama pada kartu</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Pilih cara Anda ingin membayar:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Dengan mengonfirmasi pembayaran Anda, Anda setuju bahwa transaksi Anda akan ditangani oleh Global Stack Services Limited sebagai pedagang tercatat dan sesuai dengan <a href=\"%s\">ketentuan penggunaan</a> mereka.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Dengan mengonfirmasi pembayaran Anda, Anda setuju bahwa transaksi Anda akan ditangani oleh Global Stack Services Limited sebagai pedagang tercatat dan sesuai dengan <a href=\"%s\">ketentuan</a> mereka.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Bank Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Setelah penyerahan, Anda akan dialihkan untuk menyelesaikan langkah berikutnya dengan aman.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Dengan mengonfirmasi pembayaran menggunakan PayPal, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun PayPal Anda sesuai dengan ketentuan mereka.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Ini adalah pembelian internasional dan tidak termasuk biaya IOF 3,5%. Dengan melanjutkan, Anda mengakui dan menerima <terms>syarat dan ketentuan Ebanx</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Dengan mengonfirmasi pembayaran menggunakan RevolutPay, berarti Anda mengizinkan %s mengenakan charge untuk pembayaran mendatang pada akun RevolutPay Anda sesuai dengan ketentuan mereka.</string>
   <!-- Satispay mandate text -->
@@ -113,12 +125,18 @@
   <string name="stripe_scan_card">Pindai kartu</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Bersihkan kartu yang dipindai</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Kedaluwarsa %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Dengan memberikan informasi pembayaran dan mengonfirmasi pembayaran ini, berarti Anda mengotorisasi (A) %s dan Stripe, penyedia layanan pembayaran kami, untuk mengirim instruksi kepada bank untuk mendebit rekening Anda dan (B) kepada bank untuk mendebit rekening Anda sesuai instruksi itu. Sebagai bagian dari hak Anda, Anda berhak mendapat pengembalian dana dari bank berdasarkan ketentuan dan persyaratan perjanjian Anda dengan bank. Pengembalian dana harus diklaim dalam waktu 8 minggu sejak tanggal pendebitan rekening Anda. Hak Anda dijelaskan dalam pernyataan yang dapat Anda peroleh dari bank Anda. Anda setuju untuk menerima notifikasi pendebitan di masa mendatang hingga 2 hari sebelum dilakukan.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Atur sebagai metode pembayaran default</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Siapkan</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Dengan mengonfirmasi pembayaran Anda dengan Touch \'n Go, Anda mengizinkan %s untuk men-charge akun Touch \'n Go Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Dengan mengonfirmasi pembayaran Anda dengan TrueMoney, Anda mengizinkan %s untuk men-charge akun TrueMoney Anda untuk pembayaran mendatang sesuai dengan ketentuan mereka.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Dengan melanjutkan, Anda mengizinkan %1$s untuk secara otomatis mendebit Saldo Twint Anda secara rutin sesuai dengan paket pembelian atau langganan Anda.</string>
   <!-- Label for UPI ID number field on form -->

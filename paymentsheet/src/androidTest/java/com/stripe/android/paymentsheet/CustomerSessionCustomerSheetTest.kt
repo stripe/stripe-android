@@ -248,7 +248,9 @@ internal class CustomerSessionCustomerSheetTest {
 
         page.waitUntil(savedPaymentMethodMatcher)
         assertThat(
-            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes().size
+            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(1)
     }
 

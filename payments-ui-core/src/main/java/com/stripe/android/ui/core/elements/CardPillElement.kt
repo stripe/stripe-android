@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -77,6 +78,7 @@ internal class CardPillElement(
 
 internal class CardPillController(
     val cardNumber: String,
+    val expirationDate: String?,
     private val onDismissPill: () -> Unit,
 ) : SectionFieldValidationController, SectionFieldComposable {
     override val validationMessage: StateFlow<FieldValidationMessage?> = stateFlowOf(null)
@@ -97,6 +99,7 @@ internal class CardPillController(
             enabled = enabled,
             cardBrand = CardBrand.fromCardNumber(cardNumber),
             lastFourDigits = cardNumber.takeLast(TAKE_LAST_4),
+            expirationDate = expirationDate,
             onDismiss = onDismissPill,
             modifier = modifier,
         )
@@ -113,6 +116,7 @@ fun CardPillElementUI(
     enabled: Boolean,
     cardBrand: CardBrand,
     lastFourDigits: String,
+    expirationDate: String?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -136,9 +140,10 @@ fun CardPillElementUI(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            CardNumberText(
+            CardDetailsText(
                 lastFourDigits = lastFourDigits,
                 cardBrand = cardBrand,
+                expirationDate = expirationDate,
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -162,9 +167,10 @@ private fun CardBrandIcon(
 }
 
 @Composable
-private fun RowScope.CardNumberText(
+private fun RowScope.CardDetailsText(
     cardBrand: CardBrand,
     lastFourDigits: String,
+    expirationDate: String?,
 ) {
     val summaryDescription = stringResource(
         PaymentsCoreR.string.stripe_card_ending_in,
@@ -173,18 +179,31 @@ private fun RowScope.CardNumberText(
     )
     val maskedPan = stringResource(R.string.stripe_scanned_card_masked_last4, lastFourDigits)
 
-    Text(
-        text = maskedPan,
-        style = MaterialTheme.typography.body1,
-        color = MaterialTheme.stripeColors.onComponent,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = Modifier
-            .weight(1f)
-            .semantics {
+    Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = maskedPan,
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.stripeColors.onComponent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics {
                 contentDescription = summaryDescription
             },
-    )
+        )
+
+        if (expirationDate != null) {
+            Text(
+                text = stringResource(
+                    R.string.stripe_scanned_card_pill_expiration_date,
+                    expirationDate,
+                ),
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.stripeColors.subtitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
 }
 
 @Composable

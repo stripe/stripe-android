@@ -46,12 +46,16 @@
   <string name="stripe_eps_bank">EPS Bank</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX 銀行</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">GCash による支払いを確定すると、%s が規約に従って今後の支払いをお客様の GCash アカウントに請求することを許可することになります。</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">入力した IBAN に不備があります。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">入力した IBAN が無効です。\"%s\" はサポートされている国コードではありません。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">IBANコードの先頭には 2 文字の国コードを入力してください。</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">入力した ID 番号に不備があります。</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK コードの入力に不備があります。</string>
   <!-- Error message when BLIK code is invalid -->
@@ -73,6 +77,10 @@
   <string name="stripe_name_on_card">カード名義人</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">支払い方法を選択してください:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[取引がマーチャントオブレコードである Global Stack Services Limited によって、その<a href=\"%s\">利用規約</a>に従って処理されることに同意した上で、支払いを確定します。]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[取引がマーチャントオブレコードである Global Stack Services Limited によって、その<a href=\"%s\">規約</a>に従って処理されることに同意した上で、支払いを確定します。]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">コンビニ決済</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA デビット</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">送信すると、リダイレクトされ、次の手順を安全に完了できます。</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">PayPal による支払いを確定すると、%s が規約に従って今後の支払いをお客様の PayPal アカウントに請求することを許可することになります。</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[これは海外購入であり、3.5% の IOF 手数料は含まれません。続行することにより、<terms>Ebanx の利用規約</terms>を承認し、同意したとみなされます。]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">RevolutPay による支払いを確定すると、%s が規約に従って今後の支払いをお客様の RevolutPay アカウントに請求することを許可することになります。</string>
   <!-- Satispay mandate text -->
@@ -113,12 +125,18 @@
   <string name="stripe_scan_card">カードをスキャン</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">スキャンしたカードをクリア</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">有効期限: %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">支払い情報を提供し、この支払いを確定することで、お客様は (A) %s および決済サービスプロバイダーである Stripe がお客様の銀行に口座引き落としの指図を送り、(B) 銀行がこの指図に従ってお客様の口座から引き落としを行うことを承認することになります。お客様の権利の一部として、銀行との契約条件に基づき、お客様は銀行からの返金を受ける権利を有します。返金は口座の引き落とし日から 8 週間以内に請求する必要があります。お客様の権利は、銀行から得られる明細書内で説明されています。お客様は今後の引き落としに関する通知を引き落としの実行日の 2 日前までに受け取ることに同意するものとします。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">デフォルトの決済手段として設定する</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">設定</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Touch \'n Go による支払いを確定すると、%s が規約に従って今後の支払いをお客様の Touch \'n Go アカウントに請求することを許可することになります。</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">TrueMoney による支払いを確定すると、%s が規約に従って今後の支払いをお客様の TrueMoney アカウントに請求することを許可することになります。</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">続行することにより、お客様は、購入またはサブスクリプションプランに従って、%1$s がお客様の Twint 残高から定期的に自動引き落としを行うことをオーソリしたことになります。</string>
   <!-- Label for UPI ID number field on form -->

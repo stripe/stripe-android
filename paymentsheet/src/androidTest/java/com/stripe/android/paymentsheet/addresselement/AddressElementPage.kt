@@ -17,7 +17,7 @@ import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentsheet.utils.replaceText
 import com.stripe.android.paymentsheet.utils.waitForNode
 import com.stripe.android.paymentsheet.utils.waitForText
-import kotlin.time.Duration.Companion.seconds
+import com.stripe.android.testing.waitUntilWithIdle
 
 internal class AddressElementPage(
     private val composeTestRule: ComposeTestRule,
@@ -59,9 +59,8 @@ internal class AddressElementPage(
 
     fun assertRequiredFieldError() {
         val error = "This field cannot be blank."
-        composeTestRule.waitUntil(
+        composeTestRule.waitUntilWithIdle(
             conditionDescription = "required-field validation error to appear",
-            timeoutMillis = 5.seconds.inWholeMilliseconds,
         ) {
             composeTestRule.onAllNodesWithText(error)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)

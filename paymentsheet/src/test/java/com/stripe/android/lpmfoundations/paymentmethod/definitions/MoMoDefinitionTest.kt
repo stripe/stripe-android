@@ -2,15 +2,13 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
-import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.StaticTextElement
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
@@ -28,46 +26,37 @@ internal class MoMoDefinitionTest {
     }
 
     @Test
-    fun `supports the documented intent modes`(
-        @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
+    fun `supports PaymentIntents without native authorization or mandate UI`(
+        @TestParameter hasSetupFutureUsage: Boolean,
     ) {
+        val intentScenario = if (hasSetupFutureUsage) {
+            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage
+        } else {
+            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+        }
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.MoMo),
         )
 
-        assertThat(MoMoDefinition.isSupported(metadata)).isEqualTo(
-            true
-        )
-        assertThat(MoMoDefinition.requiresMandate(metadata)).isEqualTo(
-            intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-        )
+        assertThat(MoMoDefinition.isSupported(metadata)).isTrue()
+        assertThat(MoMoDefinition.formElements(metadata)).isEmpty()
+        assertThat(MoMoDefinition.requiresMandate(metadata)).isEqualTo(hasSetupFutureUsage)
     }
 
     @Test
-    fun `form matches web instructions and mandate`(
-        @TestParameter intentScenario: LpmBillingAddressTestConfiguration.IntentScenario,
-    ) {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.MoMo),
-        )
-        val formElements = MoMoDefinition.formElements(metadata)
-
-        val instructions = formElements.first() as StaticTextElement
-        assertThat(instructions.text).isEqualTo(R.string.stripe_paymentsheet_redirect_instructions.resolvableString)
-        assertThat(formElements).hasSize(1)
-    }
-
-    @Test
-    fun `terms display never hides terms without changing confirmation requirements`() {
+    fun `does not support SetupIntents`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.SetupIntent
                 .stripeIntent(PaymentMethod.Type.MoMo),
-            termsDisplay = mapOf(PaymentMethod.Type.MoMo to PaymentSheet.TermsDisplay.NEVER),
         )
-        val formElements = MoMoDefinition.formElements(metadata)
 
-        assertThat(formElements.single()).isInstanceOf(StaticTextElement::class.java)
-        assertThat(MoMoDefinition.requiresMandate(metadata)).isEqualTo(true)
+        assertThat(MoMoDefinition.isSupported(metadata)).isFalse()
+    }
+
+    @Test
+    fun `requirements exclude SetupIntents`() {
+        assertThat(MoMoDefinition.requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup = false))
+            .containsExactly(AddPaymentMethodRequirement.UnsupportedForSetupIntent)
     }
 
     @Test
@@ -83,9 +72,24 @@ internal class MoMoDefinitionTest {
             )
         )
 
-        assertThat(formElements).hasSize(3)
+        assertThat(formElements).hasSize(2)
         checkPhoneField(formElements, 0)
         checkEmailField(formElements, 1)
+    }
+
+    @Test
+    fun `collects configured billing address`() {
+        val formElements = MoMoDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("momo")),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+            )
+        )
+
+        assertThat(formElements).hasSize(1)
+        checkBillingField(formElements, 0)
     }
 
     @Test

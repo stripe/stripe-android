@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -84,7 +85,10 @@ class AddressLauncher internal constructor(
         configuration: Configuration = Configuration()
     ) {
         val args = AddressElementActivityContract.Args.Standalone(
-            publishableKey = publishableKey,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+            ),
             config = configuration,
         )
 

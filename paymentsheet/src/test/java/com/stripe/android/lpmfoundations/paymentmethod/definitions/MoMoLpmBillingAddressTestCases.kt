@@ -63,7 +63,10 @@ private fun moMoWithBillingAddressExpectedPaymentMethodParams(
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
-internal val moMoTestCases = LpmBillingAddressTestConfiguration.IntentScenario.entries.flatMap { intentScenario ->
+internal val moMoTestCases = listOf(
+    LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+    LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage,
+).flatMap { intentScenario ->
     val requiresMandate = intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
     listOf(
         LpmBillingAddressFormValuesToParamsTestCase(
