@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
+
 ### PaymentSheet
 * [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
 * [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
