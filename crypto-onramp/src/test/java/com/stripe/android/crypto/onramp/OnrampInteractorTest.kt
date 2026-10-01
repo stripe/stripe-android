@@ -99,6 +99,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -106,6 +109,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -305,6 +309,37 @@ class OnrampInteractorTest {
         assertThat(interactor.createCryptoPaymentToken())
             .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
         verify(cryptoApiRepository).createPaymentToken("crc_customer", paymentMethod.id, "GB")
+    }
+
+    @Test
+    fun `token creation keeps original hint when configuration changes during platform settings request`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "US"))
+        interactor.onGooglePayPresented("pk_us")
+        val paymentMethod = createCardPaymentMethod()
+        interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        val settings = CompletableDeferred<Result<GetPlatformSettingsResponse>>()
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "US"))
+            .doSuspendableAnswer { settings.await() }
+        whenever(cryptoApiRepository.createPaymentToken("crc_customer", paymentMethod.id, "US"))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("cpt_token")))
+
+        val token = async(start = CoroutineStart.UNDISPATCHED) { interactor.createCryptoPaymentToken() }
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", "US")
+        assertThat(token.isCompleted).isFalse()
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "GB"))
+        settings.complete(Result.success(GetPlatformSettingsResponse("pk_us")))
+
+        val result = token.await() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(result.cryptoPaymentToken).isEqualTo("cpt_token")
+        verify(cryptoApiRepository).createPaymentToken("crc_customer", paymentMethod.id, "US")
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), eq("GB"))
+        // The old response must not be reused for the new configuration.
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_gb")
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", "GB")
     }
 
     @Test

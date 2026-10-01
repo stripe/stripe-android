@@ -725,7 +725,8 @@ internal class OnrampInteractor @Inject constructor(
 
     @Suppress("LongMethod")
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
-        val cryptoCustomerId = _state.value.cryptoCustomerId
+        val state = _state.value
+        val cryptoCustomerId = state.cryptoCustomerId
         if (cryptoCustomerId == null) {
             val error = mapError(
                 operation = Operation.CreateCryptoPaymentToken,
@@ -737,10 +738,11 @@ internal class OnrampInteractor @Inject constructor(
 
         // Get the platform publishable key
         // KYC can change the account even when the customer ID has not changed.
-        return getPlatformKey(forceRefresh = _state.value.selectedPaymentSource is SelectedPaymentSource.Wallet)
+        // Keep routing consistent if configuration changes while either request is in flight.
+        return getPlatformKey(state, forceRefresh = state.selectedPaymentSource is SelectedPaymentSource.Wallet)
             // Create a PaymentMethod + Crypto PaymentToken
             .flatMapCatching { platformPublishableKey ->
-                val selected = _state.value.selectedPaymentSource
+                val selected = state.selectedPaymentSource
                     ?: throw IllegalStateException("No selected payment source")
 
                 validateWalletAccount(selected, platformPublishableKey)
@@ -765,7 +767,7 @@ internal class OnrampInteractor @Inject constructor(
                 cryptoApiRepository.createPaymentToken(
                     cryptoCustomerId = cryptoCustomerId,
                     paymentMethod = paymentMethodId,
-                    countryHint = _state.value.configurationState?.countryHint,
+                    countryHint = state.configurationState?.countryHint,
                 )
             }
             .fold(
@@ -1544,10 +1546,9 @@ internal class OnrampInteractor @Inject constructor(
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    internal suspend fun getOrFetchPlatformKey(): Result<String> = getPlatformKey(forceRefresh = false)
+    internal suspend fun getOrFetchPlatformKey(): Result<String> = getPlatformKey(_state.value, forceRefresh = false)
 
-    private suspend fun getPlatformKey(forceRefresh: Boolean): Result<String> {
-        val state = _state.value
+    private suspend fun getPlatformKey(state: OnrampState, forceRefresh: Boolean): Result<String> {
         val cryptoCustomerId = state.cryptoCustomerId
         val countryHint = state.configurationState?.countryHint
         val merchantPublishableKey = state.configurationState?.publishableKey
