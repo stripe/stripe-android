@@ -153,10 +153,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
 
         // emits live event
-        verify(eventTracker).emitEvent(
-            name = Name.CANCEL,
-            metadata = Metadata()
-        )
+        verify(eventTracker).emitEvent(name = Name.CANCEL)
     }
 
     @Test
@@ -185,10 +182,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
 
         // emits live event
-        verify(eventTracker).emitEvent(
-            name = Name.MANUAL_ENTRY_INITIATED,
-            metadata = Metadata()
-        )
+        verify(eventTracker).emitEvent(name = Name.MANUAL_ENTRY_INITIATED)
     }
 
     @Test
