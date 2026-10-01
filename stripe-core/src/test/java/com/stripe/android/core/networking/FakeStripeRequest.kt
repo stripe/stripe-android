@@ -10,7 +10,6 @@ private val TEST_RETRY_CODES: Iterable<Int> = TEST_RETRY_CODES_START..TEST_RETRY
 
 internal class FakeStripeRequest(
     override val url: String = TEST_HOST,
-    override val shouldCache: Boolean = false,
     override val method: Method = Method.POST,
     override val mimeType: MimeType = MimeType.Form,
     override val headers: Map<String, String> = emptyMap(),

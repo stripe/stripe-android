@@ -1,7 +1,6 @@
 package com.stripe.android.networking
 
 import android.content.Context
-import android.net.http.HttpResponseCache
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -105,10 +104,7 @@ import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.utils.StripeUrlUtils
 import com.stripe.android.utils.mapResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
@@ -212,12 +208,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     init {
         fireFraudDetectionDataRequest()
-
-        CoroutineScope(workContext).launch {
-            val httpCacheDir = File(context.cacheDir, "stripe_api_repository_cache")
-            val httpCacheSize = (10 * 1024 * 1024).toLong() // 10 MiB
-            HttpResponseCache.install(httpCacheDir, httpCacheSize)
-        }
     }
 
     override suspend fun retrieveStripeIntent(
