@@ -90,7 +90,7 @@ internal fun BottomSheet() {
                     BottomSheetLine(line)
                 }
             }
-            IdentityButton(
+            IdentityPrimaryButton(
                 text = stringResource(id = R.string.stripe_close_button_text),
                 uppercase = true,
                 enabled = true,

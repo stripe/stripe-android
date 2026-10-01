@@ -127,7 +127,7 @@ internal fun ConfirmationScreen(
                     )
                 )
             }
-            IdentityButton(
+            IdentityPrimaryButton(
                 text = successPage.buttonText,
                 uppercase = true,
                 enabled = true,

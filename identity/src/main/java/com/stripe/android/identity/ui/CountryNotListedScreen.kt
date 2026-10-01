@@ -74,7 +74,7 @@ internal fun CountryNotListedScreen(
                     isMissingID = isMissingID
                 )
             }
-            IdentityButton(
+            IdentityPrimaryButton(
                 text = countryNotListedPage.cancelButtonText,
                 uppercase = true,
                 enabled = true,

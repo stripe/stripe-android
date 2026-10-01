@@ -250,7 +250,7 @@ private fun FinishMobileFlowWithResultSection(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IdentityButton(
+        IdentityPrimaryButton(
             text = stringResource(id = R.string.stripe_cancelled),
             uppercase = false,
             enabled = true,
@@ -263,7 +263,7 @@ private fun FinishMobileFlowWithResultSection(
             }
         )
 
-        IdentityButton(
+        IdentityPrimaryButton(
             text = stringResource(id = R.string.stripe_failed),
             uppercase = false,
             enabled = true,
@@ -294,7 +294,7 @@ private fun PreviewUserExperienceSection(
         text = stringResource(id = R.string.stripe_preview_user_experience_details),
         modifier = Modifier.padding(vertical = 8.dp)
     )
-    IdentityButton(
+    IdentityPrimaryButton(
         text = stringResource(id = R.string.stripe_proceed),
         uppercase = false,
         enabled = true,
