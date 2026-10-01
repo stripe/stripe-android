@@ -319,6 +319,8 @@ class CheckoutController @Inject internal constructor(
             kotlin.Result.success(checkoutSessionResponse)
         } else {
             // The tax region endpoint requires a country, so retain the previous country only.
+            // TODO: https://jira.corp.stripe.com/browse/MOBILESDK-4944
+            // Send null once CheckoutClient supports clearing tax_region on the server.
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
