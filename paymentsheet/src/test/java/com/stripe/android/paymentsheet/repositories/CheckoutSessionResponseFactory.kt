@@ -20,6 +20,7 @@ internal object CheckoutSessionResponseFactory {
         customer: CheckoutSessionResponse.Customer? = null,
         savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         checkoutItems: List<CheckoutSessionResponse.CheckoutItem> = listOf(checkoutItem(amount, currency)),
+        totalSummary: CheckoutSessionResponse.TotalSummary? = null,
         recurringDetails: CheckoutSessionResponse.RecurringDetails? = null,
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
         taxMeta: CheckoutSessionResponse.TaxMeta? = CheckoutSessionResponse.TaxMeta(
@@ -46,6 +47,7 @@ internal object CheckoutSessionResponseFactory {
         customer = customer,
         savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
         checkoutItems = checkoutItems,
+        totalSummary = totalSummary,
         recurringDetails = recurringDetails,
         adaptivePricingInfo = adaptivePricingInfo,
         taxMeta = taxMeta,

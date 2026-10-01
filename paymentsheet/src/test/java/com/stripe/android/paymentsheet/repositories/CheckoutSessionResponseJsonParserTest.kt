@@ -17,6 +17,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.id).isEqualTo("cs_test_abc123")
         assertThat(result?.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
         assertThat(result?.requiresShippingAddress).isFalse()
+        assertThat(result?.totalSummary).isNull()
         assertThat(result?.checkoutItems).hasSize(1)
         val group = result!!.checkoutItems.single()
         assertThat(group.key).isEqualTo("group_1")
@@ -81,7 +82,7 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parses aggregate discounts and taxes separately`() {
+    fun `parses recurring discounts and session tax amounts separately`() {
         val json = base()
         json.getJSONObject("recurring_details")
             .put("total_tax_amounts", JSONArray().put(taxAmount()))
@@ -93,11 +94,33 @@ class CheckoutSessionResponseJsonParserTest {
                         .put("promotion_code", JSONObject().put("code", "SAVE10"))
                 )
             )
+        json.put("total_summary", JSONObject().put("total_tax_amounts", JSONArray().put(taxAmount())))
 
         val result = parse(json)!!
 
+        assertThat(result.totalSummary?.totalTaxAmounts).hasSize(1)
+        assertThat(result.totalSummary?.totalTaxAmounts?.single()?.taxRate?.displayName).isEqualTo("Sales tax")
         assertThat(result.recurringDetails?.totalTaxAmounts).hasSize(1)
         assertThat(result.recurringDetails?.totalDiscountAmounts?.single()?.promotionCode?.code).isEqualTo("SAVE10")
+    }
+
+    @Test
+    fun `missing session total tax amounts remain null`() {
+        val json = base().put("total_summary", JSONObject().put("total", 1000))
+
+        val result = parse(json)!!
+
+        assertThat(result.totalSummary?.totalTaxAmounts).isNull()
+    }
+
+    @Test
+    fun `empty session total tax amounts remain empty`() {
+        val json = base().put("total_summary", JSONObject().put("total_tax_amounts", JSONArray()))
+
+        val result = parse(json)!!
+
+        assertThat(result.totalSummary?.totalTaxAmounts).isNotNull()
+        assertThat(result.totalSummary?.totalTaxAmounts).isEmpty()
     }
 
     @Test

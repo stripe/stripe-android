@@ -79,6 +79,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
                 "customer_managed_saved_payment_methods_offer_save"
             )?.let(::parseSavedPaymentMethodsOfferSave),
             checkoutItems = checkoutItems,
+            totalSummary = json.optionalObject("total_summary")?.let(::parseTotalSummary),
             recurringDetails = json.optionalObject("recurring_details")?.let(::parseRecurringDetails),
             adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let(::parseAdaptivePricingInfo),
             taxMeta = json.optionalObject("tax_meta")?.let(::parseTaxMeta),
@@ -144,6 +145,10 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             adjustableQuantity = adjustableQuantity,
         )
     }
+
+    private fun parseTotalSummary(json: JSONObject) = CheckoutSessionResponse.TotalSummary(
+        totalTaxAmounts = json.optionalArray("total_tax_amounts")?.objects()?.map(::parseTaxAmount),
+    )
 
     private fun parseRecurringDetails(json: JSONObject) = CheckoutSessionResponse.RecurringDetails(
         totalDiscountAmounts = json.requiredArray("total_discount_amounts").objects().map(::parseDiscountAmount),
@@ -292,6 +297,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private fun JSONObject.requiredObject(name: String): JSONObject = getJSONObject(name)
     private fun JSONObject.optionalObject(name: String): JSONObject? =
         if (!has(name) || isNull(name)) null else getJSONObject(name)
+    private fun JSONObject.optionalArray(name: String): JSONArray? =
+        if (!has(name) || isNull(name)) null else getJSONArray(name)
     private fun JSONObject.requiredArray(name: String): JSONArray = getJSONArray(name)
     private fun JSONObject.requiredBoolean(name: String): Boolean = getBoolean(name)
     private fun JSONObject.optionalBoolean(name: String): Boolean? =

@@ -50,7 +50,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())
         },
         tax = taxMeta.asTax(taxAddressSource),
-        taxAmounts = recurringDetails?.totalTaxAmounts?.map {
+        taxAmounts = totalSummary?.totalTaxAmounts?.map {
             it.asTaxAmount(presentmentCurrency, locale)
         },
         totals = totals(presentmentCurrency, locale),

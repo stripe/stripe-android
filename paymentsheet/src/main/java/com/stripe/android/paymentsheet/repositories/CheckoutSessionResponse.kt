@@ -21,6 +21,7 @@ internal data class CheckoutSessionResponse(
     val customer: Customer?,
     val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
     val checkoutItems: List<CheckoutItem>,
+    val totalSummary: TotalSummary?,
     val recurringDetails: RecurringDetails?,
     val adaptivePricingInfo: AdaptivePricingInfo?,
     val taxMeta: TaxMeta?,
@@ -96,6 +97,9 @@ internal data class CheckoutSessionResponse(
         val maximum: Int?,
         val minimum: Int?,
     ) : StripeModel
+
+    @Parcelize
+    data class TotalSummary(val totalTaxAmounts: List<TaxAmount>?) : StripeModel
 
     @Parcelize
     data class RecurringDetails(

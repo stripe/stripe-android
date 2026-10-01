@@ -104,6 +104,36 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `maps aggregate session tax amounts separately from item totals`() {
+        val session = CheckoutSessionResponseFactory.create(
+            totalSummary = CheckoutSessionResponse.TotalSummary(
+                totalTaxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 1_266,
+                        inclusive = false,
+                        taxRate = CheckoutSessionResponse.TaxRate(
+                            displayName = "Sales Tax",
+                            percentage = 10.55,
+                            rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+                        ),
+                    )
+                ),
+            ),
+        ).session()
+
+        assertThat(session.tax?.status).isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1_000.0)
+        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(0.0)
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1_000.0)
+        assertThat(session.taxAmounts).hasSize(1)
+        val tax = session.taxAmounts.orEmpty().single()
+        assertThat(tax.minorUnitsAmount).isEqualTo(1_266.0)
+        assertThat(tax.amount).isEqualTo("$12.66")
+        assertThat(tax.inclusive).isFalse()
+        assertThat(tax.displayName).isEqualTo("Sales Tax")
+    }
+
+    @Test
     fun `tax is nullable and derives pending state`() {
         val absent = CheckoutSessionResponseFactory.create(taxMeta = null).session()
         val pending = CheckoutSessionResponseFactory.create(
