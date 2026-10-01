@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.CurrentLinkBrand
@@ -564,6 +565,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             FakeCurrentLinkBrand(initialState.linkBrand),
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = eventTracker,
+        eventContext = FinancialConnectionsEventContext(null),
         activityRetainedComponent = mock(),
         applicationId = applicationId,
         uriUtils = UriUtils(Logger.noop(), mock()),

@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -105,16 +106,21 @@ internal class FinancialConnectionsEventEmitterTest {
             )
         )
         assertThat(call.event.params?.get("context_source")).isEqualTo("native_sdk")
-        assertThat(call.event.params?.get("context_pane")).isEqualTo(call.manifest.nextPane.value)
+        assertThat(call.event.params).doesNotContainKey("context_pane")
     }
 
     @Test
-    fun `analytics uses the manifest captured when the event was emitted`() = runScenario {
+    fun `analytics uses the manifest and pane captured when the event was emitted`() = runScenario {
         val originalId = requireNotNull(eventContext.manifest).id
-        emitter.emit(Name.OPEN, Metadata())
+        eventContext.updateCurrentPane(Pane.ACCOUNT_PICKER)
+        emitter.emit(Name.ACCOUNTS_SELECTED, Metadata())
         eventContext.update(ApiKeyFixtures.sessionManifest().copy(id = "fcsess_changed"))
+        eventContext.updateCurrentPane(Pane.SUCCESS)
 
-        assertThat(awaitEvent(Name.OPEN).financialConnectionsSessionId).isEqualTo(originalId)
+        assertThat(publicEvents.awaitItem().financialConnectionsSessionId).isEqualTo(originalId)
+        val call = analyticsSender.calls.awaitItem()
+        assertThat(call.manifest.id).isEqualTo(originalId)
+        assertThat(call.event.params?.get("context_pane")).isEqualTo("account_picker")
     }
 
     @Test

@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
@@ -93,6 +94,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val createInstantDebitsResult: CreateInstantDebitsResult,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val eventContext: FinancialConnectionsEventContext,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val currentLinkBrand: CurrentLinkBrand,
@@ -486,6 +488,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun handlePaneChanged(pane: Pane) {
         currentPane.value = pane
+        eventContext.updateCurrentPane(pane)
     }
 
     companion object {

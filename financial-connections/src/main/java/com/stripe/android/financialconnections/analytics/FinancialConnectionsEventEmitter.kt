@@ -23,6 +23,7 @@ internal class FinancialConnectionsEventEmitter @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     fun emit(name: Name, metadata: Metadata) {
         val manifest = eventContext.manifest?.takeIf { it.id.isNotBlank() } ?: return
+        val pane = eventContext.currentPane
         val event = FinancialConnectionsEvent(
             name = name,
             metadata = metadata,
@@ -31,11 +32,11 @@ internal class FinancialConnectionsEventEmitter @Inject constructor(
         logger.debug("Emitting event ${event.name} with metadata ${event.metadata}")
         FinancialConnections.emitEvent(event)
 
-        // Preserve the event's session even if the cached manifest changes before delivery.
+        // Preserve the event's session and pane even if they change before delivery.
         GlobalScope.launch(workContext) {
             runCatching {
                 analyticsSender.send(
-                    FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, manifest.nextPane),
+                    FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, pane),
                     manifest
                 )
             }.onFailure {

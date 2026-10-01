@@ -25,7 +25,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
 
     class ExternalOnEventEmitted(
         event: FinancialConnectionsEvent,
-        pane: Pane,
+        pane: Pane?,
     ) : FinancialConnectionsAnalyticsEvent(
         name = "external_on_event.emitted",
         params = mapOf(
@@ -39,8 +39,8 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
                 }
             }.toString(),
             "context_source" to "native_sdk",
-            "context_pane" to pane.value,
-        )
+            "context_pane" to pane?.value,
+        ).filterNotNullValues()
     )
 
     class PaneLaunched(

@@ -31,7 +31,7 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         val event = FinancialConnectionsEvent(Name.OPEN, Metadata(), manifest.id)
 
         sender.send(
-            FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, manifest.nextPane),
+            FinancialConnectionsAnalyticsEvent.ExternalOnEventEmitted(event, Pane.ACCOUNT_PICKER),
             manifest
         )
 
@@ -48,7 +48,7 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         assertThat(payload.getValue("name").jsonPrimitive.content).isEqualTo("open")
         assertThat(payload.getValue("financialConnectionsSessionId").jsonPrimitive.content).isEqualTo(manifest.id)
         assertThat(params.getValue("context_source").jsonPrimitive.content).isEqualTo("native_sdk")
-        assertThat(params.getValue("context_pane").jsonPrimitive.content).isEqualTo(manifest.nextPane.value)
+        assertThat(params.getValue("context_pane").jsonPrimitive.content).isEqualTo("account_picker")
         requests.ensureAllEventsConsumed()
     }
 
