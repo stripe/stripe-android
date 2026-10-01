@@ -1392,7 +1392,12 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         isContinuation: Boolean,
     ) {
-        val checkoutStatus = getOrFetchPlatformKey()
+        val platformKeyResult = if (_state.value.cryptoCustomerId == null) {
+            Result.failure(MissingCryptoCustomerException())
+        } else {
+            getOrFetchPlatformKey()
+        }
+        val checkoutStatus = platformKeyResult
             .flatMapCatching { platformApiKey ->
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,

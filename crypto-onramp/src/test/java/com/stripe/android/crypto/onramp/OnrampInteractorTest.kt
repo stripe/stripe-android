@@ -1990,6 +1990,67 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun startCheckout_withoutCustomer_failsBeforeFetchingPlatformSettings() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.startCheckout("cos_test_session_id")
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository, never()).getPlatformSettings(anyOrNull(), anyOrNull())
+        verify(cryptoApiRepository, never()).getOnrampSession(any(), any())
+    }
+
+    @Test
+    fun startCheckout_withoutCustomer_failsWithCachedPreAuthPlatformKey() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+
+        interactor.startCheckout("cos_test_session_id")
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository).getPlatformSettings(null, null)
+        verify(cryptoApiRepository, never()).getOnrampSession(any(), any())
+    }
+
+    @Test
+    fun continueCheckout_afterLogout_failsBeforeFetchingPlatformSettings() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_test_session_id")
+        assertThat(interactor.state.value.checkoutState?.status)
+            .isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isTrue()
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+        interactor.logOut()
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+
+        interactor.continueCheckout()
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository).getPlatformSettings(anyOrNull(), anyOrNull())
+        verify(cryptoApiRepository).getOnrampSession(any(), any())
+    }
+
+    private fun assertCheckoutFailedWithMissingCustomer() {
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        val status = interactor.state.value.checkoutState?.status
+        assertThat(status).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (status as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        val error = (result as OnrampCheckoutResult.Failed).error
+        assertUnexpectedError<MissingCryptoCustomerException>(error)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isFalse()
+    }
+
+    @Test
     fun continueCheckout_recoversPendingCheckoutAfterInteractorRecreation() = runTest {
         stubCheckoutRequiresNextAction()
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
