@@ -16,9 +16,11 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -350,6 +352,120 @@ class DefaultManageScreenInteractorTest {
         }
     }
 
+    @Test
+    fun `synchronous selector navigates back once`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val navigateBackCalls = Turbine<Boolean>()
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            handleBackPressed = navigateBackCalls::add,
+        ) {
+            interactor.state.test {
+                val displayable = awaitItem().paymentMethods.single()
+                interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+
+                expectNoEvents()
+                assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(displayable)
+                assertThat(navigateBackCalls.awaitItem()).isTrue()
+                navigateBackCalls.expectNoEvents()
+                assertThat(interactor.state.value.isSelectionPending).isFalse()
+
+                interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(displayable))
+                onSelectPaymentMethodTurbine.expectNoEvents()
+                navigateBackCalls.expectNoEvents()
+            }
+        }
+        navigateBackCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `selectionState is projected to the screen and matching row`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods = paymentMethods, currentSelection = null) {
+            interactor.state.test {
+                awaitItem()
+
+                selectionStateSource.value = SavedPaymentMethodSelectionState.Pending(paymentMethods[1].id)
+                awaitItem().run {
+                    assertThat(selectionState)
+                        .isEqualTo(SavedPaymentMethodSelectionState.Pending(paymentMethods[1].id))
+                    assertThat(isSelectionPending).isTrue()
+                    assertThat(this.paymentMethods.map { it.isSelectionPending }).containsExactly(false, true).inOrder()
+                }
+
+                selectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+                awaitItem().run {
+                    assertThat(selectionState).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                    assertThat(isSelectionPending).isFalse()
+                    assertThat(this.paymentMethods.map { it.isSelectionPending })
+                        .containsExactly(false, false)
+                        .inOrder()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `a second tap while the first selection is pending is ignored`() {
+        val updateResult = CompletableDeferred<Unit>()
+        val navigateBackCalls = Turbine<Boolean>()
+        lateinit var selectorState: MutableStateFlow<SavedPaymentMethodSelectionState>
+        runScenario(
+            initialPaymentMethods = PaymentMethodFixtures.createCards(2),
+            currentSelection = null,
+            handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = {
+                selectorState.value = SavedPaymentMethodSelectionState.Pending(it.paymentMethod.id)
+                updateResult.await()
+                selectorState.value = SavedPaymentMethodSelectionState.Idle
+            },
+        ) {
+            selectorState = selectionStateSource
+            val (first, second) = interactor.state.value.paymentMethods
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(first))
+            assertThat(onSelectPaymentMethodTurbine.awaitItem()).isEqualTo(first)
+
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(second))
+            onSelectPaymentMethodTurbine.expectNoEvents()
+            navigateBackCalls.expectNoEvents()
+
+            updateResult.complete(Unit)
+            assertThat(navigateBackCalls.awaitItem()).isTrue()
+        }
+        navigateBackCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `auto select runs once while the selector writes pending and idle`() {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val updateResult = CompletableDeferred<Unit>()
+        val navigateBackCalls = Turbine<Boolean>()
+        lateinit var selectorState: MutableStateFlow<SavedPaymentMethodSelectionState>
+        runScenario(
+            initialPaymentMethods = listOf(paymentMethod),
+            currentSelection = null,
+            handleBackPressed = navigateBackCalls::add,
+            selectPaymentMethod = {
+                selectorState.value = SavedPaymentMethodSelectionState.Pending(it.paymentMethod.id)
+                updateResult.await()
+                selectorState.value = SavedPaymentMethodSelectionState.Idle
+            },
+        ) {
+            selectorState = selectionStateSource
+            canEditSource.value = false
+            assertThat(onSelectPaymentMethodTurbine.awaitItem().paymentMethod.id).isEqualTo(paymentMethod.id)
+            navigateBackCalls.expectNoEvents()
+
+            updateResult.complete(Unit)
+
+            assertThat(navigateBackCalls.awaitItem()).isTrue()
+            onSelectPaymentMethodTurbine.expectNoEvents()
+            navigateBackCalls.expectNoEvents()
+        }
+        navigateBackCalls.ensureAllEventsConsumed()
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -359,6 +475,7 @@ class DefaultManageScreenInteractorTest {
         isEditing: Boolean = false,
         configuredLinkBrand: LinkBrand = LinkBrand.Link,
         handleBackPressed: (withDelay: Boolean) -> Unit = { notImplemented() },
+        selectPaymentMethod: suspend (DisplayableSavedPaymentMethod) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
         val paymentMethods = MutableStateFlow(initialPaymentMethods)
@@ -369,6 +486,7 @@ class DefaultManageScreenInteractorTest {
         val dispatcher = UnconfinedTestDispatcher()
         val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
         val linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = null))
+        val selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(SavedPaymentMethodSelectionState.Idle)
 
         val toggleEditTurbine = Turbine<Unit>()
         val onSelectPaymentMethodTurbine = Turbine<DisplayableSavedPaymentMethod>()
@@ -388,11 +506,13 @@ class DefaultManageScreenInteractorTest {
             },
             onSelectPaymentMethod = {
                 onSelectPaymentMethodTurbine.add(it)
+                selectPaymentMethod(it)
             },
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
             linkAccount = linkAccount,
+            selectionState = selectionState,
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)
@@ -405,6 +525,7 @@ class DefaultManageScreenInteractorTest {
             canRemoveSource = canRemove,
             defaultPaymentMethodSource = defaultPaymentMethodId,
             linkAccountSource = linkAccount,
+            selectionStateSource = selectionState,
             toggleEditTurbine = toggleEditTurbine,
             onSelectPaymentMethodTurbine = onSelectPaymentMethodTurbine,
         ).apply {
@@ -423,6 +544,7 @@ class DefaultManageScreenInteractorTest {
         val canRemoveSource: MutableStateFlow<Boolean>,
         val defaultPaymentMethodSource: MutableStateFlow<String?>,
         val linkAccountSource: MutableStateFlow<LinkAccountUpdate.Value>,
+        val selectionStateSource: MutableStateFlow<SavedPaymentMethodSelectionState>,
         val toggleEditTurbine: ReceiveTurbine<Unit>,
         val onSelectPaymentMethodTurbine: ReceiveTurbine<DisplayableSavedPaymentMethod>,
     ) {
