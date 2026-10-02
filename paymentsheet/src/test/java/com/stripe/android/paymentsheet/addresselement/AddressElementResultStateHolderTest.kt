@@ -2,100 +2,164 @@ package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 internal class AddressElementResultStateHolderTest {
     @Test
-    fun `first terminal result is retained`() {
+    fun `starts idle`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+        }
+    }
+
+    @Test
+    fun `starting a save prevents another save`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `user cancellation is rejected during save`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `failed save returns to idle and allows retry`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+
+            resultStateHolder.onSaveFailed()
+
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+        }
+    }
+
+    @Test
+    fun `save completion finishes with its result`() = runTest {
         val expectedResult = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
         val resultStateHolder = AddressElementResultStateHolder()
 
-        assertThat(resultStateHolder.setResult(expectedResult)).isTrue()
-        assertThat(resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)).isFalse()
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
 
-        assertThat(resultStateHolder.result.value).isEqualTo(expectedResult)
-    }
+            assertThat(resultStateHolder.onSaveCompleted(expectedResult)).isTrue()
 
-    @Test
-    fun `form starts enabled and follows enabled state changes`() = runTest {
-        val resultStateHolder = AddressElementResultStateHolder()
-
-        resultStateHolder.formEnabled.test {
-            assertThat(awaitItem()).isTrue()
-
-            resultStateHolder.setFormEnabled(false)
-
-            assertThat(awaitItem()).isFalse()
-
-            resultStateHolder.setFormEnabled(true)
-
-            assertThat(awaitItem()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Finished(expectedResult))
         }
     }
 
     @Test
-    fun `user cancellation returns canceled when form is enabled`() = runTest {
-        val resultStateHolder = AddressElementResultStateHolder()
-
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
-
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
-
-            assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
-
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `user cancellation is ignored when form is disabled`() = runTest {
-        val resultStateHolder = AddressElementResultStateHolder()
-        resultStateHolder.setFormEnabled(false)
-
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
-
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
-
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `user cancellation is allowed after form is enabled again`() = runTest {
-        val resultStateHolder = AddressElementResultStateHolder()
-        resultStateHolder.setFormEnabled(false)
-
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
-
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
-
-            expectNoEvents()
-
-            resultStateHolder.setFormEnabled(true)
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
-
-            assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        }
-    }
-
-    @Test
-    fun `success result is accepted when form is disabled`() = runTest {
+    fun `successful result cannot be overwritten reset or restarted`() = runTest {
         val expectedResult = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
         val resultStateHolder = AddressElementResultStateHolder()
-        resultStateHolder.setFormEnabled(false)
 
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+            assertThat(resultStateHolder.onSaveCompleted(expectedResult)).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Finished(expectedResult))
 
-            resultStateHolder.setResult(expectedResult)
+            assertThat(resultStateHolder.onSaveCompleted(AddressElementActivityContract.Result.Canceled)).isFalse()
+            resultStateHolder.onSaveFailed()
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
 
-            assertThat(awaitItem()).isEqualTo(expectedResult)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `save completion is rejected without a pending save`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+        val result = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.onSaveCompleted(result)).isFalse()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `user cancellation finishes with canceled result when idle`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
+
+            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+        }
+    }
+
+    @Test
+    fun `canceled result cannot be overwritten reset or restarted`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+        val result = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+
+            assertThat(resultStateHolder.onSaveCompleted(result)).isFalse()
+            resultStateHolder.onSaveFailed()
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `user cancellation is allowed after save fails`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+            resultStateHolder.onSaveFailed()
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
+
+            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
         }
     }
 }
