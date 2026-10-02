@@ -36,7 +36,12 @@ internal sealed interface LinkLaunchMode : Parcelable {
      * to payment.
      */
     @Parcelize
-    data object Full : LinkLaunchMode
+    data class Full(
+        /**
+         * Whether the wallet should show a secondary button that lets the user continue without Link.
+         */
+        val showSecondaryButton: Boolean,
+    ) : LinkLaunchMode
 
     @Parcelize
     data class Confirmation(

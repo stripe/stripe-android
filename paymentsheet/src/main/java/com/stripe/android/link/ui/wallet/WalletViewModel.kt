@@ -654,7 +654,14 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
 
 private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
     return when (linkLaunchMode) {
-        is LinkLaunchMode.Full,
+        is LinkLaunchMode.Full -> if (linkLaunchMode.showSecondaryButton) {
+            when (this) {
+                is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
+                is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
+            }
+        } else {
+            null
+        }
         is LinkLaunchMode.Confirmation -> when (this) {
             is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
             is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
