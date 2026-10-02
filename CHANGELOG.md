@@ -14,6 +14,7 @@ NEXT_VERSION_BUMP: MINOR
 * [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
 
 ### PaymentSheet
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support for PaymentIntents and SetupIntents.
 * [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.

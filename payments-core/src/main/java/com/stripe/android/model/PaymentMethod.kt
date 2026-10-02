@@ -581,6 +581,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
+        GCash(
+            "gcash",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         KakaoPay(
             "kakao_pay",
             isReusable = false,
