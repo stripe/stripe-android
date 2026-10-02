@@ -132,7 +132,7 @@ internal class InputAddressViewModel @Inject constructor(
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
     fun onScreenShown() {
-        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+        eventReporter.onShow(getCurrentAddress().address?.country.orEmpty())
     }
 
     init {
@@ -262,10 +262,23 @@ internal class InputAddressViewModel @Inject constructor(
         result: AddressElementActivityContract.Result,
     ) {
         addressDetails.address?.country?.let { country ->
+            val autocompleteFilledAddress = inlineAutocompleteController?.autocompleteFilledAddress
+            val autocompleteAddressDetails = autocompleteFilledAddress?.let { address ->
+                AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = address.city,
+                        country = address.country,
+                        line1 = address.line1,
+                        line2 = address.line2,
+                        postalCode = address.postalCode,
+                        state = address.state,
+                    )
+                )
+            }
             eventReporter.onCompleted(
                 country = country,
-                autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-                editDistance = addressDetails.editDistance(collectedAddress.value)
+                autocompleteResultSelected = autocompleteFilledAddress != null,
+                editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
             )
         }
         resultStateHolder.setResult(result)

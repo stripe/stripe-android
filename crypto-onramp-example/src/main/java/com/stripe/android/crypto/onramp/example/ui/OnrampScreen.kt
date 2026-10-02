@@ -58,7 +58,23 @@ internal fun OnrampScreen(
             Screen.LoginSignup -> {
                 LoginSignupScreen(
                     onRegister = viewModel::registerUser,
-                    onLogin = viewModel::loginUser
+                    onLogin = viewModel::loginUser,
+                    onCollectGooglePay = {
+                        onCollectPayment(PaymentMethodSelection.GooglePay(currencyCode = "USD", amount = 0L))
+                    },
+                    onCollectSamsungPay = {
+                        onCollectPayment(
+                            PaymentMethodSelection.SamsungPay(
+                                currencyCode = "USD",
+                                amount = 199L,
+                                orderNumber = "onramp-example-order",
+                            )
+                        )
+                    },
+                    googlePayIsReady = uiState.googlePayIsReady,
+                    samsungPayIsReady = uiState.samsungPayIsReady,
+                    selectedPaymentLabel = uiState.selectedPaymentData?.label,
+                    walletEmail = uiState.walletEmail,
                 )
             }
             Screen.Loading -> {
@@ -67,6 +83,9 @@ internal fun OnrampScreen(
             Screen.Registration -> {
                 RegistrationScreen(
                     initialEmail = uiState.email,
+                    initialPhone = uiState.walletPhone.orEmpty(),
+                    initialCountry = uiState.walletCountry.orEmpty(),
+                    initialFullName = uiState.walletFullName.orEmpty(),
                     onRegister = { email, phone, country, fullName ->
                         viewModel.registerNewLinkUser(
                             LinkUserInfo(

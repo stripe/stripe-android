@@ -17,7 +17,6 @@ import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -120,8 +119,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            params = paramsCaptor.capture()
         )
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
@@ -148,8 +146,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            params = paramsCaptor.capture()
         )
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
@@ -164,7 +161,6 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                 url = any(),
                 options = any(),
                 params = any(),
-                shouldCache = eq(false),
             )
         ).thenReturn(request)
         whenever(mockRequestExecutor.execute(any(), any<KSerializer<*>>()))
@@ -193,7 +189,6 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             url = any(),
             options = any(),
             params = paramsCaptor.capture(),
-            shouldCache = eq(false),
         )
         assertThat(paramsCaptor.allValues.map { it["pre_collected_consent"] }).containsExactly(
             PRE_COLLECTED_CONSENT_PARAMS,
@@ -212,8 +207,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any(),
-                shouldCache = eq(false)
+                params = any()
             )
         ).thenReturn(mock)
         given(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).willSuspendableAnswer {

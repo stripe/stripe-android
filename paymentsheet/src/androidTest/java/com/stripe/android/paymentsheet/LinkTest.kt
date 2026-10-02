@@ -55,6 +55,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUp() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -134,6 +135,7 @@ internal class LinkTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -243,6 +245,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Selector() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -326,6 +329,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -421,6 +425,7 @@ internal class LinkTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -538,6 +543,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Selector() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -637,6 +643,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpFailure() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -702,6 +709,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpFailureInPassthroughMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -767,6 +775,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpShareFailureInPassthroughMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -840,6 +849,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -896,6 +906,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -928,6 +939,7 @@ internal class LinkTest(
     fun testLogoutAfterLinkTransaction() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -998,6 +1010,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -1072,6 +1085,7 @@ internal class LinkTest(
     fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -1187,6 +1201,7 @@ internal class LinkTest(
     fun testSingleConsumerLookupWithLinkEnabled() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->

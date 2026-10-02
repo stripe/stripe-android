@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -10,27 +9,28 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
 
-@RunWith(RobolectricTestParameterInjector::class)
 internal class GoPayDefinitionTest {
     @Test
-    fun `supports PaymentIntents without native authorization or mandate UI`(
-        @TestParameter hasSetupFutureUsage: Boolean,
-    ) {
-        val intentScenario = if (hasSetupFutureUsage) {
-            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage
-        } else {
-            LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-        }
+    fun `supports PaymentIntents without native authorization or mandate UI`() {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.GoPay),
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.GoPay),
         )
 
         assertThat(GoPayDefinition.isSupported(metadata)).isTrue()
         assertThat(GoPayDefinition.formElements(metadata)).isEmpty()
-        assertThat(GoPayDefinition.requiresMandate(metadata)).isEqualTo(hasSetupFutureUsage)
+        assertThat(GoPayDefinition.requiresMandate(metadata)).isFalse()
+    }
+
+    @Test
+    fun `does not support PaymentIntents with setup future usage`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntentWithSetupFutureUsage
+                .stripeIntent(PaymentMethod.Type.GoPay),
+        )
+
+        assertThat(GoPayDefinition.isSupported(metadata)).isFalse()
     }
 
     @Test
@@ -44,9 +44,9 @@ internal class GoPayDefinitionTest {
     }
 
     @Test
-    fun `requirements exclude SetupIntents`() {
+    fun `requirements exclude intents with setup`() {
         assertThat(GoPayDefinition.requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup = false))
-            .containsExactly(AddPaymentMethodRequirement.UnsupportedForSetupIntent)
+            .containsExactly(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
     @Test
