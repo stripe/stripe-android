@@ -24,6 +24,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementFactory
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -55,9 +56,13 @@ internal fun VerificationDialog(
         modifier = modifier,
         state = state,
         otpElement = viewModel.otpElement,
+        phoneNumberController = viewModel.phoneNumberController,
         onBack = viewModel::onBack,
+        onNavigateBack = { viewModel.onNavigateBack() },
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
+        onEmailCodeClick = viewModel::onEmailCodeClicked,
+        onPhoneNumberSubmitted = viewModel::onPhoneNumberSubmitted,
         onFocusRequested = viewModel::onFocusRequested,
         didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
         onConsentShown = viewModel::onConsentShown
@@ -69,18 +74,24 @@ internal fun VerificationDialogBody(
     modifier: Modifier = Modifier,
     state: VerificationViewState,
     otpElement: OTPElement,
+    phoneNumberController: PhoneNumberController,
     onBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onFocusRequested: () -> Unit,
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onEmailCodeClick: () -> Unit,
+    onPhoneNumberSubmitted: () -> Unit,
     onConsentShown: () -> Unit,
 ) {
     Box(
         modifier = modifier
     ) {
         Dialog(
-            onDismissRequest = onBack,
+            onDismissRequest = {
+                if (state.authFlow?.canGoBack == true) onNavigateBack() else onBack()
+            },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false
             )
@@ -99,9 +110,13 @@ internal fun VerificationDialogBody(
                     VerificationBody(
                         state = state,
                         otpElement = otpElement,
+                        phoneNumberController = phoneNumberController,
                         onBack = onBack,
+                        onNavigateBack = onNavigateBack,
                         onChangeEmailClick = onChangeEmailClick,
                         onResendCodeClick = onResendCodeClick,
+                        onEmailCodeClick = onEmailCodeClick,
+                        onPhoneNumberSubmitted = onPhoneNumberSubmitted,
                         onFocusRequested = onFocusRequested,
                         didShowCodeSentNotification = didShowCodeSentNotification,
                         onConsentShown = onConsentShown,
@@ -125,6 +140,7 @@ fun VerificationDialogPreview() {
         ) {
             VerificationDialogBody(
                 state = VerificationViewState(
+                    authFlow = null,
                     isProcessing = false,
                     isSendingNewCode = false,
                     errorMessage = resolvableString("Test error message"),
@@ -138,9 +154,13 @@ fun VerificationDialogPreview() {
                     linkBrand = LinkBrand.Link,
                 ),
                 otpElement = OTPElementFactory.create(),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                 onBack = {},
+                onNavigateBack = {},
                 onChangeEmailClick = {},
                 onResendCodeClick = {},
+                onEmailCodeClick = {},
+                onPhoneNumberSubmitted = {},
                 onFocusRequested = {},
                 didShowCodeSentNotification = {},
                 onConsentShown = {}

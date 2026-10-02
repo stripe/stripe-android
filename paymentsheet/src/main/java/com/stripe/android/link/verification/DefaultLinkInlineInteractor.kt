@@ -17,6 +17,7 @@ import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.CoroutineScope
@@ -99,7 +100,11 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                         )
                     }
                     // confirm verification
-                    val result = linkAccountManager.confirmVerification(code = code, consentGranted = null)
+                    val result = linkAccountManager.confirmVerification(
+                        code = code,
+                        type = VerificationType.SMS,
+                        consentGranted = null,
+                    )
                     onConfirmationResult(verificationState, result)
                 }
             }
@@ -141,6 +146,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         linkConfiguration = linkConfiguration,
         paymentMethodMetadata = paymentMethodMetadata,
         viewState = VerificationViewState(
+            authFlow = null,
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
             isProcessing = false,
@@ -214,7 +220,11 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             val currentState = state.value.verificationState
             if (currentState is Render2FA) {
                 val linkAccountManager = currentState.linkAccountManager()
-                val result = linkAccountManager.startVerification(isResendSmsCode = isResend)
+                val result = linkAccountManager.startVerification(
+                    type = VerificationType.SMS,
+                    accountPhoneNumber = null,
+                    isResend = isResend,
+                )
                 val error = result.exceptionOrNull()
 
                 update2FAState { viewState ->

@@ -49,6 +49,33 @@ internal data class LinkAccount(
             }
         }
 
+    /**
+     * The last two digits of the account's phone number, used as a hint when confirming it.
+     */
+    val phoneNumberLastTwoDigits: String?
+        get() = consumerSession.redactedPhoneNumber.takeLast(2).takeIf { digits ->
+            digits.length == 2 && digits.all { it.isDigit() }
+        }
+
+    val phoneNumberCountry: String?
+        get() = consumerSession.phoneNumberCountry
+
+    val availableVerificationFactors: List<ConsumerSession.VerificationFactor>?
+        get() = consumerSession.availableVerificationFactors
+
+    val emailOtpRequiresAdditionalInfo: Boolean?
+        get() = consumerSession.emailOtpRequiresAdditionalInfo
+
+    val verificationSessions: List<ConsumerSession.VerificationSession>
+        get() = consumerSession.verificationSessions
+
+    val meetsMinimumAuthenticationLevel: Boolean
+        get() = consumerSession.meetsMinimumAuthenticationLevel
+
+    val webviewRequired: Boolean
+        get() = consumerSession.mobileFallbackWebviewParams?.webViewRequirementType ==
+            MobileFallbackWebviewParams.WebviewRequirementType.Required
+
     @IgnoredOnParcel
     val clientSecret = consumerSession.clientSecret
 
@@ -77,7 +104,7 @@ internal data class LinkAccount(
                 meetsMinimumAuthenticationLevel = consumerSession.meetsMinimumAuthenticationLevel,
             )
         }
-        consumerSession.containsSMSSessionStarted() -> {
+        consumerSession.containsOtpSessionStarted() -> {
             AccountStatus.VerificationStarted
         }
         else -> {
@@ -95,9 +122,10 @@ internal data class LinkAccount(
     @IgnoredOnParcel
     val webviewOpenUrl: String? = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
 
-    private fun ConsumerSession.containsSMSSessionStarted() = verificationSessions.find {
-        it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
-            it.state == ConsumerSession.VerificationSession.SessionState.Started
+    private fun ConsumerSession.containsOtpSessionStarted() = verificationSessions.find {
+        val isOtp = it.type == ConsumerSession.VerificationSession.SessionType.Sms ||
+            it.type == ConsumerSession.VerificationSession.SessionType.Email
+        isOtp && it.state == ConsumerSession.VerificationSession.SessionState.Started
     } != null
 
     private fun ConsumerSession.isVerifiedForSignup() = verificationSessions.find {

@@ -27,6 +27,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -131,9 +132,13 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp and loader should be displayed when resending code`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+            override suspend fun startVerification(
+                type: VerificationType,
+                accountPhoneNumber: String?,
+                isResend: Boolean,
+            ): Result<LinkAccount> {
                 delay(1500)
-                return super.startVerification(isResendSmsCode)
+                return super.startVerification(type, accountPhoneNumber, isResend)
             }
         }
 
@@ -163,9 +168,13 @@ internal class VerificationScreenTest {
     @Test
     fun `title, email, otp should be displayed when verification is in process`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+            override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                 delay(5500)
-                return super.confirmVerification(code, consentGranted)
+                return super.confirmVerification(code, type, consentGranted)
             }
         }
 
@@ -206,7 +215,11 @@ internal class VerificationScreenTest {
                     modifier = Modifier,
                     state = state,
                     otpElement = viewModel.otpElement,
+                    phoneNumberController = viewModel.phoneNumberController,
                     onBack = viewModel::onBack,
+                    onNavigateBack = { viewModel.onNavigateBack() },
+                    onEmailCodeClick = viewModel::onEmailCodeClicked,
+                    onPhoneNumberSubmitted = viewModel::onPhoneNumberSubmitted,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
                     onConsentShown = viewModel::onConsentShown,
@@ -245,7 +258,11 @@ internal class VerificationScreenTest {
                     modifier = Modifier,
                     state = state,
                     otpElement = viewModel.otpElement,
+                    phoneNumberController = viewModel.phoneNumberController,
                     onBack = viewModel::onBack,
+                    onNavigateBack = { viewModel.onNavigateBack() },
+                    onEmailCodeClick = viewModel::onEmailCodeClicked,
+                    onPhoneNumberSubmitted = viewModel::onPhoneNumberSubmitted,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
                     onConsentShown = viewModel::onConsentShown,
@@ -275,7 +292,11 @@ internal class VerificationScreenTest {
                     modifier = Modifier,
                     state = state,
                     otpElement = viewModel.otpElement,
+                    phoneNumberController = viewModel.phoneNumberController,
                     onBack = viewModel::onBack,
+                    onNavigateBack = { viewModel.onNavigateBack() },
+                    onEmailCodeClick = viewModel::onEmailCodeClicked,
+                    onPhoneNumberSubmitted = viewModel::onPhoneNumberSubmitted,
                     onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
                     onResendCodeClick = viewModel::resendCode,
                     onConsentShown = viewModel::onConsentShown,
@@ -312,6 +333,7 @@ internal class VerificationScreenTest {
             isDialog = isDialog,
             linkBrand = linkBrand,
             onVerificationSucceeded = { _ -> },
+            setScreenBackHandler = {},
             onChangeEmailRequested = {},
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult

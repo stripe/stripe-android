@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Create an account with Link for faster checkout across the web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Create an account with %s for faster checkout across the web</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">We couldn\'t verify your account. Please close this window and try again.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">Email code</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">More options</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Before we can send a code to your email, we need to verify additional information about you. Please enter your phone number ending in ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Before we can send a code to your email, we need to verify additional information about you. Please enter the phone number on your Link account.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Verify your phone number</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Resend code in %d seconds</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -98,7 +112,7 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_update_card_title">Update card</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Enter the code sent to %s to use your saved information.</string>
-  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <!-- Instructs the user to enter the code sent to their phone number or email in order to login to Link -->
   <string name="stripe_link_verification_message_short">Enter the code sent to %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Update card</string>

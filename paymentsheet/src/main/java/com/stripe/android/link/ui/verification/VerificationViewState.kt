@@ -24,4 +24,23 @@ internal data class VerificationViewState(
     val consentSection: ConsentUi.ConsentSection? = null,
     val isProcessingWebAuth: Boolean = false,
     val linkBrand: LinkBrand,
-) : Parcelable
+    /**
+     * The state of the multi-factor auth flow, or null when only SMS OTP is supported.
+     */
+    val authFlow: AuthFlowViewState?,
+) : Parcelable {
+
+    @Immutable
+    @Parcelize
+    data class AuthFlowViewState(
+        val screen: LinkAuthFlowState.Screen,
+        val recipient: String,
+        val canGoBack: Boolean,
+        val codeEntryEnabled: Boolean,
+        val actions: List<LinkAuthFlowState.Action>,
+        val canResend: Boolean,
+        val isResending: Boolean,
+        val resendSecondsRemaining: Int,
+        val phoneNumberLastTwoDigits: String?,
+    ) : Parcelable
+}

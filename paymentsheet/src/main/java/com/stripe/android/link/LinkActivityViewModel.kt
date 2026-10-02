@@ -44,6 +44,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -52,7 +53,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -85,7 +85,15 @@ internal class LinkActivityViewModel @Inject constructor(
     private val _linkAppBarState = MutableStateFlow(
         LinkAppBarState.initial(linkConfiguration.effectiveLinkBrand(linkAccount))
     )
-    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
+    private var screenBackHandler: (() -> Unit)? = null
+    private val screenCanNavigateBack = MutableStateFlow(false)
+
+    val linkAppBarState: StateFlow<LinkAppBarState> = combineAsStateFlow(
+        _linkAppBarState,
+        screenCanNavigateBack,
+    ) { appBarState, screenCanNavigateBack ->
+        if (screenCanNavigateBack) appBarState.copy(canNavigateBack = true) else appBarState
+    }
 
     init {
         viewModelScope.launch {
@@ -270,7 +278,20 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Lets the current screen handle app bar back presses to navigate between its own internal steps.
+     * Pass null once the screen can no longer go back.
+     */
+    fun setScreenBackHandler(handler: (() -> Unit)?) {
+        screenBackHandler = handler
+        screenCanNavigateBack.value = handler != null
+    }
+
     fun goBack() {
+        screenBackHandler?.let {
+            it()
+            return
+        }
         if (canDismissSheet) {
             navigationManager.tryNavigateBack()
         }

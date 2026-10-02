@@ -241,6 +241,21 @@ public final class com/stripe/android/model/ConsumerSession$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final synthetic class com/stripe/android/model/ConsumerSession$VerificationFactor$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$VerificationFactor$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession$VerificationFactor;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession$VerificationFactor;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/model/ConsumerSession$VerificationFactor$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final synthetic class com/stripe/android/model/ConsumerSession$VerificationSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$VerificationSession$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;

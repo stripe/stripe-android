@@ -228,6 +228,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 type = eq(type),
                 connectionsMerchantName = anyOrNull(),
                 customEmailType = anyOrNull(),
+                accountPhoneNumber = anyOrNull(),
+                emailAddress = anyOrNull(),
                 requestOptions = eq(apiOptions),
                 isResendSmsCode = any()
             )
@@ -252,6 +254,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             type = type,
             connectionsMerchantName = connectionsMerchantName,
             customEmailType = customEmailType,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = apiOptions
         )
 
