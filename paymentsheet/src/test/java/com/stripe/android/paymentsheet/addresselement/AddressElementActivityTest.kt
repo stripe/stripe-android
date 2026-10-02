@@ -4,23 +4,12 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
@@ -28,7 +17,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
 import org.junit.Rule
@@ -45,6 +33,11 @@ internal class AddressElementActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
     private val networkRule = NetworkRule()
+    private val addressPage = AddressElementActivityPage(
+        composeTestRule = composeTestRule,
+        primaryButtonText = applicationContext.getString(R.string.stripe_paymentsheet_address_element_primary_button),
+        scrimContentDescription = applicationContext.getString(ComposeUiR.string.close_sheet),
+    )
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -206,7 +199,7 @@ internal class AddressElementActivityTest {
             startTaxUpdate(taxUpdate)
             assertSaving()
 
-            closeButton.performClick()
+            addressPage.clickClose()
             assertSaving()
 
             activityScenario.onActivity { activity ->
@@ -214,7 +207,7 @@ internal class AddressElementActivityTest {
             }
             assertSaving()
 
-            scrim.performClick()
+            addressPage.clickScrim()
             assertSaving()
 
             taxUpdate.releaseResponse.countDown()
@@ -243,9 +236,7 @@ internal class AddressElementActivityTest {
             activityScenario.onActivity { activity = it }
             composeTestRule.waitForIdle()
 
-            primaryButton.performScrollTo().assertIsDisplayed()
-            closeButton.assertIsDisplayed()
-            scrim.assertIsDisplayed()
+            addressPage.assertVisible()
             assertSaving()
 
             taxUpdate.releaseResponse.countDown()
@@ -262,6 +253,8 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `checkout shipping restores close after tax update fails`() = runScenario {
+        val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+        addressPage.assertErrorNotDisplayed(expectedError)
         val taxUpdate = enqueueTaxUpdate(fails = true)
 
         try {
@@ -269,15 +262,12 @@ internal class AddressElementActivityTest {
             assertSaving()
             taxUpdate.releaseResponse.countDown()
 
-            val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
-            composeTestRule.waitUntilWithIdle {
-                composeTestRule.onAllNodesWithText(expectedError)
-                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                    .isNotEmpty()
-            }
-            composeTestRule.onNodeWithText(expectedError).performScrollTo().assertIsDisplayed()
-            primaryButton.assertIsEnabled()
-            closeButton.assertIsEnabled().performClick()
+            addressPage.assertErrorDisplayed(expectedError)
+            addressPage.assertReadyToSave()
+            addressPage.editName("Jenny Rosen Updated")
+            addressPage.assertErrorNotDisplayed(expectedError)
+            addressPage.assertReadyToSave()
+            addressPage.clickClose()
 
             assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         } finally {
@@ -287,8 +277,7 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `checkout shipping can be canceled with back before saving`() = runScenario {
-        primaryButton.assertIsEnabled()
-        closeButton.assertIsEnabled()
+        addressPage.assertReadyToSave()
 
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
@@ -299,9 +288,9 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `checkout shipping can be canceled with scrim before saving`() = runScenario {
-        primaryButton.assertIsEnabled()
+        addressPage.assertReadyToSave()
 
-        scrim.performClick()
+        addressPage.clickScrim()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
@@ -324,8 +313,8 @@ internal class AddressElementActivityTest {
     }
 
     private fun Scenario.startTaxUpdate(taxUpdate: TaxUpdate) {
-        closeButton.assertIsEnabled()
-        primaryButton.performScrollTo().assertIsEnabled().performClick()
+        addressPage.assertReadyToSave()
+        addressPage.clickSave()
         composeTestRule.waitUntilWithIdle {
             taxUpdate.requestReceived.count == 0L
         }
@@ -333,10 +322,7 @@ internal class AddressElementActivityTest {
 
     private fun Scenario.assertSaving() {
         assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        primaryButton.assertIsNotEnabled()
-        closeButton.assertIsNotEnabled()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG, useUnmergedTree = true)
-            .assertIsDisplayed()
+        addressPage.assertSaving()
     }
 
     private fun Scenario.awaitResult(): AddressElementActivityContract.Result {
@@ -373,13 +359,6 @@ internal class AddressElementActivityTest {
                 activityScenario = activityScenario,
                 activity = activity,
                 checkoutSessionResponse = checkoutSessionResponse,
-                primaryButton = composeTestRule.onNodeWithText(
-                    applicationContext.getString(R.string.stripe_paymentsheet_address_element_primary_button)
-                ),
-                closeButton = composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG),
-                scrim = composeTestRule.onNodeWithContentDescription(
-                    applicationContext.getString(ComposeUiR.string.close_sheet)
-                ),
             ).block()
         }
     }
@@ -388,9 +367,6 @@ internal class AddressElementActivityTest {
         val activityScenario: ActivityScenario<AddressElementActivity>,
         var activity: AddressElementActivity,
         val checkoutSessionResponse: CheckoutSessionResponse,
-        val primaryButton: SemanticsNodeInteraction,
-        val closeButton: SemanticsNodeInteraction,
-        val scrim: SemanticsNodeInteraction,
     )
 
     private data class TaxUpdate(
