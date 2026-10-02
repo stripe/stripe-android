@@ -1,10 +1,13 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
@@ -102,6 +106,8 @@ class ConsentScreenTest {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
+            onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assert(hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
             onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -135,7 +141,8 @@ class ConsentScreenTest {
     fun `when hideBrandingHeader is true consent header is hidden`() {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
-                hideBrandingHeader = true
+                hideBrandingHeader = true,
+                movePrivacyPolicyToFooter = false
             )
         )
 
@@ -148,7 +155,8 @@ class ConsentScreenTest {
     fun `when hideBrandingHeader is false consent header is shown`() {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
-                hideBrandingHeader = false
+                hideBrandingHeader = false,
+                movePrivacyPolicyToFooter = false
             )
         )
 
@@ -163,6 +171,28 @@ class ConsentScreenTest {
 
         setComposeTestRuleWith(Resource.success(verificationPage)) {
             onNodeWithTag(CONSENT_HEADER_TAG).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `when movePrivacyPolicyToFooter is true policy is below consent buttons`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false,
+                movePrivacyPolicyToFooter = true
+            )
+        )
+
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertTextEquals(CONSENT_PRIVACY_POLICY)
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            val declineButton = onNodeWithTag(DECLINE_BUTTON_TAG)
+
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    declineButton.fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
         }
     }
 
