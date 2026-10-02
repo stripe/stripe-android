@@ -149,21 +149,31 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
-    ): ConfirmCheckoutSessionParams = when (intent) {
-        is PaymentIntent -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            expectedAmount = intent.amount,
-            savePaymentMethod = savePaymentMethod,
-            shipping = shipping,
-        )
-        else -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            shipping = shipping,
-        )
+    ): ConfirmCheckoutSessionParams {
+        // Match iOS by sending independently collected email to Checkout confirmation. When the
+        // Session already has an email, the server-owned value remains authoritative.
+        val collectedInformation = paymentMethod.billingDetails?.email
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.customerEmail == null }
+            ?.let(ConfirmCheckoutSessionParams::CollectedInformation)
+
+        return when (intent) {
+            is PaymentIntent -> ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                expectedAmount = intent.amount,
+                savePaymentMethod = savePaymentMethod,
+                shipping = shipping,
+                collectedInformation = collectedInformation,
+            )
+            else -> ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                shipping = shipping,
+                collectedInformation = collectedInformation,
+            )
+        }
     }
 
     private suspend fun confirmCheckoutSession(

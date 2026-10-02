@@ -79,10 +79,31 @@ class ConfirmCheckoutSessionParamsTest {
         assertThat(params).doesNotContainKey("shipping")
     }
 
+    @Test
+    fun `toParamMap includes collected information when set`() {
+        val params = createParams(
+            collectedInformation = ConfirmCheckoutSessionParams.CollectedInformation(
+                email = "customer@example.com",
+            )
+        ).toParamMap()
+
+        assertThat(params["collected_information"]).isEqualTo(
+            mapOf("email" to "customer@example.com")
+        )
+    }
+
+    @Test
+    fun `toParamMap omits collected information when null`() {
+        val params = createParams(collectedInformation = null).toParamMap()
+
+        assertThat(params).doesNotContainKey("collected_information")
+    }
+
     private fun createParams(
         expectedAmount: Long? = null,
         savePaymentMethod: Boolean? = null,
         shipping: ConfirmCheckoutSessionParams.Shipping? = null,
+        collectedInformation: ConfirmCheckoutSessionParams.CollectedInformation? = null,
     ): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
             paymentMethodId = "pm_test_123",
@@ -91,6 +112,7 @@ class ConfirmCheckoutSessionParamsTest {
             expectedAmount = expectedAmount,
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
+            collectedInformation = collectedInformation,
         )
     }
 
