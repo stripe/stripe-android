@@ -172,6 +172,19 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testBankAccountSelectedStateWithDataConsent() {
+        snapshot(
+            state = walletUiState(
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                linkPaymentMethodBankAccountDataConsent =
+                "Rocket Deliveries can access account details and balances. " +
+                    "[Learn more](https://support.stripe.com).",
+                userSetIsExpanded = true,
+            ),
+        )
+    }
+
+    @Test
     fun testCollapsedStateWithUnknownSelected() {
         snapshot(
             state = walletUiState(
@@ -276,6 +289,7 @@ internal class WalletScreenScreenshotTest {
         signupToggleEnabled: Boolean = false,
         paymentSelectionHint: ResolvableString? = null,
         isValidating: Boolean = false,
+        linkPaymentMethodBankAccountDataConsent: String? = null,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -302,6 +316,7 @@ internal class WalletScreenScreenshotTest {
             linkBrand = LinkBrand.Link,
             isValidating = isValidating,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkPaymentMethodBankAccountDataConsent = linkPaymentMethodBankAccountDataConsent,
         )
     }
 

@@ -112,6 +112,38 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `bank account data consent is displayed for a selected bank account`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager().apply {
+            listPaymentDetailsResult = Result.success(
+                ConsumerPaymentDetails(
+                    paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
+                )
+            )
+        }
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                linkPaymentMethodBankAccountDataConsent =
+                "Merchant can access balances. [Learn more](https://stripe.com).",
+            ),
+        )
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
+                )
+            }
+        }
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithTag(WALLET_BANK_ACCOUNT_DATA_CONSENT_TAG).assertIsDisplayed()
+    }
+
+    @Test
     fun `wallet list is collapsed and pay button is disabled for expired card`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -778,6 +810,7 @@ internal class WalletScreenTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 linkBrand = LinkBrand.Link,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkPaymentMethodBankAccountDataConsent = null,
             ),
             linkBrand = LinkBrand.Link,
             onItemSelected = {},

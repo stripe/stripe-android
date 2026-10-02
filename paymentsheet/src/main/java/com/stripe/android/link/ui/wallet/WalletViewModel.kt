@@ -97,6 +97,7 @@ internal class WalletViewModel(
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             linkBrand = configuration.effectiveLinkBrand(linkAccount),
+            linkPaymentMethodBankAccountDataConsent = configuration.linkPaymentMethodBankAccountDataConsent,
         )
     )
 
@@ -335,6 +336,14 @@ internal class WalletViewModel(
         }
 
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
+
+        if (selectedPaymentDetails is ConsumerPaymentDetails.BankAccount) {
+            configuration.linkPaymentMethodBankAccountDataConsent
+                ?.takeIf { it.isNotBlank() }
+                ?.let { consentText ->
+                    linkAccountManager.recordConnectionsConsentAcquired(consentText)
+                }
+        }
 
         // Use the cached phone for this payment detail if available (ie the user updated it locally)
         val linkPaymentMethod = linkAccountManager.consumerState.value

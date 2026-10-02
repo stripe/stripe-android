@@ -33,6 +33,7 @@ import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.LinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
 import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
+import org.json.JSONObject
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -106,6 +107,13 @@ interface ConsumersApiService {
         consentGranted: Boolean,
         requestSurface: String,
         requestOptions: ApiRequest.Options
+    ): Result<Unit>
+
+    suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
     ): Result<Unit>
 
     suspend fun attachLinkConsumerToLinkAccountSession(
@@ -403,6 +411,32 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun recordConnectionsConsentAcquired(
+        consumerSessionClientSecret: String,
+        localizedConsentText: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<Unit> {
+        val consent = JSONObject()
+            .put("localizedConsent", localizedConsentText)
+            .toString()
+        return executeRequestWithErrorParsing(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = connectionsConsentAcquiredUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "consent" to consent,
+                ),
+            ),
+        )
+    }
+
     override suspend fun attachLinkConsumerToLinkAccountSession(
         consumerSessionClientSecret: String,
         clientSecret: String,
@@ -667,6 +701,9 @@ class ConsumersApiServiceImpl(
          */
         internal val consentUpdateUrl: String
             get() = getApiUrl("consumers/sessions/consent_update")
+
+        internal val connectionsConsentAcquiredUrl: String
+            get() = getApiUrl("consumers/connections_consent_acquired")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/update_phone`
