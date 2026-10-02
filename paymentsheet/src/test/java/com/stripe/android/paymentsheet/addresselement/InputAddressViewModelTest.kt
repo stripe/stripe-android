@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -63,7 +64,7 @@ class InputAddressViewModelTest {
             argsFactory(config),
             navigator,
             resultStateHolder,
-            eventReporter,
+            StandaloneAddressElementEventReporter(eventReporter),
             placesClient = placesClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
@@ -215,6 +216,20 @@ class InputAddressViewModelTest {
             ),
             checkboxChecked = true,
         )
+
+        assertThat(resultStateHolder.result.value).isEqualTo(
+            AddressElementActivityContract.Result.StandaloneSucceeded(
+                AddressDetails(
+                    address = PaymentSheet.Address(
+                        line1 = "99 Broadway St",
+                        city = "Seattle",
+                        country = "US",
+                    ),
+                    isCheckboxSelected = true,
+                )
+            )
+        )
+        assertThat(viewModel.formEnabled.value).isFalse()
 
         assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
             FakeAddressLauncherEventReporter.CompletedCall(
@@ -1240,7 +1255,7 @@ class InputAddressViewModelTest {
             ),
             navigator,
             resultStateHolder,
-            eventReporter,
+            StandaloneAddressElementEventReporter(eventReporter),
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
