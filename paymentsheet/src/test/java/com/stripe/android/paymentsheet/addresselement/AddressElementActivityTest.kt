@@ -232,6 +232,35 @@ internal class AddressElementActivityTest {
     }
 
     @Test
+    fun `checkout shipping shows disabled form after recreation during tax update and returns success`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+
+            activityScenario.recreate()
+            activityScenario.onActivity { activity = it }
+            composeTestRule.waitForIdle()
+
+            primaryButton.performScrollTo().assertIsDisplayed()
+            closeButton.assertIsDisplayed()
+            scrim.assertIsDisplayed()
+            assertSaving()
+
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
     fun `checkout shipping restores close after tax update fails`() = runScenario {
         val taxUpdate = enqueueTaxUpdate(fails = true)
 
@@ -312,11 +341,12 @@ internal class AddressElementActivityTest {
 
     private fun Scenario.awaitResult(): AddressElementActivityContract.Result {
         composeTestRule.waitUntilWithIdle {
-            activityScenario.state == Lifecycle.State.DESTROYED
+            activity.isFinishing
         }
+        val result = activityScenario.result
         return AddressElementActivityContract.CheckoutShipping.parseResult(
-            activityScenario.result.resultCode,
-            activityScenario.result.resultData,
+            result.resultCode,
+            result.resultData,
         )
     }
 
@@ -337,8 +367,11 @@ internal class AddressElementActivityTest {
                 ),
             )
         ).use { activityScenario ->
+            lateinit var activity: AddressElementActivity
+            activityScenario.onActivity { activity = it }
             Scenario(
                 activityScenario = activityScenario,
+                activity = activity,
                 checkoutSessionResponse = checkoutSessionResponse,
                 primaryButton = composeTestRule.onNodeWithText(
                     applicationContext.getString(R.string.stripe_paymentsheet_address_element_primary_button)
@@ -353,6 +386,7 @@ internal class AddressElementActivityTest {
 
     private data class Scenario(
         val activityScenario: ActivityScenario<AddressElementActivity>,
+        var activity: AddressElementActivity,
         val checkoutSessionResponse: CheckoutSessionResponse,
         val primaryButton: SemanticsNodeInteraction,
         val closeButton: SemanticsNodeInteraction,

@@ -8,24 +8,33 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AddressElementResultStateHolder @Inject constructor() {
-    private val _formEnabled = MutableStateFlow(true)
-    val formEnabled: StateFlow<Boolean> = _formEnabled.asStateFlow()
+    private val _state = MutableStateFlow<State>(State.Idle)
+    val state: StateFlow<State> = _state.asStateFlow()
 
-    private val _result = MutableStateFlow<AddressElementActivityContract.Result?>(null)
-
-    val result: StateFlow<AddressElementActivityContract.Result?> = _result.asStateFlow()
-
-    fun setFormEnabled(isEnabled: Boolean) {
-        _formEnabled.value = isEnabled
+    fun tryStartSaving(): Boolean {
+        return _state.compareAndSet(expect = State.Idle, update = State.Saving)
     }
 
-    fun onUserCancel() {
-        if (formEnabled.value) {
-            setResult(AddressElementActivityContract.Result.Canceled)
-        }
+    fun onSaveFailed() {
+        _state.compareAndSet(expect = State.Saving, update = State.Idle)
     }
 
-    fun setResult(result: AddressElementActivityContract.Result) {
-        _result.compareAndSet(expect = null, update = result)
+    fun onSaveCompleted(result: AddressElementActivityContract.Result): Boolean {
+        return _state.compareAndSet(expect = State.Saving, update = State.Finished(result))
+    }
+
+    fun onUserCancel(): Boolean {
+        return _state.compareAndSet(
+            expect = State.Idle,
+            update = State.Finished(AddressElementActivityContract.Result.Canceled),
+        )
+    }
+
+    sealed interface State {
+        data object Idle : State
+
+        data object Saving : State
+
+        data class Finished(val result: AddressElementActivityContract.Result) : State
     }
 }
