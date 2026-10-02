@@ -40,7 +40,7 @@ class CustomerSheet internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val integrationType: CustomerSheetIntegration.Type,
-    private val paymentOptionFactory: PaymentOptionFactory,
+    private val paymentOptionFactory: CustomerSheetPaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
 ) {
@@ -153,7 +153,11 @@ class CustomerSheet internal constructor(
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }
-                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+                }?.toPaymentOptionSelection(
+                    paymentOptionFactory = paymentOptionFactory,
+                    appearance = request.configuration.appearance,
+                    canUseGooglePay = request.configuration.googlePayEnabled,
+                )
             }
 
             selection.fold(
@@ -171,8 +175,13 @@ class CustomerSheet internal constructor(
         // A null result means the sheet was torn down by the OS without returning a result (e.g.
         // when a `singleTask` host is relaunched). Leave the caller's state untouched in that case.
         result?.let {
+            val appearance = viewModel.configureRequest?.configuration?.appearance
+                ?: ConfigurationDefaults.appearance
             callback.onCustomerSheetResult(
-                it.toPublicResult(paymentOptionFactory)
+                it.toPublicResult(
+                    paymentOptionFactory = paymentOptionFactory,
+                    appearance = appearance,
+                )
             )
         }
     }
@@ -586,43 +595,52 @@ class CustomerSheet internal constructor(
                 integration = integration,
             )
 
+            val paymentOptionFactoryDelegate = PaymentOptionFactory(
+                iconLoader = PaymentSelection.IconLoader(
+                    resources = application.resources,
+                    imageLoader = DefaultStripeImageLoader(application),
+                ),
+                cardArtDrawableLoader = DefaultPaymentOptionCardArtDrawableLoader(
+                    paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
+                        imageOptimizer = StripeCdnImageOptimizer,
+                    ),
+                    imageLoader = DefaultStripeImageLoader(application),
+                    errorReporter = ErrorReporter.createFallbackInstance(
+                        context = application,
+                        productUsage = setOf("CustomerSheet"),
+                    ),
+                    context = application,
+                ),
+                context = application,
+            )
+
             return CustomerSheet(
                 application = application,
                 viewModelStoreOwner = viewModelStoreOwner,
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 integrationType = integration.type,
-                paymentOptionFactory = PaymentOptionFactory(
-                    iconLoader = PaymentSelection.IconLoader(
-                        resources = application.resources,
-                        imageLoader = DefaultStripeImageLoader(application),
-                    ),
-                    cardArtDrawableLoader = DefaultPaymentOptionCardArtDrawableLoader(
-                        paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
-                            imageOptimizer = StripeCdnImageOptimizer,
-                        ),
-                        imageLoader = DefaultStripeImageLoader(application),
-                        errorReporter = ErrorReporter.createFallbackInstance(
-                            context = application,
-                            productUsage = setOf("CustomerSheet"),
-                        ),
-                        context = application,
-                    ),
-                    context = application,
-                ),
+                paymentOptionFactory = CustomerSheetPaymentOptionFactory { selection, appearance ->
+                    paymentOptionFactoryDelegate.create(
+                        selection = selection,
+                        linkBrand = null,
+                        appearance = appearance,
+                    )
+                },
                 callback = callback,
                 statusBarColor = statusBarColor,
             )
         }
 
         internal fun PaymentSelection?.toPaymentOptionSelection(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionFactory: CustomerSheetPaymentOptionFactory,
+            appearance: PaymentSheet.Appearance,
             canUseGooglePay: Boolean,
         ): PaymentOptionSelection? {
             return when (this) {
                 is PaymentSelection.GooglePay -> {
                     PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this, null, appearance = null),
+                        paymentOption = paymentOptionFactory.create(this, appearance),
                     ).takeIf {
                         canUseGooglePay
                     }
@@ -630,7 +648,7 @@ class CustomerSheet internal constructor(
                 is PaymentSelection.Saved -> {
                     PaymentOptionSelection.PaymentMethod(
                         paymentMethod = this.paymentMethod,
-                        paymentOption = paymentOptionFactory.create(this, null, appearance = null)
+                        paymentOption = paymentOptionFactory.create(this, appearance)
                     )
                 }
                 else -> null
