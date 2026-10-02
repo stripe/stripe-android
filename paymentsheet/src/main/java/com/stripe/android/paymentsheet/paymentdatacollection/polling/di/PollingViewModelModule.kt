@@ -36,6 +36,7 @@ internal interface PollingViewModelModule {
             return ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
+                betas = requestOptions.betas,
             )
         }
 

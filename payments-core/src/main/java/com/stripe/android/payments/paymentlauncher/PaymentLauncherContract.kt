@@ -34,6 +34,7 @@ class PaymentLauncherContract :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
         open val stripeAccountId: String?,
+        open val betas: Set<String>,
         open val enableLogging: Boolean,
         open val productUsage: Set<String>,
         open val includePaymentSheetNextHandlers: Boolean,
@@ -50,6 +51,7 @@ class PaymentLauncherContract :
         data class IntentConfirmationArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
+            override val betas: Set<String>,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
@@ -57,6 +59,7 @@ class PaymentLauncherContract :
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,
+            betas = betas,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -70,6 +73,7 @@ class PaymentLauncherContract :
         data class PaymentIntentNextActionArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
+            override val betas: Set<String>,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
@@ -77,6 +81,7 @@ class PaymentLauncherContract :
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,
+            betas = betas,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -90,6 +95,7 @@ class PaymentLauncherContract :
         data class SetupIntentNextActionArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
+            override val betas: Set<String>,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
@@ -97,6 +103,7 @@ class PaymentLauncherContract :
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,
+            betas = betas,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -110,6 +117,7 @@ class PaymentLauncherContract :
         data class StripeIntentNextActionWithIntentArgs internal constructor(
             override val publishableKey: String,
             override val stripeAccountId: String?,
+            override val betas: Set<String>,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
@@ -117,6 +125,7 @@ class PaymentLauncherContract :
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,
+            betas = betas,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -129,6 +138,7 @@ class PaymentLauncherContract :
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class HashedPaymentIntentNextActionArgs internal constructor(
             override val stripeAccountId: String?,
+            override val betas: Set<String>,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
@@ -136,6 +146,7 @@ class PaymentLauncherContract :
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             stripeAccountId = stripeAccountId,
+            betas = betas,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,

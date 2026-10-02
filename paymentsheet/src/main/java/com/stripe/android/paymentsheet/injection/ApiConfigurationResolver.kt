@@ -22,6 +22,7 @@ internal class DefaultApiConfigurationResolver @Inject constructor(
         return ApiConfiguration.State(
             publishableKey = config.publishableKey,
             stripeAccountId = config.stripeAccountId,
+            betas = emptySet(),
         )
     }
 }

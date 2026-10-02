@@ -31,7 +31,11 @@ internal class VoucherNextActionHandler @Inject constructor(
             ErrorReporter.createFallbackInstance(
                 context,
                 apiConfigurationProvider = {
-                    ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
+                    ApiConfiguration.State(
+                        requestOptions.apiKey,
+                        requestOptions.stripeAccount,
+                        requestOptions.betas,
+                    )
                 },
             ).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,

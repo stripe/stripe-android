@@ -27,6 +27,7 @@ internal class FinancialConnectionsLiteRepositoryImpl(
     fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
         apiKey = publishableKey,
         stripeAccount = stripeAccountId,
+        betas = emptySet(),
     )
 
     override suspend fun synchronize(

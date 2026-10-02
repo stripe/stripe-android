@@ -560,11 +560,13 @@ internal class LinkApiRepository @Inject constructor(
             ApiRequest.Options(
                 apiKey = customApiKey,
                 stripeAccount = null,
+                betas = apiConfiguration.betas,
             )
         } else {
             ApiRequest.Options(
                 apiKey = apiConfiguration.publishableKey,
                 stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas,
             )
         }
     }

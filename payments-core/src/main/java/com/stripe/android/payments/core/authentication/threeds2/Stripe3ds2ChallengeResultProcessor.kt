@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -17,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -31,6 +33,7 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext
 ) : Stripe3ds2ChallengeResultProcessor {
 
@@ -90,8 +93,9 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         )
 
         val requestOptions = ApiRequest.Options(
-            challengeResult.intentData.publishableKey,
-            challengeResult.intentData.accountId
+            apiKey = challengeResult.intentData.publishableKey,
+            stripeAccount = challengeResult.intentData.accountId,
+            betas = apiConfigurationProvider.get().betas,
         )
 
         val completionSucceeded = complete3ds2Auth(challengeResult, requestOptions)

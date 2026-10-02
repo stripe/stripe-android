@@ -60,7 +60,13 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
     // When the nextActionData object holds a publishable key, it should be used for 3DS2 requests.
     // That is the case for payments using Link, for example.
     val threeDS2RequestOptions = args.nextActionData.publishableKey?.takeIf { it.isNotEmpty() }
-        ?.let { ApiRequest.Options(it) } ?: args.requestOptions
+        ?.let {
+            args.requestOptions.copy(
+                apiKey = it,
+                stripeAccount = null,
+                idempotencyKey = null,
+            )
+        } ?: args.requestOptions
 
     suspend fun processChallengeResult(
         challengeResult: ChallengeResult

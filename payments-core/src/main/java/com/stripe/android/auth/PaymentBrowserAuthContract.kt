@@ -93,6 +93,7 @@ internal class PaymentBrowserAuthContract :
             ApiConfiguration.State(
                 publishableKey = parcel.readString() ?: "",
                 stripeAccountId = parcel.readString(),
+                betas = parcel.createStringArrayList()?.toSet().orEmpty(),
             ),
             parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),
@@ -124,6 +125,7 @@ internal class PaymentBrowserAuthContract :
             parcel.writeParcelable(toolbarCustomization, flags)
             parcel.writeString(apiConfiguration.publishableKey)
             parcel.writeString(apiConfiguration.stripeAccountId)
+            parcel.writeStringList(apiConfiguration.betas.toList())
             parcel.writeByte(if (shouldCancelSource) 1 else 0)
             parcel.writeByte(if (shouldCancelIntentOnUserNavigation) 1 else 0)
             parcel.writeValue(statusBarColor)

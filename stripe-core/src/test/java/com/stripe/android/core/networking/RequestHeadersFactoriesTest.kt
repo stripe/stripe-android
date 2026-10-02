@@ -60,6 +60,27 @@ class RequestHeadersFactoriesTest {
     }
 
     @Test
+    fun headers_withBetas_appendsBetasToStripeVersion() {
+        val headers = createBasePaymentApiHeaders(
+            options = OPTIONS.copy(betas = setOf("alipay_beta=v1", "other_beta=v2"))
+        )
+
+        assertThat(headers[HEADER_STRIPE_VERSION])
+            .isEqualTo("${ApiVersion.get().code};alipay_beta=v1;other_beta=v2")
+    }
+
+    @Test
+    fun headers_withDuplicateBeta_doesNotAppendDuplicate() {
+        val beta = "alipay_beta=v1"
+        val headers = RequestHeadersFactory.BaseApiHeadersFactory(
+            optionsProvider = { OPTIONS.copy(betas = setOf(beta)) },
+            apiVersion = "${ApiVersion.get().code};$beta",
+        ).create()
+
+        assertThat(headers[HEADER_STRIPE_VERSION]).isEqualTo("${ApiVersion.get().code};$beta")
+    }
+
+    @Test
     fun headers_containsPropertyMapValues() {
         val headers = createBasePaymentApiHeaders()
 

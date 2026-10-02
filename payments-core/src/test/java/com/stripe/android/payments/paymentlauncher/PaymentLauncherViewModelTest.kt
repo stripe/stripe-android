@@ -578,6 +578,7 @@ class PaymentLauncherViewModelTest {
             PaymentLauncherContract.Args.IntentConfirmationArgs(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
                 includePaymentSheetNextHandlers = false,

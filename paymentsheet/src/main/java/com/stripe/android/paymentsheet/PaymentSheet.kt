@@ -40,6 +40,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -1275,7 +1276,7 @@ class PaymentSheet internal constructor(
              * When not set, the payment element uses the credentials initialized through
              * [com.stripe.android.PaymentConfiguration].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ApiConfigurationPreview
             fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
             }
@@ -1321,6 +1322,7 @@ class PaymentSheet internal constructor(
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
             AddressAutocompletePreview::class,
+            ApiConfigurationPreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1350,7 +1352,9 @@ class PaymentSheet internal constructor(
                 userOverrideCountry?.let { userOverrideCountry(it) }
                 apiConfiguration?.let {
                     apiConfiguration(
-                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                        ApiConfiguration(it.publishableKey)
+                            .stripeAccountId(it.stripeAccountId)
+                            .betas(it.betas)
                     )
                 }
             }
