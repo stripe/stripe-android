@@ -80,6 +80,24 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `shipping address configuration exposes unsaved changes dialog setting`() = runScenario {
+        val shippingAddress = CheckoutPlaygroundDefinitions.Controller.shippingAddress
+        val definition = shippingAddress.enableAddressElementUnsavedChanges
+        page.group(CheckoutPlaygroundDefinitions.Controller.configuration).performClick()
+        page.value(definition).assertDoesNotExist()
+
+        page.group(shippingAddress.configuration).performScrollTo().performClick()
+
+        page.value(definition).assertIsDisplayed()
+        assertThat(settings[definition]).isFalse()
+        composeRule.onNode(
+            hasText("On").and(hasAnyAncestor(hasTestTag(checkoutSettingValueTestTag(definition))))
+        ).performClick()
+
+        assertThat(settings[definition]).isTrue()
+    }
+
+    @Test
     fun `search finds settings globally and restores the current configuration when cleared`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.Controller.express.configuration,
     ) {

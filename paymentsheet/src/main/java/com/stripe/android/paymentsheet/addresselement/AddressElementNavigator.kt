@@ -62,6 +62,7 @@ internal class NavHostAddressElementNavigator @Inject constructor() : AddressEle
     }
 
     override fun onBack(): Boolean {
+        if (navigationController?.previousBackStackEntry == null) return false
         return navigationController?.popBackStack() ?: false
     }
 }

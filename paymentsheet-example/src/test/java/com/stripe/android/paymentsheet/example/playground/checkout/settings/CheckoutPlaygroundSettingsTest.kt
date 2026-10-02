@@ -3,12 +3,21 @@ package com.stripe.android.paymentsheet.example.playground.checkout.settings
 import androidx.compose.ui.graphics.Color
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class CheckoutPlaygroundSettingsTest {
+    @get:Rule
+    val addressElementUnsavedChangesRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableAddressElementUnsavedChanges,
+        isEnabled = false,
+    )
+
     @Test
     fun `backend URL defaults to configured playground backend`() {
         val settings = CheckoutPlaygroundSettings.createInMemory(
@@ -42,6 +51,48 @@ class CheckoutPlaygroundSettingsTest {
 
         assertThat(restored[CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.scale])
             .isEqualTo(1.25f)
+    }
+
+    @Test
+    fun `address element unsaved changes dialog defaults to disabled`() = runScenario {
+        assertThat(settings[CheckoutPlaygroundDefinitions.Controller.shippingAddress.enableAddressElementUnsavedChanges])
+            .isFalse()
+    }
+
+    @Test
+    fun `persisted address element unsaved changes setting enables feature flag`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.Controller.shippingAddress.enableAddressElementUnsavedChanges
+        settings.update(definition, true)
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        restored.snapshot().applyFeatureFlags()
+
+        assertThat(restored[definition]).isTrue()
+        assertThat(FeatureFlags.enableAddressElementUnsavedChanges.isEnabled).isTrue()
+    }
+
+    @Test
+    fun `disabled address element unsaved changes setting disables enabled feature flag`() = runScenario {
+        addressElementUnsavedChangesRule.setEnabled(true)
+        assertThat(FeatureFlags.enableAddressElementUnsavedChanges.isEnabled).isTrue()
+
+        settings.snapshot().applyFeatureFlags()
+
+        assertThat(FeatureFlags.enableAddressElementUnsavedChanges.isEnabled).isFalse()
+    }
+
+    @Test
+    fun `reset disables address element unsaved changes setting and feature flag`() = runScenario {
+        val definition = CheckoutPlaygroundDefinitions.Controller.shippingAddress.enableAddressElementUnsavedChanges
+        settings.update(definition, true)
+        settings.snapshot().applyFeatureFlags()
+        assertThat(FeatureFlags.enableAddressElementUnsavedChanges.isEnabled).isTrue()
+
+        settings.reset()
+        settings.snapshot().applyFeatureFlags()
+
+        assertThat(settings[definition]).isFalse()
+        assertThat(FeatureFlags.enableAddressElementUnsavedChanges.isEnabled).isFalse()
     }
 
     @Test

@@ -14,6 +14,8 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +37,7 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     val resultStateHolder: AddressElementResultStateHolder,
     private val eventReporter: AddressElementEventReporter,
+    private val dismissalCoordinator: AddressElementDismissalCoordinator,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
     private val primaryButtonAction: AddressElementPrimaryButtonAction,
@@ -116,6 +119,8 @@ internal class InputAddressViewModel @Inject constructor(
             AutocompleteAddressInteractor.InlinePredictionsState.Idle
         )
 
+    private var inlineQuery: StateFlow<String>? = null
+
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
         interactor = this,
@@ -130,6 +135,14 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
+
+    val isDirty: StateFlow<Boolean> = dismissalCoordinator.isDirty
+
+    private val initialFormValues = rawFormValues(
+        formValues = addressFormController.uncompletedFormValues.value,
+        query = inlineQuery?.value.orEmpty(),
+    )
+    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
 
     fun onScreenShown() {
         eventReporter.onShown(
@@ -196,6 +209,18 @@ internal class InputAddressViewModel @Inject constructor(
         unparsedInitialShippingAddress?.isCheckboxSelected?.let {
             _checkboxChecked.value = it
         }
+
+        dismissalCoordinator.observeChanges(
+            combineAsStateFlow(
+                addressFormController.uncompletedFormValues,
+                inlineQuery ?: stateFlowOf(""),
+                checkboxChecked,
+            ) { formValues, query, checkboxChecked ->
+                rawFormValues(formValues, query) != initialFormValues ||
+                    (args.config?.additionalFields?.checkboxLabel != null &&
+                        checkboxChecked != initialCheckboxChecked)
+            }
+        )
     }
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
@@ -230,6 +255,7 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         _formEnabled.value = false
+        dismissalCoordinator.setSaving(true)
         val addressDetails = AddressDetails(
             name = completedFormValues[FormFieldId.Name]?.value,
             address = PaymentSheet.Address(
@@ -254,6 +280,7 @@ internal class InputAddressViewModel @Inject constructor(
                 onFailure = { error ->
                     _saveError.value = error.stripeErrorMessage()
                     _formEnabled.value = true
+                    dismissalCoordinator.setSaving(false)
                 },
             )
         }
@@ -281,6 +308,7 @@ internal class InputAddressViewModel @Inject constructor(
             autocompleteResultSelected = autocompleteFilledAddress != null,
             editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
+        dismissalCoordinator.markSaved()
         resultStateHolder.setResult(result)
     }
 
@@ -356,7 +384,23 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
+        inlineQuery = query
         inlineAutocompleteController?.observeQueryChanges(query, country)
+    }
+
+    private fun rawFormValues(
+        formValues: Map<FormFieldId, FormFieldEntry>,
+        query: String,
+    ): Map<FormFieldId, String> {
+        val values = formValues
+            .filterKeys { it != FormFieldId.OneLineAddress }
+            .mapValues { it.value.value.orEmpty() }
+            .toMutableMap()
+        // Condensed autocomplete text is not included in submitted form values.
+        if (FormFieldId.Line1 !in formValues) {
+            values[FormFieldId.Line1] = query
+        }
+        return values.filterValues { it.isNotEmpty() }
     }
 
     override fun onDismissed() {

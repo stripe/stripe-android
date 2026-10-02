@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressElementDismissalCoordinator
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -292,6 +293,7 @@ class AddressElementViewModelModuleTest {
         navigator = mock<AddressElementNavigator>(),
         resultStateHolder = resultStateHolder,
         eventReporter = module.provideAddressElementEventReporter(mock()),
+        dismissalCoordinator = AddressElementDismissalCoordinator(),
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,

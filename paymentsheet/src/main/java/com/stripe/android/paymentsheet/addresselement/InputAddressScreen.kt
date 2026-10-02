@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
@@ -113,7 +114,8 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
+    onCloseClick: () -> Unit,
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
@@ -156,9 +158,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = {
-            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-        },
+        onCloseClick = onCloseClick,
         topContent = {
             val currentState = billingSameAsShippingState
 
@@ -202,5 +202,21 @@ internal fun InputAddressScreen(
             }
         },
         saveError = saveError,
+    )
+}
+
+@Composable
+internal fun AddressElementDismissalDialog(
+    onDiscardChanges: () -> Unit,
+    onKeepEditing: () -> Unit,
+) {
+    SimpleDialogElementUI(
+        titleText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_title),
+        messageText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_body),
+        confirmText = stringResource(R.string.stripe_paymentsheet_address_element_discard_changes_confirm),
+        dismissText = stringResource(android.R.string.cancel),
+        destructive = true,
+        onConfirmListener = onDiscardChanges,
+        onDismissListener = onKeepEditing,
     )
 }
