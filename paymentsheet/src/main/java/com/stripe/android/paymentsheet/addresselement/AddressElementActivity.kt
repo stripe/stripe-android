@@ -62,7 +62,11 @@ internal class AddressElementActivity : ComponentActivity() {
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = {
+                    viewModel.resultStateHolder.formEnabled.value || viewModel.resultStateHolder.result.value != null
+                },
+            )
 
             LaunchedEffect(bottomSheetState) {
                 viewModel.resultStateHolder.result
@@ -73,11 +77,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
             }
 
-            BackHandler {
-                if (!viewModel.navigator.onBack()) {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-                }
-            }
+            BackHandler(onBack = viewModel::onBackPressed)
 
             AddressElementUi(bottomSheetState, navController)
         }
@@ -91,9 +91,7 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = {
-                    viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-                },
+                onDismissed = viewModel.resultStateHolder::onUserCancel,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
