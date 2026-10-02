@@ -285,12 +285,11 @@ internal class InputAddressViewModel @Inject constructor(
         addressDetails: AddressDetails,
         result: AddressElementActivityContract.Result,
     ) {
-        if (resultStateHolder.onSaveCompleted(result)) {
-            eventReporter.onSaveCompleted(
-                addressDetails = addressDetails,
-                autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
-            )
-        }
+        eventReporter.onSaveCompleted(
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
+        )
+        resultStateHolder.onSaveCompleted(result)
     }
 
     private fun autocompleteSelectedAddressDetails(): AddressDetails? {
