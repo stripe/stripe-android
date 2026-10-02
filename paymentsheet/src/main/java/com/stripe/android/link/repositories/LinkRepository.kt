@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.VerificationType
 
 /**
  * Interface for a repository that interacts with Link services.
@@ -174,20 +175,28 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
-     * Start an SMS verification.
+     * Start a verification of the given [type].
+     *
+     * @param accountPhoneNumber The E.164 phone number confirmed by the user, required by some
+     * accounts before an email OTP can be sent.
+     * @param emailAddress The email used to look up the consumer, which prevents email redaction.
      */
     suspend fun startVerification(
         consumerSessionClientSecret: String,
-        isResendSmsCode: Boolean = false,
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
+        isResendSmsCode: Boolean,
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>
 
     /**
-     * Confirm an SMS verification code.
+     * Confirm a verification code of the given [type].
      */
     suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
+        type: VerificationType,
         consentGranted: Boolean?,
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession>

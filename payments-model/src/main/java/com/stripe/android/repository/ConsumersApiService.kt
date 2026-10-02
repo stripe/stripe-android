@@ -88,6 +88,8 @@ interface ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
         requestOptions: ApiRequest.Options,
         isResendSmsCode: Boolean = false
     ): ConsumerSession
@@ -326,6 +328,8 @@ class ConsumersApiServiceImpl(
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
         requestOptions: ApiRequest.Options,
         isResendSmsCode: Boolean
     ): ConsumerSession {
@@ -341,6 +345,8 @@ class ConsumersApiServiceImpl(
                     put("type", type.value)
                     customEmailType?.value?.let { put("custom_email_type", it) }
                     connectionsMerchantName?.let { put("connections_merchant_name", it) }
+                    accountPhoneNumber?.let { put("account_phone_number", it) }
+                    emailAddress?.let { put("email_address", it.lowercase()) }
                     put("locale", locale.toLanguageTag())
                     if (isResendSmsCode) {
                         put("is_resend_sms_code", true)
@@ -352,7 +358,7 @@ class ConsumersApiServiceImpl(
     }
 
     /**
-     * Confirms an SMS verification for the consumer corresponding to the given client secret.
+     * Confirms a verification for the consumer corresponding to the given client secret.
      */
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
