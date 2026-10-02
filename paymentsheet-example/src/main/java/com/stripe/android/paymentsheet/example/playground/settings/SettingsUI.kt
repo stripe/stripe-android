@@ -16,6 +16,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,7 +57,9 @@ internal fun SettingsUi(
             Text("No matching settings found")
         } else {
             for (settingDefinition in filteredDefinitions) {
-                Setting(settingDefinition, playgroundSettings)
+                key(settingDefinition) {
+                    Setting(settingDefinition, playgroundSettings)
+                }
             }
         }
     }

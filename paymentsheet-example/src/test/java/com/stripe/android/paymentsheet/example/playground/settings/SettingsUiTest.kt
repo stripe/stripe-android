@@ -29,7 +29,9 @@ internal class SettingsUiTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `custom billing email can be entered`() = runScenario {
+    fun `custom billing email can be entered`() = runScenario(
+        searchQuery = "Default Billing Address",
+    ) {
         val customEmailInput = composeRule.onNodeWithTag(textSettingTestTag("Custom email"))
         customEmailInput.assertDoesNotExist()
 
@@ -43,6 +45,19 @@ internal class SettingsUiTest {
         assertThat(playgroundSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
             DefaultBillingAddress.WithEmail("custom@example.com")
         )
+    }
+
+    @Test
+    fun `changing applicable settings does not reuse another setting's value`() = runScenario(
+        searchQuery = "",
+    ) {
+        playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
+        composeRule.waitForIdle()
+
+        playgroundSettings[CustomerSettingsDefinition] = CustomerType.GUEST
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Checkout Mode").assertExists()
     }
 
     @Test
@@ -75,12 +90,15 @@ internal class SettingsUiTest {
         )
     }
 
-    private fun runScenario(block: Scenario.() -> Unit) {
+    private fun runScenario(
+        searchQuery: String,
+        block: Scenario.() -> Unit,
+    ) {
         val playgroundSettings = PlaygroundSettings.createFromDefaults()
         composeRule.setContent {
             SettingsUi(
                 playgroundSettings = playgroundSettings,
-                searchQuery = "Default Billing Address",
+                searchQuery = searchQuery,
             )
         }
 
