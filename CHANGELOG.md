@@ -1,10 +1,21 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### Crypto Onramp
+* [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
+* [Changed] Crypto Onramp wallet collection returns contact-only `KycInfo` when available, including email, validated E.164 phone, and the original phone string.
+* [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
+* [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
+* [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+
+### Payments
+* [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
+
 ### PaymentSheet
-* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and support for payments, including setup future usage, in PaymentSheet.
+* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
 ## 23.21.0 - 2026-09-28
@@ -19,6 +30,7 @@ NEXT_VERSION_BUMP: PATCH
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+* [ADDED] Added `financialConnectionsSessionId` to Financial Connections events. Events are emitted after the session ID is available.
 
 ### Payments
 * [ADDED] Added API bindings for Pix.

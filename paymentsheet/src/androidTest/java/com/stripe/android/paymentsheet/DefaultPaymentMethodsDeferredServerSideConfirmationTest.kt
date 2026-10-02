@@ -39,6 +39,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
     fun setNewCardAsDefault_withSavedPaymentMethods_failsInTestMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
@@ -92,7 +93,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        paymentSheetPage.clickPrimaryButton()
+        paymentSheetPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
 
@@ -106,6 +107,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
     fun addFirstCardForUser_failsInTestMode() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
@@ -150,7 +152,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        paymentSheetPage.clickPrimaryButton()
+        paymentSheetPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
 

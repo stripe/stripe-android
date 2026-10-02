@@ -203,6 +203,7 @@ internal class GooglePayTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = testRules.networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             resultCallback = paymentResultCallback,
         ) { context ->

@@ -2,7 +2,9 @@ package com.stripe.android.financialconnections.analytics
 
 data class FinancialConnectionsEvent internal constructor(
     val name: Name,
-    val metadata: Metadata
+    val metadata: Metadata,
+    /** The Financial Connections session that produced this event. */
+    val financialConnectionsSessionId: String
 ) {
 
     /**

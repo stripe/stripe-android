@@ -3,14 +3,16 @@ package com.stripe.android.crypto.onramp.model
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 
-internal fun PaymentMethod.googlePayKycInfo(): KycInfo? {
-    val address = billingDetails?.address
+internal fun PaymentMethod.platformPayKycInfo(): KycInfo? = billingDetails?.platformPayKycInfo()
+
+internal fun PaymentMethod.BillingDetails.platformPayKycInfo(): KycInfo? {
+    val contact = walletContactInfo()
 
     // Google Pay on Android exposes billing name as a single free-form string.
     // We split on whitespace as a best-effort heuristic to populate first/last name,
     // with the assumption that the last name will be the last word, while the first name
     // is everything preceding it.
-    val fullName = billingDetails?.name.orEmpty().trim()
+    val fullName = name.orEmpty().trim()
     val parts = fullName.split("\\s+".toRegex())
     val firstName = when {
         parts.size == 1 -> parts.firstOrNull().orEmpty()
@@ -31,12 +33,17 @@ internal fun PaymentMethod.googlePayKycInfo(): KycInfo? {
         address?.state,
     ).any { it.isNotBlank() }
 
-    if (!hasName && !hasAddress) return null
+    val hasContact = contact != null
+    if (!hasName && !hasAddress && !hasContact) return null
 
     return KycInfo(
         firstName = firstName.takeIf { it.isNotEmpty() },
         lastName = lastName.takeIf { it.isNotEmpty() },
         idNumber = null,
+        idType = IdType.SocialSecurityNumber,
+        email = contact?.email,
+        phone = contact?.phone,
+        rawPhone = contact?.rawPhone,
         dateOfBirth = null,
         address = if (hasAddress) {
             PaymentSheet.Address(

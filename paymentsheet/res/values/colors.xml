@@ -14,7 +14,6 @@
     <color name="stripe_paymentsheet_payment_option_unselected_stroke">@android:color/transparent
     </color>
     <color name="stripe_paymentsheet_payment_option_selected_stroke">#1EA672</color>
-    <color name="stripe_paymentsheet_primary_button_confirming_progress">#ffffff</color>
     <color name="stripe_paymentsheet_form_border">#33787880</color>
     <color name="stripe_paymentsheet_elements_background_default">
         @color/stripe_paymentsheet_background

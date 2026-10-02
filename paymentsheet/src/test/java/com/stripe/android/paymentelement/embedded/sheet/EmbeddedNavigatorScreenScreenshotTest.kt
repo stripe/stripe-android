@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
@@ -64,6 +65,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
                     isEditing = false,
                     canEdit = true,
                     linkBrand = LinkBrand.Link,
+                    selectionState = SavedPaymentMethodSelectionState.Idle,
                 ),
             ),
         )

@@ -824,7 +824,6 @@ private class ConsumerAuthenticatedRequest(
     )
 
     override var postHeaders: Map<String, String>? = request.postHeaders
-    override val shouldCache: Boolean = request.shouldCache
 
     override fun writePostBody(outputStream: OutputStream) = request.writePostBody(outputStream)
 

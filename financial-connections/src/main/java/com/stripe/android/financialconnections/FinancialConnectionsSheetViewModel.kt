@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -62,9 +63,6 @@ import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
 import com.stripe.android.financialconnections.utils.InstantDebitsResultBuilder
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -83,10 +81,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
+    private val eventContext: FinancialConnectionsEventContext,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val initialState: FinancialConnectionsSheetState,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -185,7 +183,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
             )
         } else {
-            FinancialConnections.emitEvent(name = Name.OPEN)
+            analyticsTracker.emitEvent(name = Name.OPEN)
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(
@@ -200,7 +198,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     )
                 }
             } else {
-                FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
+                analyticsTracker.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
                 setState {
                     copy(
                         manifest = manifest,
@@ -523,9 +521,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // Native emits its own events before finishing.
         if (fromNative.not()) {
             when (result) {
-                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
-                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
-                is Failed -> FinancialConnections.emitEvent(
+                is Completed -> analyticsTracker.emitEvent(Name.SUCCESS)
+                is Canceled -> analyticsTracker.emitEvent(Name.CANCEL)
+                is Failed -> analyticsTracker.emitEvent(
                     name = Name.ERROR,
                     metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
                 )
@@ -534,15 +532,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 
-    @Suppress("OPT_IN_USAGE")
     private fun reportResult(result: FinancialConnectionsSheetActivityResult) {
-        // We use the global scope to make sure that we can finish sending the event
-        // even if the ViewModel is cleared.
-        GlobalScope.launch(ioDispatcher) {
-            runCatching { getOrFetchSync().manifest }.onSuccess {
-                eventReporter.onResult(it.id, result)
-            }
-        }
+        val sessionId = eventContext.manifest?.id ?: return
+        eventReporter.onResult(sessionId, result)
     }
 
     /**
