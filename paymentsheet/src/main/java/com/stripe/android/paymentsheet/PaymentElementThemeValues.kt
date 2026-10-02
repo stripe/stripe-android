@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.PaymentElementThemeMode
+import com.stripe.android.uicore.PaymentElementThemeValues
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonStyle
@@ -16,24 +18,12 @@ import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.IconStyle as StripeIconStyle
 
-internal data class PaymentElementThemeValues(
-    val colorsLight: StripeColors,
-    val colorsDark: StripeColors,
-    val shapes: StripeShapes,
-    val typography: StripeTypography,
-    val primaryButtonStyle: PrimaryButtonStyle,
-    val formInsets: FormInsets,
-    val sectionSpacing: Float?,
-    val textFieldInsets: FormInsets,
-    val iconStyle: StripeIconStyle,
-    val verticalModeRowPadding: Float,
-)
-
 @OptIn(AppearanceAPIAdditionsPreview::class)
 internal fun PaymentSheet.Appearance.toPaymentElementThemeValues(): PaymentElementThemeValues {
     return PaymentElementThemeValues(
         colorsLight = colorsLight.toStripeColors(isDark = false),
         colorsDark = colorsDark.toStripeColors(isDark = true),
+        themeMode = themeMode.toPaymentElementThemeMode(),
         shapes = shapes.toStripeShapes(),
         typography = typography.toStripeTypography(),
         primaryButtonStyle = primaryButton.toStripePrimaryButtonStyle(
@@ -48,6 +38,14 @@ internal fun PaymentSheet.Appearance.toPaymentElementThemeValues(): PaymentEleme
         iconStyle = iconStyle.toStripeIconStyle(),
         verticalModeRowPadding = verticalModeRowPadding,
     )
+}
+
+internal fun PaymentSheet.ThemeMode.toPaymentElementThemeMode(): PaymentElementThemeMode {
+    return when (this) {
+        PaymentSheet.ThemeMode.Automatic -> PaymentElementThemeMode.Automatic
+        PaymentSheet.ThemeMode.AlwaysLight -> PaymentElementThemeMode.AlwaysLight
+        PaymentSheet.ThemeMode.AlwaysDark -> PaymentElementThemeMode.AlwaysDark
+    }
 }
 
 private fun PaymentSheet.Colors.toStripeColors(isDark: Boolean): StripeColors {
