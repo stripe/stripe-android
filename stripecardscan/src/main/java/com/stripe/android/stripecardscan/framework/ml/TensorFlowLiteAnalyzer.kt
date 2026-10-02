@@ -6,7 +6,6 @@ import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
-import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.Loader
 import kotlinx.coroutines.sync.Mutex
@@ -52,7 +51,8 @@ internal abstract class TFLAnalyzerFactory<
     AnalyzerType : Analyzer<Input, Any, Output>
     >(
     private val context: Context,
-    private val fetchedModel: FetchedData
+    private val fetchedModel: FetchedData,
+    private val interpreterFactory: (ByteBuffer, InterpreterOptionsWrapper) -> InterpreterWrapper,
 ) : AnalyzerFactory<Input, Any, Output, AnalyzerType> {
     protected abstract val tfOptions: InterpreterOptionsWrapper
 
@@ -70,7 +70,7 @@ internal abstract class TFLAnalyzerFactory<
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun createInterpreter(fetchedModel: FetchedData): InterpreterWrapper? = try {
-        loadModel(fetchedModel)?.let { InterpreterWrapperImpl(it, tfOptions) }
+        loadModel(fetchedModel)?.let { interpreterFactory(it, tfOptions) }
     } catch (t: Throwable) {
         Log.e(
             LOG_TAG,

@@ -44,6 +44,8 @@ dependencies {
     androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.kotlin.coroutines
     androidTestImplementation testLibs.kotlin.test
+    // Match the API version supplied by ml-core:googleplay while bundling the native runtime for tests.
+    androidTestImplementation libs.tensorflowLite
     androidTestUtil testLibs.testOrchestrator
 }
 
