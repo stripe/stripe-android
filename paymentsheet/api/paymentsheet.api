@@ -504,11 +504,13 @@ public final class com/stripe/android/link/ui/updatecard/ComposableSingletons$Up
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt;
 	public fun <init> ()V
+	public final fun getLambda$-1576354462$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-391428647$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1556541497$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1594811933$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1744992555$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1814127193$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$211050873$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$480098714$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt {

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ConsumerFixtures
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkBrand
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 
@@ -232,5 +233,78 @@ class ConsumerSessionJsonParserTest {
         val result = ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_JSON)
 
         assertThat(result?.linkSessionKey).isNull()
+    }
+
+    @Test
+    fun `Parse available verification factors, keeping unknown types`() {
+        val json = JSONObject(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        json.getJSONObject("consumer_session").put(
+            "available_verification_factors",
+            JSONArray(
+                """
+                    [
+                      {"type": "SMS", "id": "casvf_1", "provides_further_verification": true,
+                        "temporarily_disabled": false},
+                      {"type": "EMAIL", "id": "casvf_2", "provides_further_verification": false,
+                        "temporarily_disabled": true},
+                      {"type": "PHONE_MATCH", "id": "casvf_3", "provides_further_verification": true,
+                        "temporarily_disabled": false}
+                    ]
+                """.trimIndent()
+            )
+        )
+
+        val factors = ConsumerSessionJsonParser().parse(json)?.availableVerificationFactors
+
+        assertThat(factors).containsExactly(
+            ConsumerSession.VerificationFactor(
+                type = ConsumerSession.VerificationFactor.FactorType.Sms,
+                id = "casvf_1",
+                providesFurtherVerification = true,
+                temporarilyDisabled = false,
+            ),
+            ConsumerSession.VerificationFactor(
+                type = ConsumerSession.VerificationFactor.FactorType.Email,
+                id = "casvf_2",
+                providesFurtherVerification = false,
+                temporarilyDisabled = true,
+            ),
+            ConsumerSession.VerificationFactor(
+                type = ConsumerSession.VerificationFactor.FactorType.Unknown,
+                id = "casvf_3",
+                providesFurtherVerification = true,
+                temporarilyDisabled = false,
+            ),
+        ).inOrder()
+    }
+
+    @Test
+    fun `Missing verification factors parse as null`() {
+        val session = ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON)
+
+        assertThat(session?.availableVerificationFactors).isNull()
+        assertThat(session?.emailOtpRequiresAdditionalInfo).isNull()
+    }
+
+    @Test
+    fun `Parse email OTP settings from top-level settings`() {
+        val json = JSONObject(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        json.put("settings", JSONObject().put("email_otp_requires_additional_info", false))
+
+        val session = ConsumerSessionJsonParser().parse(json)
+
+        assertThat(session?.emailOtpRequiresAdditionalInfo).isFalse()
+    }
+
+    @Test
+    fun `Unknown authentication levels never meet the minimum`() {
+        val json = JSONObject(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        json.getJSONObject("consumer_session")
+            .put("current_authentication_level", "2FA")
+            .put("minimum_authentication_level", "3FA")
+
+        val session = ConsumerSessionJsonParser().parse(json)
+
+        assertThat(session?.meetsMinimumAuthenticationLevel).isFalse()
     }
 }

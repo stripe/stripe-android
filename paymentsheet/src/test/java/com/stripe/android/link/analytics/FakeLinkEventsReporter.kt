@@ -42,19 +42,19 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun on2FAStart() {
+    override fun on2FAStart(verificationType: String) {
         throw NotImplementedError()
     }
 
-    override fun on2FAStartFailure() {
+    override fun on2FAStartFailure(verificationType: String) {
         throw NotImplementedError()
     }
 
-    override fun on2FAComplete() {
+    override fun on2FAComplete(verificationType: String) {
         throw NotImplementedError()
     }
 
-    override fun on2FAFailure() {
+    override fun on2FAFailure(verificationType: String) {
         throw NotImplementedError()
     }
 

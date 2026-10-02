@@ -17,8 +17,10 @@ import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.TestApiKeys
 import kotlinx.coroutines.test.runTest
@@ -175,6 +177,8 @@ class ConsumersApiServiceImplTest {
             type = VerificationType.SMS,
             customEmailType = null,
             connectionsMerchantName = null,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = DEFAULT_OPTIONS
         )
 
@@ -212,6 +216,8 @@ class ConsumersApiServiceImplTest {
             type = VerificationType.SMS,
             customEmailType = null,
             connectionsMerchantName = null,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = DEFAULT_OPTIONS,
             isResendSmsCode = true
         )
@@ -241,6 +247,64 @@ class ConsumersApiServiceImplTest {
             type = VerificationType.SMS,
             customEmailType = null,
             connectionsMerchantName = null,
+            accountPhoneNumber = null,
+            emailAddress = null,
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = false
+        )
+    }
+
+    @Test
+    fun `startConsumerVerification() sends account phone number and email for email OTP`() = runTest {
+        val clientSecret = "secret"
+        val locale = Locale.US
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            bodyPart("credentials[consumer_session_client_secret]", clientSecret),
+            bodyPart("type", "EMAIL"),
+            bodyPart("account_phone_number", "+15555555555"),
+            bodyPart("email_address", "email@email.com"),
+            not(hasBodyPart("is_resend_sms_code")),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = clientSecret,
+            locale = locale,
+            requestSurface = "android_payment_element",
+            type = VerificationType.EMAIL,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            accountPhoneNumber = "+15555555555",
+            emailAddress = "Email@Email.com",
+            requestOptions = DEFAULT_OPTIONS,
+            isResendSmsCode = false
+        )
+    }
+
+    @Test
+    fun `startConsumerVerification() omits account phone number and email when null`() = runTest {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/start_verification"),
+            not(hasBodyPart("account_phone_number")),
+            not(hasBodyPart("email_address")),
+        ) { response ->
+            response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
+        }
+
+        consumersApiService.startConsumerVerification(
+            consumerSessionClientSecret = "secret",
+            locale = Locale.US,
+            requestSurface = "android_payment_element",
+            type = VerificationType.SMS,
+            customEmailType = null,
+            connectionsMerchantName = null,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = DEFAULT_OPTIONS,
             isResendSmsCode = false
         )

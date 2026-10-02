@@ -37,14 +37,60 @@ data class ConsumerSession(
     val supportedPaymentDetailsTypes: List<String> = emptyList(),
     @SerialName("link_session_key")
     val linkSessionKey: String? = null,
+    /**
+     * The verification factors available to this account, or null if the endpoint predates factors.
+     */
+    @SerialName("available_verification_factors")
+    val availableVerificationFactors: List<VerificationFactor>? = null,
+    /**
+     * Whether an email OTP requires the user to confirm their phone number first. This is returned
+     * in the top-level `settings` object, next to the consumer session.
+     */
+    @SerialName("email_otp_requires_additional_info")
+    val emailOtpRequiresAdditionalInfo: Boolean? = null,
 ) : StripeModel {
 
     val meetsMinimumAuthenticationLevel: Boolean
         get() {
             val current = currentAuthenticationLevel ?: return false
             val minimum = minimumAuthenticationLevel ?: return false
+            if (current == AuthenticationLevel.Unknown || minimum == AuthenticationLevel.Unknown) {
+                return false
+            }
             return current.sortOrder >= minimum.sortOrder
         }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Serializable
+    data class VerificationFactor(
+        @SerialName("type")
+        val type: FactorType,
+        @SerialName("id")
+        val id: String?,
+        @SerialName("provides_further_verification")
+        val providesFurtherVerification: Boolean,
+        @SerialName("temporarily_disabled")
+        val temporarilyDisabled: Boolean,
+    ) : StripeModel {
+
+        val isStartable: Boolean
+            get() = !temporarilyDisabled && providesFurtherVerification
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class FactorType(val value: String) : Parcelable {
+            Unknown(""),
+            Sms("sms"),
+            Email("email");
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                fun fromValue(value: String): FactorType =
+                    entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
+            }
+        }
+    }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

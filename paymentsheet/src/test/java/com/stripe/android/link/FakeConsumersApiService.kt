@@ -125,6 +125,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
         requestOptions: ApiRequest.Options,
         isResendSmsCode: Boolean
     ): ConsumerSession {

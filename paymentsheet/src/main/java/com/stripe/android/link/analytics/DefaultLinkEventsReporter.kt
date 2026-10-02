@@ -87,20 +87,20 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountRefreshFailure, params)
     }
 
-    override fun on2FAStart() {
-        fireEvent(LinkEvent.TwoFAStart)
+    override fun on2FAStart(verificationType: String) {
+        fireEvent(LinkEvent.TwoFAStart, mapOf("verification_type" to verificationType))
     }
 
-    override fun on2FAStartFailure() {
-        fireEvent(LinkEvent.TwoFAStartFailure)
+    override fun on2FAStartFailure(verificationType: String) {
+        fireEvent(LinkEvent.TwoFAStartFailure, mapOf("verification_type" to verificationType))
     }
 
-    override fun on2FAComplete() {
-        fireEvent(LinkEvent.TwoFAComplete)
+    override fun on2FAComplete(verificationType: String) {
+        fireEvent(LinkEvent.TwoFAComplete, mapOf("verification_type" to verificationType))
     }
 
-    override fun on2FAFailure() {
-        fireEvent(LinkEvent.TwoFAFailure)
+    override fun on2FAFailure(verificationType: String) {
+        fireEvent(LinkEvent.TwoFAFailure, mapOf("verification_type" to verificationType))
     }
 
     override fun on2FACancel() {

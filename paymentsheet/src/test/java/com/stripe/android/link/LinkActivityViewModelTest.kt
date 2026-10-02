@@ -16,6 +16,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -632,6 +633,38 @@ internal class LinkActivityViewModelTest {
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isTrue()
         assertThat(appBarState.canNavigateBack).isFalse()
+    }
+
+    @Test
+    fun `screen back handler takes over back navigation while set`() = runTest {
+        val navigationManager = TestNavigationManager()
+        val viewModel = createViewModel(navigationManager = navigationManager)
+        val handlerCalls = Turbine<Unit>()
+
+        viewModel.setScreenBackHandler { handlerCalls.add(Unit) }
+
+        assertThat(viewModel.linkAppBarState.value.canNavigateBack).isTrue()
+
+        viewModel.goBack()
+
+        assertThat(handlerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(navigationManager.emittedIntents).isEmpty()
+        handlerCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `clearing the screen back handler restores default back navigation`() {
+        val navigationManager = TestNavigationManager()
+        val viewModel = createViewModel(navigationManager = navigationManager)
+        viewModel.setScreenBackHandler {}
+
+        viewModel.setScreenBackHandler(null)
+
+        assertThat(viewModel.linkAppBarState.value.canNavigateBack).isFalse()
+
+        viewModel.goBack()
+
+        navigationManager.assertNavigatedBack()
     }
 
     private fun navBackStackEntry(screen: LinkScreen): NavBackStackEntry {

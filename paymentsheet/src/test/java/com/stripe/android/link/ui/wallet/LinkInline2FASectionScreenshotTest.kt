@@ -39,6 +39,7 @@ class LinkInline2FASectionScreenshotTest {
         )
 
         val verificationState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             requestFocus = true,
             errorMessage = null,
@@ -77,6 +78,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             requestFocus = true,
             errorMessage = null,
@@ -115,6 +117,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             requestFocus = true,
             errorMessage = null,
@@ -155,6 +158,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            authFlow = null,
             isProcessing = true,
             requestFocus = false,
             errorMessage = null,
@@ -187,6 +191,7 @@ class LinkInline2FASectionScreenshotTest {
         )
 
         val verificationState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             requestFocus = false,
             errorMessage = resolvableString("Invalid verification code. Please try again."),
