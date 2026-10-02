@@ -127,6 +127,7 @@ android {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':payments-ui-core')
     cardScanImplementation project(':stripecardscan')
 
     implementation libs.androidx.activity
