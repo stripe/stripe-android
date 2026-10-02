@@ -18,6 +18,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14756](https://github.com/stripe/stripe-android/pull/14756) Added Pix support for PaymentIntents and SetupIntents in PaymentSheet.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+* [FIXED] Matched the Link wallet button height to the Google Pay button height at larger font scales.
 
 ## 23.21.0 - 2026-09-28
 
