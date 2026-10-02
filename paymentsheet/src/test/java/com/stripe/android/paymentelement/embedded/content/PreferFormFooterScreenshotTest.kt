@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -28,8 +29,29 @@ internal class PreferFormFooterScreenshotTest {
             PaymentElementTheme(appearance = PaymentSheet.Appearance()) {
                 PreferFormFooter(
                     alternatives = alternatives,
+                    paymentMethodCount = 5,
                     enabled = true,
                     onClick = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun displaysRedirectConfirmation() {
+        paparazziRule.snapshot {
+            PaymentElementTheme(appearance = PaymentSheet.Appearance()) {
+                PreferFormRedirectConfirmation(
+                    paymentMethod = DisplayablePaymentMethod(
+                        code = "crypto",
+                        displayName = "Crypto".resolvableString,
+                        iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_day,
+                        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_crypto_night,
+                        lightThemeIconUrl = null,
+                        darkThemeIconUrl = null,
+                        iconRequiresTinting = true,
+                        onClick = {},
+                    )
                 )
             }
         }

@@ -80,7 +80,11 @@ internal fun PaymentElement(
                 updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
         } else if (supportedPaymentMethods.isOnlyOneNonCardPaymentMethod()) {
-            VerticalModeFormHeaderUI(enabled, supportedPaymentMethods.first().asFormHeaderInformation(incentive))
+            VerticalModeFormHeaderUI(
+                isEnabled = enabled,
+                formHeaderInformation = supportedPaymentMethods.first().asFormHeaderInformation(incentive),
+                horizontalPadding = horizontalPadding,
+            )
         }
 
         FormElement(

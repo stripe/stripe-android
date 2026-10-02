@@ -1,11 +1,14 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
@@ -33,7 +36,7 @@ internal class PreferFormFooterTest {
 
     @Test
     fun `footer displays no more than three alternative icons`() {
-        setContent(enabled = true, alternatives = List(4, ::paymentMethod))
+        setContent(enabled = true, alternatives = List(4, ::paymentMethod), paymentMethodCount = 4)
 
         composeRule.onAllNodesWithTag(
             PREFER_FORM_FOOTER_ICON_TEST_TAG,
@@ -42,9 +45,24 @@ internal class PreferFormFooterTest {
     }
 
     @Test
+    fun `footer displays label and total payment method count`() {
+        setContent(
+            enabled = true,
+            alternatives = List(3, ::paymentMethod),
+            paymentMethodCount = 5,
+        )
+
+        composeRule.onNodeWithText("Pay another way").assertIsDisplayed()
+        composeRule.onNodeWithTag(
+            PREFER_FORM_FOOTER_COUNT_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertTextEquals("+5")
+    }
+
+    @Test
     fun `enabled footer invokes click`() {
         val clicks = ViewActionRecorder<Unit>()
-        setContent(enabled = true, alternatives = listOf(paymentMethod(0))) {
+        setContent(enabled = true, alternatives = listOf(paymentMethod(0)), paymentMethodCount = 1) {
             clicks.record(Unit)
         }
 
@@ -55,7 +73,7 @@ internal class PreferFormFooterTest {
 
     @Test
     fun `processing disables footer`() {
-        setContent(enabled = false, alternatives = listOf(paymentMethod(0)))
+        setContent(enabled = false, alternatives = listOf(paymentMethod(0)), paymentMethodCount = 1)
 
         composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).assertIsNotEnabled()
     }
@@ -63,12 +81,14 @@ internal class PreferFormFooterTest {
     private fun setContent(
         enabled: Boolean,
         alternatives: List<SupportedPaymentMethod>,
+        paymentMethodCount: Int,
         onClick: () -> Unit = {},
     ) {
         composeRule.setContent {
             PaymentElementTheme(appearance = PaymentSheet.Appearance()) {
                 PreferFormFooter(
                     alternatives = alternatives,
+                    paymentMethodCount = paymentMethodCount,
                     enabled = enabled,
                     onClick = onClick,
                 )

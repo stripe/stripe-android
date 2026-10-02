@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,8 +23,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.FormFieldId
-import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -77,10 +76,10 @@ internal fun AddPaymentMethod(
 @Composable
 internal fun AddPaymentMethodForm(
     interactor: AddPaymentMethodInteractor,
+    horizontalPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     val state by interactor.state.collectAsState()
-    val horizontalPadding = androidx.compose.material.MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Box(modifier = modifier.testTag(PAYMENT_SHEET_FORM_TEST_TAG)) {
         FormElement(

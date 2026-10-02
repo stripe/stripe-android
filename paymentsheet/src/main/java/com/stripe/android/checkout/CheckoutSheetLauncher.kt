@@ -155,11 +155,12 @@ internal class CheckoutSheetLauncher @Inject constructor(
     }
 
     private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+        val selectionChanged = selectionHolder.selection.value != result.selection
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
         selectionHolder.setSelection(result.selection)
         selectionHolder.setTemporarySelection(result.temporarySelection)
-        if (result.launchMode is EmbeddedLaunchMode.VerticalPaymentOptions) {
+        if (result.launchMode is EmbeddedLaunchMode.VerticalPaymentOptions && selectionChanged) {
             (selectionHolder as? CheckoutControllerStateHolder)?.disablePreferForm()
         }
     }

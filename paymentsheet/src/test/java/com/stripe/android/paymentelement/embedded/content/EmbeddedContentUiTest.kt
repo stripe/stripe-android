@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -71,17 +73,17 @@ internal class EmbeddedContentUiTest {
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
-    fun `selected non-form payment method is the only inline option`() {
+    fun `selected redirect payment method displays confirmation`() {
         val clicks = ViewActionRecorder<Unit>()
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm"),
+                paymentMethodTypes = listOf("card", "crypto"),
             ),
         )
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
             paymentMethodMetadata = metadata,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
-                code = "affirm",
+                code = "crypto",
                 canBeChanged = false,
             ),
         )
@@ -98,23 +100,31 @@ internal class EmbeddedContentUiTest {
 
         composeRule.setContent { content.Content() }
 
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_HEADER_TITLE).assertTextEquals("Payment")
+        composeRule.onNodeWithTag(PREFER_FORM_REDIRECT_CONFIRMATION_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(PREFER_FORM_REDIRECT_PAYMENT_METHOD_TEST_TAG, useUnmergedTree = true)
+            .assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_crypto").assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
+        composeRule.onNodeWithTag(
+            PREFER_FORM_FOOTER_COUNT_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertTextEquals("+2")
         composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).performClick()
         clicks.consume(Unit)
     }
 
     @Test
-    fun `selected payment method is the only vertical option when no form is displayed`() {
+    fun `changeable redirect payment method displays confirmation`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm"),
+                paymentMethodTypes = listOf("card", "crypto"),
             ),
         )
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
             paymentMethodMetadata = metadata,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
-                code = "affirm",
+                code = "crypto",
                 canBeChanged = true,
             ),
         )
@@ -131,7 +141,8 @@ internal class EmbeddedContentUiTest {
 
         composeRule.setContent { content.Content() }
 
-        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertExists()
+        composeRule.onNodeWithTag(PREFER_FORM_REDIRECT_CONFIRMATION_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_crypto").assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
         composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).assertExists()
     }
@@ -162,12 +173,17 @@ internal class EmbeddedContentUiTest {
 
         composeRule.setContent { content.Content() }
 
+        composeRule.onNodeWithTag(TEST_TAG_HEADER_TITLE).assertTextEquals("Payment")
         composeRule.onNodeWithTag(
             TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON + "_${displayedSavedPaymentMethod.paymentMethod.id}"
         ).assertExists()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").assertDoesNotExist()
         composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").assertDoesNotExist()
         composeRule.onNodeWithTag(PREFER_FORM_FOOTER_TEST_TAG).assertExists()
+        composeRule.onNodeWithTag(
+            PREFER_FORM_FOOTER_COUNT_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertTextEquals("+3")
     }
 
     @Test

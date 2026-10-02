@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.material.MaterialTheme
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.stripeFormInsets
 import org.junit.Rule
 import org.junit.Test
 
@@ -25,7 +28,8 @@ internal class VerticalModeFormHeaderUITest {
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
                     promoBadge = null,
-                )
+                ),
+                horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets(),
             )
         }
     }
@@ -44,7 +48,8 @@ internal class VerticalModeFormHeaderUITest {
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
                     promoBadge = null,
-                )
+                ),
+                horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets(),
             )
         }
     }
@@ -63,7 +68,8 @@ internal class VerticalModeFormHeaderUITest {
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
                     promoBadge = "$5",
-                )
+                ),
+                horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets(),
             )
         }
     }

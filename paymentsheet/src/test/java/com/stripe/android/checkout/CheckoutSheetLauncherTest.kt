@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -15,11 +16,9 @@ import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
@@ -799,6 +798,62 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `dismissing vertical payment options preserves prefer form`() = testScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().paymentMethodLayout(
+                    PaymentElement.Configuration.PaymentMethodLayout.PreferForm
+                )
+            )
+            .build()
+        selectionHolder.state = requireNotNull(selectionHolder.state).copy(configuration = configuration)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
+            previousNewSelections = Bundle(),
+            customerState = null,
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.VerticalPaymentOptions,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(selectionHolder.state?.preferFormDisabled).isFalse()
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `selecting another vertical payment option disables prefer form`() = testScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().paymentMethodLayout(
+                    PaymentElement.Configuration.PaymentMethodLayout.PreferForm
+                )
+            )
+            .build()
+        selectionHolder.state = requireNotNull(selectionHolder.state).copy(configuration = configuration)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val result = EmbeddedActivityResult.Complete(
+            temporarySelection = null,
+            previousNewSelections = Bundle(),
+            customerState = null,
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.VerticalPaymentOptions,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(selectionHolder.state?.preferFormDisabled).isTrue()
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+    }
+
+    @Test
     fun `paymentOptionsResult contains checkout session refresh failure`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
         val expectedError = IllegalStateException("Refresh failed")
@@ -913,7 +968,9 @@ internal class CheckoutSheetLauncherTest {
         val testScope = this
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
+            state = CheckoutControllerStateFactory.create()
+        }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -1003,7 +1060,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private class Scenario(
-        val selectionHolder: EmbeddedSelectionHolder,
+        val selectionHolder: CheckoutControllerStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val dummyActivityResultCallerScenario: DummyActivityResultCaller.Scenario,

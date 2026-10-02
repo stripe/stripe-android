@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -53,7 +54,11 @@ internal fun VerticalModeFormUI(
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
         if (headerInformation != null && shouldShowHeader(state.selectedPaymentMethodCode, showsWalletHeader)) {
-            VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
+            VerticalModeFormHeaderUI(
+                isEnabled = enabled,
+                formHeaderInformation = headerInformation,
+                horizontalPadding = horizontalPadding,
+            )
         }
 
         FormElement(
@@ -86,6 +91,7 @@ private fun shouldShowHeader(selectedCode: String, showsWalletHeader: Boolean): 
 internal fun VerticalModeFormHeaderUI(
     isEnabled: Boolean,
     formHeaderInformation: FormHeaderInformation,
+    horizontalPadding: PaddingValues,
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -95,7 +101,7 @@ internal fun VerticalModeFormHeaderUI(
     Row(
         modifier = Modifier
             .padding(bottom = 12.dp)
-            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
+            .padding(horizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {

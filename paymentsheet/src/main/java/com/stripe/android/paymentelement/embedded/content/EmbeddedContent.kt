@@ -85,6 +85,9 @@ internal data class EmbeddedContent(
                     .animateContentSize()
             ) {
                 val verticalState by interactor.state.collectAsState()
+                if (preferForm) {
+                    PreferFormHeaderUI(enabled = !verticalState.isProcessing)
+                }
                 if (preferFormInteractor != null) {
                     val preferredCode = preferFormInteractor.state.value.selectedPaymentMethodCode
                     EventReporterProvider(requireNotNull(eventReporter)) {
@@ -92,6 +95,7 @@ internal data class EmbeddedContent(
                             interactor = preferFormInteractor,
                             showFooter = verticalState.displayedSavedPaymentMethod != null ||
                                 verticalState.displayablePaymentMethods.any { it.code != preferredCode },
+                            paymentMethodCount = verticalState.paymentMethodCount,
                             onMorePaymentMethods = onMorePaymentMethods,
                         )
                     }
@@ -107,13 +111,22 @@ internal data class EmbeddedContent(
                             ?.code
                     val displaySavedPaymentMethodOnly = preferForm &&
                         verticalState.selection?.isSaved == true
-                    PaymentMethodEmbeddedLayoutUI(
-                        interactor = interactor,
-                        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                        appearance = embeddedAppearance,
-                        displayedPaymentMethodCode = selectedPaymentMethodCode,
-                        displaySavedPaymentMethodOnly = displaySavedPaymentMethodOnly,
-                    )
+                    val selectedPaymentMethod = verticalState.displayablePaymentMethods.firstOrNull {
+                        it.syntheticCode == selectedPaymentMethodCode
+                    }
+                    val displayRedirectConfirmation = selectedPaymentMethod != null &&
+                        verticalState.mandate == null
+                    if (displayRedirectConfirmation) {
+                        PreferFormRedirectConfirmation(paymentMethod = selectedPaymentMethod)
+                    } else {
+                        PaymentMethodEmbeddedLayoutUI(
+                            interactor = interactor,
+                            embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                            appearance = embeddedAppearance,
+                            displayedPaymentMethodCode = selectedPaymentMethodCode,
+                            displaySavedPaymentMethodOnly = displaySavedPaymentMethodOnly,
+                        )
+                    }
                     val alternatives = verticalState.displayablePaymentMethods.filterNot {
                         it.syntheticCode == selectedPaymentMethodCode
                     }
@@ -125,6 +138,7 @@ internal data class EmbeddedContent(
                         Spacer(Modifier.height(16.dp))
                         VerticalModeMorePaymentMethodsFooter(
                             alternatives = alternatives,
+                            paymentMethodCount = verticalState.paymentMethodCount,
                             enabled = !verticalState.isProcessing,
                             onClick = onMorePaymentMethods,
                         )
@@ -134,3 +148,6 @@ internal data class EmbeddedContent(
         }
     }
 }
+
+private val PaymentMethodVerticalLayoutInteractor.State.paymentMethodCount: Int
+    get() = displayablePaymentMethods.size + if (displayedSavedPaymentMethod != null) 1 else 0
