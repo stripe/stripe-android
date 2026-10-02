@@ -830,6 +830,10 @@ class LinkApiRepositoryTest {
         val secret = "secret"
         linkRepository.startVerification(
             consumerSessionClientSecret = secret,
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            emailAddress = null,
+            isResendSmsCode = false,
             apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
@@ -840,6 +844,8 @@ class LinkApiRepositoryTest {
             type = VerificationType.SMS,
             customEmailType = null,
             connectionsMerchantName = null,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
             isResendSmsCode = false
         )
@@ -856,6 +862,8 @@ class LinkApiRepositoryTest {
                 type = any(),
                 customEmailType = anyOrNull(),
                 connectionsMerchantName = anyOrNull(),
+                accountPhoneNumber = anyOrNull(),
+                emailAddress = anyOrNull(),
                 requestOptions = any(),
                 isResendSmsCode = any()
             )
@@ -864,6 +872,10 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.startVerification(
             consumerSessionClientSecret = "secret",
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            emailAddress = null,
+            isResendSmsCode = false,
             apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
@@ -881,6 +893,8 @@ class LinkApiRepositoryTest {
                 type = any(),
                 customEmailType = anyOrNull(),
                 connectionsMerchantName = anyOrNull(),
+                accountPhoneNumber = anyOrNull(),
+                emailAddress = anyOrNull(),
                 requestOptions = any(),
                 isResendSmsCode = any()
             )
@@ -889,6 +903,10 @@ class LinkApiRepositoryTest {
 
         val result = linkRepository.startVerification(
             consumerSessionClientSecret = "secret",
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            emailAddress = null,
+            isResendSmsCode = false,
             apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 

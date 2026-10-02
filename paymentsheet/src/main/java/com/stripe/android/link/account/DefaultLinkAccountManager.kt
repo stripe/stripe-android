@@ -67,6 +67,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
+    /**
+     * The email and source of the last email lookup that started a session, used to recover session
+     * credentials during verification.
+     */
+    private var lookupEmail: String? = null
+    private var lookupEmailSource: EmailSource? = null
+
     private val _suggestedEmail: MutableStateFlow<String?> = MutableStateFlow(null)
     override val suggestedEmail: StateFlow<String?> = _suggestedEmail.asStateFlow()
 
@@ -346,10 +353,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
         val isSameSession = consumerSession.clientSecret.isNotBlank() &&
             currentAccount?.clientSecret == consumerSession.clientSecret
-        val newSession = if (isSameUser && isSameSession && consumerSession.linkSessionKey.isNullOrBlank()) {
+        val sessionWithKey = if (isSameUser && isSameSession && consumerSession.linkSessionKey.isNullOrBlank()) {
             consumerSession.copy(linkSessionKey = currentAccount?.linkSessionKey)
         } else {
             consumerSession
+        }
+        // Auth settings are only returned by some endpoints, so keep the last known value.
+        val newSession = if (sessionWithKey.emailOtpRequiresAdditionalInfo == null && isSameUser) {
+            sessionWithKey.copy(emailOtpRequiresAdditionalInfo = currentAccount?.emailOtpRequiresAdditionalInfo)
+        } else {
+            sessionWithKey
         }
         val newAccount = LinkAccount(
             consumerSession = newSession,
@@ -395,17 +408,24 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+    override suspend fun startVerification(
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        isResend: Boolean,
+    ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
-        linkEventsReporter.on2FAStart()
+        linkEventsReporter.on2FAStart(verificationType = type.value)
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
-            isResendSmsCode = isResendSmsCode,
+            type = type,
+            accountPhoneNumber = accountPhoneNumber,
+            emailAddress = lookupEmail?.takeIf { it.equals(linkAccount.email, ignoreCase = true) },
+            isResendSmsCode = isResend,
             apiConfiguration = config.apiConfiguration,
         )
             .onFailure {
-                linkEventsReporter.on2FAStartFailure()
+                linkEventsReporter.on2FAStartFailure(verificationType = type.value)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -413,6 +433,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun confirmVerification(
         code: String,
+        type: VerificationType,
         consentGranted: Boolean?
     ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
@@ -420,16 +441,38 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.confirmVerification(
             verificationCode = code,
             consumerSessionClientSecret = linkAccount.clientSecret,
+            type = type,
             consentGranted = consentGranted,
             apiConfiguration = config.apiConfiguration,
         )
             .onSuccess {
-                linkEventsReporter.on2FAComplete()
+                linkEventsReporter.on2FAComplete(verificationType = type.value)
             }.onFailure {
-                linkEventsReporter.on2FAFailure()
+                linkEventsReporter.on2FAFailure(verificationType = type.value)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
+    }
+
+    override suspend fun recoverSession(): Result<LinkAccount> {
+        val email = lookupEmail ?: return Result.failure(NoLinkAccountFoundException())
+        return linkAuth.lookup(
+            email = email,
+            emailSource = lookupEmailSource,
+            sessionId = config.elementsSessionId,
+            customerId = null,
+            linkAuthIntentId = null,
+            supportedVerificationTypes = supportedVerificationTypes,
+            linkAuthTokenClientSecret = null,
+        ).mapCatching { consumerSessionLookup ->
+            requireNotNull(
+                setLinkAccountFromLookupResult(
+                    lookup = consumerSessionLookup,
+                    startSession = true,
+                    linkAuthIntentId = null,
+                )
+            ) { "No Link account found" }
+        }
     }
 
     override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
@@ -590,6 +633,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
         startSession: Boolean,
         customerId: String?
     ): Result<LinkAccount?> {
+        if (startSession) {
+            lookupEmail = email
+            lookupEmailSource = emailSource
+        }
         return linkAuth.lookup(
             email = email,
             emailSource = emailSource,
@@ -676,6 +723,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
             listOf("__fake__")
         } else {
-            listOf(VerificationType.SMS.value)
+            LinkAuthCapabilities.supportedVerificationTypes().map { it.value }
         }
 }
