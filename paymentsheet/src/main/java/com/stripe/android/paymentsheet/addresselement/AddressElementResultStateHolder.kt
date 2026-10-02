@@ -19,8 +19,8 @@ internal class AddressElementResultStateHolder @Inject constructor() {
         _state.compareAndSet(expect = State.Saving, update = State.Idle)
     }
 
-    fun onSaveCompleted(result: AddressElementActivityContract.Result): Boolean {
-        return _state.compareAndSet(expect = State.Saving, update = State.Finished(result))
+    fun onSaveCompleted(result: AddressElementActivityContract.Result) {
+        _state.compareAndSet(expect = State.Saving, update = State.Finished(result))
     }
 
     fun onUserCancel(): Boolean {

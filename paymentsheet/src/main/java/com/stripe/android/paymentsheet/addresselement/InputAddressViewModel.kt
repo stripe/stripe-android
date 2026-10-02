@@ -277,13 +277,12 @@ internal class InputAddressViewModel @Inject constructor(
                 )
             )
         }
-        if (resultStateHolder.onSaveCompleted(result)) {
-            eventReporter.onSaveCompleted(
-                country = addressDetails.address?.country,
-                autocompleteResultSelected = autocompleteFilledAddress != null,
-                editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
-            )
-        }
+        eventReporter.onSaveCompleted(
+            country = addressDetails.address?.country,
+            autocompleteResultSelected = autocompleteFilledAddress != null,
+            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
+        )
+        resultStateHolder.onSaveCompleted(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

@@ -73,7 +73,7 @@ internal class AddressElementResultStateHolderTest {
             assertThat(resultStateHolder.tryStartSaving()).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Saving)
 
-            assertThat(resultStateHolder.onSaveCompleted(expectedResult)).isTrue()
+            resultStateHolder.onSaveCompleted(expectedResult)
 
             assertThat(awaitItem()).isEqualTo(State.Finished(expectedResult))
         }
@@ -88,10 +88,10 @@ internal class AddressElementResultStateHolderTest {
             assertThat(awaitItem()).isEqualTo(State.Idle)
             assertThat(resultStateHolder.tryStartSaving()).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Saving)
-            assertThat(resultStateHolder.onSaveCompleted(expectedResult)).isTrue()
+            resultStateHolder.onSaveCompleted(expectedResult)
             assertThat(awaitItem()).isEqualTo(State.Finished(expectedResult))
 
-            assertThat(resultStateHolder.onSaveCompleted(AddressElementActivityContract.Result.Canceled)).isFalse()
+            resultStateHolder.onSaveCompleted(AddressElementActivityContract.Result.Canceled)
             resultStateHolder.onSaveFailed()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
             assertThat(resultStateHolder.onUserCancel()).isFalse()
@@ -108,7 +108,7 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
 
-            assertThat(resultStateHolder.onSaveCompleted(result)).isFalse()
+            resultStateHolder.onSaveCompleted(result)
 
             expectNoEvents()
         }
@@ -137,7 +137,7 @@ internal class AddressElementResultStateHolderTest {
             assertThat(resultStateHolder.onUserCancel()).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
 
-            assertThat(resultStateHolder.onSaveCompleted(result)).isFalse()
+            resultStateHolder.onSaveCompleted(result)
             resultStateHolder.onSaveFailed()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
             assertThat(resultStateHolder.onUserCancel()).isFalse()
