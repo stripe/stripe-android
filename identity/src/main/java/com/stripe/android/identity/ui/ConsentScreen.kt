@@ -27,6 +27,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,6 +91,8 @@ internal fun ConsentScreen(
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
             hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
+            movePrivacyPolicyToFooter = identityViewModel.verificationArgs.biometricConsent
+                ?.movePrivacyPolicyToFooter == true,
             showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
@@ -126,6 +129,7 @@ private fun SuccessUI(
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
     hideBrandingHeader: Boolean,
+    movePrivacyPolicyToFooter: Boolean,
     showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
@@ -162,24 +166,13 @@ private fun SuccessUI(
                 bottomSheets = bottomSheets
             )
 
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                BottomSheetHTML(
-                    html = consentPage.privacyPolicy,
-                    bottomSheets = bottomSheets,
+            if (!movePrivacyPolicyToFooter) {
+                ConsentPrivacyPolicy(
                     modifier = Modifier
-                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-                        .semantics {
-                            testTag = PRIVACY_POLICY_TAG
-                        },
-                    color = colorResource(id = R.color.stripe_html_line),
-                    style = MaterialTheme.typography.body1,
-                    urlSpanStyle = SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        color = colorResource(id = R.color.stripe_html_line)
-                    )
+                        .fillMaxWidth()
+                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+                    privacyPolicy = consentPage.privacyPolicy,
+                    bottomSheets = bottomSheets
                 )
             }
         }
@@ -225,6 +218,42 @@ private fun SuccessUI(
             declineState = LoadingButtonState.Loading
             onConsentDeclined()
         }
+
+        if (movePrivacyPolicyToFooter) {
+            ConsentPrivacyPolicy(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+                privacyPolicy = consentPage.privacyPolicy,
+                bottomSheets = bottomSheets
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ConsentPrivacyPolicy(
+    modifier: Modifier,
+    privacyPolicy: String,
+    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        BottomSheetHTML(
+            html = privacyPolicy,
+            bottomSheets = bottomSheets,
+            modifier = Modifier
+                .semantics { testTag = PRIVACY_POLICY_TAG },
+            color = colorResource(id = R.color.stripe_html_line),
+            style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+            urlSpanStyle = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                color = colorResource(id = R.color.stripe_html_line)
+            )
+        )
     }
 }
 
@@ -266,6 +295,7 @@ internal fun ConsentPreview() {
             ),
             visitedIndividualWelcomePage = false,
             hideBrandingHeader = false,
+            movePrivacyPolicyToFooter = false,
             bottomSheets = mapOf(),
             onConsentAgreed = {},
             onConsentDeclined = {}
