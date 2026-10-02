@@ -51,5 +51,8 @@ enum class CryptoNetwork(val value: String) {
     Arbitrum("arbitrum"),
 
     @SerialName("tempo")
-    Tempo("tempo")
+    Tempo("tempo"),
+
+    @SerialName("celo")
+    Celo("celo")
 }
