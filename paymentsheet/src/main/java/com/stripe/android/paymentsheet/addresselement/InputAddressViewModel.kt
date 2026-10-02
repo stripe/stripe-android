@@ -122,8 +122,7 @@ internal class InputAddressViewModel @Inject constructor(
         config = args.config,
     )
 
-    private val _formEnabled = MutableStateFlow(true)
-    val formEnabled: StateFlow<Boolean> = _formEnabled
+    val formEnabled: StateFlow<Boolean> = resultStateHolder.formEnabled
 
     private val _saveError = MutableStateFlow<ResolvableString?>(null)
     val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
@@ -237,13 +236,13 @@ internal class InputAddressViewModel @Inject constructor(
         completedFormValues: Map<FormFieldId, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
-        if (!_formEnabled.value) return
+        if (!formEnabled.value) return
         _saveError.value = null
         if (completedFormValues == null) {
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
         }
-        _formEnabled.value = false
+        resultStateHolder.setFormEnabled(isEnabled = false)
         val addressDetails = AddressDetails(
             name = completedFormValues[FormFieldId.Name]?.value,
             address = PaymentSheet.Address(
@@ -282,7 +281,7 @@ internal class InputAddressViewModel @Inject constructor(
                         error = error,
                     )
                     _saveError.value = error.stripeErrorMessage()
-                    _formEnabled.value = true
+                    resultStateHolder.setFormEnabled(isEnabled = true)
                 },
             )
         }

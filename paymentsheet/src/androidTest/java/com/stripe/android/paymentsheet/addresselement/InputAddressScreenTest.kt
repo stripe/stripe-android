@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,22 +47,36 @@ class InputAddressScreenTest {
     }
 
     @Test
-    fun loading_primary_button_displays_indicator_and_is_disabled() {
-        setContent(primaryButtonEnabled = false, primaryButtonLoading = true)
+    fun loading_disables_primary_and_close_buttons() {
+        val closeCalls = Turbine<Unit>()
+        setContent(
+            primaryButtonEnabled = false,
+            primaryButtonLoading = true,
+            closeButtonEnabled = false,
+            onCloseCallback = { closeCalls.add(Unit) },
+        )
 
         composeTestRule.onNodeWithText("Save Address").assertIsNotEnabled()
+        composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
+            .assertIsNotEnabled()
+            .performClick()
         composeTestRule.onNode(
             matcher = hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate),
             useUnmergedTree = true,
         ).assertIsDisplayed()
+        closeCalls.expectNoEvents()
+        closeCalls.ensureAllEventsConsumed()
     }
 
     @Test
     fun clicking_close_button_triggers_callback() {
-        var counter = 0
-        setContent(onCloseCallback = { counter++ })
-        composeTestRule.onNodeWithContentDescription("Close").performClick()
-        assertThat(counter).isEqualTo(1)
+        val closeCalls = Turbine<Unit>()
+        setContent(onCloseCallback = { closeCalls.add(Unit) })
+        composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
+            .assertIsEnabled()
+            .performClick()
+        assertThat(closeCalls.takeItem()).isEqualTo(Unit)
+        closeCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -80,6 +97,7 @@ class InputAddressScreenTest {
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         primaryButtonEnabled: Boolean = true,
         primaryButtonLoading: Boolean = false,
+        closeButtonEnabled: Boolean = true,
         primaryButtonCallback: () -> Unit = {},
         onCloseCallback: () -> Unit = {},
         formContent: @Composable ColumnScope.() -> Unit = {},
@@ -90,6 +108,7 @@ class InputAddressScreenTest {
                 appearance = appearance,
                 primaryButtonEnabled = primaryButtonEnabled,
                 primaryButtonLoading = primaryButtonLoading,
+                closeButtonEnabled = closeButtonEnabled,
                 primaryButtonText = "Save Address",
                 title = "Address",
                 onPrimaryButtonClick = primaryButtonCallback,

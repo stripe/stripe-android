@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 internal class AddressElementResultStateHolderTest {
@@ -13,5 +15,83 @@ internal class AddressElementResultStateHolderTest {
         assertThat(resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)).isFalse()
 
         assertThat(resultStateHolder.result.value).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `form starts enabled and follows enabled state changes`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.formEnabled.test {
+            assertThat(awaitItem()).isTrue()
+
+            resultStateHolder.setFormEnabled(false)
+
+            assertThat(awaitItem()).isFalse()
+
+            resultStateHolder.setFormEnabled(true)
+
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `user cancellation returns canceled when form is enabled`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.result.test {
+            assertThat(awaitItem()).isNull()
+
+            resultStateHolder.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        }
+    }
+
+    @Test
+    fun `user cancellation is ignored when form is disabled`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+        resultStateHolder.setFormEnabled(false)
+
+        resultStateHolder.result.test {
+            assertThat(awaitItem()).isNull()
+
+            resultStateHolder.onUserCancel()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `user cancellation is allowed after form is enabled again`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+        resultStateHolder.setFormEnabled(false)
+
+        resultStateHolder.result.test {
+            assertThat(awaitItem()).isNull()
+
+            resultStateHolder.onUserCancel()
+
+            expectNoEvents()
+
+            resultStateHolder.setFormEnabled(true)
+            resultStateHolder.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        }
+    }
+
+    @Test
+    fun `success result is accepted when form is disabled`() = runTest {
+        val expectedResult = AddressElementActivityContract.Result.StandaloneSucceeded(AddressDetails())
+        val resultStateHolder = AddressElementResultStateHolder()
+        resultStateHolder.setFormEnabled(false)
+
+        resultStateHolder.result.test {
+            assertThat(awaitItem()).isNull()
+
+            resultStateHolder.setResult(expectedResult)
+
+            assertThat(awaitItem()).isEqualTo(expectedResult)
+        }
     }
 }

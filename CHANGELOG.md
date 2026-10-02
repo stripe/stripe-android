@@ -18,6 +18,9 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
+### AddressElement
+* [Fixed] Disabled dismissal of the Shipping Address Element while saving a shipping address.
+
 ## 23.21.0 - 2026-09-28
 
 ### Payments
