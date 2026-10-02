@@ -41,9 +41,13 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.result.test {
             assertThat(awaitItem()).isNull()
 
-            resultStateHolder.onUserCancel()
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
 
             assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
+
+            expectNoEvents()
         }
     }
 
@@ -55,7 +59,7 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.result.test {
             assertThat(awaitItem()).isNull()
 
-            resultStateHolder.onUserCancel()
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
 
             expectNoEvents()
         }
@@ -69,12 +73,12 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.result.test {
             assertThat(awaitItem()).isNull()
 
-            resultStateHolder.onUserCancel()
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
 
             expectNoEvents()
 
             resultStateHolder.setFormEnabled(true)
-            resultStateHolder.onUserCancel()
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
 
             assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         }

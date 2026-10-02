@@ -16,11 +16,11 @@ internal class AddressElementViewModel @Inject internal constructor(
     val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
 ) : ViewModel() {
 
-    fun onBackPressed() {
+    fun onBackPressed(onCancel: () -> Unit) {
         if (!resultStateHolder.formEnabled.value) return
 
         if (!navigator.onBack()) {
-            resultStateHolder.onUserCancel()
+            onCancel()
         }
     }
 

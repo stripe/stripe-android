@@ -19,11 +19,8 @@ internal class AddressElementResultStateHolder @Inject constructor() {
         _formEnabled.value = isEnabled
     }
 
-    fun onUserCancel() {
-        if (formEnabled.value) {
-            setResult(AddressElementActivityContract.Result.Canceled)
-        }
-    }
+    fun onUserCancel(): Boolean =
+        formEnabled.value && setResult(AddressElementActivityContract.Result.Canceled)
 
     fun setResult(result: AddressElementActivityContract.Result): Boolean =
         _result.compareAndSet(expect = null, update = result)

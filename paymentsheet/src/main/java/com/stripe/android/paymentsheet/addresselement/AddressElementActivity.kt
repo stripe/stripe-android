@@ -77,7 +77,11 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
             }
 
-            BackHandler(onBack = viewModel::onBackPressed)
+            BackHandler {
+                if (viewModel.resultStateHolder.result.value != null) return@BackHandler
+                val inputAddressViewModel = getInputAddressViewModel(navController)
+                viewModel.onBackPressed(onCancel = inputAddressViewModel::onUserCancel)
+            }
 
             AddressElementUi(bottomSheetState, navController)
         }
@@ -91,7 +95,11 @@ internal class AddressElementActivity : ComponentActivity() {
         StripeTheme {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.resultStateHolder::onUserCancel,
+                onDismissed = {
+                    if (viewModel.resultStateHolder.result.value == null) {
+                        getInputAddressViewModel(navController).onUserCancel()
+                    }
+                },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -124,6 +132,14 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun getInputAddressViewModel(navController: NavHostController): InputAddressViewModel {
+        val backStackEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
+        return ViewModelProvider(
+            backStackEntry,
+            InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider),
+        )[InputAddressViewModel::class.java]
     }
 
     private fun finishWithResult(result: AddressElementActivityContract.Result) {

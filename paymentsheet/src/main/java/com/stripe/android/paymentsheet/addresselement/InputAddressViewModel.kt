@@ -136,18 +136,18 @@ internal class InputAddressViewModel @Inject constructor(
         )
     }
 
-    init {
-
-        viewModelScope.launch {
-            resultStateHolder.result.collect { result ->
-                if (result is AddressElementActivityContract.Result.Canceled) {
-                    eventReporter.onCanceled(
-                        addressDetails = getCurrentAddress(),
-                        autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
-                    )
-                }
-            }
+    fun onUserCancel() {
+        val addressDetails = getCurrentAddress()
+        val autocompleteAddressDetails = autocompleteSelectedAddressDetails()
+        if (resultStateHolder.onUserCancel()) {
+            eventReporter.onCanceled(
+                addressDetails = addressDetails,
+                autocompleteAddressDetails = autocompleteAddressDetails,
+            )
         }
+    }
+
+    init {
 
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.Turbine
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -14,40 +13,29 @@ internal class AddressElementViewModelTest {
     fun `back does not navigate or cancel when form is disabled`() = runScenario {
         resultStateHolder.setFormEnabled(false)
 
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
+        viewModel.onBackPressed(onCancel = onCancel)
 
-            viewModel.onBackPressed()
-
-            onBackCalls.expectNoEvents()
-            expectNoEvents()
-        }
+        onBackCalls.expectNoEvents()
+        onCancelCalls.expectNoEvents()
     }
 
     @Test
     fun `back cancels when navigation cannot go back`() = runScenario {
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
+        viewModel.onBackPressed(onCancel = onCancel)
 
-            viewModel.onBackPressed()
-
-            assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
-            assertThat(awaitItem()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        }
+        assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(onCancelCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(resultStateHolder.result.value).isNull()
     }
 
     @Test
     fun `back navigates without cancellation when navigation can go back`() = runScenario(
         canNavigateBack = true,
     ) {
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
+        viewModel.onBackPressed(onCancel = onCancel)
 
-            viewModel.onBackPressed()
-
-            assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
-            expectNoEvents()
-        }
+        assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
+        onCancelCalls.expectNoEvents()
     }
 
     @Test
@@ -56,20 +44,16 @@ internal class AddressElementViewModelTest {
     ) {
         resultStateHolder.setFormEnabled(false)
 
-        resultStateHolder.result.test {
-            assertThat(awaitItem()).isNull()
+        viewModel.onBackPressed(onCancel = onCancel)
 
-            viewModel.onBackPressed()
+        onBackCalls.expectNoEvents()
+        onCancelCalls.expectNoEvents()
 
-            onBackCalls.expectNoEvents()
-            expectNoEvents()
+        resultStateHolder.setFormEnabled(true)
+        viewModel.onBackPressed(onCancel = onCancel)
 
-            resultStateHolder.setFormEnabled(true)
-            viewModel.onBackPressed()
-
-            assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
-            expectNoEvents()
-        }
+        assertThat(onBackCalls.awaitItem()).isEqualTo(Unit)
+        onCancelCalls.expectNoEvents()
     }
 
     private fun runScenario(
@@ -77,6 +61,7 @@ internal class AddressElementViewModelTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val onBackCalls = Turbine<Unit>()
+        val onCancelCalls = Turbine<Unit>()
         val navigator = mock<NavHostAddressElementNavigator>()
         whenever(navigator.onBack()).thenAnswer {
             onBackCalls.add(Unit)
@@ -94,14 +79,19 @@ internal class AddressElementViewModelTest {
             viewModel = viewModel,
             resultStateHolder = resultStateHolder,
             onBackCalls = onBackCalls,
+            onCancel = { onCancelCalls.add(Unit) },
+            onCancelCalls = onCancelCalls,
         ).block()
 
         onBackCalls.ensureAllEventsConsumed()
+        onCancelCalls.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
         val viewModel: AddressElementViewModel,
         val resultStateHolder: AddressElementResultStateHolder,
         val onBackCalls: Turbine<Unit>,
+        val onCancel: () -> Unit,
+        val onCancelCalls: Turbine<Unit>,
     )
 }

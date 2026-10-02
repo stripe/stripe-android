@@ -400,13 +400,13 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `cancellation reports canceled`() = runScenario(
+    fun `user cancellation reports canceled once synchronously`() = runScenario(
         address = EXPECTED_ADDRESS,
         useStandaloneEventReporter = false,
     ) {
-        resultStateHolder.onUserCancel()
+        viewModel.onUserCancel()
 
-        assertThat(addressElementEventReporter.canceledCalls.awaitItem()).isEqualTo(
+        assertThat(addressElementEventReporter.canceledCalls.asChannel().tryReceive().getOrThrow()).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
                 addressDetails = AddressDetails(
                     name = EXPECTED_ADDRESS.name,
@@ -416,6 +416,63 @@ class InputAddressViewModelTest {
                 autocompleteAddressDetails = null,
             )
         )
+        assertThat(resultStateHolder.result.value).isEqualTo(AddressElementActivityContract.Result.Canceled)
+
+        viewModel.onUserCancel()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `user cancellation reports the current edited and selected autocomplete addresses`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        useStandaloneEventReporter = false,
+    ) {
+        selectAutocompletePrediction(
+            Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+        viewModel.setRawValues(
+            COMPLETED_FORM_VALUES.mapValues { it.value.value } + (FormFieldId.Line1 to "510 Townsend Sta")
+        )
+
+        viewModel.onUserCancel()
+
+        assertThat(addressElementEventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = EXPECTED_ADDRESS.address?.copy(line1 = "510 Townsend Sta"),
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `setting a canceled result directly does not report user cancellation`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        assertThat(resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)).isTrue()
+        testScheduler.runCurrent()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
     }
 
     @Test
@@ -437,7 +494,7 @@ class InputAddressViewModelTest {
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         assertThat(viewModel.formEnabled.value).isFalse()
 
-        resultStateHolder.onUserCancel()
+        viewModel.onUserCancel()
 
         addressElementEventReporter.canceledCalls.expectNoEvents()
         assertThat(resultStateHolder.result.value).isNull()
