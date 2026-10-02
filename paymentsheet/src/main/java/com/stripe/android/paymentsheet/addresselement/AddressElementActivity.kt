@@ -64,6 +64,7 @@ internal class AddressElementActivity : ComponentActivity() {
 
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = {
+                    // Allow a successful save to hide the sheet while the form is still disabled.
                     viewModel.resultStateHolder.formEnabled.value || viewModel.resultStateHolder.result.value != null
                 },
             )
@@ -78,9 +79,13 @@ internal class AddressElementActivity : ComponentActivity() {
             }
 
             BackHandler {
+                if (!viewModel.resultStateHolder.formEnabled.value) return@BackHandler
                 if (viewModel.resultStateHolder.result.value != null) return@BackHandler
+
                 val inputAddressViewModel = getInputAddressViewModel(navController)
-                viewModel.onBackPressed(onCancel = inputAddressViewModel::onUserCancel)
+                if (!viewModel.navigator.onBack()) {
+                    inputAddressViewModel.onUserCancel()
+                }
             }
 
             AddressElementUi(bottomSheetState, navController)
