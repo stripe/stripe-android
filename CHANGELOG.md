@@ -30,6 +30,7 @@ NEXT_VERSION_BUMP: MINOR
 ### Financial Connections
 * [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
 * [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+* [ADDED] Added `financialConnectionsSessionId` to Financial Connections events. Events are emitted after the session ID is available.
 
 ### Payments
 * [ADDED] Added API bindings for Pix.
