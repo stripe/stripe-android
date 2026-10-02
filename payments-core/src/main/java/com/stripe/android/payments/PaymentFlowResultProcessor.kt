@@ -47,9 +47,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             return@withContext Result.failure(it)
         }
 
+        val apiConfiguration = apiConfigProvider.get()
         val requestOptions = ApiRequest.Options(
-            apiKey = apiConfigProvider.get().publishableKey,
-            stripeAccount = result.stripeAccountId
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = result.stripeAccountId,
+            betas = apiConfiguration.betas,
         )
 
         val initialRetrieveIntentStartTime = clock.currentTimeMillis()
@@ -120,7 +122,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     val intent = cancelStripeIntentSource(
                         stripeIntentId = threeDS2Data?.threeDS2IntentId ?: stripeIntent.id.orEmpty(),
                         requestOptions = threeDS2Data?.publishableKey?.let {
-                            ApiRequest.Options(it)
+                            requestOptions.copy(
+                                apiKey = it,
+                                stripeAccount = null,
+                                idempotencyKey = null,
+                            )
                         } ?: requestOptions,
                         sourceId = sourceId
                     ).getOrThrow()

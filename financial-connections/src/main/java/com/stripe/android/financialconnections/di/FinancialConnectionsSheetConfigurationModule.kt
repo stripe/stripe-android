@@ -20,6 +20,7 @@ internal object FinancialConnectionsSheetConfigurationModule {
     ): ApiConfiguration.State = ApiConfiguration.State(
         publishableKey = configuration.publishableKey,
         stripeAccountId = configuration.stripeAccountId,
+        betas = emptySet(),
     )
 
     @Provides

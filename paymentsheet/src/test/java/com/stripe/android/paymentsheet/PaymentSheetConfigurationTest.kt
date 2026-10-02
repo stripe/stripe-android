@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AddressAutocompletePreview
+import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -19,6 +21,7 @@ class PaymentSheetConfigurationTest {
         WalletButtonsPreview::class,
         CardFundingFilteringPrivatePreview::class,
         AddressAutocompletePreview::class,
+        ApiConfigurationPreview::class,
     )
     @Test
     fun `newBuilder round-trips all properties`() {
@@ -60,6 +63,10 @@ class PaymentSheetConfigurationTest {
             termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
             opensCardScannerAutomatically = true,
             userOverrideCountry = "GB",
+            apiConfiguration = ApiConfiguration("pk_test_123")
+                .stripeAccountId("acct_123")
+                .betas(setOf("alipay_beta=v1"))
+                .build(),
         )
 
         val roundTripped = original.newBuilder().build()

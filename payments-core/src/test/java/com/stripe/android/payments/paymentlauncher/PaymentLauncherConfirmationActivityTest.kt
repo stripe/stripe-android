@@ -41,6 +41,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -67,6 +68,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -92,6 +94,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -119,6 +122,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -163,6 +167,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.SetupIntentNextActionArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -191,6 +196,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -219,6 +225,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    betas = emptySet(),
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -274,6 +281,7 @@ class PaymentLauncherConfirmationActivityTest {
         val args = PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
             hashedValue = Base64.encodeToString("$PUBLISHABLE_KEY:$CLIENT_SECRET".toByteArray(), 0),
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
             enableLogging = false,
             productUsage = PRODUCT_USAGE,
             includePaymentSheetNextHandlers = false,
@@ -305,6 +313,7 @@ class PaymentLauncherConfirmationActivityTest {
         val args = PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
             hashedValue = hashedValue,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
             enableLogging = false,
             productUsage = PRODUCT_USAGE,
             includePaymentSheetNextHandlers = false,
@@ -357,6 +366,7 @@ class PaymentLauncherConfirmationActivityTest {
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
                 includePaymentSheetNextHandlers = false,

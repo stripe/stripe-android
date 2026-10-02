@@ -69,6 +69,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     ApiConfiguration.State(
                         publishableKey = requestOptions.apiKey,
                         stripeAccountId = requestOptions.stripeAccount,
+                        betas = requestOptions.betas,
                     )
                 },
             )

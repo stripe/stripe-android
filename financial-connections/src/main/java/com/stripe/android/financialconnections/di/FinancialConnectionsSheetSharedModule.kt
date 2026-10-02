@@ -125,7 +125,8 @@ internal interface FinancialConnectionsSheetSharedModule {
             val apiConfiguration = apiConfigurationProvider.get()
             return ApiRequest.Options(
                 apiKey = apiConfiguration.publishableKey,
-                stripeAccount = apiConfiguration.stripeAccountId
+                stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas,
             )
         }
 

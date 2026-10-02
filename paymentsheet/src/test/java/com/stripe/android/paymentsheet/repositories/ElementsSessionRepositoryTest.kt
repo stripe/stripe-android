@@ -55,13 +55,16 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = DEFAULT_API_CONFIG,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(betas = setOf("alipay_beta=v1")),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
         assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+        assertThat(requestOptions.betas).containsExactly("alipay_beta=v1")
+        assertThat(requestCaptor.firstValue.headers["Stripe-Version"])
+            .endsWith(";alipay_beta=v1")
     }
 
     @Test

@@ -30,7 +30,11 @@ internal class RealProvideApiRequestOptions @Inject constructor(
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 
         return consumerPublishableKey?.let {
-            ApiRequest.Options(apiKey = it)
+            apiRequestOptions.copy(
+                apiKey = it,
+                stripeAccount = null,
+                idempotencyKey = null,
+            )
         }
     }
 }

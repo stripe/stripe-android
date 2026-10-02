@@ -86,6 +86,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         val requestOptions = ApiRequest.Options(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
+            betas = apiConfiguration.betas,
         )
         val elementsSession = retrieveElementsSession(params, requestOptions)
 
