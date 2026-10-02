@@ -141,12 +141,9 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             resultStateHolder.result.collect { result ->
                 if (result is AddressElementActivityContract.Result.Canceled) {
-                    val addressDetails = getCurrentAddress()
-                    val selectedAddress = autocompleteSelectedAddressDetails()
                     eventReporter.onCanceled(
-                        country = addressDetails.address?.country,
-                        autocompleteResultSelected = selectedAddress != null,
-                        editDistance = selectedAddress?.let { addressDetails.editDistance(it) },
+                        addressDetails = getCurrentAddress(),
+                        autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
                     )
                 }
             }
@@ -257,13 +254,9 @@ internal class InputAddressViewModel @Inject constructor(
             isCheckboxSelected = checkboxChecked
         )
         val selectedAddress = autocompleteSelectedAddressDetails()
-        val country = addressDetails.address?.country
-        val autocompleteResultSelected = selectedAddress != null
-        val editDistance = selectedAddress?.let { addressDetails.editDistance(it) }
         eventReporter.onSaveStarted(
-            country = country,
-            autocompleteResultSelected = autocompleteResultSelected,
-            editDistance = editDistance,
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = selectedAddress,
         )
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
@@ -275,9 +268,8 @@ internal class InputAddressViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     eventReporter.onSaveFailed(
-                        country = country,
-                        autocompleteResultSelected = autocompleteResultSelected,
-                        editDistance = editDistance,
+                        addressDetails = addressDetails,
+                        autocompleteAddressDetails = selectedAddress,
                         error = error,
                     )
                     _saveError.value = error.stripeErrorMessage()
@@ -292,11 +284,9 @@ internal class InputAddressViewModel @Inject constructor(
         result: AddressElementActivityContract.Result,
     ) {
         if (resultStateHolder.setResult(result)) {
-            val selectedAddress = autocompleteSelectedAddressDetails()
             eventReporter.onSaveCompleted(
-                country = addressDetails.address?.country,
-                autocompleteResultSelected = selectedAddress != null,
-                editDistance = selectedAddress?.let { addressDetails.editDistance(it) },
+                addressDetails = addressDetails,
+                autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
             )
         }
     }

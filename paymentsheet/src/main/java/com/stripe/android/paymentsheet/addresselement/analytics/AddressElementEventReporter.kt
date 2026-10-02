@@ -2,33 +2,31 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.editDistance
 
 internal interface AddressElementEventReporter {
     fun onShown(country: String?)
 
     fun onCanceled(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     )
 
     fun onSaveStarted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     )
 
     fun onSaveFailed(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
         error: Throwable,
     )
 
     fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     )
 }
 
@@ -40,34 +38,30 @@ internal class StandaloneAddressElementEventReporter(
     }
 
     override fun onCanceled(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) = Unit
 
     override fun onSaveStarted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) = Unit
 
     override fun onSaveFailed(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
         error: Throwable,
     ) = Unit
 
     override fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
-        val savedCountry = country ?: return
+        val savedCountry = addressDetails.address?.country ?: return
         addressLauncherEventReporter.onCompleted(
             country = savedCountry,
-            autocompleteResultSelected = autocompleteResultSelected,
-            editDistance = editDistance,
+            autocompleteResultSelected = autocompleteAddressDetails != null,
+            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
     }
 }
@@ -90,63 +84,58 @@ internal class CheckoutShippingAddressElementEventReporter(
     }
 
     override fun onCanceled(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
         fireEvent(
             ShippingAddressElementEvent.Canceled(
-                analyticsData(country, autocompleteResultSelected, editDistance)
+                analyticsData(addressDetails, autocompleteAddressDetails)
             )
         )
     }
 
     override fun onSaveStarted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
         fireEvent(
             ShippingAddressElementEvent.SaveStarted(
-                analyticsData(country, autocompleteResultSelected, editDistance)
+                analyticsData(addressDetails, autocompleteAddressDetails)
             )
         )
     }
 
     override fun onSaveFailed(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
         error: Throwable,
     ) {
         fireEvent(
             ShippingAddressElementEvent.SaveFailed(
-                analyticsData(country, autocompleteResultSelected, editDistance),
+                analyticsData(addressDetails, autocompleteAddressDetails),
                 error,
             )
         )
     }
 
     override fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
         fireEvent(
             ShippingAddressElementEvent.SaveCompleted(
-                analyticsData(country, autocompleteResultSelected, editDistance)
+                analyticsData(addressDetails, autocompleteAddressDetails)
             )
         )
     }
 
     private fun analyticsData(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) = ShippingAddressElementAnalyticsData(
-        country = country.orEmpty(),
-        autocompleteResultSelected = autocompleteResultSelected,
-        editDistance = editDistance,
+        country = addressDetails.address?.country.orEmpty(),
+        autocompleteResultSelected = autocompleteAddressDetails != null,
+        editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
     )
 
     private fun fireEvent(event: ShippingAddressElementEvent) {

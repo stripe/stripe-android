@@ -305,9 +305,8 @@ class InputAddressViewModelTest {
         val started = addressElementEventReporter.saveStartedCalls.awaitItem()
         assertThat(started).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
             )
         )
         assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
@@ -326,9 +325,8 @@ class InputAddressViewModelTest {
         val started = addressElementEventReporter.saveStartedCalls.awaitItem()
         assertThat(started).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
             )
         )
         assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
@@ -359,9 +357,19 @@ class InputAddressViewModelTest {
         val started = addressElementEventReporter.saveStartedCalls.awaitItem()
         assertThat(started).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = true,
-                editDistance = 1,
+                addressDetails = EXPECTED_ADDRESS.copy(
+                    address = EXPECTED_ADDRESS.address?.copy(line1 = "510 Townsend Sta")
+                ),
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
             )
         )
         assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
@@ -378,6 +386,12 @@ class InputAddressViewModelTest {
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
+            )
+        )
         val failed = addressElementEventReporter.saveFailedCalls.awaitItem()
         assertThat(failed.analyticsCall).isEqualTo(started)
         assertThat(failed.error).isSameInstanceAs(error)
@@ -387,21 +401,25 @@ class InputAddressViewModelTest {
 
     @Test
     fun `cancellation reports canceled`() = runScenario(
+        address = EXPECTED_ADDRESS,
         useStandaloneEventReporter = false,
     ) {
-        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
+        resultStateHolder.onUserCancel()
 
         assertThat(addressElementEventReporter.canceledCalls.awaitItem()).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = EXPECTED_ADDRESS.address,
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = null,
             )
         )
     }
 
     @Test
-    fun `cancellation during save does not report save completed`() = runScenario(
+    fun `user cancellation during save is ignored`() = runScenario(
         useStandaloneEventReporter = false,
     ) {
         val primaryButtonResult = CompletableDeferred<Result<AddressElementActivityContract.Result>>()
@@ -409,30 +427,29 @@ class InputAddressViewModelTest {
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        assertThat(addressElementEventReporter.saveStartedCalls.awaitItem()).isEqualTo(
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
             FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
             )
         )
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isFalse()
 
-        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-        assertThat(addressElementEventReporter.canceledCalls.awaitItem()).isEqualTo(
-            FakeAddressElementEventReporter.AnalyticsCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
-            )
-        )
+        resultStateHolder.onUserCancel()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+        assertThat(resultStateHolder.result.value).isNull()
         primaryButtonResult.complete(
             Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
         testScheduler.runCurrent()
 
-        assertThat(resultStateHolder.result.value).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        addressElementEventReporter.saveCompletedCalls.expectNoEvents()
+        assertThat(resultStateHolder.result.value)
+            .isEqualTo(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
+        assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+        addressElementEventReporter.canceledCalls.expectNoEvents()
         addressElementEventReporter.saveFailedCalls.expectNoEvents()
     }
 

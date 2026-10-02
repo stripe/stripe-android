@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -22,11 +24,10 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
-    fun `standalone onSaveCompleted forwards computed values`() = runScenario {
+    fun `standalone onSaveCompleted derives analytics from the saved and selected addresses`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
         assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
@@ -41,9 +42,8 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `standalone onSaveCompleted forwards a missing selection`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
@@ -58,9 +58,8 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `standalone onSaveCompleted does not report without a country`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = null,
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = createAddressDetails(country = null),
+            autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
         addressLauncherEventReporter.completedCalls.expectNoEvents()
@@ -68,12 +67,17 @@ internal class AddressElementEventReporterTest {
 
     @Test
     fun `standalone ignores Checkout lifecycle events`() = runScenario {
-        standaloneReporter.onCanceled("US", autocompleteResultSelected = false, editDistance = null)
-        standaloneReporter.onSaveStarted("US", autocompleteResultSelected = false, editDistance = null)
+        standaloneReporter.onCanceled(
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
+        )
+        standaloneReporter.onSaveStarted(
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
+        )
         standaloneReporter.onSaveFailed(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
             error = IllegalStateException("sensitive details"),
         )
 
@@ -94,15 +98,15 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
-    fun `Checkout onSaveStarted forwards computed analytics values`() = runScenario {
+    fun `Checkout onSaveStarted derives analytics from the saved and selected addresses`() = runScenario {
         checkoutShippingReporter.onSaveStarted(
-            country = "US",
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.save_started")
+        assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
                 "address_country_code" to "US",
@@ -113,15 +117,15 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
-    fun `Checkout onSaveCompleted omits distance when no selection was computed`() = runScenario {
+    fun `Checkout onSaveCompleted omits distance without a selected address`() = runScenario {
         checkoutShippingReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.save_completed")
+        assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
                 "address_country_code" to "US",
@@ -133,30 +137,54 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `Checkout onCanceled reports canceled`() = runScenario {
         checkoutShippingReporter.onCanceled(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.canceled")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(params["address_data_blob"]).isEqualTo(
+            mapOf(
+                "address_country_code" to "US",
+                "auto_complete_result_selected" to false,
+            )
+        )
     }
 
     @Test
     fun `Checkout onSaveFailed reports standard error parameters`() = runScenario {
         checkoutShippingReporter.onSaveFailed(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
             error = IllegalStateException("sensitive details"),
         )
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.save_failed")
-        assertThat(params).containsKey("analytics_value")
+        assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(params["address_data_blob"]).isEqualTo(
+            mapOf(
+                "address_country_code" to "US",
+                "auto_complete_result_selected" to false,
+            )
+        )
+        assertThat(params).containsEntry("analytics_value", "java.lang.IllegalStateException")
         assertThat(params).doesNotContainKey("error_message")
     }
+
+    private fun createAddressDetails(
+        country: String? = "US",
+        line1: String = "510 Townsend St",
+    ) = AddressDetails(
+        address = PaymentSheet.Address(
+            city = "San Francisco",
+            country = country,
+            line1 = line1,
+            postalCode = "94103",
+            state = "CA",
+        ),
+    )
 
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()

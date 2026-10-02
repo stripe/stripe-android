@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement.analytics
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal class FakeAddressElementEventReporter : AddressElementEventReporter {
     private val _shownCalls = Turbine<ShownCall>()
@@ -24,41 +25,37 @@ internal class FakeAddressElementEventReporter : AddressElementEventReporter {
     }
 
     override fun onCanceled(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
-        _canceledCalls.add(AnalyticsCall(country, autocompleteResultSelected, editDistance))
+        _canceledCalls.add(AnalyticsCall(addressDetails, autocompleteAddressDetails))
     }
 
     override fun onSaveStarted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
-        _saveStartedCalls.add(AnalyticsCall(country, autocompleteResultSelected, editDistance))
+        _saveStartedCalls.add(AnalyticsCall(addressDetails, autocompleteAddressDetails))
     }
 
     override fun onSaveFailed(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
         error: Throwable,
     ) {
         _saveFailedCalls.add(
             SaveFailedCall(
-                analyticsCall = AnalyticsCall(country, autocompleteResultSelected, editDistance),
+                analyticsCall = AnalyticsCall(addressDetails, autocompleteAddressDetails),
                 error = error,
             )
         )
     }
 
     override fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
-        _saveCompletedCalls.add(AnalyticsCall(country, autocompleteResultSelected, editDistance))
+        _saveCompletedCalls.add(AnalyticsCall(addressDetails, autocompleteAddressDetails))
     }
 
     fun ensureAllEventsConsumed() {
@@ -74,9 +71,8 @@ internal class FakeAddressElementEventReporter : AddressElementEventReporter {
     )
 
     data class AnalyticsCall(
-        val country: String?,
-        val autocompleteResultSelected: Boolean,
-        val editDistance: Int?,
+        val addressDetails: AddressDetails,
+        val autocompleteAddressDetails: AddressDetails?,
     )
 
     data class SaveFailedCall(

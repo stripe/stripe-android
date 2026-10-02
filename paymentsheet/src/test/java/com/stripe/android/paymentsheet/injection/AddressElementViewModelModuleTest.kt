@@ -219,9 +219,10 @@ class AddressElementViewModelModuleTest {
 
         eventReporter.onShown(country = "CA")
         eventReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = AddressDetails(
+                address = EXPECTED_ADDRESS.address?.copy(line1 = "511 Townsend St")
+            ),
         )
 
         assertThat(addressLauncherEventReporter.showCalls.awaitItem()).isEqualTo("CA")
