@@ -1,0 +1,93 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
+package com.stripe.android.paymentsheet.example.playground.settings
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class SettingsUiTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `custom billing email can be entered`() = runScenario {
+        val customEmailInput = composeRule.onNodeWithTag(textSettingTestTag("Custom email"))
+        customEmailInput.assertDoesNotExist()
+
+        composeRule.onNodeWithTag(settingTestTag("Default Billing Address")).performClick()
+        composeRule.onNodeWithText("Custom email").performClick()
+
+        customEmailInput
+            .assertIsDisplayed()
+            .performTextReplacement("custom@example.com")
+
+        assertThat(playgroundSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
+            DefaultBillingAddress.WithEmail("custom@example.com")
+        )
+    }
+
+    @Test
+    fun `custom billing email remains when integration type changes`() {
+        val playgroundSettings = PlaygroundSettings.createFromDefaults().apply {
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail("custom@example.com")
+        }
+
+        playgroundSettings.updateConfigurationData { configurationData ->
+            configurationData.copy(
+                integrationType = PlaygroundConfigurationData.IntegrationType.Embedded,
+            )
+        }
+        assertThat(playgroundSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
+            DefaultBillingAddress.WithEmail("custom@example.com")
+        )
+    }
+
+    @Test
+    fun `custom billing email is restored`() {
+        val playgroundSettings = PlaygroundSettings.createFromDefaults().apply {
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail("custom@example.com")
+        }
+
+        val restoredSettings = PlaygroundSettings.createFromJsonString(
+            playgroundSettings.snapshot().asJsonString()
+        )
+        assertThat(restoredSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
+            DefaultBillingAddress.WithEmail("custom@example.com")
+        )
+    }
+
+    private fun runScenario(block: Scenario.() -> Unit) {
+        val playgroundSettings = PlaygroundSettings.createFromDefaults()
+        composeRule.setContent {
+            SettingsUi(
+                playgroundSettings = playgroundSettings,
+                searchQuery = "Default Billing Address",
+            )
+        }
+
+        block(Scenario(playgroundSettings))
+    }
+
+    private data class Scenario(
+        val playgroundSettings: PlaygroundSettings,
+    )
+}

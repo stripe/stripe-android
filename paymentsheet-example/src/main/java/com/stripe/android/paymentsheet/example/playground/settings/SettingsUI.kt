@@ -21,12 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.matchesQuery
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun SettingsUi(
@@ -83,17 +83,42 @@ private fun <T> Setting(
     playgroundSettings: PlaygroundSettings,
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
+    val value by playgroundSettings[settingDefinition].collectAsState()
 
     val options = remember(settingDefinition, configurationData) {
         settingDefinition.createOptions(configurationData)
+    }
+    val selectedValue = remember(settingDefinition, options, value) {
+        options.firstOrNull { option ->
+            settingDefinition.optionMatchesValue(option.value, value)
+        }?.value ?: value
     }
 
     Setting(
         name = settingDefinition.displayName,
         options = options,
-        valueFlow = playgroundSettings[settingDefinition],
+        value = selectedValue,
     ) { newValue ->
-        playgroundSettings[settingDefinition] = newValue
+        playgroundSettings[settingDefinition] = if (settingDefinition.optionMatchesValue(newValue, value)) {
+            value
+        } else {
+            newValue
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    val textInputDefinition =
+        settingDefinition as? PlaygroundSettingDefinition.Displayable.WithTextInput<T>
+    textInputDefinition?.textInputValue(value)?.let { textInputValue ->
+        TextSetting(
+            name = textInputDefinition.textInputName,
+            value = textInputValue,
+        ) { newTextInputValue ->
+            playgroundSettings[settingDefinition] = textInputDefinition.updateTextInputValue(
+                value = value,
+                textInputValue = newTextInputValue,
+            )
+        }
     }
 }
 
@@ -101,10 +126,9 @@ private fun <T> Setting(
 private fun <T> Setting(
     name: String,
     options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
-    valueFlow: StateFlow<T>,
+    value: T,
     onOptionChanged: (T) -> Unit,
 ) {
-    val value by valueFlow.collectAsState()
     if (options.isEmpty() && value is String) {
         @Suppress("UNCHECKED_CAST")
         TextSetting(
@@ -185,7 +209,9 @@ private fun TextSetting(
         onValueChange = { newValue: String ->
             onOptionChanged(newValue)
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(textSettingTestTag(name)),
     )
 }
 
@@ -267,7 +293,9 @@ internal fun <T> DropdownSetting(
             label = { Text(name) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(settingTestTag(name))
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -288,5 +316,9 @@ internal fun <T> DropdownSetting(
         }
     }
 }
+
+internal fun settingTestTag(name: String): String = "setting_$name"
+
+internal fun textSettingTestTag(name: String): String = "text_setting_$name"
 
 private const val MAX_RADIO_BUTTON_OPTIONS = 4
