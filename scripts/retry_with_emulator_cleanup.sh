@@ -6,6 +6,53 @@
 OUTPUT_LOG=$(mktemp)
 trap 'rm -f "$OUTPUT_LOG"' EXIT
 
+SOURCE_DIR="${BITRISE_SOURCE_DIR:-.}"
+SOURCE_DIR=$(cd "$SOURCE_DIR" && pwd)
+RETRY_RESULTS_DIR="${BITRISE_RETRY_RESULTS_DIR:-/tmp/test_results/retry-results}"
+RETRY_RUN_DIR=""
+
+# Gradle emits this line after a test task has produced its JUnit failure report.
+# Keep the detector narrow so compilation, setup, and emulator failures are not
+# treated as test failures.
+function is_gradle_test_failure {
+  local log_file="$1"
+  grep -qF "There were failing tests." "$log_file"
+}
+
+function capture_attempt_results {
+  local attempt="$1"
+
+  if [ ! -d "$SOURCE_DIR" ]; then
+    echo "Cannot capture retry results because source directory is missing: $SOURCE_DIR" >&2
+    return 0
+  fi
+
+  if [ -z "$RETRY_RUN_DIR" ]; then
+    mkdir -p "$RETRY_RESULTS_DIR"
+    RETRY_RUN_DIR=$(mktemp -d "$RETRY_RESULTS_DIR/run-XXXXXX")
+  fi
+
+  local attempt_dir="$RETRY_RUN_DIR/attempt-$attempt"
+  local captured=0
+  while IFS= read -r -d '' result_dir; do
+    local relative="${result_dir#"$SOURCE_DIR"/}"
+    local destination="$attempt_dir/$relative"
+    mkdir -p "$(dirname "$destination")"
+    cp -R "$result_dir" "$destination"
+    captured=$((captured + 1))
+    echo "Captured retry $attempt results: $relative"
+  done < <(
+    find "$SOURCE_DIR" -type d \( \
+      -path '*/build/outputs/androidTest-results/connected' -o \
+      -path '*/build/outputs/androidTest-results/managedDevice' \
+    \) -print0
+  )
+
+  if [ "$captured" -eq 0 ]; then
+    echo "No instrumentation result directories found after retry $attempt."
+  fi
+}
+
 function clear_corrupted_orchestrator_cache {
   if [ -f "$OUTPUT_LOG" ] && grep -qE "Failed to install split APK|Invalid File.*orchestrator" "$OUTPUT_LOG"; then
     echo "Detected orchestrator APK installation failure. Clearing corrupted cache..."
@@ -47,6 +94,7 @@ function retry {
     fi
     count=$(($count + 1))
     if [ $count -lt $retries ]; then
+      capture_attempt_results "$count"
       echo "Retry $count/$retries exited $exit. Checking for known failures..."
       clear_corrupted_orchestrator_cache
       echo "Checking emulator health..."
