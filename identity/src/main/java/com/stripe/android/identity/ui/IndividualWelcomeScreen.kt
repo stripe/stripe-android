@@ -94,7 +94,8 @@ private fun SuccessUI(
         ) {
             ConsentWelcomeHeader(
                 merchantLogoUri = merchantLogoUri,
-                title = welcomePage.title
+                title = welcomePage.title,
+                subtitle = null
             )
             ConsentLines(
                 lines = welcomePage.lines,
