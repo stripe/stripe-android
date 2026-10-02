@@ -15,6 +15,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -29,8 +30,9 @@ import org.junit.Test
 internal class WalletScreenScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         Orientation.entries,
-        SystemAppearance.entries
+        SystemAppearance.entries,
     )
 
     @Test

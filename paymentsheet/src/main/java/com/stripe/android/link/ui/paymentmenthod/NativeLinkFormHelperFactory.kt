@@ -27,6 +27,7 @@ internal class NativeLinkFormHelperFactory(
             eventReporter = parentComponent.eventReporter,
             savedStateHandle = parentComponent.viewModel.savedStateHandle,
             formDefinitionFactory = DefaultFormDefinitionFactory(
+                coroutineScope = parentComponent.viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
                 cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -47,6 +48,7 @@ internal class NativeLinkFormHelperFactory(
     private fun createAutocompleteAddressInteractorFactory(): AutocompleteAddressInteractor.Factory {
         return PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = parentComponent.autocompleteLauncher,
+            apiConfigurationProvider = { parentComponent.configuration.apiConfiguration },
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,

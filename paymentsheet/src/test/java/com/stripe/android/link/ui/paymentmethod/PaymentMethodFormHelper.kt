@@ -12,7 +12,9 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.uicore.elements.FormElement
 
-internal class PaymentMethodFormHelper : FormHelper {
+internal class PaymentMethodFormHelper(
+    private val formElements: List<FormElement> = TestFactory.CARD_FORM_ELEMENTS,
+) : FormHelper {
     var paymentMethodCreateParams: PaymentMethodCreateParams? = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
     val getPaymentMethodParamsCalls = arrayListOf<GetPaymentMethodParamsCall>()
 
@@ -43,7 +45,7 @@ internal class PaymentMethodFormHelper : FormHelper {
         require(code == PaymentMethod.Type.Card.code) {
             "$code payment not supported"
         }
-        return TestFactory.CARD_FORM_ELEMENTS
+        return formElements
     }
 
     override fun createFormArguments(paymentMethodCode: PaymentMethodCode): FormArguments {

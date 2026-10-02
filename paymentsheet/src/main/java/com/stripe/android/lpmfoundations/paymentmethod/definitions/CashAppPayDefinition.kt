@@ -1,7 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object CashAppPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.CashAppPay
@@ -45,7 +45,7 @@ private object CashAppPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         if (CashAppPayDefinition.requiresMandate(metadata)) {
             builder.footer(
                 MandateTextElement(
-                    identifier = IdentifierSpec.Generic("cashapp_mandate"),
+                    identifier = FormFieldId.Generic("cashapp_mandate"),
                     stringResId = R.string.stripe_cash_app_pay_mandate,
                     args = listOf(arguments.merchantName, arguments.merchantName)
                 )

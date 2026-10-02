@@ -83,7 +83,7 @@ class CardNumberEditText internal constructor(
         defStyleAttr,
         uiContext,
         workContext,
-        DefaultCardAccountRangeRepositoryFactory(context).create(),
+        DefaultCardAccountRangeRepositoryFactory(context, publishableKeySupplier).create(),
         DefaultStaticCardAccountRanges(),
         DefaultAnalyticsRequestExecutor(),
         PaymentAnalyticsRequestFactory(

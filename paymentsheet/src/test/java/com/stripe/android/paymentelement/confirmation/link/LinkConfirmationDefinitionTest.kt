@@ -119,7 +119,7 @@ internal class LinkConfirmationDefinitionTest {
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
-        assertThat(presentCall.linkAccount).isNull()
+        assertThat(presentCall.linkAccountInfo.account).isNull()
     }
 
     @Test
@@ -173,7 +173,7 @@ internal class LinkConfirmationDefinitionTest {
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
-        assertThat(presentCall.linkAccount).isNull()
+        assertThat(presentCall.linkAccountInfo.account).isNull()
         assertThat(presentCall.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
     }
 

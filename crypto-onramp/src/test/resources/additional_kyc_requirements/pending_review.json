@@ -1,0 +1,9 @@
+{
+  "requirements": {
+    "proof_of_address": {
+      "requested_by": "swapped",
+      "awaiting_action_from": "partner",
+      "errors": []
+    }
+  }
+}

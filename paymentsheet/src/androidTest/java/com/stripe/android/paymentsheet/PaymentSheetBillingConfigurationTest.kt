@@ -5,11 +5,13 @@ import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
@@ -26,10 +28,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
-internal class PaymentSheetBillingConfigurationTest {
+internal class PaymentSheetBillingConfigurationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -50,7 +54,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -60,25 +64,27 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                        attachDefaultsToPaymentMethod = true,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                            attachDefaultsToPaymentMethod = true,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -102,7 +108,9 @@ internal class PaymentSheetBillingConfigurationTest {
 
         page.clickPrimaryButton()
 
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        composeTestRule.waitUntil(5_000) {
+            countDownLatch.count == 0L
+        }
     }
 
     @Test
@@ -124,7 +132,7 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -134,22 +142,24 @@ internal class PaymentSheetBillingConfigurationTest {
         scenario.onActivity {
             paymentSheet.presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                        attachDefaultsToPaymentMethod = false,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                            attachDefaultsToPaymentMethod = false,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -170,12 +180,16 @@ internal class PaymentSheetBillingConfigurationTest {
 
         page.clickPrimaryButton()
 
-        assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+        composeTestRule.waitUntil(5_000) {
+            countDownLatch.count == 0L
+        }
     }
 
     @Test
     fun testAddressInputNotReset() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = IntegrationType.Compose,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -186,26 +200,28 @@ internal class PaymentSheetBillingConfigurationTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "foo@bar.com",
-                        phone = "+13105551234",
-                        address = PaymentSheet.Address(
-                            postalCode = "94111",
-                            country = "US",
-                            state = "CA",
-                            city = "South San Francisco",
-                            line1 = "123 Main Street",
-                            line2 = null,
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration(
+                        merchantDisplayName = "Merchant, Inc.",
+                        defaultBillingDetails = PaymentSheet.BillingDetails(
+                            name = "Jenny Rosen",
+                            email = "foo@bar.com",
+                            phone = "+13105551234",
+                            address = PaymentSheet.Address(
+                                postalCode = "94111",
+                                country = "US",
+                                state = "CA",
+                                city = "South San Francisco",
+                                line1 = "123 Main Street",
+                                line2 = null,
+                            ),
                         ),
-                    ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                        attachDefaultsToPaymentMethod = false,
-                    ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                            attachDefaultsToPaymentMethod = false,
+                        ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    )
                 ),
             )
         }
@@ -227,7 +243,9 @@ internal class PaymentSheetBillingConfigurationTest {
         @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
         layoutType: PaymentSheetLayoutType,
     ) = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->

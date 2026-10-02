@@ -21,13 +21,8 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,17 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
@@ -64,7 +51,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
-import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -91,7 +77,6 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 @OptIn(
     WalletButtonsPreview::class,
@@ -797,74 +782,6 @@ internal class PaymentSheetPlaygroundActivity :
                 .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
-}
-
-@Composable
-private fun SearchSettingsField(
-    query: String,
-    onQueryChanged: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var hasFocus by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    TextField(
-        modifier = modifier
-            .onFocusChanged { hasFocus = it.isFocused }
-            .onKeyEvent {
-                if (it.key == Key.Enter) {
-                    keyboardController?.hide()
-                    true
-                } else {
-                    false
-                }
-            }
-            .fillMaxWidth(),
-        value = query,
-        placeholder = if (hasFocus) {
-            null
-        } else {
-            @Composable {
-                Text(text = "Search settings")
-            }
-        },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { keyboardController?.show() }
-        ),
-        leadingIcon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_search),
-                contentDescription = null,
-            )
-        },
-        trailingIcon = if (query.isEmpty()) {
-            null
-        } else {
-            @Composable {
-                IconButton(onClick = { onQueryChanged("") }) {
-                    Icon(
-                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
-                        contentDescription = null,
-                    )
-                }
-            }
-        },
-        onValueChange = onQueryChanged,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SearchSettingsFieldPreview() {
-    var query by remember { mutableStateOf("") }
-    SearchSettingsField(
-        query = query,
-        onQueryChanged = { query = it },
-    )
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"

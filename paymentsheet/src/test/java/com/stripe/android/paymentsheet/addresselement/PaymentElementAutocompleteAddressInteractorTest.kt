@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -76,12 +77,12 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(expandFormEvent.values).isNotNull()
         assertThat(expandFormEvent.values).containsExactlyEntriesIn(
             mapOf(
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "Apt 4B",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.PostalCode to "94105",
-                IdentifierSpec.Country to "US",
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "Apt 4B",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.PostalCode to "94105",
+                FormFieldId.Country to "US",
             )
         )
     }
@@ -112,12 +113,12 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         assertThat(valuesEvent.values).containsExactlyEntriesIn(
             mapOf(
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "Apt 4B",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.PostalCode to "94105",
-                IdentifierSpec.Country to "US",
+                FormFieldId.Line1 to "123 Main Street",
+                FormFieldId.Line2 to "Apt 4B",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.PostalCode to "94105",
+                FormFieldId.Country to "US",
             )
         )
     }
@@ -188,6 +189,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -213,6 +215,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
@@ -247,6 +250,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = fakePlaces,
             stripeAutocompleteRepository = null,
@@ -281,6 +285,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -295,7 +300,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when proxy flag is on with repository`() = test { scenario ->
+    fun `Factory creates inline interactor without launcher when proxy flag is on with repository`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
@@ -304,7 +309,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
+            launcher = null,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -331,6 +337,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -348,6 +355,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     fun `Factory uses launcher when proxy flag is on but inline disabled`() = test { scenario ->
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "test-key",
                 autocompleteCountries = setOf("US"),
@@ -412,6 +420,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         ),
     ) = PaymentElementAutocompleteAddressInteractor(
         launcher = launcher,
+        apiConfigurationProvider = { DEFAULT_API_CONFIG },
         autocompleteConfig = autocompleteConfig,
     )
 

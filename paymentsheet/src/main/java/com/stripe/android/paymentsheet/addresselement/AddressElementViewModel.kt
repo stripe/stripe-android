@@ -13,6 +13,7 @@ import javax.inject.Provider
 
 internal class AddressElementViewModel @Inject internal constructor(
     val navigator: NavHostAddressElementNavigator,
+    val resultStateHolder: AddressElementResultStateHolder,
     val inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
     val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
     private val dismissalCoordinator: AddressElementDismissalCoordinator,
@@ -22,11 +23,15 @@ internal class AddressElementViewModel @Inject internal constructor(
         dismissalCoordinator.showDiscardConfirmation
 
     fun dismiss() {
-        if (!FeatureFlags.enableAddressElementUnsavedChanges.isEnabled ||
-            dismissalCoordinator.requestDismiss()
-        ) {
-            navigator.dismiss()
+        if (canDismiss()) {
+            resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
         }
+    }
+
+    fun canDismiss(): Boolean {
+        return resultStateHolder.result.value != null ||
+            !FeatureFlags.enableAddressElementUnsavedChanges.isEnabled ||
+            (!dismissalCoordinator.isSaving && dismissalCoordinator.requestDismiss())
     }
 
     fun onBack() {
@@ -41,7 +46,7 @@ internal class AddressElementViewModel @Inject internal constructor(
 
     fun discardChanges() {
         dismissalCoordinator.discardChanges()
-        navigator.dismiss(AddressLauncherResult.Canceled())
+        resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
     }
 
     internal class Factory(

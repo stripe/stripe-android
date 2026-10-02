@@ -1,25 +1,12 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.createCustomerState
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -88,60 +75,15 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
-    fun `presentPaymentOptions reports error when state is null`() = testScenario {
+    fun `presentPaymentOptions delegates to presenter`() = testScenario {
         embeddedContentHelper.presentPaymentOptions()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.present_payment_options.not_configured"
-        )
-    }
-
-    @Test
-    fun `presentPaymentOptions reports error when launcher is null`() = testScenario(
-        initialState = EmbeddedContentHelperStateFactory.create()
-    ) {
-        embeddedContentHelper.presentPaymentOptions()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.present_payment_options.no_launcher"
-        )
-    }
-
-    @Test
-    fun `presentPaymentOptions launches with the current state, customer, and selection`() {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val customerState = createCustomerState()
-        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        testScenario(
-            initialState = EmbeddedContentHelperStateFactory.create(
-                paymentMethodMetadata = paymentMethodMetadata,
-                configuration = configuration,
-            ),
-            setup = {
-                set(CustomerStateHolder.SAVED_CUSTOMER, customerState)
-                set(DefaultEmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, selection)
-            }
-        ) {
-            val fakeLauncher = RecordingEmbeddedSheetLauncher()
-            sheetStateHolder.sheetLauncher = fakeLauncher
-            embeddedContentHelper.presentPaymentOptions()
-
-            assertThat(fakeLauncher.launchPaymentOptionsCalls.single()).isEqualTo(
-                RecordingEmbeddedSheetLauncher.LaunchPaymentOptionsCall(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerState = customerState,
-                    selection = selection,
-                    configuration = configuration,
-                )
-            )
-            assertThat(errorReporter.getLoggedErrors()).isEmpty()
-        }
+        presenter.presentCalls.awaitItem()
     }
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
-        val sheetStateHolder: SheetStateHolder,
-        val errorReporter: FakeErrorReporter,
+        val presenter: FakeEmbeddedPaymentOptionsPresenter,
         val verticalLayoutInteractors: List<FakePaymentMethodVerticalLayoutInteractor>,
     )
 
@@ -149,23 +91,10 @@ internal class DefaultEmbeddedContentHelperTest {
     @Suppress("LongMethod")
     private fun testScenario(
         initialState: EmbeddedContentHelperStateHolder.State? = null,
-        setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val savedStateHandle = SavedStateHandle().apply { setup() }
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        val errorReporter = FakeErrorReporter()
-        val customerStateHolder = DefaultCustomerStateHolder(
-            savedStateHandle = savedStateHandle,
-            selection = selectionHolder.selection,
-            customerMetadata = stateFlowOf(
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-            ),
-            paymentMethodMetadataFlow = stateFlowOf(null),
-        )
-        val sheetStateHolder = SheetStateHolder(savedStateHandle)
-
         val state = MutableStateFlow(initialState)
+        val presenter = FakeEmbeddedPaymentOptionsPresenter()
         val verticalLayoutInteractors = mutableListOf<FakePaymentMethodVerticalLayoutInteractor>()
         val verticalLayoutInteractorFactory = EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
             paymentMethodMetadata, _, _, _, _ ->
@@ -177,62 +106,25 @@ internal class DefaultEmbeddedContentHelperTest {
             coroutineScope = backgroundScope,
             state = state,
             verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-            sheetStateHolder = sheetStateHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
             internalRowSelectionCallback = { null },
-            customerStateHolder = customerStateHolder,
-            selectionHolder = selectionHolder,
-            errorReporter = errorReporter,
+            paymentOptionsPresenter = presenter,
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             state = state,
-            sheetStateHolder = sheetStateHolder,
-            errorReporter = errorReporter,
+            presenter = presenter,
             verticalLayoutInteractors = verticalLayoutInteractors,
         ).block()
         verticalLayoutInteractors.forEach(FakePaymentMethodVerticalLayoutInteractor::validate)
+        presenter.presentCalls.ensureAllEventsConsumed()
     }
 
-    private class RecordingEmbeddedSheetLauncher : EmbeddedSheetLauncher {
-        val launchPaymentOptionsCalls = mutableListOf<LaunchPaymentOptionsCall>()
+    private class FakeEmbeddedPaymentOptionsPresenter : EmbeddedPaymentOptionsPresenter {
+        val presentCalls = Turbine<Unit>()
 
-        override fun launchForm(
-            code: String,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            configuration: EmbeddedPaymentElement.Configuration?,
-            customerState: CustomerState?,
-            promotion: PaymentMethodMessagePromotion?,
-        ) = error("Not expected.")
-
-        override fun launchManage(
-            paymentMethodMetadata: PaymentMethodMetadata,
-            customerState: CustomerState,
-            selection: PaymentSelection?,
-            configuration: EmbeddedPaymentElement.Configuration?,
-        ) = error("Not expected.")
-
-        override fun launchPaymentOptions(
-            paymentMethodMetadata: PaymentMethodMetadata,
-            customerState: CustomerState?,
-            selection: PaymentSelection?,
-            configuration: EmbeddedPaymentElement.Configuration?,
-        ) {
-            launchPaymentOptionsCalls.add(
-                LaunchPaymentOptionsCall(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerState = customerState,
-                    selection = selection,
-                    configuration = configuration,
-                )
-            )
+        override fun present() {
+            presentCalls.add(Unit)
         }
-
-        data class LaunchPaymentOptionsCall(
-            val paymentMethodMetadata: PaymentMethodMetadata,
-            val customerState: CustomerState?,
-            val selection: PaymentSelection?,
-            val configuration: EmbeddedPaymentElement.Configuration?,
-        )
     }
 }

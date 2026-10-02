@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SectionFieldElement {
-    val identifier: IdentifierSpec
+    val identifier: FormFieldId
 
     /**
      * Whether the field element allows user interaction.
@@ -23,9 +23,9 @@ interface SectionFieldElement {
      */
     val mandateText: ResolvableString?
 
-    fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>>
     fun sectionFieldErrorController(): SectionFieldValidationController
-    fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
-    fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>>
+    fun setRawValue(rawValuesMap: Map<FormFieldId, String?>)
+    fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>>
     fun onValidationStateChanged(isValidating: Boolean) {}
 }

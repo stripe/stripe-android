@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -17,8 +18,7 @@ import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForC
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -41,31 +42,31 @@ internal interface CustomerSheetLoader {
 internal class DefaultCustomerSheetLoader(
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-    private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
+    private val apiConfigurationResolver: ApiConfigurationResolver,
 ) : CustomerSheetLoader {
 
     @Inject
     constructor(
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
-        lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
+        apiConfigurationResolver: ApiConfigurationResolver,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-        lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
+        apiConfigurationResolver = apiConfigurationResolver,
     )
 
     override suspend fun load(
@@ -138,13 +139,10 @@ internal class DefaultCustomerSheetLoader(
         isPaymentMethodSyncDefaultEnabled: Boolean,
     ): PaymentMethodMetadata {
         val elementsSession = customerSheetSession.elementsSession
-        val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
-            stripeIntent = elementsSession.stripeIntent,
-            serverLpmSpecs = elementsSession.paymentMethodSpecs,
-        ).sharedDataSpecs
         val cardFundingFilter = DefaultCardFundingFilter
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
+        val apiConfiguration = apiConfigurationResolver.resolve(apiConfiguration = null)
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
             environment = if (elementsSession.stripeIntent.isLiveMode) {
                 GooglePayEnvironment.Production
@@ -152,7 +150,11 @@ internal class DefaultCustomerSheetLoader(
                 GooglePayEnvironment.Test
             },
             cardBrandFilter = cardBrandFilter,
-            cardFundingFilter = cardFundingFilter
+            cardFundingFilter = cardFundingFilter,
+            googlePayConfig = GooglePayConfig(
+                publishableKey = apiConfiguration.publishableKey,
+                connectedAccountId = apiConfiguration.stripeAccountId,
+            ),
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
@@ -168,7 +170,6 @@ internal class DefaultCustomerSheetLoader(
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
             integrationMetadata = IntegrationMetadata.CustomerSheet(
@@ -178,6 +179,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
+            apiConfiguration = apiConfiguration,
         )
     }
 

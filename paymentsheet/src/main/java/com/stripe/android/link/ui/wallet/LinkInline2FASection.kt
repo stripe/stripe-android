@@ -39,7 +39,7 @@ import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
@@ -220,7 +220,7 @@ private fun Title(
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -249,7 +249,7 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -282,7 +282,7 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -315,7 +315,7 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionProcessingPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController().apply {
             onValueChanged(0, "123456")
         }
@@ -350,7 +350,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionErrorPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController().apply {
             onValueChanged(0, "123")
         }

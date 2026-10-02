@@ -108,6 +108,8 @@ internal interface LinkAccountManager {
 
     suspend fun logOut(): Result<ConsumerSession>
 
+    suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession>
+
     suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<PaymentMethod>

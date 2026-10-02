@@ -121,6 +121,12 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$DocumentS
 	public final fun getLambda$1467661199$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/identity/ui/ComposableSingletons$IdentityTopAppBarKt {
+	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$IdentityTopAppBarKt;
+	public fun <init> ()V
+	public final fun getLambda$1456593140$identity_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt;
 	public fun <init> ()V

@@ -10,7 +10,7 @@ import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.utils.isInstanceOf
@@ -19,9 +19,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-private val ALL_ADDRESS_FIELDS: Set<IdentifierSpec> = FieldType.entries
+private val ALL_ADDRESS_FIELDS: Set<FormFieldId> = FieldType.entries
     .filterNot { it == FieldType.Name }
-    .map { it.identifierSpec }
+    .map { it.formFieldId }
     .toSet()
 
 @RunWith(RobolectricTestRunner::class)
@@ -35,7 +35,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when US is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(FormFieldId.PostalCode)
         }
     }
 
@@ -43,7 +43,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when GB is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("GB")
-            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(FormFieldId.PostalCode)
         }
     }
 
@@ -51,7 +51,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when CA is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("CA")
-            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(FormFieldId.PostalCode)
         }
     }
 
@@ -82,7 +82,7 @@ internal class CardBillingAddressElementTest {
         element.hiddenIdentifiers.test {
             // IN has no AVS default fields, but requires a postal code for automatic tax.
             dropdownFieldController.onRawValueChange("IN")
-            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(FormFieldId.PostalCode)
         }
     }
 
@@ -93,9 +93,9 @@ internal class CardBillingAddressElementTest {
         element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("PR")
             expectMostRecentItem().verifyFieldsShown(
-                IdentifierSpec.Line1,
-                IdentifierSpec.City,
-                IdentifierSpec.PostalCode,
+                FormFieldId.Line1,
+                FormFieldId.City,
+                FormFieldId.PostalCode,
             )
         }
     }
@@ -107,10 +107,10 @@ internal class CardBillingAddressElementTest {
         element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
             expectMostRecentItem().verifyFieldsShown(
-                IdentifierSpec.Line1,
-                IdentifierSpec.City,
-                IdentifierSpec.State,
-                IdentifierSpec.PostalCode,
+                FormFieldId.Line1,
+                FormFieldId.City,
+                FormFieldId.State,
+                FormFieldId.PostalCode,
             )
         }
     }
@@ -248,7 +248,7 @@ internal class CardBillingAddressElementTest {
                 .value
                 .fieldsFlowable
                 .value
-                .findField(IdentifierSpec.PostalCode)
+                .findField(FormFieldId.PostalCode)
 
             assertThat(postalCodeField).isNotNull()
 
@@ -256,7 +256,7 @@ internal class CardBillingAddressElementTest {
 
             nonNullPostalCodeField.setRawValue(
                 mapOf(
-                    IdentifierSpec.PostalCode to "99999"
+                    FormFieldId.PostalCode to "99999"
                 )
             )
 
@@ -264,14 +264,14 @@ internal class CardBillingAddressElementTest {
         }
     }
 
-    private fun List<SectionFieldElement>.findField(identifierSpec: IdentifierSpec): SectionFieldElement? {
+    private fun List<SectionFieldElement>.findField(formFieldId: FormFieldId): SectionFieldElement? {
         for (element in this) {
             when (element) {
-                is RowElement -> element.fields.findField(identifierSpec)?.let {
+                is RowElement -> element.fields.findField(formFieldId)?.let {
                     return it
                 }
                 else -> element.takeIf {
-                    it.identifier == identifierSpec
+                    it.identifier == formFieldId
                 }?.let {
                     return it
                 }
@@ -286,7 +286,7 @@ internal class CardBillingAddressElementTest {
      * set - rather than which are hidden, since that's what a human reviewing a test failure
      * actually wants to check against the expected UX.
      */
-    private fun Set<IdentifierSpec>.verifyFieldsShown(vararg shownFields: IdentifierSpec) {
+    private fun Set<FormFieldId>.verifyFieldsShown(vararg shownFields: FormFieldId) {
         Truth.assertThat(ALL_ADDRESS_FIELDS - this).containsExactlyElementsIn(shownFields.toSet())
     }
 
@@ -308,7 +308,7 @@ internal class CardBillingAddressElementTest {
         addressCollectionMode: BillingAddressCollectionMode,
     ): BillingAddressElement {
         return BillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
+            identifier = FormFieldId.Generic("billing_element"),
             rawValuesMap = emptyMap(),
             countryCodes = emptySet(),
             countryDropdownFieldController = dropdownFieldController,
@@ -336,11 +336,11 @@ internal class CardBillingAddressElementTest {
         val addressFields = addressController.fieldsFlowable.value
 
         val hasEmail = addressFields.any { field ->
-            field.identifier == IdentifierSpec.Email
+            field.identifier == FormFieldId.Email
         }
 
         val hasPhone = addressFields.any { field ->
-            field.identifier == IdentifierSpec.Phone
+            field.identifier == FormFieldId.Phone
         }
 
         block(hasEmail, hasPhone)
@@ -362,11 +362,11 @@ internal class CardBillingAddressElementTest {
         val addressFields = addressController.fieldsFlowable.value
 
         val hasEmail = addressFields.any { field ->
-            field.identifier == IdentifierSpec.Email
+            field.identifier == FormFieldId.Email
         }
 
         val hasPhone = addressFields.any { field ->
-            field.identifier == IdentifierSpec.Phone
+            field.identifier == FormFieldId.Phone
         }
 
         block(hasEmail, hasPhone)
@@ -378,7 +378,7 @@ internal class CardBillingAddressElementTest {
     ) = runTest {
         block(
             BillingAddressElement(
-                identifier = IdentifierSpec.Generic("billing_element"),
+                identifier = FormFieldId.Generic("billing_element"),
                 rawValuesMap = emptyMap(),
                 countryCodes = emptySet(),
                 countryDropdownFieldController = dropdownFieldController,

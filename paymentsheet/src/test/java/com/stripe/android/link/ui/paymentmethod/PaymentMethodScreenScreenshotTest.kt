@@ -13,40 +13,40 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 internal class PaymentMethodScreenScreenshotTest {
-    @get:Rule
-    val paparazziRule = PaparazziRule()
+    private val paparazziRule = PaparazziRule(LayoutDirection.entries)
 
-    @get:Rule
-    val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
+    private val enableKlarnaFormRemovalRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableKlarnaFormRemoval,
         isEnabled = false,
     )
 
     private val dispatcher = UnconfinedTestDispatcher()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(dispatcher)
-    }
+    private val coroutineRule = CoroutineTestRule(dispatcher)
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(paparazziRule)
+        .around(enableKlarnaFormRemovalRule)
+        .around(coroutineRule)
+        .around(coroutineScopeCleanupRule)
 
     @Test
     fun `form with button disabled`() {
@@ -124,6 +124,7 @@ internal class PaymentMethodScreenScreenshotTest {
             ),
         )
         val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = null,
             linkInlineHandler = null,

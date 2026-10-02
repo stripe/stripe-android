@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NfcScanningAction
+import com.stripe.android.common.nfcscan.NfcScanningAvailability
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -11,12 +12,12 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -31,6 +32,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
@@ -41,6 +43,7 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -48,13 +51,25 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.filterOutHiddenIdentifiers
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.lpmfoundations.paymentmethod.formElements as createFormElements
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDefinitionTest {
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val cleanupRule = coroutineScopeCleanupRule
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
+
     @Test
     fun `createFormElements returns minimal set of fields`() {
         val formElements = CardDefinition.formElements(
@@ -694,15 +709,9 @@ class CardDefinitionTest {
     @Test
     fun `createSupportedPaymentMethod returns expected supported PM when tap to add is not supported`() {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
-        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
-
-        assertThat(nullablePaymentMethod).isNotNull()
-
-        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
 
         assertThat(supportedPaymentMethod.iconResource)
             .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card)
@@ -714,15 +723,9 @@ class CardDefinitionTest {
     @Test
     fun `createSupportedPaymentMethod returns tap to add icon when tap to add is supported`() {
         val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
-        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+        val supportedPaymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
             metadata = metadata,
-            definition = CardDefinition,
-            sharedDataSpecs = emptyList()
         )
-
-        assertThat(nullablePaymentMethod).isNotNull()
-
-        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
 
         assertThat(supportedPaymentMethod.iconResource)
             .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
@@ -762,7 +765,30 @@ class CardDefinitionTest {
         }
 
     @Test
-    fun `createFormElements has TapToAddCardDetailsAction when tap to add on even if NFC scanning enabled`() =
+    fun `createFormElements has NfcScanningAction when NFC scanning is primary and card scan is allowed`() =
+        cardDetailsActionTest(
+            isStripeCardScanAllowed = true,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<NfcScanningAction>()
+        }
+
+    @Test
+    fun `createFormElements has CardScanAction when NFC scanning is a secondary option`() =
+        cardDetailsActionTest(
+            isTapToAddSupported = false,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(
+                result = NfcScanningAvailability.Available(
+                    shouldBePrimaryScanningOption = false,
+                )
+            ),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+        ) { cardDetailsAction ->
+            assertThat(cardDetailsAction).isInstanceOf<CardScanAction>()
+        }
+
+    @Test
+    fun `createFormElements has TapToAddCardDetailsAction when NFC scanning is the primary option`() =
         cardDetailsActionTest(
             isTapToAddSupported = true,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
@@ -773,12 +799,14 @@ class CardDefinitionTest {
 
     private fun cardDetailsActionTest(
         isTapToAddSupported: Boolean = false,
+        isStripeCardScanAllowed: Boolean = false,
         isNfcScanningAvailable: IsNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         tapToAddHelper: TapToAddHelper? = null,
         block: (CardDetailsAction?) -> Unit,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = isTapToAddSupported,
+            isStripeCardScanAllowed = isStripeCardScanAllowed,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             ),
@@ -842,6 +870,31 @@ class CardDefinitionTest {
     private fun createLinkConfiguration(): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        )
+    }
+
+    private fun CardDefinition.formElements(
+        metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        tapToAddHelper: TapToAddHelper? = null,
+        isNfcScanningAvailable: IsNfcScanningAvailable? = null,
+    ): List<FormElement> {
+        return createFormElements(
+            coroutineScope = coroutineScope,
+            metadata = metadata,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 

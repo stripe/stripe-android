@@ -1,7 +1,7 @@
 package com.stripe.android.utils
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.ui.core.R
 
 internal object MockPaymentMethodsFactory {

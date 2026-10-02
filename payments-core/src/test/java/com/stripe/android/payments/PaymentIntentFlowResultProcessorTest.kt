@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.ApiRequest
@@ -1229,7 +1230,9 @@ internal class PaymentIntentFlowResultProcessorTest {
         pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        {
+            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+        },
         stripeRepository,
         Logger.noop(),
         testDispatcher,

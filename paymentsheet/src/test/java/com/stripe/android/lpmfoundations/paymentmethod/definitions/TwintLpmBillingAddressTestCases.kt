@@ -5,14 +5,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val twintRawValues = mapOf(
-    IdentifierSpec.Line1 to "Bahnhofstrasse 1",
-    IdentifierSpec.Line2 to "2. Stock",
-    IdentifierSpec.City to "Zürich",
-    IdentifierSpec.PostalCode to "8001",
-    IdentifierSpec.Country to "CH",
+    FormFieldId.Line1 to "Bahnhofstrasse 1",
+    FormFieldId.Line2 to "2. Stock",
+    FormFieldId.City to "Zürich",
+    FormFieldId.PostalCode to "8001",
+    FormFieldId.Country to "CH",
 )
 private val twintTypeOnlyExpectedParams = LpmBillingAddressFormParams(
     createParams = PaymentMethodCreateParams.createWithOverride(
@@ -21,6 +21,32 @@ private val twintTypeOnlyExpectedParams = LpmBillingAddressFormParams(
         requiresMandate = false,
         overrideParamMap = mapOf(
             "type" to PaymentMethod.Type.Twint.code,
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
+private val twintAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Twint.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "CH",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Twint.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "CH",
+                ),
+            ),
         ),
         productUsage = emptySet(),
         allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
@@ -134,6 +160,17 @@ internal val twintTestCases = listOf(
         ),
         rawValues = twintRawValues,
         expectedParams = twintTypeOnlyExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Twint AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Twint,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = twintRawValues,
+        expectedParams = twintAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Twint Full PaymentIntent automatic terms",

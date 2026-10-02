@@ -19,9 +19,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -62,8 +64,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
     @Test
     fun `state propagates shipping address requirement to Google Pay button`() = runScenario(
-        configuration = ExpressCheckoutElement.Configuration()
-            .shippingAddressRequired(true),
+        requiresShippingAddress = true,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -90,6 +91,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state has no buttons when ECE configuration is absent`() = runScenario(
+        configuration = null,
+    ) {
+        assertThat(interactor.state.value.expressButtons).isEmpty()
+    }
+
+    @Test
     fun `state contains configured button theme`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
@@ -104,6 +112,20 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
         )
+    }
+
+    @Test
+    fun `state is disabled when updating`() = runScenario(
+        isUpdating = MutableStateFlow(true),
+    ) {
+        assertThat(interactor.state.value.enabled).isFalse()
+    }
+
+    @Test
+    fun `state is enabled when not updating`() = runScenario(
+        isUpdating = MutableStateFlow(false),
+    ) {
+        assertThat(interactor.state.value.enabled).isTrue()
     }
 
     @Test
@@ -129,31 +151,21 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
 
         interactor.state.test {
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(null),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
             linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
 
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
@@ -212,7 +224,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnWalletTapped reports wallet tapped event and starts confirmation`() = runScenario(
+    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -227,18 +239,11 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         val confirmedButton = confirmationPerformer.calls.awaitItem()
         assertThat(confirmedButton).isEqualTo(expressButton)
-
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(
-                FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped(
-                    expressButton = expressButton,
-                ),
-            )
     }
 
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
         googlePayConfiguration: CheckoutGooglePayConfiguration = createGooglePayConfiguration(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
@@ -248,6 +253,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        requiresShippingAddress: Boolean = false,
+        isUpdating: MutableStateFlow<Boolean> = MutableStateFlow(false),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeExpressCheckoutElementEventReporter()
@@ -259,6 +266,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
                 savedStateHandle = savedStateHandle,
                 configuration = configuration,
+                requiresShippingAddress = requiresShippingAddress,
             )
 
             DefaultExpressCheckoutElementInteractor(
@@ -267,6 +275,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 savedStateHandle = savedStateHandle,
                 eventReporter = eventReporter,
                 expressCheckoutElementConfirmationPerformer = confirmationPerformer,
+                isUpdating = isUpdating,
             )
         }
 
@@ -288,7 +297,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata,
         availableExpressButtonTypes: List<ExpressButtonType>,
         savedStateHandle: SavedStateHandle,
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        requiresShippingAddress: Boolean = false,
     ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -298,11 +308,16 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
             ),
         )
+        val configurationBuilder = CheckoutController.Configuration()
+        if (configuration != null) {
+            configurationBuilder.expressCheckoutElement(configuration)
+        }
         stateHolder.state = CheckoutControllerStateFactory.create(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(configuration)
-                .build(),
+            expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
+            configuration = configurationBuilder.build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                requiresShippingAddress = requiresShippingAddress,
+            ),
         )
 
         return stateHolder

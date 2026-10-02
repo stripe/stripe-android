@@ -5,14 +5,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val cryptoRawValues = mapOf(
-    IdentifierSpec.Line1 to "221B Baker Street",
-    IdentifierSpec.Line2 to "Flat B",
-    IdentifierSpec.City to "London",
-    IdentifierSpec.PostalCode to "NW16XE",
-    IdentifierSpec.Country to "GB",
+    FormFieldId.Line1 to "221B Baker Street",
+    FormFieldId.Line2 to "Flat B",
+    FormFieldId.City to "London",
+    FormFieldId.PostalCode to "NW16XE",
+    FormFieldId.Country to "GB",
 )
 
 private val cryptoNeverExpectedParams = LpmBillingAddressFormParams(
@@ -38,6 +38,34 @@ private val cryptoAutomaticWithoutTaxExpectedParams = LpmBillingAddressFormParam
         requiresMandate = false,
         overrideParamMap = mapOf(
             "type" to PaymentMethod.Type.Crypto.code,
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
+private val cryptoAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Crypto.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "GB",
+                postalCode = "NW16XE",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Crypto.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "GB",
+                    "postal_code" to "NW16XE",
+                ),
+            ),
         ),
         productUsage = emptySet(),
         allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
@@ -102,6 +130,17 @@ internal val cryptoTestCases = listOf(
         ),
         rawValues = cryptoRawValues,
         expectedParams = cryptoAutomaticWithoutTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Crypto AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Crypto,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = cryptoRawValues,
+        expectedParams = cryptoAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Crypto Full",

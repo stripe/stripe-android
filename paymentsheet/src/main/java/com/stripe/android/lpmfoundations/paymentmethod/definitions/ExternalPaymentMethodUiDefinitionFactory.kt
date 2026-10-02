@@ -1,7 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -9,6 +9,8 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 internal class ExternalPaymentMethodUiDefinitionFactory(
     private val externalPaymentMethodSpec: ExternalPaymentMethodSpec
 ) : UiDefinitionFactory.Simple() {
+    override val supportsAutomaticTaxBillingAddress: Boolean = false
+
     override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = externalPaymentMethodSpec.type,

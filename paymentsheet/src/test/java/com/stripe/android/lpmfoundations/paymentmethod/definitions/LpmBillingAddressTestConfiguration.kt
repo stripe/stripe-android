@@ -1,11 +1,14 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.SetupIntentFactory
 
 internal data class LpmBillingAddressTestConfiguration(
@@ -15,11 +18,13 @@ internal data class LpmBillingAddressTestConfiguration(
     val termsDisplay: PaymentSheet.TermsDisplay,
 ) {
     fun metadata(): PaymentMethodMetadata {
+        val stripeIntent = intentScenario.stripeIntent(paymentMethodType)
         return PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(paymentMethodType),
+            stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionMode
                 .billingDetailsCollectionConfiguration(),
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
+            integrationMetadata = billingDetailsCollectionMode.integrationMetadata(stripeIntent),
         )
     }
 
@@ -54,6 +59,7 @@ internal data class LpmBillingAddressTestConfiguration(
 internal enum class LpmBillingDetailsCollectionMode {
     Never,
     AutomaticWithoutTax,
+    AutomaticWithTax,
     Full,
     ;
 
@@ -65,10 +71,28 @@ internal enum class LpmBillingDetailsCollectionMode {
                 email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             )
-            AutomaticWithoutTax -> PaymentSheet.BillingDetailsCollectionConfiguration()
+            AutomaticWithoutTax,
+            AutomaticWithTax,
+            -> PaymentSheet.BillingDetailsCollectionConfiguration()
             Full -> PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
+        }
+    }
+
+    fun integrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {
+        return if (this == AutomaticWithTax) {
+            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+            IntegrationMetadata.CheckoutSession(
+                id = checkoutSessionResponse.id,
+                instancesKey = "key",
+                checkoutSessionResponse = checkoutSessionResponse,
+            )
+        } else {
+            PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent)
         }
     }
 }

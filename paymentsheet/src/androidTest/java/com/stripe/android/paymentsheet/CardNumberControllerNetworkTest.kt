@@ -2,10 +2,15 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.doesNotContainHeader
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -20,7 +25,10 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CardFundingFilteringPrivatePreview::class)
 @RunWith(TestParameterInjector::class)
-internal class CardNumberControllerNetworkTest {
+internal class CardNumberControllerNetworkTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     // The card-metadata request happens async during card number input. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
@@ -37,7 +45,9 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoCardMetadataRequestWhenAllFundingTypesAllowed() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -54,7 +64,7 @@ internal class CardNumberControllerNetworkTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = configuration,
+                configuration = apiConfigurationTestType.applyTo(configuration),
             )
         }
 
@@ -74,7 +84,9 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testCardMetadataRequestMadeWhenFundingTypesRestricted() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -91,7 +103,7 @@ internal class CardNumberControllerNetworkTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = configuration,
+                configuration = apiConfigurationTestType.applyTo(configuration),
             )
         }
 
@@ -99,7 +111,10 @@ internal class CardNumberControllerNetworkTest {
         // If this request is NOT made, the test will fail because we enqueued but didn't consume it
         networkRule.enqueue(
             method("GET"),
-            path("edge-internal/card-metadata")
+            path("edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+            doesNotContainHeader("Stripe-Account"),
+            applyDefaultAuthorization = false,
         ) { response ->
             // Return a CREDIT card response - this should trigger the warning
             response.testBodyFromFile("card-metadata-visa-credit.json")
@@ -123,7 +138,9 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoWarningForAllowedFundingWithNetworkRequest() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -140,14 +157,17 @@ internal class CardNumberControllerNetworkTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = configuration,
+                configuration = apiConfigurationTestType.applyTo(configuration),
             )
         }
 
         // Enqueue card-metadata response for a DEBIT card
         networkRule.enqueue(
             method("GET"),
-            path("edge-internal/card-metadata")
+            path("edge-internal/card-metadata"),
+            header("Authorization", "Bearer ${TestApiKeys.PUBLISHABLE}"),
+            doesNotContainHeader("Stripe-Account"),
+            applyDefaultAuthorization = false,
         ) { response ->
             response.testBodyFromFile("card-metadata-visa-debit.json")
         }
@@ -170,7 +190,9 @@ internal class CardNumberControllerNetworkTest {
 
     @Test
     fun testNoCardMetadataRequestWhenServerFlagDisabled() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -197,7 +219,7 @@ internal class CardNumberControllerNetworkTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = configuration,
+                configuration = apiConfigurationTestType.applyTo(configuration),
             )
         }
 

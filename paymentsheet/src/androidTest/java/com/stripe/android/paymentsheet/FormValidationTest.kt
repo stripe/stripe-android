@@ -15,19 +15,25 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.android.testing.waitUntilWithIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class FormValidationTest {
+internal class FormValidationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create {
         around(IntentsRule())
@@ -43,7 +49,9 @@ internal class FormValidationTest {
         @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType,
     ) = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult
     ) { testContext ->
@@ -65,7 +73,9 @@ internal class FormValidationTest {
         @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
         integrationType: ProductIntegrationType,
     ) = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult
     ) { testContext ->
@@ -128,19 +138,19 @@ internal class FormValidationTest {
     }
 
     private fun clickPrimaryButton() {
-        composeTestRule.waitUntil(5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
-                .fetchSemanticsNodes().isNotEmpty()
+                .onAllNodes(hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isNotEnabled()))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
-        composeTestRule.waitUntil(5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
-                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
-                .fetchSemanticsNodes().isNotEmpty()
+                .onAllNodes(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
+        composeTestRule.onNode(hasTestTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG))
             .performScrollTo()
             .performClick()
 
@@ -148,10 +158,10 @@ internal class FormValidationTest {
     }
 
     private fun assertFieldErrorsAreShown() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasText("This field cannot be blank."))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

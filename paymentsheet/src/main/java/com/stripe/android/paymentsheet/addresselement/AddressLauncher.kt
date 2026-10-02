@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -25,7 +26,8 @@ import kotlinx.parcelize.Parcelize
  */
 class AddressLauncher internal constructor(
     private val application: Application,
-    private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
+    private val activityResultLauncher:
+        ActivityResultLauncher<AddressElementActivityContract.Args.Standalone>
 ) {
     /**
      * Constructor to be used when launching the address element from an Activity.
@@ -39,10 +41,9 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressLauncherResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -56,10 +57,9 @@ class AddressLauncher internal constructor(
         activityResultLauncher = registerForReactNativeActivityResult(
             activity,
             signal,
-            AddressElementActivityContract
-        ) {
-            callback.onAddressLauncherResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     /**
@@ -74,10 +74,9 @@ class AddressLauncher internal constructor(
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressLauncherResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     @JvmOverloads
@@ -85,8 +84,11 @@ class AddressLauncher internal constructor(
         publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        val args = AddressElementActivityContract.Args(
-            publishableKey = publishableKey,
+        val args = AddressElementActivityContract.Args.Standalone(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+            ),
             config = configuration,
         )
 
@@ -112,7 +114,7 @@ class AddressLauncher internal constructor(
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
-        internal val useStripeHostedAutocomplete: Boolean = false,
+        internal val useStripeHostedAutocomplete: Boolean = true,
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -319,8 +321,8 @@ fun rememberAddressLauncher(
     callback: AddressLauncherResultCallback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = AddressElementActivityContract,
-        onResult = callback::onAddressLauncherResult
+        contract = AddressElementActivityContract.Standalone,
+        onResult = callback::onAddressLauncherResult,
     )
 
     val context = LocalContext.current

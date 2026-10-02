@@ -1,8 +1,11 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.annotation.RestrictTo
+import com.google.android.gms.wallet.callback.IntermediatePaymentData
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import dev.drewhamilton.poko.Poko
+import org.json.JSONObject
 
 /**
  * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
@@ -13,7 +16,7 @@ import dev.drewhamilton.poko.Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
 class GooglePayPaymentDataUpdate(
-    val callbackTrigger: CallbackTrigger,
+    val callbackTrigger: CallbackTrigger?,
     val shippingAddress: ShippingAddress?,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -84,5 +87,48 @@ class GooglePayPaymentDataUpdate(
         private companion object {
             const val SEPARATOR = "-"
         }
+    }
+
+    internal companion object {
+        fun fromIntermediatePaymentData(
+            intermediatePaymentData: IntermediatePaymentData,
+        ): GooglePayPaymentDataUpdate {
+            return fromJson(JSONObject(intermediatePaymentData.toJson()))
+        }
+
+        private fun fromJson(json: JSONObject): GooglePayPaymentDataUpdate {
+            return GooglePayPaymentDataUpdate(
+                callbackTrigger = json.optString(FIELD_CALLBACK_TRIGGER)
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { value ->
+                        CallbackTrigger.entries.firstOrNull {
+                            it.name.replace(UPPERCASE_WORD_BOUNDARY, "_$1")
+                                .trimStart('_')
+                                .uppercase() == value
+                        }
+                    },
+                shippingAddress = json.optJSONObject(FIELD_SHIPPING_ADDRESS)?.let { addressJson ->
+                    ShippingAddress(
+                        administrativeArea = optString(addressJson, FIELD_ADMINISTRATIVE_AREA)
+                            .orEmpty(),
+                        countryCode = optString(addressJson, FIELD_COUNTRY_CODE).orEmpty(),
+                        locality = optString(addressJson, FIELD_LOCALITY).orEmpty(),
+                        postalCode = optString(addressJson, FIELD_POSTAL_CODE).orEmpty(),
+                        iso3166AdministrativeArea =
+                            optString(addressJson, FIELD_IOS_3166_ADMINISTRATIVE_AREA)
+                                ?.takeIf { it.isNotEmpty() },
+                    )
+                },
+            )
+        }
+
+        private const val FIELD_CALLBACK_TRIGGER = "callbackTrigger"
+        private const val FIELD_SHIPPING_ADDRESS = "shippingAddress"
+        private const val FIELD_COUNTRY_CODE = "countryCode"
+        private const val FIELD_ADMINISTRATIVE_AREA = "administrativeArea"
+        private const val FIELD_LOCALITY = "locality"
+        private const val FIELD_POSTAL_CODE = "postalCode"
+        private const val FIELD_IOS_3166_ADMINISTRATIVE_AREA = "iso3166AdministrativeArea"
+        private val UPPERCASE_WORD_BOUNDARY = Regex("([A-Z])")
     }
 }

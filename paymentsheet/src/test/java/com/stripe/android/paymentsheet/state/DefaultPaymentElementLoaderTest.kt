@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
@@ -14,6 +15,7 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -31,12 +33,12 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -77,6 +79,7 @@ import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -154,7 +157,6 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
-                    sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
                     linkState = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession)),
@@ -175,6 +177,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
+                    apiConfiguration = DEFAULT_API_CONFIG,
                 ),
             )
         )
@@ -704,7 +707,10 @@ internal class DefaultPaymentElementLoaderTest {
                 ).getOrThrow()
 
                 assertThat(startCalls.awaitItem()).isEqualTo(
-                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                    FakeTapToAddConnectionStarter.StartCall(
+                        config = config.asCommonConfiguration(),
+                        apiConfiguration = DEFAULT_API_CONFIG,
+                    )
                 )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
@@ -751,7 +757,10 @@ internal class DefaultPaymentElementLoaderTest {
                 ).getOrThrow()
 
                 assertThat(startCalls.awaitItem()).isEqualTo(
-                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                    FakeTapToAddConnectionStarter.StartCall(
+                        config = config.asCommonConfiguration(),
+                        apiConfiguration = DEFAULT_API_CONFIG,
+                    )
                 )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
@@ -1046,6 +1055,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load() with customer should allow sepa`() = runScenario {
         var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
+        var requestApiConfiguration: ApiConfiguration.State? = null
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
@@ -1053,8 +1063,10 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret: String,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean,
+                    apiConfiguration: ApiConfiguration.State,
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
+                    requestApiConfiguration = apiConfiguration
                     return Result.success(
                         listOf(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1089,6 +1101,7 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethod.Type.SepaDebit,
                 PaymentMethod.Type.USBankAccount,
             )
+        assertThat(requestApiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2344,7 +2357,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -2369,7 +2382,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
+            paymentSheetConfiguration = CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -5027,12 +5040,12 @@ internal class DefaultPaymentElementLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
             },
-            lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
             errorReporter = errorReporter,
@@ -5046,7 +5059,13 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
+            apiConfigurationResolver = FakeApiConfigurationResolver(
+                resolvedApiConfiguration = if (isLiveMode) {
+                    DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
+                } else {
+                    DEFAULT_API_CONFIG
+                },
+            ),
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
                 errorReporter = errorReporter,
@@ -5093,6 +5112,13 @@ internal class DefaultPaymentElementLoaderTest {
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_123",
                 ephemeralKeySecret = "ek_123",
+            ),
+        )
+        private val CUSTOMER_SESSION_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
+            merchantDisplayName = "Some Name",
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_1",
             ),
         )
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -5176,7 +5202,6 @@ internal class DefaultPaymentElementLoaderTest {
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 stripeIntent = stripeIntent,
                 merchantCountry = null,
                 isGooglePayEnabled = true,

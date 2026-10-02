@@ -9,11 +9,13 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.ManageSavedPaymentMethods
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
 import org.junit.Rule
@@ -22,6 +24,7 @@ import org.junit.Test
 internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
@@ -51,6 +54,11 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             )
         }
 
+    private val displayableBankAccount = DisplayableSavedPaymentMethod.create(
+        displayName = US_BANK_ACCOUNT.usBankAccount!!.last4!!.resolvableString,
+        paymentMethod = US_BANK_ACCOUNT,
+    )
+
     @Test
     fun displaysSelectMode() {
         screenshotTest(
@@ -79,6 +87,15 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         screenshotTest(paymentMethods = displayableCards, isEditing = true)
     }
 
+    @Test
+    fun displaysSelectModeWithBankAccountOnly() {
+        screenshotTest(
+            paymentMethods = listOf(displayableBankAccount),
+            selection = displayableBankAccount,
+            isEditing = false,
+        )
+    }
+
     private fun screenshotTest(
         paymentMethods: List<DisplayableSavedPaymentMethod>,
         selection: DisplayableSavedPaymentMethod? = null,
@@ -92,6 +109,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 isEditing = isEditing,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)

@@ -10,7 +10,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
@@ -35,7 +35,7 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
     private val countryElement = CountryElement(
-        IdentifierSpec.Country,
+        FormFieldId.Country,
         DropdownFieldController(
             CountryConfig(setOf("US", "CA"))
         )
@@ -46,7 +46,7 @@ class AddressElementTest {
         runBlocking {
             // ZZ does not have state and US does
             val addressElement = AddressElement(
-                IdentifierSpec.Generic("address"),
+                FormFieldId.Generic("address"),
                 countryElement = countryElement,
                 sameAsShippingElement = null,
                 shippingValuesMap = null
@@ -82,7 +82,7 @@ class AddressElementTest {
     @Test
     fun `verify flow of form field values`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -99,7 +99,7 @@ class AddressElementTest {
 
         // Verify
         var firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec.PostalCode])
+        assertThat(firstForFieldValues.toMap()[FormFieldId.PostalCode])
             .isEqualTo(
                 FormFieldEntry("999", false)
             )
@@ -113,7 +113,7 @@ class AddressElementTest {
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
         firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec.PostalCode])
+        assertThat(firstForFieldValues.toMap()[FormFieldId.PostalCode])
             .isEqualTo(
                 FormFieldEntry("A1B2C3", true)
             )
@@ -122,7 +122,7 @@ class AddressElementTest {
     @Test
     fun `changing country updates the fields`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -147,9 +147,9 @@ class AddressElementTest {
     @Test
     fun `changing country rebuilds form values`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             rawValuesMap = mapOf(
-                IdentifierSpec.Country to "US",
+                FormFieldId.Country to "US",
             ),
             countryCodes = setOf("US", "BS"),
             sameAsShippingElement = null,
@@ -157,30 +157,30 @@ class AddressElementTest {
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
         val usValues = mapOf(
-            IdentifierSpec.PostalCode to "10001",
-            IdentifierSpec.State to "NY",
+            FormFieldId.PostalCode to "10001",
+            FormFieldId.State to "NY",
         )
         addressElement.fields.value
-            .filterNot { it.identifier == IdentifierSpec.Country }
+            .filterNot { it.identifier == FormFieldId.Country }
             .forEach { it.setRawValue(usValues) }
 
         val initialFormValues = formFieldValueFlow.value.toMap()
-        assertThat(initialFormValues).containsKey(IdentifierSpec.PostalCode)
-        assertThat(initialFormValues).containsKey(IdentifierSpec.State)
-        assertThat(initialFormValues[IdentifierSpec.PostalCode]?.value).isEqualTo("10001")
-        assertThat(initialFormValues[IdentifierSpec.State]?.value).isEqualTo("NY")
+        assertThat(initialFormValues).containsKey(FormFieldId.PostalCode)
+        assertThat(initialFormValues).containsKey(FormFieldId.State)
+        assertThat(initialFormValues[FormFieldId.PostalCode]?.value).isEqualTo("10001")
+        assertThat(initialFormValues[FormFieldId.State]?.value).isEqualTo("NY")
 
         addressElement.countryElement.controller.onRawValueChange("BS")
 
         val bahamasValues = formFieldValueFlow.value.toMap()
-        assertThat(bahamasValues).doesNotContainKey(IdentifierSpec.PostalCode)
-        assertThat(bahamasValues[IdentifierSpec.State]?.value).isEmpty()
+        assertThat(bahamasValues).doesNotContainKey(FormFieldId.PostalCode)
+        assertThat(bahamasValues[FormFieldId.State]?.value).isEmpty()
     }
 
     @Test
     fun `condensed address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
@@ -193,18 +193,18 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isTrue()
     }
 
     @Test
     fun `hidden name & phone number field is not shown`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
@@ -217,18 +217,18 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isFalse()
     }
 
     @Test
     fun `optional name & phone number field is shown`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
@@ -241,12 +241,12 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isTrue()
     }
 
     @Test
@@ -256,8 +256,8 @@ class AddressElementTest {
         val phoneNumberWithoutCountryCode = "8008675309"
         val addressElement = createAddressElement(
             initialValues = mapOf(
-                IdentifierSpec.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
-                IdentifierSpec.Country to countryCode
+                FormFieldId.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
+                FormFieldId.Country to countryCode
             )
         )
 
@@ -274,8 +274,8 @@ class AddressElementTest {
         val phoneNumberWithoutCountryCode = "8008675309"
         val addressElement = createAddressElement(
             initialValues = mapOf(
-                IdentifierSpec.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
-                IdentifierSpec.Country to countryCode
+                FormFieldId.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
+                FormFieldId.Country to countryCode
             )
         )
 
@@ -288,7 +288,7 @@ class AddressElementTest {
     @Test
     fun `expanded address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
@@ -301,18 +301,18 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isTrue()
     }
 
     @Test
     fun `expanded shipping address element should hide name and phone number when state is hidden`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
@@ -325,18 +325,18 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isFalse()
     }
 
     @Test
     fun `expanded shipping address element should show phone number when state is optional`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
@@ -349,50 +349,50 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
     }
 
     @Test
     fun `normal address element should not have name, email, and phone number fields`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.Name)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Phone)).isFalse()
-        assertThat(identifierSpecs.contains(IdentifierSpec.Email)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Name)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Phone)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.Email)).isFalse()
     }
 
     @Test
     fun `normal address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
     }
 
     @Test
     fun `condensed shipping address element should have one line address element`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = "some key",
@@ -405,16 +405,16 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isTrue()
+        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isTrue()
     }
 
     @Test
     fun `AddressElement should not have OneLineAddress when places is unavailable`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = "some key",
@@ -427,10 +427,10 @@ class AddressElementTest {
             shippingValuesMap = null,
             isPlacesAvailable = false,
         )
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
     }
 
     @Test
@@ -439,9 +439,9 @@ class AddressElementTest {
             CountryConfig(setOf("US", "CA", "JP"))
         )
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = FormFieldId.Country,
                 controller = countryDropdownFieldController,
             ),
             addressInputMode = AddressInputMode.AutocompleteCondensed(
@@ -457,7 +457,7 @@ class AddressElementTest {
         )
         countryDropdownFieldController.onValueChange(1)
 
-        val trailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
+        val trailingIcon = addressElement.trailingIconFor(FormFieldId.Line1)
         assertThat(trailingIcon).isNull()
     }
 
@@ -468,9 +468,9 @@ class AddressElementTest {
         )
         val onNavigationCounter = AtomicInteger(0)
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = FormFieldId.Country,
                 controller = countryDropdownFieldController,
             ),
             addressInputMode = AddressInputMode.AutocompleteExpanded(
@@ -486,10 +486,10 @@ class AddressElementTest {
         )
         countryDropdownFieldController.onValueChange(1)
 
-        val line1TrailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
+        val line1TrailingIcon = addressElement.trailingIconFor(FormFieldId.Line1)
         assertThat(line1TrailingIcon?.contentDescription)
             .isEqualTo(UiCoreR.string.stripe_address_search_content_description)
-        assertThat(addressElement.trailingIconFor(IdentifierSpec.Line2)).isNull()
+        assertThat(addressElement.trailingIconFor(FormFieldId.Line2)).isNull()
 
         line1TrailingIcon?.onClick?.invoke()
         assertThat(onNavigationCounter.get()).isEqualTo(1)
@@ -499,7 +499,7 @@ class AddressElementTest {
     fun `when google api key not supplied, condensed shipping address element is not one line address element`() =
         runTest {
             val addressElement = AddressElement(
-                IdentifierSpec.Generic("address"),
+                FormFieldId.Generic("address"),
                 countryElement = countryElement,
                 addressInputMode = AddressInputMode.AutocompleteCondensed(
                     googleApiKey = null,
@@ -512,16 +512,16 @@ class AddressElementTest {
                 shippingValuesMap = null
             )
 
-            val identifierSpecs = addressElement.fields.first().map {
+            val formFieldIds = addressElement.fields.first().map {
                 it.identifier
             }
-            assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+            assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
         }
 
     @Test
     fun `expanded shipping address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
@@ -534,28 +534,28 @@ class AddressElementTest {
             shippingValuesMap = null
         )
 
-        val identifierSpecs = addressElement.fields.first().map {
+        val formFieldIds = addressElement.fields.first().map {
             it.identifier
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
+        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
     }
 
     @Test
     fun `when same as shipping is enabled billing address is the same as shipping`() = runTest {
         val sameAsShippingElement = SameAsShippingElement(
-            IdentifierSpec.SameAsShipping,
+            FormFieldId.SameAsShipping,
             SameAsShippingController(false)
         )
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             mapOf(
-                IdentifierSpec.Country to "CA"
+                FormFieldId.Country to "CA"
             ),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = mapOf(
-                IdentifierSpec.Country to "US"
+                FormFieldId.Country to "US"
             )
         )
 
@@ -570,7 +570,7 @@ class AddressElementTest {
 
         assertThat(country()).isEqualTo("CA")
 
-        sameAsShippingElement.setRawValue(mapOf(IdentifierSpec.SameAsShipping to "true"))
+        sameAsShippingElement.setRawValue(mapOf(FormFieldId.SameAsShipping to "true"))
 
         assertThat(country()).isEqualTo("US")
     }
@@ -578,9 +578,9 @@ class AddressElementTest {
     @Test
     fun `when phone number is required, should not be complete until fully entered`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             mapOf(
-                IdentifierSpec.Country to "CA"
+                FormFieldId.Country to "CA"
             ),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(
@@ -605,9 +605,9 @@ class AddressElementTest {
     @Test
     fun `on validating, should update all internal fields of validation state`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             mapOf(
-                IdentifierSpec.Country to "CA"
+                FormFieldId.Country to "CA"
             ),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(
@@ -620,24 +620,24 @@ class AddressElementTest {
         addressElement.fields.test {
             val fields = awaitItem()
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.Line1).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.State).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.PostalCode).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.City).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Country).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line1).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.State).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.PostalCode).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.City).errorTest(fieldValidationMessage = null)
 
             addressElement.onValidationStateChanged(true)
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.Line1)
+            fields.element(FormFieldId.Country).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.Line1)
                 .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
-            fields.element(IdentifierSpec.State)
+            fields.element(FormFieldId.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(FormFieldId.State)
                 .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.PostalCode)
+            fields.element(FormFieldId.PostalCode)
                 .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.City)
+            fields.element(FormFieldId.City)
                 .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
         }
     }
@@ -645,7 +645,7 @@ class AddressElementTest {
     @Test
     fun `name element filters out emojis`() = runTest {
         val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
@@ -659,7 +659,7 @@ class AddressElementTest {
         )
 
         val nameElement = addressElement.fields.first()
-            .find { it.identifier == IdentifierSpec.Name } as? SimpleTextElement
+            .find { it.identifier == FormFieldId.Name } as? SimpleTextElement
 
         assertThat(nameElement).isNotNull()
 
@@ -676,9 +676,9 @@ class AddressElementTest {
         assertThat(nameController.fieldValue.first()).isEqualTo("Bob  Jones")
     }
 
-    private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {
+    private fun createAddressElement(initialValues: Map<FormFieldId, String>): AddressElement {
         return AddressElement(
-            IdentifierSpec.Generic("address"),
+            FormFieldId.Generic("address"),
             rawValuesMap = initialValues,
             countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
@@ -704,16 +704,16 @@ private suspend fun Flow<List<SectionFieldElement>>.postalCodeController(): Text
             listOf(element)
         }
     }.flatten().find { element ->
-        element.identifier == IdentifierSpec.PostalCode
+        element.identifier == FormFieldId.PostalCode
     }
 
     return (element as SimpleTextElement).controller
 }
 
 private suspend fun AddressElement.trailingIconFor(
-    identifierSpec: IdentifierSpec
+    formFieldId: FormFieldId
 ): TextFieldIcon.Trailing? {
-    val fieldForSpec = fields.first().first { it.identifier == identifierSpec }
+    val fieldForSpec = fields.first().first { it.identifier == formFieldId }
     val controllerForSpec = (fieldForSpec as SimpleTextElement).controller
     val trailingIcon = (controllerForSpec as SimpleTextFieldController).textFieldConfig.trailingIcon
     return trailingIcon.value as? TextFieldIcon.Trailing?

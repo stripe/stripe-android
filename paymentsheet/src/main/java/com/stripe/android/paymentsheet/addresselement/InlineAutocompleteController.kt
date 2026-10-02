@@ -5,7 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -83,7 +83,7 @@ internal class InlineAutocompleteController(
                                 AutocompleteAddressInteractor.InlinePredictionsState.Idle
                             eventListenerProvider()?.invoke(
                                 AutocompleteAddressInteractor.Event.OnValues(
-                                    mapOf(IdentifierSpec.Country to c)
+                                    mapOf(FormFieldId.Country to c)
                                 )
                             )
                             return@collectLatest
@@ -99,7 +99,7 @@ internal class InlineAutocompleteController(
                         if (countryChanged && activationState != ActivationState.Inactive) {
                             eventListenerProvider()?.invoke(
                                 AutocompleteAddressInteractor.Event.OnValues(
-                                    mapOf(IdentifierSpec.Country to c)
+                                    mapOf(FormFieldId.Country to c)
                                 )
                             )
                         }
@@ -144,12 +144,12 @@ internal class InlineAutocompleteController(
         eventListenerProvider()?.invoke(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 mapOf(
-                    IdentifierSpec.Line1 to address.line1,
-                    IdentifierSpec.Line2 to address.line2,
-                    IdentifierSpec.City to address.city,
-                    IdentifierSpec.State to address.state,
-                    IdentifierSpec.PostalCode to address.postalCode,
-                    IdentifierSpec.Country to address.country,
+                    FormFieldId.Line1 to address.line1,
+                    FormFieldId.Line2 to address.line2,
+                    FormFieldId.City to address.city,
+                    FormFieldId.State to address.state,
+                    FormFieldId.PostalCode to address.postalCode,
+                    FormFieldId.Country to address.country,
                 )
             )
         )
@@ -266,9 +266,9 @@ internal class InlineAutocompleteController(
     }
 
     private fun emitExpandForm(query: String?, country: String?) {
-        val values = buildMap<IdentifierSpec, String?> {
-            query?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
-            country?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
+        val values = buildMap<FormFieldId, String?> {
+            query?.takeIf { it.isNotBlank() }?.let { put(FormFieldId.Line1, it) }
+            country?.takeIf { it.isNotBlank() }?.let { put(FormFieldId.Country, it) }
         }.takeIf { it.isNotEmpty() }
 
         eventListenerProvider()?.invoke(

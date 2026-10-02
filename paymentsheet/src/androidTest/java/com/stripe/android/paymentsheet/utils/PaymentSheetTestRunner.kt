@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.compose.setContent
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -20,6 +20,7 @@ internal class PaymentSheetTestRunnerContext(
     private val scenario: ActivityScenario<MainActivity>,
     private val paymentSheet: PaymentSheet,
     private val countDownLatch: CountDownLatch,
+    val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
 
     fun presentPaymentSheet(
@@ -45,6 +46,8 @@ internal class PaymentSheetTestRunnerContext(
 
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     isLiveMode: Boolean = false,
     integrationType: IntegrationType = IntegrationType.Compose,
     builder: PaymentSheet.Builder.() -> Unit = {},
@@ -53,6 +56,11 @@ internal fun runPaymentSheetTest(
     block: suspend (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
+    val effectiveApiConfigurationTestType = if (isLiveMode) {
+        apiConfigurationTestType.withPublishableKey("pk_live_123")
+    } else {
+        apiConfigurationTestType
+    }
 
     val paymentSheetBuilder = PaymentSheet.Builder { result ->
         resultCallback.onPaymentSheetResult(result)
@@ -64,14 +72,7 @@ internal fun runPaymentSheetTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(
-                it,
-                if (isLiveMode) {
-                    "pk_live_123"
-                } else {
-                    "pk_test_123"
-                }
-            )
+            effectiveApiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -90,19 +91,30 @@ internal fun runPaymentSheetTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        val testContext = PaymentSheetTestRunnerContext(
+            scenario,
+            paymentSheet,
+            countDownLatch,
+            effectiveApiConfigurationTestType,
+        )
         runTest {
             block(testContext)
         }
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        composeTestRule.waitUntil(
+            conditionDescription = "PaymentSheetResultCallback to be called",
+            timeoutMillis = TimeUnit.SECONDS.toMillis(successTimeoutSeconds),
+        ) {
+            countDownLatch.count == 0L
+        }
         networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
     }
 }
 
 internal fun runMultiplePaymentSheetInstancesTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     testType: MultipleInstancesTestType,
     createIntentCallback: CreateIntentCallback,
     successTimeoutSeconds: Long = 5L,
@@ -151,7 +163,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -173,12 +185,19 @@ internal fun runMultiplePaymentSheetInstancesTest(
             secondPaymentSheet
         }
 
-        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        val testContext = PaymentSheetTestRunnerContext(
+            scenario,
+            paymentSheet,
+            countDownLatch,
+            apiConfigurationTestType,
+        )
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        composeTestRule.waitUntil(TimeUnit.SECONDS.toMillis(successTimeoutSeconds)) {
+            countDownLatch.count == 0L
+        }
         networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
+        assertThat(countDownLatch.count).isEqualTo(0L)
 
         if (testType == MultipleInstancesTestType.RunWithFirst) {
             assertThat(firstCreateIntentCallbackCalled).isTrue()

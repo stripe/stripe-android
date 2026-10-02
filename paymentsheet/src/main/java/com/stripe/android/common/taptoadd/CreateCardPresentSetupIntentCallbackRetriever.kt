@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackRetriever
@@ -14,26 +13,26 @@ import javax.inject.Provider
 internal interface CreateCardPresentSetupIntentCallbackRetriever {
     fun hasCallback(): Boolean
 
-    suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback
+    suspend fun waitForCallback(isLiveMode: Boolean): CreateCardPresentSetupIntentCallback
 }
 
 @OptIn(TapToAddPreview::class)
 internal class DefaultCreateCardPresentSetupIntentCallbackRetriever @Inject constructor(
     errorReporter: ErrorReporter,
-    requestOptionsProvider: Provider<ApiRequest.Options>,
     private val createCardPresentSetupIntentCallbackProvider: Provider<CreateCardPresentSetupIntentCallback?>
-) : CallbackRetriever(errorReporter, requestOptionsProvider), CreateCardPresentSetupIntentCallbackRetriever {
+) : CallbackRetriever(errorReporter), CreateCardPresentSetupIntentCallbackRetriever {
     override fun hasCallback(): Boolean {
         return createCardPresentSetupIntentCallbackProvider.get() != null
     }
 
-    override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
+    override suspend fun waitForCallback(isLiveMode: Boolean): CreateCardPresentSetupIntentCallback {
         return waitForCallback(
             neededWaitEvent = SuccessEvent.FOUND_CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_WHILE_POLLING,
             notFoundEvent = ExpectedErrorEvent.CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_NULL,
             analyticsValue = ANALYTICS_VALUE,
             notFoundMessage = "${CreateCardPresentSetupIntentCallback::class.java.simpleName} must be " +
                 "implemented when using Tap to Add!",
+            isLiveMode = isLiveMode,
         ) {
             createCardPresentSetupIntentCallbackProvider.get()
         }

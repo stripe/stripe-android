@@ -18,6 +18,7 @@ internal class IdentityVerificationSheetContract :
         val ephemeralKeySecret: String,
         val brandLogo: Uri,
         val brandColor: Int?,
+        val biometricConsent: IdentityVerificationSheet.Configuration.BiometricConsentConfiguration?,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

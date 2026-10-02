@@ -5,16 +5,16 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val epsFullRawValues = mapOf(
-    IdentifierSpec.Generic("eps[bank]") to "bank_austria",
-    IdentifierSpec.Name to "Anna Gruber",
-    IdentifierSpec.Line1 to "Kärntner Straße 1",
-    IdentifierSpec.Line2 to "Top 2",
-    IdentifierSpec.City to "Vienna",
-    IdentifierSpec.PostalCode to "1010",
-    IdentifierSpec.Country to "AT",
+    FormFieldId.Generic("eps[bank]") to "bank_austria",
+    FormFieldId.Name to "Anna Gruber",
+    FormFieldId.Line1 to "Kärntner Straße 1",
+    FormFieldId.Line2 to "Top 2",
+    FormFieldId.City to "Vienna",
+    FormFieldId.PostalCode to "1010",
+    FormFieldId.Country to "AT",
 )
 
 private val epsNoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

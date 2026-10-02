@@ -6,18 +6,19 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHandler
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,11 +42,13 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
-    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val verticalPaymentSelectionHandler: VerticalPaymentSelectionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val sheetStateHolder: SheetStateHolder,
     private val savedPaymentMethodMutatorFactory: EmbeddedContentSavedPaymentMethodMutatorFactory,
     private val linkAccountHolder: LinkAccountHolder,
+    @EmbeddedHostProcessing private val hostProcessing: StateFlow<Boolean>,
+    private val savedPaymentMethodSelectionState: StateFlow<@JvmSuppressWildcards SavedPaymentMethodSelectionState>,
 ) : EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 
     @Suppress("LongMethod")
@@ -67,7 +70,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             eventReporter = eventReporter,
             selectionUpdater = {
                 selectionHolder.setSelection(it)
-                rowSelectionImmediateActionHandler.invoke()
+                verticalPaymentSelectionHandler.onSelectionComplete()
             },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
@@ -78,7 +81,13 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
+            processing = combineAsStateFlow(
+                hostProcessing,
+                confirmationHandler.state,
+            ) { isHostProcessing, confirmationState ->
+                isHostProcessing || confirmationState is ConfirmationHandler.State.Confirming
+            },
+            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
@@ -112,9 +121,10 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
-            updateSelection = { updatedSelection, _ ->
+            updateSelection = { updatedSelection ->
                 selectionHolder.setSelection(updatedSelection)
             },
+            verticalPaymentSelectionHandler = verticalPaymentSelectionHandler,
             isCurrentScreen = stateFlowOf(true),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
@@ -130,7 +140,6 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                     true
                 }
             },
-            invokeRowSelectionCallback = rowSelectionImmediateActionHandler::invoke,
             displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(

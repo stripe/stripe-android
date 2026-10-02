@@ -48,6 +48,8 @@ import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_INSTANT_TAG
 import com.stripe.android.crypto.onramp.example.SETTLEMENT_SPEED_STANDARD_TAG
 import com.stripe.android.crypto.onramp.example.START_IDENTITY_VERIFICATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_AND_CONDITIONS_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.TERMS_OF_SERVICE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.USER_ATTESTATION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_ADDRESS_TAG
 import com.stripe.android.crypto.onramp.example.WALLET_NETWORK_DROPDOWN_TAG
@@ -546,6 +548,38 @@ internal fun VerificationSection(
 }
 
 @Composable
+internal fun PartnerTermsSection(
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
+) {
+    Text(
+        text = "Partner Terms",
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    Button(
+        onClick = onShowTermsOfService,
+        modifier = Modifier
+            .testTag(TERMS_OF_SERVICE_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    ) {
+        Text("Terms of Service")
+    }
+
+    Button(
+        onClick = onShowTermsAndConditions,
+        modifier = Modifier
+            .testTag(TERMS_AND_CONDITIONS_BUTTON_TAG)
+            .fillMaxWidth()
+            .padding(bottom = 24.dp)
+    ) {
+        Text("Terms and Conditions")
+    }
+}
+
+@Composable
 internal fun PaymentSection(
     googlePayIsReady: Boolean,
     samsungPayIsReady: Boolean,
@@ -611,7 +645,7 @@ internal fun PaymentSection(
 
     SamsungPayButton(
         enabled = samsungPayIsReady,
-        onClick = { onCollectPayment(samsungPaySelection()) },
+        onClick = { onCollectPayment(samsungPaySelection(sourceCurrency)) },
         modifier = Modifier
             .testTag(COLLECT_SAMSUNG_PAY_BUTTON_TAG)
             .padding(bottom = 8.dp)
@@ -620,9 +654,9 @@ internal fun PaymentSection(
     Spacer(modifier = Modifier.height(32.dp))
 }
 
-private fun samsungPaySelection(): PaymentMethodSelection.SamsungPay {
+private fun samsungPaySelection(sourceCurrency: SourceCurrency): PaymentMethodSelection.SamsungPay {
     return PaymentMethodSelection.SamsungPay(
-        currencyCode = "USD",
+        currencyCode = sourceCurrency.value.uppercase(),
         amount = 199L,
         orderNumber = "onramp-example-order",
     )
@@ -677,8 +711,7 @@ private fun SourceCurrencySelector(
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 8.dp)
     )
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
@@ -687,7 +720,7 @@ private fun SourceCurrencySelector(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .selectable(
                         selected = currency == sourceCurrency,
                         onClick = { onSelectSourceCurrency(currency) },
@@ -698,7 +731,7 @@ private fun SourceCurrencySelector(
                     selected = currency == sourceCurrency,
                     onClick = null
                 )
-                Text("${currency.symbol} ${currency.value.uppercase()}")
+                Text(currency.displayName)
             }
         }
     }

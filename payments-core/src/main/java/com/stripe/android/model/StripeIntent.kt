@@ -106,7 +106,10 @@ sealed interface StripeIntent : StripeModel {
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
         DisplayPromptPayDetails("promptpay_display_qr_code"),
-        SwishRedirect("swish_handle_redirect_or_display_qr_code");
+        DisplayPixDetails("pix_display_qr_code"),
+        SwishRedirect("swish_handle_redirect_or_display_qr_code"),
+        AwaitAuthorization("await_authorization"),
+        MbWayAwaitAuthorization("mb_way_await_authorization");
 
         @Keep
         override fun toString(): String {
@@ -246,6 +249,31 @@ sealed interface StripeIntent : StripeModel {
             val qrCodeUrl: String? = null,
         ) : NextActionData()
 
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPixDetails(
+            /** The Pix copy-and-paste string represented by the QR code. */
+            val data: String? = null,
+            /** URL for a PNG image containing the Pix QR code. */
+            val imageUrlPng: String? = null,
+            /** URL for an SVG image containing the Pix QR code. */
+            val imageUrlSvg: String? = null,
+            /** Unix timestamp when the Pix QR code expires. */
+            val expiresAt: Long? = null,
+            /** URL for Stripe-hosted instructions to complete the Pix payment. */
+            val hostedInstructionsUrl: String,
+        ) : NextActionData() {
+            override fun toString(): String {
+                return "DisplayPixDetails(" +
+                    "data=${if (data == null) "null" else "<redacted>"}, " +
+                    "imageUrlPng=$imageUrlPng, " +
+                    "imageUrlSvg=$imageUrlSvg, " +
+                    "expiresAt=$expiresAt, " +
+                    "hostedInstructionsUrl=$hostedInstructionsUrl" +
+                    ")"
+            }
+        }
+
         /**
          * Contains instructions for authenticating by redirecting your customer to another
          * page or application.
@@ -371,6 +399,14 @@ sealed interface StripeIntent : StripeModel {
 
         @Parcelize
         data object BlikAuthorize : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object AwaitAuthorization : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object MbWayAwaitAuthorization : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize

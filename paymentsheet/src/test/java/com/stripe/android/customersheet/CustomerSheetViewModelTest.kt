@@ -5,7 +5,6 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
@@ -18,8 +17,9 @@ import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionData
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -55,7 +55,7 @@ import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -440,13 +440,10 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     }
 
     @Test
-    fun `When the payment configuration is test, isLiveMode should be false`() = runTest(testDispatcher) {
+    fun `When the API configuration is test, isLiveMode should be false`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
-            paymentConfiguration = PaymentConfiguration(
-                publishableKey = "pk_test_123",
-                stripeAccountId = null,
-            )
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         viewModel.viewState.test {
@@ -950,7 +947,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -1751,7 +1748,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -1773,7 +1770,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount
+                SupportedPaymentMethodFixtures.usBankAccount
             )
         )
 
@@ -1798,7 +1795,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -1818,7 +1815,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.card
+                    SupportedPaymentMethodFixtures.card
                 )
             )
 
@@ -1844,7 +1841,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -1881,7 +1878,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -1900,8 +1897,8 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     customerPaymentMethods = listOf(),
                     isGooglePayAvailable = false,
                     supportedPaymentMethods = listOf(
-                        LpmRepositoryTestHelpers.usBankAccount,
-                        LpmRepositoryTestHelpers.card,
+                        SupportedPaymentMethodFixtures.usBankAccount,
+                        SupportedPaymentMethodFixtures.card,
                     ),
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
                 ),
@@ -1994,7 +1991,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount,
+                    SupportedPaymentMethodFixtures.usBankAccount,
                 )
             )
 
@@ -2062,7 +2059,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.usBankAccount,
             )
         )
 
@@ -2104,7 +2101,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.card,
+                    SupportedPaymentMethodFixtures.card,
                 )
             )
 
@@ -2123,12 +2120,12 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
+            supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.usBankAccount),
         )
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.usBankAccount,
             )
         )
 
@@ -2171,7 +2168,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.usBankAccount,
             )
         )
 
@@ -2225,7 +2222,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.usBankAccount,
             )
         )
 
@@ -2251,7 +2248,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount
+                SupportedPaymentMethodFixtures.usBankAccount
             )
         )
 
@@ -2259,11 +2256,11 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             val viewState = awaitViewState<AddPaymentMethod>()
 
             assertThat(viewState.paymentMethodCode)
-                .isEqualTo(LpmRepositoryTestHelpers.usBankAccount.code)
+                .isEqualTo(SupportedPaymentMethodFixtures.usBankAccount.code)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -2277,7 +2274,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             workContext = testDispatcher,
             isGooglePayAvailable = false,
             customerPaymentMethods = listOf(),
-            supportedPaymentMethods = listOf(LpmRepositoryTestHelpers.usBankAccount),
+            supportedPaymentMethods = listOf(SupportedPaymentMethodFixtures.usBankAccount),
         )
 
         viewModel.viewState.test {
@@ -2297,7 +2294,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
         viewModel.handleViewAction(
             CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.usBankAccount,
             )
         )
 
@@ -2312,7 +2309,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.card
+                    SupportedPaymentMethodFixtures.card
                 )
             )
 
@@ -2322,7 +2319,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -2347,7 +2344,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -2368,7 +2365,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.card
+                    SupportedPaymentMethodFixtures.card
                 )
             )
 
@@ -2446,7 +2443,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -2661,7 +2658,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                     CustomerSheetViewAction.OnFormFieldValuesCompleted(
                         formFieldValues = FormFieldValues(
                             fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                                FormFieldId.Generic("test") to FormFieldEntry("test", true)
                             ),
                             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                         )
@@ -3403,7 +3400,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.usBankAccount
+                    SupportedPaymentMethodFixtures.usBankAccount
                 )
             )
 
@@ -3413,7 +3410,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepositoryTestHelpers.card
+                    SupportedPaymentMethodFixtures.card
                 )
             )
             viewState = awaitViewState()
@@ -3451,7 +3448,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
                     formFieldValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                            FormFieldId.Generic("test") to FormFieldEntry("test", true)
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     )
@@ -3752,7 +3749,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     private companion object {
         val TEST_FORM_VALUES = FormFieldValues(
             fieldValuePairs = mapOf(
-                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
+                FormFieldId.Generic("test") to FormFieldEntry("test", true)
             ),
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )

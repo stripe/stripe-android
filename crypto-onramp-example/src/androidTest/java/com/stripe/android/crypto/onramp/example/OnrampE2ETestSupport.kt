@@ -165,14 +165,28 @@ internal class OnrampE2EPage(
     }
 
     fun collectKycInfo(user: FreshOnrampUser) {
-        val address = TestKycAddress.forCountry(user.country)
+        val country = user.country.uppercase()
+        val address = TestKycAddress.forCountry(country)
+        val residence = when (country) {
+            "US" -> "United States"
+            "CA" -> "Canada"
+            "CO" -> "Colombia"
+            "PH" -> "Philippines"
+            else -> "European Union"
+        }
 
         clickTag(KYC_SECTION_TAG)
+        if (country != "US") {
+            clickTag(KYC_RESIDENCE_DROPDOWN_TAG)
+            clickText(residence)
+        }
         replaceTag(KYC_FIRST_NAME_TAG, TEST_KYC_FIRST_NAME)
         replaceTag(KYC_LAST_NAME_TAG, TEST_KYC_LAST_NAME)
-        replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
-        replaceTag(KYC_BIRTH_CITY_TAG, address.city)
-        replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        if (residence == "European Union") {
+            replaceTag(KYC_BIRTH_COUNTRY_TAG, user.country)
+            replaceTag(KYC_BIRTH_CITY_TAG, address.city)
+            replaceTag(KYC_NATIONALITIES_TAG, user.country)
+        }
         replaceTag(KYC_ADDRESS_LINE_1_TAG, TEST_KYC_ADDRESS_LINE_1)
         replaceTag(KYC_ADDRESS_CITY_TAG, address.city)
         replaceTag(KYC_ADDRESS_STATE_TAG, address.state)
@@ -193,7 +207,7 @@ internal class OnrampE2EPage(
     }
 
     fun confirmKycVerification() {
-        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 1.seconds.inWholeMilliseconds)) {
+        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 5.seconds.inWholeMilliseconds)) {
             clickTag(KYC_SECTION_TAG)
         }
         clickTag(VERIFY_KYC_BUTTON_TAG)
@@ -207,7 +221,7 @@ internal class OnrampE2EPage(
             IDENTITY_FAILED_BUTTON_TAG,
             timeoutMs = 30.seconds.inWholeMilliseconds,
         )
-        waitForSnackbar("Identity Verification failed: Failure from test mode")
+        waitForSnackbar("Identity Verification failed: Something went wrong. Please try again later.")
         waitForTag(LOGIN_EMAIL_TAG)
     }
 
@@ -321,7 +335,7 @@ internal class OnrampE2EPage(
         replaceText(CARD_CVC_LABEL, TEST_NEW_CARD_CVC)
 
         val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
-        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
             composeRule.onNode(postalCodeMatcher)
                 .performScrollTo()
                 .performTextReplacement(TEST_CARD_POSTAL_CODE)
@@ -614,6 +628,24 @@ private data class TestKycAddress(
                     country = "MT",
                     postalCode = "VLT 1117",
                 )
+                "CA" -> TestKycAddress(
+                    city = "Toronto",
+                    state = "ON",
+                    country = "CA",
+                    postalCode = "M5V 3L9",
+                )
+                "CO" -> TestKycAddress(
+                    city = "Bogota",
+                    state = "Bogota",
+                    country = "CO",
+                    postalCode = "110111",
+                )
+                "PH" -> TestKycAddress(
+                    city = "Manila",
+                    state = "Metro Manila",
+                    country = "PH",
+                    postalCode = "1000",
+                )
                 else -> TestKycAddress(
                     city = "San Francisco",
                     state = "CA",
@@ -643,7 +675,7 @@ private const val IDENTITY_SUCCESS_OPTION_TAG = "success"
 private const val IDENTITY_SUBMIT_BUTTON_TAG = "Submit"
 private const val IDENTITY_CONFIRM_BUTTON_TAG = "ConfirmButton"
 private const val IDENTITY_FAILED_BUTTON_TAG = "Failed"
-private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelButtonTag"
+private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "HTMLConfirmationCancelButtonTag"
 private const val USER_ATTESTATION_ACCEPT_TEXT = "Accept"
 private const val OAUTH_ALLOW_TEXT = "Allow"
 private const val TEST_MALTA_NATIONAL_ID = "1234567M"

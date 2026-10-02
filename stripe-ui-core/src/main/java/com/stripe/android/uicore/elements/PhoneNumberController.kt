@@ -23,6 +23,8 @@ class PhoneNumberController private constructor(
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
+    override val enforceLeftToRightTextDirection: Boolean = true
+
     override val label = stateFlowOf(
         resolvableString(CoreR.string.stripe_address_label_phone_number)
     )
@@ -195,8 +197,8 @@ class PhoneNumberController private constructor(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         PhoneNumberElementUI(
             enabled,

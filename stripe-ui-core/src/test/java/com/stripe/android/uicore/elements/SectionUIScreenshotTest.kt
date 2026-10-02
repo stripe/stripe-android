@@ -40,7 +40,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString
@@ -67,7 +67,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString
@@ -92,7 +92,7 @@ class SectionUIScreenshotTest {
 
             val sectionElement = SectionElement.wrap(
                 sectionFieldElement = SimpleTextElement(
-                    identifier = IdentifierSpec.Generic("zip"),
+                    identifier = FormFieldId.Generic("zip"),
                     controller = textFieldController
                 ),
                 label = "Billing Address".resolvableString
@@ -133,7 +133,6 @@ class SectionUIScreenshotTest {
             androidx.compose.ui.text.input.KeyboardCapitalization.None
         override val keyboardType: androidx.compose.ui.text.input.KeyboardType =
             androidx.compose.ui.text.input.KeyboardType.Number
-        override val layoutDirection: androidx.compose.ui.unit.LayoutDirection? = null
         override val visualTransformation: StateFlow<androidx.compose.ui.text.input.VisualTransformation> =
             MutableStateFlow(androidx.compose.ui.text.input.VisualTransformation.None)
         override val fieldState: StateFlow<TextFieldState> = MutableStateFlow(

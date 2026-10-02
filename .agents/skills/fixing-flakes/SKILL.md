@@ -16,6 +16,19 @@ Treat every `ShampooRule` swap or iteration-count edit as uncommittable diagnost
 3. Record the original exception, first relevant stack frame, execution task, device/API/browser when applicable, and whether the failure occurred before, during, or after the tested behavior. Distinguish a test failure from emulator boot, Gradle, network, or other infrastructure failures.
 4. Audit the boundaries that can vary between executions: wall versus virtual time, animation/frame time, process-global state, retained caches or selections, external activities, IME/browser state, asynchronous resource identity, and teardown completion.
 
+## Require failure evidence before permanent changes
+
+Do not implement or submit a permanent fix until the failure has qualifying evidence. Require one of:
+
+- A focused local reproduction with the original exception, relevant stack frame, and failure artifact.
+- An actionable original CI failure trace plus a deterministic regression test that fails for the same reason before the fix.
+
+A suspicious comment, theoretical race, code smell, or passing candidate soak is not causal evidence. Map the proposed fix to the observed failure state, not merely to a plausible source of nondeterminism.
+
+If the initial two-execution reproduction passes, run the focused 50-execution baseline before changing permanent code. If all 50 pass and there is no qualifying external evidence, restore all diagnostic edits and stop. Report the task as unable to reproduce, including the Gradle invocation and actual method-execution count. Do not change production code or permanent test expectations, and do not commit, push, or open a flake-fix pull request.
+
+A clean baseline establishes only that the failure was not reproduced. Keep baseline reproduction evidence separate from post-fix validation evidence.
+
 ## Choose the repetition mechanism
 
 Use one focused class or method and expose the first failure. Do not combine inner retries, outer command retries, and repetition; they destroy the failing iteration's evidence.
@@ -119,6 +132,12 @@ rg -n 'Executing iteration|Failed on iteration|UiObjectNotFoundException|Asserti
   paymentsheet-example/build/outputs/androidTest-results
 ```
 
+For strict `NetworkRule` tests, interpret dispatcher failures before changing expectations:
+
+- `Production code made extra requests` identifies a production branch that ran without a matching enqueue. Record the request event/path and the nearest matcher; do not enqueue the variable request merely to make both orderings pass.
+- `Mock responses is not empty` identifies expected production behavior that never ran. Record the remaining matcher and determine which lifecycle, layout, or coroutine boundary was supposed to trigger it.
+- When fixing the first mismatch exposes a different failure at a later Shampoo iteration, treat it as a second race. Diagnose it independently, return to 2 iterations, then repeat all 50 on the combined candidate.
+
 Useful outputs include:
 
 - `*/build/outputs/androidTest-results/managedDevice/.../shard_0/logcat-<class>-<method>.txt`
@@ -131,11 +150,16 @@ For non-instrumentation repetition, confirm that every invocation executed the f
 
 ## Fix causes, not symptoms
 
+Require one deterministic outcome for a given test setup. Do not make a flaky test pass by accepting whichever result wins a race. If the nondeterminism originates in production code, change the production code or its boundary to make the intended behavior deterministic, then assert that behavior. When variability is intentional, control its inputs in the test instead of weakening the assertion.
+
 Prefer bounded state-based synchronization over retries or arbitrary sleeps:
 
 - Time: keep all timing decisions in one domain. When coroutine delays use a test scheduler, inject a typed clock backed by that scheduler instead of reading wall time. Match test animation delays to production delays; use frame buffers only for frame scheduling tolerance, not to cover incorrect constants.
+- Sampled asynchronous work: identify code that observes whether work has completed without synchronizing with its completion. Even immediately returning collaborators can be scheduler-dependent. Preserve the production contract and make observable results deterministic at the appropriate boundary rather than masking the race in the test.
+- Execution ordering: change coroutine start or dispatch behavior only when the production contract requires work to begin or complete before it is observed. Verify that any inline work is lightweight, account for ordering, cancellation, error handling, and latency changes, and do not force genuinely asynchronous work to finish synchronously.
 - Repeated-process state: assume Shampoo iterations share process state. Establish a known baseline for companion/static flags, analytics sent-once markers, customer/session caches, payment selections, IME visibility, and browser state. Reset only state the test owns, using a narrow test seam when necessary.
 - Compose: wait for the exact semantics state, combining tag/text with enabled or click action when relevant. Allow `atLeastOneRootRequired = false` only during a known activity transition, and add `conditionDescription` to every nontrivial wait.
+- Event-driven stabilization: do not infer stability from a particular callback count or repeated value. When production needs a stable snapshot, define completeness and a quiet period explicitly, restart stabilization when relevant state changes, and cover incomplete state, cancellation, reset, and one-time delivery with deterministic tests.
 - Ordering: wait for processing, screen visibility, or event delivery before asserting the next state. Do not assume an activity finishing, a semantics click, or one analytics event implies that downstream work is complete.
 - Espresso: synchronize with app idleness and explicit activity/window transitions.
 - UiAutomator and Chrome: wait for the requested package/activity and target object. Prefer stable resource IDs to coordinate taps, handle every valid onboarding screen, and wait for the transient or first-run activity to exit. Do not call `UiScrollable.scrollIntoView` unless a scrollable container exists.

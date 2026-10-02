@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
@@ -23,9 +25,14 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
@@ -55,7 +62,9 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -107,24 +116,28 @@ class CheckoutController @Inject internal constructor(
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
+                clientParams = elementsSessionClientParams,
                 sessionId = sessionId,
-                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                        checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = defaultBillingAddress,
-                    ).getOrThrow()
-                } else {
-                    response
-                }
-            }.mapCatching { response ->
-                checkoutStateLoader.loadInitial(
+                val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
+                val billingAddress = initialLoad.state.paymentSelection
+                    ?.billingDetails?.address?.toCheckoutAddress()
+                    ?: configurationState.defaults.billingDetails?.address
+                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = billingAddress,
+                    ).getOrThrow()
+                    // The updated totals change payment method metadata, so rebuild it before publishing.
+                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
+                } else {
+                    checkoutStateLoader.publish(initialLoad)
+                }
             }
         }
     }
@@ -159,8 +172,11 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun updateShippingAddress(
         name: String?,
-        address: Address,
+        address: Address?,
     ): kotlin.Result<Unit> {
+        if (address == null) {
+            return clearShippingAddress()
+        }
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
@@ -172,6 +188,23 @@ class CheckoutController @Inject internal constructor(
                 ),
             )
         }
+    }
+
+    internal suspend fun commitShippingAddress(
+        name: String?,
+        address: Address.State,
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
+    ): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = name,
+                    shippingAddress = address,
+                ),
+            )
+        },
+    ) {
+        kotlin.Result.success(updatedCheckoutSessionResponse)
     }
 
     /**
@@ -191,16 +224,45 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    internal suspend fun updateBillingAddress(
-        name: String?,
-        address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(
-            collectedDetails = collectedDetails.copy(
-                billingName = name,
-                billingAddress = it,
-            ),
-        )
+    internal suspend fun selectSavedPaymentMethod(
+        selection: PaymentSelection.Saved,
+    ): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = { commitSelection(selection) },
+        ) {
+            stateHolder.state = copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                    selection.paymentMethod.id,
+                ),
+            )
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+            if (address == null) {
+                if (
+                    checkoutSessionTaxRegionUpdater.requiresUpdate(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    )
+                ) {
+                    // Billing-tax filtering should prevent this state from reaching selection.
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+                    )
+                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            }
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = address,
+            ).onFailure {
+                stateHolder.state = stateHolder.state?.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                        error = it.stripeErrorMessage(),
+                    ),
+                )
+            }
+        }
     }
 
     /**
@@ -219,8 +281,9 @@ class CheckoutController @Inject internal constructor(
         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 checkoutSessionRepository.init(
+                    clientParams = elementsSessionClientParams,
                     sessionId = sessionId,
-                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                    adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                 )
             },
             onFailure = { kotlin.Result.failure(it) },
@@ -240,6 +303,31 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
+            )
+        }
+    }
+
+    private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = null,
+                    shippingAddress = null,
+                ),
+            )
+        },
+    ) {
+        val previousAddress = collectedDetails.shippingAddress
+        if (previousAddress == null) {
+            kotlin.Result.success(checkoutSessionResponse)
+        } else {
+            // The tax region endpoint requires a country, so retain the previous country only.
+            // Follow-up tracked in MOBILESDK-4944: https://jira.corp.stripe.com/browse/MOBILESDK-4944
+            // Send null once CheckoutClient supports clearing tax_region on the server.
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = Address().country(previousAddress.country).build(),
             )
         }
     }
@@ -283,18 +371,6 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    private fun requireMutableState(): kotlin.Result<Unit> {
-        stateHolder.state
-            ?: return kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        return if (sheetStateHolder.sheetIsOpen) {
-            integrationLaunchedFailure()
-        } else {
-            kotlin.Result.success(Unit)
-        }
-    }
-
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
@@ -318,6 +394,7 @@ class CheckoutController @Inject internal constructor(
                 registryOwner = activity,
             ),
             lifecycleOwner = activity,
+            activityResultRegistry = activity.activityResultRegistry,
             statusBarColor = StatusBarCompat.color(activity),
         )
         subcomponent.initializer.initialize()
@@ -338,18 +415,20 @@ class CheckoutController @Inject internal constructor(
      * Clears the customer's selected payment option, resetting it to `null`.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
-     * currently presented, or another mutation or confirmation is in progress.
+     * currently presented.
      */
-    fun clearPaymentOption(): kotlin.Result<Unit> {
-        return requireMutableState().fold(
-            onSuccess = {
-                operationCoordinator.runSynchronousMutation {
-                    stateHolder.clearSelection()
-                    kotlin.Result.success(Unit)
-                }
+    suspend fun clearPaymentOption(): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(
+                    paymentSelection = null,
+                    temporarySelection = null,
+                    previousNewSelections = Bundle(),
+                )
             },
-            onFailure = { kotlin.Result.failure(it) },
-        )
+        ) {
+            kotlin.Result.success(checkoutSessionResponse)
+        }
     }
 
     /**
@@ -367,41 +446,64 @@ class CheckoutController @Inject internal constructor(
          */
         val id: String,
         /**
+         * The business name configured in the Business Public Details settings of your Stripe account,
+         * or `null` if unavailable.
+         */
+        val businessName: String?,
+        /**
          * The status of the [Session] (open, complete, or expired).
          */
         val status: Status,
         /**
          * Whether this checkout session was created in live mode.
          */
-        val liveMode: Boolean,
+        val livemode: Boolean,
         /**
          * The three-letter ISO currency code (e.g., "usd").
          */
         val currency: String,
         /**
+         * Details about the currency presented to the customer, or `null` if the session is not using
+         * adaptive pricing.
+         */
+        val presentmentDetails: PresentmentDetails?,
+        /**
+         * Aggregate discounts across all order-summary items.
+         */
+        val discountAmounts: List<DiscountAmount>,
+        /**
          * The customer's email address from the checkout session.
          */
         val email: String?,
         /**
-         * The tax computation status for this checkout session.
+         * The items the customer is purchasing.
          */
-        val tax: Tax,
+        val orderSummaryItems: List<OrderSummaryItem>,
         /**
-         * Summary of totals including subtotal, discounts, taxes, and shipping.
+         * The factor used to convert amounts in the smallest currency unit to the major currency unit
+         * (e.g., `100` for USD and `1` for JPY).
          */
-        val totalSummary: TotalSummary?,
-        /**
-         * The products or services being purchased in this checkout session.
-         */
-        val lineItems: List<LineItem>,
-        /**
-         * Available shipping options for this checkout session.
-         */
-        val shippingOptions: List<ShippingRate>,
+        val minorUnitsAmountDivisor: Int,
         /**
          * The customer's currently selected payment option, or `null` if none has been selected yet.
          */
-        val paymentOptionDisplayData: PaymentOptionDisplayData?,
+        val paymentOption: PaymentOptionDisplayData?,
+        /**
+         * The customer's shipping contact details and postal address, if one has been collected.
+         */
+        val shippingAddress: ShippingAddress?,
+        /**
+         * Tax computation state, when available.
+         */
+        val tax: Tax?,
+        /**
+         * Aggregate tax amounts, or null before tax is computed.
+         */
+        val taxAmounts: List<TaxAmount>?,
+        /**
+         * The tax and discount breakdown for the computed session total.
+         */
+        val totals: Totals,
         internal val currencySelectorOptions: CurrencySelectorOptions?,
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {
@@ -445,10 +547,34 @@ class CheckoutController @Inject internal constructor(
              */
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            class Complete internal constructor() : Status() {
-                override fun equals(other: Any?): Boolean = other is Complete
+            @Poko
+            class Complete internal constructor(
+                /**
+                 * Whether the payment for this completed session has been collected.
+                 */
+                val paymentStatus: PaymentStatus,
+            ) : Status()
 
-                override fun hashCode(): Int = Complete::class.hashCode()
+            /**
+             * Whether the payment for a completed checkout session has been collected.
+             */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class PaymentStatus {
+                /**
+                 * The payment has been collected.
+                 */
+                Paid,
+
+                /**
+                 * The payment has not been collected. It may still be processing or may have failed.
+                 */
+                Unpaid,
+
+                /**
+                 * No payment was required for this session, such as for a zero-amount order.
+                 */
+                NoPaymentRequired,
             }
 
             /**
@@ -495,81 +621,114 @@ class CheckoutController @Inject internal constructor(
                  * A billing address must be provided to calculate tax.
                  */
                 RequiresBillingAddress,
-
-                /**
-                 * A tax status not recognized by this version of the SDK.
-                 */
-                Unknown,
             }
         }
 
         /**
-         * Summary of all totals for the checkout session.
+         * A localized monetary amount and its unformatted minor-unit value.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class TotalSummary internal constructor(
+        class Amount internal constructor(
             /**
-             * The subtotal before discounts, taxes, and shipping.
+             * A localized, currency-formatted string representing the amount (e.g., "$9.99").
              */
-            val subtotal: Long,
+            val amount: String,
             /**
-             * The amount due today, accounting for applied balances.
+             * The unformatted amount in the smallest currency unit (e.g., cents for USD).
              */
-            val totalDueToday: Long,
-            /**
-             * The total amount due including all charges.
-             */
-            val totalAmountDue: Long,
-            /**
-             * Discounts applied to the checkout session.
-             */
-            val discountAmounts: List<DiscountAmount>,
-            /**
-             * Tax amounts applied to the checkout session.
-             */
-            val taxAmounts: List<TaxAmount>,
-            /**
-             * The selected shipping rate, if any.
-             */
-            val shippingRate: ShippingRate?,
-            /**
-             * The customer's account balance applied to this session, if any.
-             */
-            val appliedBalance: Long?,
+            val minorUnitsAmount: Double,
         )
 
         /**
-         * A discount applied to the checkout session.
+         * Aggregate amounts for the checkout session.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Totals internal constructor(
+            /**
+             * The subtotal before discounts and taxes.
+             */
+            val subtotal: Amount,
+            /**
+             * The total tax added on top of the subtotal.
+             */
+            val taxExclusive: Amount,
+            /**
+             * The total tax already included in the subtotal.
+             */
+            val taxInclusive: Amount,
+            /**
+             * The total of all discounts applied.
+             */
+            val discount: Amount,
+            /**
+             * The grand total for the session.
+             */
+            val total: Amount,
+        )
+
+        /**
+         * Information about the currency presented to the customer during payment.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class PresentmentDetails internal constructor(
+            /**
+             * The three-letter ISO currency code presented to the customer (e.g., "eur").
+             */
+            val presentmentCurrency: String,
+        )
+
+        /**
+         * An aggregate discount calculated across all items.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class DiscountAmount internal constructor(
             /**
-             * The discount amount in the smallest currency unit.
+             * A localized, currency-formatted string representing the discount amount.
              */
-            val amount: Long,
+            val amount: String,
+            /**
+             * The unformatted discount amount in the smallest currency unit.
+             */
+            val minorUnitsAmount: Double,
             /**
              * The display name of the discount.
              */
             val displayName: String,
+            /**
+             * The promotion code that produced this discount, if any.
+             */
+            val promotionCode: String?,
+            /**
+             * The percentage off applied by this discount, if it is percentage-based.
+             */
+            val percentOff: Double?,
         )
 
         /**
-         * A tax amount applied to the checkout session.
+         * A tax amount included in an item or aggregated across the session.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class TaxAmount internal constructor(
             /**
-             * The tax amount in the smallest currency unit.
+             * A localized, currency-formatted string representing the tax amount.
              */
-            val amount: Long,
+            val amount: String,
             /**
-             * Whether this tax is inclusive (already included in the price).
+             * The unformatted tax amount in the smallest currency unit.
+             */
+            val minorUnitsAmount: Double,
+            /**
+             * Whether this tax is already included in the price.
              */
             val inclusive: Boolean,
             /**
@@ -577,68 +736,198 @@ class CheckoutController @Inject internal constructor(
              */
             val displayName: String,
             /**
-             * The tax rate as a percentage (e.g., 8.25).
+             * The tax rate as a percentage (e.g., `8.25`), if percentage-based.
              */
-            val percentage: Double,
+            val percentage: Double?,
         )
 
         /**
-         * A shipping rate option for the checkout session.
+         * The customer's shipping contact details and postal address.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class ShippingRate internal constructor(
+        class ShippingAddress internal constructor(
             /**
-             * The shipping rate ID.
+             * The recipient's name, if collected.
              */
-            val id: String,
+            val name: String?,
             /**
-             * The shipping amount in the smallest currency unit.
+             * The shipping postal address.
              */
-            val amount: Long,
+            val address: Address,
+        ) {
             /**
-             * The display name of the shipping option (e.g., "Standard Shipping").
+             * A shipping postal address on the checkout session.
              */
-            val displayName: String,
-            /**
-             * The estimated delivery time, if available (e.g., "3-5 business days").
-             */
-            val deliveryEstimate: String?,
-        )
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Address internal constructor(
+                /**
+                 * The city, district, suburb, town, or village.
+                 */
+                val city: String?,
+                /**
+                 * The two-letter ISO country code (e.g., "US").
+                 */
+                val country: String,
+                /**
+                 * The first line of the address (e.g., street or PO box).
+                 */
+                val line1: String?,
+                /**
+                 * The second line of the address (e.g., apartment, suite, or unit).
+                 */
+                val line2: String?,
+                /**
+                 * The postal or ZIP code.
+                 */
+                val postalCode: String?,
+                /**
+                 * The state, county, province, or region.
+                 */
+                val state: String?,
+            )
+        }
 
         /**
-         * A line item in the checkout session.
+         * The configuration and bounds for adjusting an item's quantity.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class LineItem internal constructor(
+        class AdjustableQuantity internal constructor(
             /**
-             * The line item ID.
+             * Whether the item's quantity can be adjusted.
              */
-            val id: String,
+            val enabled: Boolean,
             /**
-             * The display name of the item.
+             * The maximum allowed quantity.
              */
-            val name: String,
+            val maximum: Int,
             /**
-             * The quantity of this item.
+             * The minimum allowed quantity.
              */
-            val quantity: Int,
-            /**
-             * The unit price in the smallest currency unit, if available.
-             */
-            val unitAmount: Long?,
-            /**
-             * The subtotal before discounts and taxes.
-             */
-            val subtotal: Long,
-            /**
-             * The total after discounts and taxes.
-             */
-            val total: Long,
+            val minimum: Int,
         )
+
+        /**
+         * An item or group of items the customer is purchasing.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        sealed class OrderSummaryItem {
+            /**
+             * A stable identifier for this order-summary item.
+             */
+            abstract val id: String
+
+            /**
+             * A group of one-time-priced items.
+             */
+            @Poko
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class OneTimePrice internal constructor(
+                /**
+                 * A stable key for this group.
+                 */
+                val key: String,
+                /**
+                 * A description of this group, if available.
+                 */
+                val description: String?,
+                /**
+                 * The individual items in this group.
+                 */
+                val items: List<Item>,
+            ) : OrderSummaryItem() {
+                /**
+                 * A stable identifier for this group.
+                 */
+                override val id: String get() = key
+
+                /**
+                 * A single line item in a [OneTimePrice] group.
+                 */
+                @Poko
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Item internal constructor(
+                    /**
+                     * A stable key for this item.
+                     */
+                    val key: String,
+                    /**
+                     * The display name of the item.
+                     */
+                    val displayName: String,
+                    /**
+                     * Image URLs for the item. May be empty.
+                     */
+                    val images: List<String>,
+                    /**
+                     * The unit price rounded to the currency's standard number of decimal places.
+                     */
+                    val unitAmount: Amount,
+                    /**
+                     * The unit price with its full decimal precision, when provided by the Checkout Session.
+                     */
+                    val unitAmountDecimal: Amount?,
+                    /**
+                     * A label describing the unit (e.g., "per seat"), if any.
+                     */
+                    val unitLabel: String?,
+                    /**
+                     * The quantity of this item.
+                     */
+                    val quantity: Int,
+                    /**
+                     * The quantity adjustment configuration, if available.
+                     */
+                    val adjustableQuantity: AdjustableQuantity?,
+                    /**
+                     * The subtotal, total, and tax breakdown for this item.
+                     */
+                    val amountDetails: AmountDetails,
+                ) {
+                    /**
+                     * A stable identifier for this item.
+                     */
+                    val id: String get() = key
+
+                    /**
+                     * The amount breakdown for an order-summary item.
+                     */
+                    @Poko
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    class AmountDetails internal constructor(
+                        /**
+                         * The total after discounts and taxes.
+                         */
+                        val total: Amount,
+                        /**
+                         * The subtotal before discounts and taxes.
+                         */
+                        val subtotal: Amount,
+                        /**
+                         * The taxes applied to this item, or `null` before tax is computed.
+                         */
+                        val taxAmounts: List<TaxAmount>?,
+                        /**
+                         * The total tax already included in the subtotal.
+                         */
+                        val taxInclusive: Amount,
+                        /**
+                         * The total tax added on top of the subtotal.
+                         */
+                        val taxExclusive: Amount,
+                    )
+                }
+            }
+        }
 
         /**
          * Display data for the customer's currently selected payment option.
@@ -695,6 +984,10 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
+                /**
+                 * The customer's phone number.
+                 */
+                val phone: String?,
             ) {
                 /**
                  * A billing address.
@@ -821,25 +1114,12 @@ class CheckoutController @Inject internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        private var adaptivePricing: AdaptivePricing = AdaptivePricing()
         private var merchantDisplayName: String? = null
         private var defaults: Defaults = Defaults()
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
-        private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
-            CurrencySelectorElement.Configuration()
-        private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration =
-            ShippingAddressElement.Configuration()
-        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
-            ExpressCheckoutElement.Configuration()
-
-        /**
-         * Sets the adaptive pricing configuration for this checkout session.
-         */
-        fun adaptivePricing(
-            adaptivePricing: AdaptivePricing,
-        ): Configuration = apply {
-            this.adaptivePricing = adaptivePricing
-        }
+        private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration? = null
+        private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration? = null
+        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration? = null
 
         /**
          * Sets the merchant display name shown to the customer during checkout.
@@ -901,49 +1181,23 @@ class CheckoutController @Inject internal constructor(
 
         @Parcelize
         internal data class State(
-            val adaptivePricingAllowed: Boolean,
             val merchantDisplayName: String?,
             val defaults: Defaults.State,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
-            val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
-            val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
-            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
+            val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State?,
+            val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State?,
+            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
         ) : Parcelable
 
         internal fun build(): State {
             val defaultsState = defaults.build()
             return State(
-                adaptivePricingAllowed = adaptivePricing.build().allowed,
                 merchantDisplayName = merchantDisplayName,
                 paymentElementConfiguration = paymentElementConfiguration.build(),
-                currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
-                shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
-                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+                currencySelectorElementConfiguration = currencySelectorElementConfiguration?.build(),
+                shippingAddressElementConfiguration = shippingAddressElementConfiguration?.build(),
+                expressCheckoutElementConfiguration = expressCheckoutElementConfiguration?.build(),
                 defaults = defaultsState,
-            )
-        }
-
-        /**
-         * Configuration for adaptive pricing.
-         */
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class AdaptivePricing {
-            private var allowed: Boolean = false
-
-            /**
-             * Sets whether adaptive pricing is allowed for this checkout session.
-             */
-            fun allowed(allowed: Boolean): AdaptivePricing = apply {
-                this.allowed = allowed
-            }
-
-            internal fun build(): State = State(
-                allowed = allowed,
-            )
-
-            internal data class State(
-                val allowed: Boolean,
             )
         }
 
@@ -1019,7 +1273,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builder for an address passed to [updateShippingAddress] and [updateBillingAddress].
+     * Builder for an address passed to [updateShippingAddress].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

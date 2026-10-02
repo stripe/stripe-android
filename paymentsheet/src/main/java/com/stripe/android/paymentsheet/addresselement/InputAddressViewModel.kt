@@ -1,19 +1,21 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.injection.AddressElementViewModelModule
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineStart
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,14 +25,22 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 
+internal interface AddressElementPrimaryButtonAction {
+    suspend operator fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result>
+}
+
 @Suppress("TooManyFunctions")
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
-    private val eventReporter: AddressLauncherEventReporter,
+    val resultStateHolder: AddressElementResultStateHolder,
+    private val eventReporter: AddressElementEventReporter,
     private val dismissalCoordinator: AddressElementDismissalCoordinator,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
     private val placesClient: PlacesClientProxy?,
+    private val primaryButtonAction: AddressElementPrimaryButtonAction,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -46,12 +56,6 @@ internal class InputAddressViewModel @Inject constructor(
         addressFormatParser.parse(it)
     }
 
-    private val initialAddress = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
-    private val normalizedInitialFormValues = addressFormatParser
-        .parse(initialAddress ?: AddressDetails())
-        .mapValues { it.value.orEmpty() }
-    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
-
     private val initialInputsAreTheSame = initialBillingAddress == initialShippingAddress
 
     private val _shippingSameAsBillingState = MutableStateFlow(
@@ -65,7 +69,7 @@ internal class InputAddressViewModel @Inject constructor(
         }
     )
 
-    private var previousUserInput: Map<IdentifierSpec, String?>? = if (initialInputsAreTheSame) {
+    private var previousUserInput: Map<FormFieldId, String?>? = if (initialInputsAreTheSame) {
         null
     } else {
         initialShippingAddress
@@ -115,22 +119,35 @@ internal class InputAddressViewModel @Inject constructor(
             AutocompleteAddressInteractor.InlinePredictionsState.Idle
         )
 
+    private var inlineQuery: StateFlow<String>? = null
+
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
         interactor = this,
         config = args.config,
     )
 
-    val isDirty: StateFlow<Boolean> = dismissalCoordinator.isDirty
-
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
+
+    private val _saveError = MutableStateFlow<ResolvableString?>(null)
+    val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()
 
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    val isDirty: StateFlow<Boolean> = dismissalCoordinator.isDirty
+
+    private val initialFormValues = rawFormValues(
+        formValues = addressFormController.uncompletedFormValues.value,
+        query = inlineQuery?.value.orEmpty(),
+    )
+    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
+
     fun onScreenShown() {
-        eventReporter.onShow(_collectedAddress.value?.address?.country.orEmpty())
+        eventReporter.onShown(
+            country = getCurrentAddress().address?.country,
+        )
     }
 
     init {
@@ -164,10 +181,10 @@ internal class InputAddressViewModel @Inject constructor(
             }
         }
 
-        // Register before returning so dirty tracking is active before the UI can accept input.
-        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        viewModelScope.launch {
             addressFormController.uncompletedFormValues.collectLatest { formValues ->
-                updateDirtyState(formValues)
+                _saveError.value = null
+
                 val currentBillingSameAsShippingState = _shippingSameAsBillingState.value
 
                 if (currentBillingSameAsShippingState is ShippingSameAsBillingState.Show) {
@@ -193,7 +210,17 @@ internal class InputAddressViewModel @Inject constructor(
             _checkboxChecked.value = it
         }
 
-        updateDirtyState(addressFormController.uncompletedFormValues.value)
+        dismissalCoordinator.observeChanges(
+            combineAsStateFlow(
+                addressFormController.uncompletedFormValues,
+                inlineQuery ?: stateFlowOf(""),
+                checkboxChecked,
+            ) { formValues, query, checkboxChecked ->
+                rawFormValues(formValues, query) != initialFormValues ||
+                    (args.config?.additionalFields?.checkboxLabel != null &&
+                        checkboxChecked != initialCheckboxChecked)
+            }
+        )
     }
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
@@ -204,58 +231,85 @@ internal class InputAddressViewModel @Inject constructor(
         val formValues = addressFormController.getCurrentFormValues()
 
         return AddressDetails(
-            name = formValues[IdentifierSpec.Name]?.value,
+            name = formValues[FormFieldId.Name]?.value,
             address = PaymentSheet.Address(
-                city = formValues[IdentifierSpec.City]?.value,
-                country = formValues[IdentifierSpec.Country]?.value,
-                line1 = formValues[IdentifierSpec.Line1]?.value,
-                line2 = formValues[IdentifierSpec.Line2]?.value,
-                postalCode = formValues[IdentifierSpec.PostalCode]?.value,
-                state = formValues[IdentifierSpec.State]?.value
+                city = formValues[FormFieldId.City]?.value,
+                country = formValues[FormFieldId.Country]?.value,
+                line1 = formValues[FormFieldId.Line1]?.value,
+                line2 = formValues[FormFieldId.Line2]?.value,
+                postalCode = formValues[FormFieldId.PostalCode]?.value,
+                state = formValues[FormFieldId.State]?.value
             ),
-            phoneNumber = formValues[IdentifierSpec.Phone]?.value
+            phoneNumber = formValues[FormFieldId.Phone]?.value
         )
     }
 
     fun clickPrimaryButton(
-        completedFormValues: Map<IdentifierSpec, FormFieldEntry>?,
+        completedFormValues: Map<FormFieldId, FormFieldEntry>?,
         checkboxChecked: Boolean
     ) {
+        if (!_formEnabled.value) return
+        _saveError.value = null
         if (completedFormValues == null) {
             addressFormController.elements.forEach { it.onValidationStateChanged(true) }
             return
         }
         _formEnabled.value = false
-        dismissWithAddress(
-            AddressDetails(
-                name = completedFormValues?.get(IdentifierSpec.Name)?.value,
-                address = PaymentSheet.Address(
-                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
-                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
-                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
-                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
-                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
-                    state = completedFormValues?.get(IdentifierSpec.State)?.value
-                ),
-                phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
-                isCheckboxSelected = checkboxChecked
-            )
+        dismissalCoordinator.setSaving(true)
+        val addressDetails = AddressDetails(
+            name = completedFormValues[FormFieldId.Name]?.value,
+            address = PaymentSheet.Address(
+                city = completedFormValues[FormFieldId.City]?.value,
+                country = completedFormValues[FormFieldId.Country]?.value,
+                line1 = completedFormValues[FormFieldId.Line1]?.value,
+                line2 = completedFormValues[FormFieldId.Line2]?.value,
+                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
+                state = completedFormValues[FormFieldId.State]?.value
+            ),
+            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
+            isCheckboxSelected = checkboxChecked
         )
-    }
-
-    @VisibleForTesting
-    fun dismissWithAddress(addressDetails: AddressDetails) {
-        addressDetails.address?.country?.let { country ->
-            eventReporter.onCompleted(
-                country = country,
-                autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
-                editDistance = addressDetails.editDistance(collectedAddress.value)
+        viewModelScope.launch {
+            primaryButtonAction(addressDetails).fold(
+                onSuccess = { result ->
+                    completeWithAddress(
+                        addressDetails = addressDetails,
+                        result = result,
+                    )
+                },
+                onFailure = { error ->
+                    _saveError.value = error.stripeErrorMessage()
+                    _formEnabled.value = true
+                    dismissalCoordinator.setSaving(false)
+                },
             )
         }
-        dismissalCoordinator.markSaved()
-        navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
+    }
+
+    private fun completeWithAddress(
+        addressDetails: AddressDetails,
+        result: AddressElementActivityContract.Result,
+    ) {
+        val autocompleteFilledAddress = inlineAutocompleteController?.autocompleteFilledAddress
+        val autocompleteAddressDetails = autocompleteFilledAddress?.let { address ->
+            AddressDetails(
+                address = PaymentSheet.Address(
+                    city = address.city,
+                    country = address.country,
+                    line1 = address.line1,
+                    line2 = address.line2,
+                    postalCode = address.postalCode,
+                    state = address.state,
+                )
+            )
+        }
+        eventReporter.onSaveCompleted(
+            country = addressDetails.address?.country,
+            autocompleteResultSelected = autocompleteFilledAddress != null,
+            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
+        dismissalCoordinator.markSaved()
+        resultStateHolder.setResult(result)
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {
@@ -278,15 +332,6 @@ internal class InputAddressViewModel @Inject constructor(
 
     fun clickCheckbox(newValue: Boolean) {
         _checkboxChecked.value = newValue
-        updateDirtyState(addressFormController.uncompletedFormValues.value)
-    }
-
-    private fun updateDirtyState(formValues: Map<IdentifierSpec, FormFieldEntry>) {
-        val currentValues = formValues.mapValues { it.value.value.orEmpty() }
-        dismissalCoordinator.setDirty(
-            currentValues != normalizedInitialFormValues ||
-                _checkboxChecked.value != initialCheckboxChecked
-        )
     }
 
     fun onEnterManually() {
@@ -339,7 +384,23 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
+        inlineQuery = query
         inlineAutocompleteController?.observeQueryChanges(query, country)
+    }
+
+    private fun rawFormValues(
+        formValues: Map<FormFieldId, FormFieldEntry>,
+        query: String,
+    ): Map<FormFieldId, String> {
+        val values = formValues
+            .filterKeys { it != FormFieldId.OneLineAddress }
+            .mapValues { it.value.value.orEmpty() }
+            .toMutableMap()
+        // Condensed autocomplete text is not included in submitted form values.
+        if (FormFieldId.Line1 !in formValues) {
+            values[FormFieldId.Line1] = query
+        }
+        return values.filterValues { it.isNotEmpty() }
     }
 
     override fun onDismissed() {

@@ -46,14 +46,16 @@
   <string name="stripe_eps_bank">EPS 銀行</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX 銀行</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">透過 GCash 確認付款，即表示閣下允許 %s 根據其條款，就日後的付款從閣下的 GCash 賬戶扣款。</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">您輸入的 IBAN 不完整。</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">您輸入的 IBAN 無效，「%s」是不支援的國家代碼。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">您的 IBAN 應以兩個字母的國家代碼開頭。</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">iDEAL 銀行</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">閣下輸入的身份證號碼不完整。</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">您的 BLIK 代碼不完整。</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +71,16 @@
   <string name="stripe_klarna_pay_later">用 Klarna 先買後付</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">電話</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">透過 NICEPAY 確認付款，即表示閣下允許 %s 據其條款，使用此付款方式扣取日後的款項。</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">持卡人姓名</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">選擇您想如何付款：</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[建議：確認付款，即表示閣下同意，閣下的交易將由 Global Stack Services Limited 作為記錄商家處理，並遵守其<a href=\"%s\">使用條款</a>。]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[確認付款，即表示閣下同意，閣下的交易將由 Global Stack Services Limited 作為記錄商家處理，並遵守其<a href=\"%s\">條款</a>。]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 銀行</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -97,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">提交後，閣下將被重新導向以安全地完成後續步驟。</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">確認您的 PayPal 付款，即表示您允許 %s 按照他們的條款從您的 PayPal 扣取未來款項。</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[此為國際購買，不包括 3.5% IOF 費用。繼續操作即表示閣下了解並接受 <terms>Ebanx 的條款及細則</terms>。]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">確認您的 RevolutPay 付款即表示您允許 %s 按照其條款從您的 RevolutPay 賬戶扣取未來款項。</string>
   <!-- Satispay mandate text -->
@@ -111,14 +125,18 @@
   <string name="stripe_scan_card">掃描卡</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">清除已掃描的銀行卡</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">於 %1$s 到期</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務者 Stripe 向您的銀行發送對您的賬戶進行扣款的指令以及 (B) 您的銀行按照這些指令對您的賬戶進行扣款。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內申請，從您的賬戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續扣款的通知。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">設置為預設支付方式</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">設置</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">透過 Touch \'n Go 確認付款，即表示閣下允許 %s 根據其條款，就日後的付款從閣下的 Touch \'n Go 賬戶扣款。</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">透過 TrueMoney 確認付款，即表示閣下允許 %s 根據其條款，就日後的付款從閣下的 TrueMoney 賬戶扣款。</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">繼續操作即表示您授權 %1$s 按照您的購買或訂用計劃定期自動扣取您的 Twint 餘額。</string>
   <!-- Label for UPI ID number field on form -->

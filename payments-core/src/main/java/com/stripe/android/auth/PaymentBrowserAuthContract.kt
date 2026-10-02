@@ -6,6 +6,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
@@ -55,7 +56,7 @@ internal class PaymentBrowserAuthContract :
         val returnUrl: String? = null,
         val enableLogging: Boolean = false,
         val toolbarCustomization: StripeToolbarCustomization? = null,
-        val stripeAccountId: String? = null,
+        val apiConfiguration: ApiConfiguration.State,
         /**
          * TODO(mshafrir-stripe): we should probably rename this to `canCancelSource`
          */
@@ -71,7 +72,6 @@ internal class PaymentBrowserAuthContract :
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true,
         val statusBarColor: Int?,
-        val publishableKey: String,
         val isInstantApp: Boolean,
         val referrer: String? = null,
         val forceInAppWebView: Boolean = false,
@@ -90,11 +90,13 @@ internal class PaymentBrowserAuthContract :
             parcel.readString(),
             parcel.readByte() != 0.toByte(),
             parcel.readParcelable(StripeToolbarCustomization::class.java.classLoader),
-            parcel.readString(),
+            ApiConfiguration.State(
+                publishableKey = parcel.readString() ?: "",
+                stripeAccountId = parcel.readString(),
+            ),
             parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),
             parcel.readValue(Int::class.java.classLoader) as? Int,
-            parcel.readString() ?: "",
             parcel.readByte() != 0.toByte(),
             parcel.readString(),
             parcel.readByte() != 0.toByte(),
@@ -120,11 +122,11 @@ internal class PaymentBrowserAuthContract :
             parcel.writeString(returnUrl)
             parcel.writeByte(if (enableLogging) 1 else 0)
             parcel.writeParcelable(toolbarCustomization, flags)
-            parcel.writeString(stripeAccountId)
+            parcel.writeString(apiConfiguration.publishableKey)
+            parcel.writeString(apiConfiguration.stripeAccountId)
             parcel.writeByte(if (shouldCancelSource) 1 else 0)
             parcel.writeByte(if (shouldCancelIntentOnUserNavigation) 1 else 0)
             parcel.writeValue(statusBarColor)
-            parcel.writeString(publishableKey)
             parcel.writeByte(if (isInstantApp) 1 else 0)
             parcel.writeString(referrer)
             parcel.writeByte(if (forceInAppWebView) 1 else 0)

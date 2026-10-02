@@ -9,7 +9,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -17,11 +16,15 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultCardAccountRangeService
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
+import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
@@ -30,7 +33,7 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -38,6 +41,9 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardBrandFilter
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -45,6 +51,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -60,16 +67,22 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    private val composeTestRule = createComposeRule()
 
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    private val composeCleanupRule = createComposeCleanupRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(composeCleanupRule)
+        .around(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {
@@ -571,7 +584,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")
@@ -606,7 +619,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")
@@ -678,7 +691,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 label = "Card number".resolvableString
@@ -742,7 +755,7 @@ internal class CardNumberControllerTest {
                 cardNumberController.ComposeUI(
                     enabled = true,
                     field = SimpleTextElement(
-                        identifier = IdentifierSpec.Name,
+                        identifier = FormFieldId.Name,
                         controller = SimpleTextFieldController(
                             textFieldConfig = SimpleTextFieldConfig(
                                 resolvableString(value = "Card number")
@@ -845,10 +858,10 @@ internal class CardNumberControllerTest {
     }
 
     @Test
-    fun `Controller should always have an Ltr layout`() = runTest {
+    fun `Controller should enforce Ltr text direction`() = runTest {
         val cardNumberController = createController()
 
-        assertThat(cardNumberController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
+        assertThat(cardNumberController.enforceLeftToRightTextDirection).isTrue()
     }
 
     @Test
@@ -893,6 +906,42 @@ internal class CardNumberControllerTest {
         }
     }
 
+    @Test
+    fun `cancelling parent scope cancels controller collectors and stops account range updates`() = runTest {
+        val parentJob = Job()
+        val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher + parentJob))
+        val accountRangeService = DefaultCardAccountRangeService(
+            cardAccountRangeRepository = FakeCardAccountRangeRepository(),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            staticCardAccountRanges = mock(),
+            coroutineScope = coroutineScope,
+        )
+        val cardNumberController = DefaultCardNumberController(
+            cardTextFieldConfig = CardNumberConfig(
+                isCardBrandChoiceEligible = false,
+                cardBrandFilter = DefaultCardBrandFilter,
+            ),
+            cardAccountRangeRepository = FakeCardAccountRangeRepository(),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            coroutineScope = coroutineScope,
+            initialValue = null,
+            accountRangeService = accountRangeService,
+        )
+        val controllerJobs = parentJob.children.toList()
+        assertThat(controllerJobs).hasSize(4)
+
+        accountRangeService.updateAccountRangesResult(listOf(accountRange(CardBrand.Visa)))
+        assertThat(cardNumberController.cardBrandFlow.value).isEqualTo(CardBrand.Visa)
+
+        coroutineScope.cancel()
+        assertThat(controllerJobs.all { it.isCancelled }).isTrue()
+
+        accountRangeService.updateAccountRangesResult(listOf(accountRange(CardBrand.MasterCard)))
+        assertThat(cardNumberController.cardBrandFlow.value).isEqualTo(CardBrand.Visa)
+    }
+
     private fun createController(
         initialValue: String? = null,
         cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
@@ -906,6 +955,7 @@ internal class CardNumberControllerTest {
             cardAccountRangeRepository = FakeCardAccountRangeRepository(),
             uiContext = testDispatcher,
             workContext = testDispatcher,
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher)),
             initialValue = initialValue,
             cardBrandChoiceConfig = cardBrandChoiceConfig,
             cardBrandFilter = cardBrandFilter
@@ -932,6 +982,22 @@ internal class CardNumberControllerTest {
         }
 
         override val loading: StateFlow<Boolean> = stateFlowOf(false)
+    }
+
+    private fun accountRange(cardBrand: CardBrand): AccountRange {
+        return AccountRange(
+            binRange = BinRange(
+                low = "4000000000000000",
+                high = "4999999999999999",
+            ),
+            panLength = 16,
+            brandInfo = when (cardBrand) {
+                CardBrand.Visa -> AccountRange.BrandInfo.Visa
+                CardBrand.MasterCard -> AccountRange.BrandInfo.Mastercard
+                else -> error("Unsupported card brand: $cardBrand")
+            },
+            funding = CardFunding.Credit,
+        )
     }
 
     private companion object {

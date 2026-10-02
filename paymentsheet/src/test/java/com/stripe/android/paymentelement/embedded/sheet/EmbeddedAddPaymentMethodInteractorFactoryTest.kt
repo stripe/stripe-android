@@ -1,20 +1,27 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -73,6 +80,46 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
         assertThat(interactor.state.value.selectedPaymentMethodCode).isEqualTo("cashapp")
     }
 
+    @Test
+    fun `US bank account arguments receive autocomplete factory`() = runScenario {
+        assertThat(interactor.state.value.usBankAccountFormArguments.autocompleteAddressInteractorFactory)
+            .isSameInstanceAs(autocompleteAddressInteractorFactory)
+    }
+
+    @Test
+    fun `linked bank account removes incentive`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("link"),
+                ),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+                paymentMethodIncentive = incentive,
+            ),
+        ) {
+            interactor.state.test {
+                val initialState = awaitItem()
+                assertThat(initialState.incentive).isEqualTo(incentive)
+
+                initialState.usBankAccountFormArguments.onLinkedBankAccountChanged(
+                    PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+                )
+
+                awaitItem()
+                assertThat(awaitItem().incentive).isNull()
+            }
+        }
+    }
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -100,6 +147,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             savedStateHandle = SavedStateHandle(),
             selection = selectionHolder.selection,
         )
+        val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val factory = EmbeddedAddPaymentMethodInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedSelectionHolder = selectionHolder,
@@ -110,12 +158,14 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val interactor = factory.create()
 
         Scenario(
             interactor = interactor,
             paymentMethodMetadata = paymentMethodMetadata,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).apply { block() }
 
         interactor.close()
@@ -125,5 +175,6 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     private data class Scenario(
         val interactor: AddPaymentMethodInteractor,
         val paymentMethodMetadata: PaymentMethodMetadata,
+        val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
     )
 }

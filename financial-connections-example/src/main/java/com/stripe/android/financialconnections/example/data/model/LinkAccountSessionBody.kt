@@ -27,4 +27,6 @@ data class LinkAccountSessionBody(
     val stripeAccountId: String? = null,
     @SerialName("relink_authorization")
     val relinkAuthorization: String? = null,
+    @SerialName("account_holder")
+    val accountHolder: AccountHolder? = null,
 )

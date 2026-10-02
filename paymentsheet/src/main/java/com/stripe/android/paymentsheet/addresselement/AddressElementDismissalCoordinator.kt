@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -8,14 +10,22 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AddressElementDismissalCoordinator @Inject constructor() {
-    private val _isDirty = MutableStateFlow(false)
-    val isDirty: StateFlow<Boolean> = _isDirty.asStateFlow()
+    private val changes = MutableStateFlow<StateFlow<Boolean>>(stateFlowOf(false))
+    val isDirty: StateFlow<Boolean> = changes.flatMapLatestAsStateFlow { it }
+
+    var isSaving: Boolean = false
+        private set
 
     private val _showDiscardConfirmation = MutableStateFlow(false)
     val showDiscardConfirmation: StateFlow<Boolean> = _showDiscardConfirmation.asStateFlow()
 
-    fun setDirty(isDirty: Boolean) {
-        _isDirty.value = isDirty
+    fun observeChanges(changes: StateFlow<Boolean>) {
+        this.changes.value = changes
+    }
+
+    fun setSaving(isSaving: Boolean) {
+        this.isSaving = isSaving
+        if (isSaving) keepEditing()
     }
 
     fun requestDismiss(): Boolean {
@@ -33,11 +43,12 @@ internal class AddressElementDismissalCoordinator @Inject constructor() {
 
     fun discardChanges() {
         _showDiscardConfirmation.value = false
-        _isDirty.value = false
+        changes.value = stateFlowOf(false)
     }
 
     fun markSaved() {
         _showDiscardConfirmation.value = false
-        _isDirty.value = false
+        changes.value = stateFlowOf(false)
+        isSaving = false
     }
 }

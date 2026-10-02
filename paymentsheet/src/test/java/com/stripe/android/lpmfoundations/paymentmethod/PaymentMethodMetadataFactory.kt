@@ -5,6 +5,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkBrand
@@ -23,8 +24,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
-import com.stripe.android.ui.core.elements.LpmSerializer
-import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
     @Suppress("LongMethod")
@@ -40,7 +39,6 @@ internal object PaymentMethodMetadataFactory {
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
-        sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
@@ -75,6 +73,7 @@ internal object PaymentMethodMetadataFactory {
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
         isNfcScanningEnabled: Boolean = false,
+        preferNfcOverCameraScan: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
@@ -83,6 +82,7 @@ internal object PaymentMethodMetadataFactory {
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -123,7 +123,6 @@ internal object PaymentMethodMetadataFactory {
             } else {
                 null
             },
-            sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
@@ -148,6 +147,7 @@ internal object PaymentMethodMetadataFactory {
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
             isNfcScanningEnabled = isNfcScanningEnabled,
+            preferNfcOverCameraScan = preferNfcOverCameraScan,
             experimentsData = experimentsData,
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
@@ -156,13 +156,8 @@ internal object PaymentMethodMetadataFactory {
             cardArts = cardArts,
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
-    }
-
-    private fun createSharedDataSpecs(): List<SharedDataSpec> {
-        val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
-        val specsString = inputStream.bufferedReader().use { it.readText() }
-        return LpmSerializer.deserializeList(specsString).getOrThrow()
     }
 
     fun defaultIntegrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {

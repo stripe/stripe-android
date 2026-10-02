@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -32,7 +31,7 @@ import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -43,7 +42,6 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -75,12 +73,12 @@ internal class DefaultCardNumberController(
     cardAccountRangeRepository: CardAccountRangeRepository,
     uiContext: CoroutineContext,
     workContext: CoroutineContext,
+    private val coroutineScope: CoroutineScope,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
     cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
-    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext + SupervisorJob()),
     private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
         cardAccountRangeRepository,
         uiContext,
@@ -114,7 +112,7 @@ internal class DefaultCardNumberController(
         cardTextFieldConfig.determineVisualTransformation(number, panLength)
     }
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val enforceLeftToRightTextDirection: Boolean = true
 
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cardTextFieldConfig.convertToRaw(it) }
@@ -326,8 +324,8 @@ internal class DefaultCardNumberController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current

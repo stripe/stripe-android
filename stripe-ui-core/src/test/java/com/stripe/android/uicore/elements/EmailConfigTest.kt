@@ -11,6 +11,11 @@ class EmailConfigTest {
     private val emailConfig = EmailConfig()
 
     @Test
+    fun `email enforces left-to-right text direction`() {
+        assertThat(emailConfig.enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
     fun `verify determine state returns blank and required when empty`() {
         assertThat(emailConfig.determineState("")).isEqualTo(Blank)
     }

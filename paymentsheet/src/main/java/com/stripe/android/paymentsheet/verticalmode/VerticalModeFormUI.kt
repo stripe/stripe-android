@@ -32,6 +32,9 @@ import com.stripe.android.uicore.utils.collectAsState
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_HEADER_PROMO_BADGE = "TEST_TAG_HEADER_PROMO_BADGE"
+
 @Composable
 internal fun VerticalModeFormUI(
     interactor: VerticalModeFormInteractor,
@@ -118,7 +121,9 @@ internal fun VerticalModeFormHeaderUI(
         if (formHeaderInformation.promoBadge != null) {
             PromoBadge(
                 text = formHeaderInformation.promoBadge,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier
+                    .testTag(TEST_TAG_HEADER_PROMO_BADGE)
+                    .padding(start = 12.dp),
             )
         }
     }

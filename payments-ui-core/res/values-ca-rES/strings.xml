@@ -46,14 +46,16 @@
   <string name="stripe_eps_bank">Banc EPS</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">Banc FPX</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">En confirmar el vostre pagament amb GCash, permeteu a %s carregar el vostre compte GCash per a futurs pagaments d\'acord amb les seves condicions.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">L\'BAN és incomplet.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">L\'IBAN no és vàlid, %s no és un codi de país compatible.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">El teu IBAN ha de començar amb un codi de país de dues lletres.</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_ideal_bank">Bank iDeal</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">El número d\'identificació que heu introduït és incomplet.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">El codi BLIK no està complet.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -69,8 +71,16 @@
   <string name="stripe_klarna_pay_later">Paga més endavant amb Klarna.</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">Telèfon</string>
+  <!-- Korean payment method mandate text -->
+  <string name="stripe_kr_card_mandate">En confirmar el vostre pagament amb NICEPAY, permeteu a %s carregar aquest mètode de pagament per a futurs pagaments d\'acord amb les seves condicions.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nom a la targeta</string>
+  <!-- Label for the Naver Pay funding source selector -->
+  <string name="stripe_naver_pay_funding_label">Seleccioneu com voleu pagar:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[En confirmar el pagament, accepteu que Global Stack Services Limited gestioni la vostra transacció com a comerciant registrat i d\'acord amb les seves <a href=\"%s\">condicions d\'ús</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[En confirmar el pagament, accepteu que Global Stack Services Limited gestioni la vostra transacció com a comerciant registrat i d\'acord amb les seves <a href=\"%s\">condicions</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banc Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -97,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Domiciliació SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Un cop enviat, se us redirigirà per completar els passos següents de manera segura.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Si confirmeu el pagament a PayPal, permeteu que %s faci càrrecs al vostre compte de PayPal per a pagaments en el futur d\'acord amb les seves condicions.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Aquesta és una compra internacional i exclou una comissió del 3,5 % d\'IOF. En continuar, accepteu les <terms>condicions d\'Ebanx</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Si confirmeu el pagament amb RevolutPay, permeteu que %s faci càrrecs al vostre compte de RevolutPay per a pagaments en el futur d\'acord amb les seves condicions.</string>
   <!-- Satispay mandate text -->
@@ -111,14 +125,18 @@
   <string name="stripe_scan_card">Escanejar targeta</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Netegeu la targeta escanejada</string>
-  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
-  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Caduca el %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Proporcionant la informació de pagament i confirmant aquest pagament, estàs autoritzant (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar ordres al teu banc per tal de carregar des del teu compte i (B) carregar el teu compte en conformitat amb aquestes ordres. Tens dret a un reembolsament per part del teu banc sota els termes i condicions que s\'hagin acordat amb aquest. El reembolsament s\'ha de sol·licitar en un termini de 8 setmanes des de la data en que es va carregar el compte. Els teus drets estan explicats en un extracte que pots demanar al teu banc. Estàs acceptant rebre notificacions per pròxims dèbits fins a dos dies abans de que es portin a terme.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Configura com a mètode de pagament per defecte</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configuració</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">En confirmar el vostre pagament amb Touch \'n Go, permeteu a %s carregar el vostre compte Touch \'n Go per a futurs pagaments d\'acord amb les seves condicions.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">En confirmar el vostre pagament amb TrueMoney, permeteu a %s carregar el vostre compte TrueMoney per a futurs pagaments d\'acord amb les seves condicions.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">En continuar, autoritzeu a %1$s a carregar automàticament el vostre Saldo Twint de manera periòdica, d\'acord amb el vostre pla de compra o subscripció.</string>
   <!-- Label for UPI ID number field on form -->

@@ -1,8 +1,12 @@
 package com.stripe.android.crypto.onramp
 
+import android.app.Activity
+import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -11,13 +15,31 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodCallback
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationCallback
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityCallback
+import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
+import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
+import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncher
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncherFactory
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivity
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationArgs
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,10 +51,12 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class OnrampPresenterCoordinatorTest {
@@ -122,6 +146,60 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
             .isSameInstanceAs(error)
+    }
+
+    @Test
+    fun `missing identity ephemeral key is mapped by interactor`() = runTest {
+        val response = StartIdentityVerificationResponse(
+            id = "vs_123",
+            url = "https://example.com/verify",
+            ephemeralKey = null,
+        )
+        val expectedResult = OnrampVerifyIdentityResult.Failed(mock())
+        whenever(interactor.startIdentityVerification()).thenReturn(
+            OnrampStartVerificationResult.Completed(response)
+        )
+        whenever(interactor.handleIdentityVerificationResult(any())).thenReturn(expectedResult)
+        var callbackResult: OnrampVerifyIdentityResult? = null
+        val coordinator = createCoordinator(
+            verifyIdentityCallback = { callbackResult = it },
+        )
+
+        coordinator.verifyIdentity()
+        testScope.testScheduler.advanceUntilIdle()
+
+        val resultCaptor = argumentCaptor<IdentityVerificationSheet.VerificationFlowResult>()
+        verify(interactor).handleIdentityVerificationResult(resultCaptor.capture())
+        assertThat(resultCaptor.firstValue)
+            .isInstanceOf(IdentityVerificationSheet.VerificationFlowResult.Failed::class.java)
+        val error = (resultCaptor.firstValue as IdentityVerificationSheet.VerificationFlowResult.Failed)
+            .throwable
+        assertThat(error.message).isEqualTo("No ephemeral key found.")
+        assertThat(callbackResult).isSameInstanceAs(expectedResult)
+    }
+
+    @Test
+    fun `Google Pay platform key failure is mapped by interactor`() = runTest {
+        val platformKeyError = IllegalStateException("Platform key unavailable")
+        val mappedError = IllegalStateException("Mapped Onramp error")
+        val expectedResult = OnrampCollectPaymentMethodResult.Failed(mappedError)
+        whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.failure(platformKeyError))
+        whenever(interactor.collectPaymentMethodFailure(platformKeyError)).thenReturn(expectedResult)
+        var callbackResult: OnrampCollectPaymentMethodResult? = null
+        val coordinator = createCoordinator(
+            collectPaymentCallback = { callbackResult = it },
+        )
+
+        coordinator.collectPaymentMethod(
+            PaymentMethodSelection.GooglePay(
+                currencyCode = "usd",
+                amount = 1099,
+            )
+        )
+        testScope.testScheduler.advanceUntilIdle()
+
+        verify(interactor).collectPaymentMethodFailure(platformKeyError)
+        assertThat(callbackResult).isSameInstanceAs(expectedResult)
     }
 
     @Test
@@ -317,11 +395,245 @@ class OnrampPresenterCoordinatorTest {
         samsungPayLauncher.destroyCalls.awaitItem()
     }
 
+    @Test
+    fun `terms not required invokes callback without presenting`() = runTest {
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms)).thenReturn(
+            OnrampStartPartnerTermsResult.NotRequired
+        )
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add),
+        )
+
+        coordinator.presentTermsAndConditionsIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(results.awaitItem())
+            .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms of service not required invokes callback without presenting`() = runTest {
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService)).thenReturn(
+            OnrampStartPartnerTermsResult.NotRequired
+        )
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsOfServiceCallback = OnrampPartnerTermsCallback(results::add),
+        )
+
+        coordinator.presentTermsOfServiceIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(results.awaitItem())
+            .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms and conditions confirmation carries declaration to interactor`() = runTest {
+        val declarationType = PartnerDeclarationType.TransactionTerms
+        whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
+            OnrampStartPartnerTermsResult.PresentationRequired(
+                terms = PartnerTerms.Required(
+                    declaration = PartnerTerms.Declaration(
+                        id = "copt_decl_123",
+                        type = declarationType,
+                        text = "Terms",
+                    ),
+                ),
+                appearance = null,
+            )
+        )
+        val expected = OnrampPartnerTermsResult.Accepted()
+        whenever(interactor.confirmPartnerTerms("copt_decl_123", declarationType)).thenReturn(expected)
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add),
+        )
+        coordinator.presentTermsAndConditionsIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(
+            HTMLConfirmationResult.Confirmed(
+                HTMLConfirmationContent.PartnerTerms("copt_decl_123", declarationType),
+            )
+        )
+
+        assertThat(results.awaitItem()).isSameInstanceAs(expected)
+        verify(interactor).confirmPartnerTerms("copt_decl_123", declarationType)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms and conditions cancellation invokes callback without confirming`() = runTest {
+        val declarationType = PartnerDeclarationType.TransactionTerms
+        whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
+            OnrampStartPartnerTermsResult.PresentationRequired(
+                terms = PartnerTerms.Required(
+                    declaration = PartnerTerms.Declaration(
+                        id = "copt_decl_123",
+                        type = declarationType,
+                        text = "Terms",
+                    ),
+                ),
+                appearance = null,
+            )
+        )
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add),
+        )
+        coordinator.presentTermsAndConditionsIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(HTMLConfirmationResult.Cancelled)
+
+        assertThat(results.awaitItem()).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
+        verify(interactor, never()).confirmPartnerTerms(any(), any())
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms of service confirmation carries declaration to interactor`() = runTest {
+        val declarationType = PartnerDeclarationType.TermsOfService
+        whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
+            OnrampStartPartnerTermsResult.PresentationRequired(
+                terms = PartnerTerms.Required(
+                    declaration = PartnerTerms.Declaration(
+                        id = "copt_decl_456",
+                        type = declarationType,
+                        text = "Terms",
+                    ),
+                ),
+                appearance = null,
+            )
+        )
+        val expected = OnrampPartnerTermsResult.Accepted()
+        whenever(interactor.confirmPartnerTerms("copt_decl_456", declarationType)).thenReturn(expected)
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsOfServiceCallback = OnrampPartnerTermsCallback(results::add),
+        )
+        coordinator.presentTermsOfServiceIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(
+            HTMLConfirmationResult.Confirmed(
+                HTMLConfirmationContent.PartnerTerms("copt_decl_456", declarationType),
+            )
+        )
+
+        assertThat(results.awaitItem()).isSameInstanceAs(expected)
+        verify(interactor).confirmPartnerTerms("copt_decl_456", declarationType)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms of service cancellation invokes callback without confirming`() = runTest {
+        val declarationType = PartnerDeclarationType.TermsOfService
+        whenever(interactor.startPartnerTerms(declarationType)).thenReturn(
+            OnrampStartPartnerTermsResult.PresentationRequired(
+                terms = PartnerTerms.Required(
+                    declaration = PartnerTerms.Declaration(
+                        id = "copt_decl_456",
+                        type = declarationType,
+                        text = "Terms",
+                    ),
+                ),
+                appearance = null,
+            )
+        )
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(
+            termsOfServiceCallback = OnrampPartnerTermsCallback(results::add),
+        )
+        coordinator.presentTermsOfServiceIfNeeded()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(HTMLConfirmationResult.Cancelled)
+
+        assertThat(results.awaitItem()).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
+        verify(interactor, never()).confirmPartnerTerms(any(), any())
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `user attestation confirmation uses attestation payload`() = runTest {
+        whenever(interactor.startUserAttestation()).thenReturn(
+            OnrampStartUserAttestationResult.Completed(
+                attestation = UserAttestation(text = "Attestation", version = "1"),
+                appearance = null,
+            )
+        )
+        val expected = OnrampUserAttestationResult.Confirmed()
+        whenever(interactor.confirmUserAttestation()).thenReturn(expected)
+        val results = Turbine<OnrampUserAttestationResult>()
+        val coordinator = createCoordinator(
+            userAttestationCallback = OnrampUserAttestationCallback(results::add),
+        )
+        coordinator.presentUserAttestation()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(
+            HTMLConfirmationResult.Confirmed(HTMLConfirmationContent.UserAttestation)
+        )
+
+        assertThat(results.awaitItem()).isSameInstanceAs(expected)
+        verify(interactor).confirmUserAttestation()
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `user attestation cancellation invokes callback without confirming`() = runTest {
+        whenever(interactor.startUserAttestation()).thenReturn(
+            OnrampStartUserAttestationResult.Completed(
+                attestation = UserAttestation(text = "Attestation", version = "1"),
+                appearance = null,
+            )
+        )
+        val results = Turbine<OnrampUserAttestationResult>()
+        val coordinator = createCoordinator(
+            userAttestationCallback = OnrampUserAttestationCallback(results::add),
+        )
+        coordinator.presentUserAttestation()
+        testScope.testScheduler.advanceUntilIdle()
+
+        dispatchHTMLConfirmationResult(HTMLConfirmationResult.Cancelled)
+
+        assertThat(results.awaitItem()).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
+        verify(interactor, never()).confirmUserAttestation()
+        results.ensureAllEventsConsumed()
+    }
+
+    private fun dispatchHTMLConfirmationResult(result: HTMLConfirmationResult) {
+        val launched = shadowOf(activity).nextStartedActivityForResult
+        if (result is HTMLConfirmationResult.Confirmed) {
+            val args = BundleCompat.getParcelable(
+                requireNotNull(launched.intent.extras),
+                "html_confirmation_args",
+                HTMLConfirmationArgs::class.java,
+            )
+            assertThat(args?.content).isEqualTo(result.content)
+        }
+        activity.activityResultRegistry.dispatchResult(
+            launched.requestCode,
+            if (result is HTMLConfirmationResult.Confirmed) Activity.RESULT_OK else Activity.RESULT_CANCELED,
+            Intent().putExtra(HTMLConfirmationActivity.RESULT_ARG, result),
+        )
+        testScope.testScheduler.advanceUntilIdle()
+    }
+
     private fun createCoordinator(
         onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState()),
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
+        termsAndConditionsCallback: OnrampPartnerTermsCallback? = null,
+        termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
+        userAttestationCallback: OnrampUserAttestationCallback? = null,
+        verifyIdentityCallback: OnrampVerifyIdentityCallback = OnrampVerifyIdentityCallback {},
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -343,13 +655,16 @@ class OnrampPresenterCoordinatorTest {
 
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
-            .verifyIdentityCallback {}
+            .verifyIdentityCallback(verifyIdentityCallback)
             .collectPaymentCallback(collectPaymentCallback)
             .authorizeCallback {}
             .verifyKycCallback {}
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
+        termsAndConditionsCallback?.let(callbacks::termsAndConditionsCallback)
+        termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
+        userAttestationCallback?.let(callbacks::userAttestationCallback)
 
         OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
 

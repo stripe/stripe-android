@@ -9,12 +9,12 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -23,14 +23,15 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
         PaymentSheetCommonModule::class,
+        ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,

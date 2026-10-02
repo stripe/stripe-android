@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -85,6 +86,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
@@ -129,6 +131,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
@@ -177,6 +180,7 @@ class GooglePayLauncher internal constructor(
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                 allowCreditCards = config.allowCreditCards,
+                googlePayConfig = GooglePayConfig(context),
                 errorReporter = ErrorReporter.createFallbackInstance(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE)
@@ -416,6 +420,7 @@ fun rememberGooglePayLauncher(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    googlePayConfig = GooglePayConfig(context),
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)

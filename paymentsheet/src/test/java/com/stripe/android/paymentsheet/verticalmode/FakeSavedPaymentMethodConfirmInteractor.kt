@@ -7,7 +7,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -43,7 +43,7 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
                     SectionElement.wrap(
                         sectionFieldElements = listOf(
                             SimpleTextElement(
-                                identifier = IdentifierSpec.Generic("Name"),
+                                identifier = FormFieldId.Generic("Name"),
                                 controller = SimpleTextFieldController(
                                     initialValue = "John Doe",
                                     textFieldConfig = SimpleTextFieldConfig(

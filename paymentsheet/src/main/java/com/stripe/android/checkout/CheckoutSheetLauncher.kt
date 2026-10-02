@@ -4,6 +4,12 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -14,29 +20,65 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentelement.embedded.linkAccountInfoOrNull
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
+
+@Singleton
+internal class CheckoutSheetLauncherState @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+) {
+    var isAwaitingPaymentOptionsReady: Boolean
+        get() = savedStateHandle.get<Boolean>(AWAITING_PAYMENT_OPTIONS_READY_KEY) == true
+        set(value) {
+            savedStateHandle[AWAITING_PAYMENT_OPTIONS_READY_KEY] = value
+        }
+
+    private companion object {
+        const val AWAITING_PAYMENT_OPTIONS_READY_KEY =
+            "CheckoutSheetLauncherState_AWAITING_PAYMENT_OPTIONS_READY"
+    }
+}
 
 @OptIn(CheckoutSessionPreview::class)
+@CheckoutPresenterScope
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
+    private val sessionRefresher: CheckoutSessionRefresher,
+    private val operationCoordinator: CheckoutOperationCoordinator,
+    private val launcherState: CheckoutSheetLauncherState,
+    private val embeddedContentState: StateFlow<EmbeddedContentHelperStateHolder.State?>,
+    private val logger: Logger,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -52,6 +94,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            result.linkAccountInfoOrNull?.let(linkAccountHolder::set)
+            launcherState.isAwaitingPaymentOptionsReady = false
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
@@ -63,6 +107,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
             }
         }
 
+    init {
+        resumePendingReadyLaunch()
+    }
+
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
@@ -70,6 +118,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 if (!result.hasBeenConfirmed) {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
@@ -83,6 +132,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
@@ -91,7 +141,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> applyCompleteResult(result)
+            is EmbeddedActivityResult.Complete -> {
+                applyCompleteResult(result)
+                refreshCheckoutSession(result.checkoutSessionResponse)
+            }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
                 clearStaleSelection()
@@ -104,6 +157,17 @@ internal class CheckoutSheetLauncher @Inject constructor(
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
         selectionHolder.setSelection(result.selection)
+    }
+
+    private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
+        response ?: return
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                runCatching { sessionRefresher.refresh(response) }
+            }.onFailure {
+                logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+            }
+        }
     }
 
     private fun applyCustomerState(customerState: CustomerState?) {
@@ -143,15 +207,18 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = promotion,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }
@@ -173,13 +240,16 @@ internal class CheckoutSheetLauncher @Inject constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)
     }
@@ -198,17 +268,74 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedActivityArgs(
+        val initialArgs = createPaymentOptionsArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
+            selection = selection,
+            customerState = customerState,
+            presentationState = if (operationCoordinator.isUpdating.value) {
+                EmbeddedActivityArgs.PresentationState.Loading
+            } else {
+                EmbeddedActivityArgs.PresentationState.Ready
+            },
+        )
+        launcherState.isAwaitingPaymentOptionsReady =
+            initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
+        activityLauncher.launch(initialArgs)
+
+        resumePendingReadyLaunch()
+    }
+
+    private fun resumePendingReadyLaunch() {
+        if (!launcherState.isAwaitingPaymentOptionsReady) return
+
+        lifecycleOwner.lifecycleScope.launch {
+            operationCoordinator.isUpdating.first { isUpdating -> !isUpdating }
+            if (!sheetStateHolder.sheetIsOpen) {
+                launcherState.isAwaitingPaymentOptionsReady = false
+                return@launch
+            }
+
+            val refreshedState = embeddedContentState.value
+            if (refreshedState == null) {
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+                )
+                return@launch
+            }
+            activityLauncher.launch(
+                createPaymentOptionsArgs(
+                    paymentMethodMetadata = refreshedState.paymentMethodMetadata,
+                    configuration = refreshedState.configuration,
+                    selection = selectionHolder.selection.value,
+                    customerState = customerStateHolder.customer.value,
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                )
+            )
+            launcherState.isAwaitingPaymentOptionsReady = false
+        }
+    }
+
+    private fun createPaymentOptionsArgs(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration,
+        presentationState: EmbeddedActivityArgs.PresentationState,
+    ): EmbeddedActivityArgs {
+        return EmbeddedActivityArgs(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = configuration,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotion = null,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
+            presentationState = presentationState,
         )
-        activityLauncher.launch(args)
     }
 }

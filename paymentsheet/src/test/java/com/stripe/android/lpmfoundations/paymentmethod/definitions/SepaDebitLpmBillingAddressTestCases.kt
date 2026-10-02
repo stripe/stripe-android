@@ -7,20 +7,20 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val sepaDebitNoBillingAddressRawValues = mapOf(
-    IdentifierSpec.Generic("sepa_debit[iban]") to "DE89370400440532013000",
+    FormFieldId.Generic("sepa_debit[iban]") to "DE89370400440532013000",
 )
 
 private val sepaDebitWithBillingAddressRawValues = sepaDebitNoBillingAddressRawValues + mapOf(
-    IdentifierSpec.Name to "Jane Doe",
-    IdentifierSpec.Email to "jane@example.com",
-    IdentifierSpec.Line1 to "Unter den Linden 1",
-    IdentifierSpec.Line2 to "Wohnung 2",
-    IdentifierSpec.City to "Berlin",
-    IdentifierSpec.Country to "DE",
-    IdentifierSpec.PostalCode to "10117",
+    FormFieldId.Name to "Jane Doe",
+    FormFieldId.Email to "jane@example.com",
+    FormFieldId.Line1 to "Unter den Linden 1",
+    FormFieldId.Line2 to "Wohnung 2",
+    FormFieldId.City to "Berlin",
+    FormFieldId.Country to "DE",
+    FormFieldId.PostalCode to "10117",
 )
 
 private val sepaDebitNoBillingAddressExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

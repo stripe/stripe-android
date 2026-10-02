@@ -3,13 +3,17 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -22,6 +26,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -50,31 +55,6 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             synchronized(admissionLock) {
                 pendingMutations -= 1
                 updateIsUpdating()
-            }
-        }
-    }
-
-    fun <T> runSynchronousMutation(
-        block: () -> Result<T>,
-    ): Result<T> {
-        return synchronized(admissionLock) {
-            when {
-                confirmationInFlight -> Result.failure(
-                    IllegalStateException("Cannot mutate checkout session while confirmation is in progress.")
-                )
-                pendingMutations > 0 -> Result.failure(
-                    IllegalStateException("Cannot mutate checkout session while another mutation is in progress.")
-                )
-                else -> {
-                    check(mutex.tryLock()) {
-                        "Checkout operation gate should be available after synchronous mutation admission."
-                    }
-                    try {
-                        block()
-                    } finally {
-                        mutex.unlock()
-                    }
-                }
             }
         }
     }
@@ -164,7 +144,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    private fun updateIsUpdating() {
+    private fun updateIsUpdating() = viewModelScope.launch(Dispatchers.Main) {
         _isUpdating.value = confirmationInFlight || pendingMutations > 0
     }
 }

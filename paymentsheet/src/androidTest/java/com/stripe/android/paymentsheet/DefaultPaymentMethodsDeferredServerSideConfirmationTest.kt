@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -16,7 +18,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
+internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
 
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -32,7 +37,9 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
 
     @Test
     fun setNewCardAsDefault_withSavedPaymentMethods_failsInTestMode() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
@@ -86,7 +93,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        paymentSheetPage.clickPrimaryButton()
+        paymentSheetPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
 
@@ -98,7 +105,9 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
 
     @Test
     fun addFirstCardForUser_failsInTestMode() = runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _, _ ->
                 CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
@@ -143,7 +152,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-        paymentSheetPage.clickPrimaryButton()
+        paymentSheetPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
 

@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -12,6 +13,7 @@ import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@CheckoutPresenterScope
 class CheckoutPresenter @Inject internal constructor(
     private val paymentElementProvider: Lazy<PaymentElement>,
     private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,

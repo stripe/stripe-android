@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -12,10 +11,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
@@ -61,6 +66,7 @@ internal fun USBankAccountMandate(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                .testTag(SHEET_MANDATE_TEST_TAG)
         )
     }
 }
@@ -75,6 +81,7 @@ internal fun FormActivityError(
             modifier = Modifier
                 .padding(vertical = 8.dp)
                 .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                .testTag(SHEET_ERROR_TEST_TAG)
         )
     }
 }
@@ -90,7 +97,13 @@ internal fun FormActivityPrimaryButton(
         modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
         PrimaryButton(
-            modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
+            modifier = Modifier
+                .testTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .semantics {
+                    if (!state.isEnabled) {
+                        disabled()
+                    }
+                },
             label = state.primaryButtonLabel.resolve(),
             locked = state.shouldDisplayLockIcon,
             enabled = state.isEnabled,
@@ -101,6 +114,7 @@ internal fun FormActivityPrimaryButton(
         if (!state.isEnabled && !state.isProcessing) {
             Box(
                 modifier = Modifier
+                    .testTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)
                     .matchParentSize()
                     .pointerInput(Unit) {
                         detectTapGestures { onDisabledClick() }
@@ -109,6 +123,3 @@ internal fun FormActivityPrimaryButton(
         }
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON = "EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON"

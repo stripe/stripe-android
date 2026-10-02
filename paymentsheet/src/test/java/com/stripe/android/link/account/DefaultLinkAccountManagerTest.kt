@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkAccountUpdate
@@ -437,6 +438,7 @@ class DefaultLinkAccountManagerTest {
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.New> {
                 val details = result.first()
                 if (result.size > 1) {
@@ -450,7 +452,8 @@ class DefaultLinkAccountManagerTest {
                 linkAuthIntentId: String?,
                 sessionId: String,
                 customerId: String?,
-                supportedVerificationTypes: List<String>?
+                supportedVerificationTypes: List<String>?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSessionLookup> {
                 callCount += 1
                 return super.lookupConsumer(
@@ -458,7 +461,8 @@ class DefaultLinkAccountManagerTest {
                     linkAuthIntentId = linkAuthIntentId,
                     sessionId = sessionId,
                     customerId = customerId,
-                    supportedVerificationTypes = supportedVerificationTypes
+                    supportedVerificationTypes = supportedVerificationTypes,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -488,6 +492,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
                 customerEphemeralKey: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.Saved> {
                 createPaymentDetailsFromPaymentMethodCallCount += 1
                 capturedCustomerEphemeralKey = customerEphemeralKey
@@ -550,6 +555,7 @@ class DefaultLinkAccountManagerTest {
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkPaymentDetails.Passthrough> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
@@ -561,6 +567,7 @@ class DefaultLinkAccountManagerTest {
                     id = id,
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -589,10 +596,11 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun startVerification(
                 consumerSessionClientSecret: String,
-                isResendSmsCode: Boolean
+                isResendSmsCode: Boolean,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(consumerSessionClientSecret, isResendSmsCode)
+                return super.startVerification(consumerSessionClientSecret, isResendSmsCode, apiConfiguration)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -665,13 +673,15 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return super.confirmVerification(
                     verificationCode = verificationCode,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    consentGranted = consentGranted
+                    consentGranted = consentGranted,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
@@ -701,7 +711,8 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
-                consentGranted: Boolean?
+                consentGranted: Boolean?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
                 return Result.failure(error)
@@ -731,6 +742,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.failure(error)
@@ -753,6 +765,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun listPaymentDetails(
                 paymentMethodTypes: Set<String>,
                 consumerSessionClientSecret: String,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
                 return Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -963,6 +976,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
             }
@@ -1006,6 +1020,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
@@ -1035,6 +1050,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 intentToken: String?,
                 linkMode: LinkMode?,
+                apiConfiguration: ApiConfiguration.State,
             ): Result<LinkAccountSession> {
                 capturedIntentToken = intentToken
                 return Result.success(TestFactory.LINK_ACCOUNT_SESSION)

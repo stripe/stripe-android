@@ -443,7 +443,7 @@ class ConsumersApiServiceImplTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE)
+        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
         private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

@@ -1,6 +1,15 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,23 +46,39 @@ fun InlineAddressPredictionsUI(
     onClear: () -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
-    if (!shouldShowPredictionsDropdown(state)) {
-        return
-    }
-
-    Card(
-        elevation = 4.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp),
-    ) {
-        InlineAddressPredictionsContent(
-            state = state,
-            attributionDrawable = attributionDrawable,
-            onPredictionSelected = onPredictionSelected,
-            onClear = onClear,
-            onEnterManually = onEnterManually,
-        )
+    AnimatedContent(
+        modifier = Modifier.fillMaxWidth(),
+        targetState = state,
+        contentKey = { shouldShowPredictionsDropdown(it) },
+        transitionSpec = {
+            if (shouldShowPredictionsDropdown(targetState)) {
+                (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith
+                    ExitTransition.None using null
+            } else {
+                EnterTransition.None togetherWith
+                    (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)) using null
+            }
+        },
+        label = "InlineAddressPredictions",
+    ) { animatedState ->
+        if (shouldShowPredictionsDropdown(animatedState)) {
+            Card(
+                elevation = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+            ) {
+                Box(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+                    InlineAddressPredictionsContent(
+                        state = animatedState,
+                        attributionDrawable = attributionDrawable,
+                        onPredictionSelected = onPredictionSelected,
+                        onClear = onClear,
+                        onEnterManually = onEnterManually,
+                    )
+                }
+            }
+        }
     }
 }
 

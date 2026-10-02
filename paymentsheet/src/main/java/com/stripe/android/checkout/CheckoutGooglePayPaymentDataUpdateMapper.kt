@@ -37,7 +37,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapper @Inject construct
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                 countryCode = countryCode?.takeIf { it.isNotEmpty() },
                 transactionId = response.stripeIntent()?.id,
-                totalPrice = response.totalSummary?.totalAmountDue ?: response.amount,
+                totalPrice = response.amount,
                 totalPriceLabel = context.getString(R.string.stripe_google_pay_total),
                 checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
                 displayItems = displayItems,

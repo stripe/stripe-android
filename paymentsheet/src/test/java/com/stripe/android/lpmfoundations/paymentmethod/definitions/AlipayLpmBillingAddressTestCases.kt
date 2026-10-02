@@ -5,13 +5,13 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val alipayRawValues = mapOf(
-    IdentifierSpec.Line1 to "10 Collyer Quay",
-    IdentifierSpec.Line2 to "#10-01",
-    IdentifierSpec.PostalCode to "049315",
-    IdentifierSpec.Country to "SG",
+    FormFieldId.Line1 to "10 Collyer Quay",
+    FormFieldId.Line2 to "#10-01",
+    FormFieldId.PostalCode to "049315",
+    FormFieldId.Country to "SG",
 )
 
 private val alipayNeverExpectedParams = LpmBillingAddressFormParams(
@@ -37,6 +37,32 @@ private val alipayAutomaticWithoutTaxExpectedParams = LpmBillingAddressFormParam
         requiresMandate = false,
         overrideParamMap = mapOf(
             "type" to PaymentMethod.Type.Alipay.code,
+        ),
+        productUsage = emptySet(),
+        allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+    ),
+    optionsParams = null,
+    extraParams = null,
+)
+
+private val alipayAutomaticWithTaxExpectedParams = LpmBillingAddressFormParams(
+    createParams = PaymentMethodCreateParams.createWithOverride(
+        code = PaymentMethod.Type.Alipay.code,
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line2 = null,
+                country = "SG",
+            ),
+        ),
+        requiresMandate = false,
+        overrideParamMap = mapOf(
+            "type" to PaymentMethod.Type.Alipay.code,
+            "billing_details" to mapOf(
+                "address" to mapOf(
+                    "country" to "SG",
+                ),
+            ),
         ),
         productUsage = emptySet(),
         allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
@@ -99,6 +125,17 @@ internal val alipayTestCases = listOf(
         ),
         rawValues = alipayRawValues,
         expectedParams = alipayAutomaticWithoutTaxExpectedParams,
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Alipay AutomaticWithTax PaymentIntent automatic terms",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.Alipay,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = alipayRawValues,
+        expectedParams = alipayAutomaticWithTaxExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Alipay Full",

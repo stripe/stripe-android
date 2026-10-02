@@ -9,9 +9,10 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
@@ -42,6 +43,9 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -81,6 +85,8 @@ internal class CustomerSheetScreenshotTest {
 
     private val closeInteractorRule = CleanupTestRule(UpdatePaymentMethodInteractor::close)
 
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
         .around(closeInteractorRule)
@@ -89,6 +95,7 @@ internal class CustomerSheetScreenshotTest {
         .around(scopedThemePaparazzi)
         .around(localeRule)
         .around(coroutineRule)
+        .around(coroutineScopeCleanupRule)
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
@@ -118,6 +125,7 @@ internal class CustomerSheetScreenshotTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        apiConfiguration = DEFAULT_API_CONFIG,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -144,6 +152,7 @@ internal class CustomerSheetScreenshotTest {
             ).formElementsForCode(
                 code = PaymentMethod.Type.Card.code,
                 uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     linkConfigurationCoordinator = null,
                     onLinkInlineSignupStateChanged = {},
@@ -160,8 +169,8 @@ internal class CustomerSheetScreenshotTest {
             ),
             usBankAccountFormArguments = usBankAccountFormArguments,
             supportedPaymentMethods = listOf(
-                LpmRepositoryTestHelpers.card,
-                LpmRepositoryTestHelpers.usBankAccount,
+                SupportedPaymentMethodFixtures.card,
+                SupportedPaymentMethodFixtures.usBankAccount,
             ),
             enabled = true,
             isLiveMode = false,

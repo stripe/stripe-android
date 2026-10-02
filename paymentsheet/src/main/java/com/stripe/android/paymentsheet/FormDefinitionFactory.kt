@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
+import kotlinx.coroutines.CoroutineScope
 
 internal interface FormDefinitionFactory {
     fun formElementsForCode(code: PaymentMethodCode): List<FormElement>
@@ -33,7 +35,29 @@ internal interface FormDefinitionFactory {
     fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType
 }
 
+internal fun formTypeForCode(
+    paymentMethodCode: PaymentMethodCode,
+    formElements: List<FormElement>,
+): FormHelper.FormType {
+    val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
+    val requiresFormScreen = userInteractionAllowed ||
+        paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+        paymentMethodCode == PaymentMethod.Type.Link.code
+
+    return if (requiresFormScreen) {
+        FormHelper.FormType.UserInteractionRequired
+    } else {
+        val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
+        if (mandate == null) {
+            FormHelper.FormType.Empty
+        } else {
+            FormHelper.FormType.MandateOnly(mandate)
+        }
+    }
+}
+
 internal class DefaultFormDefinitionFactory(
+    private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -73,29 +97,14 @@ internal class DefaultFormDefinitionFactory(
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
         val formElements = formElementsForCode(paymentMethodCode)
-        return if (requiresFormScreen(paymentMethodCode, formElements)) {
-            FormHelper.FormType.UserInteractionRequired
-        } else {
-            val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
-            if (mandate == null) {
-                FormHelper.FormType.Empty
-            } else {
-                FormHelper.FormType.MandateOnly(mandate)
-            }
-        }
-    }
-
-    private fun requiresFormScreen(paymentMethodCode: String, formElements: List<FormElement>): Boolean {
-        val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
-        return userInteractionAllowed ||
-            paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-            paymentMethodCode == PaymentMethod.Type.Link.code
+        return formTypeForCode(paymentMethodCode, formElements)
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {
         val currentSelection = newPaymentSelectionProvider(code)?.takeIf { it.getType() == code }
 
         return UiDefinitionFactory.Arguments.Factory.Default(
+            coroutineScope = coroutineScope,
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkInlineHandler = linkInlineHandler,
@@ -126,19 +135,24 @@ internal class DefaultFormDefinitionFactory(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
         ): FormDefinitionFactory {
-            return DefaultFormDefinitionFactory(
-                linkInlineHandler = LinkInlineHandler.create(),
-                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = { viewModel.newPaymentSelection },
+            val formFactory = PaymentMethodFormFactory(
                 linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
-                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
-                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
-                isLinkUI = false,
-                automaticallyLaunchedCardScanFormDataHelper = null,
-                tapToAddHelper = viewModel.tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = null,
+                cardAccountRangeRepositoryFactory = viewModel.cardAccountRangeRepositoryFactory,
+                savedStateHandle = viewModel.savedStateHandle,
                 isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
+            )
+            return formFactory.createFormDefinitionFactory(
+                PaymentMethodFormFactory.FormDefinitionArguments(
+                    coroutineScope = viewModel.viewModelScope,
+                    linkInlineHandler = LinkInlineHandler.create(),
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    newPaymentSelectionProvider = { viewModel.newPaymentSelection },
+                    setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                    automaticallyLaunchedCardScanFormDataHelper = null,
+                    tapToAddHelper = viewModel.tapToAddHelper,
+                    paymentMethodMessagePromotionsHelper = null,
+                    autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                )
             )
         }
     }

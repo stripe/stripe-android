@@ -3,14 +3,14 @@ package com.stripe.android.paymentsheet.utils
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldElement
 
 internal suspend fun List<SectionFieldElement>.errorTest(
-    identifierSpec: IdentifierSpec,
+    formFieldId: FormFieldId,
     error: FieldValidationMessage?,
 ) {
-    val element = find { it.identifier == identifierSpec }
+    val element = find { it.identifier == formFieldId }
 
     assertThat(element).isNotNull()
 

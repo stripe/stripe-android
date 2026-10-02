@@ -44,6 +44,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
 
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
+            linkSessionKey = optString(consumerSessionJson, FIELD_LINK_SESSION_KEY),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
@@ -80,6 +81,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
 
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
+        private const val FIELD_LINK_SESSION_KEY = "link_session_key"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"

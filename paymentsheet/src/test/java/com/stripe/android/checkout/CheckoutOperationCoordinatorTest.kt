@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResp
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -38,6 +40,9 @@ import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
 internal class CheckoutOperationCoordinatorTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `runMutation returns the block result`() = runScenario {
@@ -359,7 +364,7 @@ internal class CheckoutOperationCoordinatorTest {
 
             resultTurbine.expectNoEvents()
             assertThat(coordinator.isUpdating.value).isFalse()
-            assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
+            assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
         }
 
     @Test
@@ -377,7 +382,7 @@ internal class CheckoutOperationCoordinatorTest {
 
         resultTurbine.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
-        assertThat(coordinator.runSynchronousMutation { Result.success(Unit) }.isSuccess).isTrue()
+        assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
     }
 
     @Test
@@ -733,61 +738,6 @@ internal class CheckoutOperationCoordinatorTest {
         }
     }
 
-    @Test
-    fun `synchronous mutation fails while confirmation is in flight`() = runScenario {
-        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
-
-        val result = coordinator.runSynchronousMutation {
-            Result.success(Unit)
-        }
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .isEqualTo("Cannot mutate checkout session while confirmation is in progress.")
-    }
-
-    @Test
-    fun `synchronous mutation fails while asynchronous mutation is in flight`() = runScenario {
-        val mutationStarted = CompletableDeferred<Unit>()
-        val finishMutation = CompletableDeferred<Unit>()
-        val mutation = async {
-            coordinator.runMutation {
-                mutationStarted.complete(Unit)
-                finishMutation.await()
-                Result.success(Unit)
-            }
-        }
-        mutationStarted.await()
-        var synchronousMutationInvoked = false
-
-        val result = coordinator.runSynchronousMutation {
-            synchronousMutationInvoked = true
-            Result.success(Unit)
-        }
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .isEqualTo("Cannot mutate checkout session while another mutation is in progress.")
-        assertThat(synchronousMutationInvoked).isFalse()
-
-        finishMutation.complete(Unit)
-        mutation.await()
-    }
-
-    @Test
-    fun `synchronous mutation executes and returns success when confirmation is not in flight`() = runScenario {
-        var invocationCount = 0
-
-        val result = coordinator.runSynchronousMutation {
-            invocationCount += 1
-            Result.success("updated")
-        }
-
-        assertThat(result.getOrThrow()).isEqualTo("updated")
-        assertThat(invocationCount).isEqualTo(1)
-        assertThat(coordinator.isUpdating.value).isFalse()
-    }
-
     private fun runScenario(
         sheetIsOpen: Boolean = false,
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
@@ -812,6 +762,7 @@ internal class CheckoutOperationCoordinatorTest {
             sessionRefresher = sessionRefresher,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
+            viewModelScope = backgroundScope,
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()

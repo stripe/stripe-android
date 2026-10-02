@@ -5,16 +5,16 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val fpxRawValues = mapOf(
-    IdentifierSpec.Generic("fpx[bank]") to "affin_bank",
-    IdentifierSpec.Line1 to "12 Jalan Ampang",
-    IdentifierSpec.Line2 to "Level 3",
-    IdentifierSpec.City to "Kuala Lumpur",
-    IdentifierSpec.State to "Kuala Lumpur",
-    IdentifierSpec.PostalCode to "50450",
-    IdentifierSpec.Country to "MY",
+    FormFieldId.Generic("fpx[bank]") to "affin_bank",
+    FormFieldId.Line1 to "12 Jalan Ampang",
+    FormFieldId.Line2 to "Level 3",
+    FormFieldId.City to "Kuala Lumpur",
+    FormFieldId.State to "Kuala Lumpur",
+    FormFieldId.PostalCode to "50450",
+    FormFieldId.Country to "MY",
 )
 
 private val fpxBankExpectedParams = PaymentMethodCreateParams.createWithOverride(

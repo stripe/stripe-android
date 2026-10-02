@@ -6,6 +6,8 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -18,12 +20,16 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.waitUntilWithIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
+internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create {
         around(IntentsRule())
@@ -85,6 +91,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
         secondLaunchBlock: (PaymentSheetPage) -> Unit,
     ) {
         runFlowControllerTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
             builder = {
                 confirmationType.createIntentCallback?.let {
@@ -121,21 +128,17 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             composeTestRule.waitForIdle()
 
             if (paymentMethodType is PaymentMethodType.UsBankAccount) {
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_BILLING_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
+                    ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
                 }
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
 
-                composeTestRule.waitUntil(
-                    timeoutMillis = 5000L
-                ) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule.onAllNodes(
                         hasTestTag(TEST_TAG_ACCOUNT_DETAILS)
-                    ).fetchSemanticsNodes().isNotEmpty()
+                    ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
                 }
             } else {
                 paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)

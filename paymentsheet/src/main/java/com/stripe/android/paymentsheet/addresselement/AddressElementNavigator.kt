@@ -22,8 +22,6 @@ internal interface AddressElementNavigator {
 
     fun <T : Any?> getResultFlow(key: String): Flow<T>?
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled())
-
     fun onBack(): Boolean
 
     sealed interface AutocompleteEvent : Parcelable {
@@ -44,7 +42,6 @@ internal interface AddressElementNavigator {
 @Singleton
 internal class NavHostAddressElementNavigator @Inject constructor() : AddressElementNavigator {
     var navigationController: NavHostController? = null
-    var onDismiss: ((AddressLauncherResult) -> Unit)? = null
 
     override fun navigateTo(
         target: AddressElementScreen
@@ -64,9 +61,8 @@ internal class NavHostAddressElementNavigator @Inject constructor() : AddressEle
             .filterNotNull()
     }
 
-    override fun dismiss(result: AddressLauncherResult) {
-        onDismiss?.invoke(result)
+    override fun onBack(): Boolean {
+        if (navigationController?.previousBackStackEntry == null) return false
+        return navigationController?.popBackStack() ?: false
     }
-
-    override fun onBack(): Boolean = navigationController?.popBackStack() ?: false
 }

@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor.InlinePredictionsState
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +97,7 @@ class InlineAutocompleteControllerTest {
         val event = eventCalls.awaitItem()
         assertThat(event).isEqualTo(
             AutocompleteAddressInteractor.Event.OnValues(
-                mapOf(IdentifierSpec.Country to "CA")
+                mapOf(FormFieldId.Country to "CA")
             )
         )
     }
@@ -272,11 +272,11 @@ class InlineAutocompleteControllerTest {
             .isInstanceOf<AutocompleteAddressInteractor.Event.OnExpandForm>()
         val values =
             (event as AutocompleteAddressInteractor.Event.OnExpandForm).values
-        assertThat(values?.get(IdentifierSpec.Line1)).isEqualTo("123 Main Street")
-        assertThat(values?.get(IdentifierSpec.City)).isEqualTo("San Francisco")
-        assertThat(values?.get(IdentifierSpec.State)).isEqualTo("CA")
-        assertThat(values?.get(IdentifierSpec.Country)).isEqualTo("US")
-        assertThat(values?.get(IdentifierSpec.PostalCode)).isEqualTo("94105")
+        assertThat(values?.get(FormFieldId.Line1)).isEqualTo("123 Main Street")
+        assertThat(values?.get(FormFieldId.City)).isEqualTo("San Francisco")
+        assertThat(values?.get(FormFieldId.State)).isEqualTo("CA")
+        assertThat(values?.get(FormFieldId.Country)).isEqualTo("US")
+        assertThat(values?.get(FormFieldId.PostalCode)).isEqualTo("94105")
     }
 
     @Test
@@ -554,7 +554,7 @@ class InlineAutocompleteControllerTest {
         countryFlow.value = "CA"
         advanceTimeBy(500)
         assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnValues(mapOf(IdentifierSpec.Country to "CA"))
+            AutocompleteAddressInteractor.Event.OnValues(mapOf(FormFieldId.Country to "CA"))
         )
 
         // Expanding removes the inline field from composition, so focus is lost. The country
@@ -565,7 +565,7 @@ class InlineAutocompleteControllerTest {
         countryFlow.value = "US"
         advanceTimeBy(500)
         assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnValues(mapOf(IdentifierSpec.Country to "US"))
+            AutocompleteAddressInteractor.Event.OnValues(mapOf(FormFieldId.Country to "US"))
         )
     }
 
@@ -728,8 +728,8 @@ class InlineAutocompleteControllerTest {
         assertThat(eventCalls.awaitItem()).isEqualTo(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
+                    FormFieldId.Line1 to "123 Main",
+                    FormFieldId.Country to "US",
                 )
             )
         )
@@ -762,8 +762,8 @@ class InlineAutocompleteControllerTest {
         assertThat(eventCalls.awaitItem()).isEqualTo(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 values = mapOf(
-                    IdentifierSpec.Line1 to "456 Oak Ave",
-                    IdentifierSpec.Country to "US",
+                    FormFieldId.Line1 to "456 Oak Ave",
+                    FormFieldId.Country to "US",
                 )
             )
         )
@@ -904,8 +904,8 @@ class InlineAutocompleteControllerTest {
         assertThat(eventCalls.awaitItem()).isEqualTo(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main St",
-                    IdentifierSpec.Country to "US",
+                    FormFieldId.Line1 to "123 Main St",
+                    FormFieldId.Country to "US",
                 )
             )
         )

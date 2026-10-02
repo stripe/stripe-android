@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -15,6 +16,7 @@ internal class SavedPaymentMethodConfirmScreenFactory @Inject constructor(
     private val confirmationHelper: SheetActivityConfirmationHelper,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
 ) {
     fun create(selection: PaymentSelection.Saved) = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
@@ -24,6 +26,7 @@ internal class SavedPaymentMethodConfirmScreenFactory @Inject constructor(
         confirmationHelper = confirmationHelper,
         embeddedSelectionHolder = embeddedSelectionHolder,
         customerStateHolder = customerStateHolder,
+        linkAccountHolder = linkAccountHolder,
         launchMode = launchMode,
     )
 }

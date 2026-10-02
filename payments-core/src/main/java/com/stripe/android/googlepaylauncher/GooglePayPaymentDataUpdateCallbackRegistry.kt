@@ -1,10 +1,10 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.annotation.MainThread
-import androidx.annotation.RestrictTo
+import kotlinx.coroutines.CoroutineScope
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object GooglePayPaymentDataUpdateCallbackRegistry {
+internal object GooglePayPaymentDataUpdateCallbackRegistry {
+    private var selection: Selection? = null
     private val registeredCallbacks = mutableMapOf<String, GooglePayPaymentDataUpdateCallback>()
 
     @MainThread
@@ -17,7 +17,22 @@ object GooglePayPaymentDataUpdateCallbackRegistry {
         registeredCallbacks.remove(key)
     }
 
-    fun get(key: String): GooglePayPaymentDataUpdateCallback? {
-        return registeredCallbacks[key]
+    fun select(key: String, workScope: CoroutineScope) {
+        selection = registeredCallbacks[key]?.let {
+            Selection(callback = it, workScope = workScope)
+        }
     }
+
+    fun deselect() {
+        selection = null
+    }
+
+    fun get(): Selection? {
+        return selection
+    }
+
+    class Selection(
+        val callback: GooglePayPaymentDataUpdateCallback,
+        val workScope: CoroutineScope,
+    )
 }

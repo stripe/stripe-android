@@ -5,6 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -23,7 +25,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class CustomPaymentMethodsTest {
+internal class CustomPaymentMethodsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -50,7 +55,9 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
@@ -107,7 +114,9 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
@@ -183,7 +192,9 @@ internal class CustomPaymentMethodsTest {
         var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
 
         runProductIntegrationTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
@@ -246,6 +257,7 @@ internal class CustomPaymentMethodsTest {
 
         runEmbeddedPaymentElementTest(
             networkRule = networkRule,
+            apiConfigurationTestType = apiConfigurationTestType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
                     calledConfirmCallback = true

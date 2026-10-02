@@ -3,17 +3,19 @@ package com.stripe.android.paymentelement
 import android.net.Uri
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
@@ -21,6 +23,8 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.clientAttributionMetadataParamsForDeferredIntent
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.EmbeddedPaymentElementApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -29,12 +33,13 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
@@ -54,17 +59,16 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
 
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: ApiConfigurationTestType
+
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
-
-    @Before
-    fun before() {
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
-    }
 
     @Test
     fun testSuccessfulCardPayment() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -178,6 +182,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentWithConfirmationToken() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         builderInstance = EmbeddedPaymentElement.Builder(
             createIntentCallback = { _ ->
                 CreateIntentResult.Success("pi_example_secret_example")
@@ -277,6 +282,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testCheckoutWithSavedCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -355,6 +361,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testEditCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -416,6 +423,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @Test
     fun testRemoveCard() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,
+        apiConfigurationTestType = apiConfigurationTestType,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")

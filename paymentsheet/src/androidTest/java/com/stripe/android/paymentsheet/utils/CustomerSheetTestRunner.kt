@@ -10,6 +10,7 @@ import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.MainActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -73,7 +74,7 @@ private fun runCustomerSheetTest(
         scenario.moveToState(Lifecycle.State.CREATED)
 
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
+            PaymentConfiguration.init(it, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
             DefaultLinkStore(it.applicationContext).clear()
         }
 

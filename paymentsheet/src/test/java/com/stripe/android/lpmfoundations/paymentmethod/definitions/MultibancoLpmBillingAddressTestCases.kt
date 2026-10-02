@@ -5,15 +5,15 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val multibancoRawValues = mapOf(
-    IdentifierSpec.Email to "ines.silva@example.com",
-    IdentifierSpec.Line1 to "Rua do Ouro 1",
-    IdentifierSpec.Line2 to "2.º Esq.",
-    IdentifierSpec.City to "Lisboa",
-    IdentifierSpec.PostalCode to "1100-063",
-    IdentifierSpec.Country to "PT",
+    FormFieldId.Email to "ines.silva@example.com",
+    FormFieldId.Line1 to "Rua do Ouro 1",
+    FormFieldId.Line2 to "2.º Esq.",
+    FormFieldId.City to "Lisboa",
+    FormFieldId.PostalCode to "1100-063",
+    FormFieldId.Country to "PT",
 )
 
 private val multibancoNeverExpectedParams = LpmBillingAddressFormParams(

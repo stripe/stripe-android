@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.AUTHENTICATED_OPERATIONS_TAG
 import com.stripe.android.crypto.onramp.example.BACK_TO_SIGN_IN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.LOG_OUT_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.model.KycResidence
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.CustomerWallet
@@ -48,6 +49,8 @@ internal fun AuthenticatedOperationsScreen(
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onShowUserAttestation: () -> Unit,
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -61,6 +64,7 @@ internal fun AuthenticatedOperationsScreen(
     onKycBirthCountryChange: (String) -> Unit,
     onKycBirthCityChange: (String) -> Unit,
     onKycNationalitiesChange: (String) -> Unit,
+    onKycResidenceChange: (KycResidence) -> Unit,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
     onIdentifierTypeChange: (Int, String) -> Unit,
     onIdentifierValueChange: (Int, String) -> Unit,
@@ -164,10 +168,17 @@ internal fun AuthenticatedOperationsScreen(
             onBirthCityChange = onKycBirthCityChange,
             nationalities = uiState.kycNationalities,
             onNationalitiesChange = onKycNationalitiesChange,
+            residence = uiState.kycResidence,
+            onResidenceChange = onKycResidenceChange,
             address = uiState.kycAddress,
             onAddressChange = onKycAddressChange,
             onCollectKyc = onCollectKyc,
             onVerifyKyc = onVerifyKyc
+        )
+
+        PartnerTermsSection(
+            onShowTermsAndConditions = onShowTermsAndConditions,
+            onShowTermsOfService = onShowTermsOfService,
         )
 
         IdentifierSection(

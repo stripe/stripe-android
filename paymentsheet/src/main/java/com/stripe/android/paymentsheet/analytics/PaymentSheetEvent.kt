@@ -78,14 +78,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
-    class Init(
-        private val mode: EventReporter.Mode,
-    ) : PaymentSheetEvent() {
-
-        override val eventName: String
-            get() = formatEventName(mode, "init")
-    }
-
     class Dismiss : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
     }
@@ -248,13 +240,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     is Failure -> "failure"
                 }
         }
-    }
-
-    class LpmSerializeFailureEvent(
-        val errorMessage: String?
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "luxe_serialize_failure"
-        override val params: Map<String, Any?> = mapOf(FIELD_ERROR_MESSAGE to errorMessage)
     }
 
     class AutofillEvent(

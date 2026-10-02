@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -205,6 +205,14 @@ internal class DefaultAddPaymentMethodInteractor(
             processing.collect {
                 _state.value = _state.value.copy(
                     processing = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
+            incentive.collect {
+                _state.value = _state.value.copy(
+                    incentive = it
                 )
             }
         }

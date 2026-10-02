@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.example.model.AuthorizeEvent
 import com.stripe.android.crypto.onramp.example.model.CheckoutEvent
 import com.stripe.android.crypto.onramp.example.model.IdentifierInputEntry
 import com.stripe.android.crypto.onramp.example.model.KEY_UI_STATE
+import com.stripe.android.crypto.onramp.example.model.KycResidence
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
@@ -40,6 +41,7 @@ import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
@@ -88,6 +90,8 @@ internal class OnrampViewModel(
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
         .samsungPayIsReadyCallback { isReady, result -> samsungPayIsReady(isReady, result) }
         .userAttestationCallback(callback = ::onUserAttestationResult)
+        .termsAndConditionsCallback { onPartnerTermsResult("Terms and conditions", it) }
+        .termsOfServiceCallback { onPartnerTermsResult("Terms of service", it) }
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator.Builder().build(getApplication(), savedStateHandle, callbacks)
@@ -98,7 +102,16 @@ internal class OnrampViewModel(
     private val savedUiState: OnrampUiState?
         get() = savedStateHandle[KEY_UI_STATE]
 
-    private val _uiState = MutableStateFlow(savedUiState ?: OnrampUiState())
+    private val _uiState = MutableStateFlow(
+        savedUiState ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
+            walletRawPhone = null,
+            kycResidence = KycResidence.UnitedStates,
+        )
+    )
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -291,16 +304,28 @@ internal class OnrampViewModel(
 
         _uiState.value = savedUser?.let {
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
+                walletRawPhone = null,
                 email = it.email,
                 authToken = it.authToken,
                 screen = Screen.SeamlessSignIn,
                 googlePayIsReady = googlePayIsReady,
                 samsungPayIsReady = samsungPayIsReady,
+                kycResidence = KycResidence.UnitedStates,
             )
         } ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
+            walletRawPhone = null,
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
             samsungPayIsReady = samsungPayIsReady,
+            kycResidence = KycResidence.UnitedStates,
         )
     }
 
@@ -349,6 +374,18 @@ internal class OnrampViewModel(
         }
     }
 
+    private fun onPartnerTermsResult(
+        label: String,
+        result: OnrampPartnerTermsResult,
+    ) {
+        _message.value = when (result) {
+            is OnrampPartnerTermsResult.Accepted -> "$label accepted"
+            is OnrampPartnerTermsResult.NotRequired -> "$label not required"
+            is OnrampPartnerTermsResult.Cancelled -> "$label cancelled"
+            is OnrampPartnerTermsResult.Failed -> "$label failed: ${result.error.message}"
+        }
+    }
+
     fun onVerifyKycResult(result: OnrampVerifyKycInfoResult) {
         when (result) {
             is OnrampVerifyKycInfoResult.Confirmed -> {
@@ -377,7 +414,14 @@ internal class OnrampViewModel(
                 _message.value = "Payment selection completed"
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
+                        walletEmail = result.kycInfo?.email,
+                        walletPhone = result.kycInfo?.phone,
+                        walletCountry = result.kycInfo?.address?.country,
+                        walletFullName = listOfNotNull(result.kycInfo?.firstName, result.kycInfo?.lastName)
+                            .filter { it.isNotBlank() }
+                            .joinToString(" ")
+                            .takeIf { it.isNotEmpty() },
+                        walletRawPhone = result.kycInfo?.rawPhone,
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
@@ -401,7 +445,6 @@ internal class OnrampViewModel(
                     _message.value = "Payment selection failed: ${result.error.message}"
                     _uiState.update {
                         it.copy(
-                            screen = Screen.AuthenticatedOperations,
                             loadingMessage = null
                         )
                     }
@@ -1065,6 +1108,19 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycNationalities = value) }
     }
 
+    fun updateKycResidence(residence: KycResidence) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                kycResidence = residence,
+                sourceCurrency = residence.localCurrency,
+                kycBirthCountry = if (residence.followsEuFlow) currentState.kycBirthCountry else "",
+                kycBirthCity = if (residence.followsEuFlow) currentState.kycBirthCity else "",
+                kycNationalities = if (residence.followsEuFlow) currentState.kycNationalities else "",
+                kycAddress = currentState.kycAddress.replacingCountry(residence.countryCode.orEmpty()),
+            )
+        }
+    }
+
     fun updateKycAddress(address: PaymentSheet.Address) {
         _uiState.update { it.copy(kycAddress = address) }
     }
@@ -1353,9 +1409,15 @@ internal class OnrampViewModel(
 
         _uiState.update { currentState ->
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
+                walletRawPhone = null,
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,
                 samsungPayIsReady = currentState.samsungPayIsReady,
+                kycResidence = KycResidence.UnitedStates,
             )
         }
     }
@@ -1405,4 +1467,15 @@ private fun List<IdentifierInputEntry>.replaceAt(
 private fun List<IdentifierInputEntry>.removeEntryAt(index: Int): List<IdentifierInputEntry> {
     if (index !in indices) return this
     return filterIndexed { currentIndex, _ -> currentIndex != index }
+}
+
+private fun PaymentSheet.Address.replacingCountry(country: String): PaymentSheet.Address {
+    return PaymentSheet.Address(
+        city = city,
+        country = country,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 }

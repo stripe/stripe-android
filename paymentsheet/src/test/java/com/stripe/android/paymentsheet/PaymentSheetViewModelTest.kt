@@ -35,7 +35,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -60,8 +60,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -78,7 +76,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
@@ -126,7 +123,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.ResetMockRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -202,10 +199,9 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `init should fire analytics event`() {
+    fun `creating viewmodel should regenerate analytics session ID`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
-        verify(eventReporter).onInit()
 
         // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -824,7 +820,7 @@ internal class PaymentSheetViewModelTest {
             formHelper.onFormFieldValuesChanged(
                 formValues = FormFieldValues(
                     fieldValuePairs = mapOf(
-                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                        FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                     ),
                     userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                 ),
@@ -1618,7 +1614,7 @@ internal class PaymentSheetViewModelTest {
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = false,
             paymentMethodMessagePromotionsHelper = null,
         ).createFormArguments(
-            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
+            paymentMethodCode = SupportedPaymentMethodFixtures.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(
@@ -2056,51 +2052,6 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error.resolvableString)))
         }
-    }
-
-    @Test
-    fun `Sends correct analytics event when using normal intent`() = runTest {
-        createViewModel()
-
-        verify(eventReporter).onInit()
-    }
-
-    @Test
-    fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("Should not be called!")
-            }
-            .build()
-
-        createViewModelForDeferredIntent()
-
-        verify(eventReporter).onInit()
-    }
-
-    @Test
-    fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createIntentCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .confirmCustomPaymentMethodCallback { _, _ ->
-                error("Should not be called!")
-            }
-            .externalPaymentMethodConfirmHandler { _, _ ->
-                error("Should not be called!")
-            }
-            .build()
-
-        createViewModelForDeferredIntent()
-
-        verify(eventReporter).onInit()
     }
 
     @Test
@@ -2804,7 +2755,7 @@ internal class PaymentSheetViewModelTest {
                 formHelper.onFormFieldValuesChanged(
                     formValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                            FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     ),
@@ -2836,7 +2787,7 @@ internal class PaymentSheetViewModelTest {
                 formHelper.onFormFieldValuesChanged(
                     formValues = FormFieldValues(
                         fieldValuePairs = mapOf(
-                            IdentifierSpec.Country to FormFieldEntry("CA", true),
+                            FormFieldId.Country to FormFieldEntry("CA", true),
                         ),
                         userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
                     ),

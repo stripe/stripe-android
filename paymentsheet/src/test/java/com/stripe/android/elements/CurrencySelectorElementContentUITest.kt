@@ -160,7 +160,10 @@ internal class CurrencySelectorElementContentUITest {
     private fun runScenario(
         fixture: String = FIXTURE_WITH_ADAPTIVE_PRICING,
         setContent: Boolean = true,
-        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
+        configuration: CheckoutController.Configuration = CheckoutController.Configuration()
+            .currencySelectorElement(
+                CurrencySelectorElement.Configuration()
+            ),
         block: Scenario.() -> Unit,
     ) {
         enqueueCheckoutInit(fixture)

@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
@@ -149,10 +151,13 @@ private fun Screens(
             )
         }
 
-        composable(LinkScreen.Verification.route) {
+        composable(LinkScreen.Verification.route) { backStackEntry ->
             // Keep height fixed to reduce animations caused by IME toggling on both
             // this screen and SignUp screen.
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = rememberRouteLinkAccount(
+                backStackEntry = backStackEntry,
+                getLinkAccount = getLinkAccount,
+            ) ?: return@composable dismissWithResult(noLinkAccountResult())
             MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
                 VerificationRoute(
                     linkAccount = linkAccount,
@@ -163,8 +168,11 @@ private fun Screens(
             }
         }
 
-        composable(LinkScreen.Wallet.route) {
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+        composable(LinkScreen.Wallet.route) { backStackEntry ->
+            val linkAccount = rememberRouteLinkAccount(
+                backStackEntry = backStackEntry,
+                getLinkAccount = getLinkAccount,
+            ) ?: return@composable dismissWithResult(noLinkAccountResult())
 
             WalletRoute(
                 linkAccount = linkAccount,
@@ -176,22 +184,39 @@ private fun Screens(
             )
         }
 
-        composable(LinkScreen.PaymentMethod.route) {
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+        composable(LinkScreen.PaymentMethod.route) { backStackEntry ->
+            val linkAccount = rememberRouteLinkAccount(
+                backStackEntry = backStackEntry,
+                getLinkAccount = getLinkAccount,
+            ) ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
                 linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
             )
         }
 
-        composable(LinkScreen.OAuthConsent.route) {
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+        composable(LinkScreen.OAuthConsent.route) { backStackEntry ->
+            val linkAccount = rememberRouteLinkAccount(
+                backStackEntry = backStackEntry,
+                getLinkAccount = getLinkAccount,
+            ) ?: return@composable dismissWithResult(noLinkAccountResult())
             OAuthConsentRoute(
                 linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
             )
         }
     }
+}
+
+@Composable
+private fun rememberRouteLinkAccount(
+    backStackEntry: NavBackStackEntry,
+    getLinkAccount: () -> LinkAccount?,
+): LinkAccount? {
+    val initialLinkAccount = remember(backStackEntry) {
+        getLinkAccount()
+    }
+    return getLinkAccount() ?: initialLinkAccount
 }
 
 @Composable

@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
@@ -14,282 +12,68 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayDisplayItemsFactoryTest {
-
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
-    fun `returns empty list when checkoutSessionResponse is null`() {
-        val metadata = PaymentMethodMetadataFactory.create()
+    fun `flattens nested price items using server computed subtotal`() {
+        val response = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(
+                    name = "Widget",
+                    quantity = 2,
+                    unitAmount = 1000,
+                    subtotal = 1800,
+                    total = 1950,
+                )
+            )
+        )
 
-        val result = GooglePayDisplayItemsFactory.create(metadata, context)
+        val items = GooglePayDisplayItemsFactory.create(response, context)
 
-        assertThat(result).isEmpty()
+        assertThat(items.first().label).isEqualTo("Widget x2")
+        assertThat(items.first().price).isEqualTo(1800)
+        assertThat(items.first().type).isEqualTo(GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM)
     }
 
     @Test
-    fun `returns empty list when checkout session has no line items`() {
-        val result = createAndGetDisplayItems(lineItems = emptyList())
+    fun `uses unified aggregates for subtotal discounts taxes and final total`() {
+        val tax = CheckoutSessionResponse.TaxAmount(
+            amount = 150,
+            inclusive = false,
+            taxRate = CheckoutSessionResponse.TaxRate(
+                displayName = "Sales tax",
+                percentage = 8.0,
+                rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+            ),
+        )
+        val discount = CheckoutSessionResponse.DiscountAmount(
+            amount = 200,
+            displayName = "Summer",
+            coupon = CheckoutSessionResponse.Coupon("SUMMER", null, 10.0),
+            promotionCode = null,
+        )
+        val response = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
+            ),
+            recurringDetails = CheckoutSessionResponse.RecurringDetails(
+                totalDiscountAmounts = listOf(discount),
+                totalTaxAmounts = listOf(tax),
+            ),
+        )
 
-        assertThat(result).isEmpty()
+        val items = GooglePayDisplayItemsFactory.create(response, context)
+
+        assertThat(items.map { it.price }).containsAtLeast(2000L, -200L, 150L, 1950L)
+        assertThat(items.map { it.label }).containsAtLeast("Summer", "Sales tax")
     }
 
     @Test
-    fun `maps checkout session line items to display items`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 2,
-                    unitAmount = 1000L, subtotal = 2000L, total = 2000L,
-                ),
-                lineItem(
-                    id = "li_2", name = "Gadget", quantity = 1,
-                    unitAmount = 500L, subtotal = 500L, total = 450L,
-                ),
-            ),
-        )
+    fun `absent aggregate tax produces no tax row`() {
+        val response = CheckoutSessionResponseFactory.create(recurringDetails = null)
 
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget x2",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1000L,
-            ),
-            displayItem(
-                label = "Gadget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 500L,
-            ),
-        ).inOrder()
-    }
+        val items = GooglePayDisplayItemsFactory.create(response, context)
 
-    @Test
-    fun `uses total when line item has no unit amount`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 1,
-                    unitAmount = null, subtotal = 2000L, total = 1800L,
-                ),
-            ),
-        )
-
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1800L,
-            ),
-        )
-    }
-
-    @Test
-    fun `includes discount amounts from total summary`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 1,
-                    unitAmount = 2000L, subtotal = 2000L, total = 2000L,
-                ),
-            ),
-            totalSummary = totalSummary(
-                subtotal = 2000L,
-                totalDueToday = 1500L,
-                totalAmountDue = 1500L,
-                discountAmounts = listOf(discountAmount(amount = 500L, displayName = "SAVE50")),
-            ),
-        )
-
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
-            ),
-            displayItem(
-                label = "Cost excluding tax",
-                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-                price = 2000L,
-            ),
-            displayItem(
-                label = "SAVE50",
-                type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
-                price = -500L,
-            ),
-            displayItem(
-                label = "Estimated total (final tax may vary)",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1500L,
-            ),
-        ).inOrder()
-    }
-
-    @Test
-    fun `includes tax amounts from total summary`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 1,
-                    unitAmount = 1000L, subtotal = 1000L, total = 1000L,
-                ),
-            ),
-            totalSummary = totalSummary(
-                subtotal = 1000L,
-                totalDueToday = 1080L,
-                totalAmountDue = 1080L,
-                taxAmounts = listOf(
-                    taxAmount(amount = 80L, displayName = "Sales Tax", percentage = 8.0),
-                ),
-            ),
-        )
-
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1000L,
-            ),
-            displayItem(
-                label = "Cost excluding tax",
-                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-                price = 1000L,
-            ),
-            displayItem(
-                label = "Sales Tax",
-                type = GooglePayJsonFactory.DisplayItem.Type.TAX,
-                price = 80L,
-            ),
-            displayItem(
-                label = "Estimated total (final tax may vary)",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1080L,
-            ),
-        ).inOrder()
-    }
-
-    @Test
-    fun `includes both discounts and taxes from total summary`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 1,
-                    unitAmount = 2000L, subtotal = 2000L, total = 2000L,
-                ),
-            ),
-            totalSummary = totalSummary(
-                subtotal = 2000L,
-                totalDueToday = 1620L,
-                totalAmountDue = 1620L,
-                discountAmounts = listOf(discountAmount(amount = 500L, displayName = "SAVE50")),
-                taxAmounts = listOf(taxAmount(amount = 120L, displayName = "VAT", percentage = 8.0)),
-            ),
-        )
-
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
-            ),
-            displayItem(
-                label = "Cost excluding tax",
-                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-                price = 2000L,
-            ),
-            displayItem(
-                label = "SAVE50",
-                type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
-                price = -500L,
-            ),
-            displayItem(
-                label = "VAT",
-                type = GooglePayJsonFactory.DisplayItem.Type.TAX,
-                price = 120L,
-            ),
-            displayItem(
-                label = "Estimated total (final tax may vary)",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1620L,
-            ),
-        ).inOrder()
-    }
-
-    private fun createAndGetDisplayItems(
-        lineItems: List<CheckoutSessionResponse.LineItem>,
-        totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
-    ): List<GooglePayJsonFactory.DisplayItem> {
-        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            lineItems = lineItems,
-            totalSummary = totalSummary,
-        )
-        val metadata = PaymentMethodMetadataFactory.create(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = checkoutSessionResponse.id,
-                instancesKey = "GooglePayDisplayItemsFactoryTest",
-                checkoutSessionResponse = checkoutSessionResponse,
-            ),
-        )
-
-        return GooglePayDisplayItemsFactory.create(metadata, context)
-    }
-
-    private companion object {
-        fun lineItem(
-            id: String,
-            name: String,
-            quantity: Int,
-            unitAmount: Long?,
-            subtotal: Long,
-            total: Long,
-        ) = CheckoutSessionResponse.LineItem(
-            id = id,
-            name = name,
-            quantity = quantity,
-            unitAmount = unitAmount,
-            subtotal = subtotal,
-            total = total,
-        )
-
-        fun totalSummary(
-            subtotal: Long,
-            totalDueToday: Long,
-            totalAmountDue: Long,
-            discountAmounts: List<CheckoutSessionResponse.DiscountAmount> = emptyList(),
-            taxAmounts: List<CheckoutSessionResponse.TaxAmount> = emptyList(),
-        ) = CheckoutSessionResponse.TotalSummaryResponse(
-            subtotal = subtotal,
-            totalDueToday = totalDueToday,
-            totalAmountDue = totalAmountDue,
-            discountAmounts = discountAmounts,
-            taxAmounts = taxAmounts,
-            shippingRate = null,
-            appliedBalance = null,
-        )
-
-        fun discountAmount(amount: Long, displayName: String) = CheckoutSessionResponse.DiscountAmount(
-            amount = amount,
-            displayName = displayName,
-        )
-
-        fun taxAmount(
-            amount: Long,
-            displayName: String,
-            percentage: Double,
-            inclusive: Boolean = false,
-        ) = CheckoutSessionResponse.TaxAmount(
-            amount = amount,
-            inclusive = inclusive,
-            displayName = displayName,
-            percentage = percentage,
-        )
-
-        fun displayItem(
-            label: String,
-            type: GooglePayJsonFactory.DisplayItem.Type,
-            price: Long,
-        ) = GooglePayJsonFactory.DisplayItem(
-            label = label,
-            type = type,
-            price = price,
-        )
+        assertThat(items.none { it.type == GooglePayJsonFactory.DisplayItem.Type.TAX }).isTrue()
     }
 }

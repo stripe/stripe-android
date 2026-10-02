@@ -155,6 +155,7 @@ internal class IdentityViewModelTest {
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
             brandColor = null,
+            biometricConsent = null,
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),

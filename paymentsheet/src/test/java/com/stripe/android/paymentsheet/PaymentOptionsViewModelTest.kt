@@ -72,7 +72,7 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -1389,7 +1389,7 @@ internal class PaymentOptionsViewModelTest {
             formHelper.onFormFieldValuesChanged(
                 formValues = FormFieldValues(
                     fieldValuePairs = mapOf(
-                        IdentifierSpec.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
+                        FormFieldId.CardBrand to FormFieldEntry(CardBrand.Visa.code, true),
                     ),
                     userRequestedReuse = expectedCustomerRequestedSave,
                 ),

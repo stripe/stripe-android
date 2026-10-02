@@ -7,7 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -64,11 +64,10 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
     )
 
-    @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
+        publishableKeyProvider: () -> String,
+        defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
@@ -78,9 +77,21 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
+    @Inject
+    internal constructor(
+        context: Context,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    ) : this(
+        context = context,
+        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+        defaultProductUsageTokens = defaultProductUsageTokens,
+    )
+
     override fun createRequest(
         event: AnalyticsEvent,
-        additionalParams: Map<String, Any?>
+        additionalParams: Map<String, Any?>,
+        publishableKeyOverride: String?,
     ): AnalyticsRequest {
         return super.createRequest(
             event = event,
@@ -89,6 +100,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 .orEmpty()
                 .plus(additionalParams)
                 .plus(libraryParams()),
+            publishableKeyOverride = publishableKeyOverride,
         )
     }
 
@@ -233,7 +245,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        publishableKeyOverride: String? = null
     ): AnalyticsRequest {
         return createRequest(
             event,
@@ -243,7 +256,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 tokenType = tokenType,
                 threeDS2UiType = threeDS2UiType,
                 errorMessage = errorMessage,
-            )
+            ),
+            publishableKeyOverride
         )
     }
 

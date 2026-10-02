@@ -256,6 +256,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             query("bin_prefix", binPrefix),
+            applyDefaultAuthorization = false
         ) { response ->
             response.setBody(
                 """

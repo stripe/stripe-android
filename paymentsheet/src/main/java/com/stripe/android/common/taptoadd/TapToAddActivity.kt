@@ -8,9 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.taptoadd.ui.TapToAddLayout
 import com.stripe.android.common.taptoadd.ui.TapToAddNavigator
 import com.stripe.android.common.taptoadd.ui.TapToAddTheme
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -31,9 +31,10 @@ internal class TapToAddActivity : AppCompatActivity() {
     }
 
     private val viewModel: TapToAddViewModel by viewModels {
-        TapToAddViewModel.Factory {
-            requireNotNull(args)
-        }
+        TapToAddViewModel.Factory(
+            argSupplier = { requireNotNull(args) },
+            isSystemDarkSupplier = { isSystemDarkTheme() },
+        )
     }
 
     @Inject
@@ -70,6 +71,11 @@ internal class TapToAddActivity : AppCompatActivity() {
             }
         }
 
+        val appearance = tapToAddArguments.paymentMethodMetadata.appearance
+        configureSystemBars(
+            isDark = appearance.themeMode.isDarkTheme(isSystemDarkTheme()),
+        )
+
         setContent {
             val view = LocalView.current
 
@@ -85,21 +91,10 @@ internal class TapToAddActivity : AppCompatActivity() {
                 }
             }
 
-            TapToAddTheme(tapToAddImageRepository) {
-                val systemBarStyle = remember {
-                    SystemBarStyle.light(
-                        scrim = Color.TRANSPARENT,
-                        darkScrim = Color.TRANSPARENT,
-                    )
-                }
-
-                LaunchedEffect(systemBarStyle) {
-                    enableEdgeToEdge(
-                        statusBarStyle = systemBarStyle,
-                        navigationBarStyle = systemBarStyle,
-                    )
-                }
-
+            TapToAddTheme(
+                appearance = appearance,
+                imageRepository = tapToAddImageRepository,
+            ) {
                 val screen by tapToAddNavigator.screen.collectAsState()
 
                 TapToAddLayout(
@@ -110,6 +105,23 @@ internal class TapToAddActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    private fun configureSystemBars(isDark: Boolean) {
+        val systemBarStyle = if (isDark) {
+            SystemBarStyle.dark(
+                scrim = Color.TRANSPARENT,
+            )
+        } else {
+            SystemBarStyle.light(
+                scrim = Color.TRANSPARENT,
+                darkScrim = Color.TRANSPARENT,
+            )
+        }
+        enableEdgeToEdge(
+            statusBarStyle = systemBarStyle,
+            navigationBarStyle = systemBarStyle,
+        )
     }
 
     override fun finish() {

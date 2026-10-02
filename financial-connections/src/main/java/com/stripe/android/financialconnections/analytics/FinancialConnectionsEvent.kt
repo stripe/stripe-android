@@ -2,7 +2,9 @@ package com.stripe.android.financialconnections.analytics
 
 data class FinancialConnectionsEvent internal constructor(
     val name: Name,
-    val metadata: Metadata
+    val metadata: Metadata,
+    /** The Financial Connections session that produced this event. */
+    val financialConnectionsSessionId: String
 ) {
 
     /**
@@ -96,6 +98,11 @@ data class FinancialConnectionsEvent internal constructor(
          * Error when accounts cannot be retrieved for the selected institution.
          */
         ACCOUNTS_UNAVAILABLE("accounts_unavailable"),
+
+        /**
+         * Error when no eligible accounts are available for the selected institution.
+         */
+        NO_ELIGIBLE_ACCOUNTS("no_eligible_accounts"),
 
         /**
          * Error when no debitable account is available at the selected institution for payments flows.

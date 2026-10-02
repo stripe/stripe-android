@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
@@ -120,7 +120,7 @@ class PaymentMethodViewModelTest {
 
         viewModel.formValuesChanged(
             formValues = FormFieldValues(
-                fieldValuePairs = mapOf(IdentifierSpec.CardCvc to FormFieldEntry("111")),
+                fieldValuePairs = mapOf(FormFieldId.CardCvc to FormFieldEntry("111")),
                 userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
             )
         )

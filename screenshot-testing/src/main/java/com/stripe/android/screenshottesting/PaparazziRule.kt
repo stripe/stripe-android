@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidedValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -101,12 +102,13 @@ class PaparazziRule(
                     base = object : Statement() {
                         override fun evaluate() {
                             val deviceConfig = testCase.apply(defaultDeviceConfig)
-                            if (deviceConfig != defaultDeviceConfig) {
-                                paparazzi.unsafeUpdateConfig(deviceConfig)
-                            }
+                            paparazzi.unsafeUpdateConfig(deviceConfig)
 
                             paparazziFunction {
-                                CompositionLocalProvider(LocalInspectionMode provides useLocalInspectionMode) {
+                                CompositionLocalProvider(
+                                    LocalInspectionMode provides useLocalInspectionMode,
+                                    *testCase.compositionLocalValues.toTypedArray(),
+                                ) {
                                     @Composable
                                     fun boxContent() {
                                         Box(
@@ -182,6 +184,9 @@ private fun createPermutations(
 private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
+
+    val compositionLocalValues: List<ProvidedValue<*>>
+        get() = configOptions.flatMap { it.compositionLocalValues() }
 
     val name: String
         get() {

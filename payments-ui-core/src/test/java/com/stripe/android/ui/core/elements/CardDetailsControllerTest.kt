@@ -19,8 +19,10 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.ApiKeyFixtures
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -28,30 +30,44 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.isInstanceOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
 
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(testDispatcher))
+
+    private val composeTestRule = createComposeRule()
+
+    private val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
-    val composeTestRule = createComposeRule()
-
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(composeCleanupRule)
+        .around(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -114,8 +130,8 @@ class CardDetailsControllerTest {
         runTest {
             val cardController = cardDetailsController(
                 initialValues = mapOf(
-                    IdentifierSpec.CardNumber to "4000002500001001",
-                    IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
+                    FormFieldId.CardNumber to "4000002500001001",
+                    FormFieldId.PreferredCardBrand to CardBrand.CartesBancaires.code
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
             )
@@ -157,10 +173,10 @@ class CardDetailsControllerTest {
     fun `When new card overwrites existing card, fields properly filled in`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -192,10 +208,10 @@ class CardDetailsControllerTest {
     fun `When new card scanned with invalid expiry date, should not use invalid date`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -243,10 +259,10 @@ class CardDetailsControllerTest {
     fun `When initialized with validated scan and card number, card pill is shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardValidatedScan to "true",
-                IdentifierSpec.CardExpMonth to "06",
-                IdentifierSpec.CardExpYear to "2030",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardValidatedScan to "true",
+                FormFieldId.CardExpMonth to "06",
+                FormFieldId.CardExpYear to "2030",
             )
         )
 
@@ -263,14 +279,14 @@ class CardDetailsControllerTest {
             ensureAllEventsConsumed()
         }
 
-        assertThat(cardController.cardPillElement.value).isNotNull()
+        assertThat(cardController.cardPillElement.value?.controller?.expirationDate).isEqualTo("06/30")
     }
 
     @Test
     fun `When initialized with validated scan but no card number, card pill is not shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardValidatedScan to "true",
+                FormFieldId.CardValidatedScan to "true",
             )
         )
         idleLooper()
@@ -293,8 +309,8 @@ class CardDetailsControllerTest {
     fun `When initialized with validated scan false, card pill is not shown`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardValidatedScan to "false",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardValidatedScan to "false",
             )
         )
         idleLooper()
@@ -339,6 +355,7 @@ class CardDetailsControllerTest {
             val cardPillElement = after[0] as CardPillElement
 
             assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(cardPillElement.controller.expirationDate).isEqualTo("06/30")
             assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
             ensureAllEventsConsumed()
         }
@@ -405,10 +422,10 @@ class CardDetailsControllerTest {
     fun `When new card scanned with no expiry date, should clear date`() = runTest {
         val cardController = cardDetailsController(
             initialValues = mapOf(
-                IdentifierSpec.CardNumber to "4242424242424242",
-                IdentifierSpec.CardExpYear to "2042",
-                IdentifierSpec.CardExpMonth to "2",
-                IdentifierSpec.CardCvc to "123",
+                FormFieldId.CardNumber to "4242424242424242",
+                FormFieldId.CardExpYear to "2042",
+                FormFieldId.CardExpMonth to "2",
+                FormFieldId.CardCvc to "123",
             )
         )
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -452,6 +469,47 @@ class CardDetailsControllerTest {
     }
 
     @Test
+    fun `When validated card scanned with empty required name, name field gains focus`() = composeTest(
+        collectName = true,
+    ) { controller ->
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(isFocused())
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+    }
+
+    @Test
+    fun `When validated card scanned with completed required name, CVC field gains focus`() = composeTest(
+        collectName = true,
+        initialValues = mapOf(FormFieldId.Name to "Jenny Rosen"),
+    ) { controller ->
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
+
+        controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(CVC_TEXT).assert(isFocused())
+        composeTestRule.onNodeWithText(NAME_ON_CARD_TEXT).assert(!isFocused())
+    }
+
+    @Test
     fun `When card scanned via camera, CVC field does not gain focus`() = composeTest { controller ->
         composeTestRule.onNodeWithText(CVC_TEXT).assert(!isFocused())
 
@@ -469,9 +527,14 @@ class CardDetailsControllerTest {
     }
 
     private fun composeTest(
+        collectName: Boolean = false,
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
         block: suspend (controller: CardDetailsController) -> Unit,
     ) = runTest {
-        val cardController = cardDetailsController()
+        val cardController = cardDetailsController(
+            initialValues = initialValues,
+            collectName = collectName,
+        )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
@@ -481,9 +544,13 @@ class CardDetailsControllerTest {
                     cardController.ComposeUI(
                         enabled = true,
                         field = CardDetailsElement(
-                            identifier = IdentifierSpec.Generic("card_details"),
-                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+                            identifier = FormFieldId.Generic("card_details"),
+                            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                                context = context,
+                                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                            ),
                             initialValues = mapOf(),
+                            coroutineScope = coroutineScope,
                         ),
                         modifier = Modifier,
                         hiddenIdentifiers = emptySet(),
@@ -497,7 +564,7 @@ class CardDetailsControllerTest {
     }
 
     private fun cardDetailsController(
-        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        initialValues: Map<FormFieldId, String?> = emptyMap(),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
@@ -506,15 +573,21 @@ class CardDetailsControllerTest {
         ),
         cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
         dateConfig: TextFieldConfig = DateConfig(),
+        collectName: Boolean = false,
     ): CardDetailsController {
         return CardDetailsController(
             cardBrandFilter = cardBrandFilter,
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                context = context,
+                publishableKeySupplier = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            ),
             initialValues = initialValues,
+            coroutineScope = coroutineScope,
             cbcEligibility = cbcEligibility,
             cardDetailsTextFieldConfig = cardDetailsTextFieldConfig,
             cvcTextFieldConfig = cvcTextFieldConfig,
             dateConfig = dateConfig,
+            collectName = collectName,
             validationMessageComparator = object : FieldValidationMessageComparator {
                 override fun compare(
                     a: FieldValidationMessage?,
@@ -576,5 +649,6 @@ class CardDetailsControllerTest {
 
     private companion object {
         const val CVC_TEXT = "CVC"
+        const val NAME_ON_CARD_TEXT = "Name on card"
     }
 }

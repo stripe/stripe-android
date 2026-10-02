@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -26,8 +27,8 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -40,6 +41,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -69,8 +71,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @Suppress("LargeClass")
 internal class DefaultCustomerSheetLoaderTest {
     private val dispatcher = StandardTestDispatcher()
-    private val lpmRepository = LpmRepository()
-
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
 
@@ -452,6 +452,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             )
         )
 
@@ -770,7 +771,6 @@ internal class DefaultCustomerSheetLoaderTest {
             }
         ),
         intentDataSource: CustomerSheetIntentDataSource = FakeCustomerSheetIntentDataSource(),
-        lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
     ): CustomerSheetLoader {
@@ -779,7 +779,6 @@ internal class DefaultCustomerSheetLoaderTest {
             intentDataSourceProvider = CompletableSingle(intentDataSource),
             isGooglePayReady = isGooglePayReady,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-            lpmRepository = lpmRepository,
             errorReporter = errorReporter,
             eventReporter = eventReporter,
         )
@@ -820,7 +819,6 @@ internal class DefaultCustomerSheetLoaderTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             customPaymentMethods = emptyList(),
-            paymentMethodSpecs = null,
             flags = emptyMap(),
             elementsSessionId = "session_1234",
             orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
@@ -839,7 +837,6 @@ internal class DefaultCustomerSheetLoaderTest {
         isGooglePayReady: Boolean = true,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
-        lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
@@ -849,7 +846,8 @@ internal class DefaultCustomerSheetLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return if (isGooglePayReady) {
                         readyGooglePayRepository
@@ -860,11 +858,11 @@ internal class DefaultCustomerSheetLoaderTest {
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
             intentDataSourceProvider = intentDataSourceProvider,
-            lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            apiConfigurationResolver = FakeApiConfigurationResolver(),
         )
     }
 

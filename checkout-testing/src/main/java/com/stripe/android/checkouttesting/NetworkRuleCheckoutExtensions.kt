@@ -28,7 +28,7 @@ fun NetworkRule.createPaymentMethod(
 fun NetworkRule.checkoutInit(
     vararg requestMatchers: RequestMatcher,
     sessionId: String = DEFAULT_CHECKOUT_SESSION_ID,
-    responseFactory: (MockResponse) -> Unit,
+    responseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
 ) {
     enqueue(
         host("api.stripe.com"),

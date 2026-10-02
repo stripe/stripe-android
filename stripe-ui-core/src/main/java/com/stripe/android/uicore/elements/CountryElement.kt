@@ -5,7 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CountryElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: DropdownFieldController
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true

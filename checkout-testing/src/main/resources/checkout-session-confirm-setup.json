@@ -1,13 +1,50 @@
 {
   "session_id": "cs_test_abc123",
   "ui_mode": "custom",
+  "mode": "modeless",
   "status": "complete",
+  "payment_status": "no_payment_required",
+  "livemode": false,
   "currency": "usd",
-  "mode": "setup",
-  "total_summary": {
-    "subtotal": 0,
-    "due": 0,
-    "total": 0
+  "checkout_items": [
+    {
+      "key": "group_1",
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "inner_item_key": "item_1",
+            "price": {
+              "id": "price_1",
+              "currency": "usd",
+              "unit_amount": 0,
+              "product": {
+                "name": "Save payment method",
+                "images": []
+              }
+            },
+            "quantity": 1,
+            "subtotal": 0,
+            "total": 0,
+            "unit_amount": 0,
+            "unit_amount_decimal": "0",
+            "unit_label": null,
+            "tax_amounts": [],
+            "tax_inclusive": 0,
+            "tax_exclusive": 0,
+            "adjustable_quantity": null
+          }
+        ]
+      }
+    }
+  ],
+  "recurring_details": {
+    "total_discount_amounts": [],
+    "total_tax_amounts": []
+  },
+  "tax_meta": {
+    "computation_type": "Off",
+    "status": null
   },
   "setup_intent": {
     "id": "seti_cs_example",
@@ -48,7 +85,9 @@
         "generated_from": null,
         "last4": "4242",
         "networks": {
-          "available": ["visa"],
+          "available": [
+            "visa"
+          ],
           "preferred": null
         },
         "three_d_secure_usage": {
@@ -61,8 +100,46 @@
       "livemode": false,
       "type": "card"
     },
-    "payment_method_types": ["card"],
+    "payment_method_types": [
+      "card"
+    ],
     "status": "succeeded",
     "usage": "off_session"
+  },
+  "elements_session": {
+    "business_name": "Mobile Example Account",
+    "google_pay_preference": "enabled",
+    "merchant_country": "US",
+    "merchant_currency": "usd",
+    "merchant_id": "acct_123",
+    "ordered_payment_method_types_and_wallets": [
+      "card",
+      "google_pay"
+    ],
+    "payment_method_preference": {
+      "object": "payment_method_preference",
+      "country_code": "US",
+      "ordered_payment_method_types": [
+        "card"
+      ],
+      "type": "deferred_intent"
+    },
+    "unactivated_payment_method_types": [],
+    "session_id": "elements_session_cs_123",
+    "config_id": "cs_config_123"
+  },
+  "server_built_elements_session_params": {
+    "type": "deferred_intent",
+    "locale": "en-US",
+    "deferred_intent": {
+      "mode": "payment",
+      "amount": 0,
+      "currency": "usd",
+      "setup_future_usage": "off_session",
+      "capture_method": "automatic",
+      "payment_method_types": [
+        "card"
+      ]
+    }
   }
 }

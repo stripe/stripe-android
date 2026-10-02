@@ -1,19 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.net.Uri
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
@@ -21,6 +22,8 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -35,8 +38,11 @@ import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-@RunWith(AndroidJUnit4::class)
-internal class PaymentSheetAnalyticsTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetAnalyticsTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
@@ -69,7 +75,9 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
@@ -79,7 +87,6 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
@@ -100,7 +107,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration),
             )
         }
 
@@ -149,7 +156,9 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
@@ -159,7 +168,6 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
@@ -177,7 +185,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = verticalModeConfiguration,
+                configuration = apiConfigurationTestType.applyTo(verticalModeConfiguration),
             )
         }
 
@@ -227,7 +235,9 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentWithConfirmationToken() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _ ->
                 CreateIntentResult.Success("pi_example_secret_example")
@@ -236,7 +246,6 @@ internal class PaymentSheetAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
@@ -265,7 +274,7 @@ internal class PaymentSheetAnalyticsTest {
                         currency = "usd"
                     )
                 ),
-                configuration = horizontalModeConfiguration
+                configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration)
             )
         }
 
@@ -326,7 +335,9 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSavedPaymentMethod() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
@@ -339,7 +350,6 @@ internal class PaymentSheetAnalyticsTest {
         networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
         networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
-        validateAnalyticsRequest(eventName = "mc_complete_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
@@ -353,14 +363,16 @@ internal class PaymentSheetAnalyticsTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = horizontalModeConfiguration.newBuilder()
-                    .customer(
-                        PaymentSheet.CustomerConfiguration(
-                            id = "cus_1",
-                            ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                configuration = apiConfigurationTestType.applyTo(
+                    horizontalModeConfiguration.newBuilder()
+                        .customer(
+                            PaymentSheet.CustomerConfiguration(
+                                id = "cus_1",
+                                ephemeralKeySecret = TestApiKeys.EPHEMERAL,
+                            )
                         )
-                    )
-                    .build()
+                        .build()
+                )
             )
         }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())

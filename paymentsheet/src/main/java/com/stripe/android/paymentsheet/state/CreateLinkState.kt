@@ -4,13 +4,14 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
-import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
@@ -36,6 +37,7 @@ internal interface CreateLinkState {
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkStateResult
 }
 
@@ -80,6 +82,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -98,6 +101,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = clientAttributionMetadata,
+            apiConfiguration = apiConfiguration,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
@@ -107,8 +111,8 @@ internal class DefaultCreateLinkState @Inject constructor(
             signupModeResult = getLinkSignupMode(
                 accountStatus = accountStatus,
                 elementsSession = elementsSession,
-                configuration = configuration,
                 linkConfiguration = linkConfiguration,
+                customerMetadata = customerMetadata,
             )
         )
     }
@@ -139,6 +143,12 @@ internal class DefaultCreateLinkState @Inject constructor(
         if (collectsExtraBillingDetails && useWebLink) {
             // Extra billing details collection isn't currently supported in the web flow.
             add(LinkDisabledReason.BillingDetailsCollection)
+        }
+
+        val requiresCheckoutSessionEmail =
+            initializationMode.requiresEmailAddress() && configuration.defaultBillingDetails?.email == null
+        if (requiresCheckoutSessionEmail && useWebLink) {
+            add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
         }
 
         when (initializationMode.walletsDisabledReason()) {
@@ -176,8 +186,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     private fun getLinkSignupMode(
         accountStatus: AccountStatus,
         elementsSession: ElementsSession,
-        configuration: CommonConfiguration,
         linkConfiguration: LinkConfiguration,
+        customerMetadata: CustomerMetadata?,
     ): LinkSignupModeResult {
         if (accountStatus != AccountStatus.SignedOut) {
             return LinkSignupModeResult.AlreadyRegistered
@@ -195,8 +205,8 @@ internal class DefaultCreateLinkState @Inject constructor(
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
             intent = elementsSession.stripeIntent,
-            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-            hasCustomerConfiguration = configuration.customer != null,
+            paymentMethodSaveConsentBehavior = customerMetadata?.saveConsent,
+            hasCustomerConfiguration = customerMetadata != null,
         )
         val signupMode = when {
             // If signup toggle enabled, we show a future usage + link combined toggle
@@ -224,6 +234,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
             elementsSession = elementsSession,
@@ -236,6 +247,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration,
             customerMetadata,
             customerEmail = elementsSession.customer?.email,
+            apiConfiguration = apiConfiguration,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
@@ -254,6 +266,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             shippingDetails = shippingDetails,
             clientAttributionMetadata = clientAttributionMetadata,
+            apiConfiguration = apiConfiguration,
         )
     }
 
@@ -266,6 +279,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         cardBrandChoice: LinkConfiguration.CardBrandChoice?,
         shippingDetails: AddressDetails?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
     ) = LinkConfiguration(
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
@@ -309,6 +323,8 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
+        apiConfiguration = apiConfiguration,
+        shouldDisplay = configuration.link.shouldDisplay,
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {

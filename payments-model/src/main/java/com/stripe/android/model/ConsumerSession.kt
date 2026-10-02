@@ -35,6 +35,8 @@ data class ConsumerSession(
     val linkBrand: LinkBrand? = null,
     @SerialName("support_payment_details_types")
     val supportedPaymentDetailsTypes: List<String> = emptyList(),
+    @SerialName("link_session_key")
+    val linkSessionKey: String? = null,
 ) : StripeModel {
 
     val meetsMinimumAuthenticationLevel: Boolean

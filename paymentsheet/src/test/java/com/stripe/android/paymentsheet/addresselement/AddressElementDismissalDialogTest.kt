@@ -11,7 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.google.common.truth.Truth.assertThat
+import app.cash.turbine.Turbine
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -38,46 +38,47 @@ internal class AddressElementDismissalDialogTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `dialog displays copy and discard invokes callback`() {
-        var discardChangesCount = 0
-        var keepEditingCount = 0
-
-        composeRule.setContent {
-            DefaultStripeTheme {
-                AddressElementDismissalDialog(
-                    onDiscardChanges = { discardChangesCount++ },
-                    onKeepEditing = { keepEditingCount++ },
-                )
-            }
-        }
-
+    fun `dialog displays copy and discard invokes callback`() = runScenario {
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
             hasText("Discard changes?")
         )
         composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).onChildren().assertAny(
-            hasText("Your address changes have not been saved.")
+            hasText("Your address changes won't be saved.")
         )
-        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).assert(hasText("Discard changes"))
-        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).assert(hasText("Keep editing"))
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).assert(hasText("Discard"))
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).assert(hasText("Cancel"))
 
         composeRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
 
-        assertThat(discardChangesCount).isEqualTo(1)
-        assertThat(keepEditingCount).isEqualTo(0)
+        discardChanges.takeItem()
+        keepEditing.expectNoEvents()
     }
 
     @Test
-    fun `keep editing callback dismisses dialog`() {
+    fun `cancel dismisses dialog and keeps editing`() = runScenario {
+        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
+        composeRule.waitForIdle()
+
+        keepEditing.takeItem()
+        discardChanges.expectNoEvents()
+        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+    }
+
+    private fun runScenario(block: Scenario.() -> Unit) {
         var dialogVisible by mutableStateOf(true)
-        var keepEditingCount = 0
+        val discardChanges = Turbine<Unit>()
+        val keepEditing = Turbine<Unit>()
 
         composeRule.setContent {
             DefaultStripeTheme {
                 if (dialogVisible) {
                     AddressElementDismissalDialog(
-                        onDiscardChanges = {},
+                        onDiscardChanges = {
+                            discardChanges.add(Unit)
+                            dialogVisible = false
+                        },
                         onKeepEditing = {
-                            keepEditingCount++
+                            keepEditing.add(Unit)
                             dialogVisible = false
                         },
                     )
@@ -85,10 +86,13 @@ internal class AddressElementDismissalDialogTest {
             }
         }
 
-        composeRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
-        composeRule.waitForIdle()
-
-        assertThat(keepEditingCount).isEqualTo(1)
-        composeRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+        Scenario(discardChanges, keepEditing).block()
+        discardChanges.ensureAllEventsConsumed()
+        keepEditing.ensureAllEventsConsumed()
     }
+
+    private data class Scenario(
+        val discardChanges: Turbine<Unit>,
+        val keepEditing: Turbine<Unit>,
+    )
 }

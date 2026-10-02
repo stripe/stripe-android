@@ -94,5 +94,6 @@ private fun PaymentMethod.BillingDetails.toCheckoutBillingDetails(): PaymentOpti
         },
         email = email,
         name = name,
+        phone = phone,
     )
 }

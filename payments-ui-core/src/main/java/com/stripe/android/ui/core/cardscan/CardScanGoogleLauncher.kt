@@ -25,8 +25,8 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
 ) : CardScanLauncher {
     private val implementation = "google_pay"
     private var _isLaunching = false
-    private val _isAvailable = MutableStateFlow(false)
-    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+    private val _loadingState = MutableStateFlow(CardScanLoadingState.Loading)
+    override val loadingState: StateFlow<CardScanLoadingState> = _loadingState.asStateFlow()
 
     @VisibleForTesting
     lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -35,11 +35,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
-                _isAvailable.value = false
+                _loadingState.value = CardScanLoadingState.Unavailable
                 eventsReporter.onCardScanApiCheckFailed(implementation, e)
             },
             onSuccess = {
-                _isAvailable.value = true
+                _loadingState.value = CardScanLoadingState.Available
                 eventsReporter.onCardScanApiCheckSucceeded(implementation)
             }
         )

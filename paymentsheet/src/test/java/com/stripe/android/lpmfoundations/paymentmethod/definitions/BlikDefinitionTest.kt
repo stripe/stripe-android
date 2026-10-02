@@ -6,7 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.BlikElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 
@@ -30,7 +30,7 @@ class BlikDefinitionTest {
     fun `createFormElements seeds the blik code from initialValues`() {
         val formElements = BlikDefinition.formElements(
             metadata = blikMetadata,
-            initialValues = mapOf(IdentifierSpec.BlikCode to "123456"),
+            initialValues = mapOf(FormFieldId.BlikCode to "123456"),
         )
 
         val blikElement = (formElements[0] as SectionElement).fields[0] as BlikElement

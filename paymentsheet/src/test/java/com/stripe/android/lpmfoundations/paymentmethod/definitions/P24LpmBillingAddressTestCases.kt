@@ -5,17 +5,17 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 private val p24FullRawValues = mapOf(
-    IdentifierSpec.Generic("p24[bank]") to "santander_przelew24",
-    IdentifierSpec.Name to "Anna Kowalska",
-    IdentifierSpec.Email to "anna.kowalska@example.com",
-    IdentifierSpec.Line1 to "Marszalkowska 1",
-    IdentifierSpec.Line2 to "Apartment 2",
-    IdentifierSpec.City to "Warsaw",
-    IdentifierSpec.PostalCode to "00-001",
-    IdentifierSpec.Country to "PL",
+    FormFieldId.Generic("p24[bank]") to "santander_przelew24",
+    FormFieldId.Name to "Anna Kowalska",
+    FormFieldId.Email to "anna.kowalska@example.com",
+    FormFieldId.Line1 to "Marszalkowska 1",
+    FormFieldId.Line2 to "Apartment 2",
+    FormFieldId.City to "Warsaw",
+    FormFieldId.PostalCode to "00-001",
+    FormFieldId.Country to "PL",
 )
 
 private val p24NoBillingDetailsExpectedPaymentMethodParams = PaymentMethodCreateParams.createWithOverride(

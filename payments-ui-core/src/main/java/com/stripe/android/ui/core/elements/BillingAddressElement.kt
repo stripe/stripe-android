@@ -18,7 +18,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FieldValidationMessage
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionFieldComposable
@@ -39,7 +39,7 @@ sealed interface BillingAddressCollectionMode {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Country(
-        val additionalFieldsByCountry: Map<String, Set<IdentifierSpec>>,
+        val additionalFieldsByCountry: Map<String, Set<FormFieldId>>,
     ) : BillingAddressCollectionMode
 }
 
@@ -54,7 +54,7 @@ fun cardBillingAddressCollectionMode(
         BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
             val additionalFieldsByCountry = buildMap {
                 listOf("US", "GB", "CA").forEach { countryCode ->
-                    put(countryCode, setOf(IdentifierSpec.PostalCode))
+                    put(countryCode, setOf(FormFieldId.PostalCode))
                 }
                 if (requiresBillingAddressForAutomaticTax) {
                     additionalAutomaticTaxFieldsByCountry.forEach { (countryCode, fields) ->
@@ -72,16 +72,16 @@ fun cardBillingAddressCollectionMode(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BillingAddressElement(
-    override val identifier: IdentifierSpec,
-    rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
+    override val identifier: FormFieldId,
+    rawValuesMap: Map<FormFieldId, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        rawValuesMap[IdentifierSpec.Country]
+        rawValuesMap[FormFieldId.Country]
     ),
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    shippingValuesMap: Map<FormFieldId, String?>?,
     private val addressCollectionMode: BillingAddressCollectionMode,
     private val collectionConfiguration: BillingDetailsCollectionConfiguration =
         BillingDetailsCollectionConfiguration(),
@@ -132,7 +132,7 @@ class BillingAddressElement(
                 emailConfig = emailConfig,
             ),
             countryElement = CountryElement(
-                identifier = IdentifierSpec.Country,
+                identifier = FormFieldId.Country,
                 controller = countryDropdownFieldController,
             ),
             shippingValuesMap = shippingValuesMap,
@@ -177,8 +177,8 @@ class BillingAddressElement(
                 enabled: Boolean,
                 field: SectionFieldElement,
                 modifier: Modifier,
-                hiddenIdentifiers: Set<IdentifierSpec>,
-                lastTextFieldIdentifier: IdentifierSpec?
+                hiddenIdentifiers: Set<FormFieldId>,
+                lastTextFieldIdentifier: FormFieldId?
             ) {
                 if (addressElementSectionController is SectionFieldComposable) {
                     addressElementSectionController.ComposeUI(
@@ -198,13 +198,13 @@ class BillingAddressElement(
 
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use
-    val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>> =
+    val hiddenIdentifiers: StateFlow<Set<FormFieldId>> =
         countryDropdownFieldController.rawFieldValue.mapAsStateFlow { countryCode ->
             when (val mode = addressCollectionMode) {
                 BillingAddressCollectionMode.Never -> {
                     FieldType.entries
                         .filterNot { it == FieldType.Name }
-                        .map { it.identifierSpec }
+                        .map { it.formFieldId }
                         .toSet()
                 }
                 BillingAddressCollectionMode.Full -> {
@@ -215,8 +215,8 @@ class BillingAddressElement(
                     FieldType.entries
                         // Filtering name causes the field to be hidden even outside
                         // of this form.
-                        .filterNot { it == FieldType.Name || it.identifierSpec in shownFields }
-                        .map { it.identifierSpec }
+                        .filterNot { it == FieldType.Name || it.formFieldId in shownFields }
+                        .map { it.formFieldId }
                         .toSet()
                 }
             }
@@ -231,7 +231,7 @@ class BillingAddressElement(
     override fun sectionFieldErrorController(): SectionFieldValidationController =
         cardBillingAddressElementSectionErrorController
 
-    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) = addressElement.setRawValue(rawValuesMap)
+    override fun setRawValue(rawValuesMap: Map<FormFieldId, String?>) = addressElement.setRawValue(rawValuesMap)
 
     override fun getTextFieldIdentifiers() = addressElement.getTextFieldIdentifiers()
 

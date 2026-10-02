@@ -336,7 +336,9 @@ internal fun PaymentMethod.getSublabel(): ResolvableString? {
                 else -> null
             }
         }
-        else -> null
+        else -> {
+            card?.cardArt?.programName?.takeIf { it.isNotBlank() }?.resolvableString
+        }
     }
 }
 

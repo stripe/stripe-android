@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
@@ -22,8 +26,13 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
-internal class PaymentSheetConfirmationTokenTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentSheetConfirmationTokenTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -77,7 +86,9 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType: PaymentMethodType,
     ) {
         runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             isLiveMode = isLiveMode,
             builder = {
                 createIntentCallback { _ ->
@@ -95,7 +106,9 @@ internal class PaymentSheetConfirmationTokenTest {
     @Test
     fun testSuccessfulSetup() {
         runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             isLiveMode = false,
             builder = {
                 createIntentCallback { _ ->
@@ -158,19 +171,21 @@ internal class PaymentSheetConfirmationTokenTest {
                     },
                     requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
                 ),
-                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-                    .also {
-                        if (customerType == CustomerType.ReturningCustomer) {
-                            it.customer(
-                                PaymentSheet.CustomerConfiguration(
-                                    "cus_foobar",
-                                    TestApiKeys.EPHEMERAL
+                configuration = testContext.apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                        .also {
+                            if (customerType == CustomerType.ReturningCustomer) {
+                                it.customer(
+                                    PaymentSheet.CustomerConfiguration(
+                                        "cus_foobar",
+                                        TestApiKeys.EPHEMERAL
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                    .build()
+                        .build()
+                )
             )
         }
     }

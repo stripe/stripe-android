@@ -23,7 +23,7 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TA
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
-import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
+import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
@@ -58,7 +58,7 @@ internal class Selectors(
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
     val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
-    val embeddedFormBuyButton = ComposeButton(composeTestRule, hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
+    val embeddedFormBuyButton = ComposeButton(composeTestRule, hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG))
     val multiStepSelect = ComposeButton(
         composeTestRule,
         hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
@@ -400,6 +400,8 @@ internal class Selectors(
 
     fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithTextAfterWaiting(labelText)
 
+    fun getCountryCode() = composeTestRule.onNode(hasTestTag("DropDown:tiny"))
+
     fun getAuBsb() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)
     )
@@ -434,7 +436,7 @@ internal class Selectors(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodes(
                 hasContentDescription("Expiration date", true)
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
     }

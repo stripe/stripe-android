@@ -20,6 +20,7 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +35,7 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
     )
 
     @Test
+    @Ignore("#ir-hybrid-telescope")
     fun testLinkCardBrandSuccess() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
