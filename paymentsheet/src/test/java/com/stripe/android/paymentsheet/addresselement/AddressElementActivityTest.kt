@@ -218,7 +218,7 @@ internal class AddressElementActivityTest {
             }
             assertSaving()
 
-            addressPage.clickScrim()
+            addressPage.dismissViaScrimAccessibilityAction()
             assertSaving()
 
             val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
@@ -317,11 +317,11 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping can be canceled with scrim before saving`() = runScenario {
+    fun `checkout shipping can be canceled with scrim accessibility action before saving`() = runScenario {
         addressPage.assertReadyToSave()
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.clickScrim()
+        addressPage.dismissViaScrimAccessibilityAction()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -413,8 +413,8 @@ internal class AddressElementActivityTest {
     }
 
     private fun Scenario.awaitResult(): AddressElementActivityContract.Result {
-        composeTestRule.waitUntilWithIdle {
-            activity.isFinishing
+        composeTestRule.waitUntilWithIdle(conditionDescription = "address Activity to finish") {
+            composeTestRule.runOnIdle { activity.isFinishing }
         }
         val result = activityScenario.result
         return AddressElementActivityContract.CheckoutShipping.parseResult(

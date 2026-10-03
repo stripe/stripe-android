@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasProgressBarRangeInfo
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
@@ -38,8 +40,8 @@ internal class AddressElementActivityPage(
         closeButton.performClick()
     }
 
-    fun clickScrim() {
-        scrim.performClick()
+    fun dismissViaScrimAccessibilityAction() {
+        scrim.performSemanticsAction(SemanticsActions.OnClick)
     }
 
     fun assertVisible() {
@@ -59,7 +61,7 @@ internal class AddressElementActivityPage(
         composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG, useUnmergedTree = true)
             .assertIsDisplayed()
         composeTestRule.onNode(
-            matcher = hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate).and(
+            matcher = SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo).and(
                 hasAnyAncestor(hasTestTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG))
             ),
             useUnmergedTree = true,
