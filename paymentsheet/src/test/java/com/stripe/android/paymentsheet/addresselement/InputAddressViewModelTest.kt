@@ -451,9 +451,7 @@ class InputAddressViewModelTest {
                 state = "CA",
             )
         )
-        viewModel.setRawValues(
-            COMPLETED_FORM_VALUES.mapValues { it.value.value } + (FormFieldId.Line1 to "510 Townsend Sta")
-        )
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
 
         viewModel.onUserCancel()
 
