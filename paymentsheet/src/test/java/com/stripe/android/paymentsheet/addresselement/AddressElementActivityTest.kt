@@ -47,6 +47,7 @@ internal class AddressElementActivityTest {
     private val addressPage = AddressElementActivityPage(
         composeTestRule = composeTestRule,
         primaryButtonText = applicationContext.getString(R.string.stripe_paymentsheet_address_element_primary_button),
+        closeContentDescription = applicationContext.getString(R.string.stripe_paymentsheet_close),
         scrimContentDescription = applicationContext.getString(ComposeUiR.string.close_sheet),
     )
 
