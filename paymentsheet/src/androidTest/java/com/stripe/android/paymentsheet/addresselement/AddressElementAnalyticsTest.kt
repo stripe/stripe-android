@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.text.SpannableString
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -15,6 +16,7 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,7 +35,7 @@ internal class AddressElementAnalyticsTest {
         around(placesClientProxyTestRule)
     }
 
-    private val page = AddressElementPage(testRules.compose)
+    private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())
 
     @Test
     fun completingMerchantProvidedAddressDoesNotReportAutocompleteSelection() {
