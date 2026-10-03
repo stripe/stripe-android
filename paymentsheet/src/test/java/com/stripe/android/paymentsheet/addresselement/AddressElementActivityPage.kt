@@ -50,6 +50,10 @@ internal class AddressElementActivityPage(
         scrim.assertIsDisplayed()
     }
 
+    fun assertCloseDisabled() {
+        closeButton.assertIsNotEnabled()
+    }
+
     fun assertReadyToSave() {
         primaryButton.assertIsEnabled()
         closeButton.assertIsEnabled()
@@ -57,7 +61,6 @@ internal class AddressElementActivityPage(
 
     fun assertSaving() {
         primaryButton.assertIsNotEnabled()
-        closeButton.assertIsNotEnabled()
         composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG, useUnmergedTree = true)
             .assertIsDisplayed()
         composeTestRule.onNode(

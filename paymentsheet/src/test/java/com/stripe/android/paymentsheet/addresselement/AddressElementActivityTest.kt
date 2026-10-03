@@ -203,23 +203,100 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping blocks dismissal while tax update is in flight and returns success`() = runScenario {
+    fun `checkout shipping shows loading during tax update and returns success`() = runScenario {
         val taxUpdate = enqueueTaxUpdate()
 
         try {
             startTaxUpdate(taxUpdate)
             assertSaving()
 
-            addressPage.clickClose()
+            val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            awaitAnalytics(completedRequest)
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.country).isEqualTo(SHIPPING_ADDRESS.address?.country)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.address.address?.postalCode).isEqualTo(SHIPPING_ADDRESS.address?.postalCode)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping displays save error and clears it after editing`() = runScenario {
+        val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+        addressPage.assertReadyToSave()
+        addressPage.assertErrorNotDisplayed(expectedError)
+        val taxUpdate = enqueueTaxUpdate(fails = true)
+
+        try {
+            startTaxUpdate(taxUpdate)
             assertSaving()
+            val failedRequest = expectShippingAnalytics("elements.shipping_address.save_failed")
+            taxUpdate.releaseResponse.countDown()
+
+            addressPage.assertErrorDisplayed(expectedError)
+            awaitAnalytics(failedRequest)
+            addressPage.assertReadyToSave()
+            addressPage.editName("Jenny Rosen Updated")
+            addressPage.assertErrorNotDisplayed(expectedError)
+            addressPage.assertReadyToSave()
+            val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+            addressPage.clickClose()
+
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+            awaitAnalytics(canceledRequest)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping can be canceled with back before saving`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `checkout shipping can be canceled with scrim accessibility action before saving`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.dismissViaScrimAccessibilityAction()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `checkout shipping blocks dismissal while tax update is in flight and returns success`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertDismissalBlocked()
+
+            addressPage.clickClose()
+            assertDismissalBlocked()
 
             activityScenario.onActivity { activity ->
                 activity.onBackPressedDispatcher.onBackPressed()
             }
-            assertSaving()
+            assertDismissalBlocked()
 
             addressPage.dismissViaScrimAccessibilityAction()
-            assertSaving()
+            assertDismissalBlocked()
 
             val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
             taxUpdate.releaseResponse.countDown()
@@ -243,7 +320,7 @@ internal class AddressElementActivityTest {
 
         try {
             startTaxUpdate(taxUpdate)
-            assertSaving()
+            assertDismissalBlocked()
 
             val shownRequest = expectShippingAnalytics(
                 eventName = "elements.shipping_address.shown",
@@ -257,7 +334,7 @@ internal class AddressElementActivityTest {
             awaitAnalytics(shownRequest)
 
             addressPage.assertVisible()
-            assertSaving()
+            assertDismissalBlocked()
 
             val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
             taxUpdate.releaseResponse.countDown()
@@ -275,21 +352,16 @@ internal class AddressElementActivityTest {
 
     @Test
     fun `checkout shipping restores close after tax update fails`() = runScenario {
-        val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
-        addressPage.assertErrorNotDisplayed(expectedError)
         val taxUpdate = enqueueTaxUpdate(fails = true)
 
         try {
             startTaxUpdate(taxUpdate)
-            assertSaving()
+            assertDismissalBlocked()
             val failedRequest = expectShippingAnalytics("elements.shipping_address.save_failed")
             taxUpdate.releaseResponse.countDown()
 
-            addressPage.assertErrorDisplayed(expectedError)
+            addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
             awaitAnalytics(failedRequest)
-            addressPage.assertReadyToSave()
-            addressPage.editName("Jenny Rosen Updated")
-            addressPage.assertErrorNotDisplayed(expectedError)
             addressPage.assertReadyToSave()
             val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
             addressPage.clickClose()
@@ -317,17 +389,6 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping can be canceled with scrim accessibility action before saving`() = runScenario {
-        addressPage.assertReadyToSave()
-
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.dismissViaScrimAccessibilityAction()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        awaitAnalytics(canceledRequest)
-    }
-
-    @Test
     fun `checkout shipping can be canceled with close before saving`() = runScenario {
         addressPage.assertReadyToSave()
 
@@ -336,6 +397,11 @@ internal class AddressElementActivityTest {
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
+    }
+
+    private fun Scenario.assertDismissalBlocked() {
+        assertSaving()
+        addressPage.assertCloseDisabled()
     }
 
     private fun enqueueTaxUpdate(fails: Boolean = false): TaxUpdate {
