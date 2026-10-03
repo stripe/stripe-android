@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -16,11 +17,11 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.addresselement.AddressElementPage
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.replaceText
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.paymentelementtestpages.AddressElementPage
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -40,7 +41,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
-    private val page = AddressElementPage(testRules.compose)
+    private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())
 
     @Test
     fun `manual edit of prefilled address reports no autocomplete selection`() {
