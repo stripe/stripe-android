@@ -159,7 +159,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = viewModel.resultStateHolder::onUserCancel,
+        onCloseClick = viewModel::onUserCancel,
         topContent = {
             val currentState = billingSameAsShippingState
 

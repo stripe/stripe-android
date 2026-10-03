@@ -367,6 +367,28 @@ internal class AddressElementActivityTest {
         }
     }
 
+    @Test
+    fun `checkout shipping can be canceled with repeated back after editing the country`() = runScenario {
+        addressPage.assertReadyToSave()
+        addressPage.selectCountry("Canada")
+
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `checkout shipping can be canceled with close before saving`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        addressPage.clickClose()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
     private fun AddressElementActivityTestRunner.Scenario.assertDismissalBlocked() {
         assertSaving()
         addressPage.assertCloseDisabled()

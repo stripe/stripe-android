@@ -13,7 +13,9 @@ import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
@@ -27,6 +29,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -52,6 +55,7 @@ class InputAddressViewModelTest {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
         eventReporter: AddressLauncherEventReporter = this.eventReporter,
+        addressElementEventReporter: AddressElementEventReporter? = null,
         placesClient: PlacesClientProxy? = null,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
@@ -65,7 +69,7 @@ class InputAddressViewModelTest {
             argsFactory(config),
             navigator,
             resultStateHolder,
-            StandaloneAddressElementEventReporter(eventReporter),
+            addressElementEventReporter ?: StandaloneAddressElementEventReporter(eventReporter),
             placesClient = placesClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
@@ -218,6 +222,7 @@ class InputAddressViewModelTest {
             checkboxChecked = true,
         )
 
+        assertThat(primaryButtonAction.calls.awaitItem().address?.line1).isEqualTo("99 Broadway St")
         assertThat(resultStateHolder.state.value).isEqualTo(
             State.Finished(
                 AddressElementActivityContract.Result.StandaloneSucceeded(
@@ -262,6 +267,7 @@ class InputAddressViewModelTest {
             checkboxChecked = false,
         )
 
+        assertThat(primaryButtonAction.calls.awaitItem().address?.line1).isEqualTo("123 Main Street")
         assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
             FakeAddressLauncherEventReporter.CompletedCall(
                 country = "US",
@@ -281,6 +287,7 @@ class InputAddressViewModelTest {
             checkboxChecked = false,
         )
 
+        assertThat(primaryButtonAction.calls.awaitItem().address?.line1).isEqualTo("123 Main St")
         assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
             FakeAddressLauncherEventReporter.CompletedCall(
                 country = "US",
@@ -289,6 +296,236 @@ class InputAddressViewModelTest {
                 editDistance = 4,
             )
         )
+    }
+
+    @Test
+    fun `clickPrimaryButton reports save started and completed`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+        assertThat(resultStateHolder.state.value)
+            .isEqualTo(State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)))
+    }
+
+    @Test
+    fun `clickPrimaryButton does not report a prefilled address as an autocomplete selection`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        useStandaloneEventReporter = false,
+    ) {
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+    }
+
+    @Test
+    fun `clickPrimaryButton reports the selected inline autocomplete address`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        selectAutocompletePrediction(
+            Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+
+        val editedFormValues = COMPLETED_FORM_VALUES +
+            (FormFieldId.Line1 to FormFieldEntry("510 Townsend Sta", true))
+        val editedAddress = AddressDetails(
+            name = EXPECTED_ADDRESS.name,
+            address = PaymentSheet.Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend Sta",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            ),
+            phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+            isCheckboxSelected = EXPECTED_ADDRESS.isCheckboxSelected,
+        )
+        viewModel.clickPrimaryButton(editedFormValues, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(editedAddress)
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = editedAddress,
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
+            )
+        )
+        assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+    }
+
+    @Test
+    fun `clickPrimaryButton reports save failure and re-enables the form`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        val error = IllegalStateException("save failed")
+        primaryButtonAction.action = { Result.failure(error) }
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
+            )
+        )
+        val failed = addressElementEventReporter.saveFailedCalls.awaitItem()
+        assertThat(failed.analyticsCall).isEqualTo(started)
+        assertThat(failed.error).isSameInstanceAs(error)
+        assertThat(viewModel.formEnabled.value).isTrue()
+        addressElementEventReporter.saveCompletedCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `user cancellation reports canceled once synchronously`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        useStandaloneEventReporter = false,
+    ) {
+        viewModel.onUserCancel()
+
+        assertThat(addressElementEventReporter.canceledCalls.asChannel().tryReceive().getOrThrow()).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = EXPECTED_ADDRESS.address,
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(resultStateHolder.state.value)
+            .isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+
+        viewModel.onUserCancel()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `user cancellation reports the current edited and selected autocomplete addresses`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        useStandaloneEventReporter = false,
+    ) {
+        selectAutocompletePrediction(
+            Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
+
+        viewModel.onUserCancel()
+
+        assertThat(addressElementEventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend Sta",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    ),
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `canceling through the holder does not report user cancellation`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        testScheduler.runCurrent()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `user cancellation during save is ignored`() = runScenario(
+        useStandaloneEventReporter = false,
+    ) {
+        val primaryButtonResult = CompletableDeferred<Result<AddressElementActivityContract.Result>>()
+        primaryButtonAction.action = { primaryButtonResult.await() }
+
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        val started = addressElementEventReporter.saveStartedCalls.awaitItem()
+        assertThat(started).isEqualTo(
+            FakeAddressElementEventReporter.AnalyticsCall(
+                addressDetails = EXPECTED_ADDRESS,
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(viewModel.formEnabled.value).isFalse()
+
+        viewModel.onUserCancel()
+
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
+        primaryButtonResult.complete(
+            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
+        )
+        testScheduler.runCurrent()
+
+        assertThat(resultStateHolder.state.value)
+            .isEqualTo(State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)))
+        assertThat(addressElementEventReporter.saveCompletedCalls.awaitItem()).isEqualTo(started)
+        addressElementEventReporter.canceledCalls.expectNoEvents()
+        addressElementEventReporter.saveFailedCalls.expectNoEvents()
     }
 
     @Test
@@ -1356,12 +1593,14 @@ class InputAddressViewModelTest {
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
             .build(),
-        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
-            AddressElementActivityContract.Result.StandaloneSucceeded(it)
+        useStandaloneEventReporter: Boolean = true,
+        primaryButtonAction: RecordingPrimaryButtonAction = RecordingPrimaryButtonAction {
+            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(it))
         },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
+        val addressElementEventReporter = FakeAddressElementEventReporter()
         val placesClient = FakePlacesClientProxy(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
             fetchPlaceResult = Result.success(Address()),
@@ -1370,24 +1609,38 @@ class InputAddressViewModelTest {
             config = config,
             primaryButtonAction = primaryButtonAction,
             eventReporter = eventReporter,
+            addressElementEventReporter = if (useStandaloneEventReporter) {
+                StandaloneAddressElementEventReporter(eventReporter)
+            } else {
+                addressElementEventReporter
+            },
             placesClient = placesClient,
         )
 
         Scenario(
             viewModel = viewModel,
             eventReporter = eventReporter,
+            addressElementEventReporter = addressElementEventReporter,
             placesClient = placesClient,
+            primaryButtonAction = primaryButtonAction,
+            resultStateHolder = resultStateHolder,
+            testScheduler = testScheduler,
         ).apply { block() }
 
         eventReporter.validate()
+        addressElementEventReporter.ensureAllEventsConsumed()
         placesClient.ensureAllEventsConsumed()
-        (primaryButtonAction as? RecordingPrimaryButtonAction)?.validate()
+        primaryButtonAction.validate()
     }
 
     private data class Scenario(
         val viewModel: InputAddressViewModel,
         val eventReporter: FakeAddressLauncherEventReporter,
+        val addressElementEventReporter: FakeAddressElementEventReporter,
         val placesClient: FakePlacesClientProxy,
+        val primaryButtonAction: RecordingPrimaryButtonAction,
+        val resultStateHolder: AddressElementResultStateHolder,
+        val testScheduler: TestCoroutineScheduler,
     ) {
         suspend fun selectAutocompletePrediction(address: Address) {
             placesClient.fetchPlaceResult = Result.success(address)
@@ -1451,7 +1704,7 @@ private class FakeAddressElementPrimaryButtonAction(
 }
 
 private class RecordingPrimaryButtonAction(
-    private val action: suspend (AddressDetails) -> Result<AddressElementActivityContract.Result>,
+    var action: suspend (AddressDetails) -> Result<AddressElementActivityContract.Result>,
 ) : AddressElementPrimaryButtonAction {
     private val _calls = Turbine<AddressDetails>()
     val calls: ReceiveTurbine<AddressDetails> = _calls
