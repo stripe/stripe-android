@@ -10,6 +10,7 @@ import app.cash.turbine.withTurbineTimeout
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
+import com.stripe.paymentelementtestpages.AddressElementPage
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.seconds
 
