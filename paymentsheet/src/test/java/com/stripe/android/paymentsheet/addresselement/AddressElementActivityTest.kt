@@ -192,22 +192,11 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping blocks dismissal while tax update is in flight and returns success`() = runScenario {
+    fun `checkout shipping shows loading during tax update and returns success`() = runScenario {
         val taxUpdate = enqueueTaxUpdate()
 
         try {
             startTaxUpdate(taxUpdate)
-            assertSaving()
-
-            addressPage.clickClose()
-            assertSaving()
-
-            activityScenario.onActivity { activity ->
-                activity.onBackPressedDispatcher.onBackPressed()
-            }
-            assertSaving()
-
-            addressPage.dismissViaScrimAccessibilityAction()
             assertSaving()
 
             taxUpdate.releaseResponse.countDown()
@@ -225,35 +214,9 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping shows disabled form after recreation during tax update and returns success`() = runScenario {
-        val taxUpdate = enqueueTaxUpdate()
-
-        try {
-            startTaxUpdate(taxUpdate)
-            assertSaving()
-
-            activityScenario.recreate()
-            activityScenario.onActivity { activity = it }
-            composeTestRule.waitForIdle()
-
-            addressPage.assertVisible()
-            assertSaving()
-
-            taxUpdate.releaseResponse.countDown()
-
-            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
-            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
-            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
-            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
-            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
-        } finally {
-            taxUpdate.releaseResponse.countDown()
-        }
-    }
-
-    @Test
-    fun `checkout shipping restores close after tax update fails`() = runScenario {
+    fun `checkout shipping displays save error and clears it after editing`() = runScenario {
         val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+        addressPage.assertReadyToSave()
         addressPage.assertErrorNotDisplayed(expectedError)
         val taxUpdate = enqueueTaxUpdate(fails = true)
 
@@ -293,6 +256,90 @@ internal class AddressElementActivityTest {
         addressPage.dismissViaScrimAccessibilityAction()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `checkout shipping blocks dismissal while tax update is in flight and returns success`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertDismissalBlocked()
+
+            addressPage.clickClose()
+            assertDismissalBlocked()
+
+            activityScenario.onActivity { activity ->
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+            assertDismissalBlocked()
+
+            addressPage.dismissViaScrimAccessibilityAction()
+            assertDismissalBlocked()
+
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.country).isEqualTo(SHIPPING_ADDRESS.address?.country)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.address.address?.postalCode).isEqualTo(SHIPPING_ADDRESS.address?.postalCode)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping shows disabled form after recreation during tax update and returns success`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertDismissalBlocked()
+
+            activityScenario.recreate()
+            activityScenario.onActivity { activity = it }
+            composeTestRule.waitForIdle()
+
+            addressPage.assertVisible()
+            assertDismissalBlocked()
+
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping restores close after tax update fails`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate(fails = true)
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertDismissalBlocked()
+            taxUpdate.releaseResponse.countDown()
+
+            addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
+            addressPage.assertReadyToSave()
+            addressPage.clickClose()
+
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    private fun Scenario.assertDismissalBlocked() {
+        assertSaving()
+        addressPage.assertCloseDisabled()
     }
 
     private fun enqueueTaxUpdate(fails: Boolean = false): TaxUpdate {
