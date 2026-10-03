@@ -7,7 +7,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,7 +28,6 @@ internal fun AddressOptionsAppBar(
         IconButton(
             enabled = isEnabled,
             onClick = onButtonClick,
-            modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG),
         ) {
             Icon(
                 painter = painterResource(

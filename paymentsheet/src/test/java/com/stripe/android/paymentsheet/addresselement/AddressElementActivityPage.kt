@@ -20,16 +20,16 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
-import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.waitUntilWithIdle
 
 internal class AddressElementActivityPage(
     private val composeTestRule: ComposeTestRule,
     primaryButtonText: String,
+    closeContentDescription: String,
     scrimContentDescription: String,
 ) {
     private val primaryButton = composeTestRule.onNodeWithText(primaryButtonText)
-    private val closeButton = composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG)
+    private val closeButton = composeTestRule.onNodeWithContentDescription(closeContentDescription)
     private val scrim = composeTestRule.onNodeWithContentDescription(scrimContentDescription)
 
     fun clickSave() {
