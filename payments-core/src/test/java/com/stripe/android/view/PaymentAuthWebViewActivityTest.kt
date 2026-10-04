@@ -96,6 +96,7 @@ internal class PaymentAuthWebViewActivityTest {
         private const val CLIENT_SECRET = "client_secret"
 
         private val ARGS = PaymentBrowserAuthContract.Args(
+            shouldUseAppChooser = false,
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,

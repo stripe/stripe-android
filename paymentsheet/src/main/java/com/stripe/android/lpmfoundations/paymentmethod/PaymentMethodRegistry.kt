@@ -46,6 +46,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
@@ -100,6 +101,7 @@ internal object PaymentMethodRegistry {
         SunbitDefinition,
         SwishDefinition,
         TwintDefinition,
+        UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
         WeroDefinition,

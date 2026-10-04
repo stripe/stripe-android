@@ -110,11 +110,15 @@ class StripeBrowserLauncherViewModelTest {
             customTabsPackage = null,
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
+            canResolveActivity = { error("Browser redirects should not query installed apps") },
+            appChooserTitle = "Pay with",
+            noCompatibleAppMessage = "No compatible UPI app",
         ).also { viewModelStoreRule.track(it) }
     }
 
     private companion object {
         private val ARGS = PaymentBrowserAuthContract.Args(
+            shouldUseAppChooser = false,
             objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             requestCode = 50000,
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",

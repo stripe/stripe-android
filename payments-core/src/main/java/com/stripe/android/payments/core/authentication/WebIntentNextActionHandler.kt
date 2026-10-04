@@ -61,6 +61,9 @@ internal class WebIntentNextActionHandler @Inject constructor(
             is StripeIntent.NextActionData.SwishRedirect -> {
                 nextActionData.webAuthParams()
             }
+            is StripeIntent.NextActionData.UpiRedirect -> {
+                nextActionData.webAuthParams()
+            }
             else -> {
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
             }
@@ -78,6 +81,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
             shouldCancelIntentOnUserNavigation = webAuthParams.shouldCancelIntentOnUserNavigation,
             referrer = webAuthParams.referrer,
             forceInAppWebView = webAuthParams.forceInAppWebView,
+            shouldUseAppChooser = webAuthParams.shouldUseAppChooser,
         )
     }
 
@@ -93,6 +97,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
         shouldCancelIntentOnUserNavigation: Boolean = true,
         referrer: String?,
         forceInAppWebView: Boolean,
+        shouldUseAppChooser: Boolean,
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
         paymentBrowserWebStarter.start(
@@ -110,6 +115,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 isInstantApp = isInstantApp,
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,
+                shouldUseAppChooser = shouldUseAppChooser,
             )
         )
     }
@@ -128,7 +134,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 referrer = url.toString(),
                 // This is crucial so that we can set the "Referer" field in the web view activity.
                 // WeChat will otherwise fail with an error indicating an incorrect configuration.
-                forceInAppWebView = true
+                forceInAppWebView = true,
+                shouldUseAppChooser = false,
             )
         } else {
             var urlString = url.toString()
@@ -138,6 +145,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
             WebAuthParams(
                 authUrl = urlString,
                 returnUrl = returnUrl,
+                shouldUseAppChooser = false,
             )
         }
     }
@@ -151,6 +159,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
             authUrl = webViewUrl.toString(),
             returnUrl = defaultReturnUrl.value,
             shouldCancelIntentOnUserNavigation = false,
+            shouldUseAppChooser = false,
         )
     }
 
@@ -164,7 +173,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
                     "null hostedVoucherUrl for ${actionable.nextActionType?.code}"
                 ),
             returnUrl = null,
-            shouldCancelIntentOnUserNavigation = false
+            shouldCancelIntentOnUserNavigation = false,
+            shouldUseAppChooser = false,
         )
     }
 
@@ -172,7 +182,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
         return WebAuthParams(
             authUrl = mobileAuthUrl,
             returnUrl = defaultReturnUrl.value,
-            shouldCancelIntentOnUserNavigation = false
+            shouldCancelIntentOnUserNavigation = false,
+            shouldUseAppChooser = false,
         )
     }
 
@@ -180,7 +191,17 @@ internal class WebIntentNextActionHandler @Inject constructor(
         return WebAuthParams(
             authUrl = mobileAuthUrl,
             returnUrl = defaultReturnUrl.value,
-            shouldCancelIntentOnUserNavigation = false
+            shouldCancelIntentOnUserNavigation = false,
+            shouldUseAppChooser = false,
+        )
+    }
+
+    private fun StripeIntent.NextActionData.UpiRedirect.webAuthParams(): WebAuthParams {
+        return WebAuthParams(
+            authUrl = mobileAuthUrl.orEmpty(),
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false,
+            shouldUseAppChooser = true,
         )
     }
 }
@@ -192,4 +213,5 @@ private data class WebAuthParams(
     val shouldCancelIntentOnUserNavigation: Boolean = true,
     val referrer: String? = null,
     val forceInAppWebView: Boolean = false,
+    val shouldUseAppChooser: Boolean,
 )

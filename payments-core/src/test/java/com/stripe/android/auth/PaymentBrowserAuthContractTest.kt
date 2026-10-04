@@ -107,6 +107,27 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
+    fun `app chooser uses launcher without a return URL`() {
+        val intent = PaymentBrowserAuthContract().createIntent(
+            context,
+            ARGS.copy(url = "upi://pay?pa=merchant@upi", returnUrl = null, shouldUseAppChooser = true)
+        )
+
+        assertThat(intent.component?.className).isEqualTo(StripeBrowserLauncherActivity::class.java.name)
+    }
+
+    @Test
+    fun `parcel round trip preserves app chooser mode`() {
+        val parcel = Parcel.obtain()
+        val args = ARGS.copy(shouldUseAppChooser = true)
+        args.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+
+        assertThat(PaymentBrowserAuthContract.Args(parcel)).isEqualTo(args)
+        parcel.recycle()
+    }
+
+    @Test
     fun `parcel round trip preserves api configuration`() {
         val parcel = Parcel.obtain()
         ARGS.writeToParcel(parcel, 0)
@@ -120,6 +141,7 @@ class PaymentBrowserAuthContractTest {
 
     private companion object {
         private val ARGS = PaymentBrowserAuthContract.Args(
+            shouldUseAppChooser = false,
             clientSecret = "client_secret",
             objectId = "pi_12345",
             requestCode = 5000,

@@ -333,6 +333,15 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        Upi(
+            "upi",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = MAX_POLLING_DURATION),
+        ),
         WeChatPay(
             "wechat_pay",
             isReusable = false,

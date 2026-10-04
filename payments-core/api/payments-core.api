@@ -2165,6 +2165,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Swish Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Twint Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Upi Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field WeChatPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Wero Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Zip Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3728,6 +3729,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionType : java/l
 	public static final field MbWayAwaitAuthorization Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field SwishRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field UpiRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UseStripeSdk Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field VerifyWithMicrodeposits Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field WeChatPayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;

@@ -154,6 +154,7 @@ class PaymentAuthWebViewActivityViewModelTest {
 
     private companion object {
         val ARGS = PaymentBrowserAuthContract.Args(
+            shouldUseAppChooser = false,
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 100,
             clientSecret = "client_secret",

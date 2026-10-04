@@ -16,16 +16,13 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
- * A transparent activity that launches [PaymentBrowserAuthContract.Args.url] in either
- * Custom Tabs (if available) or a browser.
+ * A transparent activity that launches [PaymentBrowserAuthContract.Args.url] in
+ * Custom Tabs (if available), a browser, or the native UPI app chooser.
  *
  * The eventual replacement for [PaymentAuthWebViewActivity].
  *
- * [StripeBrowserLauncherActivity] will only be used when the following are true:
- * - Custom Tabs are available or Chrome is installed
- * - the confirmation request's `return_url` is set to [DefaultReturnUrl.value]
- *
- * See [BrowserCapabilities] and [PaymentBrowserAuthContract.Args.hasDefaultReturnUrl].
+ * [PaymentBrowserAuthContract] selects this activity for the app chooser, the SDK default
+ * return URL, or instant apps. Returning from an external app triggers intent verification.
  */
 internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val args: PaymentBrowserAuthContract.Args? by lazy {
@@ -35,6 +32,8 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
         StripeBrowserLauncherViewModel.Factory(requireNotNull(args))
     }
+
+    private var hasLeftForAppChooser = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,37 +64,38 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        if (args?.shouldUseAppChooser == true && viewModel.hasLaunched && !isFinishing) {
+            hasLeftForAppChooser = true
+        }
+        super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Some UPI apps do not deliver an activity result when the customer returns manually.
+        // Returning to checkout is a signal to verify the intent, not proof of payment success.
+        if (hasLeftForAppChooser && !isFinishing) {
+            args?.let(::finishWithSuccess)
+        }
+    }
+
     private fun launchBrowser(args: PaymentBrowserAuthContract.Args) {
         val contract = ActivityResultContracts.StartActivityForResult()
         val launcher = registerForActivityResult(contract) {
             finishWithSuccess(args)
         }
 
-        val intent = viewModel.createLaunchIntent(args)
-
         try {
+            val intent = viewModel.createLaunchIntent(args)
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
-            ErrorReporter.createFallbackInstance(
-                applicationContext,
-                apiConfigurationProvider = { args.apiConfiguration },
-            )
-                .report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
-                    stripeException = StripeException.create(e),
-                )
-            finishWithFailure(args)
+            finishWithFailure(args, e)
         } catch (e: SecurityException) {
-            ErrorReporter.createFallbackInstance(
-                applicationContext,
-                apiConfigurationProvider = { args.apiConfiguration },
-            )
-                .report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
-                    stripeException = StripeException.create(e),
-                )
-            finishWithFailure(args)
+            finishWithFailure(args, e)
+        } catch (e: IllegalArgumentException) {
+            finishWithFailure(args, e)
         }
     }
 
@@ -107,10 +107,17 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun finishWithFailure(args: PaymentBrowserAuthContract.Args) {
+    private fun finishWithFailure(args: PaymentBrowserAuthContract.Args, cause: Exception) {
+        ErrorReporter.createFallbackInstance(
+            applicationContext,
+            apiConfigurationProvider = { args.apiConfiguration },
+        ).report(
+            errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
+            stripeException = StripeException.create(cause),
+        )
         setResult(
             Activity.RESULT_OK,
-            viewModel.getFailureIntent(args)
+            viewModel.getFailureIntent(args, cause)
         )
         finish()
     }

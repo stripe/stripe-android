@@ -98,6 +98,14 @@ internal abstract class NextActionHandlerModule {
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
+    @IntentAuthenticatorKey(NextActionData.UpiRedirect::class)
+    abstract fun bindsUpiRedirectNextActionHandler(
+        webIntentNextActionHandler: WebIntentNextActionHandler
+    ): PaymentNextActionHandler<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
     @IntentAuthenticatorKey(NextActionData.SdkData.IntentConfirmationChallenge::class)
     abstract fun bindsIntentConfirmationChallengeNextActionHandler(
         intentConfirmationChallengeNextActionHandler: IntentConfirmationChallengeNextActionHandler
