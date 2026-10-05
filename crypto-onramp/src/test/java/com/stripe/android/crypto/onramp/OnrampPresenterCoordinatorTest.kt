@@ -821,7 +821,7 @@ class OnrampPresenterCoordinatorTest {
         return AdditionalKycRequirements(
             userActionRequired = listOf(
                 AdditionalKycRequirement(
-                    description = "screening_questions",
+                    description = "source_of_funds",
                     requestedBy = "swapped",
                     awaitingActionFrom = "user",
                     errors = emptyList(),
@@ -842,6 +842,70 @@ class OnrampPresenterCoordinatorTest {
             pendingStripeAction = emptyList(),
             unrecognizedActionOwner = emptyList(),
         )
+    }
+
+    @Test
+    fun `empty requirements return not required`() = runTest {
+        val requirements = additionalKycRequirements().copy(userActionRequired = emptyList())
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(additionalKycCallback = { result = it })
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.NotRequired::class.java)
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        verify(interactor).onAdditionalKycFlowStarted()
+        verify(interactor, never()).onAdditionalKycFlowCompleted()
+    }
+
+    @Test
+    fun `partner review returns pending verification`() = runTest {
+        val requirements = additionalKycRequirements().copy(
+            userActionRequired = emptyList(),
+            pendingPartnerAction = additionalKycRequirements().userActionRequired,
+        )
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(additionalKycCallback = { result = it })
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.PendingVerification::class.java)
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        verify(interactor).onAdditionalKycFlowStarted()
+        verify(interactor).onAdditionalKycFlowCompleted()
+    }
+
+    @Test
+    fun `stripe review returns pending verification`() = runTest {
+        val requirements = additionalKycRequirements().copy(
+            userActionRequired = emptyList(),
+            pendingStripeAction = additionalKycRequirements().userActionRequired,
+        )
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(additionalKycCallback = { result = it })
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.PendingVerification::class.java)
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        verify(interactor).onAdditionalKycFlowStarted()
+        verify(interactor).onAdditionalKycFlowCompleted()
+    }
+
+    @Test
+    fun `unsupported requirement returns failure`() = runTest {
+        val requirements = additionalKycRequirements().copy(
+            userActionRequired = additionalKycRequirements().userActionRequired.map { it.copy(description = "future") }
+        )
+        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampAdditionalKycResult? = null
+        val coordinator = createCoordinator(additionalKycCallback = { result = it })
+        coordinator.fulfillAdditionalKycRequirement()
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.Failed::class.java)
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        verify(interactor).onAdditionalKycFlowStarted()
+        verify(interactor, never()).onAdditionalKycFlowCompleted()
     }
 
     private fun additionalKycSubmission(): AdditionalKycSubmission {

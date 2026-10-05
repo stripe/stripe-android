@@ -199,17 +199,32 @@ private fun AdditionalKycContent(
                     onChooseFile = onChooseFile,
                     onRemoveFile = onRemoveFile,
                 )
-                AdditionalKycCollectionPage.Submitted -> SubmittedContent(state.completedDocumentCount > 0)
+                AdditionalKycCollectionPage.Submitted -> SubmittedContent(
+                    state.requirementType == AdditionalKycRequirementType.ProofOfAddress
+                )
                 AdditionalKycCollectionPage.Pending -> SubmittedContent(documentsUploaded = false)
                 AdditionalKycCollectionPage.Unavailable -> UnavailableContent()
             }
         }
 
+        SubmissionError(state.submissionState)
         AdditionalKycPrimaryButton(
             state = state,
             onClose = onClose,
             onSubmit = onSubmit,
             onContinue = onContinue,
+        )
+    }
+}
+
+@Composable
+private fun SubmissionError(state: AdditionalKycSubmissionState) {
+    if (state == AdditionalKycSubmissionState.Failed) {
+        Text(
+            text = stringResource(R.string.stripe_onramp_default_api_error_user_message),
+            modifier = Modifier.padding(horizontal = 20.dp).testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
+            style = LinkTheme.typography.detail,
+            color = LinkTheme.colors.textCritical,
         )
     }
 }
@@ -323,9 +338,7 @@ private fun QuestionnaireContent(
     state: AdditionalKycScreenState,
     onQuestionAnswerChanged: (questionId: String, answer: String) -> Unit,
 ) {
-    val questions = state.questions.filterNot { question ->
-        state.document != null && question.id == FUNDING_SOURCES_QUESTION_ID
-    }
+    val questions = state.questions
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -430,6 +443,8 @@ private fun DocumentOverviewContent(
         )
         SourceDocumentsCard(
             groups = groups,
+            canAddDocuments = groups.size < (state.document?.maxDocumentTypes ?: 0) &&
+                state.document?.slots?.firstOrNull()?.subtypes.orEmpty().any { it.id !in groups },
             onAddDocuments = onAddDocuments,
             onEditDocuments = onEditDocuments,
         )
@@ -440,6 +455,7 @@ private fun DocumentOverviewContent(
 @Suppress("LongMethod")
 private fun SourceDocumentsCard(
     groups: Map<String?, List<AdditionalKycDocumentSlotState>>,
+    canAddDocuments: Boolean,
     onAddDocuments: () -> Unit,
     onEditDocuments: (slotIndex: Int) -> Unit,
 ) {
@@ -510,7 +526,7 @@ private fun SourceDocumentsCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onAddDocuments)
+                .clickable(enabled = canAddDocuments, onClick = onAddDocuments)
                 .padding(vertical = 12.dp)
                 .testTag(ADDITIONAL_KYC_ADD_DOCUMENTS_TAG),
             verticalAlignment = Alignment.CenterVertically,
@@ -588,6 +604,13 @@ private fun DocumentEditorContent(
             )
         }
 
+        if (state.errorMessages.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.stripe_link_onramp_additional_kyc_previous_document_issue),
+                style = LinkTheme.typography.detail,
+                color = LinkTheme.colors.textCritical,
+            )
+        }
         DocumentTypeField(
             requirementType = state.requirementType,
             slot = editingSlot,
@@ -1399,7 +1422,6 @@ internal fun additionalKycDocumentGroupTag(slotIndex: Int): String =
 internal fun additionalKycPendingRequirementTag(index: Int): String =
     "AdditionalKycPendingRequirement-$index"
 
-private const val FUNDING_SOURCES_QUESTION_ID = "funding_sources"
 private const val DEFAULT_MAX_FILE_SIZE_MEGABYTES = 5
 internal const val ADDITIONAL_KYC_CANCEL_BUTTON_TAG = "AdditionalKycCancelButton"
 internal const val ADDITIONAL_KYC_BACK_BUTTON_TAG = "AdditionalKycBackButton"

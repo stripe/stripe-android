@@ -195,4 +195,6 @@
   <string name="stripe_link_onramp_additional_kyc_document_uploaded_title">Document uploaded successfully</string>
   <string name="stripe_link_onramp_additional_kyc_document_uploaded_message">You can continue while we verify your document in the background.</string>
   <string name="stripe_onramp_platform_pay_account_changed">Please select your wallet payment method again.</string>
+  <!-- User-facing explanation for a rejected KYC document; backend errors are developer-facing. -->
+  <string name="stripe_link_onramp_additional_kyc_previous_document_issue">There was an issue with your previous document. Please upload a new document that meets the requirements.</string>
 </resources>

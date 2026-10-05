@@ -25,7 +25,11 @@ import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -34,6 +38,8 @@ import java.io.IOException
 import java.util.Locale
 
 internal class AdditionalKycActivity : ComponentActivity() {
+    private var fileSelectionJob: Job? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -61,13 +67,14 @@ internal class AdditionalKycActivity : ComponentActivity() {
             AdditionalKycStateHolder(args.requirements)
         }
         val scope = rememberCoroutineScope()
-        val chooseFile = rememberFilePicker(stateHolder)
+        val chooseFile = rememberFilePicker(stateHolder, args.submissionHandlerKey)
 
         AdditionalKycScreen(
             appearance = args.appearance,
             state = stateHolder.state,
             onClose = { cancel(stateHolder) },
             onBack = {
+                fileSelectionJob?.cancel()
                 if (!stateHolder.onBack()) {
                     cancel(stateHolder)
                 }
@@ -101,7 +108,10 @@ internal class AdditionalKycActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun rememberFilePicker(stateHolder: AdditionalKycStateHolder): (Int) -> Unit {
+    private fun rememberFilePicker(
+        stateHolder: AdditionalKycStateHolder,
+        handlerKey: String,
+    ): (Int) -> Unit {
         val scope = rememberCoroutineScope()
         var pendingFileSlot by remember { mutableStateOf<Int?>(null) }
         val filePicker = rememberLauncherForActivityResult(
@@ -113,17 +123,27 @@ internal class AdditionalKycActivity : ComponentActivity() {
             if (uri == null || slotIndex == null) {
                 stateHolder.onFileSelectionCancelled()
             } else {
-                scope.launch {
+                fileSelectionJob?.cancel()
+                fileSelectionJob = scope.launch {
                     handleSelectedFile(
                         uri = uri,
                         slotIndex = slotIndex,
                         stateHolder = stateHolder,
+                        handlerKey = handlerKey,
                     )
                 }
             }
         }
 
-        return { slotIndex ->
+        return chooseFile@{ slotIndex ->
+            if (stateHolder.state.submissionState !in setOf(
+                    AdditionalKycSubmissionState.Collecting,
+                    AdditionalKycSubmissionState.Failed,
+                )
+            ) {
+                return@chooseFile
+            }
+            fileSelectionJob?.cancel()
             stateHolder.onFileSelectionStarted(slotIndex)
             pendingFileSlot = slotIndex
             filePicker.launch(acceptedMimeTypes(stateHolder.acceptedFormats))
@@ -134,6 +154,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
         uri: Uri,
         slotIndex: Int,
         stateHolder: AdditionalKycStateHolder,
+        handlerKey: String,
     ) {
         val displayName = withContext(Dispatchers.IO) {
             runCatching { selectedFileName(uri) }
@@ -142,42 +163,77 @@ internal class AdditionalKycActivity : ComponentActivity() {
             return
         }
         stateHolder.onFileUploadStarted(slotIndex, displayName)
-        val selectedFile = withContext(Dispatchers.IO) {
-            readSelectedFile(
-                uri = uri,
-                displayName = displayName,
-                maximumFileSizeBytes = stateHolder.maximumFileSizeBytes,
+        var localCopy: File? = null
+        try {
+            val selectedFile = withContext(Dispatchers.IO) {
+                readSelectedFile(
+                    uri = uri,
+                    displayName = displayName,
+                    maximumFileSizeBytes = stateHolder.maximumFileSizeBytes,
+                ).also { localCopy = it.getOrNull()?.file }
+            }
+            selectedFile.fold(
+                onSuccess = { selection ->
+                    if (
+                        stateHolder.isAcceptedFileSize(selection.file.length()) &&
+                        stateHolder.isAcceptedFile(
+                            displayName = selection.displayName,
+                            mimeTypeExtension = selection.mimeTypeExtension,
+                        )
+                    ) {
+                        uploadSelectedFile(selection, slotIndex, stateHolder, handlerKey)
+                    } else {
+                        selection.file.delete()
+                    }
+                },
+                onFailure = { error ->
+                    if (error is AdditionalKycFileTooLargeException) {
+                        stateHolder.onFileTooLarge()
+                    } else {
+                        stateHolder.onFileSelectionFailed()
+                    }
+                },
             )
+        } finally {
+            localCopy?.delete()
         }
-        selectedFile.fold(
-            onSuccess = { selection ->
-                if (
-                    stateHolder.isAcceptedFileSize(selection.file.length()) &&
-                    stateHolder.isAcceptedFile(
-                        displayName = selection.displayName,
-                        mimeTypeExtension = selection.mimeTypeExtension,
-                    )
-                ) {
-                    stateHolder.onFileSelected(
-                        slotIndex = slotIndex,
-                        file = selection.file,
-                        displayName = selection.displayName,
-                    )?.delete()
-                } else {
-                    selection.file.delete()
-                }
+    }
+
+    private suspend fun uploadSelectedFile(
+        selection: SelectedFile,
+        slotIndex: Int,
+        stateHolder: AdditionalKycStateHolder,
+        handlerKey: String,
+    ) {
+        val uploader = AdditionalKycSubmissionHandlerRegistry.uploader(handlerKey)
+        val result = uploader?.upload(selection.file)
+            ?: Result.failure(IllegalStateException("Missing KYC document uploader"))
+        currentCoroutineContext().ensureActive()
+        if (stateHolder.state.selectingFileSlot != slotIndex || isFinishing) return
+        result.fold(
+            onSuccess = { fileId ->
+                stateHolder.onFileSelected(
+                    slotIndex = slotIndex,
+                    file = selection.file,
+                    displayName = selection.displayName,
+                    fileId = fileId,
+                )?.delete()
             },
             onFailure = { error ->
-                if (error is AdditionalKycFileTooLargeException) {
-                    stateHolder.onFileTooLarge()
-                } else {
-                    stateHolder.onFileSelectionFailed()
-                }
+                if (error is CancellationException) throw error
+                stateHolder.onFileSelectionFailed()
             },
         )
     }
 
     private fun cancel(stateHolder: AdditionalKycStateHolder) {
+        if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitting) return
+        fileSelectionJob?.cancel()
+        if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitted) {
+            finishSubmitted()
+            return
+        }
+        stateHolder.onFileSelectionCancelled()
         stateHolder.currentFiles().forEach { file -> file.delete() }
         setResult(
             RESULT_CANCELED,

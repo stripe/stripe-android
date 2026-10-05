@@ -20,6 +20,7 @@ internal data class AdditionalKycRequirementSubmission(
 internal data class AdditionalKycDocumentSubmission(
     val documentSubtype: String,
     val files: List<File>,
+    val uploadedFileIds: List<String>,
 ) : Parcelable
 
 @Parcelize

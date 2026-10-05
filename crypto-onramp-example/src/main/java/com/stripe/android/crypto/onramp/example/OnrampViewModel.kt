@@ -408,6 +408,8 @@ internal class OnrampViewModel(
 
     fun onAdditionalKycResult(result: OnrampAdditionalKycResult) {
         _message.value = when (result) {
+            is OnrampAdditionalKycResult.NotRequired -> "Additional KYC Not Required"
+            is OnrampAdditionalKycResult.PendingVerification -> "Additional KYC Pending Verification"
             is OnrampAdditionalKycResult.Submitted -> "Additional KYC Submitted"
             is OnrampAdditionalKycResult.Cancelled -> "Additional KYC Cancelled"
             is OnrampAdditionalKycResult.Failed -> "Additional KYC Failed: ${result.error.message}"

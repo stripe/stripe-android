@@ -174,7 +174,7 @@ internal class AdditionalKycScreenTest {
     }
 
     @Test
-    fun `questionnaire excludes funding sources and forwards answers`() = runScenario(
+    fun `questionnaire includes funding sources and forwards answers`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.Questionnaire,
             questions = listOf(
@@ -187,7 +187,7 @@ internal class AdditionalKycScreenTest {
     ) {
         composeRule.onNodeWithTag(additionalKycQuestionTag("purchase_purpose"))
             .performTextReplacement("For investment")
-        composeRule.onNodeWithTag(additionalKycQuestionTag("funding_sources")).assertDoesNotExist()
+        composeRule.onNodeWithTag(additionalKycQuestionTag("funding_sources")).assertExists()
         composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
 
         assertThat(changedAnswer).isEqualTo("purchase_purpose" to "For investment")
@@ -283,6 +283,7 @@ internal class AdditionalKycScreenTest {
     fun `submitted screen renders review copy and done action`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.Submitted,
+            requirementType = AdditionalKycRequirementType.SourceOfFunds,
             submissionState = AdditionalKycSubmissionState.Submitted,
         ),
     ) {
@@ -299,6 +300,7 @@ internal class AdditionalKycScreenTest {
     fun `document submission shows success and continues on done`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.Submitted,
+            requirementType = AdditionalKycRequirementType.ProofOfAddress,
             submissionState = AdditionalKycSubmissionState.Submitted,
             completedDocumentCount = 1,
         ),
@@ -371,6 +373,7 @@ internal class AdditionalKycScreenTest {
     fun `large text upload success message scrolls while done remains visible`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.Submitted,
+            requirementType = AdditionalKycRequirementType.ProofOfAddress,
             completedDocumentCount = 1,
         ),
         fontScale = 2f,

@@ -46,6 +46,7 @@ import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
+import com.stripe.android.crypto.onramp.ui.isSupportedForCollection
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -148,6 +149,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
 
     init {
+        AdditionalKycSubmissionHandlerRegistry.setUploader(
+            onrampCallbackIdentifier,
+            AdditionalKycDocumentUploader(interactor::uploadAdditionalKycDocument),
+        )
         AdditionalKycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
             AdditionalKycSubmissionHandler { submission ->
                 interactor.fulfillKycRequirements(submission)
@@ -260,9 +265,35 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun fulfillAdditionalKycRequirement() {
+        interactor.onAdditionalKycFlowStarted()
         coroutineScope.launch {
             interactor.retrieveAdditionalKycRequirements().fold(
                 onSuccess = { requirements ->
+                    val callback = onrampCallbacksState.additionalKycCallback
+                    if (requirements.userActionRequired.isEmpty()) {
+                        when {
+                            requirements.unrecognizedActionOwner.isNotEmpty() -> callback?.onResult(
+                                OnrampAdditionalKycResult.Failed(
+                                    IllegalArgumentException("Unsupported additional KYC requirement")
+                                )
+                            )
+                            requirements.pendingPartnerAction.isNotEmpty() ||
+                                requirements.pendingStripeAction.isNotEmpty() -> {
+                                interactor.onAdditionalKycFlowCompleted()
+                                callback?.onResult(OnrampAdditionalKycResult.PendingVerification())
+                            }
+                            else -> callback?.onResult(OnrampAdditionalKycResult.NotRequired())
+                        }
+                        return@fold
+                    }
+                    if (requirements.userActionRequired.any { !it.isSupportedForCollection() }) {
+                        callback?.onResult(
+                            OnrampAdditionalKycResult.Failed(
+                                IllegalArgumentException("Unsupported additional KYC requirement")
+                            )
+                        )
+                        return@fold
+                    }
                     additionalKycResultLauncher.launch(
                         AdditionalKycActivityArgs(
                             requirements = requirements,
@@ -566,6 +597,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 OnrampAdditionalKycResult.Cancelled()
             }
             is AdditionalKycScreenAction.Submitted -> {
+                interactor.onAdditionalKycFlowCompleted()
                 OnrampAdditionalKycResult.Submitted()
             }
         }

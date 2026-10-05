@@ -28,12 +28,13 @@ internal class AdditionalKycStateHolderTest {
         assertThat(document.instructions).contains("Documents must include your full name and address.")
 
         stateHolder.onDocumentSubtypeSelected(0, "utility_provider")
-        stateHolder.onFileSelected(0, File("utility.pdf"), "utility.pdf")
+        stateHolder.onFileSelected(0, File("utility.pdf"), "utility.pdf", fileId = "file_uploaded")
         val submission = requireNotNull(stateHolder.startSubmission())
 
         assertThat(submission.requirements.values.single().requestedBy).isEqualTo("swapped")
         assertThat(submission.requirements.keys).containsExactly("proof_of_address")
-        assertThat(submission.requirements.values.single().documents.single().documentSubtype).isEqualTo("utility_provider")
+        assertThat(submission.requirements.values.single().documents.single().documentSubtype)
+            .isEqualTo("utility_provider")
     }
 
     @Test
@@ -52,15 +53,20 @@ internal class AdditionalKycStateHolderTest {
 
         assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Questionnaire)
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "Long-term investment")
+        stateHolder.state.questions.filter { it.id != "purchase_purpose" }.forEach {
+            stateHolder.onQuestionAnswerChanged(it.id, "Salary")
+        }
         stateHolder.onContinue()
         stateHolder.onAddDocuments()
         assertThat(stateHolder.isAcceptedFile("payslip.docx", null)).isTrue()
-        stateHolder.onFileSelected(0, File("payslip.docx"), "payslip.docx")
+        stateHolder.onFileSelected(0, File("payslip.docx"), "payslip.docx", fileId = "file_uploaded")
 
         val submission = requireNotNull(stateHolder.startSubmission())
         assertThat(submission.requirements.values.single().documents.single().documentSubtype).isEqualTo("payslip")
-        assertThat(submission.requirements.values.single().questionnaire?.answers?.single()?.value)
-            .isEqualTo("Long-term investment")
+        val answer = submission.requirements.values.single().questionnaire?.answers?.first {
+            it.questionId == "purchase_purpose"
+        }
+        assertThat(answer?.value).isEqualTo("Long-term investment")
     }
 
     private fun stateHolderFromFixture(fileName: String): AdditionalKycStateHolder {
@@ -115,6 +121,7 @@ internal class AdditionalKycStateHolderTest {
 
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "For investment")
         stateHolder.onQuestionAnswerChanged("third_party_advised", "No")
+        stateHolder.onQuestionAnswerChanged("funding_sources", "Salary")
         assertThat(stateHolder.onContinue()).isTrue()
         assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentOverview)
 
@@ -193,16 +200,19 @@ internal class AdditionalKycStateHolderTest {
             )
         )
 
+        stateHolder.onQuestionAnswerChanged("funding_sources", "Savings and salary")
         stateHolder.onFileSelected(
             slotIndex = 0,
             file = File("/tmp/bank.pdf"),
             displayName = "bank.pdf",
+            fileId = "file_uploaded",
         )
         assertThat(stateHolder.isAcceptedFile("income.jpg", null)).isTrue()
         stateHolder.onFileSelected(
             slotIndex = 1,
             file = File("/tmp/income.jpg"),
             displayName = "income.jpg",
+            fileId = "file_uploaded",
         )
 
         val submission = stateHolder.createSubmission()
@@ -212,11 +222,12 @@ internal class AdditionalKycStateHolderTest {
             .containsExactly("source_of_funds")
         assertThat(submission?.requirements?.values?.single()?.documents?.map { document -> document.documentSubtype })
             .containsExactly("bank_statement")
-        assertThat(submission?.requirements?.values?.single()?.documents?.flatMap { document -> document.files })
-            .containsExactly(File("/tmp/bank.pdf"), File("/tmp/income.jpg"))
+        val fileIds = submission?.requirements?.values?.single()?.documents?.flatMap { it.uploadedFileIds }
+        assertThat(fileIds)
+            .containsExactly("file_uploaded", "file_uploaded")
             .inOrder()
         assertThat(submission?.requirements?.values?.single()?.questionnaire?.answers?.single()?.value)
-            .isEqualTo("Bank statement")
+            .isEqualTo("Savings and salary")
     }
 
     @Test
@@ -370,7 +381,7 @@ internal class AdditionalKycStateHolderTest {
 
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
         assertThat(stateHolder.state.pendingRequirements.single().requirementType)
-            .isEqualTo(AdditionalKycRequirementType.AdditionalVerification)
+            .isEqualTo(AdditionalKycRequirementType.SourceOfFunds)
         assertThat(stateHolder.state.pendingRequirements.single().status)
             .isEqualTo(AdditionalKycPendingRequirementStatus.Processing)
     }
@@ -480,8 +491,8 @@ internal class AdditionalKycStateHolderTest {
     fun `multiple files of one type do not satisfy minimum distinct types`() = runDocumentScenario(
         minDocumentTypes = 2,
     ) {
-        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf")
-        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf")
+        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf", fileId = "file_uploaded")
+        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
 
         assertThat(createSubmission()).isNull()
         assertThat(state.validationError).isEqualTo(AdditionalKycValidationError.MissingDocuments)
@@ -496,17 +507,17 @@ internal class AdditionalKycStateHolderTest {
     fun `maximum distinct types disables new types but permits more files of existing type`() = runDocumentScenario(
         maxDocumentTypes = 1,
     ) {
-        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf")
+        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf", fileId = "file_uploaded")
 
         val slot = requireNotNull(state.document).slots.first { it.index == 1 }
         assertThat(slot.subtypes.first { it.id == "payslip" }.isEnabled).isFalse()
         assertThat(slot.subtypes.first { it.id == "bank_statement" }.isEnabled).isTrue()
         onDocumentSubtypeSelected(1, "payslip")
-        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf")
+        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
 
         val documents = requireNotNull(createSubmission()).requirements.values.single().documents
         assertThat(documents.single().documentSubtype).isEqualTo("bank_statement")
-        assertThat(documents.single().files).hasSize(2)
+        assertThat(documents.single().uploadedFileIds).hasSize(2)
     }
 
     @Test
@@ -517,6 +528,20 @@ internal class AdditionalKycStateHolderTest {
         assertThat(isAcceptedFileSize(2_000_000L)).isTrue()
         assertThat(isAcceptedFileSize(2_000_001L)).isFalse()
         assertThat(state.document?.maxFileSizeMegabytes).isEqualTo(2)
+    }
+
+    @Test
+    fun `source of funds without questions skips questionnaire and omits answers`() = runDocumentScenario {
+        assertThat(onContinue()).isTrue()
+        assertThat(state.page).isEqualTo(AdditionalKycCollectionPage.DocumentOverview)
+
+        onAddDocuments()
+        val slot = requireNotNull(state.document?.editingSlotIndex)
+        onFileSelected(slot, File("salary.pdf"), "salary.pdf", fileId = "file_salary")
+
+        val requirement = requireNotNull(createSubmission()).requirements.getValue("source_of_funds")
+        assertThat(requirement.questionnaire).isNull()
+        assertThat(requirement.documents.single().uploadedFileIds).containsExactly("file_salary")
     }
 
     private fun runDocumentScenario(
@@ -568,7 +593,7 @@ internal class AdditionalKycStateHolderTest {
 
         fun questionnaireRequirement(): AdditionalKycRequirement {
             return AdditionalKycRequirement(
-                description = "screening_questions",
+                description = "source_of_funds",
                 requestedBy = "swapped",
                 awaitingActionFrom = "user",
                 errors = emptyList(),

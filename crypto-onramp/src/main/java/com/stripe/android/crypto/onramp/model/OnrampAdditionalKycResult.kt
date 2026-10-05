@@ -21,6 +21,14 @@ sealed interface OnrampAdditionalKycResult {
     @ExperimentalCryptoOnramp
     class Submitted internal constructor() : OnrampAdditionalKycResult
 
+    /** An existing submission is awaiting Stripe or partner review. */
+    @ExperimentalCryptoOnramp
+    class PendingVerification internal constructor() : OnrampAdditionalKycResult
+
+    /** A fresh requirements check found nothing to collect. */
+    @ExperimentalCryptoOnramp
+    class NotRequired internal constructor() : OnrampAdditionalKycResult
+
     /**
      * The additional KYC collection flow was cancelled.
      */

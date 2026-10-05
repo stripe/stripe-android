@@ -40,6 +40,37 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 class OnrampInteractorFulfillKycRequirementsTest {
     @Test
+    fun `uploaded file IDs are reused when retrying fulfillment`() = runScenario {
+        val original = documentSubmission(emptyList())
+        val requirement = original.requirements.getValue("source_of_funds")
+        val submission = original.copy(
+            requirements = mapOf(
+                "source_of_funds" to requirement.copy(
+                    documents = requirement.documents.map { it.copy(uploadedFileIds = listOf("file_existing")) }
+                )
+            )
+        )
+        val requests = requirementRequests(documentRequests(listOf("file_existing")), questionnaireRequest())
+        whenever(cryptoApiRepository.fulfillKycRequirements(requests, LINK_SESSION_KEY))
+            .thenReturn(Result.failure(IllegalStateException("Temporary failure")))
+            .thenReturn(Result.success(Unit))
+
+        assertThat(interactor.fulfillKycRequirements(submission).isFailure).isTrue()
+        assertThat(interactor.fulfillKycRequirements(submission).isSuccess).isTrue()
+        verify(cryptoApiRepository, never()).uploadAdditionalKycDocument(any(), any())
+    }
+
+    @Test
+    fun `selected document uploads with Link authentication and returns file ID`() = runScenario {
+        whenever(cryptoApiRepository.uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY))
+            .thenReturn(Result.success(StripeFile(id = "file_selected")))
+
+        assertThat(interactor.uploadAdditionalKycDocument(firstFile).getOrThrow()).isEqualTo("file_selected")
+        verify(cryptoApiRepository).uploadAdditionalKycDocument(firstFile, LINK_SESSION_KEY)
+        verify(cryptoApiRepository, never()).fulfillKycRequirements(any(), any())
+    }
+
+    @Test
     fun `documents are uploaded in order before submission`() = runScenario {
         val expectedDocuments = documentRequests(fileIds = listOf("file_1", "file_2"))
         val expectedQuestionnaire = questionnaireRequest()
@@ -76,7 +107,9 @@ class OnrampInteractorFulfillKycRequirementsTest {
             requirements = mapOf(
                 "proof_of_address" to AdditionalKycRequirementSubmission(
                     requestedBy = "swapped",
-                    documents = listOf(AdditionalKycDocumentSubmission("utility_provider", listOf(firstFile))),
+                    documents = listOf(
+                        AdditionalKycDocumentSubmission("utility_provider", listOf(firstFile), emptyList())
+                    ),
                     questionnaire = null,
                 ),
                 "source_of_funds" to sourceOfFunds,
@@ -153,7 +186,7 @@ class OnrampInteractorFulfillKycRequirementsTest {
         assertThat(error.code).isEqualTo("unexpected_error")
         assertThat(error.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(error.developerMessage).contains("Uploaded additional KYC document is missing a file ID")
-        assertThat(error.developerMessage).contains("operation: fulfill_additional_kyc_requirement")
+        assertThat(error.developerMessage).contains("operation: fulfill_kyc_requirement")
         assertThat(error.docUrl).isNull()
         verifyFulfillmentWasNotRequested()
     }
@@ -336,6 +369,7 @@ class OnrampInteractorFulfillKycRequirementsTest {
                             AdditionalKycDocumentSubmission(
                                 documentSubtype = "bank_statement",
                                 files = files,
+                                uploadedFileIds = emptyList(),
                             )
                         ),
                         questionnaire = AdditionalKycQuestionnaireSubmission(

@@ -311,6 +311,14 @@ public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycRes
 	public final fun getError ()Ljava/lang/Throwable;
 }
 
+public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$PendingVerification : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
+	public static final field $stable I
+}
+
 public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Submitted : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
 	public static final field $stable I
 }

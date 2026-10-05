@@ -344,8 +344,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newLaiInfo = linkAuthIntentInfo
             ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
+        val newSession = if (isSameUser && consumerSession.linkSessionKey.isNullOrBlank()) {
+            consumerSession.copy(linkSessionKey = currentAccount?.linkSessionKey)
+        } else {
+            consumerSession
+        }
         val newAccount = LinkAccount(
-            consumerSession = consumerSession,
+            consumerSession = newSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
             linkAuthIntentInfo = newLaiInfo,
