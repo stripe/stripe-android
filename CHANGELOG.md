@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+
 ## 23.22.0 - 2026-10-05
 
 ### Crypto Onramp
