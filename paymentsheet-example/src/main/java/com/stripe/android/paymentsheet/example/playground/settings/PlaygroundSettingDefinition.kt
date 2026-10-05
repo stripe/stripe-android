@@ -205,10 +205,22 @@ internal interface PlaygroundSettingDefinition<T> {
 
         fun createOptions(configurationData: PlaygroundConfigurationData): List<Option<T>>
 
+        fun optionMatchesValue(optionValue: T, value: T): Boolean {
+            return optionValue == value
+        }
+
         fun option(name: String, value: T): Option<T> {
             return Option(name, value)
         }
 
         data class Option<T>(val name: String, val value: T)
+
+        interface WithTextInput<T> : Displayable<T> {
+            val textInputName: String
+
+            fun textInputValue(value: T): String?
+
+            fun updateTextInputValue(value: T, textInputValue: String): T
+        }
     }
 }

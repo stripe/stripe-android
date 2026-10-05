@@ -150,7 +150,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     init {
         AdditionalKycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
             AdditionalKycSubmissionHandler { submission ->
-                interactor.fulfillAdditionalKycRequirement(submission).map { }
+                interactor.fulfillKycRequirements(submission)
             }
 
         // Observe Link controller state
@@ -366,6 +366,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 coroutineScope.launch {
                     interactor.getOrFetchPlatformKey().fold(
                         onSuccess = {
+                            interactor.onGooglePayPresented(it)
                             googlePayPaymentMethodLauncher?.present(
                                 currencyCode = selection.currencyCode,
                                 amount = selection.amount,

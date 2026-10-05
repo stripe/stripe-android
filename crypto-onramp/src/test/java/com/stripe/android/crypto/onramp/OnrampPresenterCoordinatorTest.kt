@@ -14,9 +14,9 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmissionResponse
 import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycCallback
 import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -204,8 +204,8 @@ class OnrampPresenterCoordinatorTest {
         val submission = additionalKycSubmission()
         var callbackResult: OnrampAdditionalKycResult? = null
         whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
-        whenever(interactor.fulfillAdditionalKycRequirement(submission)).thenReturn(
-            Result.success(AdditionalKycSubmissionResponse(id = "kyc_submission_123"))
+        whenever(interactor.fulfillKycRequirements(submission)).thenReturn(
+            Result.success(Unit)
         )
         val coordinator = createCoordinator(
             additionalKycCallback = { callbackResult = it },
@@ -219,7 +219,7 @@ class OnrampPresenterCoordinatorTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(callbackResult).isNull()
-        verify(interactor).fulfillAdditionalKycRequirement(submission)
+        verify(interactor).fulfillKycRequirements(submission)
     }
 
     @Test
@@ -261,7 +261,7 @@ class OnrampPresenterCoordinatorTest {
         testScope.testScheduler.advanceUntilIdle()
 
         assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Cancelled::class.java)
-        verify(interactor, never()).fulfillAdditionalKycRequirement(any())
+        verify(interactor, never()).fulfillKycRequirements(any())
     }
 
     @Test
@@ -846,14 +846,18 @@ class OnrampPresenterCoordinatorTest {
 
     private fun additionalKycSubmission(): AdditionalKycSubmission {
         return AdditionalKycSubmission(
-            liquidityProvider = "swapped",
-            documents = emptyList(),
-            questionnaire = AdditionalKycQuestionnaireSubmission(
-                answers = listOf(
-                    AdditionalKycQuestionnaireAnswer(
-                        questionId = "purchase_purpose",
-                        value = "Long-term investment",
-                    )
+            requirements = mapOf(
+                "source_of_funds" to AdditionalKycRequirementSubmission(
+                    requestedBy = "swapped",
+                    documents = emptyList(),
+                    questionnaire = AdditionalKycQuestionnaireSubmission(
+                        answers = listOf(
+                            AdditionalKycQuestionnaireAnswer(
+                                questionId = "purchase_purpose",
+                                value = "Long-term investment",
+                            )
+                        )
+                    ),
                 )
             ),
         )

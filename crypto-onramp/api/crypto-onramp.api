@@ -120,6 +120,15 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 	public static final field $stable I
 }
 
+public final class com/stripe/android/crypto/onramp/exception/PlatformPayAccountChangedException : java/lang/IllegalStateException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+	public fun getDeveloperMessage ()Ljava/lang/String;
+	public fun getDocUrl ()Ljava/lang/String;
+	public fun getUnderlyingError ()Ljava/lang/Throwable;
+	public fun getUserMessage ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/exception/SDKVersion {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
@@ -211,6 +220,7 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/l
 	public static final field Avalanche Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Base Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Bitcoin Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Celo Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Companion Lcom/stripe/android/crypto/onramp/model/CryptoNetwork$Companion;
 	public static final field Ethereum Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Optimism Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
@@ -248,6 +258,8 @@ public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/IdType;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -256,11 +268,14 @@ public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public final fun getBirthCity ()Ljava/lang/String;
 	public final fun getBirthCountry ()Lcom/stripe/android/core/model/CountryCode;
 	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
+	public final fun getEmail ()Ljava/lang/String;
 	public final fun getFirstName ()Ljava/lang/String;
 	public final fun getIdNumber ()Ljava/lang/String;
 	public final fun getIdType ()Lcom/stripe/android/crypto/onramp/model/IdType;
 	public final fun getLastName ()Ljava/lang/String;
 	public final fun getNationalities ()Ljava/util/List;
+	public final fun getPhone ()Ljava/lang/String;
+	public final fun getRawPhone ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -401,6 +416,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration {
 	public static final field $stable I
 	public fun <init> ()V
 	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun countryHint (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun cryptoCustomerId (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
@@ -415,6 +431,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$Sa
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun collectContactInformation (Z)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration$SamsungPayConfig;
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {

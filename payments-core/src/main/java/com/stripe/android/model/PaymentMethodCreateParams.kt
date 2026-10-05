@@ -1415,6 +1415,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createPix(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Pix,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createPayByBank(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -1422,6 +1437,36 @@ constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createGoPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.GoPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createMoMo(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.MoMo,
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,

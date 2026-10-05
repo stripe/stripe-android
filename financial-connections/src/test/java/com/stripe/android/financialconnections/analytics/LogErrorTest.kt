@@ -1,11 +1,9 @@
 package com.stripe.android.financialconnections.analytics
 
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -14,21 +12,14 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedDow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LogErrorTest {
-
-    private val liveEvents = mutableListOf<FinancialConnectionsEvent>()
-
-    @Before
-    fun setUp() {
-        FinancialConnections.setEventListener { liveEvents += it }
-    }
 
     @Test
     fun `InstitutionUnplannedDowntimeError with live events in response should not emit live event`() =
@@ -68,7 +59,7 @@ class LogErrorTest {
             )
 
             // emits live event
-            assertThat(liveEvents).isEmpty()
+            verify(analyticsTracker, never()).emitEvent(any(), any())
         }
 
     @Test
@@ -99,18 +90,9 @@ class LogErrorTest {
         )
 
         // emits live event
-        assertThat(liveEvents).contains(
-            FinancialConnectionsEvent(
-                name = Name.ERROR,
-                metadata = Metadata(
-                    errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
-                )
-            )
+        verify(analyticsTracker).emitEvent(
+            name = Name.ERROR,
+            metadata = Metadata(errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE)
         )
-    }
-
-    @After
-    fun tearDown() {
-        liveEvents.clear()
     }
 }

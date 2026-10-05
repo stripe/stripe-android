@@ -37,6 +37,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -98,6 +99,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -105,6 +109,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -133,6 +138,352 @@ class OnrampInteractorTest {
 
     private object NoopUserFacingLogger : UserFacingLogger {
         override fun logWarningWithoutPii(message: String) = Unit
+    }
+
+    @Test
+    fun `platform settings can be resolved and cached before authentication`() = runTest {
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+
+        verify(cryptoApiRepository).getPlatformSettings(null, null)
+    }
+
+    @Test
+    fun `customer arrival replaces the pre-auth platform key`() = runTest {
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_authenticated")))
+
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_authenticated")
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", null)
+    }
+
+    @Test
+    fun `logout clears customer platform key and selected wallet`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_authenticated")))
+        interactor.getOrFetchPlatformKey().getOrThrow()
+        interactor.onGooglePayPresented("pk_platform_123")
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+        assertThat(interactor.state.value.selectedPaymentSource).isNotNull()
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+
+        assertThat(interactor.logOut()).isInstanceOf(OnrampLogOutResult.Completed::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(interactor.state.value.platformKeyCache).isNull()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `changing country hint fetches new platform settings`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(countryHint = "US"))
+        whenever(cryptoApiRepository.getPlatformSettings(null, "US"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_us")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_us")
+        interactor.configure(createConfigurationState(countryHint = "GB"))
+        whenever(cryptoApiRepository.getPlatformSettings(null, "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_gb")
+        verify(cryptoApiRepository).getPlatformSettings(null, "GB")
+    }
+
+    @Test
+    fun `wallet account change returns recoverable error without creating token`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "GB"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        interactor.onGooglePayPresented("pk_us")
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Failed
+
+        assertThat(result.error).isInstanceOf(
+            com.stripe.android.crypto.onramp.exception.PlatformPayAccountChangedException::class.java
+        )
+        assertThat((result.error as StripeCryptoOnrampError).code).isEqualTo("platform_pay_account_changed")
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `missing wallet collection key blocks token creation even with a cached platform key`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_platform")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_platform")
+
+        val collection = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+
+        assertThat(collection).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.platformPublishableKey).isNull()
+        val token = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Failed
+        assertThat(token.error).isInstanceOf(
+            com.stripe.android.crypto.onramp.exception.PlatformPayAccountChangedException::class.java
+        )
+        assertThat((token.error as StripeCryptoOnrampError).code).isEqualTo("platform_pay_account_changed")
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `recollecting wallet recovers from a missing collection key`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_platform")))
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+
+        interactor.onGooglePayPresented("pk_platform")
+        val paymentMethod = createCardPaymentMethod()
+        interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        whenever(cryptoApiRepository.createPaymentToken("crc_customer", paymentMethod.id, null))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("cpt_token")))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(result.cryptoPaymentToken).isEqualTo("cpt_token")
+        verify(cryptoApiRepository).createPaymentToken("crc_customer", paymentMethod.id, null)
+    }
+
+    @Test
+    fun `wallet token creation refreshes settings even for the same customer`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_us")))
+        interactor.onGooglePayPresented(interactor.getOrFetchPlatformKey().getOrThrow())
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Failed
+
+        assertThat(result.error).isInstanceOf(
+            com.stripe.android.crypto.onramp.exception.PlatformPayAccountChangedException::class.java
+        )
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `recollecting wallet on the new account allows token creation with hint`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "GB"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        interactor.onGooglePayPresented("pk_us")
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+        interactor.onGooglePayPresented("pk_gb")
+        val paymentMethod = createCardPaymentMethod()
+        interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        whenever(cryptoApiRepository.createPaymentToken("crc_customer", paymentMethod.id, "GB"))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("cpt_token")))
+
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+        verify(cryptoApiRepository).createPaymentToken("crc_customer", paymentMethod.id, "GB")
+    }
+
+    @Test
+    fun `token creation keeps original hint when configuration changes during platform settings request`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "US"))
+        interactor.onGooglePayPresented("pk_us")
+        val paymentMethod = createCardPaymentMethod()
+        interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        val settings = CompletableDeferred<Result<GetPlatformSettingsResponse>>()
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "US"))
+            .doSuspendableAnswer { settings.await() }
+        whenever(cryptoApiRepository.createPaymentToken("crc_customer", paymentMethod.id, "US"))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("cpt_token")))
+
+        val token = async(start = CoroutineStart.UNDISPATCHED) { interactor.createCryptoPaymentToken() }
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", "US")
+        assertThat(token.isCompleted).isFalse()
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "GB"))
+        settings.complete(Result.success(GetPlatformSettingsResponse("pk_us")))
+
+        val result = token.await() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(result.cryptoPaymentToken).isEqualTo("cpt_token")
+        verify(cryptoApiRepository).createPaymentToken("crc_customer", paymentMethod.id, "US")
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), eq("GB"))
+        // The old response must not be reused for the new configuration.
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_gb")
+        verify(cryptoApiRepository).getPlatformSettings("crc_customer", "GB")
+    }
+
+    @Test
+    fun `Samsung Pay account change prevents token creation`() = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
+        whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_us"))
+            .thenReturn(Result.success(createCardPaymentMethod()))
+        interactor.handleSamsungPayPaymentResult(SamsungPayResult.Completed("credential", kycInfo = null), "pk_us")
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Failed
+
+        assertThat((result.error as StripeCryptoOnrampError).code).isEqualTo("platform_pay_account_changed")
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `Google Pay completion without presentation key preserves collected payment method`() {
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isNull()
+    }
+
+    @Test
+    @Suppress("RestrictedApi")
+    fun `Google Pay collection key survives saved state restoration and is consumed on success`() {
+        interactor.onGooglePayPresented("pk_collection")
+        val restoredHandle = SavedStateHandle.createHandle(savedStateHandle.savedStateProvider().saveState(), null)
+        val restoredInteractor = createInteractor(
+            cryptoApiRepository = cryptoApiRepository,
+            savedStateHandle = restoredHandle,
+        )
+        val paymentMethod = createCardPaymentMethod()
+
+        val result = restoredInteractor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val selected = restoredInteractor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_collection")
+        assertThat(restoredHandle.contains("onramp_google_pay_platform_key")).isFalse()
+    }
+
+    @Test
+    fun `Google Pay cancellation clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `Google Pay failure clears the pending collection key`() {
+        interactor.onGooglePayPresented("pk_collection")
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isTrue()
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                error = IllegalStateException("Wallet failed"),
+                errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR,
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        assertThat(savedStateHandle.contains("onramp_google_pay_platform_key")).isFalse()
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+    }
+
+    @Test
+    fun `Google Pay completion uses the presentation key after configuration changes`() = runTest {
+        interactor.onGooglePayPresented("pk_us")
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer", countryHint = "GB"))
+        whenever(cryptoApiRepository.getPlatformSettings("crc_customer", "GB"))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
+        interactor.getOrFetchPlatformKey().getOrThrow()
+
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(createCardPaymentMethod())
+        )
+
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_us")
+    }
+
+    @Test
+    fun `Google Pay returns contact fields before authentication`() {
+        interactor.onGooglePayPresented("pk_platform")
+        val paymentMethod = PaymentMethod(
+            id = "pm_wallet",
+            created = null,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            code = "card",
+            billingDetails = PaymentMethod.BillingDetails(
+                email = "user@example.com",
+                phone = "(212) 555-1234",
+                address = com.stripe.android.model.Address(country = "US"),
+            ),
+        )
+
+        val result = interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        ) as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(result.kycInfo?.email).isEqualTo("user@example.com")
+        assertThat(result.kycInfo?.phone).isEqualTo("+12125551234")
+        assertThat(result.kycInfo?.rawPhone).isEqualTo("(212) 555-1234")
+    }
+
+    @Test
+    fun `Samsung Pay returns contact information when provided by payment method`() = runTest {
+        val paymentMethod = PaymentMethod(
+            id = "pm_wallet",
+            created = null,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            code = "card",
+            billingDetails = PaymentMethod.BillingDetails(email = "user@example.com"),
+        )
+        whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_platform"))
+            .thenReturn(Result.success(paymentMethod))
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("credential", kycInfo = null), "pk_platform"
+        ) as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(result.kycInfo?.email).isEqualTo("user@example.com")
     }
 
     @Test
@@ -1171,7 +1522,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         interactor.handlePresentPaymentMethodsResult(
@@ -1211,7 +1564,9 @@ class OnrampInteractorTest {
 
         val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
         whenever(
-            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+            cryptoApiRepository.createPaymentToken(
+                cryptoCustomerId = any(), paymentMethod = any(), countryHint = anyOrNull()
+            )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
         val pm = PaymentMethod(
@@ -1223,6 +1578,7 @@ class OnrampInteractorTest {
             code = "card"
         )
 
+        interactor.onGooglePayPresented("pk_platform_123")
         interactor.handleGooglePayPaymentResult(
             GooglePayPaymentMethodLauncher.Result.Completed(pm)
         )
@@ -1260,12 +1616,13 @@ class OnrampInteractorTest {
             cryptoApiRepository.createPaymentToken(
                 cryptoCustomerId = "cpt_123",
                 paymentMethod = paymentMethod.id,
+                countryHint = null,
             ),
         ).thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
 
         val platformPublishableKey = interactor.getOrFetchPlatformKey().getOrThrow()
         val collectionResult = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("{\"method\":\"3DS\"}"),
+            SamsungPayResult.Completed("{\"method\":\"3DS\"}", kycInfo = null),
             platformPublishableKey = platformPublishableKey,
         )
         val tokenResult = interactor.createCryptoPaymentToken()
@@ -1276,7 +1633,7 @@ class OnrampInteractorTest {
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
         assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
         assertThat(interactor.state.value.selectedPaymentSource)
-            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id))
+            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
         verify(cryptoApiRepository).createSamsungPayPaymentMethod(
             paymentCredential = "{\"method\":\"3DS\"}",
@@ -1285,6 +1642,7 @@ class OnrampInteractorTest {
         verify(cryptoApiRepository).createPaymentToken(
             cryptoCustomerId = "cpt_123",
             paymentMethod = paymentMethod.id,
+            countryHint = null,
         )
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.CollectPaymentMethodCompleted(PaymentMethodType.SamsungPay),
@@ -1292,6 +1650,23 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.CryptoPaymentTokenCreated(PaymentMethodType.SamsungPay),
         )
+    }
+
+    @Test
+    fun `Samsung Pay contact data reaches the client independently of PaymentMethod billing details`() = runTest {
+        val contact = KycInfo(
+            firstName = "Wallet", lastName = "Tester", idNumber = null,
+            idType = IdType.SocialSecurityNumber, dateOfBirth = null, address = null,
+            email = "wallet@example.com", phone = "+12125551234", rawPhone = "(212) 555-1234",
+        )
+        whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_platform"))
+            .thenReturn(Result.success(createCardPaymentMethod()))
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayResult.Completed("credential", kycInfo = contact), "pk_platform",
+        ) as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(result.kycInfo).isSameInstanceAs(contact)
     }
 
     @Test
@@ -1309,7 +1684,7 @@ class OnrampInteractorTest {
     @Test
     fun `Samsung Pay completion without platform key fails without creating PaymentMethod`() = runTest {
         val result = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("credential"),
+            SamsungPayResult.Completed("credential", kycInfo = null),
             platformPublishableKey = null,
         )
 
@@ -1364,7 +1739,7 @@ class OnrampInteractorTest {
         ).thenReturn(Result.failure(backendError))
 
         val result = interactor.handleSamsungPayPaymentResult(
-            SamsungPayResult.Completed("credential"),
+            SamsungPayResult.Completed("credential", kycInfo = null),
             platformPublishableKey = "pk_platform_123",
         )
 
@@ -1647,6 +2022,67 @@ class OnrampInteractorTest {
         interactor.startCheckout("cos_test_session_id")
 
         assertThat(interactor.markNextActionLaunched(status)).isTrue()
+    }
+
+    @Test
+    fun startCheckout_withoutCustomer_failsBeforeFetchingPlatformSettings() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.startCheckout("cos_test_session_id")
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository, never()).getPlatformSettings(anyOrNull(), anyOrNull())
+        verify(cryptoApiRepository, never()).getOnrampSession(any(), any())
+    }
+
+    @Test
+    fun startCheckout_withoutCustomer_failsWithCachedPreAuthPlatformKey() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.getPlatformSettings(null, null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_pre_auth")))
+        assertThat(interactor.getOrFetchPlatformKey().getOrThrow()).isEqualTo("pk_pre_auth")
+
+        interactor.startCheckout("cos_test_session_id")
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository).getPlatformSettings(null, null)
+        verify(cryptoApiRepository, never()).getOnrampSession(any(), any())
+    }
+
+    @Test
+    fun continueCheckout_afterLogout_failsBeforeFetchingPlatformSettings() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_test_session_id")
+        assertThat(interactor.state.value.checkoutState?.status)
+            .isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isTrue()
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+        interactor.logOut()
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+
+        interactor.continueCheckout()
+
+        assertCheckoutFailedWithMissingCustomer()
+        verify(cryptoApiRepository).getPlatformSettings(anyOrNull(), anyOrNull())
+        verify(cryptoApiRepository).getOnrampSession(any(), any())
+    }
+
+    private fun assertCheckoutFailedWithMissingCustomer() {
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        val status = interactor.state.value.checkoutState?.status
+        assertThat(status).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (status as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        val error = (result as OnrampCheckoutResult.Failed).error
+        assertUnexpectedError<MissingCryptoCustomerException>(error)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isFalse()
     }
 
     @Test
@@ -2104,6 +2540,7 @@ class OnrampInteractorTest {
 
     private fun createConfigurationState(
         cryptoCustomerId: String? = null,
+        countryHint: String? = null,
         additionalSdkVersions: List<SDKVersion> = emptyList(),
     ): OnrampConfiguration.State =
         OnrampConfiguration()
@@ -2111,6 +2548,7 @@ class OnrampInteractorTest {
             .publishableKey("pk_test_12345")
             .appearance(LinkAppearance())
             .cryptoCustomerId(cryptoCustomerId)
+            .countryHint(countryHint)
             .additionalSdkVersions(additionalSdkVersions)
             .build()
 
@@ -2155,6 +2593,8 @@ class OnrampInteractorTest {
         return mock {
             on { applicationContext } doReturn runtimeApplication
             on { packageName } doReturn runtimeApplication.packageName
+            on { getString(R.string.stripe_onramp_platform_pay_account_changed) } doReturn
+                "Please select your wallet payment method again."
             on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
                 defaultApiErrorUserMessage
             on { getString(R.string.stripe_onramp_app_attestation_default_user_message) } doReturn

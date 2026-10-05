@@ -6,15 +6,19 @@ import java.io.File
 
 @Parcelize
 internal data class AdditionalKycSubmission(
-    val liquidityProvider: String,
+    val requirements: Map<String, AdditionalKycRequirementSubmission>,
+) : Parcelable
+
+@Parcelize
+internal data class AdditionalKycRequirementSubmission(
+    val requestedBy: String,
     val documents: List<AdditionalKycDocumentSubmission>,
     val questionnaire: AdditionalKycQuestionnaireSubmission?,
 ) : Parcelable
 
 @Parcelize
 internal data class AdditionalKycDocumentSubmission(
-    val documentType: String,
-    val documentSubtype: String?,
+    val documentSubtype: String,
     val files: List<File>,
 ) : Parcelable
 

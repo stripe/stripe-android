@@ -31,9 +31,9 @@ internal class AdditionalKycStateHolderTest {
         stateHolder.onFileSelected(0, File("utility.pdf"), "utility.pdf")
         val submission = requireNotNull(stateHolder.startSubmission())
 
-        assertThat(submission.liquidityProvider).isEqualTo("swapped")
-        assertThat(submission.documents.single().documentType).isEqualTo("proof_of_address")
-        assertThat(submission.documents.single().documentSubtype).isEqualTo("utility_provider")
+        assertThat(submission.requirements.values.single().requestedBy).isEqualTo("swapped")
+        assertThat(submission.requirements.keys).containsExactly("proof_of_address")
+        assertThat(submission.requirements.values.single().documents.single().documentSubtype).isEqualTo("utility_provider")
     }
 
     @Test
@@ -58,8 +58,9 @@ internal class AdditionalKycStateHolderTest {
         stateHolder.onFileSelected(0, File("payslip.docx"), "payslip.docx")
 
         val submission = requireNotNull(stateHolder.startSubmission())
-        assertThat(submission.documents.single().documentSubtype).isEqualTo("payslip")
-        assertThat(submission.questionnaire?.answers?.single()?.value).isEqualTo("Long-term investment")
+        assertThat(submission.requirements.values.single().documents.single().documentSubtype).isEqualTo("payslip")
+        assertThat(submission.requirements.values.single().questionnaire?.answers?.single()?.value)
+            .isEqualTo("Long-term investment")
     }
 
     private fun stateHolderFromFixture(fileName: String): AdditionalKycStateHolder {
@@ -158,13 +159,13 @@ internal class AdditionalKycStateHolderTest {
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "  Long-term investment  ")
         val submission = stateHolder.createSubmission()
 
-        assertThat(submission?.liquidityProvider).isEqualTo("swapped")
-        assertThat(submission?.questionnaire).isNotNull()
-        assertThat(submission?.documents).isEmpty()
-        assertThat(submission?.questionnaire?.answers).hasSize(1)
-        assertThat(submission?.questionnaire?.answers?.single()?.questionId)
+        assertThat(submission?.requirements?.values?.single()?.requestedBy).isEqualTo("swapped")
+        assertThat(submission?.requirements?.values?.single()?.questionnaire).isNotNull()
+        assertThat(submission?.requirements?.values?.single()?.documents).isEmpty()
+        assertThat(submission?.requirements?.values?.single()?.questionnaire?.answers).hasSize(1)
+        assertThat(submission?.requirements?.values?.single()?.questionnaire?.answers?.single()?.questionId)
             .isEqualTo("purchase_purpose")
-        assertThat(submission?.questionnaire?.answers?.single()?.value)
+        assertThat(submission?.requirements?.values?.single()?.questionnaire?.answers?.single()?.value)
             .isEqualTo("Long-term investment")
     }
 
@@ -206,15 +207,15 @@ internal class AdditionalKycStateHolderTest {
 
         val submission = stateHolder.createSubmission()
 
-        assertThat(submission?.documents).isNotEmpty()
-        assertThat(submission?.documents?.map { document -> document.documentType })
+        assertThat(submission?.requirements?.values?.single()?.documents).isNotEmpty()
+        assertThat(submission?.requirements?.keys)
             .containsExactly("source_of_funds")
-        assertThat(submission?.documents?.map { document -> document.documentSubtype })
+        assertThat(submission?.requirements?.values?.single()?.documents?.map { document -> document.documentSubtype })
             .containsExactly("bank_statement")
-        assertThat(submission?.documents?.flatMap { document -> document.files })
+        assertThat(submission?.requirements?.values?.single()?.documents?.flatMap { document -> document.files })
             .containsExactly(File("/tmp/bank.pdf"), File("/tmp/income.jpg"))
             .inOrder()
-        assertThat(submission?.questionnaire?.answers?.single()?.value)
+        assertThat(submission?.requirements?.values?.single()?.questionnaire?.answers?.single()?.value)
             .isEqualTo("Bank statement")
     }
 
@@ -487,7 +488,7 @@ internal class AdditionalKycStateHolderTest {
 
         onDocumentSubtypeSelected(1, "payslip")
 
-        assertThat(createSubmission()?.documents?.map { it.documentSubtype })
+        assertThat(createSubmission()?.requirements?.values?.single()?.documents?.map { it.documentSubtype })
             .containsExactly("bank_statement", "payslip")
     }
 
@@ -503,7 +504,7 @@ internal class AdditionalKycStateHolderTest {
         onDocumentSubtypeSelected(1, "payslip")
         onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf")
 
-        val documents = requireNotNull(createSubmission()).documents
+        val documents = requireNotNull(createSubmission()).requirements.values.single().documents
         assertThat(documents.single().documentSubtype).isEqualTo("bank_statement")
         assertThat(documents.single().files).hasSize(2)
     }

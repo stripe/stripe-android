@@ -4,45 +4,40 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class AddressElementActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
     private val networkRule = NetworkRule()
+    private val addressPage = AddressElementPage(
+        composeTestRule = composeTestRule,
+        context = applicationContext,
+    )
+    private val activityTestRunner = AddressElementActivityTestRunner(composeTestRule, networkRule, addressPage)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(composeTestRule)
+        .around(createComposeCleanupRule())
         .around(networkRule)
 
     @Test
@@ -192,49 +187,120 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping shows loading while tax update is in flight`() {
-        val requestReceived = CountDownLatch(1)
-        val releaseResponse = CountDownLatch(1)
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-init.json")
-            requestReceived.countDown()
-            check(releaseResponse.await(10, TimeUnit.SECONDS))
-        }
+    fun `standalone shipping returns the entered address without a tax update`() = runScenario(
+        args = AddressElementActivityContract.Args.Standalone(
+            apiConfiguration = DEFAULT_API_CONFIG,
+            config = AddressLauncher.Configuration.Builder()
+                .address(SHIPPING_ADDRESS)
+                .build(),
+        ),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.editName("Jenny Rosen Updated")
+        addressPage.clickSave()
 
-        ActivityScenario.launchActivityForResult<AddressElementActivity>(
-            AddressElementActivityContract.CheckoutShipping.createIntent(
-                applicationContext,
-                AddressElementActivityContract.Args.CheckoutShipping(
-                    apiConfiguration = DEFAULT_API_CONFIG,
-                    config = AddressLauncher.Configuration.Builder()
-                        .address(SHIPPING_ADDRESS)
-                        .build(),
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                        automaticTaxEnabled = true,
-                        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                    ),
-                ),
-            )
-        ).use {
-            try {
-                val primaryButton = composeTestRule.onNodeWithText(
-                    applicationContext.getString(R.string.stripe_paymentsheet_address_element_primary_button)
-                )
-                primaryButton
-                    .performScrollTo()
-                    .assertIsEnabled()
-                    .performClick()
-                composeTestRule.waitUntilWithIdle {
-                    requestReceived.count == 0L
-                }
-                primaryButton.assertIsNotEnabled()
-                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG, useUnmergedTree = true)
-                    .assertIsDisplayed()
-            } finally {
-                releaseResponse.countDown()
-            }
+        val result = awaitStandaloneResult() as AddressLauncherResult.Succeeded
+        assertThat(result.address.name).isEqualTo("Jenny Rosen Updated")
+        assertThat(result.address.address?.country).isEqualTo(SHIPPING_ADDRESS.address?.country)
+        assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+        assertThat(result.address.address?.postalCode).isEqualTo(SHIPPING_ADDRESS.address?.postalCode)
+    }
+
+    @Test
+    fun `standalone shipping can be canceled with close before saving`() = runScenario(
+        args = AddressElementActivityContract.Args.Standalone(
+            apiConfiguration = DEFAULT_API_CONFIG,
+            config = AddressLauncher.Configuration.Builder()
+                .address(SHIPPING_ADDRESS)
+                .build(),
+        ),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.clickClose()
+
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+    }
+
+    @Test
+    fun `checkout shipping shows loading during tax update and returns success`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.country).isEqualTo(SHIPPING_ADDRESS.address?.country)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.address.address?.postalCode).isEqualTo(SHIPPING_ADDRESS.address?.postalCode)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
         }
     }
+
+    @Test
+    fun `checkout shipping displays save error and clears it after editing`() = runScenario {
+        val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+        addressPage.assertReadyToSave()
+        addressPage.assertErrorNotDisplayed(expectedError)
+        val taxUpdate = enqueueTaxUpdate(fails = true)
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+            taxUpdate.releaseResponse.countDown()
+
+            addressPage.assertErrorDisplayed(expectedError)
+            addressPage.assertReadyToSave()
+            addressPage.editName("Jenny Rosen Updated")
+            addressPage.assertErrorNotDisplayed(expectedError)
+            addressPage.assertReadyToSave()
+            addressPage.clickClose()
+
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping can be canceled with back before saving`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `checkout shipping can be canceled with scrim accessibility action before saving`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        addressPage.dismissViaScrimAccessibilityAction()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    private fun runScenario(
+        args: AddressElementActivityContract.Args = AddressElementActivityContract.Args.CheckoutShipping(
+            apiConfiguration = DEFAULT_API_CONFIG,
+            config = AddressLauncher.Configuration.Builder()
+                .address(SHIPPING_ADDRESS)
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
+        ),
+        block: AddressElementActivityTestRunner.Scenario.() -> Unit,
+    ) = activityTestRunner.run(args, block)
 
     private companion object {
         val SHIPPING_ADDRESS = AddressDetails(

@@ -9,6 +9,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
@@ -20,16 +23,20 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import kotlin.reflect.KClass
 
-class PaymentMethodEmbeddedLayoutUIScreenshotTest {
+@RunWith(TestParameterInjector::class)
+internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
 
@@ -138,7 +145,10 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testSavedPaymentMethodLoading() {
+    fun testSavedPaymentMethodLoading(
+        @TestParameter(valuesProvider = SavedPaymentMethodLoadingTestCaseProvider::class)
+        testCase: SavedPaymentMethodLoadingTestCase,
+    ) {
         val imageLoader = FakeStripeImageLoader()
 
         paparazziRule.snapshot {
@@ -149,7 +159,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     paymentMethod = savedPaymentMethod.paymentMethod,
                     isSelectionPending = true,
                 ),
-                savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+                savedPaymentMethodAction = testCase.savedPaymentMethodAction,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 linkBrand = LinkBrand.Link,
                 isEnabled = false,
@@ -157,7 +167,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = imageLoader,
-                appearance = getEmbeddedAppearance(FloatingButton::class),
+                appearance = testCase.appearance,
             )
         }
 
@@ -334,7 +344,9 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                     displayName = savedPaymentMethod.displayName,
                     paymentMethod = savedPaymentMethod.paymentMethod,
-                    selectionError = R.string.stripe_something_went_wrong.resolvableString,
+                ),
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                    R.string.stripe_something_went_wrong.resolvableString,
                 ),
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
@@ -455,4 +467,27 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
 
         return Embedded(row)
     }
+}
+
+internal data class SavedPaymentMethodLoadingTestCase(
+    val name: String,
+    val savedPaymentMethodAction: SavedPaymentMethodAction,
+    val appearance: Embedded,
+) {
+    override fun toString(): String = name
+}
+
+internal object SavedPaymentMethodLoadingTestCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<SavedPaymentMethodLoadingTestCase> = listOf(
+        SavedPaymentMethodLoadingTestCase(
+            name = "ManageAll_FloatingButton",
+            savedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ALL,
+            appearance = Embedded(FloatingButton.default),
+        ),
+        SavedPaymentMethodLoadingTestCase(
+            name = "ManageOne_FlatWithDisclosure",
+            savedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ONE,
+            appearance = Embedded(FlatWithDisclosure.default),
+        ),
+    )
 }

@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.error
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -108,7 +109,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         mandate = state.mandate,
     )
 
-    state.displayedSavedPaymentMethod?.selectionError?.let { error ->
+    state.savedPaymentMethodSelectionState.error?.let { error ->
         ErrorMessage(
             error = error.resolve(),
             modifier = Modifier
@@ -289,6 +290,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isSelected = selection?.isSaved == true,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
+                    isEnabled = isEnabled,
                     viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
                     savedPaymentMethodAction = savedPaymentMethodAction,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,

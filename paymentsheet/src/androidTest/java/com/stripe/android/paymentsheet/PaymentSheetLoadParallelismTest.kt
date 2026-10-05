@@ -164,6 +164,7 @@ internal class PaymentSheetLoadParallelismTest(
     ) = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
     ) { testContext ->

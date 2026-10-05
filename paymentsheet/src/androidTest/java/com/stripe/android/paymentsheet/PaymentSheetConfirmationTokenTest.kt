@@ -88,6 +88,7 @@ internal class PaymentSheetConfirmationTokenTest(
         runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             isLiveMode = isLiveMode,
             builder = {
                 createIntentCallback { _ ->
@@ -107,6 +108,7 @@ internal class PaymentSheetConfirmationTokenTest(
         runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             isLiveMode = false,
             builder = {
                 createIntentCallback { _ ->

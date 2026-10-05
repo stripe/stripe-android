@@ -15,16 +15,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneNotFound
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
@@ -94,6 +95,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val createInstantDebitsResult: CreateInstantDebitsResult,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val eventContext: FinancialConnectionsEventContext,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val currentLinkBrand: CurrentLinkBrand,
@@ -350,7 +352,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                 when {
                     session.isCustomManualEntryError() -> {
-                        FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
+                        eventTracker.emitEvent(Name.MANUAL_ENTRY_INITIATED)
                         finishWithResult(
                             Failed(error = CustomManualEntryRequiredError())
                         )
@@ -369,7 +371,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
 
                     else -> {
-                        FinancialConnections.emitEvent(Name.CANCEL)
+                        eventTracker.emitEvent(Name.CANCEL)
                         finishWithResult(Canceled)
                     }
                 }
@@ -391,7 +393,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     private fun handleFinancialConnectionsCompletion(session: FinancialConnectionsSession) {
-        FinancialConnections.emitEvent(
+        eventTracker.emitEvent(
             name = Name.SUCCESS,
             metadata = Metadata(
                 manualEntry = session.paymentAccount is BankAccount,
@@ -442,14 +444,17 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        if (pane.destination.logPaneLaunched) {
+        val event = when {
+            pane == Pane.UNKNOWN -> PaneNotFound(paneName = Pane.Serializer.consumeUnknownValue())
+            pane.destination.logPaneLaunched -> PaneLaunched(
+                referrer = referrer,
+                pane = pane
+            )
+            else -> null
+        }
+        event?.let {
             viewModelScope.launch {
-                eventTracker.track(
-                    PaneLaunched(
-                        referrer = referrer,
-                        pane = pane
-                    )
-                )
+                eventTracker.track(it)
             }
         }
     }
@@ -487,6 +492,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun handlePaneChanged(pane: Pane) {
         currentPane.value = pane
+        eventContext.updateCurrentPane(pane)
     }
 
     companion object {

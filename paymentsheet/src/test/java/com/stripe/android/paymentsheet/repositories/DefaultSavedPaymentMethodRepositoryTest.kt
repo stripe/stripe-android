@@ -33,6 +33,11 @@ class DefaultSavedPaymentMethodRepositoryTest {
     @get:Rule
     val networkRule = NetworkRule()
 
+    private val clientParams = ElementsSessionClientParams(
+        mobileAppId = "com.stripe.android.paymentsheet.test",
+        mobileSessionIdProvider = { "test-session-id" },
+    )
+
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(
         customerMetadata = CHECKOUT_SESSION_METADATA,
@@ -41,6 +46,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
             method("POST"),
             path("/v1/payment_pages/cs_123"),
             bodyPart("payment_method_to_detach", "pm_123"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("elements_session_client[locale]", clientParams.locale),
+            bodyPart("elements_session_client[mobile_session_id]", "test-session-id"),
+            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -349,6 +358,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
+            elementsSessionClientParams = clientParams,
             apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 

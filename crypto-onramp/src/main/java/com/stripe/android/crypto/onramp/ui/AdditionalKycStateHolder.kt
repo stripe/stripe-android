@@ -7,6 +7,7 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
+import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
 import java.io.File
@@ -380,42 +381,45 @@ internal class AdditionalKycStateHolder(
             .joinToString()
 
         return AdditionalKycSubmission(
-            liquidityProvider = requirement.requestedBy,
-            documents = if (requirement.document != null) {
-                completedSlots.groupBy { slot -> slot.subtypeId }.map { (subtypeId, slots) ->
-                    AdditionalKycDocumentSubmission(
-                        documentType = requirement.description,
-                        documentSubtype = subtypeId,
-                        files = slots.map { slot -> requireNotNull(slot.file).file },
-                    )
-                }
-            } else {
-                emptyList()
-            },
-            questionnaire = requirement.questionnaire?.let { questionnaire ->
-                AdditionalKycQuestionnaireSubmission(
-                    answers = questionnaire.questions.mapNotNull { question ->
-                        val answer = if (
-                            requirement.document != null &&
-                            requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds &&
-                            question.id == FUNDING_SOURCES_QUESTION_ID &&
-                            fundingSources.isNotBlank()
-                        ) {
-                            fundingSources
-                        } else {
-                            answers[question.id]
+            requirements = mapOf(
+                requirement.description to AdditionalKycRequirementSubmission(
+                    requestedBy = requirement.requestedBy,
+                    documents = if (requirement.document != null) {
+                        completedSlots.groupBy { slot -> slot.subtypeId }.map { (subtypeId, slots) ->
+                            AdditionalKycDocumentSubmission(
+                                documentSubtype = requireNotNull(subtypeId),
+                                files = slots.map { slot -> requireNotNull(slot.file).file },
+                            )
                         }
-                        answer
-                            ?.takeIf { value -> value.isNotBlank() || question.required }
-                            ?.let { value ->
-                                AdditionalKycQuestionnaireAnswer(
-                                    questionId = question.id,
-                                    value = value.trim(),
-                                )
-                            }
+                    } else {
+                        emptyList()
+                    },
+                    questionnaire = requirement.questionnaire?.let { questionnaire ->
+                        AdditionalKycQuestionnaireSubmission(
+                            answers = questionnaire.questions.mapNotNull { question ->
+                                val answer = if (
+                                    requirement.document != null &&
+                                    requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds &&
+                                    question.id == FUNDING_SOURCES_QUESTION_ID &&
+                                    fundingSources.isNotBlank()
+                                ) {
+                                    fundingSources
+                                } else {
+                                    answers[question.id]
+                                }
+                                answer
+                                    ?.takeIf { value -> value.isNotBlank() || question.required }
+                                    ?.let { value ->
+                                        AdditionalKycQuestionnaireAnswer(
+                                            questionId = question.id,
+                                            value = value.trim(),
+                                        )
+                                    }
+                            },
+                        )
                     },
                 )
-            },
+            ),
         )
     }
 

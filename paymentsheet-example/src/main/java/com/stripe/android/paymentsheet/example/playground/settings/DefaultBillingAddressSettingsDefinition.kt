@@ -13,22 +13,30 @@ import java.util.UUID
 internal object DefaultBillingAddressSettingsDefinition :
     PlaygroundSettingDefinition<DefaultBillingAddress>,
     PlaygroundSettingDefinition.Saveable<DefaultBillingAddress>,
-    PlaygroundSettingDefinition.Displayable<DefaultBillingAddress> {
+    PlaygroundSettingDefinition.Displayable.WithTextInput<DefaultBillingAddress> {
 
     override val key: String = "defaultBillingAddress"
     override val defaultValue: DefaultBillingAddress = DefaultBillingAddress.On
 
     override fun convertToValue(value: String): DefaultBillingAddress {
+        if (value.startsWith(CUSTOM_EMAIL_PREFIX)) {
+            return DefaultBillingAddress.WithEmail(value.removePrefix(CUSTOM_EMAIL_PREFIX))
+        }
+
         return when (value) {
             "on" -> DefaultBillingAddress.On
             "on_with_random_email" -> DefaultBillingAddress.OnWithRandomEmail
+            "with_email" -> DefaultBillingAddress.WithEmail("")
             "off" -> DefaultBillingAddress.Off
             else -> defaultValue
         }
     }
 
     override fun convertToString(value: DefaultBillingAddress): String {
-        return value.value
+        return when (value) {
+            is DefaultBillingAddress.WithEmail -> CUSTOM_EMAIL_PREFIX + value.email
+            else -> value.value
+        }
     }
 
     override val displayName: String
@@ -39,8 +47,30 @@ internal object DefaultBillingAddressSettingsDefinition :
     ) = listOf(
         option("On", DefaultBillingAddress.On),
         option("On with random email", DefaultBillingAddress.OnWithRandomEmail),
+        option("Custom email", DefaultBillingAddress.WithEmail("")),
         option("Off", DefaultBillingAddress.Off),
     )
+
+    override fun optionMatchesValue(
+        optionValue: DefaultBillingAddress,
+        value: DefaultBillingAddress,
+    ): Boolean {
+        return optionValue == value ||
+            optionValue is DefaultBillingAddress.WithEmail && value is DefaultBillingAddress.WithEmail
+    }
+
+    override val textInputName: String = "Custom email"
+
+    override fun textInputValue(value: DefaultBillingAddress): String? {
+        return (value as? DefaultBillingAddress.WithEmail)?.email
+    }
+
+    override fun updateTextInputValue(
+        value: DefaultBillingAddress,
+        textInputValue: String,
+    ): DefaultBillingAddress {
+        return DefaultBillingAddress.WithEmail(textInputValue)
+    }
 
     override fun configure(
         value: DefaultBillingAddress,
@@ -129,3 +159,5 @@ internal sealed class DefaultBillingAddress(val value: String) {
     data object Off : DefaultBillingAddress("off")
     data class WithEmail(val email: String) : DefaultBillingAddress("with_email")
 }
+
+private const val CUSTOM_EMAIL_PREFIX = "with_email:"

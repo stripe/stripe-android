@@ -119,6 +119,56 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
+    fun `link is disabled when web Link checkout session and configuration are missing email`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = LinkDisabledReason.CheckoutSessionsRequiresEmail,
+        )
+
+    @Test
+    fun `link is enabled when native Link checkout session and configuration are missing email`() =
+        testLinkEmailRequirement(
+            useNativeLink = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `link is enabled when web Link checkout session has customer email`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = "customer@example.com",
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `link is enabled when web Link configuration has default email`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = "merchant@example.com",
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `link is enabled when web Link is not initialized with checkout session`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            useCheckoutSession = false,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
     fun `uses checkout session save consent to determine Link signup mode`() = runTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
@@ -210,13 +260,70 @@ internal class DefaultCreateLinkStateTest {
             FakeCustomerRepository(),
             FakeDurationProvider(),
         ),
+        useNativeLink: Boolean = true,
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
             retrieveCustomerEmail = retrieveCustomerEmail,
             linkStore = FakeLinkStore(),
-            linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
+            linkGateFactory = FakeLinkGate.Factory(
+                FakeLinkGate().apply { setUseNativeLink(useNativeLink) }
+            ),
             cardFundingFilterFactory = cardFundingFilterFactory
+        )
+    }
+
+    private fun testLinkEmailRequirement(
+        useNativeLink: Boolean,
+        useCheckoutSession: Boolean,
+        checkoutSessionCustomerEmail: String?,
+        defaultEmail: String?,
+        expectedDisabledReason: LinkDisabledReason?,
+    ) = runTest {
+        val createLinkState = createLinkStateFactory(useNativeLink = useNativeLink)
+        val elementsSession = createElementsSession()
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder().apply {
+            defaultEmail?.let {
+                defaultBillingDetails(PaymentSheet.BillingDetails(email = it))
+            }
+        }.build().asCommonConfiguration()
+        val initializationMode = if (useCheckoutSession) {
+            checkoutSessionInitializationMode(
+                elementsSession = elementsSession,
+                customerEmail = checkoutSessionCustomerEmail,
+            )
+        } else {
+            PAYMENT_INTENT_INIT_MODE
+        }
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        if (expectedDisabledReason == null) {
+            assertThat(result).isInstanceOf<LinkState>()
+        } else {
+            assertThat(result).isInstanceOf<LinkDisabledState>()
+            assertThat((result as LinkDisabledState).linkDisabledReasons)
+                .containsExactly(expectedDisabledReason)
+        }
+    }
+
+    private fun checkoutSessionInitializationMode(
+        elementsSession: ElementsSession,
+        customerEmail: String?,
+    ): PaymentElementLoader.InitializationMode.CheckoutSession {
+        return PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                customerEmail = customerEmail,
+            ),
         )
     }
 

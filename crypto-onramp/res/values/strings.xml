@@ -194,4 +194,5 @@
   <string name="stripe_link_onramp_additional_kyc_waiting_for_review_title">Waiting for review</string>
   <string name="stripe_link_onramp_additional_kyc_document_uploaded_title">Document uploaded successfully</string>
   <string name="stripe_link_onramp_additional_kyc_document_uploaded_message">You can continue while we verify your document in the background.</string>
+  <string name="stripe_onramp_platform_pay_account_changed">Please select your wallet payment method again.</string>
 </resources>

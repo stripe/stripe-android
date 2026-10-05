@@ -1,5 +1,7 @@
 package com.stripe.android.crypto.onramp.example
 
+internal const val PREAUTH_GOOGLE_PAY_BUTTON_TAG = "PreauthGooglePayButtonTag"
+internal const val PREAUTH_SELECTED_PAYMENT_TAG = "PreauthSelectedPaymentTag"
 internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
 internal const val LOGIN_PASSWORD_TAG = "LoginPasswordTag"
 internal const val LOGIN_LOGIN_BUTTON_TAG = "LoginLoginButtonTag"

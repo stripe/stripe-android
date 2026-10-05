@@ -50,7 +50,12 @@ interface IdentityVerificationSheet {
             /**
              * Whether to hide the branding header above the consent title.
              */
-            val hideBrandingHeader: Boolean
+            val hideBrandingHeader: Boolean,
+
+            /**
+             * Whether to hide the decline button below the primary action.
+             */
+            val hideDeclineButton: Boolean
         ) : Parcelable
     }
 

@@ -77,6 +77,7 @@ internal class PaymentSheetAnalyticsTest(
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
@@ -157,6 +158,7 @@ internal class PaymentSheetAnalyticsTest(
     fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
@@ -235,6 +237,7 @@ internal class PaymentSheetAnalyticsTest(
     fun testSuccessfulCardPaymentWithConfirmationToken() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             createIntentCallback { _ ->
                 CreateIntentResult.Success("pi_example_secret_example")
@@ -334,6 +337,7 @@ internal class PaymentSheetAnalyticsTest(
     fun testSavedPaymentMethod() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             analyticEventCallback(analyticEventRule)
         },
