@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.22.0 - 2026-10-05
 
 ### Crypto Onramp
 * [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
