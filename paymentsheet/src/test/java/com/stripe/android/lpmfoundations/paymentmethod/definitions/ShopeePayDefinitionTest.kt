@@ -2,13 +2,16 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +60,7 @@ internal class ShopeePayDefinitionTest {
     }
 
     @Test
-    fun `limits billing countries and defaults to United States`() {
+    fun `defaults billing country to United States without restricting the picker`() {
         val formElements = ShopeePayDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("shopeepay")),
@@ -68,11 +71,42 @@ internal class ShopeePayDefinitionTest {
         )
 
         val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
-        assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
-            "🇺🇸 United States",
-            "🇮🇩 Indonesia",
-        ).inOrder()
+        assertThat(addressElement.countryElement.controller.displayItems)
+            .hasSize(CountryUtils.supportedBillingCountries.size)
         assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("US")
+    }
+
+    @Test
+    fun `billing countries follow merchant configuration`(
+        @TestParameter(value = ["Full", "AutomaticWithTax"])
+        billingMode: LpmBillingDetailsCollectionMode,
+    ) {
+        val metadata = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.ShopeePay,
+            billingDetailsCollectionMode = billingMode,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ).metadata().copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = billingMode.billingDetailsCollectionConfiguration().address,
+                allowedCountries = setOf("CA"),
+            ),
+        )
+        val formElements = ShopeePayDefinition.formElements(
+            metadata = metadata,
+            initialValues = mapOf(FormFieldId.Country to "CA"),
+        )
+        val addressField = formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .single()
+        val countryElement = when (addressField) {
+            is AddressElement -> addressField.countryElement
+            is BillingAddressElement -> addressField.countryElement
+            else -> error("Expected a billing address field")
+        }
+
+        assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
     }
 
     @Test

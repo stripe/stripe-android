@@ -38,9 +38,6 @@ private object ShopeePayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        builder.restrictBillingCountries(
-            allowedCountryCodes = setOf("US", "ID"),
-            defaultCountryCode = "US",
-        )
+        builder.defaultBillingCountry("US")
     }
 }

@@ -207,7 +207,7 @@ class BillingAddressFormElementsBuilderTest {
     }
 
     @Test
-    fun `country restriction overrides automatic tax countries and supplies a default`() {
+    fun `default country respects automatic tax merchant countries`() {
         val countryElement = billingAddressFormElementsBuilder(
             arguments = arguments(
                 billingDetailsCollectionConfiguration = automaticAddressConfiguration(
@@ -215,27 +215,46 @@ class BillingAddressFormElementsBuilderTest {
                 ),
                 requiresBillingAddressForAutomaticTax = true,
             ),
-            countryRestriction = CountryRestriction(
-                allowedCountryCodes = setOf("ID"),
-                defaultCountryCode = "ID",
-            ),
+            defaultCountryCode = "ID",
         ).build().billingAddressElement().countryElement
 
-        assertThat(countryElement.controller.displayItems).containsExactly("🇮🇩 Indonesia")
-        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("ID")
+        assertThat(countryElement.controller.displayItems).containsExactly("🇺🇸 United States")
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("US")
     }
 
     @Test
-    fun `country restriction does not require standalone country collection`() {
+    fun `default country does not require standalone country collection`() {
         val formElements = billingAddressFormElementsBuilder(
             arguments = arguments(),
-            countryRestriction = CountryRestriction(
-                allowedCountryCodes = setOf("US"),
-                defaultCountryCode = "US",
-            ),
+            defaultCountryCode = "US",
         ).build()
 
         assertThat(formElements).isEmpty()
+    }
+
+    @Test
+    fun `default country preserves an explicitly supplied country`() {
+        val countryElement = billingAddressFormElementsBuilder(
+            arguments = arguments(initialValues = mapOf(FormFieldId.Country to "CA")),
+            requireBillingAddressCollection = true,
+            defaultCountryCode = "US",
+        ).build().addressElement().countryElement
+
+        assertThat(countryElement.controller.displayItems).hasSize(CountryUtils.supportedBillingCountries.size)
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `default country respects full address merchant countries`() {
+        val countryElement = billingAddressFormElementsBuilder(
+            arguments = arguments(),
+            requireBillingAddressCollection = true,
+            fallbackCountryCodes = setOf("CA"),
+            defaultCountryCode = "US",
+        ).build().addressElement().countryElement
+
+        assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
+        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
     }
 
     @Test
@@ -337,7 +356,7 @@ class BillingAddressFormElementsBuilderTest {
         fallbackCountryCodes: Set<String> =
             arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         countryRequirement: CountryRequirement? = null,
-        countryRestriction: CountryRestriction? = null,
+        defaultCountryCode: String? = null,
     ): BillingAddressFormElementsBuilder {
         return BillingAddressFormElementsBuilder(
             arguments = arguments,
@@ -345,7 +364,7 @@ class BillingAddressFormElementsBuilderTest {
             requireBillingAddressCollection = requireBillingAddressCollection,
             fallbackCountryCodes = fallbackCountryCodes,
             countryRequirement = countryRequirement,
-            countryRestriction = countryRestriction,
+            defaultCountryCode = defaultCountryCode,
         )
     }
 

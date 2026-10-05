@@ -22,7 +22,7 @@ internal class FormElementsBuilder(
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
     private var countryRequirement: CountryRequirement? = null
-    private var countryRestriction: CountryRestriction? = null
+    private var defaultCountryCode: String? = null
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -102,14 +102,8 @@ internal class FormElementsBuilder(
         )
     }
 
-    fun restrictBillingCountries(
-        allowedCountryCodes: Set<String>,
-        defaultCountryCode: String?,
-    ): FormElementsBuilder = apply {
-        countryRestriction = CountryRestriction(
-            allowedCountryCodes = allowedCountryCodes,
-            defaultCountryCode = defaultCountryCode,
-        )
+    fun defaultBillingCountry(countryCode: String): FormElementsBuilder = apply {
+        defaultCountryCode = countryCode
     }
 
     fun footer(formElement: FormElement): FormElementsBuilder = apply {
@@ -135,7 +129,7 @@ internal class FormElementsBuilder(
                     requireBillingAddressCollection = requireBillingAddressCollection,
                     fallbackCountryCodes = availableCountries,
                     countryRequirement = countryRequirement,
-                    countryRestriction = countryRestriction,
+                    defaultCountryCode = defaultCountryCode,
                 ).build()
             )
 
