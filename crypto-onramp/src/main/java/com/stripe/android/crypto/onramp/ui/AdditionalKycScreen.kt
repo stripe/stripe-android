@@ -1149,17 +1149,19 @@ private fun DocumentTypeSelector(
                         modifier = Modifier.size(48.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            painter = painterResource(
-                                if (subtype.id == slot.selectedSubtypeId) {
-                                    R.drawable.stripe_link_radio_filled
-                                } else {
-                                    R.drawable.stripe_link_radio_unfilled
-                                }
-                            ),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(width = 20.dp, height = 24.dp),
+                        val isSelected = subtype.id == slot.selectedSubtypeId
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .border(
+                                    width = if (isSelected) 5.dp else 1.dp,
+                                    color = if (isSelected) {
+                                        LinkTheme.colors.iconPrimary
+                                    } else {
+                                        LinkTheme.colors.textTertiary
+                                    },
+                                    shape = CircleShape,
+                                ),
                         )
                     }
                     Spacer(Modifier.width(4.dp))
