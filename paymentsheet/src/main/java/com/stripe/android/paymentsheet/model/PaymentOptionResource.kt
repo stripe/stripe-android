@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
 @Stable
-interface PaymentOptionResource {
+internal interface PaymentOptionResource {
     suspend fun load(isSystemDarkTheme: Boolean?): Drawable
 
     @Composable
