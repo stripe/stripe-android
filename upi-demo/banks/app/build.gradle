@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.stripe.upidemo.bank'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.stripe.upidemo.bank'
+        minSdk 23
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+    }
+
+    flavorDimensions 'bank'
+    productFlavors {
+        blue {
+            dimension 'bank'
+            applicationIdSuffix '.blue'
+            resValue 'string', 'app_name', 'Demo Bank Blue'
+            resValue 'color', 'bank_accent', '#1565C0'
+        }
+        green {
+            dimension 'bank'
+            applicationIdSuffix '.green'
+            resValue 'string', 'app_name', 'Demo Bank Green'
+            resValue 'color', 'bank_accent', '#2E7D32'
+        }
+        orange {
+            dimension 'bank'
+            applicationIdSuffix '.orange'
+            resValue 'string', 'app_name', 'Demo Bank Orange'
+            resValue 'color', 'bank_accent', '#E65100'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}

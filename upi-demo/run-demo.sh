@@ -7,8 +7,17 @@ if [[ $# -gt 1 ]]; then
 fi
 
 demo_sdk_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-demo_banks_root="${UPI_DEMO_BANKS_DIR:-/Users/tjclawson/stripe/upi-demo-banks}"
-demo_adb=("${UPI_DEMO_ADB:-/Users/tjclawson/Library/Android/sdk/platform-tools/adb}")
+demo_banks_root="${UPI_DEMO_BANKS_DIR:-$demo_sdk_root/upi-demo/banks}"
+source "$demo_sdk_root/upi-demo/sdk-env.sh"
+demo_adb_path="${UPI_DEMO_ADB:-$demo_android_sdk/platform-tools/adb}"
+if [[ -z "${UPI_DEMO_ADB:-}" && ! -x "$demo_adb_path" ]]; then
+    demo_adb_path="$(command -v adb || true)"
+fi
+if [[ -z "$demo_adb_path" ]] || ! command -v "$demo_adb_path" >/dev/null 2>&1; then
+    echo "adb not found. Install Android SDK platform-tools or set UPI_DEMO_ADB." >&2
+    exit 1
+fi
+demo_adb=("$demo_adb_path")
 if [[ $# -eq 1 ]]; then
     demo_adb+=(-s "$1")
 fi

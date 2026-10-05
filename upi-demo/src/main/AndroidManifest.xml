@@ -3,7 +3,7 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="stripe-upi-demo" />
+            <data android:scheme="stripe-upi-demo" android:host="pay" />
         </intent>
     </queries>
     <application

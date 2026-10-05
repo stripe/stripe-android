@@ -99,7 +99,7 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="upi" />
+            <data android:scheme="upi" android:host="pay" />
         </intent>
         <!--
         Added to check if Chrome is installed for browser-based payment authentication (e.g. 3DS1).

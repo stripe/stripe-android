@@ -28,8 +28,8 @@ class DemoActivity : AppCompatActivity() {
         paymentSheet = PaymentSheet.Builder { result ->
             DemoStore.recordResult(
                 when (result) {
-                    PaymentSheetResult.Completed -> "Completed"
-                    PaymentSheetResult.Canceled -> "Canceled"
+                    is PaymentSheetResult.Completed -> "Completed"
+                    is PaymentSheetResult.Canceled -> "Canceled"
                     is PaymentSheetResult.Failed -> "Failed: ${result.error.message}"
                 }
             )

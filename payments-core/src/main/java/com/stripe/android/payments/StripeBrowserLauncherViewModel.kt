@@ -48,7 +48,7 @@ internal class StripeBrowserLauncherViewModel(
     ): Intent {
         val url = Uri.parse(args.url)
         if (args.shouldUseAppChooser) {
-            // LOCAL DEMO BRANCH ONLY: fake bank apps must never claim the real UPI scheme.
+            // Demo branch only: fake bank apps must never claim the real UPI scheme.
             val isDemoUri = BuildConfig.DEBUG && url.scheme == "stripe-upi-demo"
             require((url.scheme == "upi" || isDemoUri) && url.host == "pay") { "Invalid UPI mobile_auth_url" }
             val target = Intent(Intent.ACTION_VIEW, url)
