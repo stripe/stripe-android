@@ -5,6 +5,7 @@ import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElement.Configuration.Appearance
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -91,12 +92,23 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                     .colorsLight(
                         PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
                     )
+                    .typography(Appearance.Typography().sizeScaleFactor(1.5f))
+                    .shapes(Appearance.Shapes().cornerRadiusDp(12f))
+                    .embeddedAppearance(
+                        Appearance.Embedded()
+                            .rowStyle(Appearance.Embedded.RowStyle.FloatingButton().spacingDp(7f))
+                    )
             ),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
         assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
+        assertThat(result.appearance.typography.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(12f)
+        assertThat(result.appearance.embeddedAppearance.style).isEqualTo(
+            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder().spacingDp(7f).build()
+        )
     }
 
     @Test
