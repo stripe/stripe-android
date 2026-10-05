@@ -4,6 +4,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.FormElement
 
+// Keep the form configuration methods together in the builder.
+@Suppress("TooManyFunctions")
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
     private val supportsAutomaticTaxBillingAddress: Boolean,
