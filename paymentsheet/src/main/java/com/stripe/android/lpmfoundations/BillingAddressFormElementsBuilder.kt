@@ -25,27 +25,11 @@ internal class BillingAddressFormElementsBuilder(
     private val requireBillingAddressCollection: Boolean,
     private val fallbackCountryCodes: Set<String>,
     private val countryRequirement: CountryRequirement?,
-    private val defaultCountryCode: String?,
 ) {
-    private val resolvedInitialValues = countryRequirement?.applyTo(arguments.initialValues)
-        ?: initialValuesWithDefaultCountry()
-    private val fullAddressCountryCodes = countryRequirement?.allowedCountryCodes
-        ?: fallbackCountryCodes
+    private val resolvedInitialValues = countryRequirement?.applyTo(arguments.initialValues) ?: arguments.initialValues
+    private val fullAddressCountryCodes = countryRequirement?.allowedCountryCodes ?: fallbackCountryCodes
     private val automaticTaxCountryCodes = countryRequirement?.allowedCountryCodes
         ?: arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
-
-    private fun initialValuesWithDefaultCountry(): Map<FormFieldId, String?> {
-        val initialValues = arguments.initialValues
-        return if (
-            initialValues[FormFieldId.Country] == null &&
-            defaultCountryCode != null &&
-            (fallbackCountryCodes.isEmpty() || defaultCountryCode in fallbackCountryCodes)
-        ) {
-            initialValues + (FormFieldId.Country to defaultCountryCode)
-        } else {
-            initialValues
-        }
-    }
 
     fun build(): List<FormElement> {
         return when {

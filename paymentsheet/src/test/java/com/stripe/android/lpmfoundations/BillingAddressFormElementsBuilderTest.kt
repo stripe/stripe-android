@@ -207,57 +207,6 @@ class BillingAddressFormElementsBuilderTest {
     }
 
     @Test
-    fun `default country respects automatic tax merchant countries`() {
-        val countryElement = billingAddressFormElementsBuilder(
-            arguments = arguments(
-                billingDetailsCollectionConfiguration = automaticAddressConfiguration(
-                    allowedCountries = setOf("US"),
-                ),
-                requiresBillingAddressForAutomaticTax = true,
-            ),
-            defaultCountryCode = "ID",
-        ).build().billingAddressElement().countryElement
-
-        assertThat(countryElement.controller.displayItems).containsExactly("🇺🇸 United States")
-        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("US")
-    }
-
-    @Test
-    fun `default country does not require standalone country collection`() {
-        val formElements = billingAddressFormElementsBuilder(
-            arguments = arguments(),
-            defaultCountryCode = "US",
-        ).build()
-
-        assertThat(formElements).isEmpty()
-    }
-
-    @Test
-    fun `default country preserves an explicitly supplied country`() {
-        val countryElement = billingAddressFormElementsBuilder(
-            arguments = arguments(initialValues = mapOf(FormFieldId.Country to "CA")),
-            requireBillingAddressCollection = true,
-            defaultCountryCode = "US",
-        ).build().addressElement().countryElement
-
-        assertThat(countryElement.controller.displayItems).hasSize(CountryUtils.supportedBillingCountries.size)
-        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
-    fun `default country respects full address merchant countries`() {
-        val countryElement = billingAddressFormElementsBuilder(
-            arguments = arguments(),
-            requireBillingAddressCollection = true,
-            fallbackCountryCodes = setOf("CA"),
-            defaultCountryCode = "US",
-        ).build().addressElement().countryElement
-
-        assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
-        assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
     fun `full address falls back to fallback country codes`() {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(
@@ -356,7 +305,6 @@ class BillingAddressFormElementsBuilderTest {
         fallbackCountryCodes: Set<String> =
             arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         countryRequirement: CountryRequirement? = null,
-        defaultCountryCode: String? = null,
     ): BillingAddressFormElementsBuilder {
         return BillingAddressFormElementsBuilder(
             arguments = arguments,
@@ -364,7 +312,6 @@ class BillingAddressFormElementsBuilderTest {
             requireBillingAddressCollection = requireBillingAddressCollection,
             fallbackCountryCodes = fallbackCountryCodes,
             countryRequirement = countryRequirement,
-            defaultCountryCode = defaultCountryCode,
         )
     }
 

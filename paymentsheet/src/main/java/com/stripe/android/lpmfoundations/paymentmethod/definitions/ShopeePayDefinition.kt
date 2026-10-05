@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -32,12 +31,4 @@ private object ShopeePayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_shopeepay,
         iconResourceNight = null,
     )
-
-    override fun buildFormElements(
-        metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-        builder: FormElementsBuilder,
-    ) {
-        builder.defaultBillingCountry("US")
-    }
 }

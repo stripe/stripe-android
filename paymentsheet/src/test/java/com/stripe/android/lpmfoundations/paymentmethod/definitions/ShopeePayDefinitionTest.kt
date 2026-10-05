@@ -60,7 +60,7 @@ internal class ShopeePayDefinitionTest {
     }
 
     @Test
-    fun `defaults billing country to United States without restricting the picker`() {
+    fun `billing address uses all supported countries`() {
         val formElements = ShopeePayDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("shopeepay")),
@@ -68,12 +68,13 @@ internal class ShopeePayDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
             ),
+            initialValues = mapOf(FormFieldId.Country to "CA"),
         )
 
         val addressElement = (formElements.single() as SectionElement).fields.single() as AddressElement
         assertThat(addressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
-        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("US")
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
     }
 
     @Test

@@ -4,8 +4,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.FormElement
 
-// Keep the form configuration methods together in the builder.
-@Suppress("TooManyFunctions")
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
     private val supportsAutomaticTaxBillingAddress: Boolean,
@@ -22,7 +20,6 @@ internal class FormElementsBuilder(
     private var availableCountries: Set<String> =
         arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
     private var countryRequirement: CountryRequirement? = null
-    private var defaultCountryCode: String? = null
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
@@ -102,10 +99,6 @@ internal class FormElementsBuilder(
         )
     }
 
-    fun defaultBillingCountry(countryCode: String): FormElementsBuilder = apply {
-        defaultCountryCode = countryCode
-    }
-
     fun footer(formElement: FormElement): FormElementsBuilder = apply {
         footerFormElements += formElement
     }
@@ -129,7 +122,6 @@ internal class FormElementsBuilder(
                     requireBillingAddressCollection = requireBillingAddressCollection,
                     fallbackCountryCodes = availableCountries,
                     countryRequirement = countryRequirement,
-                    defaultCountryCode = defaultCountryCode,
                 ).build()
             )
 
