@@ -102,10 +102,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Tanca la sessió a Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Tanca la sessió de %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Confirmeu el pagament a la vostra aplicació MB WAY en %s per completar la compra.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">S\'ha produït un error. Comproveu la vostra connexió i torneu-ho a provar.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Per seguretat, les opcions de desenvolupador han d\'estar desactivades per utilitzar Toqueu per afegir.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Obre la configuració</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Desactiveu les opcions de desenvolupador</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Targeta caducada. Proveu-ho amb una altra targeta.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Apropeu la targeta</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Targeta rebutjada. Proveu-ho amb una altra targeta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -140,6 +150,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Afegir la teva informació de pagament</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Targeta afegida</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Els canvis de la vostra adreça no es desaran.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Descarteu</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Voleu descartar els canvis?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Desar adreça</string>
   <!-- Title for shipping address entry section -->

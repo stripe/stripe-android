@@ -112,7 +112,7 @@
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Indem Sie Ihre Zahlung bei PayPal bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr PayPal-Konto zur Durchführung zukünftiger Zahlungen gemäß der Nutzungsbedingungen belastet.</string>
   <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
-  <string name="stripe_pix_international_disclosure" formatted="false"><![CDATA[Dies ist ein internationaler Kauf und schließt eine IOF-Gebühr von 3,5 % aus. Mit dem Fortfahren erkennen Sie die <terms>allgemeinen Geschäftsbedingungen von Ebanx</terms> an und akzeptieren diese.]]></string>
+  <string name="stripe_pix_international_disclosure"><![CDATA[Dies ist ein internationaler Kauf und schließt eine IOF-Gebühr von 3,5 % aus. Mit dem Fortfahren erkennen Sie die <terms>allgemeinen Geschäftsbedingungen von Ebanx</terms> an und akzeptieren diese.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Indem Sie Ihre Zahlung bei RevolutPay bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr RevolutPay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
   <!-- Satispay mandate text -->

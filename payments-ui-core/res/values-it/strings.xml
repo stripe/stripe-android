@@ -54,6 +54,8 @@
   <string name="stripe_iban_invalid_country">L\'IBAN inserito non è valido; \"%s\" non è un codice di paese valido.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">L\'IBAN deve iniziare con un codice di paese di due lettere.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Il numero del documento di identità inserito non è completo.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Il codice BLIK non è completo.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -109,6 +111,8 @@
   <string name="stripe_paymentsheet_redirect_instructions">Una volta inviata la richiesta, si aprirà un\'altra pagina in cui completare i passaggi successivi in tutta sicurezza.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a %s di addebitare i pagamenti futuri sul tuo conto PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Si tratta di un acquisto internazionale ed esclude una commissione IOF del 3,5%. Procedendo, accetti <terms>Termini e condizioni</terms> di Ebanx.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Confermando il tuo pagamento con RevolutPay, consenti a %s di addebitare i pagamenti futuri sul tuo account RevolutPay in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->

@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Esci da Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Vuoi uscire da %s?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Per completare l\'acquisto, conferma il pagamento nella tua app MB WAY entro il giorno %s.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Si è verificato un errore. Verifica la tua connessione e riprova.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Per motivi di sicurezza, le opzioni sviluppatore devono essere disattivate per utilizzare Tocca per aggiungere.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Apri impostazioni</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Disattiva opzioni Sviluppatore</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Carta scaduta. Prova con un\'altra carta.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Avvicina la carta</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Carta rifiutata. Prova con un\'altra carta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Il circuito della carta non è stato aggiornato. Riprova.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Per completare l\'acquisto, conferma il pagamento nell\'app della tua banca o nell\'app per i pagamenti entro il giorno %s</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Completa il pagamento con Pix per concludere l\'acquisto.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Imposta come metodo di pagamento predefinito</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->
@@ -304,7 +316,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link </privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account %1$s e salvare i tuoi dati di pagamento su %1$s, in base ai <terms>Termini</terms> di %1$s e all\'<privacy>Informativa sulla privacy</privacy>.]]></string>
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account %1$s e salvare i tuoi dati di pagamento su %1$s, in base ai <terms>Termini</terms> di %1$s e all\\'<privacy>Informativa sulla privacy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Fornendo il tuo numero di telefono, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link</privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
