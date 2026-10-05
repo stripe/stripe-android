@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
-import com.stripe.android.paymentsheet.model.rememberPaymentOptionResource
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
@@ -705,7 +704,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         val iconPainter: Painter
             @Composable
-            get() = rememberDrawablePainter(rememberPaymentOptionResource(paymentOptionResource))
+            get() = paymentOptionResource.rememberPainter()
     }
 
     /**

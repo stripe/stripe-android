@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -19,6 +20,8 @@ import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
+import com.stripe.android.paymentsheet.model.useDarkThemeIcon
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
@@ -59,9 +62,11 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
         }
 
         return PaymentOptionDisplayData(
-            paymentOptionResource = PaymentOptionResource(
+            paymentOptionResource = DefaultPaymentOptionResource(
                 appearance = paymentMethodMetadata.appearance,
-            ) { useDarkThemeIcon ->
+            ) { packet ->
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(packet.isSystemDarkTheme)
+                    ?: useDarkThemeIcon(context)
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,

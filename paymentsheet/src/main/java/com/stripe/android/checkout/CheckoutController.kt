@@ -29,14 +29,12 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
-import com.stripe.android.paymentsheet.model.rememberPaymentOptionResource
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -1036,7 +1034,7 @@ class CheckoutController @Inject internal constructor(
              */
             val iconPainter: Painter
                 @Composable
-                get() = rememberDrawablePainter(rememberPaymentOptionResource(paymentOptionResource))
+                get() = paymentOptionResource.rememberPainter()
         }
     }
 
