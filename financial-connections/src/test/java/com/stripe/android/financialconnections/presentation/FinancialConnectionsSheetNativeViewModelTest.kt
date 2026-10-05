@@ -609,7 +609,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         },
         currentLinkBrand: CurrentLinkBrand =
             FakeCurrentLinkBrand(initialState.linkBrand),
-        eventTracker: FinancialConnectionsAnalyticsTracker = mock(),
+        eventTracker: FinancialConnectionsAnalyticsTracker = this.eventTracker,
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = eventTracker,
         eventContext = FinancialConnectionsEventContext(null),
