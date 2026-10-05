@@ -307,7 +307,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val result = factory().create(
             configuration = CheckoutController.Configuration()
                 .defaults(
-                    CheckoutController.Configuration.Defaults().billingDetails(
+                    CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("Jane Billing")
                             .address(
@@ -329,6 +329,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val billingDetails = requireNotNull(result.defaultBillingDetails)
         assertThat(billingDetails.email).isEqualTo("checkout@example.com")
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
+        assertThat(billingDetails.phone).isEqualTo("+15555551234")
         val address = requireNotNull(billingDetails.address)
         assertThat(address.city).isEqualTo("Denver")
         assertThat(address.country).isEqualTo("US")
@@ -375,6 +376,23 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         )
 
         assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `clearing default phone leaves billing phone null`() {
+        val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
+        assertThat(defaults.build().phone).isEqualTo("+15555551234")
+        val configuration = CheckoutController.Configuration()
+            .defaults(defaults.phone(null))
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.defaultBillingDetails?.phone).isNull()
     }
 
     private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)

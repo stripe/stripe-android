@@ -1202,7 +1202,7 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Prefill values for the customer's billing/shipping details and email.
+         * Prefill values for the customer's billing/shipping details, email, and phone number.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1210,6 +1210,7 @@ class CheckoutController @Inject internal constructor(
             private var billingDetails: ContactDetails? = null
             private var shippingDetails: ContactDetails? = null
             private var email: String? = null
+            private var phone: String? = null
 
             /**
              * The customer's known billing contact details.
@@ -1232,17 +1233,26 @@ class CheckoutController @Inject internal constructor(
                 this.email = email
             }
 
+            /**
+             * The customer's known phone number. Pass `null` to clear the default phone number.
+             */
+            fun phone(phone: String?): Defaults = apply {
+                this.phone = phone
+            }
+
             @Parcelize
             internal data class State(
                 val billingDetails: ContactDetails.State?,
                 val shippingDetails: ContactDetails.State?,
                 val email: String?,
+                val phone: String?,
             ) : Parcelable
 
             internal fun build(): State = State(
                 billingDetails = billingDetails?.build(),
                 shippingDetails = shippingDetails?.build(),
                 email = email,
+                phone = phone,
             )
 
             /**
