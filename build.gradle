@@ -118,6 +118,7 @@ apiValidation {
             "payment-element-test-pages",
             "payments-core-testing",
             "paymentsheet-example",
+            "upi-demo",
             "stripecardscan-example",
             "connect-example",
             "screenshot-testing",

@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.BuildConfig
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -47,7 +48,9 @@ internal class StripeBrowserLauncherViewModel(
     ): Intent {
         val url = Uri.parse(args.url)
         if (args.shouldUseAppChooser) {
-            require(url.scheme == "upi" && url.host == "pay") { "Invalid UPI mobile_auth_url" }
+            // LOCAL DEMO BRANCH ONLY: fake bank apps must never claim the real UPI scheme.
+            val isDemoUri = BuildConfig.DEBUG && url.scheme == "stripe-upi-demo"
+            require((url.scheme == "upi" || isDemoUri) && url.host == "pay") { "Invalid UPI mobile_auth_url" }
             val target = Intent(Intent.ACTION_VIEW, url)
             if (!canResolveActivity(target)) {
                 throw ActivityNotFoundException("No compatible app available")

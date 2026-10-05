@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_paymentsheet_payment_method_upi" translatable="false">UPI Demo</string>
+    <style name="UpiDemoTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorAccent">#635BFF</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+</resources>

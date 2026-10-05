@@ -1,0 +1,15 @@
+apply from: configs.androidApplication
+
+android {
+    defaultConfig {
+        applicationId 'com.stripe.android.upidemo'
+        versionCode 1
+    }
+}
+
+dependencies {
+    implementation project(':paymentsheet')
+    implementation project(':payments-core')
+    implementation project(':stripe-core')
+    implementation libs.androidx.appCompat
+}
