@@ -287,7 +287,29 @@ class PaymentAuthWebViewClientTest {
     }
 
     @Test
-    fun `intent URI cannot specify an activity through a selector`() {
+    fun `intent URI cannot override browsable routing through a selector`() {
+        val url = "intent://example.com/#Intent;scheme=https;" +
+            "SEL;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end"
+        val parsedIntent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+        val selector = requireNotNull(parsedIntent.selector)
+        assertThat(parsedIntent.component).isNull()
+        assertThat(parsedIntent.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(selector.component).isNull()
+        assertThat(selector.action).isEqualTo(Intent.ACTION_MAIN)
+        assertThat(selector.categories).containsExactly(Intent.CATEGORY_APP_BROWSER)
+        assertThat(selector.hasCategory(Intent.CATEGORY_BROWSABLE)).isFalse()
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            assertThat(intent.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent.dataString).isEqualTo("https://example.com/")
+            assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    fun `intent URI cannot specify an explicit activity component through a selector`() {
         val url = "intent://example.com/#Intent;scheme=https;SEL;component=com.example.app/.PrivateActivity;end"
         assertThat(Intent.parseUri(url, Intent.URI_INTENT_SCHEME).selector?.component).isNotNull()
 
