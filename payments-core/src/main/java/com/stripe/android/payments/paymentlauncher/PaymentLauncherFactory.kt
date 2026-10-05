@@ -97,10 +97,9 @@ class PaymentLauncherFactory(
         val productUsage = setOf("PaymentLauncher")
         return StripePaymentLauncher(
             apiConfigurationProvider = {
-                ApiConfiguration.State(
+                ApiConfiguration(
                     publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
-                )
+                ).stripeAccountId(stripeAccountId).build()
             },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
@@ -115,10 +114,9 @@ class PaymentLauncherFactory(
         return StripePaymentLauncher(
             apiConfigurationProvider = {
                 val config = PaymentConfiguration.getInstance(applicationContext)
-                ApiConfiguration.State(
+                ApiConfiguration(
                     publishableKey = config.publishableKey,
-                    stripeAccountId = config.stripeAccountId,
-                )
+                ).stripeAccountId(config.stripeAccountId).build()
             },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,

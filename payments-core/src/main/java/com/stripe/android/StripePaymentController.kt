@@ -69,10 +69,9 @@ constructor(
         paymentAnalyticsRequestFactory,
     )
     private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
-        ApiConfiguration.State(
+        ApiConfiguration(
             publishableKey = publishableKeyProvider(),
-            stripeAccountId = null,
-        )
+        ).stripeAccountId(null).build()
     }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,

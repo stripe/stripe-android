@@ -36,10 +36,9 @@ internal class StripeGooglePayPaymentDataCallbacks(
         errorReporter = ErrorReporter.createFallbackInstance(
             context = context,
             apiConfigurationProvider = {
-                ApiConfiguration.State(
+                ApiConfiguration(
                     publishableKey = paymentConfiguration.publishableKey,
-                    stripeAccountId = paymentConfiguration.stripeAccountId,
-                )
+                ).stripeAccountId(paymentConfiguration.stripeAccountId).build()
             },
             productUsage = emptySet(),
         ),

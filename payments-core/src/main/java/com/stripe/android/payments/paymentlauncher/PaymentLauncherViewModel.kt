@@ -420,10 +420,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .create(
                     context = application,
                     enableLogging = arg.enableLogging,
-                    apiConfiguration = ApiConfiguration.State(
+                    apiConfiguration = ApiConfiguration(
                         publishableKey = arg.publishableKey,
-                        stripeAccountId = arg.stripeAccountId,
-                    ),
+                    ).stripeAccountId(arg.stripeAccountId).build(),
                     productUsage = arg.productUsage,
                     includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,
                 ).viewModelSubcomponentFactory

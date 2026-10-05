@@ -54,10 +54,9 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
         analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
         apiConfigurationProvider = Provider {
-            ApiConfiguration.State(
+            ApiConfiguration(
                 publishableKey = publishableKeySupplier(),
-                stripeAccountId = null,
-            )
+            ).stripeAccountId(null).build()
         },
     )
 

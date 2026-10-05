@@ -33,10 +33,9 @@ internal interface PollingViewModelModule {
 
         @Provides
         fun provideApiConfiguration(requestOptions: ApiRequest.Options): ApiConfiguration.State {
-            return ApiConfiguration.State(
+            return ApiConfiguration(
                 publishableKey = requestOptions.apiKey,
-                stripeAccountId = requestOptions.stripeAccount,
-            )
+            ).stripeAccountId(requestOptions.stripeAccount).build()
         }
 
         @Provides

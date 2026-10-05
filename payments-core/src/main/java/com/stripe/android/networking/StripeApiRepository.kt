@@ -136,10 +136,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         DefaultFraudDetectionDataRepository(
             context = context,
             apiConfigurationProvider = {
-                ApiConfiguration.State(
+                ApiConfiguration(
                     publishableKey = publishableKeyProvider(),
-                    stripeAccountId = null,
-                )
+                ).stripeAccountId(null).build()
             },
             workContext = workContext,
         ),
@@ -150,10 +149,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             requestSurface = requestSurface,
             analyticsRequestExecutor = analyticsRequestExecutor,
             apiConfigurationProvider = {
-                ApiConfiguration.State(
+                ApiConfiguration(
                     publishableKey = publishableKeyProvider(),
-                    stripeAccountId = null,
-                )
+                ).stripeAccountId(null).build()
             },
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =

@@ -90,10 +90,9 @@ internal class PaymentBrowserAuthContract :
             parcel.readString(),
             parcel.readByte() != 0.toByte(),
             parcel.readParcelable(StripeToolbarCustomization::class.java.classLoader),
-            ApiConfiguration.State(
+            ApiConfiguration(
                 publishableKey = parcel.readString() ?: "",
-                stripeAccountId = parcel.readString(),
-            ),
+            ).stripeAccountId(parcel.readString()).build(),
             parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),
             parcel.readValue(Int::class.java.classLoader) as? Int,

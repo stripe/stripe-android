@@ -63,10 +63,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
                 apiConfigurationProvider = {
-                    ApiConfiguration.State(
+                    ApiConfiguration(
                         publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                    )
+                    ).stripeAccountId(args.stripeAccountId).build()
                 },
             )
                 .report(

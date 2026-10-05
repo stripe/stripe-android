@@ -80,10 +80,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                 context = context,
                 apiConfigurationProvider = {
                     val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
+                    ApiConfiguration(
                         publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
+                    ).stripeAccountId(paymentConfiguration.stripeAccountId).build()
                 },
                 productUsage = productUsage,
             )

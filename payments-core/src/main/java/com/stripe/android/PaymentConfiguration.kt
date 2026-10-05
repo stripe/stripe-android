@@ -111,10 +111,9 @@ constructor(
             DefaultFraudDetectionDataRepository(
                 context = context,
                 apiConfigurationProvider = {
-                    ApiConfiguration.State(
+                    ApiConfiguration(
                         publishableKey = publishableKey,
-                        stripeAccountId = stripeAccountId,
-                    )
+                    ).stripeAccountId(stripeAccountId).build()
                 },
             ).refresh()
         }

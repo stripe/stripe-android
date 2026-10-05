@@ -17,10 +17,9 @@ class ApiConfigurationFromPaymentConfigurationModule {
         context: Context
     ): ApiConfiguration.State {
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
-        return ApiConfiguration.State(
+        return ApiConfiguration(
             publishableKey = paymentConfiguration.publishableKey,
-            stripeAccountId = paymentConfiguration.stripeAccountId,
-        )
+        ).stripeAccountId(paymentConfiguration.stripeAccountId).build()
     }
 }
 

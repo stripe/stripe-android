@@ -19,9 +19,8 @@ internal class DefaultApiConfigurationResolver @Inject constructor(
     override fun resolve(apiConfiguration: ApiConfiguration.State?): ApiConfiguration.State {
         if (apiConfiguration != null) return apiConfiguration
         val config = PaymentConfiguration.getInstance(context)
-        return ApiConfiguration.State(
+        return ApiConfiguration(
             publishableKey = config.publishableKey,
-            stripeAccountId = config.stripeAccountId,
-        )
+        ).stripeAccountId(config.stripeAccountId).build()
     }
 }

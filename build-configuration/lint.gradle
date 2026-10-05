@@ -1,6 +1,7 @@
 import groovy.xml.XmlSlurper
 
 def enforcedCustomLintIssueIds = [
+    'ApiConfigurationStateConstruction',
     'ComposeCleanupRuleUsageIssue',
     'TestResourceCleanup',
 ] as Set

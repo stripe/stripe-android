@@ -85,10 +85,9 @@ class AddressLauncher internal constructor(
         configuration: Configuration = Configuration()
     ) {
         val args = AddressElementActivityContract.Args.Standalone(
-            apiConfiguration = ApiConfiguration.State(
+            apiConfiguration = ApiConfiguration(
                 publishableKey = publishableKey,
-                stripeAccountId = null,
-            ),
+            ).stripeAccountId(null).build(),
             config = configuration,
         )
 

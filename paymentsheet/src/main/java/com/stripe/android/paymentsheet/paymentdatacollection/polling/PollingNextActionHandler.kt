@@ -66,10 +66,9 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
             ErrorReporter.createFallbackInstance(
                 context = host.application,
                 apiConfigurationProvider = {
-                    ApiConfiguration.State(
+                    ApiConfiguration(
                         publishableKey = requestOptions.apiKey,
-                        stripeAccountId = requestOptions.stripeAccount,
-                    )
+                    ).stripeAccountId(requestOptions.stripeAccount).build()
                 },
             )
                 .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
