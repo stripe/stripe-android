@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Cerrar la sesión de Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Cerrar la sesión de %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Confirma el pago en tu aplicación MB WAY en %s para completar la compra.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Se produjo un error. Verifica tu conexión y vuelve a intentarlo.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Por seguridad, las opciones para desarrolladores deben estar desactivadas para usar «Tocar para añadir».</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Abre la configuración</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Desactiva las Opciones para desarrolladores</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Tarjeta caducada. Prueba con otra tarjeta.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Aproximar la tarjeta</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Tarjeta rechazada. Prueba con otra tarjeta.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marca de la tarjeta no se ha actualizado. Vuelve a intentarlo.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Confirma el pago en tu banco o aplicación de pago en %s para completar la compra.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Completa el pago con Pix para finalizar la compra.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Establecer como método de pago predeterminado</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

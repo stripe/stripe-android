@@ -90,6 +90,7 @@ internal fun ConsentScreen(
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
             hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
+            hideDeclineButton = identityViewModel.verificationArgs.biometricConsent?.hideDeclineButton == true,
             showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
@@ -126,6 +127,7 @@ private fun SuccessUI(
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
     hideBrandingHeader: Boolean,
+    hideDeclineButton: Boolean,
     showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
@@ -215,15 +217,17 @@ private fun SuccessUI(
             onConsentAgreed()
         }
 
-        LoadingTextButton(
-            modifier = Modifier
-                .semantics { testTag = DECLINE_BUTTON_TAG },
-            text = consentPage.declineButtonText.uppercase(),
-            state = declineState
-        ) {
-            acceptState = LoadingButtonState.Disabled
-            declineState = LoadingButtonState.Loading
-            onConsentDeclined()
+        if (!hideDeclineButton) {
+            LoadingTextButton(
+                modifier = Modifier
+                    .semantics { testTag = DECLINE_BUTTON_TAG },
+                text = consentPage.declineButtonText.uppercase(),
+                state = declineState
+            ) {
+                acceptState = LoadingButtonState.Disabled
+                declineState = LoadingButtonState.Loading
+                onConsentDeclined()
+            }
         }
     }
 }
@@ -266,6 +270,7 @@ internal fun ConsentPreview() {
             ),
             visitedIndividualWelcomePage = false,
             hideBrandingHeader = false,
+            hideDeclineButton = false,
             bottomSheets = mapOf(),
             onConsentAgreed = {},
             onConsentDeclined = {}

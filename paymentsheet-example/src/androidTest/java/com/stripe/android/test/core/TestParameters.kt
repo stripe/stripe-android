@@ -113,11 +113,7 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true,
     ) : AuthorizeAction {
         override fun text(isSetup: Boolean): String {
-            return if (isSetup) {
-                "AUTHORIZE TEST SETUP"
-            } else {
-                "AUTHORIZE TEST PAYMENT"
-            }
+            return testAuthorizationButtonText(isSetup)
         }
         override val isConsideredDone: Boolean = true
     }
@@ -193,5 +189,13 @@ internal sealed interface AuthorizeAction {
             override val requiresBrowser: Boolean = false
             override val isConsideredDone: Boolean = true
         }
+    }
+}
+
+internal fun testAuthorizationButtonText(isSetup: Boolean): String {
+    return if (isSetup) {
+        "AUTHORIZE TEST SETUP"
+    } else {
+        "AUTHORIZE TEST PAYMENT"
     }
 }

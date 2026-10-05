@@ -54,6 +54,8 @@
   <string name="stripe_iban_invalid_country">A beírt IBAN-szám érvénytelen, a(z) „%s” nem támogatott országkód.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">A megadott azonosítószám hiányos.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">BLIK kódja hiányos.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -109,6 +111,8 @@
   <string name="stripe_paymentsheet_redirect_instructions">A beküldést követően átirányítjuk, hogy biztonságosan elvégezze a következő lépéseket.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">A fizetés megerősítésével a PayPalon engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a PayPal számláját.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Ez egy nemzetközi vásárlás, amely nem tartalmazza a 3,5%-os IOF díjat. A folytatással Ön tudomásul veszi és elfogadja <terms>az Ebanx feltételeit</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">A fizetés megerősítésével a RevolutPayen engedélyezi, hogy a(z) %s a feltételeinek megfelelően a későbbi kifizetésekkel megterhelje a RevolutPay számláját.</string>
   <!-- Satispay mandate text -->
@@ -121,6 +125,8 @@
   <string name="stripe_scan_card">Kártya beolvasása</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Beolvasott kártya törlése</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Lejár: %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Fizetési adatainak megadásával és a fizetés megerősítésével Ön felhatalmazza (A) a(z) %s céget és a Stripe-ot, fizetési szolgáltatónkat, hogy utasításokat küldjön a bankjának, hogy megterhelje a számláját, és (B) bankját, hogy az utasításoknak megfelelően megterhelje a számláját. A jogai részeként Ön jogosult a bankjától a velük kötött megállapodás feltételei szerinti visszatérítésre. A visszatérítést a számla megterhelésének napjától számított 8 héten belül kell igényelni. Jogait egy, a bankjától beszerezhető nyilatkozat tartalmazza. Beleegyezik abba, hogy a jövőbeni terhelésekről értesítést kap, legfeljebb 2 nappal azok bekövetkezése előtt.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

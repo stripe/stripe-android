@@ -70,6 +70,67 @@ class CryptoApiRepositoryTest {
     private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @Test
+    fun `platform settings sends country hint alongside customer`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        cryptoApiRepository.getPlatformSettings("crc_customer", "GB").getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "country_hint" to "GB", "ui_mode" to "headless")
+        )
+    }
+
+    @Test
+    fun `payment token sends country hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"id":"cpt_token"}""", emptyMap()))
+
+        cryptoApiRepository.createPaymentToken("crc_customer", "pm_wallet", "GB").getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf(
+                "crypto_customer_id" to "crc_customer", "payment_method" to "pm_wallet",
+                "country_hint" to "GB", "ui_mode" to "headless"
+            )
+        )
+    }
+
+    @Test
+    fun `payment token omits absent hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"id":"cpt_token"}""", emptyMap()))
+
+        cryptoApiRepository.createPaymentToken("crc_customer", "pm_wallet", null).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "payment_method" to "pm_wallet", "ui_mode" to "headless")
+        )
+    }
+
+    @Test
+    fun `platform settings preserves unsupported country API error`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(
+            StripeResponse(
+                400,
+                """{"error": {
+                    "type":"invalid_request_error",
+                    "code":"crypto_onramp_transactions_unavailable_in_country"
+                }}""",
+                emptyMap()
+            )
+        )
+
+        val error = cryptoApiRepository.getPlatformSettings("crc_customer", "ZZ").exceptionOrNull()
+
+        assertThat((error as APIException).stripeError?.code)
+            .isEqualTo("crypto_onramp_transactions_unavailable_in_country")
+    }
+
+    @Test
     fun testGrantingPartnerMerchantPermissionsSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
@@ -139,25 +200,26 @@ class CryptoApiRepositoryTest {
             """
                 {
                     "requirements": {
-                        "entries": [
-                            {
-                                "description": "proof_of_address",
-                                "requested_by": "swapped",
-                                "awaiting_action_from": "user",
-                                "errors": [],
-                                "document": {
-                                    "accepted_subtypes": [
-                                        {
-                                            "id": "utility_bill",
-                                            "label": "Utility bill"
-                                        }
-                                    ],
-                                    "accepted_formats": ["pdf", "jpeg", "png"],
-                                    "min_documents": 1,
-                                    "instructions": []
-                                }
+                        "proof_of_address": {
+                            "requested_by": "swapped",
+                            "awaiting_action_from": "user",
+                            "errors": [],
+                            "document": {
+                                "accepted_subtypes": [
+                                    {
+                                        "id": "utility_bill",
+                                        "label": "Utility bill",
+                                        "description": "Recent utility bill"
+                                    }
+                                ],
+                                "accepted_formats": ["pdf", "jpeg", "png"],
+                                "min_document_types": 1,
+                                "max_document_types": 2,
+                                "max_file_size_bytes": 5000000,
+                                "file_requirements": "PDF, JPEG, or PNG, up to 5 MB per file.",
+                                "instructions": []
                             }
-                        ]
+                        }
                     }
                 }
             """.trimIndent(),
@@ -175,8 +237,7 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.url).isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_requirements")
         assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"]).isEqualTo("test-secret")
         val response = result.getOrThrow()
-        assertThat(response.requirements.entries.single().description)
-            .isEqualTo("proof_of_address")
+        assertThat(response.requirements.entries).containsKey("proof_of_address")
     }
 
     @Test
@@ -1276,5 +1337,30 @@ class CryptoApiRepositoryTest {
         assertThat(result.invalidIdentifiers)
             .isEqualTo(listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC))
         assertThat(result.carfTinRequired).isFalse()
+    }
+
+    @Test
+    fun `platform settings omits absent customer and hint`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        val result = cryptoApiRepository.getPlatformSettings(null, null)
+
+        assertThat(result.getOrThrow().publishableKey).isEqualTo("pk_platform")
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(mapOf("ui_mode" to "headless"))
+    }
+
+    @Test
+    fun `platform settings includes existing customer`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, """{"publishable_key":"pk_platform"}""", emptyMap()))
+
+        cryptoApiRepository.getPlatformSettings("crc_customer", null).getOrThrow()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        assertThat(apiRequestArgumentCaptor.firstValue.params).isEqualTo(
+            mapOf("crypto_customer_id" to "crc_customer", "ui_mode" to "headless")
+        )
     }
 }

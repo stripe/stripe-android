@@ -83,8 +83,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any(),
-                shouldCache = eq(false)
+                params = any()
             )
         ).thenReturn(mock)
         given(

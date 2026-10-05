@@ -68,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">情報を確認する</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN の末尾 4 桁</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">利用規約</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">利用規約</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">サインインまたは登録</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -100,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Link からログアウト</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">%s からログアウト</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">購入を完了するには、%s 以内に MB WAY アプリで決済を確認してください。</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">エラーが発生しました。接続を確認して、もう一度お試しください。</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">セキュリティ上の理由から、Tap to Add を使用するには開発者向けオプションをオフにする必要があります。</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">設定を開く</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">開発者向けオプションをオフにする</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">カードの有効期限が切れています。別のカードをお試しください。</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">カードをタップする</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">カードが拒否されました。別のカードをお試しください。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -275,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">カードブランドは更新されていません。もう一度お試しください。</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">%s 以内に銀行または決済アプリで支払いを確定し、購入を完了してください。</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Pix を使用して支払い、購入を完了してください。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">デフォルトの支払い方法として設定する</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

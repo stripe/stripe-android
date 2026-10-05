@@ -72,7 +72,8 @@ class FlowControllerFactoryTest {
         return FlowControllerFactory(
             activity,
             mock(),
-            mock()
+            mock(),
+            paymentElementCallbackIdentifier = "flow-controller-test",
         )
     }
 
@@ -82,7 +83,8 @@ class FlowControllerFactoryTest {
         return FlowControllerFactory(
             fragment,
             mock(),
-            mock()
+            mock(),
+            paymentElementCallbackIdentifier = "flow-controller-test",
         )
     }
 

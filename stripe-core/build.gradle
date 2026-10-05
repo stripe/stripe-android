@@ -38,7 +38,6 @@ dependencies {
 
     ksp libs.daggerCompiler
 
-    testImplementation project(':network-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
@@ -51,7 +50,6 @@ dependencies {
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.okhttpMockWebServer
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
 }

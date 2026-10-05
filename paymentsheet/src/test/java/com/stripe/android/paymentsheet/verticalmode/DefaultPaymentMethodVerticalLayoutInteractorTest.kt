@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.state.error
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -94,11 +95,47 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
+            // Emits twice: once through displayedSavedPaymentMethod, then from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
             assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+        }
+    }
+
+    @Test
+    fun state_exposesSelectionErrorOnlyWhileSelectionFailed() = runScenario(
+        initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+    ) {
+        val error = PaymentSheetR.string.stripe_something_went_wrong.resolvableString
+
+        interactor.state.test {
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Pending(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            )
+
+            // Entering or leaving Pending emits twice: once through displayedSavedPaymentMethod, then
+            // from the selection state itself.
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
+
+            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+
+            savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
+
+            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
         }
     }
 
@@ -111,7 +148,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 "pm_missing",
             )
 
-            expectNoEvents()
+            val state = awaitItem()
+            assertThat(state.savedPaymentMethodSelectionState)
+                .isEqualTo(SavedPaymentMethodSelectionState.Pending("pm_missing"))
+            assertThat(state.displayedSavedPaymentMethod).isNull()
             assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
         }
     }

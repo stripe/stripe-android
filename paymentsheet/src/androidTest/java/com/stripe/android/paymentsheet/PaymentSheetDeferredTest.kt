@@ -52,6 +52,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -124,6 +125,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentCardPayment_forSetup() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -177,6 +179,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentSavedCardPayment_forSetup() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -240,6 +243,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentCardPaymentWithCustomer() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -328,6 +332,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentWithSavedCard_sendsClientAttributionMetadata() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -394,6 +399,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentCardPaymentWithSaveFor() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -481,6 +487,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
@@ -521,7 +528,7 @@ internal class PaymentSheetDeferredTest(
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         page.waitForText("We don't accept visa")
         testContext.markTestSucceeded()
@@ -532,6 +539,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
@@ -576,6 +584,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredIntentKonbiniPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -657,6 +666,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredPaymentIntent_withElementsSessionFailure() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -728,6 +738,7 @@ internal class PaymentSheetDeferredTest(
     fun testDeferredSetupIntent_withElementsSessionFailure() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, shouldSavePaymentMethod ->
@@ -782,6 +793,7 @@ internal class PaymentSheetDeferredTest(
         testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
         apiConfigurationTestType = apiConfigurationTestType,
+        composeTestRule = testRules.compose,
         networkRule = networkRule,
         testType = testType,
         createIntentCallback = { _, _ ->

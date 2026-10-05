@@ -132,6 +132,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit

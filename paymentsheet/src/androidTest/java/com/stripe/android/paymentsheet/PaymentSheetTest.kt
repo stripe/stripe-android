@@ -67,6 +67,7 @@ internal class PaymentSheetTest(
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -92,13 +93,14 @@ internal class PaymentSheetTest(
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
     }
 
     @Test
     fun testSuccessfulPayByBankPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -131,6 +133,7 @@ internal class PaymentSheetTest(
     fun testSuccessfulLpmPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -163,6 +166,7 @@ internal class PaymentSheetTest(
     fun testSuccessfulUsBankPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -190,7 +194,7 @@ internal class PaymentSheetTest(
 
         formPage.fillOutName()
         formPage.fillOutEmail()
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         networkRule.enqueue(
             method("POST"),
@@ -208,6 +212,7 @@ internal class PaymentSheetTest(
     fun testSocketErrorCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
@@ -231,7 +236,7 @@ internal class PaymentSheetTest(
             response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.waitForText("An error occurred. Check your connection and try again.")
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
@@ -241,6 +246,7 @@ internal class PaymentSheetTest(
     fun testInsufficientFundsCardPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
@@ -265,7 +271,7 @@ internal class PaymentSheetTest(
             response.testBodyFromFile("payment-intent-confirm-insufficient-funds.json")
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.waitForText("Your card has insufficient funds.")
         page.assertNoText("StripeException", substring = true)
         testContext.markTestSucceeded()
@@ -275,6 +281,7 @@ internal class PaymentSheetTest(
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         successTimeoutSeconds = 10L,
         resultCallback = ::assertCompleted,
@@ -313,6 +320,7 @@ internal class PaymentSheetTest(
     fun testFailureWhenSetupRequestsFail() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
@@ -339,6 +347,7 @@ internal class PaymentSheetTest(
     fun testPaymentIntentWithCardBrandChoiceSuccess_Selector() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -373,6 +382,7 @@ internal class PaymentSheetTest(
     fun testPaymentIntentWithCardBrandChoiceSuccess_PreferredBrands_Deselect() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -410,6 +420,7 @@ internal class PaymentSheetTest(
     fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
@@ -431,6 +442,7 @@ internal class PaymentSheetTest(
             runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
                 networkRule = networkRule,
+                composeTestRule = testRules.compose,
                 integrationType = integrationType,
                 resultCallback = ::assertCompleted,
             ) { testContext ->
@@ -477,6 +489,7 @@ internal class PaymentSheetTest(
     fun testPaymentIntentWithCvcRecollection() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -528,6 +541,7 @@ internal class PaymentSheetTest(
     fun testDeferredIntentWithCvcRecollection() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
         builder = {
             createIntentCallback { _, _ ->
@@ -609,6 +623,7 @@ internal class PaymentSheetTest(
     fun testSavedUsBankAccountMandateNotDisplayDuringCardCheckout() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -668,7 +683,7 @@ internal class PaymentSheetTest(
             response.setResponseCode(500)
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
         page.assertMandateIsMissing()
         testContext.markTestSucceeded()
     }
@@ -677,6 +692,7 @@ internal class PaymentSheetTest(
     fun testSavedUsBankPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -741,6 +757,7 @@ internal class PaymentSheetTest(
     fun testSavedCardPayment_sendsClientAttributionMetadata() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -805,6 +822,7 @@ internal class PaymentSheetTest(
     fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -840,6 +858,7 @@ internal class PaymentSheetTest(
     fun testFocusFirstEditBadgeOnEdit() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -889,6 +908,7 @@ internal class PaymentSheetTest(
     fun testTermsDisplayNeverHidesMandate() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _ ->
@@ -933,6 +953,7 @@ internal class PaymentSheetTest(
     fun testSocketErrorElementsSessions() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
@@ -952,6 +973,7 @@ internal class PaymentSheetTest(
     fun testOBO_PassedToElementsSessionCall() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         builder = {
             createIntentCallback { _ ->
@@ -990,6 +1012,7 @@ internal class PaymentSheetTest(
     fun testSavedCard_isDisplayedForDashboard() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->

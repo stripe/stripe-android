@@ -1470,13 +1470,13 @@ internal class PlaygroundTestDriver(
                         simulateScanText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         simulateScanText.click()
 
-                        val authorizeTestPaymentText = UiAutomatorText(
-                            "AUTHORIZE TEST PAYMENT",
+                        val authorizeTestIntentText = UiAutomatorText(
+                            testAuthorizationButtonText(testParameters.isSetupMode),
                             labelMatchesExactly = true,
                             device = device
                         )
-                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-                        authorizeTestPaymentText.click()
+                        authorizeTestIntentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        authorizeTestIntentText.clickVisible()
 
                         waitForPollingToFinish()
                     }

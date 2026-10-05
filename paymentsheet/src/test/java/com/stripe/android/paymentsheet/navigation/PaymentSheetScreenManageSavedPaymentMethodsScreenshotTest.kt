@@ -9,6 +9,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.ManageSavedPaymentMethods
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -108,6 +109,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 isEditing = isEditing,
                 canEdit = true,
                 linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)

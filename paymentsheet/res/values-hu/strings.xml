@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Kijelentkezés a Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Kijelentkezik a következőről: %s?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">A vásárlás befejezéséhez erősítse meg a fizetést az MB WAY alkalmazásában %s belül.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Hiba történt, ellenőrizze az internetkapcsolatát és próbálja újra.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Biztonsági okokból a fejlesztői beállításokat ki kell kapcsolni az Érintéses hozzáadás használatához.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Beállítások megnyitása</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Kapcsolja ki a fejlesztői beállításokat</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">A kártya lejárt. Próbálkozzon egy másik kártyával.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Érintse oda a kártyát</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">A kártyát elutasították. Próbálkozzon egy másik kártyával.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -279,6 +289,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">A kártyatípus frissítése nem sikerült, próbálja újra.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">A vásárlás befejezéséhez erősítse meg a fizetést a bankjában vagy a fizetési alkalmazásban ennyi időn belül: %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">A vásárlás befejezéséhez teljesítse a fizetést a Pix használatával.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Legyen ez az alapértelmezett fizetési mód</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

@@ -50,6 +50,7 @@ internal class ConfirmWithAttestationTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -61,6 +62,7 @@ internal class ConfirmWithAttestationTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
             builder = {
