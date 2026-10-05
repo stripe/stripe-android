@@ -7,9 +7,12 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -76,6 +79,28 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm keeps saved SEPA unacknowledged when embedded view displays mandate text`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = true),
+    ) {
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `confirm acknowledges saved SEPA when embedded view omits mandate text`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
     fun `confirm records the payment selection for analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
@@ -111,6 +136,17 @@ internal class CheckoutConfirmationPerformerTest {
         )
     }
 
+    private fun savedSepaState(
+        embeddedViewDisplaysMandateText: Boolean,
+    ): CheckoutControllerState {
+        return CheckoutControllerStateFactory.create(
+            embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+                .build(),
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+        )
+    }
+
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
@@ -127,6 +163,7 @@ internal class CheckoutConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
             resultCallback = {},
+            viewModelScope = backgroundScope,
         )
         val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(

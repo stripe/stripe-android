@@ -13,14 +13,15 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.NoOpAddressLauncherEventReporter
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.DefaultStripeTheme
-import java.util.Locale
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Locale
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
@@ -53,10 +54,10 @@ class AutocompleteScreenTest {
             )
         )
         onQueryField().performTextInput("Some text")
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodesWithText("primaryText")
-                .fetchSemanticsNodes().size == 1
+                .fetchSemanticsNodes(atLeastOneRootRequired = false).size == 1
         }
     }
 

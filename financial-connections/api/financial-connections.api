@@ -20,6 +20,7 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public static final fun createForBankAccountToken (Landroidx/activity/ComponentActivity;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public static final fun createForBankAccountToken (Landroidx/fragment/app/Fragment;Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public final fun present (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)V
+	public final fun present (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/financialconnections/FinancialConnectionsPreCollectedConsent;)V
 }
 
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$Companion {
@@ -63,7 +64,9 @@ public final class com/stripe/android/financialconnections/analytics/FinancialCo
 	public static final field $stable I
 	public final fun component1 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
 	public final fun component2 ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
+	public final fun component3 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFinancialConnectionsSessionId ()Ljava/lang/String;
 	public final fun getMetadata ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Metadata;
 	public final fun getName ()Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$Name;
 	public fun hashCode ()I
@@ -79,6 +82,7 @@ public final class com/stripe/android/financialconnections/analytics/FinancialCo
 	public static final field INSTITUTION_UNAVAILABLE_PLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
 	public static final field INSTITUTION_UNAVAILABLE_UNPLANNED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
 	public static final field NO_DEBITABLE_ACCOUNT Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
+	public static final field NO_ELIGIBLE_ACCOUNTS Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
 	public static final field SESSION_EXPIRED Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
 	public static final field UNEXPECTED_ERROR Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
 	public static final field WEB_BROWSER_UNAVAILABLE Lcom/stripe/android/financialconnections/analytics/FinancialConnectionsEvent$ErrorCode;
@@ -345,6 +349,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda$-258743460$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-361367997$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-404597064$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-481499691$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-513144654$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-610989204$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-640448304$financial_connections_release ()Lkotlin/jvm/functions/Function3;

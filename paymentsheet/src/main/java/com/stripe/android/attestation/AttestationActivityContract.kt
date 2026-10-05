@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.core.ApiConfiguration
 import kotlinx.parcelize.Parcelize
 
 internal class AttestationActivityContract :
@@ -14,7 +15,7 @@ internal class AttestationActivityContract :
         return AttestationActivity.createIntent(
             context,
             args = AttestationArgs(
-                publishableKey = input.publishableKey,
+                apiConfiguration = input.apiConfiguration,
                 productUsage = input.productUsage.toList()
             )
         )
@@ -29,7 +30,7 @@ internal class AttestationActivityContract :
 
     @Parcelize
     internal data class Args(
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val productUsage: Set<String>
     ) : Parcelable
 

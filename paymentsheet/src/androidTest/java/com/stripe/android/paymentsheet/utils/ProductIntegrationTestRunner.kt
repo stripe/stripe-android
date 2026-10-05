@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -9,6 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
     integrationType: ProductIntegrationType,
     apiConfigurationTestType: ApiConfigurationTestType,
     builder: ProductIntegrationBuilder.() -> Unit = {},
@@ -23,6 +25,7 @@ internal fun runProductIntegrationTest(
         ProductIntegrationType.PaymentSheet -> {
             runPaymentSheetTest(
                 networkRule = networkRule,
+                composeTestRule = composeTestRule,
                 apiConfigurationTestType = apiConfigurationTestType,
                 integrationType = IntegrationType.Compose,
                 builder = {
@@ -116,12 +119,12 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                                 currency = "usd"
                             )
                         ),
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 } else {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                     )
                 }
             }
@@ -151,7 +154,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                                 currency = "usd",
                             )
                         ),
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
@@ -161,7 +164,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                 } else {
                     configureWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = configuration,
+                        configuration = context.apiConfigurationTestType.applyTo(configuration),
                         callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()

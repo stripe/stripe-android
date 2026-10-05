@@ -1,88 +1,92 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.stripe.android.common.taptoadd.LocalTapToAddImageRepository
 import com.stripe.android.common.taptoadd.TapToAddImageRepository
-import com.stripe.android.uicore.StripeColors
-import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 
 @Composable
 internal fun TapToAddTheme(
+    appearance: PaymentSheet.Appearance,
     imageRepository: TapToAddImageRepository?,
     content: @Composable () -> Unit,
 ) {
-    StripeTheme(
-        colors = TapToAddThemeDefaults.colors,
-        typography = TapToAddThemeDefaults.typography,
-    ) {
-        CompositionLocalProvider(
-            LocalTapToAddImageRepository provides imageRepository
+    PaymentElementTheme(appearance = appearance) {
+        val isDark = MaterialTheme.stripeThemeIsDark
+        MaterialTheme(
+            colors = MaterialTheme.colors.copy(
+                background = MaterialTheme.colors.surface,
+                primaryVariant = if (isDark) {
+                    PRIMARY_VARIANT_DARK
+                } else {
+                    VARIANT_LIGHT
+                },
+                secondaryVariant = if (isDark) {
+                    SECONDARY_VARIANT_DARK
+                } else {
+                    VARIANT_LIGHT
+                },
+                error = ERROR_COLOR,
+            ),
+            typography = MaterialTheme.typography.copy(
+                h4 = MaterialTheme.typography.h4.merge(TapToAddThemeDefaults.h4),
+            ),
         ) {
-            content()
+            CompositionLocalProvider(
+                LocalTapToAddImageRepository provides imageRepository
+            ) {
+                content()
+            }
         }
     }
 }
 
+private val PRIMARY_VARIANT_DARK = Color(0xFF808080)
+private val SECONDARY_VARIANT_DARK = Color(0xFFE3E3E3)
+private val VARIANT_LIGHT = Color(0xFF757F8F)
+private val ERROR_COLOR = Color(0xFFF30000)
+
 private object TapToAddThemeDefaults {
-    val typography = StripeThemeDefaults.typography.copy(
-        h4 = TextStyle(
-            fontSize = 28.sp,
-            letterSpacing = (-0.48).sp,
-            lineHeight = 37.44.sp,
-            fontWeight = FontWeight.W500,
-        )
+    val h4 = TextStyle(
+        fontSize = 28.sp,
+        letterSpacing = (-0.48).sp,
+        lineHeight = 37.44.sp,
+        fontWeight = FontWeight.W500,
     )
-
-    val colors: StripeColors
-        @Composable
-        get() {
-            val isDarkTheme = isSystemInDarkTheme()
-
-            return remember {
-                val colors = StripeThemeDefaults.colors(isDarkTheme)
-
-                colors.copy(
-                    materialColors = colors.materialColors.copy(
-                        primaryVariant = if (isDarkTheme) {
-                            Color(0xFF808080)
-                        } else {
-                            Color(0xFF757F8F)
-                        },
-                        secondaryVariant = if (isDarkTheme) {
-                            Color(0xFFE3E3E3)
-                        } else {
-                            Color(0xFF757F8F)
-                        },
-                        error = Color(0xFFF30000),
-                    ),
-                )
-            }
-        }
 }
 
-internal fun createTapToAddUxConfiguration(): TapToPayUxConfiguration {
+internal fun createTapToAddUxConfiguration(
+    appearance: PaymentSheet.Appearance,
+    isSystemDark: Boolean,
+): TapToPayUxConfiguration {
+    val isDark = appearance.themeMode.isDarkTheme(isSystemDark)
+
     return TapToPayUxConfiguration.Builder()
-        .darkMode(darkMode = TapToPayUxConfiguration.DarkMode.SYSTEM)
+        .darkMode(
+            darkMode = if (isDark) {
+                TapToPayUxConfiguration.DarkMode.DARK
+            } else {
+                TapToPayUxConfiguration.DarkMode.LIGHT
+            }
+        )
         .colors(
             colors = TapToPayUxConfiguration.ColorScheme.Builder()
                 .primary(
                     primary = TapToPayUxConfiguration.Color.Value(
-                        color = PRIMARY_COLOR.toArgb(),
+                        color = appearance.getColors(isDark).primary,
                     )
                 )
                 .build()
         )
         .build()
 }
-
-private val PRIMARY_COLOR = Color(0xFF007AFF)

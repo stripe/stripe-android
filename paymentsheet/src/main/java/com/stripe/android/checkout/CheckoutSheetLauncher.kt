@@ -6,8 +6,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -21,6 +23,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentelement.embedded.linkAccountInfoOrNull
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -29,6 +32,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -55,11 +59,13 @@ internal class CheckoutSheetLauncherState @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
+@CheckoutPresenterScope
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
     private val sessionRefresher: CheckoutSessionRefresher,
@@ -72,6 +78,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -87,6 +94,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            result.linkAccountInfoOrNull?.let(linkAccountHolder::set)
             launcherState.isAwaitingPaymentOptionsReady = false
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
@@ -124,6 +132,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
+                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
@@ -204,6 +213,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = currentSelection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = listOfNotNull(promotion),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
@@ -236,6 +246,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
@@ -321,7 +332,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
             selection = selection,
             previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
-            promotions = emptyList(),
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
         )

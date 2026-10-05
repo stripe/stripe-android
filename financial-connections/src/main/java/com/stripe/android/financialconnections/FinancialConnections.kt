@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections
 
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventListener
 
 object FinancialConnections {
@@ -12,6 +10,9 @@ object FinancialConnections {
     /**
      * Set the event listener to be notified of events that occur during the Financial
      * Connections Auth Flow.
+     *
+     * Events are emitted after the Financial Connections session ID is available. If the flow
+     * fails before a session ID is available, its completion callback still reports the failure.
      */
     @JvmStatic
     @Synchronized
@@ -28,15 +29,7 @@ object FinancialConnections {
         this.eventListener = null
     }
 
-    internal fun emitEvent(
-        name: Name,
-        metadata: Metadata = Metadata()
-    ) = runCatching {
-        eventListener?.onEvent(
-            FinancialConnectionsEvent(
-                name = name,
-                metadata = metadata
-            )
-        )
+    internal fun emitEvent(event: FinancialConnectionsEvent) = runCatching {
+        eventListener?.onEvent(event)
     }
 }

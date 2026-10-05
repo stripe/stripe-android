@@ -60,6 +60,10 @@ internal class CardDetailsController(
             CardPillElement(
                 controller = CardPillController(
                     cardNumber = initialCardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = initialValues[FormFieldId.CardExpMonth]?.toIntOrNull(),
+                        expirationYear = initialValues[FormFieldId.CardExpYear]?.toIntOrNull(),
+                    ),
                     onDismissPill = ::dismissCardPill,
                 )
             )
@@ -68,20 +72,24 @@ internal class CardDetailsController(
         }
     )
 
-    val nameElement = if (collectName) {
-        SimpleTextElement(
-            controller = SimpleTextFieldController(
-                textFieldConfig = SimpleTextFieldConfig(
-                    label = resolvableString(R.string.stripe_name_on_card),
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboard = androidx.compose.ui.text.input.KeyboardType.Text
-                ),
-                initialValue = initialValues[FormFieldId.Name],
+    private val nameController = if (collectName) {
+        SimpleTextFieldController(
+            textFieldConfig = SimpleTextFieldConfig(
+                label = resolvableString(R.string.stripe_name_on_card),
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = androidx.compose.ui.text.input.KeyboardType.Text
             ),
-            identifier = FormFieldId.Name,
+            initialValue = initialValues[FormFieldId.Name],
         )
     } else {
         null
+    }
+
+    val nameElement = nameController?.let { controller ->
+        SimpleTextElement(
+            controller = controller,
+            identifier = FormFieldId.Name,
+        )
     }
 
     val label: Int? = null
@@ -134,6 +142,10 @@ internal class CardDetailsController(
             cardPillElement.value = CardPillElement(
                 controller = CardPillController(
                     cardNumber = scannedCardDetails.cardNumber,
+                    expirationDate = formatExpirationDateForDisplay(
+                        expirationMonth = scannedCardDetails.expirationMonth,
+                        expirationYear = scannedCardDetails.expirationYear,
+                    ),
                     onDismissPill = ::dismissCardPill,
                 )
             )
@@ -145,7 +157,17 @@ internal class CardDetailsController(
                 )
             )
             cvcElement.controller.onRawValueChange("")
-            cvcElement.controller.requestFocus()
+
+            val emptyNameController = nameController?.takeIf { controller ->
+                controller.rawFieldValue.value.isBlank()
+            }
+
+            if (emptyNameController != null) {
+                emptyNameController.requestFocus()
+            } else {
+                cvcElement.controller.requestFocus()
+            }
+
             return
         } else {
             numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
@@ -244,7 +266,25 @@ internal class CardDetailsController(
         return "%02d%02d".format(expirationMonth, expirationYear % YEAR_REMAINDER)
     }
 
+    private fun formatExpirationDateForDisplay(
+        expirationMonth: Int?,
+        expirationYear: Int?,
+    ): String? {
+        if (expirationMonth == null || expirationYear == null) {
+            return null
+        }
+
+        return buildString {
+            append(expirationMonth.toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0'))
+            append('/')
+            append(
+                (expirationYear % YEAR_REMAINDER).toString().padStart(EXPIRATION_DATE_PART_LENGTH, '0')
+            )
+        }
+    }
+
     private companion object {
+        const val EXPIRATION_DATE_PART_LENGTH = 2
         const val YEAR_REMAINDER = 100
     }
 }

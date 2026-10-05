@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
 internal enum class AddPaymentMethodRequirement {
@@ -14,6 +15,13 @@ internal enum class AddPaymentMethodRequirement {
     UnsupportedForSetup {
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return !metadata.hasIntentToSetup(code)
+        }
+    },
+
+    /** Indicates the payment method is unsupported by PaymentSheet when using SetupIntents. */
+    UnsupportedForSetupIntent {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return metadata.stripeIntent !is SetupIntent
         }
     },
 

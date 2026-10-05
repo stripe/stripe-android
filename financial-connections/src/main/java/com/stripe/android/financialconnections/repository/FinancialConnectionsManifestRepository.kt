@@ -6,7 +6,9 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -50,7 +52,8 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse
 
     /**
@@ -188,7 +191,8 @@ internal interface FinancialConnectionsManifestRepository {
             provideApiRequestOptions: ProvideApiRequestOptions,
             logger: Logger,
             locale: Locale,
-            initialSync: SynchronizeSessionResponse?
+            initialSync: SynchronizeSessionResponse?,
+            eventContext: FinancialConnectionsEventContext
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
@@ -196,7 +200,8 @@ internal interface FinancialConnectionsManifestRepository {
                 provideApiRequestOptions,
                 locale,
                 logger,
-                initialSync
+                initialSync,
+                eventContext
             )
     }
 }
@@ -207,7 +212,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val provideApiRequestOptions: ProvideApiRequestOptions,
     val locale: Locale,
     val logger: Logger,
-    initialSync: SynchronizeSessionResponse?
+    initialSync: SynchronizeSessionResponse?,
+    private val eventContext: FinancialConnectionsEventContext
 ) : FinancialConnectionsManifestRepository {
 
     /**
@@ -218,9 +224,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private val cachedSynchronizeSessionResponseFlow = MutableStateFlow(initialSync)
 
+    init {
+        initialSync?.manifest?.let(eventContext::update)
+    }
+
     private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse?
         get() = cachedSynchronizeSessionResponseFlow.value
         set(value) {
+            value?.manifest?.let(eventContext::update)
             cachedSynchronizeSessionResponseFlow.value = value
         }
 
@@ -231,16 +242,23 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse = mutex.withLock {
         val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
-        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification)
+        return cachedSync ?: synchronize(
+            applicationId,
+            clientSecret,
+            supportsAppVerification,
+            preCollectedConsent,
+        )
     }
 
     private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
         supportsAppVerification: Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
@@ -256,11 +274,20 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     PARAMS_VERIFY_APP_ID to applicationId,
                     NetworkConstants.PARAMS_APPLICATION_ID to applicationId
                 ),
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_PRE_COLLECTED_CONSENT to preCollectedConsent?.let {
+                    mapOf(
+                        "consent" to it.consent,
+                        "collected_at" to it.collectedAt,
+                    )
+                }
+            ).filterNotNullValues()
         ),
         SynchronizeSessionResponse.serializer()
-    ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
+    ).also {
+        require(it.manifest.id.isNotBlank()) { "Financial Connections session ID is missing" }
+        updateCachedSynchronizeSessionResponse("get/fetch", it)
+    }
 
     override suspend fun markConsentAcquired(
         clientSecret: String
@@ -343,7 +370,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "frontend_events[$index]" to event.toMap()
             }
         )
-        return requestExecutor.execute(
+        return requestExecutor.executeWithoutUserFacingEvents(
             request,
             FinancialConnectionsAuthorizationSession.serializer()
         )
@@ -597,6 +624,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
         internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
         internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
+        internal const val PARAMS_PRE_COLLECTED_CONSENT = "pre_collected_consent"
 
         internal val synchronizeSessionUrl: String
             get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"

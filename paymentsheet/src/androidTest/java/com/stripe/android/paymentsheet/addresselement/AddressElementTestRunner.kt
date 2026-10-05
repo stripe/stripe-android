@@ -10,6 +10,7 @@ import app.cash.turbine.withTurbineTimeout
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
+import com.stripe.paymentelementtestpages.AddressElementPage
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.seconds
 
@@ -19,19 +20,23 @@ internal class AddressElementTestRunnerContext(
     val page: AddressElementPage,
     val results: Turbine<AddressLauncherResult>,
 ) {
-    fun present(): AddressElementActivity {
+    fun present(): AddressElementActivity = present(
+        configuration = AddressLauncher.Configuration(
+            address = AddressDetails(
+                address = PaymentSheet.Address(country = "US"),
+            ),
+            allowedCountries = setOf("US"),
+            autocompleteCountries = setOf("CA"),
+        )
+    )
+
+    fun present(configuration: AddressLauncher.Configuration): AddressElementActivity {
         val activityLaunchObserver = ActivityLaunchObserver(AddressElementActivity::class.java)
         scenario.onActivity {
             activityLaunchObserver.prepareForLaunch(it)
             addressLauncher.present(
                 publishableKey = "pk_test_123",
-                configuration = AddressLauncher.Configuration(
-                    address = AddressDetails(
-                        address = PaymentSheet.Address(country = "US"),
-                    ),
-                    allowedCountries = setOf("US"),
-                    autocompleteCountries = setOf("CA"),
-                ),
+                configuration = configuration,
             )
         }
         activityLaunchObserver.awaitLaunch()

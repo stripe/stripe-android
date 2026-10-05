@@ -12,6 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
@@ -24,9 +25,14 @@ import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
@@ -56,7 +62,9 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -108,24 +116,28 @@ class CheckoutController @Inject internal constructor(
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
+                clientParams = elementsSessionClientParams,
                 sessionId = sessionId,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
-                val defaultBillingAddress = configurationState.defaults.billingDetails?.address
-                if (defaultBillingAddress != null) {
-                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                        checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = defaultBillingAddress,
-                    ).getOrThrow()
-                } else {
-                    response
-                }
-            }.mapCatching { response ->
-                checkoutStateLoader.loadInitial(
+                val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
+                val billingAddress = initialLoad.state.paymentSelection
+                    ?.billingDetails?.address?.toCheckoutAddress()
+                    ?: configurationState.defaults.billingDetails?.address
+                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = billingAddress,
+                    ).getOrThrow()
+                    // The updated totals change payment method metadata, so rebuild it before publishing.
+                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
+                } else {
+                    checkoutStateLoader.publish(initialLoad)
+                }
             }
         }
     }
@@ -160,8 +172,11 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun updateShippingAddress(
         name: String?,
-        address: Address,
+        address: Address?,
     ): kotlin.Result<Unit> {
+        if (address == null) {
+            return clearShippingAddress()
+        }
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
@@ -178,6 +193,7 @@ class CheckoutController @Inject internal constructor(
     internal suspend fun commitShippingAddress(
         name: String?,
         address: Address.State,
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
     ): kotlin.Result<Unit> = withCheckoutState(
         additionalStateMutations = {
             copy(
@@ -188,7 +204,7 @@ class CheckoutController @Inject internal constructor(
             )
         },
     ) {
-        kotlin.Result.success(checkoutSessionResponse)
+        kotlin.Result.success(updatedCheckoutSessionResponse)
     }
 
     /**
@@ -208,6 +224,47 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    internal suspend fun selectSavedPaymentMethod(
+        selection: PaymentSelection.Saved,
+    ): kotlin.Result<Unit> {
+        return withCheckoutState(
+            additionalStateMutations = { commitSelection(selection) },
+        ) {
+            stateHolder.state = copy(
+                savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                    selection.paymentMethod.id,
+                ),
+            )
+            val address = selection.billingDetails?.address?.toCheckoutAddress()
+            if (address == null) {
+                if (
+                    checkoutSessionTaxRegionUpdater.requiresUpdate(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    )
+                ) {
+                    // Billing-tax filtering should prevent this state from reaching selection.
+                    errorReporter.report(
+                        errorEvent = ErrorReporter.UnexpectedErrorEvent
+                            .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
+                    )
+                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
+            }
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = address,
+            ).onFailure {
+                stateHolder.state = stateHolder.state?.copy(
+                    savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                        error = it.stripeErrorMessage(),
+                    ),
+                )
+            }
+        }
+    }
+
     /**
      * Runs an async function that calls your server to update the Checkout Session,
      * then automatically refreshes [session] with the latest session data.
@@ -224,6 +281,7 @@ class CheckoutController @Inject internal constructor(
         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 checkoutSessionRepository.init(
+                    clientParams = elementsSessionClientParams,
                     sessionId = sessionId,
                     adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                 )
@@ -245,6 +303,31 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
+            )
+        }
+    }
+
+    private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = {
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = null,
+                    shippingAddress = null,
+                ),
+            )
+        },
+    ) {
+        val previousAddress = collectedDetails.shippingAddress
+        if (previousAddress == null) {
+            kotlin.Result.success(checkoutSessionResponse)
+        } else {
+            // The tax region endpoint requires a country, so retain the previous country only.
+            // Follow-up tracked in MOBILESDK-4944: https://jira.corp.stripe.com/browse/MOBILESDK-4944
+            // Send null once CheckoutClient supports clearing tax_region on the server.
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                address = Address().country(previousAddress.country).build(),
             )
         }
     }
@@ -901,6 +984,10 @@ class CheckoutController @Inject internal constructor(
                  * The customer's full name.
                  */
                 val name: String?,
+                /**
+                 * The customer's phone number.
+                 */
+                val phone: String?,
             ) {
                 /**
                  * A billing address.

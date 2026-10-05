@@ -43,6 +43,25 @@ internal fun optionalText(
     )
 }
 
+internal fun optionalText(
+    key: String,
+    displayName: String,
+    isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
+    onValueChanged: CheckoutPlaygroundSettingUpdateScope.(String?) -> Unit,
+    validate: CheckoutPlaygroundSettingValues.(String?) -> String? = { null },
+): CheckoutPlaygroundSettingDefinition.Value<String?> {
+    return value(
+        key = key,
+        displayName = displayName,
+        defaultValue = null,
+        isApplicable = isApplicable,
+        onValueChanged = onValueChanged,
+        validate = validate,
+        encode = { it.orEmpty() },
+        decode = { serialized -> Result.success(serialized.trim().ifEmpty { null }) },
+    )
+}
+
 internal fun optionalInt(
     key: String,
     displayName: String,

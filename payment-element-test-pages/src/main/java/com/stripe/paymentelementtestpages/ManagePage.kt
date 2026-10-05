@@ -13,13 +13,14 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.testing.waitUntilWithIdle
 
 @Suppress("TooManyFunctions")
 class ManagePage(
     private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -34,10 +35,10 @@ class ManagePage(
     }
 
     fun waitUntilNotVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }
@@ -64,13 +65,13 @@ class ManagePage(
     }
 
     fun waitUntilGone(paymentMethodId: String) {
-        composeTestRule.waitUntil(timeoutMillis = 2_000L) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(
                     hasTestTag("${TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON}_$paymentMethodId"),
                     useUnmergedTree = true
                 )
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }

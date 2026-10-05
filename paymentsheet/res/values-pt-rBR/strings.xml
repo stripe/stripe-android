@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Conta bancária ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Conta bancária ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Confirme o pagamento por Bizum no seu aplicativo bancário para dispositivos móveis em até %s para concluir a compra.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirme o pagamento no aplicativo do seu banco em até %s para concluir a compra.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -66,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Confirme seus dados</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Últimos 4 dígitos do SSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Termos e Condições</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Termos de Serviço</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Entrar ou registrar-se</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -273,6 +279,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">A bandeira do cartão não foi atualizada. Tente novamente.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Confirme o pagamento no seu banco ou aplicativo de pagamento em até %s para concluir a compra.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Conclua o pagamento usando Pix para finalizar a compra.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Definir como forma de pagamento padrão</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

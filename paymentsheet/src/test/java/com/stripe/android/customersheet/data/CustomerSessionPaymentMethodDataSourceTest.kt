@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -104,6 +105,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
         assertThat(detachRequest.customerId).isEqualTo("cus_1")
         assertThat(detachRequest.ephemeralKeySecret).isEqualTo("ek_123")
         assertThat(detachRequest.customerSessionClientSecret).isEqualTo("cuss_123")
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<PaymentMethod>>()
 
@@ -196,6 +198,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
         assertThat(detachRequest.customerId).isEqualTo("cus_1")
         assertThat(detachRequest.ephemeralKeySecret).isEqualTo("ek_123")
         assertThat(detachRequest.params).isEqualTo(updateParams)
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<PaymentMethod>>()
 
@@ -266,6 +269,7 @@ class CustomerSessionPaymentMethodDataSourceTest {
             elementsSessionManager = elementsSessionManager,
             customerRepository = customerRepository,
             errorReporter = errorReporter,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = coroutineContext,
         )
     }

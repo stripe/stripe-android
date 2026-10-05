@@ -12,7 +12,9 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
 import dagger.Subcomponent
 import javax.inject.Named
+import javax.inject.Scope
 
+@CheckoutPresenterScope
 @Subcomponent(
     modules = [
         ExpressCheckoutElementModule::class,
@@ -33,3 +35,7 @@ internal interface CheckoutPresenterSubcomponent {
         ): CheckoutPresenterSubcomponent
     }
 }
+
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+internal annotation class CheckoutPresenterScope

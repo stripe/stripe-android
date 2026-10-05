@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
 import androidx.compose.ui.graphics.Color
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class CheckoutPlaygroundSettingsTest {
@@ -60,6 +62,83 @@ class CheckoutPlaygroundSettingsTest {
         val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
 
         assertThat(restored[definition]).isEqualTo("cus_custom")
+    }
+
+    @Test
+    fun `custom credentials survive JSON round trip`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customStripeApi, "example-api.tunnel.stripe.me")
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[session.customStripeApi]).isEqualTo("example-api.tunnel.stripe.me")
+        assertThat(restored[session.customSecretKey]).isEqualTo("sk_test_custom")
+        assertThat(restored[session.customPublishableKey]).isEqualTo("pk_test_custom")
+    }
+
+    @Test
+    fun `custom merchant requires custom credentials`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+
+        settings.update(session.merchant, Merchant.Custom)
+
+        assertThat(settings.validationErrors()).containsExactly(
+            session.customSecretKey,
+            "Required for custom merchant",
+            session.customPublishableKey,
+            "Required for custom merchant",
+        )
+    }
+
+    @Test
+    fun `standard merchant does not require custom credentials`() = runScenario {
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
+    @Test
+    fun `custom merchant with custom credentials is valid`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
+    @Test
+    fun `leaving custom merchant clears custom credentials`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.Custom)
+        settings.update(session.customSecretKey, "sk_test_custom")
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        settings.update(session.merchant, Merchant.US)
+
+        assertThat(settings[session.customSecretKey]).isNull()
+        assertThat(settings[session.customPublishableKey]).isNull()
+    }
+
+    @Test
+    fun `changing custom secret key resets returning customer`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customer, CheckoutCustomer.Returning)
+
+        settings.update(session.customSecretKey, "sk_test_custom")
+
+        assertThat(settings[session.customer]).isEqualTo(CheckoutCustomer.New)
+    }
+
+    @Test
+    fun `changing custom publishable key resets returning customer`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customer, CheckoutCustomer.Returning)
+
+        settings.update(session.customPublishableKey, "pk_test_custom")
+
+        assertThat(settings[session.customer]).isEqualTo(CheckoutCustomer.New)
     }
 
     @Test
@@ -248,6 +327,125 @@ class CheckoutPlaygroundSettingsTest {
         assertThat(settings[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.US)
         assertThat(settings[CheckoutPlaygroundDefinitions.session.adaptivePricingCountry])
             .isEqualTo(AdaptivePricingCountry.None)
+    }
+
+    @Test
+    fun `selecting France adaptive pricing updates customer email`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.automaticTax, true)
+
+        settings.update(session.adaptivePricingCountry, AdaptivePricingCountry.France)
+
+        assertThat(settings[session.adaptivePricingCountry]).isEqualTo(AdaptivePricingCountry.France)
+        assertThat(settings[session.customerEmail]).isEqualTo("test+location_FR@example.com")
+        assertThat(settings[session.automaticTax]).isTrue()
+    }
+
+    @Test
+    fun `selecting serialized Japan adaptive pricing updates customer email`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+
+        settings.updateSerialized(session.adaptivePricingCountry, "JP")
+
+        assertThat(settings[session.adaptivePricingCountry]).isEqualTo(AdaptivePricingCountry.Japan)
+        assertThat(settings[session.customerEmail]).isEqualTo("test+location_JP@example.com")
+    }
+
+    @Test
+    fun `enabling automatic tax selects US tax merchant`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.adaptivePricingCountry, AdaptivePricingCountry.France)
+        settings.update(session.merchant, Merchant.JP)
+
+        settings.update(session.automaticTax, true)
+
+        assertThat(settings[session.automaticTax]).isTrue()
+        assertThat(settings[session.merchant]).isEqualTo(Merchant.US_TAX)
+        assertThat(settings[session.adaptivePricingCountry]).isEqualTo(AdaptivePricingCountry.France)
+    }
+
+    @Test
+    fun `turning off adaptive pricing preserves customer email`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customerEmail, "custom@example.com")
+
+        settings.update(session.adaptivePricingCountry, AdaptivePricingCountry.None)
+
+        assertThat(settings[session.customerEmail]).isEqualTo("custom@example.com")
+    }
+
+    @Test
+    fun `disabling automatic tax preserves merchant`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.merchant, Merchant.JP)
+
+        settings.update(session.automaticTax, false)
+
+        assertThat(settings[session.merchant]).isEqualTo(Merchant.JP)
+    }
+
+    @Test
+    fun `dependent update persists final state once`() = runTest {
+        val persisted = Turbine<Map<String, String>>()
+        val session = CheckoutPlaygroundDefinitions.session
+        val settings = CheckoutPlaygroundSettings.createInMemory(persist = persisted::add)
+
+        settings.update(session.adaptivePricingCountry, AdaptivePricingCountry.France)
+
+        val persistedValues = persisted.awaitItem()
+        assertThat(persistedValues[session.adaptivePricingCountry.key]).isEqualTo("FR")
+        assertThat(persistedValues[session.customerEmail.key]).isEqualTo("test+location_FR@example.com")
+        persisted.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invalid serialized update does not update dependent setting`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        settings.update(session.customerEmail, "custom@example.com")
+
+        settings.updateSerialized(session.adaptivePricingCountry, "invalid")
+
+        assertThat(settings.serializedValue(session.adaptivePricingCountry)).isEqualTo("invalid")
+        assertThat(settings[session.customerEmail]).isEqualTo("custom@example.com")
+        assertThat(settings.validationErrors()).containsKey(session.adaptivePricingCountry)
+    }
+
+    @Test
+    fun `restored values do not apply value changed callbacks`() {
+        val session = CheckoutPlaygroundDefinitions.session
+        val settings = CheckoutPlaygroundSettings.createInMemory(
+            json = """{"session.automatic_tax":"true","session.merchant":"JP"}""",
+        )
+
+        assertThat(settings[session.automaticTax]).isTrue()
+        assertThat(settings[session.merchant]).isEqualTo(Merchant.JP)
+    }
+
+    @Test
+    fun `imported values do not apply value changed callbacks`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+
+        val result = settings.importJson(
+            """{"session.adaptive_pricing_country":"JP","session.customer_email":"custom@example.com"}"""
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(settings[session.adaptivePricingCountry]).isEqualTo(AdaptivePricingCountry.Japan)
+        assertThat(settings[session.customerEmail]).isEqualTo("custom@example.com")
+    }
+
+    @Test
+    fun `preset values do not apply value changed callbacks`() = runScenario {
+        val session = CheckoutPlaygroundDefinitions.session
+        val preset = checkoutPlaygroundPreset {
+            set(session.automaticTax, true)
+            set(session.merchant, Merchant.JP)
+        }
+
+        settings.applyPreset(preset)
+
+        assertThat(settings[session.automaticTax]).isTrue()
+        assertThat(settings[session.merchant]).isEqualTo(Merchant.JP)
     }
 
     private fun runScenario(

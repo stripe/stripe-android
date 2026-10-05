@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -31,6 +33,11 @@ class DefaultSavedPaymentMethodRepositoryTest {
     @get:Rule
     val networkRule = NetworkRule()
 
+    private val clientParams = ElementsSessionClientParams(
+        mobileAppId = "com.stripe.android.paymentsheet.test",
+        mobileSessionIdProvider = { "test-session-id" },
+    )
+
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(
         customerMetadata = CHECKOUT_SESSION_METADATA,
@@ -39,6 +46,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
             method("POST"),
             path("/v1/payment_pages/cs_123"),
             bodyPart("payment_method_to_detach", "pm_123"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("elements_session_client[locale]", clientParams.locale),
+            bodyPart("elements_session_client[mobile_session_id]", "test-session-id"),
+            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -66,6 +77,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
         assertThat(detachRequest.customerSessionClientSecret).isEqualTo("css_456")
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -82,6 +94,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
         assertThat(detachRequest.customerSessionClientSecret).isNull()
+        assertThat(detachRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -98,6 +111,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val updateRequest = customerRepository.updateRequests.awaitItem()
         assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -190,6 +204,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val updateRequest = customerRepository.updateRequests.awaitItem()
         assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(updateRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -205,6 +220,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -233,6 +249,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
+        assertThat(setDefaultRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -249,6 +266,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -265,6 +285,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_456")
+
+        val retrieveRequest = customerRepository.retrievePaymentMethodRequests.awaitItem()
+        assertThat(retrieveRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -319,22 +342,24 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
-            clientParams = ElementsSessionClientParams(
-                mobileAppId = "com.stripe.android.test",
-                mobileSessionIdProvider = { "test_session" },
-            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { "acct_123" },
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
+            elementsSessionClientParams = clientParams,
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 
         Scenario(

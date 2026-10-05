@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMe
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -420,7 +421,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -457,7 +458,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -495,7 +496,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -534,7 +535,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = "Merchant Inc.",
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -587,7 +588,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = GooglePayDisplayItemsFactory.create(
                 checkoutSessionResponse,
                 ApplicationProvider.getApplicationContext(),
@@ -628,7 +629,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = shippingAddressParameters,
@@ -705,7 +706,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,
@@ -738,7 +739,7 @@ class GooglePayConfirmationDefinitionTest {
             transactionId = "pi_12345",
             label = null,
             isElements = true,
-            publishableKey = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
             displayItems = emptyList(),
             billingEmailOverride = null,
             shippingAddressParameters = null,

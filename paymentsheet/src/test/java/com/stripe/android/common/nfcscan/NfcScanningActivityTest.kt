@@ -6,8 +6,9 @@ import android.os.Build
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.Settings
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
@@ -15,6 +16,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.ui.NFC_CLOSE_BUTTON_TEST_TAG
+import com.stripe.android.common.nfcscan.ui.NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
@@ -56,7 +59,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `close button returns canceled result`() = test {
-        composeRule.onNodeWithContentDescription("Cancel").performClick()
+        composeRule.onNodeWithTag(NFC_CLOSE_BUTTON_TEST_TAG).performClick()
 
         waitForIdle()
 
@@ -189,7 +192,7 @@ internal class NfcScanningActivityTest {
         autoAdvance = false,
     ) {
         dispatchCardRead(NfcScanningActivityTestFixtures.declinedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card declined. Try another.")
+        assertErrorIsDisplayed(errorText = "Card declined. Use another card.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -202,7 +205,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `unsupported card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.unsupportedCardResponses())
-        assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
+        assertErrorIsDisplayed(errorText = "Card not supported. Use another card.")
         assertErrorDisappears()
 
         isoDep.assertUntilPpseSelectionCommand()
@@ -217,7 +220,7 @@ internal class NfcScanningActivityTest {
             paymentMethodMetadata = NfcScanningActivityTestFixtures.paymentMethodMetadataWithVisaDisallowed(),
         ) {
             dispatchCardRead(NfcScanningActivityTestFixtures.successResponses())
-            assertErrorIsDisplayed(errorText = "Card not supported. Try another.")
+            assertErrorIsDisplayed(errorText = "Card not supported. Use another card.")
             assertErrorDisappears()
 
             isoDep.assertSuccess()
@@ -229,7 +232,7 @@ internal class NfcScanningActivityTest {
     @Test
     fun `expired card shows error and keeps activity open`() = test(autoAdvance = false) {
         dispatchCardRead(NfcScanningActivityTestFixtures.expiredCardResponses())
-        assertErrorIsDisplayed(errorText = "Card expired. Try another.")
+        assertErrorIsDisplayed(errorText = "Card expired. Use another card.")
         assertErrorDisappears()
 
         isoDep.assertSuccess()
@@ -268,6 +271,37 @@ internal class NfcScanningActivityTest {
             .isEqualTo(R.anim.stripe_nfc_screen_fade_out)
     }
 
+    @Test
+    fun `insecure device opens developer options and starts scanning after settings are updated`() {
+        developerOptions(enabled = true)
+
+        try {
+            test {
+                composeRule.onNodeWithTag(NFC_OPEN_DEVELOPER_OPTIONS_TEST_TAG)
+                    .assertExists()
+                    .performClick()
+
+                waitForIdle()
+
+                assertThat(nfcAdapter?.isInReaderMode).isFalse()
+                assertThat(shadowOf(activity).nextStartedActivity.action)
+                    .isEqualTo(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+
+                developerOptions(enabled = false)
+
+                moveToState(Lifecycle.State.STARTED)
+                moveToState(Lifecycle.State.RESUMED)
+
+                waitForIdle()
+
+                assertThat(nfcAdapter?.isInReaderMode).isTrue()
+                composeRule.onNodeWithTag(NFC_CLOSE_BUTTON_TEST_TAG).assertExists()
+            }
+        } finally {
+            developerOptions(enabled = false)
+        }
+    }
+
     private fun test(
         autoAdvance: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -279,6 +313,20 @@ internal class NfcScanningActivityTest {
             autoAdvance = autoAdvance,
             paymentMethodMetadata = paymentMethodMetadata,
             block = block,
+        )
+    }
+
+    private fun developerOptions(enabled: Boolean) {
+        val value = if (enabled) {
+            "1"
+        } else {
+            "0"
+        }
+
+        Settings.Global.putString(
+            context.contentResolver,
+            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+            value
         )
     }
 

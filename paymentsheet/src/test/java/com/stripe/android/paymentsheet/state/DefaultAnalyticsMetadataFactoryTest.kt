@@ -962,6 +962,8 @@ class DefaultAnalyticsMetadataFactoryTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+                shouldDisplay = true,
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +23,7 @@ import android.graphics.Color as AndroidColor
 
 internal class NfcScanningActivity : AppCompatActivity() {
     private lateinit var args: NfcScanningContract.Args
+    private var isOpeningDeveloperOptions = false
 
     private val viewModel by viewModels<NfcScanningViewModel> {
         NfcScanningViewModel.factory { args }
@@ -43,6 +45,7 @@ internal class NfcScanningActivity : AppCompatActivity() {
             viewModel.event.collectLatest { event ->
                 when (event) {
                     is NfcScanningEvent.CloseWithResult -> finishWithResult(event.result)
+                    is NfcScanningEvent.OpenDeveloperOptions -> openDeveloperOptions()
                     is NfcScanningEvent.TriggerHapticFeedback -> {
                         NfcScanningHapticFeedback.trigger(this@NfcScanningActivity, event.type)
                     }
@@ -82,13 +85,19 @@ internal class NfcScanningActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.register(this)
+        isOpeningDeveloperOptions = false
     }
 
     override fun onStop() {
         super.onStop()
-        if (!isFinishing && !isChangingConfigurations) {
+        if (!isFinishing && !isChangingConfigurations && !isOpeningDeveloperOptions) {
             finishWithResult(NfcScanningContract.Result.Canceled)
         }
+    }
+
+    internal fun openDeveloperOptions() {
+        isOpeningDeveloperOptions = true
+        startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
     }
 
     private fun finishWithResult(result: NfcScanningContract.Result) {

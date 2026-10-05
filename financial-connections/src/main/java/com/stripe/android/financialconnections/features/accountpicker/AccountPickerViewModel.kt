@@ -6,7 +6,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
@@ -305,7 +304,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
         }
-        FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
+        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
                 submitAccounts(

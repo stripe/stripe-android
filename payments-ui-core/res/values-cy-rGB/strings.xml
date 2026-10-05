@@ -36,12 +36,16 @@
   <string name="stripe_continue_button_label">Parhau</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Banc EPS</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Drwy gadarnhau eich taliad gyda GCash, rydych chi’n caniatáu i %s godi tâl ar eich cyfrif GCash ar gyfer taliadau yn y dyfodol yn unol â’u telerau.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Mae\'r IBAN a roddwyd yn anghyflawn.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">Mae\'r IBAN a roddwyd yn annilys, does dim modd delio â\'r cod gwlad \"%s\".</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Dylai eich IBAN ddechrau gyda chod dwy lythyren y wlad.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Mae’r rhif ID a roddwyd yn anghyflawn.</string>
   <string name="stripe_invalid_email_address">Cyfeiriad e-bost annilys: %s</string>
   <!-- Error message when UPI ID is invalid -->
   <string name="stripe_invalid_upi_id">ID UPI annilys</string>
@@ -59,6 +63,10 @@
   <string name="stripe_name_on_card">Enw ar y cerdyn</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Dewiswch sut rydych chi eisiau talu:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Drwy gadarnhau eich taliad, rydych chi’n cytuno i’ch trafodyn gael ei drin gan Global Stack Services Limited fel yr asiant swyddogol, ac yn unol â’u <a href=\"%s\">telerau defnydd</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Drwy gadarnhau eich taliad, rydych chi’n cytuno i’ch trafodyn gael ei drin gan Global Stack Services Limited fel yr asiant swyddogol, ac yn unol â’u <a href=\"%s\">telerau</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banc Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -81,8 +89,12 @@
   <string name="stripe_paymentsheet_payment_method_card">Cerdyn</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Debyd SEPA</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Ar ôl cyflwyno, byddwch chi’n cael eich ailgyfeirio i gwblhau’r camau nesaf yn ddiogel.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Drwy gadarnhau eich taliad gyda PayPal, rydych chi\'n caniatáu i %s godi tâl ar eich cyfrif PayPal ar gyfer taliadau yn y dyfodol yn unol â\'u telerau.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Mae hwn yn bryniant rhyngwladol ac nid yw\'n cynnwys ffi IOF o 3.5%. Drwy fwrw ymlaen, rydych chi’n cydnabod ac yn derbyn <terms>telerau ac amodau Ebanx</terms>.]]></string>
   <!-- Satispay mandate text -->
   <string name="stripe_satispay_mandate">Drwy barhau, rydych chi\'n awdurdodi %1$s i ddebydu eich Balans Satispay yn awtomatig ar sail gylchol yn unol â\'ch cynllun prynu neu danysgrifio.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
@@ -93,12 +105,18 @@
   <string name="stripe_scan_card">Sganio cerdyn</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Clirio’r cerdyn a sganiwyd</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Yn dod i ben ar %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Drwy roi eich manylion talu a chadarnhau\'r taliad hwn, rydych chi\'n awdurdodi (A) %s a Stripe, ein darparwr gwasanaethau talu, i anfon cyfarwyddiadau i\'ch banc i ddebydu eich cyfrif a (B) eich banc i ddebydu eich cyfrif yn unol â\'r cyfarwyddiadau hynny. Fel rhan o\'ch hawliau, mae gennych chi hawl i gael ad-daliad gan eich banc yn unol â thelerau ac amodau eich cytundeb â\'ch banc. Rhaid hawlio ad-daliad cyn pen 8 wythnos i\'r dyddiad y cafodd eich cyfrif ei ddebydu. Caiff eich hawliau eu hesbonio mewn datganiad y gallwch ei gael gan eich banc. Rydych chi\'n cytuno i gael hysbysiadau ynghylch debydau yn y dyfodol hyd at 2 ddiwrnod cyn iddynt ddigwydd.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Gosod fel dull talu diofyn</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Gosod</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Drwy gadarnhau eich taliad gyda Touch \'n Go, rydych chi’n caniatáu i %s godi tâl ar eich cyfrif Touch \'n Go ar gyfer taliadau yn y dyfodol yn unol â’u telerau.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Drwy gadarnhau eich taliad gyda TrueMoney, rydych chi’n caniatáu i %s godi tâl ar eich cyfrif TrueMoney ar gyfer taliadau yn y dyfodol yn unol â’u telerau.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Drwy barhau, rydych chi’n awdurdodi %1$s i ddebydu eich Balans Twint yn awtomatig ar sail gylchol yn unol â’ch cynllun prynu neu danysgrifio.</string>
   <!-- Label for UPI ID number field on form -->

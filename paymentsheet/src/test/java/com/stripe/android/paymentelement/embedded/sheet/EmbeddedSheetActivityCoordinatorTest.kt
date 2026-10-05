@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -288,6 +289,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
                 selection = null,
                 previousNewSelections = Bundle(),
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
                 promotions = emptyList(),
                 launchMode = launchMode,
                 presentationState = presentationState,

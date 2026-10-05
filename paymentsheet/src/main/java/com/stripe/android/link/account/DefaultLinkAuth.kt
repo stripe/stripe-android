@@ -66,7 +66,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -96,6 +97,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction.consumerAction,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -107,7 +109,8 @@ internal class DefaultLinkAuth @Inject constructor(
         return linkRepository.refreshConsumer(
             appId = applicationId,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            supportedVerificationTypes = supportedVerificationTypes
+            supportedVerificationTypes = supportedVerificationTypes,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -132,6 +135,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 customerId = customerId,
                 supportedVerificationTypes = supportedVerificationTypes,
                 linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             val operation = if (email != null) "lookup" else "lookupByAuthIntent"
@@ -161,6 +165,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 amount = config.stripeIntent.amount,
                 currency = config.stripeIntent.currency,
                 incentiveEligibilitySession = null,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             reportAttestationError(error, operation = "signup")

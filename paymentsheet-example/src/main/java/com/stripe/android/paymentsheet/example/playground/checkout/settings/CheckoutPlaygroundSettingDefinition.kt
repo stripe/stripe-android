@@ -17,6 +17,8 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
         val options: List<Option<T>>,
         val input: Input,
         val isApplicable: (CheckoutPlaygroundSettingValues) -> Boolean,
+        internal val onValueChanged: CheckoutPlaygroundSettingUpdateScope.(T) -> Unit,
+        private val validate: CheckoutPlaygroundSettingValues.(T) -> String?,
         private val applyFeatureFlags: (T) -> Unit,
         private val encode: (T) -> String,
         private val decode: (String) -> Result<T>,
@@ -29,6 +31,15 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
 
         fun validationError(value: String): String? {
             return decode(value).exceptionOrNull()?.message
+        }
+
+        fun validationError(
+            value: String,
+            settings: CheckoutPlaygroundSettingValues,
+        ): String? {
+            val decoded = decode(value)
+            return decoded.exceptionOrNull()?.message
+                ?: if (isApplicable(settings)) validate(settings, decoded.getOrThrow()) else null
         }
 
         fun applyFeatureFlags(settings: CheckoutPlaygroundSettingValues) {
@@ -52,6 +63,13 @@ internal sealed interface CheckoutPlaygroundSettingDefinition {
 
 internal interface CheckoutPlaygroundSettingValues {
     operator fun <T> get(definition: CheckoutPlaygroundSettingDefinition.Value<T>): T
+}
+
+internal interface CheckoutPlaygroundSettingUpdateScope : CheckoutPlaygroundSettingValues {
+    fun <T> update(
+        definition: CheckoutPlaygroundSettingDefinition.Value<T>,
+        value: T,
+    )
 }
 
 internal fun CheckoutPlaygroundSettingDefinition.Configuration.values():

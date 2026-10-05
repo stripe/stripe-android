@@ -13,8 +13,6 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
@@ -59,11 +57,6 @@ internal interface PaymentElementModule {
     fun bindsLinkHelper(helper: DefaultEmbeddedLinkHelper): EmbeddedLinkHelper
 
     @Binds
-    fun bindsEmbeddedRowSelectionImmediateActionHandler(
-        handler: DefaultEmbeddedRowSelectionImmediateActionHandler,
-    ): EmbeddedRowSelectionImmediateActionHandler
-
-    @Binds
     fun bindsSheetLauncher(launcher: CheckoutSheetLauncher): EmbeddedSheetLauncher
 
     @OptIn(CheckoutSessionPreview::class)
@@ -92,6 +85,7 @@ internal interface PaymentElementModule {
 
         @Provides
         @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER)
+        @CheckoutPresenterScope
         fun provideCheckoutLinkPaymentLauncher(
             linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
             linkActivityContract: LinkActivityContract,

@@ -5,7 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -33,6 +35,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         val call = customerRepository.retrieveCalls.awaitItem()
         assertThat(call.customerId).isEqualTo("cus_123")
         assertThat(call.ephemeralKeySecret).isEqualTo(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY)
+        assertThat(call.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -100,6 +103,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         Scenario(
@@ -120,15 +124,20 @@ internal class DefaultRetrieveCustomerEmailTest {
      * Returns null for all calls (Customer has an internal constructor in payments-core).
      */
     private class CallTrackingCustomerRepository : FakeCustomerRepository() {
-        data class RetrieveCall(val customerId: String, val ephemeralKeySecret: String)
+        data class RetrieveCall(
+            val customerId: String,
+            val ephemeralKeySecret: String,
+            val apiConfiguration: ApiConfiguration.State,
+        )
 
         val retrieveCalls = Turbine<RetrieveCall>()
 
         override suspend fun retrieveCustomer(
             customerId: String,
             ephemeralKeySecret: String,
+            apiConfiguration: ApiConfiguration.State,
         ) = null.also {
-            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
+            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret, apiConfiguration))
         }
 
         override fun ensureAllEventsConsumed() {

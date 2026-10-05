@@ -34,7 +34,6 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -72,8 +71,6 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.ui.SepaMandateContract
-import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
@@ -112,7 +109,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
-    private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -141,11 +137,6 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onPaymentOptionResult
         )
 
-        sepaMandateActivityLauncher = activityResultCaller.registerForActivityResult(
-            SepaMandateContract(),
-            ::onSepaMandateResult,
-        )
-
         flowControllerLinkLauncher.register(
             key = FLOW_CONTROLLER_LINK_LAUNCHER,
             activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
@@ -162,7 +153,6 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentOptionActivityLauncher.unregister()
-                    sepaMandateActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
@@ -509,42 +499,10 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        when (val paymentSelection = viewModel.paymentSelection) {
-            is Link,
-            is PaymentSelection.GooglePay,
-            is PaymentSelection.ExternalPaymentMethod,
-            is PaymentSelection.CustomPaymentMethod,
-            is PaymentSelection.New,
-            null -> confirmPaymentSelection(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-            )
-            is PaymentSelection.Saved -> confirmSavedPaymentMethod(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-            )
-        }
-    }
-
-    private fun confirmSavedPaymentMethod(
-        paymentSelection: PaymentSelection.Saved,
-        state: PaymentSheetState.Full,
-    ) {
-        if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
-            viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
-        ) {
-            // We're legally required to show the customer the SEPA mandate before every payment/setup.
-            // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
-            // we present the mandate directly.
-            sepaMandateActivityLauncher.launch(
-                SepaMandateContract.Args(
-                    merchantName = state.config.merchantDisplayName,
-                    appearance = state.config.appearance,
-                )
-            )
-        } else {
-            confirmPaymentSelection(paymentSelection, state)
-        }
+        confirmPaymentSelection(
+            paymentSelection = viewModel.paymentSelection,
+            state = state.paymentSheetState,
+        )
     }
 
     @VisibleForTesting
@@ -736,18 +694,6 @@ internal class DefaultFlowController @Inject internal constructor(
             selection.isLink &&
             // Only log out non-verified merchants.
             verifiedMerchant.not()
-    }
-
-    internal fun onSepaMandateResult(sepaMandateResult: SepaMandateResult) {
-        when (sepaMandateResult) {
-            SepaMandateResult.Acknowledged -> {
-                viewModel.paymentSelection?.hasAcknowledgedSepaMandate = true
-                confirm()
-            }
-            SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled())
-            }
-        }
     }
 
     private fun logPaymentResult(

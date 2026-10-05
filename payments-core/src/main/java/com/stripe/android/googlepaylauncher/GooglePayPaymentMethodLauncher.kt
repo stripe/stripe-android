@@ -20,7 +20,9 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -70,10 +72,16 @@ class GooglePayPaymentMethodLauncher internal constructor(
         lifecycleOwner = lifecycleOwner,
         activityResultLauncher = activityResultLauncher,
         onPaymentDataChangedCallback = null,
-        context = context,
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor,
     )
+
+    private val apiConfiguration = PaymentConfiguration.getInstance(context).let {
+        ApiConfiguration.State(
+            publishableKey = it.publishableKey,
+            stripeAccountId = it.stripeAccountId
+        )
+    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -179,7 +187,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
             override fun invoke(
                 environment: GooglePayEnvironment,
                 cardFundingFilter: CardFundingFilter,
-                cardBrandFilter: CardBrandFilter
+                cardBrandFilter: CardBrandFilter,
+                googlePayConfig: GooglePayConfig
             ): GooglePayRepository {
                 return DefaultGooglePayRepository(
                     context = context,
@@ -187,6 +196,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
                     allowCreditCards = config.allowCreditCards,
+                    googlePayConfig = googlePayConfig,
                     errorReporter = ErrorReporter.createFallbackInstance(
                         context = context,
                         productUsage = setOf(PRODUCT_USAGE_TOKEN),
@@ -206,7 +216,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
                 val repository = googlePayRepositoryFactory(
                     environment = config.environment,
                     cardFundingFilter = cardFundingFilter,
-                    cardBrandFilter = cardBrandFilter
+                    cardBrandFilter = cardBrandFilter,
+                    googlePayConfig = GooglePayConfig(context),
                 )
                 readyCallback.onReady(
                     repository.isReady().first().also {
@@ -266,6 +277,11 @@ class GooglePayPaymentMethodLauncher internal constructor(
             "present() may only be called when Google Pay is available on this device."
         }
 
+        // Use explicitly passed publishable key if provided, else fallback to global PaymentConfiguration
+        val apiConfig = publishableKey?.let {
+            apiConfiguration.copy(publishableKey = it)
+        } ?: apiConfiguration
+
         internalLauncher.present(
             currencyCode = currencyCode,
             amount = amount,
@@ -276,7 +292,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
             transactionId = transactionId,
             label = label,
             isElements = isElements,
-            publishableKey = publishableKey,
+            apiConfiguration = apiConfig,
             displayItems = displayItems,
             billingEmailOverride = billingEmailOverride,
             shippingAddressParameters = null,

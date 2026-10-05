@@ -207,7 +207,7 @@ internal class OnrampE2EPage(
     }
 
     fun confirmKycVerification() {
-        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 1.seconds.inWholeMilliseconds)) {
+        if (!waitForOptionalNode(hasTestTag(VERIFY_KYC_BUTTON_TAG), timeoutMs = 5.seconds.inWholeMilliseconds)) {
             clickTag(KYC_SECTION_TAG)
         }
         clickTag(VERIFY_KYC_BUTTON_TAG)
@@ -221,7 +221,7 @@ internal class OnrampE2EPage(
             IDENTITY_FAILED_BUTTON_TAG,
             timeoutMs = 30.seconds.inWholeMilliseconds,
         )
-        waitForSnackbar("Identity Verification failed: Failure from test mode")
+        waitForSnackbar("Identity Verification failed: Something went wrong. Please try again later.")
         waitForTag(LOGIN_EMAIL_TAG)
     }
 
@@ -335,7 +335,7 @@ internal class OnrampE2EPage(
         replaceText(CARD_CVC_LABEL, TEST_NEW_CARD_CVC)
 
         val postalCodeMatcher = hasText(CARD_POSTAL_CODE_LABEL).and(hasSetTextAction())
-        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 3.seconds.inWholeMilliseconds)) {
+        if (waitForOptionalNode(postalCodeMatcher, timeoutMs = 5.seconds.inWholeMilliseconds)) {
             composeRule.onNode(postalCodeMatcher)
                 .performScrollTo()
                 .performTextReplacement(TEST_CARD_POSTAL_CODE)
@@ -675,7 +675,7 @@ private const val IDENTITY_SUCCESS_OPTION_TAG = "success"
 private const val IDENTITY_SUBMIT_BUTTON_TAG = "Submit"
 private const val IDENTITY_CONFIRM_BUTTON_TAG = "ConfirmButton"
 private const val IDENTITY_FAILED_BUTTON_TAG = "Failed"
-private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "UserAttestationCancelButtonTag"
+private const val USER_ATTESTATION_CANCEL_BUTTON_TAG = "HTMLConfirmationCancelButtonTag"
 private const val USER_ATTESTATION_ACCEPT_TEXT = "Accept"
 private const val OAUTH_ALLOW_TEXT = "Allow"
 private const val TEST_MALTA_NATIONAL_ID = "1234567M"

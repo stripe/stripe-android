@@ -189,8 +189,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             configuration = TestFactory.LINK_CONFIGURATION,
                             paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
-                            publishableKey = PUBLISHABLE_KEY,
-                            stripeAccountId = STRIPE_ACCOUNT,
+                            apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
@@ -244,6 +243,5 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             "com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
 
         const val PUBLISHABLE_KEY = "pk_123"
-        const val STRIPE_ACCOUNT = "acct_123"
     }
 }

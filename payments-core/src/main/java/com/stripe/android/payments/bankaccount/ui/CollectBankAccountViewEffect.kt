@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.ui
 
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 
 /**
@@ -19,6 +20,7 @@ internal sealed class CollectBankAccountViewEffect {
         val financialConnectionsSessionSecret: String,
         val stripeAccountId: String?,
         val elementsSessionContext: ElementsSessionContext?,
+        val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) : CollectBankAccountViewEffect()
 
     /**

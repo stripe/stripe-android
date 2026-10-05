@@ -1222,7 +1222,7 @@ internal class PlaygroundTestDriver(
             try {
                 composeTestRule
                     .onAllNodesWithText("Approve payment")
-                    .fetchSemanticsNodes()
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isEmpty()
             } catch (_: IllegalStateException) {
                 // PollingActivity was closed
@@ -1470,13 +1470,13 @@ internal class PlaygroundTestDriver(
                         simulateScanText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         simulateScanText.click()
 
-                        val authorizeTestPaymentText = UiAutomatorText(
-                            "AUTHORIZE TEST PAYMENT",
+                        val authorizeTestIntentText = UiAutomatorText(
+                            testAuthorizationButtonText(testParameters.isSetupMode),
                             labelMatchesExactly = true,
                             device = device
                         )
-                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-                        authorizeTestPaymentText.click()
+                        authorizeTestIntentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        authorizeTestIntentText.clickVisible()
 
                         waitForPollingToFinish()
                     }

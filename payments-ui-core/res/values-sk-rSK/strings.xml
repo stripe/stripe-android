@@ -46,12 +46,16 @@
   <string name="stripe_eps_bank">EPS banka</string>
   <!-- Label for the field containing the dropdown of FPX Banks -->
   <string name="stripe_fpx_bank">FPX Bank</string>
+  <!-- GCash mandate. %s is the merchant name. -->
+  <string name="stripe_gcash_mandate">Potvrdením platby prostredníctvom služby GCash umožňujete spoločnosti %s spoplatniť váš účet GCash za budúce platby v súlade s jej podmienkami.</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">Zadaný IBAN je neúplný.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="stripe_iban_invalid_country">Zadaný IBAN je neplatný, „%s“ nie je podporovaný kód krajiny.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="stripe_iban_invalid_start">Váš IBAN by mal začínať dvojpísmenovým kódom krajiny.</string>
+  <!-- Error message shown when a CPF or CNPJ is incomplete -->
+  <string name="stripe_id_number_incomplete">Zadané identifikačné číslo je neúplné.</string>
   <!-- Error message when BLIK code is invalid -->
   <string name="stripe_incomplete_blik_code">Váš kód BLIK je neúplný.</string>
   <!-- Error message when BLIK code is invalid -->
@@ -73,6 +77,10 @@
   <string name="stripe_name_on_card">Meno na karte</string>
   <!-- Label for the Naver Pay funding source selector -->
   <string name="stripe_naver_pay_funding_label">Vyberte, ako chcete platiť:</string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_payment_mor_notice"><![CDATA[Potvrdením platby súhlasíte s tým, že vašu transakciu spracuje spoločnosť Global Stack Services Limited ako registrovaný obchodník v súlade s jej <a href=\"%s\">podmienkami používania</a>.]]></string>
+  <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
+  <string name="stripe_ng_wallet_mor_notice"><![CDATA[Potvrdením platby súhlasíte s tým, že vašu transakciu spracuje spoločnosť Global Stack Services Limited ako registrovaný obchodník v súlade s jej <a href=\"%s\">podmienkami</a>.]]></string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
@@ -99,8 +107,12 @@
   <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA inkaso</string>
+  <!-- Explains the next step for payment methods that redirect to a hosted payment page. -->
+  <string name="stripe_paymentsheet_redirect_instructions">Po odoslaní budete presmerovaní na bezpečné dokončenie ďalších krokov.</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Potvrdením platby prostredníctvom služby PayPal povolíte spoločnosti %s, aby z vášho účtu PayPal účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
+  <!-- Disclosure for an international Pix payment. The terms tags enclose a link to Ebanx's terms. -->
+  <string name="stripe_pix_international_disclosure"><![CDATA[Ide o medzinárodný nákup, ktorý nezahŕňa 3,5 % poplatok IOF. Pokračovaním beriete na vedomie a akceptujete <terms>podmienky spoločnosti Ebanx</terms>.]]></string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Potvrdením platby prostredníctvom služby RevolutPay povolíte spoločnosti %s, aby z vášho účtu RevolutPay účtovala poplatky za budúce platby v súlade s podmienkami tejto spoločnosti.</string>
   <!-- Satispay mandate text -->
@@ -113,12 +125,18 @@
   <string name="stripe_scan_card">Naskenovať kartu</string>
   <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
   <string name="stripe_scanned_card_pill_clear_content_description">Vymazať naskenovanú kartu</string>
+  <!-- Expiration date shown for a scanned card in the card pill -->
+  <string name="stripe_scanned_card_pill_expiration_date">Platnosť vyprší dňa %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti %s a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastaviť ako predvolený spôsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastaviť</string>
+  <!-- Touch 'n Go mandate. %s is the merchant name. -->
+  <string name="stripe_touch_n_go_mandate">Potvrdením platby prostredníctvom služby Touch \'n Go umožňujete spoločnosti %s spoplatniť váš účet Touch \'n Go za budúce platby v súlade s jej podmienkami.</string>
+  <!-- TrueMoney mandate. %s is the merchant name. -->
+  <string name="stripe_truemoney_mandate">Potvrdením platby proň služby TrueMoney umožňujete spoločnosti %s spoplatniť váš účet TrueMoney za budúce platby v súlade s jej podmienkami.</string>
   <!-- Satispay mandate text -->
   <string name="stripe_twint_mandate">Pokračovaním oprávňujete %1$s na automatické opakované odpísanie vášho zostatku Twint Balance v súlade s vaším nákupom alebo plánom predplatného.</string>
   <!-- Label for UPI ID number field on form -->

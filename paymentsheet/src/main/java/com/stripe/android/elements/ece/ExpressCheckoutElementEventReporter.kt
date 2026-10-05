@@ -7,21 +7,13 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
-import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.analytics.linkContext
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.utils.filterNotNullValues
 import javax.inject.Inject
 
 internal interface ExpressCheckoutElementEventReporter {
     fun onEceDisplayed()
-
-    fun onEceWalletTapped(
-        expressButton: ExpressButton,
-    )
 }
 
 internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
@@ -36,23 +28,6 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             eventName = ECE_DISPLAYED_EVENT_NAME,
             additionalParams = emptyMap(),
         )
-    }
-
-    override fun onEceWalletTapped(
-        expressButton: ExpressButton,
-    ) {
-        fireEvent(
-            eventName = ECE_WALLET_TAPPED_EVENT_NAME,
-            additionalParams = durationProvider.elapsed(DurationProvider.Key.ExpressCheckoutElement)
-                .mapOfDurationInSeconds() + paymentMethodParams(expressButton),
-        )
-    }
-
-    private fun paymentMethodParams(expressButton: ExpressButton): Map<String, Any> {
-        return mapOf(
-            FIELD_SELECTED_LPM to expressButton.toWalletType().code,
-            FIELD_LINK_CONTEXT to (expressButton.toSelection() as? PaymentSelection.Link)?.linkContext()
-        ).filterNotNullValues()
     }
 
     private fun defaultParams(): Map<String, Any> {
@@ -93,10 +68,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     }
 
     private companion object {
-        const val ECE_DISPLAYED_EVENT_NAME = "mc_ece_init"
-        const val ECE_WALLET_TAPPED_EVENT_NAME = "mc_ece_wallet_tapped"
-        const val FIELD_SELECTED_LPM = "selected_lpm"
-        const val FIELD_LINK_CONTEXT = "link_context"
+        const val ECE_DISPLAYED_EVENT_NAME = "elements.express_checkout_element.init"
+
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_ECE_CONFIG = "ece_config"
         const val FIELD_LINK_VISIBILITY = "link_visibility"

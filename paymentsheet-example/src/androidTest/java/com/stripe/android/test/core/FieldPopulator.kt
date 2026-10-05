@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -119,7 +120,7 @@ internal class FieldPopulator(
         val auBecsAccountNumber: String = "000123456",
         val bacsSortCode: String = "108800",
         val bacsAccountNumber: String = "00012345",
-        val boletoTaxId: String = "00000000000",
+        val brazilianTaxId: String = "00000000000",
         val addressEntryMode: AddressEntryMode = AddressEntryMode.Regular,
     )
 
@@ -290,10 +291,18 @@ internal class FieldPopulator(
             .performTextInput(values.phoneNumber)
     }
 
-    fun populateBoletoTaxId() {
-        selectors.getBoletoTaxId().apply {
+    fun populateCountryCodeSelector(country: String) {
+        selectors.getCountryCode().performClick()
+        selectors.composeTestRule
+            .onNode(hasText(country, substring = true))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun populateBrazilianTaxId() {
+        selectors.getBrazilianTaxId().apply {
             performScrollTo()
-            performTextInput(values.boletoTaxId)
+            performTextInput(values.brazilianTaxId)
         }
     }
 

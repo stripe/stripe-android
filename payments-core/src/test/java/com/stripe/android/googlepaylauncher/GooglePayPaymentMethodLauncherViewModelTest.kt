@@ -20,6 +20,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
@@ -129,6 +130,21 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentMethod() creates request options from api config`() = runTest {
+        viewModel.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+        assertThat(stripeRepository.getRequestOptions()).isEqualTo(
+            ApiRequest.Options(
+                apiKey = ARGS.apiConfiguration.publishableKey,
+                stripeAccount = ARGS.apiConfiguration.stripeAccountId
+            )
+        )
+    }
+
+    @Test
     fun `createPaymentMethod() should return shipping information`() = runTest {
         val result = viewModel.createPaymentMethod(
             PaymentData.fromJson(GooglePayFixtures.RESULT_WITH_SHIPPING_ADDRESS.toString())
@@ -216,6 +232,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
+                    apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
                 )
             )
@@ -245,6 +262,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     ),
                     currencyCode = "usd",
                     amount = 0,
+                    apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
                 )
             )
@@ -346,6 +364,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     amount = 1099,
                     label = null,
                     transactionId = null,
+                    apiConfiguration = ARGS.apiConfiguration,
                     shippingAddressParameters = null,
                 )
             )
@@ -363,16 +382,19 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         private var createParams: PaymentMethodCreateParams? = null
+        private var requestOptions: ApiRequest.Options? = null
 
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options,
         ): Result<PaymentMethod> {
             createParams = paymentMethodCreateParams
+            requestOptions = options
             return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
         fun getCreateParams(): PaymentMethodCreateParams? = createParams
+        fun getRequestOptions(): ApiRequest.Options? = requestOptions
     }
 
     internal class TestFragment : Fragment() {
@@ -390,7 +412,6 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             GooglePayPaymentMethodLauncherViewModel(
                 ApplicationProvider.getApplicationContext(),
                 paymentsClient,
-                REQUEST_OPTIONS,
                 args,
                 stripeRepository,
                 googlePayJsonFactory,
@@ -417,11 +438,11 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = null,
             ),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+            ),
             shippingAddressParameters = null,
-        )
-        val REQUEST_OPTIONS = ApiRequest.Options(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "account"
         )
     }
 }

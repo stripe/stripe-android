@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 import kotlinx.coroutines.delay
 import kotlinx.parcelize.Parcelize
 import kotlin.time.Duration
@@ -43,7 +44,7 @@ private val ErrorShownDelay = 3.seconds
 private val ErrorBannerShape = RoundedCornerShape(size = 12.dp)
 private val ErrorBannerIconSize = 20.dp
 private val ErrorBannerIconSpacing = 8.dp
-private const val ErrorBannerBackgroundAlpha = 0.1f
+private const val ErrorBannerBackgroundAlpha = 0.2f
 private val ErrorBannerVerticalPadding = 11.dp
 
 @Composable
@@ -139,7 +140,11 @@ private fun ErrorBannerContent(
                     modifier = Modifier
                         .padding(start = ErrorBannerIconSpacing)
                         .weight(1f, fill = false),
-                    color = MaterialTheme.colors.error,
+                    color = if (MaterialTheme.stripeThemeIsDark) {
+                        MaterialTheme.colors.onSurface
+                    } else {
+                        MaterialTheme.colors.error
+                    },
                     style = MaterialTheme.typography.body1,
                 )
             }

@@ -225,6 +225,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata?.shouldShowLinkButton == true,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
+            apiConfiguration = paymentMethodMetadata?.apiConfiguration,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -263,8 +264,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
-
-        eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()

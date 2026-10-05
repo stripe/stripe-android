@@ -20,10 +20,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
@@ -44,10 +46,12 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     @Assisted private val activityResultCaller: ActivityResultCaller,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     private val embeddedNavigator: EmbeddedNavigator,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val sheetActivityRegistrar: SheetActivityRegistrar,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
 ) : EmbeddedSheetPresentation {
     override fun register() {
         sheetActivityRegistrar.registerAndBootstrap(
@@ -96,6 +100,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         return when (val launchMode = args.launchMode) {
             is EmbeddedLaunchMode.Form -> EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = launchMode,
             )
             is EmbeddedLaunchMode.Manage -> createManageResult(
@@ -126,7 +131,8 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             previousNewSelections = selectionHolder.previousNewSelections,
             hasBeenConfirmed = false,
             customerState = customerStateHolder.customer.value,
-            checkoutSessionResponse = null,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            checkoutSessionResponse = savedPaymentMethodSelector.checkoutSessionResponse,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
         )
@@ -135,6 +141,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private fun createPaymentOptionsCancellationResult(): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
     }

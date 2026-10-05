@@ -3,12 +3,14 @@ package com.stripe.android.checkout
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.parseAppearance
 import javax.inject.Inject
 
+@CheckoutPresenterScope
 internal class CheckoutPresenterInitializer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val activityResultCaller: ActivityResultCaller,

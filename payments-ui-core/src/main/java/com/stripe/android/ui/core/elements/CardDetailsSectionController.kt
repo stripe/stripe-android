@@ -9,7 +9,6 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionFieldValidationController
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -33,10 +32,6 @@ class CardDetailsSectionController(
         cardBrandFilter,
         cardFundingFilter,
     )
-
-    internal val shouldHideHeader = cardDetailsElement.controller.cardPillElement.mapAsStateFlow { element ->
-        element != null
-    }
 
     override val validationMessage = cardDetailsElement.controller.validationMessage
 

@@ -31,7 +31,7 @@ class PlaygroundBackendTest {
     @Test
     fun `publishable key uses merchant query and decodes response`() = runTest {
         val executor = FakePlaygroundRequestExecutor(buildJsonObject { put("publishable_key", "pk_test_123") })
-        val backend = PlaygroundBackend("https://example.com/", "JP", executor)
+        val backend = backend(merchant = "JP", executor = executor)
 
         assertThat(backend.fetchPublishableKey()).isEqualTo("pk_test_123")
         assertThat(executor.requests.awaitItem()).isEqualTo(
@@ -48,12 +48,15 @@ class PlaygroundBackendTest {
     @Test
     fun `customer and attachment use generic envelopes`() = runTest {
         val executor = FakePlaygroundRequestExecutor(buildJsonObject { put("id", "cus_123") })
-        val backend = PlaygroundBackend("https://example.com", "US", executor)
+        val backend = backend(merchant = "US", executor = executor)
 
         assertThat(backend.createCustomer(buildJsonObject { put("email", "a@example.com") })).isEqualTo("cus_123")
         val customerRequest = executor.requests.awaitItem()
         assertThat(customerRequest.url).isEqualTo("https://example.com/create_customer")
         assertThat(customerRequest.body!!.string("merchant")).isEqualTo("US")
+        assertThat(customerRequest.body).doesNotContainKey("custom_stripe_api")
+        assertThat(customerRequest.body).doesNotContainKey("custom_secret_key")
+        assertThat(customerRequest.body).doesNotContainKey("custom_publishable_key")
         assertThat(customerRequest.body["request_params"]!!.jsonObject.string("email")).isEqualTo("a@example.com")
 
         executor.response = buildJsonObject { }
@@ -68,7 +71,7 @@ class PlaygroundBackendTest {
     @Test
     fun `checkout session sends preview version and decodes secret`() = runTest {
         val executor = FakePlaygroundRequestExecutor(buildJsonObject { put("client_secret", "cs_test_123") })
-        val backend = PlaygroundBackend("https://example.com", "us_tax", executor)
+        val backend = backend(merchant = "us_tax", executor = executor)
         val params = buildJsonObject { put("ui_mode", "elements") }
 
         assertThat(backend.createCheckoutSession(params)).isEqualTo("cs_test_123")
@@ -80,11 +83,57 @@ class PlaygroundBackendTest {
     }
 
     @Test
+    fun `custom credentials are included in every generic POST envelope`() = runTest {
+        val executor = FakePlaygroundRequestExecutor(buildJsonObject { put("id", "cus_123") })
+        val backend = PlaygroundBackend(
+            baseUrl = "https://example.com",
+            merchant = "custom",
+            customStripeApi = "example-api.tunnel.stripe.me",
+            customSecretKey = "sk_test_custom",
+            customPublishableKey = "pk_test_custom",
+            requestExecutor = executor,
+        )
+
+        backend.createCustomer(JsonObject(emptyMap()))
+        val customerRequest = executor.requests.awaitItem()
+
+        executor.response = JsonObject(emptyMap())
+        backend.attachPaymentMethod("pm_123", "cus_123")
+        val attachmentRequest = executor.requests.awaitItem()
+
+        executor.response = buildJsonObject { put("client_secret", "cs_test_123") }
+        backend.createCheckoutSession(JsonObject(emptyMap()))
+        val checkoutSessionRequest = executor.requests.awaitItem()
+
+        listOf(customerRequest, attachmentRequest, checkoutSessionRequest).forEach { request ->
+            assertThat(request.body!!.string("merchant")).isEqualTo("custom")
+            assertThat(request.body.string("custom_stripe_api")).isEqualTo("example-api.tunnel.stripe.me")
+            assertThat(request.body.string("custom_secret_key")).isEqualTo("sk_test_custom")
+            assertThat(request.body.string("custom_publishable_key")).isEqualTo("pk_test_custom")
+        }
+        executor.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `backend error message is preserved`() {
         assertThat(parseBackendError(Json, """{"error":"Invalid customer"}""".encodeToByteArray()))
             .isEqualTo("Invalid customer")
         assertThat(parseBackendError(Json, "Not JSON".encodeToByteArray())).isNull()
     }
+}
+
+private fun backend(
+    merchant: String,
+    executor: PlaygroundRequestExecutor,
+): PlaygroundBackend {
+    return PlaygroundBackend(
+        baseUrl = "https://example.com/",
+        merchant = merchant,
+        customStripeApi = null,
+        customSecretKey = null,
+        customPublishableKey = null,
+        requestExecutor = executor,
+    )
 }
 
 private class FakePlaygroundRequestExecutor(

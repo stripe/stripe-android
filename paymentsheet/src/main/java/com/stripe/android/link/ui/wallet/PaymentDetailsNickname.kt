@@ -21,14 +21,14 @@ internal val LinkPaymentDetails.paymentOptionLabel: ResolvableString
 internal val LinkPaymentDetails.label: ResolvableString
     get() = when (this) {
         is Card -> makeCardDisplayName(nickname, funding, brand)
-        is BankAccount -> bankName?.resolvableString ?: "••••$last4".resolvableString
+        is BankAccount -> bankName?.resolvableString ?: maskedLast4(last4)
         is Generic -> label.resolvableString
     }
 
 internal val LinkPaymentDetails.sublabel: ResolvableString?
     get() = when (this) {
-        is Card -> "•••• $last4".resolvableString
-        is BankAccount -> if (bankName != null) "••••$last4".resolvableString else null
+        is Card -> maskedLast4(last4)
+        is BankAccount -> if (bankName != null) maskedLast4(last4) else null
         is Generic -> sublabel?.resolvableString
     }
 
@@ -37,7 +37,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
         is ConsumerPaymentDetails.Card -> makeCardDisplayName(nickname, funding.code, brand)
         is ConsumerPaymentDetails.BankAccount -> makeBankAccountDisplayName(nickname, bankAccountName)
         is ConsumerPaymentDetails.Passthrough -> {
-            "•••• $last4".resolvableString
+            maskedLast4(last4)
         }
         is ConsumerPaymentDetails.Generic -> display.label.resolvableString
     }
@@ -46,13 +46,13 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
     get() {
         val components = when (this) {
             is ConsumerPaymentDetails.Card -> {
-                listOf(makeCardDisplayName(nickname, funding.code, brand), "•••• $last4".resolvableString)
+                listOf(makeCardDisplayName(nickname, funding.code, brand), maskedLast4(last4))
             }
             is ConsumerPaymentDetails.BankAccount -> {
-                listOf(makeBankAccountDisplayName(nickname, bankAccountName), "•••• $last4".resolvableString)
+                listOf(makeBankAccountDisplayName(nickname, bankAccountName), maskedLast4(last4))
             }
             is ConsumerPaymentDetails.Passthrough -> {
-                listOf("•••• $last4".resolvableString)
+                listOf(maskedLast4(last4))
             }
             is ConsumerPaymentDetails.Generic -> {
                 listOfNotNull(display.label.resolvableString, display.sublabel?.resolvableString)
@@ -79,6 +79,10 @@ private fun makeBankAccountDisplayName(nickname: String?, bankName: String?): Re
     return nickname?.resolvableString
         ?: bankName?.resolvableString
         ?: StripeUiCoreR.string.stripe_payment_method_bank.resolvableString
+}
+
+private fun maskedLast4(last4: String): ResolvableString {
+    return resolvableString(R.string.stripe_link_payment_method_last4, last4)
 }
 
 private fun List<ResolvableString>.joinToString(separator: String): ResolvableString {

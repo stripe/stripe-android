@@ -6,7 +6,9 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -32,15 +34,18 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
-        clientParams = clientParams,
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
-        publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { "acct_123" },
+        apiRequestOptionsProvider = {
+            ApiRequest.Options(
+                apiKey = DEFAULT_API_CONFIG.publishableKey,
+                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+            )
+        },
     )
 
     @Test
@@ -55,8 +60,31 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
+            clientParams = clientParams,
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             adaptivePricingAllowed = true,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `detach sends elements_session_client params`() = runTest {
+        val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
+        networkRule.checkoutUpdate(
+            bodyPart("payment_method_to_detach", "pm_123"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("elements_session_client[locale]", clientParams.locale),
+            bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
+            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.detachPaymentMethod(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            paymentMethodId = "pm_123",
+            clientParams = clientParams,
         )
 
         assertThat(result.isSuccess).isTrue()

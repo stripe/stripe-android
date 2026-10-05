@@ -15,14 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.stripeThemeIsDark
+import kotlin.math.roundToInt
 
 internal val CoilCircleSize = 160.dp
 private val ShadowElevation = 8.dp
@@ -40,7 +43,7 @@ internal fun NfcCoilLayout(
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = BiasAlignment(
+            contentAlignment = PhysicalBiasAlignment(
                 horizontalBias = tapZone.xBias * 2 - 1,
                 verticalBias = tapZone.yBias * 2 - 1,
             ),
@@ -162,6 +165,22 @@ private fun StatefulPulseRings(
 
     if (status is NfcScanningStatus.Idle && coilState.isComplete) {
         PulseRings(coilSize = CoilCircleSize)
+    }
+}
+
+private data class PhysicalBiasAlignment(
+    val horizontalBias: Float,
+    val verticalBias: Float,
+) : Alignment {
+    override fun align(
+        size: IntSize,
+        space: IntSize,
+        layoutDirection: LayoutDirection,
+    ): IntOffset {
+        return IntOffset(
+            x = ((space.width - size.width) / 2f * (1 + horizontalBias)).roundToInt(),
+            y = ((space.height - size.height) / 2f * (1 + verticalBias)).roundToInt(),
+        )
     }
 }
 

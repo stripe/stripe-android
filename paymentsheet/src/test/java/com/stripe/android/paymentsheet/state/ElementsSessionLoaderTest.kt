@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -20,10 +21,27 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = null,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(result.stripeIntent)
             .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `passes API configuration to repository`() = runScenario {
+        val apiConfiguration = DEFAULT_API_CONFIG
+
+        loader(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            configuration = DEFAULT_CONFIG,
+            savedPaymentMethodSelection = null,
+            apiConfiguration = apiConfiguration,
+        )
+
+        assertThat(elementsSessionRepository.lastParams?.apiConfiguration).isEqualTo(apiConfiguration)
     }
 
     @Test
@@ -36,6 +54,7 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = savedSelection,
+            apiConfiguration = DEFAULT_API_CONFIG,
         )
 
         assertThat(elementsSessionRepository.lastParams?.savedPaymentMethodSelectionId)

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -14,6 +15,7 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -1053,6 +1055,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load() with customer should allow sepa`() = runScenario {
         var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
+        var requestApiConfiguration: ApiConfiguration.State? = null
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
@@ -1060,8 +1063,10 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret: String,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean,
+                    apiConfiguration: ApiConfiguration.State,
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
+                    requestApiConfiguration = apiConfiguration
                     return Result.success(
                         listOf(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -1096,6 +1101,7 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethod.Type.SepaDebit,
                 PaymentMethod.Type.USBankAccount,
             )
+        assertThat(requestApiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -5034,7 +5040,8 @@ internal class DefaultPaymentElementLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }

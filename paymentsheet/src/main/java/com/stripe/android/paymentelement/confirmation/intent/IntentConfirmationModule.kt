@@ -1,8 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -13,7 +11,6 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
-import javax.inject.Provider
 
 @Module
 internal class IntentConfirmationModule {
@@ -46,19 +43,12 @@ internal class IntentConfirmationModule {
     fun providesIntentConfirmationDefinition(
         interceptorFactory: IntentConfirmationInterceptor.Factory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
-        paymentConfigurationProvider: Provider<PaymentConfiguration>,
     ): ConfirmationDefinition<*, *, *, *> {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = interceptorFactory,
-            paymentLauncherFactory = { hostActivityLauncher, statusBarColor ->
+            paymentLauncherFactory = { hostActivityLauncher, statusBarColor, apiConfiguration ->
                 stripePaymentLauncherAssistedFactory.create(
-                    apiConfigurationProvider = {
-                        val configuration = paymentConfigurationProvider.get()
-                        ApiConfiguration.State(
-                            publishableKey = configuration.publishableKey,
-                            stripeAccountId = configuration.stripeAccountId,
-                        )
-                    },
+                    apiConfigurationProvider = { apiConfiguration },
                     hostActivityLauncher = hostActivityLauncher,
                     statusBarColor = statusBarColor,
                     includePaymentSheetNextHandlers = true,

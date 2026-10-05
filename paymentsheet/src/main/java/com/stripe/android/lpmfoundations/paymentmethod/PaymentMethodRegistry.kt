@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AuBecsDebitDe
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BacsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BancontactDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BillieDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BizumDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BoletoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -16,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
@@ -23,6 +25,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KakaoPayDefin
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MbWayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
@@ -33,6 +37,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PaycoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PixDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
@@ -59,6 +64,7 @@ internal object PaymentMethodRegistry {
         BacsDebitDefinition,
         BancontactDefinition,
         BillieDefinition,
+        BizumDefinition,
         BlikDefinition,
         BoletoDefinition,
         CardDefinition,
@@ -66,6 +72,7 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
+        GoPayDefinition,
         GrabPayDefinition,
         IdealWeroDefinition,
         InstantDebitsDefinition,
@@ -73,6 +80,8 @@ internal object PaymentMethodRegistry {
         KlarnaDefinition,
         KonbiniDefinition,
         KrCardDefinition,
+        MbWayDefinition,
+        MoMoDefinition,
         MobilePayDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
@@ -83,6 +92,7 @@ internal object PaymentMethodRegistry {
         PayPalDefinition,
         PayPayDefinition,
         PaycoDefinition,
+        PixDefinition,
         PromptPayDefinition,
         RevolutPayDefinition,
         SatispayDefinition,

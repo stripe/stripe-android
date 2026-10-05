@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import javax.inject.Inject
 
 /**
@@ -26,10 +27,17 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     internal constructor(
         stateHolder: CheckoutControllerStateHolder,
         checkoutSessionRepository: CheckoutSessionRepository,
+        elementsSessionClientParams: ElementsSessionClientParams,
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(
         stateHolder = stateHolder,
-        fetchResponse = checkoutSessionRepository::init,
+        fetchResponse = { sessionId, adaptivePricingAllowed ->
+            checkoutSessionRepository.init(
+                clientParams = elementsSessionClientParams,
+                sessionId = sessionId,
+                adaptivePricingAllowed = adaptivePricingAllowed,
+            )
+        },
         reloadState = checkoutStateLoader::reload,
     )
 

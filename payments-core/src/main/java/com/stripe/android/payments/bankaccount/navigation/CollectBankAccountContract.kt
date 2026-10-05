@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -48,7 +49,8 @@ class CollectBankAccountContract :
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean,
         open val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        open val hostedSurface: String?
+        open val hostedSurface: String?,
+        open val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -68,7 +70,8 @@ class CollectBankAccountContract :
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-            override val hostedSurface: String?
+            override val hostedSurface: String?,
+            override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
@@ -76,7 +79,8 @@ class CollectBankAccountContract :
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            preCollectedConsent = preCollectedConsent
         )
 
         @Parcelize
@@ -88,7 +92,8 @@ class CollectBankAccountContract :
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-            override val hostedSurface: String?
+            override val hostedSurface: String?,
+            override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
@@ -96,7 +101,8 @@ class CollectBankAccountContract :
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            preCollectedConsent = preCollectedConsent
         )
 
         @Parcelize
@@ -120,6 +126,7 @@ class CollectBankAccountContract :
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = false,
+            preCollectedConsent = null
         )
 
         @Parcelize
@@ -140,7 +147,8 @@ class CollectBankAccountContract :
             clientSecret = null,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = false
+            attachToIntent = false,
+            preCollectedConsent = null
         )
 
         companion object {

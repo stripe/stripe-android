@@ -11,7 +11,9 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 
 class PaymentSelection(val composeTestRule: ComposeTestRule, val paymentMethodCode: String) {
     fun click() {
-        if (composeTestRule.onAllNodes(hasTestTag(TEST_TAG_LIST)).fetchSemanticsNodes().isNotEmpty()) {
+        val paymentMethodList = composeTestRule.onAllNodes(hasTestTag(TEST_TAG_LIST))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+        if (paymentMethodList.isNotEmpty()) {
             val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + paymentMethodCode)
 
             composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)

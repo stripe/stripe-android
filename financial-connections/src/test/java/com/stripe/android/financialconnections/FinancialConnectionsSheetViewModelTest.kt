@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
@@ -68,7 +69,8 @@ class FinancialConnectionsSheetViewModelTest {
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        preCollectedConsent = null,
     )
 
     private val syncResponse = syncResponse()
@@ -1036,13 +1038,13 @@ class FinancialConnectionsSheetViewModelTest {
             eventReporter = eventReporter,
             nativeRouter = nativeRouter,
             analyticsTracker = analyticsTracker,
+            eventContext = FinancialConnectionsEventContext(initialState.manifest ?: syncResponse.manifest),
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
             integrityVerdictManager = mock(),
             logger = Logger.noop(),
-            ioDispatcher = testDispatcher,
         ).also { viewModelStoreRule.track(it) }
     }
 }

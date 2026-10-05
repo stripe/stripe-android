@@ -20,7 +20,8 @@ internal class TapToAddViewModel @Inject constructor(
     }
 
     class Factory(
-        private val argSupplier: () -> TapToAddContract.Args
+        private val argSupplier: () -> TapToAddContract.Args,
+        private val isSystemDarkSupplier: () -> Boolean,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -34,6 +35,7 @@ internal class TapToAddViewModel @Inject constructor(
                 eventMode = args.eventMode,
                 productUsage = args.productUsage,
                 statusBarColor = args.statusBarColor,
+                isSystemDark = isSystemDarkSupplier(),
             )
 
             return component.viewModel as T

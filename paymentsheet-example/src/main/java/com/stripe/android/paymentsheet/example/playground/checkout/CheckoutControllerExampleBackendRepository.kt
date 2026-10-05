@@ -22,8 +22,11 @@ internal class CheckoutControllerExampleBackendRepository(
         val backend = PlaygroundBackend(
             baseUrl = backendUrl ?: defaultBackendUrl,
             merchant = merchant.value,
+            customStripeApi = settings[CheckoutPlaygroundDefinitions.session.customStripeApi],
+            customSecretKey = settings[CheckoutPlaygroundDefinitions.session.customSecretKey],
+            customPublishableKey = settings[CheckoutPlaygroundDefinitions.session.customPublishableKey],
         )
-        val publishableKey = backend.fetchPublishableKey()
+        val publishableKey = settings.publishableKey(backend)
         PaymentConfiguration.init(applicationContext, publishableKey)
         val stripe = Stripe(applicationContext, publishableKey)
         CheckoutSessionFactory(
@@ -37,5 +40,17 @@ internal class CheckoutControllerExampleBackendRepository(
 
 internal fun CheckoutPlaygroundSettings.Snapshot.backendMerchant(): Merchant {
     val session = CheckoutPlaygroundDefinitions.session
-    return if (this[session.automaticTax]) Merchant.US_TAX else this[session.merchant]
+    return when {
+        this[session.merchant] == Merchant.Custom -> Merchant.Custom
+        this[session.automaticTax] -> Merchant.US_TAX
+        else -> this[session.merchant]
+    }
+}
+
+internal suspend fun CheckoutPlaygroundSettings.Snapshot.publishableKey(
+    backend: CheckoutPlaygroundBackend,
+): String {
+    return this[CheckoutPlaygroundDefinitions.session.customPublishableKey]
+        ?.takeIf(String::isNotBlank)
+        ?: backend.fetchPublishableKey()
 }

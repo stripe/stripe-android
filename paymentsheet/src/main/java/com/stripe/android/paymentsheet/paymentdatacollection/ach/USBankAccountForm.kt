@@ -92,6 +92,7 @@ internal fun USBankAccountForm(
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                 stripeIntentId = usBankAccountFormArgs.stripeIntentId,
                 clientSecret = usBankAccountFormArgs.clientSecret,
+                apiConfiguration = usBankAccountFormArgs.apiConfiguration,
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,

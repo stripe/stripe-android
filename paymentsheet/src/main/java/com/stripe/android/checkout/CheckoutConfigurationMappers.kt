@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.elements.CheckoutGooglePayConfiguration.Display as GooglePayDisplay
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
@@ -41,13 +42,17 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
 internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
-        paymentElementConfiguration.googlePayConfiguration.asPaymentSheet(
-            merchantCountry = merchantCountry,
-            liveMode = checkoutSessionResponse.livemode,
-            isDebugBuild = BuildConfig.DEBUG,
-        )
-    }
+    paymentElementConfiguration.googlePayConfiguration
+        .takeIf { it.display == GooglePayDisplay.Automatic }
+        ?.let { configuration ->
+            checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
+                configuration.asPaymentSheet(
+                    merchantCountry = merchantCountry,
+                    liveMode = checkoutSessionResponse.livemode,
+                    isDebugBuild = BuildConfig.DEBUG,
+                )
+            }
+        }
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutController.Configuration.State.toBillingDetails(
