@@ -133,7 +133,7 @@ class ConsentScreenTest {
             consentPage.copy(subtitle = CONSENT_SUBTITLE)
         )
 
-        setComposeTestRuleWith(Resource.success(verificationPage)) {
+        runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(SUBTITLE_TAG).assertTextEquals(CONSENT_SUBTITLE)
         }

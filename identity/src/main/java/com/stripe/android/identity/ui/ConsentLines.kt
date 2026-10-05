@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,6 +34,7 @@ internal fun ConsentLines(
     lines: List<VerificationPageStaticConsentLineContent>,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
 ) {
+    val textColor = MaterialTheme.colors.onBackground
     for (line in lines) {
         Row(
             modifier = Modifier
@@ -58,12 +59,12 @@ internal fun ConsentLines(
                     // Remove the distance between lines to find the first line's center.
                     (it.measuredHeight - (it[LastBaseline] - it[FirstBaseline])) / 2
                 },
-                color = colorResource(id = R.color.stripe_html_line),
+                color = textColor,
                 style = LocalTextStyle.current.merge(fontSize = 16.sp),
                 bottomSheets = bottomSheets,
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
-                    color = colorResource(id = R.color.stripe_html_line)
+                    color = textColor
                 )
             )
         }

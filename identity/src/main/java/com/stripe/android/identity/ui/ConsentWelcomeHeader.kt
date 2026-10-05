@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +37,7 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import com.stripe.android.uicore.stripeColors
 
 @Suppress("LongMethod")
 @Composable
@@ -126,7 +128,8 @@ internal fun ConsentWelcomeHeader(
                 .fillMaxWidth()
                 .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                 .semantics { testTag = SUBTITLE_TAG },
-            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.stripeColors.subtitle,
+            style = LocalTextStyle.current.merge(fontSize = 16.sp),
             textAlign = TextAlign.Center
         )
     }
