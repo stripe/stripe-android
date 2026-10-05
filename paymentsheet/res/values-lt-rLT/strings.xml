@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Atsijungti nuo \"Link\"</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Atsijungti nuo %s?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Per %s naudodamiesi „MB WAY“ programėle patvirtinkite mokėjimą, kad užbaigtumėte pirkimą.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Įvyko klaida. Patikrinkite ryšį ir bandykite dar kartą.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Saugumo sumetimais kūrėjo parinktys turi būti išjungtos, kad galėtumėte naudoti „Bakstelėti, kad būtų galima pridėti”.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Atidarykite nuostatas</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Išjunkite kūrėjo parinktis</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kortelė nebegalioja. Pabandykite naudoti kitą kortelę.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Priglauskite kortelę</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kortelė atmesta. Pabandykite naudoti kitą kortelę.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -142,6 +152,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Pridėkite mokėjimo informaciją</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Pridėta kortelė</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Su adresu susiję pakeitimai nebus išsaugoti.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Atšaukti</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Atšaukti pakeitimus?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">išsaugoti adresą</string>
   <!-- Title for shipping address entry section -->

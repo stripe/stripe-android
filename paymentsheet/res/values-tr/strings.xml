@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Link\'ten çıkış yap</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">%s oturumu kapatılsın mı?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Satın alma işlemini tamamlamak için %s içinde MB WAY uygulamanızdaki ödemeyi onaylayın.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Bir hata oluştu. Bağlantınızı kontrol edip tekrar deneyin.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Güvenlik amacıyla, Dokunarak ekle özelliğini kullanmak için geliştirici seçenekleri kapalı olmalıdır.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Ayarları aç</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Geliştirici seçeneklerini kapatın</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kartın süresi doldu. Başka bir kart deneyin.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Kartı dokundurun</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kart reddedildi. Başka bir kart deneyin.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -142,6 +152,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Kart eklendi</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Adres değişiklikleriniz kaydedilmeyecek.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Vazgeç</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Değişiklikler iptal edilsin mi?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Adresi kaydet</string>
   <!-- Title for shipping address entry section -->

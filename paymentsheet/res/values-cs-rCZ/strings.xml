@@ -104,10 +104,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Odhlásit ze služby Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Odhlásit se z %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Pro dokončení nákupu potvrďte platbu v aplikaci MB WAY do %s.</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Došlo k chybě. Zkontrolujte připojení a zkuste to znovu.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Z bezpečnostních důvodů musí být možnosti pro vývojáře vypnuté, abyste mohli používat funkci Přidat přiložením.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Otevřít nastavení</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Vypněte možnosti pro vývojáře</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Karta vypršela. Zkuste jinou kartu.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Přiložte kartu</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Karta zamítnuta. Zkuste jinou kartu.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -142,6 +152,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Přidejte své platební údaje</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Přidaná karta</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Změny vaší adresy nebudou uloženy.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Zrušit</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Zrušit změny?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Uložit adresu</string>
   <!-- Title for shipping address entry section -->
