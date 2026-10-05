@@ -658,38 +658,38 @@ private fun DocumentTypeField(
     slot: AdditionalKycDocumentSlotState,
     onClick: () -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .testTag(additionalKycSubtypePickerTag(slot.index)),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_document_type)
-            } else {
-                stringResource(R.string.stripe_link_onramp_additional_kyc_funds_source)
-            },
-            style = LinkTheme.typography.caption,
-            color = LinkTheme.colors.textTertiary,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
+                    stringResource(R.string.stripe_link_onramp_additional_kyc_document_type)
+                } else {
+                    stringResource(R.string.stripe_link_onramp_additional_kyc_funds_source)
+                },
+                style = LinkTheme.typography.caption,
+                color = LinkTheme.colors.textTertiary,
+            )
             Text(
                 text = slot.selectedSubtypeLabel
                     ?: stringResource(R.string.stripe_link_onramp_additional_kyc_select_document_type),
-                modifier = Modifier.weight(1f),
                 style = LinkTheme.typography.body,
                 color = LinkTheme.colors.textPrimary,
             )
-            Icon(
-                painter = painterResource(R.drawable.stripe_link_chevron_down),
-                contentDescription = null,
-                tint = LinkTheme.colors.iconPrimary,
-                modifier = Modifier.size(12.dp),
-            )
         }
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_chevron_down),
+            contentDescription = null,
+            tint = LinkTheme.colors.iconPrimary,
+            modifier = Modifier.size(12.dp),
+        )
     }
 }
 
@@ -1209,6 +1209,8 @@ private fun AdditionalKycPrimaryButton(
     val label = when {
         isUnavailable -> stringResource(R.string.stripe_link_onramp_additional_kyc_close)
         isSubmitted || isPending -> stringResource(R.string.stripe_link_onramp_additional_kyc_done)
+        isSourceEditor && editingDocumentCount == 0 ->
+            stringResource(R.string.stripe_link_onramp_additional_kyc_add_documents)
         isSourceEditor -> stringResource(
             if (editingDocumentCount == 1) {
                 R.string.stripe_link_onramp_additional_kyc_add_one_document
