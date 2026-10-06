@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
@@ -20,13 +21,18 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
      */
     @Parcelize
     data class Selected internal constructor(
-        val paymentSelection: PaymentSelection?
+        val paymentSelection: PaymentSelection?,
+        private val appearance: PaymentSheet.Appearance
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Selected(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(
+                    paymentOptionFactory,
+                    canUseGooglePay = true,
+                    appearance = appearance
+                )
             )
         }
     }
@@ -36,13 +42,18 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
      */
     @Parcelize
     data class Canceled(
-        val paymentSelection: PaymentSelection?
+        val paymentSelection: PaymentSelection?,
+        private val appearance: PaymentSheet.Appearance
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Canceled(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(
+                    paymentOptionFactory,
+                    canUseGooglePay = true,
+                    appearance = appearance
+                )
             )
         }
     }

@@ -133,6 +133,7 @@ class CustomerSheet internal constructor(
                     "Must call `configure` first before attempting to fetch the saved payment option!"
                 )
             )
+        val appearance = viewModel.configureRequest?.configuration?.appearance ?: ConfigurationDefaults.appearance
 
         return coroutineScope {
             val savedSelectionDeferred = async {
@@ -153,7 +154,11 @@ class CustomerSheet internal constructor(
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }
-                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+                }?.toPaymentOptionSelection(
+                    paymentOptionFactory = paymentOptionFactory,
+                    canUseGooglePay = request.configuration.googlePayEnabled,
+                    appearance = appearance
+                )
             }
 
             selection.fold(
@@ -618,11 +623,16 @@ class CustomerSheet internal constructor(
         internal fun PaymentSelection?.toPaymentOptionSelection(
             paymentOptionFactory: PaymentOptionFactory,
             canUseGooglePay: Boolean,
+            appearance: PaymentSheet.Appearance
         ): PaymentOptionSelection? {
             return when (this) {
                 is PaymentSelection.GooglePay -> {
                     PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this, null, appearance = null),
+                        paymentOption = paymentOptionFactory.create(
+                            selection = this,
+                            linkBrand = null,
+                            appearance = appearance
+                        ),
                     ).takeIf {
                         canUseGooglePay
                     }
@@ -630,7 +640,11 @@ class CustomerSheet internal constructor(
                 is PaymentSelection.Saved -> {
                     PaymentOptionSelection.PaymentMethod(
                         paymentMethod = this.paymentMethod,
-                        paymentOption = paymentOptionFactory.create(this, null, appearance = null)
+                        paymentOption = paymentOptionFactory.create(
+                            selection = this,
+                            linkBrand = null,
+                            appearance = appearance
+                        )
                     )
                 }
                 else -> null
