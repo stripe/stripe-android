@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -59,7 +60,12 @@ internal class AddressElementActivityAnalyticsTest {
         try {
             startTaxUpdateWithAnalytics(taxUpdate)
             assertDismissalBlocked()
-            val failedRequest = expectShippingAnalytics("elements.shipping_address.save_failed")
+            val failedRequest = expectShippingAnalytics(
+                "elements.shipping_address.save_failed",
+                analyticsPayloadField("analytics_value", "apiError"),
+                analyticsPayloadField("status_code", "400"),
+                not(hasQueryParam("error_message")),
+            )
             taxUpdate.releaseResponse.countDown()
 
             addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
@@ -204,12 +210,14 @@ internal class AddressElementActivityAnalyticsTest {
 
     private fun AddressElementActivityTestRunner.Scenario.expectShippingAnalytics(
         eventName: String,
+        vararg requestMatchers: RequestMatcher,
         country: String = "US",
     ): CountDownLatch = expectShippingAnalytics(
         eventName = eventName,
         checkoutSessionId = checkoutSessionResponse.id,
         country = country,
         autocompleteResultSelected = false,
+        requestMatchers = requestMatchers,
     )
 
     private fun expectShippingAnalytics(
@@ -217,6 +225,7 @@ internal class AddressElementActivityAnalyticsTest {
         checkoutSessionId: String,
         country: String,
         autocompleteResultSelected: Boolean?,
+        vararg requestMatchers: RequestMatcher,
     ): CountDownLatch {
         val requestReceived = CountDownLatch(1)
         val selectionMatcher = autocompleteResultSelected?.let {
@@ -231,6 +240,7 @@ internal class AddressElementActivityAnalyticsTest {
             analyticsPayloadField("address_data_blob[address_country_code]", country),
             selectionMatcher,
             not(hasQueryParam("address_data_blob[edit_distance]")),
+            *requestMatchers,
         ) { response ->
             response.status = "HTTP/1.1 200 OK"
             requestReceived.countDown()
