@@ -16,7 +16,7 @@ internal fun interface PaymentOptionFactory {
     fun create(
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
-        appearance: PaymentSheet.Appearance?,
+        appearance: PaymentSheet.Appearance,
     ): PaymentOption
 }
 
@@ -28,7 +28,7 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
     override fun create(
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
-        appearance: PaymentSheet.Appearance?,
+        appearance: PaymentSheet.Appearance,
     ): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
@@ -47,7 +47,7 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance?.shouldUseDarkThemeIcon(isSystemDark ?: context.isSystemDarkTheme()),
+                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(isSystemDark ?: context.isSystemDarkTheme()),
                 )
             },
         )

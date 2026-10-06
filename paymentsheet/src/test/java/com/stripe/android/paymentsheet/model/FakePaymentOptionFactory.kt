@@ -12,7 +12,7 @@ internal class FakePaymentOptionFactory(
     override fun create(
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
-        appearance: PaymentSheet.Appearance?,
+        appearance: PaymentSheet.Appearance,
     ): PaymentOption {
         createCalls.add(CreateCall(selection, linkBrand, appearance))
         return result
@@ -25,6 +25,6 @@ internal class FakePaymentOptionFactory(
     data class CreateCall(
         val selection: PaymentSelection,
         val linkBrand: LinkBrand?,
-        val appearance: PaymentSheet.Appearance?,
+        val appearance: PaymentSheet.Appearance,
     )
 }
