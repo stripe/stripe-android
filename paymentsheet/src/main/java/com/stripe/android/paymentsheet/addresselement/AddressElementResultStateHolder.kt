@@ -8,11 +8,33 @@ import javax.inject.Singleton
 
 @Singleton
 internal class AddressElementResultStateHolder @Inject constructor() {
-    private val _result = MutableStateFlow<AddressElementActivityContract.Result?>(null)
+    private val _state = MutableStateFlow<State>(State.Idle)
+    val state: StateFlow<State> = _state.asStateFlow()
 
-    val result: StateFlow<AddressElementActivityContract.Result?> = _result.asStateFlow()
+    fun tryStartSaving(): Boolean {
+        return _state.compareAndSet(expect = State.Idle, update = State.Saving)
+    }
 
-    fun setResult(result: AddressElementActivityContract.Result) {
-        _result.compareAndSet(expect = null, update = result)
+    fun onSaveFailed() {
+        _state.compareAndSet(expect = State.Saving, update = State.Idle)
+    }
+
+    fun onSaveCompleted(result: AddressElementActivityContract.Result) {
+        _state.compareAndSet(expect = State.Saving, update = State.Finished(result))
+    }
+
+    fun onUserCancel(): Boolean {
+        return _state.compareAndSet(
+            expect = State.Idle,
+            update = State.Finished(AddressElementActivityContract.Result.Canceled),
+        )
+    }
+
+    sealed interface State {
+        data object Idle : State
+
+        data object Saving : State
+
+        data class Finished(val result: AddressElementActivityContract.Result) : State
     }
 }

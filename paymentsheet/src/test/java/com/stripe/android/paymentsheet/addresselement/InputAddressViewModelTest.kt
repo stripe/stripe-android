@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
@@ -217,15 +218,17 @@ class InputAddressViewModelTest {
             checkboxChecked = true,
         )
 
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.StandaloneSucceeded(
-                AddressDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "99 Broadway St",
-                        city = "Seattle",
-                        country = "US",
-                    ),
-                    isCheckboxSelected = true,
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(
+                AddressElementActivityContract.Result.StandaloneSucceeded(
+                    AddressDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "99 Broadway St",
+                            city = "Seattle",
+                            country = "US",
+                        ),
+                        isCheckboxSelected = true,
+                    )
                 )
             )
         )
@@ -316,7 +319,7 @@ class InputAddressViewModelTest {
         assertThat(viewModel.saveError.value)
             .isEqualTo(IllegalStateException("first submission failed").stripeErrorMessage())
         eventReporter.completedCalls.expectNoEvents()
-        assertThat(resultStateHolder.result.value).isNull()
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
@@ -324,8 +327,8 @@ class InputAddressViewModelTest {
         assertThat(viewModel.formEnabled.value).isFalse()
         assertThat(viewModel.saveError.value).isNull()
         assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
 
         primaryButtonAction.calls.expectNoEvents()
@@ -363,7 +366,7 @@ class InputAddressViewModelTest {
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
         assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
         assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(resultStateHolder.result.value).isNull()
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
         eventReporter.completedCalls.expectNoEvents()
 
         primaryButtonAction.validate()
@@ -422,7 +425,7 @@ class InputAddressViewModelTest {
             primaryButtonAction.calls.expectNoEvents()
             eventReporter.completedCalls.expectNoEvents()
             expectNoEvents()
-            assertThat(resultStateHolder.result.value).isNull()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
 
             primaryButtonResult.complete(
                 Result.success(
@@ -1216,7 +1219,7 @@ class InputAddressViewModelTest {
 
         assertThat(controller.validationMessage.value).isNotNull()
         assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(resultStateHolder.result.value).isNull()
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
     }
 
     @Test
@@ -1225,8 +1228,8 @@ class InputAddressViewModelTest {
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
     }
 
