@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
-    open val isLiveMode: Boolean,
     open val isProcessing: Boolean,
     open val canNavigateBack: Boolean,
 ) {
@@ -38,16 +37,12 @@ internal sealed class CustomerSheetViewState(
         }
     }
 
-    data class Loading(
-        override val isLiveMode: Boolean,
-    ) : CustomerSheetViewState(
-        isLiveMode = isLiveMode,
+    data object Loading : CustomerSheetViewState(
         isProcessing = false,
         canNavigateBack = false,
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
         }
@@ -57,7 +52,6 @@ internal sealed class CustomerSheetViewState(
         val title: String?,
         val savedPaymentMethods: List<PaymentMethod>,
         val paymentSelection: PaymentSelection?,
-        override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val isEditing: Boolean,
         val showGooglePay: Boolean,
@@ -67,7 +61,6 @@ internal sealed class CustomerSheetViewState(
         val errorMessage: String? = null,
         val mandateText: ResolvableString? = null,
     ) : CustomerSheetViewState(
-        isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         canNavigateBack = false,
     ) {
@@ -78,7 +71,6 @@ internal sealed class CustomerSheetViewState(
 
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Maybe(
                     isEditing = isEditing,
                     canEdit = canEdit,
@@ -97,7 +89,6 @@ internal sealed class CustomerSheetViewState(
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val draftPaymentSelection: PaymentSelection?,
         val enabled: Boolean,
-        override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val errorMessage: ResolvableString? = null,
         val isFirstPaymentMethod: Boolean,
@@ -110,13 +101,11 @@ internal sealed class CustomerSheetViewState(
         val bankAccountSelection: PaymentSelection.New.USBankAccount?,
         val errorReporter: ErrorReporter,
     ) : CustomerSheetViewState(
-        isLiveMode = isLiveMode,
         isProcessing = isProcessing,
         canNavigateBack = !isFirstPaymentMethod,
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
         }
@@ -124,15 +113,12 @@ internal sealed class CustomerSheetViewState(
 
     data class UpdatePaymentMethod(
         val updatePaymentMethodInteractor: UpdatePaymentMethodInteractor,
-        override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
-        isLiveMode = isLiveMode,
         isProcessing = false,
         canNavigateBack = true,
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
         }

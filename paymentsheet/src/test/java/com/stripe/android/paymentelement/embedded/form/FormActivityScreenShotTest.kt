@@ -154,7 +154,6 @@ internal class FormActivityScreenShotTest {
         )
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,

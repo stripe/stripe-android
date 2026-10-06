@@ -18,7 +18,6 @@ internal class FakeSelectSavedPaymentMethodsInteractor(
     private val viewActionRecorder: ViewActionRecorder<SelectSavedPaymentMethodsInteractor.ViewAction> =
         ViewActionRecorder(),
 ) : SelectSavedPaymentMethodsInteractor {
-    override val isLiveMode: Boolean = true
 
     override val state: StateFlow<SelectSavedPaymentMethodsInteractor.State> = stateFlowOf(initialState)
 

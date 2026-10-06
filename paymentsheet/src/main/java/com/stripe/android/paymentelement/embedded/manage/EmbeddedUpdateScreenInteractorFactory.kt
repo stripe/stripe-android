@@ -33,7 +33,6 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     ): UpdatePaymentMethodInteractor {
         return DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails.value,
             canChangeCbc = customerStateHolder.canChangeCbc.value,

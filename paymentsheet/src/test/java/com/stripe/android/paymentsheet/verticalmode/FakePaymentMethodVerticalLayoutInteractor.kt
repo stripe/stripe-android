@@ -51,7 +51,6 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    override val isLiveMode: Boolean = true
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlowOf(initialState)
     override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(initialShowsWalletsHeader)
 

@@ -82,7 +82,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         val formHelper = createFormHelper(formHelperScope)
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper, coroutineScope),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
@@ -151,7 +150,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
             updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
     }

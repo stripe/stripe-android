@@ -503,7 +503,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,
                     cvc = "",
-                    isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
                 ),
                 processing = processing,
                 coroutineScope = viewModelScope,

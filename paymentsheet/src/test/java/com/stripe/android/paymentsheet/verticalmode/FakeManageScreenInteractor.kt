@@ -11,7 +11,6 @@ internal class FakeManageScreenInteractor(
     initialState: ManageScreenInteractor.State? = null,
     val viewActionRecorder: ViewActionRecorder<ManageScreenInteractor.ViewAction>? = null,
 ) : ManageScreenInteractor {
-    override val isLiveMode: Boolean = true
 
     val closeCalls = Turbine<Unit>()
 

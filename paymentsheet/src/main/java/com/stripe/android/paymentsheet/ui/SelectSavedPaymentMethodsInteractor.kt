@@ -26,8 +26,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal interface SelectSavedPaymentMethodsInteractor {
-    val isLiveMode: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -65,7 +63,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onAddCardPressed: () -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
-    override val isLiveMode: Boolean,
     private val linkBrand: LinkBrand,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
@@ -276,7 +273,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     }
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 linkBrand = paymentMethodMetadata.effectiveLinkBrand(
                     viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value
                 ),

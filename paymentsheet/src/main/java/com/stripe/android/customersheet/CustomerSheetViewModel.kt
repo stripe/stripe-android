@@ -175,15 +175,9 @@ internal class CustomerSheetViewModel(
         )
     )
 
-    private val isConfiguredLiveMode = apiConfigurationProvider.get().isLiveMode()
-    private val isLiveMode
-        get() = customerState.value.metadata?.stripeIntent?.isLiveMode ?: isConfiguredLiveMode
-
     private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
         listOf(
-            CustomerSheetViewState.Loading(
-                isLiveMode = isLiveMode
-            )
+            CustomerSheetViewState.Loading
         )
     )
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
@@ -216,7 +210,6 @@ internal class CustomerSheetViewModel(
             title = configuration.headerTextForSelectionScreen,
             savedPaymentMethods = paymentMethods,
             paymentSelection = paymentSelection,
-            isLiveMode = isLiveMode,
             canRemovePaymentMethods = customerState.canRemove,
             primaryButtonVisible = primaryButtonVisible,
             showGooglePay = shouldShowGooglePay(paymentMethodMetadata),
@@ -588,7 +581,6 @@ internal class CustomerSheetViewModel(
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                    isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
                     canUpdateCardExpiryAndBillingDetails = customerState.canUpdateCardExpiryAndBillingDetails,
                     canChangeCbc = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
@@ -623,7 +615,6 @@ internal class CustomerSheetViewModel(
                     },
                     autocompleteAddressInteractorFactory = null,
                 ),
-                isLiveMode = isLiveMode,
             )
         )
     }
@@ -863,7 +854,6 @@ internal class CustomerSheetViewModel(
                 ),
                 draftPaymentSelection = null,
                 enabled = true,
-                isLiveMode = isLiveMode,
                 isProcessing = false,
                 isFirstPaymentMethod = isFirstPaymentMethod,
                 primaryButtonLabel = R.string.stripe_paymentsheet_save.resolvableString,
