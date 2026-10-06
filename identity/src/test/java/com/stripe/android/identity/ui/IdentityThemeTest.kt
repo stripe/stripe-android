@@ -1,20 +1,35 @@
 package com.stripe.android.identity.ui
 
+import android.net.Uri
 import android.os.Build
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Typography
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet.Configuration.ButtonColor
 import com.stripe.android.identity.IdentityVerificationSheet.Configuration.ButtonShape
 import com.stripe.android.identity.IdentityVerificationSheet.Configuration.PrimaryButtonStyle
 import com.stripe.android.identity.IdentityVerificationSheet.Configuration.SecondaryButtonStyle
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.networking.models.VerificationPageIconType
+import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -259,5 +274,69 @@ internal class IdentityThemeTest {
         const val configuredSecondaryElevation = 5f
         const val buttonText = "Button text"
         const val uppercaseButtonText = "BUTTON TEXT"
+    }
+
+    @Test
+    fun `consent body and subtitle preserve custom font with Identity size and weight`() = runScenario(
+        hostingAppTypography = Typography(
+            defaultFontFamily = FontFamily.Monospace,
+            body1 = TextStyle(
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Medium
+            )
+        )
+    ) {
+        val bodyStyle = textLayout(composeRule.onNodeWithTag(CONSENT_LINE_TAG).onChildAt(1)).layoutInput.style
+        assertThat(bodyStyle.fontFamily).isEqualTo(FontFamily.Monospace)
+        assertThat(bodyStyle.fontSize).isEqualTo(16.sp)
+        assertThat(bodyStyle.fontWeight).isEqualTo(FontWeight.Normal)
+
+        val subtitleStyle = textLayout(composeRule.onNodeWithTag(SUBTITLE_TAG)).layoutInput.style
+        assertThat(subtitleStyle.fontFamily).isEqualTo(FontFamily.Monospace)
+        assertThat(subtitleStyle.fontSize).isEqualTo(16.sp)
+        assertThat(subtitleStyle.fontWeight).isEqualTo(FontWeight.Normal)
+    }
+
+    private fun runScenario(
+        hostingAppTypography: Typography,
+        block: IdentityThemeTest.() -> Unit
+    ) {
+        composeRule.setContent {
+            AdoptForStripeTheme(
+                hostingAppColors = MaterialTheme.colors,
+                hostingAppTypography = hostingAppTypography,
+                hostingAppShapes = MaterialTheme.shapes,
+                inspectionMode = true
+            ) {
+                Column {
+                    ConsentWelcomeHeader(
+                        merchantLogoUri = Uri.EMPTY,
+                        title = "Verify your identity",
+                        subtitle = "Complete a one-time identity check.",
+                        showLogos = false,
+                        showStripeLogo = false
+                    )
+                    ConsentLines(
+                        lines = listOf(
+                            VerificationPageStaticConsentLineContent(
+                                icon = VerificationPageIconType.CAMERA,
+                                content = "Take a photo of your ID."
+                            )
+                        ),
+                        bottomSheets = null,
+                        textColor = MaterialTheme.colors.onBackground
+                    )
+                }
+            }
+        }
+        block()
+    }
+
+    private fun textLayout(node: SemanticsNodeInteraction): TextLayoutResult {
+        val results = mutableListOf<TextLayoutResult>()
+        node.performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
+            it(results)
+        }
+        return results.single()
     }
 }
