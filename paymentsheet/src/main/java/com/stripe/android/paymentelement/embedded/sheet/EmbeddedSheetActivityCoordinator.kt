@@ -7,23 +7,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
+import com.stripe.android.paymentelement.embedded.toState
 
 internal class EmbeddedSheetActivityCoordinator(
     private val activity: EmbeddedSheetActivity,
-    initialArgs: EmbeddedActivityArgs,
+    initialState: EmbeddedActivityState,
     private val presentationFactory: EmbeddedSheetPresentationFactory,
 ) {
     private var state by mutableStateOf(
         State(
-            args = initialArgs,
+            state = initialState,
             presentation = presentationFactory.create(
                 activity = activity,
-                args = initialArgs,
+                state = initialState,
                 activityResultCaller = activity,
             ),
         ),
     )
+
+    val currentState: EmbeddedActivityState
+        get() = state.state
 
     fun register() {
         state.presentation.register()
@@ -43,24 +47,21 @@ internal class EmbeddedSheetActivityCoordinator(
     }
 
     fun handleNewIntent(intent: Intent) {
-        val updatedArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
-        val isValidTransition =
-            !activity.isFinishing &&
-                state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
-                state.args.launchMode is EmbeddedLaunchMode.PaymentOptions &&
-                updatedArgs.presentationState == EmbeddedActivityArgs.PresentationState.Ready &&
-                updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions
+        val updatedState = EmbeddedActivityArgs.fromIntent(intent)?.toState() ?: return
+        val isValidTransition = !activity.isFinishing &&
+            state.state is EmbeddedActivityState.LoadingPaymentOptions &&
+            updatedState is EmbeddedActivityState.Ready.PaymentOptions
         if (!isValidTransition) return
 
         activity.intent = intent
         state.presentation.onDestroy()
         state = State(
-            args = updatedArgs,
+            state = updatedState,
             presentation = presentationFactory.create(
                 activity = activity,
-                args = updatedArgs,
+                state = updatedState,
                 activityResultCaller = PaymentElementActivityResultCaller(
-                    key = "EmbeddedSheetActivity_${updatedArgs.paymentElementCallbackIdentifier}",
+                    key = "EmbeddedSheetActivity_${updatedState.context.paymentElementCallbackIdentifier}",
                     registryOwner = activity,
                 ),
             ),
@@ -73,7 +74,7 @@ internal class EmbeddedSheetActivityCoordinator(
     }
 
     private data class State(
-        val args: EmbeddedActivityArgs,
+        val state: EmbeddedActivityState,
         val presentation: EmbeddedSheetPresentation,
     )
 }

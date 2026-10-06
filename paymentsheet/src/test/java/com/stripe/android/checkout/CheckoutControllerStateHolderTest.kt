@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -14,7 +13,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.previousNewSelection
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -215,7 +214,7 @@ internal class CheckoutControllerStateHolderTest {
 
     @Test
     fun `setSelection with a new selection emits and stashes it into previousNewSelections`() = testScenario {
-        val originalPreviousNewSelections = Bundle()
+        val originalPreviousNewSelections = PreviousNewSelections.empty
         stateHolder.state = committedState(previousNewSelections = originalPreviousNewSelections)
 
         stateHolder.selection.test {
@@ -247,16 +246,14 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `setPreviousNewSelections merges into the existing previousNewSelections rather than replacing`() =
         testScenario {
-            val originalPreviousNewSelections = Bundle().apply {
-                putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            }
+            val originalPreviousNewSelections = PreviousNewSelections.empty
+                .updatedWith(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             stateHolder.state = committedState(
                 previousNewSelections = originalPreviousNewSelections,
             )
 
-            val bundle = Bundle().apply {
-                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            }
+            val bundle = PreviousNewSelections.empty
+                .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             stateHolder.setPreviousNewSelections(bundle)
 
             assertThat(stateHolder.state?.previousNewSelections).isNotSameInstanceAs(originalPreviousNewSelections)
@@ -264,7 +261,7 @@ internal class CheckoutControllerStateHolderTest {
                 .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             assertThat(stateHolder.getPreviousNewSelection("cashapp"))
                 .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            assertThat(originalPreviousNewSelections.previousNewSelection("cashapp")).isNull()
+            assertThat(originalPreviousNewSelections["cashapp"]).isNull()
         }
 
     @Test
@@ -276,7 +273,7 @@ internal class CheckoutControllerStateHolderTest {
         assertSetBeforeLoadError(operation = "setTemporarySelection")
 
         stateHolder.setPreviousNewSelections(
-            Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
+            PreviousNewSelections.empty.updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION),
         )
         assertSetBeforeLoadError(operation = "setPreviousNewSelections")
 
@@ -293,9 +290,8 @@ internal class CheckoutControllerStateHolderTest {
         val restored = committedState(
             paymentSelection = PaymentSelection.GooglePay,
             temporarySelection = "card",
-            previousNewSelections = Bundle().apply {
-                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
-            },
+            previousNewSelections = PreviousNewSelections.empty
+                .updatedWith(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION),
         )
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
@@ -313,7 +309,7 @@ internal class CheckoutControllerStateHolderTest {
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
-        previousNewSelections: Bundle = Bundle(),
+        previousNewSelections: PreviousNewSelections = PreviousNewSelections.empty,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,

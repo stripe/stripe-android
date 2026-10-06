@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
@@ -24,6 +23,7 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -423,7 +423,7 @@ class CheckoutController @Inject internal constructor(
                 copy(
                     paymentSelection = null,
                     temporarySelection = null,
-                    previousNewSelections = Bundle(),
+                    previousNewSelections = PreviousNewSelections.empty,
                 )
             },
         ) {

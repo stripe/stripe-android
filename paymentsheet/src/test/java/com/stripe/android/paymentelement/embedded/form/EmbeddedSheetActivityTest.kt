@@ -31,9 +31,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.createCustomerState
@@ -254,21 +255,21 @@ internal class EmbeddedSheetActivityTest {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = configuration,
-                    productUsage = setOf("EmbeddedPaymentElement"),
-                    statusBarColor = null,
-                    paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
-                    selection = null,
-                    previousNewSelections = Bundle(),
-                    customerState = createCustomerState(paymentMethods = emptyList()),
-                    linkAccountInfo = LinkAccountUpdate.Value(null),
-                    promotions = emptyList(),
-                    launchMode = EmbeddedLaunchMode.Form(
-                        selectedPaymentMethodCode = selectedPaymentMethodCode,
+                input = EmbeddedActivityState.Ready.Form(
+                    context = EmbeddedActivityState.Context(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = configuration,
+                        productUsage = setOf("EmbeddedPaymentElement"),
+                        statusBarColor = null,
+                        paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
+                        promotions = emptyList(),
                     ),
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    selectedPaymentMethodCode = selectedPaymentMethodCode,
+                    initialSelection = null,
+                    previousNewSelections = PreviousNewSelections.empty,
+                    customerState = createCustomerState(paymentMethods = emptyList()),
+                    promotion = null,
                 ),
             )
         ).use { scenario ->

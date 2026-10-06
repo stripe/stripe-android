@@ -1,7 +1,6 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
-import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
@@ -14,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -85,7 +85,9 @@ internal class DefaultEmbeddedStateHelperTest {
             selection = PaymentSelection.GooglePay,
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         )
-        selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setPreviousNewSelections(
+            PreviousNewSelections.empty.updatedWith(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        )
 
         confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(stateHelper.state).isNotNull()
@@ -271,7 +273,7 @@ internal class DefaultEmbeddedStateHelperTest {
                     statusBarColor = null,
                 ),
                 customer = customer,
-                previousNewSelections = Bundle(),
+                previousNewSelections = PreviousNewSelections.empty,
             )
         }
     }

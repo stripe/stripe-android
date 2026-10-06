@@ -3,8 +3,8 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Activity
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.runtime.Composable
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 
 internal interface EmbeddedSheetPresentation {
     fun register()
@@ -18,30 +18,21 @@ internal interface EmbeddedSheetPresentation {
 
     fun onDestroy()
 
-    interface Factory {
-        fun create(
-            activity: EmbeddedSheetActivity,
-            args: EmbeddedActivityArgs,
-            activityResultCaller: ActivityResultCaller,
-        ): EmbeddedSheetPresentation
-    }
-
     companion object : EmbeddedSheetPresentationFactory {
         override fun create(
             activity: EmbeddedSheetActivity,
-            args: EmbeddedActivityArgs,
+            state: EmbeddedActivityState,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
-            return when (args.presentationState) {
-                EmbeddedActivityArgs.PresentationState.Loading -> LoadingEmbeddedSheetPresentation.Factory.create(
+            return when (state) {
+                is EmbeddedActivityState.LoadingPaymentOptions -> LoadingEmbeddedSheetPresentation.Factory.create(
                     activity = activity,
-                    args = args,
-                    activityResultCaller = activityResultCaller,
+                    state = state,
                 )
-                EmbeddedActivityArgs.PresentationState.Ready ->
-                    EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
+                is EmbeddedActivityState.Ready ->
+                    EmbeddedSheetViewModel.Factory { state }.createReadyPresentation(
                         activity = activity,
-                        args = args,
+                        state = state,
                         activityResultCaller = activityResultCaller,
                     )
             }
@@ -52,7 +43,7 @@ internal interface EmbeddedSheetPresentation {
 internal interface EmbeddedSheetPresentationFactory {
     fun create(
         activity: EmbeddedSheetActivity,
-        args: EmbeddedActivityArgs,
+        state: EmbeddedActivityState,
         activityResultCaller: ActivityResultCaller,
     ): EmbeddedSheetPresentation
 }

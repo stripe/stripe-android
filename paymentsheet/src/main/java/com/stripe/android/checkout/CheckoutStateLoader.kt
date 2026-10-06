@@ -1,12 +1,12 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
-import android.os.Bundle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -203,7 +203,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val cachedFlagImages: Map<String, Bitmap>?,
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
-        val previousNewSelections: Bundle,
+        val previousNewSelections: PreviousNewSelections,
         val linkEagerPresentationSuppressed: Boolean,
     ) {
         companion object {
@@ -212,7 +212,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 cachedFlagImages = null,
                 previousSelection = null,
                 temporarySelection = null,
-                previousNewSelections = Bundle(),
+                previousNewSelections = PreviousNewSelections.empty,
                 linkEagerPresentationSuppressed = false,
             )
 
