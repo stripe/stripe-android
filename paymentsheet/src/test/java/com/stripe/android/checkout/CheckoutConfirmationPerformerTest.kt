@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
@@ -40,6 +41,17 @@ internal class CheckoutConfirmationPerformerTest {
     @Test
     fun `confirm does nothing when there is no selection`() = runScenario(
         state = CheckoutControllerStateFactory.create(paymentSelection = null),
+    ) {
+        performer.confirm()
+    }
+
+    @Test
+    fun `confirm does nothing when checkout session is expired`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                status = CheckoutSessionResponse.Status.EXPIRED,
+            )
+        ),
     ) {
         performer.confirm()
     }
@@ -161,6 +173,7 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
+            stateHolder = stateHolder,
             logger = Logger.noop(),
             resultCallback = {},
             viewModelScope = backgroundScope,

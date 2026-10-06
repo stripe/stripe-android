@@ -208,6 +208,25 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `launchForm is not launched when checkout session is expired`() = testScenario {
+        checkoutStateHolder.state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                status = CheckoutSessionResponse.Status.EXPIRED,
+            )
+        )
+
+        sheetLauncher.launchForm(
+            code = "card",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = null,
+            promotion = null,
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
     fun `formActivityLauncher sets selection and customer state on complete result`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         launchForm("cashapp")
@@ -275,6 +294,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `formActivityLauncher refreshes checkout session from complete result`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         sessionRefresher.enqueueRefreshAction {}
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
@@ -291,11 +311,17 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         runCurrent()
 
-        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(awaitRefreshCall()).isEqualTo(
+            FakeCheckoutSessionRefresher.Call.CommitWithSelection(
+                response = response,
+                paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                previousNewSelections = result.previousNewSelections,
+            )
+        )
     }
 
     @Test
@@ -875,9 +901,10 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `paymentOptionsResult contains checkout session refresh failure`() = testScenario {
+    fun `paymentOptionsResult keeps previous selection when checkout session refresh fails`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
         val expectedError = IllegalStateException("Refresh failed")
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         sessionRefresher.enqueueRefreshAction { throw expectedError }
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
@@ -894,8 +921,14 @@ internal class CheckoutSheetLauncherTest {
         callback.onActivityResult(result)
         runCurrent()
 
-        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        assertThat(awaitRefreshCall()).isEqualTo(
+            FakeCheckoutSessionRefresher.Call.CommitWithSelection(
+                response = response,
+                paymentSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                previousNewSelections = result.previousNewSelections,
+            )
+        )
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(logger.errorLogs).containsExactly(
             "Failed to refresh the checkout session after the sheet closed." to expectedError
         )
@@ -1149,12 +1182,16 @@ internal class CheckoutSheetLauncherTest {
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val checkoutStateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
+            state = CheckoutControllerStateFactory.create()
+        }
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            stateHolder = checkoutStateHolder,
             logger = logger,
             resultCallback = {},
             viewModelScope = backgroundScope,
@@ -1177,6 +1214,7 @@ internal class CheckoutSheetLauncherTest {
                     activityResultCaller = activityResultCaller,
                     lifecycleOwner = owner,
                     selectionHolder = selectionHolder,
+                    checkoutStateHolder = checkoutStateHolder,
                     customerStateHolder = customerStateHolder,
                     linkAccountHolder = linkAccountHolder,
                     sheetStateHolder = sheetStateHolder,
@@ -1204,6 +1242,7 @@ internal class CheckoutSheetLauncherTest {
 
             Scenario(
                 selectionHolder = selectionHolder,
+                checkoutStateHolder = checkoutStateHolder,
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = linkAccountHolder,
@@ -1232,6 +1271,7 @@ internal class CheckoutSheetLauncherTest {
 
     private class Scenario(
         val selectionHolder: CheckoutControllerStateHolder,
+        val checkoutStateHolder: CheckoutControllerStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val linkAccountHolder: LinkAccountHolder,
