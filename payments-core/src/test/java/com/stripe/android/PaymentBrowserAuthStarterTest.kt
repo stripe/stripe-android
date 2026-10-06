@@ -142,7 +142,6 @@ class PaymentBrowserAuthStarterTest {
 
     private companion object {
         private val DATA = PaymentBrowserAuthContract.Args(
-            shouldUseAppChooser = false,
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 50000,
             clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",

@@ -97,10 +97,6 @@
     See https://developer.android.com/training/package-visibility/declaring for more details.
     -->
     <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="upi" />
-        </intent>
         <!--
         Added to check if Chrome is installed for browser-based payment authentication (e.g. 3DS1).
         -->

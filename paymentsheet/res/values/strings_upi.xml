@@ -4,4 +4,6 @@
     <string name="stripe_upi_choose_app">Pay with</string>
     <!-- Error shown when no installed app can handle a UPI payment. -->
     <string name="stripe_upi_no_compatible_apps">No compatible UPI app is available. Install a UPI app and try again.</string>
+    <!-- Error shown when launching a UPI payment app fails. -->
+    <string name="stripe_upi_launch_failed">Unable to open a UPI app. Please try again.</string>
 </resources>

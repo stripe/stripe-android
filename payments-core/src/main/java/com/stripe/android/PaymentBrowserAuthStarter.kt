@@ -23,9 +23,7 @@ internal interface PaymentBrowserAuthStarter :
                 .copy(statusBarColor = host.statusBarColor)
                 .toBundle()
 
-            val destination = if (
-                args.shouldUseAppChooser || args.hasDefaultReturnUrl(defaultReturnUrl) || args.isInstantApp
-            ) {
+            val destination = if (args.hasDefaultReturnUrl(defaultReturnUrl) || args.isInstantApp) {
                 StripeBrowserLauncherActivity::class.java
             } else {
                 PaymentAuthWebViewActivity::class.java
