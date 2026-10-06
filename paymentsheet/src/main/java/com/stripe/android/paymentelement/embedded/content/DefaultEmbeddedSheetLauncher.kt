@@ -9,8 +9,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -78,7 +78,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         )
     }
 
-    private val activityLauncher: ActivityResultLauncher<EmbeddedActivityState> =
+    private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             result.linkAccountInfoOrNull?.let(linkAccountHolder::set)
             sheetStateHolder.sheetIsOpen = false
@@ -185,11 +185,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
-        val args = EmbeddedActivityState.Ready.Form(
+        val args = EmbeddedActivityArgs.Ready.Form(
             context = createContext(paymentMethodMetadata, configuration),
             selectedPaymentMethodCode = code,
             initialSelection = currentSelection,
-            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = promotion,
         )
@@ -210,10 +209,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedActivityState.Ready.Manage(
+        val args = EmbeddedActivityArgs.Ready.Manage(
             context = createContext(paymentMethodMetadata, configuration),
             initialSelection = selection,
-            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
         )
         activityLauncher.launch(args)
@@ -233,11 +231,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedActivityState.Ready.PaymentOptions(
+        val args = EmbeddedActivityArgs.Ready.PaymentOptions(
             context = createContext(paymentMethodMetadata, configuration),
             initialSelection = selection,
-            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
+            promotions = emptyList(),
         )
         activityLauncher.launch(args)
     }
@@ -245,15 +243,15 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private fun createContext(
         paymentMethodMetadata: PaymentMethodMetadata,
         configuration: EmbeddedPaymentElement.Configuration,
-    ): EmbeddedActivityState.Context {
-        return EmbeddedActivityState.Context(
+    ): EmbeddedActivityArgs.ReadyContext {
+        return EmbeddedActivityArgs.ReadyContext(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            promotions = emptyList(),
+            previousNewSelections = selectionHolder.previousNewSelections,
         )
     }
 }

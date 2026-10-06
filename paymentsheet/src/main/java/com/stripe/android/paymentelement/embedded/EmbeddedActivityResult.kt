@@ -9,14 +9,12 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.TypeParceler
 
 internal sealed interface EmbeddedActivityResult : Parcelable {
 
     val launchMode: EmbeddedLaunchMode
 
     @Parcelize
-    @TypeParceler<PreviousNewSelections, PreviousNewSelectionsParceler>()
     data class Complete(
         val selection: PaymentSelection?,
         val previousNewSelections: PreviousNewSelections,

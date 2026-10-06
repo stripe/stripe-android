@@ -7,12 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
-import com.stripe.android.paymentelement.embedded.toState
 
 internal class EmbeddedSheetActivityCoordinator(
     private val activity: EmbeddedSheetActivity,
-    initialState: EmbeddedActivityState,
+    initialState: EmbeddedActivityArgs,
     private val presentationFactory: EmbeddedSheetPresentationFactory,
 ) {
     private var state by mutableStateOf(
@@ -26,7 +24,7 @@ internal class EmbeddedSheetActivityCoordinator(
         ),
     )
 
-    val currentState: EmbeddedActivityState
+    val currentState: EmbeddedActivityArgs
         get() = state.state
 
     fun register() {
@@ -47,10 +45,10 @@ internal class EmbeddedSheetActivityCoordinator(
     }
 
     fun handleNewIntent(intent: Intent) {
-        val updatedState = EmbeddedActivityArgs.fromIntent(intent)?.toState() ?: return
+        val updatedState = EmbeddedActivityArgs.fromIntent(intent) ?: return
         val isValidTransition = !activity.isFinishing &&
-            state.state is EmbeddedActivityState.LoadingPaymentOptions &&
-            updatedState is EmbeddedActivityState.Ready.PaymentOptions
+            state.state is EmbeddedActivityArgs.LoadingPaymentOptions &&
+            updatedState is EmbeddedActivityArgs.Ready.PaymentOptions
         if (!isValidTransition) return
 
         activity.intent = intent
@@ -74,7 +72,7 @@ internal class EmbeddedSheetActivityCoordinator(
     }
 
     private data class State(
-        val state: EmbeddedActivityState,
+        val state: EmbeddedActivityArgs,
         val presentation: EmbeddedSheetPresentation,
     )
 }

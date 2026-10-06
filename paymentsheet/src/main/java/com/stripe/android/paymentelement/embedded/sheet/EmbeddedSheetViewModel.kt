@@ -7,7 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,11 +23,11 @@ internal class EmbeddedSheetViewModel @Inject constructor(
     }
 
     class Factory(
-        private val stateSupplier: () -> EmbeddedActivityState.Ready,
+        private val stateSupplier: () -> EmbeddedActivityArgs.Ready,
     ) : ViewModelProvider.Factory {
         fun createReadyPresentation(
             activity: EmbeddedSheetActivity,
-            state: EmbeddedActivityState.Ready,
+            state: EmbeddedActivityArgs.Ready,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             val viewModel = ViewModelProvider(activity, this)[EmbeddedSheetViewModel::class.java]
@@ -57,7 +57,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             )
 
             component.customerStateHolder.setCustomerState(state.customerState)
-            component.selectionHolder.setPreviousNewSelections(state.previousNewSelections)
+            component.selectionHolder.setPreviousNewSelections(context.previousNewSelections)
             component.selectionHolder.setSelection(state.initialSelection)
             component.linkAccountHolder.set(state.context.linkAccountInfo)
 

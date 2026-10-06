@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 
 internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     @Assisted private val activity: EmbeddedSheetActivity,
-    @Assisted private val state: EmbeddedActivityState.Ready,
+    @Assisted private val state: EmbeddedActivityArgs.Ready,
     @Assisted private val activityResultCaller: ActivityResultCaller,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
@@ -98,25 +98,25 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
 
     private fun createDismissalResult(): EmbeddedActivityResult {
         return when (state) {
-            is EmbeddedActivityState.Ready.Form -> EmbeddedActivityResult.Cancelled(
+            is EmbeddedActivityArgs.Ready.Form -> EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = state.launchMode,
             )
-            is EmbeddedActivityState.Ready.Manage -> createManageResult(
+            is EmbeddedActivityArgs.Ready.Manage -> createManageResult(
                 shouldInvokeSelectionCallback = false,
             )
-            is EmbeddedActivityState.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedActivityArgs.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
 
     private fun createNavigatorResult(result: Boolean?): EmbeddedActivityResult {
         return when (state) {
-            is EmbeddedActivityState.Ready.Form -> createDismissalResult()
-            is EmbeddedActivityState.Ready.Manage -> createManageResult(
+            is EmbeddedActivityArgs.Ready.Form -> createDismissalResult()
+            is EmbeddedActivityArgs.Ready.Manage -> createManageResult(
                 shouldInvokeSelectionCallback = result == true,
             )
-            is EmbeddedActivityState.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedActivityArgs.Ready.PaymentOptions -> createPaymentOptionsCancellationResult()
         }
     }
 
@@ -167,7 +167,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     interface Factory {
         fun create(
             activity: EmbeddedSheetActivity,
-            state: EmbeddedActivityState.Ready,
+            state: EmbeddedActivityArgs.Ready,
             activityResultCaller: ActivityResultCaller,
         ): ReadyEmbeddedSheetPresentation
     }

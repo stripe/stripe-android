@@ -3,8 +3,8 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Activity
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.runtime.Composable
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 
 internal interface EmbeddedSheetPresentation {
     fun register()
@@ -21,15 +21,15 @@ internal interface EmbeddedSheetPresentation {
     companion object : EmbeddedSheetPresentationFactory {
         override fun create(
             activity: EmbeddedSheetActivity,
-            state: EmbeddedActivityState,
+            state: EmbeddedActivityArgs,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             return when (state) {
-                is EmbeddedActivityState.LoadingPaymentOptions -> LoadingEmbeddedSheetPresentation.Factory.create(
+                is EmbeddedActivityArgs.LoadingPaymentOptions -> LoadingEmbeddedSheetPresentation.Factory.create(
                     activity = activity,
                     state = state,
                 )
-                is EmbeddedActivityState.Ready ->
+                is EmbeddedActivityArgs.Ready ->
                     EmbeddedSheetViewModel.Factory { state }.createReadyPresentation(
                         activity = activity,
                         state = state,
@@ -43,7 +43,7 @@ internal interface EmbeddedSheetPresentation {
 internal interface EmbeddedSheetPresentationFactory {
     fun create(
         activity: EmbeddedSheetActivity,
-        state: EmbeddedActivityState,
+        state: EmbeddedActivityArgs,
         activityResultCaller: ActivityResultCaller,
     ): EmbeddedSheetPresentation
 }

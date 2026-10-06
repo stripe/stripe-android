@@ -6,13 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 
 internal class LoadingEmbeddedSheetPresentation(
     private val activity: EmbeddedSheetActivity,
-    private val state: EmbeddedActivityState.LoadingPaymentOptions,
+    private val state: EmbeddedActivityArgs.LoadingPaymentOptions,
 ) : EmbeddedSheetPresentation {
     private var backCallback: OnBackPressedCallback? = null
 
@@ -44,7 +44,7 @@ internal class LoadingEmbeddedSheetPresentation(
     private fun createCancellationResult(): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = state.customerState,
-            linkAccountInfo = state.context.linkAccountInfo,
+            linkAccountInfo = state.linkAccountInfo,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
     }
@@ -52,7 +52,7 @@ internal class LoadingEmbeddedSheetPresentation(
     object Factory {
         fun create(
             activity: EmbeddedSheetActivity,
-            state: EmbeddedActivityState.LoadingPaymentOptions,
+            state: EmbeddedActivityArgs.LoadingPaymentOptions,
         ): LoadingEmbeddedSheetPresentation {
             return LoadingEmbeddedSheetPresentation(
                 activity = activity,

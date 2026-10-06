@@ -14,9 +14,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.PreviousNewSelections
-import com.stripe.android.paymentelement.embedded.toArgs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -100,6 +98,14 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
         assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
         assertThat(activity.intent).isSameInstanceAs(readyIntent)
+        assertThat(coordinator.currentState).isEqualTo(readyState)
+
+        coordinator.handleNewIntent(createIntent(createReadyState()))
+        assertThat(coordinator.currentState).isEqualTo(readyState)
+        assertThat(activity.intent).isSameInstanceAs(readyIntent)
+        presentationFactory.createCalls.expectNoEvents()
+        readyPresentation.registerCalls.expectNoEvents()
+        readyPresentation.onDestroyCalls.expectNoEvents()
 
         coordinator.onDestroy()
         assertThat(readyPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
@@ -127,6 +133,21 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     }
 
     @Test
+    fun `ready form intent is ignored`() = runScenario {
+        assertTransitionIgnored(
+            createIntent(
+                EmbeddedActivityArgs.Ready.Form(
+                    context = createManageState().context,
+                    selectedPaymentMethodCode = "card",
+                    initialSelection = null,
+                    customerState = null,
+                    promotion = null,
+                )
+            )
+        )
+    }
+
+    @Test
     fun `ready coordinator ignores later ready intent`() = runScenario(
         initialState = createReadyState(),
     ) {
@@ -145,7 +166,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     }
 
     private fun runScenario(
-        initialState: EmbeddedActivityState = createLoadingState(),
+        initialState: EmbeddedActivityArgs = createLoadingState(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val activity = Robolectric.buildActivity(EmbeddedSheetActivity::class.java).get()
@@ -179,7 +200,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
     private data class Scenario(
         val activity: EmbeddedSheetActivity,
-        val state: EmbeddedActivityState,
+        val state: EmbeddedActivityArgs,
         val coordinator: EmbeddedSheetActivityCoordinator,
         val initialPresentation: FakeEmbeddedSheetPresentation,
         val readyPresentation: FakeEmbeddedSheetPresentation,
@@ -208,13 +229,13 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         override fun create(
             activity: EmbeddedSheetActivity,
-            state: EmbeddedActivityState,
+            state: EmbeddedActivityArgs,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             createCalls.add(CreateCall(activity, state, activityResultCaller))
             return when (state) {
-                is EmbeddedActivityState.LoadingPaymentOptions -> initialPresentation
-                is EmbeddedActivityState.Ready -> readyPresentation
+                is EmbeddedActivityArgs.LoadingPaymentOptions -> initialPresentation
+                is EmbeddedActivityArgs.Ready -> readyPresentation
             }
         }
 
@@ -224,7 +245,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         data class CreateCall(
             val activity: EmbeddedSheetActivity,
-            val state: EmbeddedActivityState,
+            val state: EmbeddedActivityArgs,
             val activityResultCaller: ActivityResultCaller,
         )
     }
@@ -272,47 +293,45 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         fun createReadyState(
             callbackIdentifier: String = "callback_identifier",
-        ): EmbeddedActivityState.Ready.PaymentOptions {
-            return EmbeddedActivityState.Ready.PaymentOptions(
+        ): EmbeddedActivityArgs.Ready.PaymentOptions {
+            return EmbeddedActivityArgs.Ready.PaymentOptions(
                 context = createContext(callbackIdentifier),
                 initialSelection = null,
-                previousNewSelections = PreviousNewSelections.empty,
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+                promotions = emptyList(),
             )
         }
 
-        fun createManageState(): EmbeddedActivityState.Ready.Manage {
-            return EmbeddedActivityState.Ready.Manage(
+        fun createManageState(): EmbeddedActivityArgs.Ready.Manage {
+            return EmbeddedActivityArgs.Ready.Manage(
                 context = createContext("callback_identifier"),
                 initialSelection = null,
-                previousNewSelections = PreviousNewSelections.empty,
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             )
         }
 
-        fun createLoadingState(): EmbeddedActivityState.LoadingPaymentOptions {
-            return EmbeddedActivityState.LoadingPaymentOptions(
-                context = createContext("callback_identifier"),
-                initialSelection = null,
-                previousNewSelections = PreviousNewSelections.empty,
+        fun createLoadingState(): EmbeddedActivityArgs.LoadingPaymentOptions {
+            return EmbeddedActivityArgs.LoadingPaymentOptions(
+                appearance = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build().appearance,
+                linkAccountInfo = LinkAccountUpdate.Value(null),
                 customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             )
         }
 
-        private fun createContext(callbackIdentifier: String): EmbeddedActivityState.Context {
-            return EmbeddedActivityState.Context(
+        private fun createContext(callbackIdentifier: String): EmbeddedActivityArgs.ReadyContext {
+            return EmbeddedActivityArgs.ReadyContext(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 productUsage = setOf("EmbeddedPaymentElement"),
                 paymentElementCallbackIdentifier = callbackIdentifier,
                 statusBarColor = null,
-                linkAccountInfo = com.stripe.android.link.LinkAccountUpdate.Value(null),
-                promotions = emptyList(),
+                linkAccountInfo = LinkAccountUpdate.Value(null),
+                previousNewSelections = PreviousNewSelections.empty,
             )
         }
 
-        fun createIntent(state: EmbeddedActivityState): Intent {
-            return Intent().putExtra(EmbeddedActivityArgs.EXTRA_ARGS, state.toArgs())
+        fun createIntent(state: EmbeddedActivityArgs): Intent {
+            return Intent().putExtra(EmbeddedActivityArgs.EXTRA_ARGS, state)
         }
     }
 }

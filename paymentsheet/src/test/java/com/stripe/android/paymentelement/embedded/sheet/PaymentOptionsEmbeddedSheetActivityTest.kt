@@ -28,8 +28,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityState
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.PreviousNewSelections
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -441,9 +441,9 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         ),
         customerState: CustomerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         loading: Boolean = false,
-    ): EmbeddedActivityState {
+    ): EmbeddedActivityArgs {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val context = EmbeddedActivityState.Context(
+        val context = EmbeddedActivityArgs.ReadyContext(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
             productUsage = setOf("EmbeddedPaymentElement"),
@@ -453,21 +453,20 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 account = null,
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
-            promotions = emptyList(),
+            previousNewSelections = previousNewSelections,
         )
         return if (loading) {
-            EmbeddedActivityState.LoadingPaymentOptions(
-                context = context,
-                initialSelection = selection,
-                previousNewSelections = previousNewSelections,
+            EmbeddedActivityArgs.LoadingPaymentOptions(
+                appearance = context.configuration.appearance,
+                linkAccountInfo = context.linkAccountInfo,
                 customerState = customerState,
             )
         } else {
-            EmbeddedActivityState.Ready.PaymentOptions(
+            EmbeddedActivityArgs.Ready.PaymentOptions(
                 context = context,
                 initialSelection = selection,
-                previousNewSelections = previousNewSelections,
                 customerState = customerState,
+                promotions = emptyList(),
             )
         }
     }

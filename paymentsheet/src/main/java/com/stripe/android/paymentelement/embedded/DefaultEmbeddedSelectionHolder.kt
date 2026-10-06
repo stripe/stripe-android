@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -45,15 +44,11 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
     }
 
     private fun readPreviousNewSelections(): PreviousNewSelections {
-        return when (val savedSelections = savedStateHandle.get<Any?>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)) {
-            is Bundle -> PreviousNewSelections.fromBundle(savedSelections)
-            is PreviousNewSelections -> savedSelections
-            else -> PreviousNewSelections.empty
-        }
+        return savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] ?: PreviousNewSelections.empty
     }
 
     private fun persistPreviousNewSelections(selections: PreviousNewSelections) {
-        savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = selections.toBundle()
+        savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = selections
     }
 
     companion object {

@@ -8,16 +8,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.PreviousNewSelections
-import com.stripe.android.paymentelement.embedded.PreviousNewSelectionsParceler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.TypeParceler
 
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
-@TypeParceler<PreviousNewSelections, PreviousNewSelectionsParceler>()
 internal data class CheckoutControllerState(
     val configuration: CheckoutController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
