@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.FakeStripeImageLoader
 import org.junit.Test
@@ -65,7 +65,7 @@ internal class DefaultPaymentOptionSelectionFactoryTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val imageLoader = FakeStripeImageLoader()
         val factory = DefaultPaymentOptionSelectionFactory(
-            paymentOptionFactory = PaymentOptionFactory(
+            paymentOptionFactory = DefaultPaymentOptionFactory(
                 iconLoader = PaymentSelection.IconLoader(
                     resources = context.resources,
                     imageLoader = imageLoader,

@@ -84,7 +84,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -2449,7 +2449,7 @@ internal class DefaultFlowControllerTest {
             viewModelScope = testScope,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
-            paymentOptionFactory = PaymentOptionFactory(
+            paymentOptionFactory = DefaultPaymentOptionFactory(
                 iconLoader = PaymentSelection.IconLoader(
                     resources = context.resources,
                     imageLoader = DefaultStripeImageLoader(context),

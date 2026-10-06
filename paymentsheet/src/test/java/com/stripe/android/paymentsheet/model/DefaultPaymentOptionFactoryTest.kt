@@ -31,7 +31,7 @@ import kotlin.test.Test
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionFactoryTest {
+class DefaultPaymentOptionFactoryTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -337,7 +337,7 @@ class PaymentOptionFactoryTest {
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val imageLoader = FakeStripeImageLoader()
-        val factory = PaymentOptionFactory(
+        val factory = DefaultPaymentOptionFactory(
             iconLoader = PaymentSelection.IconLoader(
                 resources = context.resources,
                 imageLoader = imageLoader,
@@ -372,7 +372,7 @@ class PaymentOptionFactoryTest {
         cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
     ): PaymentOptionFactory {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        return PaymentOptionFactory(
+        return DefaultPaymentOptionFactory(
             iconLoader = PaymentSelection.IconLoader(
                 resources = context.resources,
                 imageLoader = DefaultStripeImageLoader(context),

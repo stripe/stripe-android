@@ -12,12 +12,20 @@ import com.stripe.android.paymentsheet.ui.isDarkTheme
 import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
 
-internal class PaymentOptionFactory @Inject constructor(
+internal fun interface PaymentOptionFactory {
+    fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+        appearance: PaymentSheet.Appearance?,
+    ): PaymentOption
+}
+
+internal class DefaultPaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
-) {
-    fun create(
+) : PaymentOptionFactory {
+    override fun create(
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
         appearance: PaymentSheet.Appearance?,
