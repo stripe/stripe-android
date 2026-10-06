@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.graphics.Color
+import android.graphics.drawable.ShapeDrawable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
@@ -15,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -85,6 +87,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
+import com.stripe.android.paymentsheet.model.FakePaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -385,6 +390,42 @@ internal class DefaultFlowControllerTest {
     fun `getPaymentOption() when defaultPaymentMethodId is null should be null`() {
         val flowController = createFlowController()
         assertThat(flowController.getPaymentOption()).isNull()
+    }
+
+    @Test
+    fun `getPaymentOption() passes default appearance to factory when state is null`() =
+        runPaymentOptionScenario(state = null) {
+            flowController.getPaymentOption()
+
+            val call = paymentOptionFactory.createCalls.awaitItem()
+            assertThat(call.selection).isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+            assertThat(call.linkBrand).isNull()
+            assertThat(call.appearance).isEqualTo(ConfigurationDefaults.appearance)
+        }
+
+    @Test
+    fun `getPaymentOption() passes configured appearance and Link brand to factory`() {
+        val appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.Builder.light().component(Color.BLACK).build(),
+        )
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder().appearance(appearance).build()
+        val state = DefaultFlowController.State(
+            paymentSheetState = PAYMENT_SHEET_STATE_FULL.copy(
+                config = config.asCommonConfiguration(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+            ),
+            config = config,
+            declinedLink2FA = false,
+        )
+
+        runPaymentOptionScenario(state = state) {
+            flowController.getPaymentOption()
+
+            val call = paymentOptionFactory.createCalls.awaitItem()
+            assertThat(call.selection).isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+            assertThat(call.linkBrand).isEqualTo(LinkBrand.Link)
+            assertThat(call.appearance).isEqualTo(appearance)
+        }
     }
 
     @Test
@@ -2327,6 +2368,40 @@ internal class DefaultFlowControllerTest {
             }
         }
 
+    private fun runPaymentOptionScenario(
+        state: DefaultFlowController.State?,
+        block: suspend PaymentOptionScenario.() -> Unit,
+    ) = runTest {
+        val paymentOptionFactory = FakePaymentOptionFactory(
+            result = PaymentOption(
+                drawableResourceId = 0,
+                label = "Payment option",
+                paymentMethodType = "card",
+                billingDetails = null,
+                _shippingDetails = null,
+                _labels = PaymentOption.Labels(label = "Payment option"),
+                imageLoader = { ShapeDrawable() },
+            ),
+        )
+        val viewModel = createViewModel()
+        viewModel.state = state
+        viewModel.paymentSelection = NEW_CARD_PAYMENT_SELECTION
+        val flowController = createFlowController(
+            paymentElementLoader = FakePaymentElementLoader(),
+            viewModel = viewModel,
+            paymentOptionFactory = paymentOptionFactory,
+        )
+
+        PaymentOptionScenario(flowController, paymentOptionFactory).block()
+
+        paymentOptionFactory.ensureAllEventsConsumed()
+    }
+
+    private data class PaymentOptionScenario(
+        val flowController: DefaultFlowController,
+        val paymentOptionFactory: FakePaymentOptionFactory,
+    )
+
     private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferred(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -2444,19 +2519,20 @@ internal class DefaultFlowControllerTest {
         paymentSelectionUpdater: PaymentSelectionUpdater = PaymentSelectionUpdater { _, _, newState, _, _ ->
             newState.paymentSelection
         },
+        paymentOptionFactory: PaymentOptionFactory = DefaultPaymentOptionFactory(
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = DefaultStripeImageLoader(context),
+            ),
+            cardArtDrawableLoader = { null },
+            context = context,
+        ),
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
-            paymentOptionFactory = DefaultPaymentOptionFactory(
-                iconLoader = PaymentSelection.IconLoader(
-                    resources = context.resources,
-                    imageLoader = DefaultStripeImageLoader(context),
-                ),
-                cardArtDrawableLoader = { null },
-                context = context,
-            ),
+            paymentOptionFactory = paymentOptionFactory,
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
             context = context,
