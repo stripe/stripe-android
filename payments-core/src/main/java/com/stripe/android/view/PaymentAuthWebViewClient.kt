@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -82,19 +81,11 @@ class PaymentAuthWebViewClient(
     private fun openIntentScheme(uri: Uri) {
         logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
         runCatching {
-            val parsedIntent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
             openIntent(
-                Intent(parsedIntent.action).apply {
-                    setDataAndType(parsedIntent.data, parsedIntent.type)
-                    setPackage(parsedIntent.`package`)
-                    flags = parsedIntent.flags
-                    sourceBounds = parsedIntent.sourceBounds
-                    parsedIntent.categories?.forEach { addCategory(it) }
+                Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME).apply {
+                    component = null
+                    selector = null
                     addCategory(Intent.CATEGORY_BROWSABLE)
-                    parsedIntent.extras?.let { putExtras(it) }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        identifier = parsedIntent.identifier
-                    }
                 }
             )
         }.onFailure { error ->
