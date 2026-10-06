@@ -40,7 +40,6 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
             loader = { packet ->
                 val isSystemDarkTheme = packet.isSystemDarkTheme ?: context.isSystemDarkTheme()
                 val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(isSystemDarkTheme)
-                    ?: useDarkThemeIcon(context)
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
@@ -63,17 +62,19 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
     }
 }
 
-internal fun useDarkThemeIcon(context: Context): Boolean {
+private fun useDarkThemeIcon(context: Context): Boolean {
     return context.isSystemDarkTheme() ||
         StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean?): Boolean? {
-    if (isSystemDarkTheme == null) return null
-    return shouldUseDarkThemeIconHelper(isSystemDarkTheme)
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(
+    isSystemDarkTheme: Boolean?,
+    context: Context,
+): Boolean {
+    return isSystemDarkTheme?.let { shouldUseDarkThemeIcon(it) } ?: useDarkThemeIcon(context)
 }
 
-private fun PaymentSheet.Appearance.shouldUseDarkThemeIconHelper(isSystemDarkTheme: Boolean): Boolean {
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
     val isDark = themeMode.isDarkTheme(isSystemDarkTheme)
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
