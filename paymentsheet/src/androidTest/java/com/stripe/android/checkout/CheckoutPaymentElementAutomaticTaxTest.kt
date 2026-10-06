@@ -45,7 +45,6 @@ import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
-import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.After
@@ -100,7 +99,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             billingAddressCollection = "auto",
             hasSavedPaymentMethod = true,
         )
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             checkoutInitResponse = automaticTaxResponse(
@@ -116,7 +115,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
                 ).getOrThrow()
             },
-        ) { context ->
+        ) {
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
 
             enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
@@ -126,7 +125,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            context.confirm()
+            confirm()
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
@@ -598,56 +597,52 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
-        lateinit var controller: CheckoutController
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             rowSelectionBehavior = rowSelectionBehavior,
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 configureNetworkSetup()
-                configuredController.configure(
+                controller.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
                 ).getOrThrow()
             },
-        ) { runnerContext ->
-            runBlocking {
-                val scenario = Scenario(
-                    runnerContext = runnerContext,
-                    controller = controller,
-                    holdTaxUpdateResponse = holdTaxUpdateResponse,
-                )
-                scenario.block()
-                scenario.immediateActionCalls.ensureAllEventsConsumed()
-                scenario.taxUpdateRequests.ensureAllEventsConsumed()
-            }
+        ) {
+            val scenario = Scenario(
+                checkoutScenario = this,
+                holdTaxUpdateResponse = holdTaxUpdateResponse,
+            )
+            scenario.block()
+            scenario.immediateActionCalls.ensureAllEventsConsumed()
+            scenario.taxUpdateRequests.ensureAllEventsConsumed()
         }
     }
 
     private class Scenario(
-        private val runnerContext: CheckoutPaymentElementTestRunnerContext,
-        val controller: CheckoutController,
+        private val checkoutScenario: CheckoutPaymentElementScenario,
         holdTaxUpdateResponse: Boolean,
     ) {
+        val controller: CheckoutController
+            get() = checkoutScenario.controller
         val immediateActionCalls = Turbine<Unit>()
         val taxUpdateRequests = Turbine<Unit>()
         val releaseTaxUpdateResponse = CountDownLatch(if (holdTaxUpdateResponse) 1 else 0)
 
         fun presentPaymentOptions() {
-            runnerContext.presentPaymentOptions()
+            checkoutScenario.presentPaymentOptions()
         }
 
         fun confirm() {
-            runnerContext.confirm()
+            checkoutScenario.confirm()
         }
 
         fun recreateHost() {
-            runnerContext.recreateHost()
+            checkoutScenario.recreateHost()
         }
 
         fun markTestSucceeded() {
-            runnerContext.markTestSucceeded()
+            checkoutScenario.markTestSucceeded()
         }
     }
 
