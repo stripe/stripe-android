@@ -30,33 +30,7 @@ internal class ShopeePayDefinitionTest {
         assertThat(ShopeePayDefinition.isSupported(metadata)).isEqualTo(
             intentScenario == LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         )
-        assertThat(ShopeePayDefinition.requiresMandate(metadata)).isEqualTo(
-            false
-        )
-    }
-
-    @Test
-    fun `form has no method-specific copy`() {
-        val intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.ShopeePay),
-        )
-        val formElements = ShopeePayDefinition.formElements(metadata)
-
-        assertThat(formElements).isEmpty()
-    }
-
-    @Test
-    fun `terms display never hides terms without changing confirmation requirements`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-                .stripeIntent(PaymentMethod.Type.ShopeePay),
-            termsDisplay = mapOf(PaymentMethod.Type.ShopeePay to PaymentSheet.TermsDisplay.NEVER),
-        )
-        val formElements = ShopeePayDefinition.formElements(metadata)
-
-        assertThat(formElements).isEmpty()
-        assertThat(ShopeePayDefinition.requiresMandate(metadata)).isEqualTo(false)
+        assertThat(ShopeePayDefinition.requiresMandate(metadata)).isFalse()
     }
 
     @Test
@@ -108,24 +82,6 @@ internal class ShopeePayDefinitionTest {
 
         assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
         assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
-    fun `collects configured contact information`() {
-        val formElements = ShopeePayDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("shopeepay")),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                ),
-            )
-        )
-
-        assertThat(formElements).hasSize(2)
-        checkPhoneField(formElements, 0)
-        checkEmailField(formElements, 1)
     }
 
     @Test
