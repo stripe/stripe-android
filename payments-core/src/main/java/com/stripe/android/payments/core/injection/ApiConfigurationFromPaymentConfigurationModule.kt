@@ -20,6 +20,7 @@ class ApiConfigurationFromPaymentConfigurationModule {
         return ApiConfiguration.State(
             publishableKey = paymentConfiguration.publishableKey,
             stripeAccountId = paymentConfiguration.stripeAccountId,
+            betas = emptySet(),
         )
     }
 }
@@ -35,6 +36,7 @@ class ApiRequestOptionsModule {
         return ApiRequest.Options(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
+            betas = apiConfiguration.betas,
         )
     }
 }

@@ -67,7 +67,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 locale = Locale.getDefault().language,
                 requestOptions = ApiRequest.Options(
                     apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
+                    stripeAccount = apiConfiguration.stripeAccountId,
+                    betas = apiConfiguration.betas,
                 )
             )
         }

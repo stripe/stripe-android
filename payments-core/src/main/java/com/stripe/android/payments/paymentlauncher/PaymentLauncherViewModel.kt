@@ -423,6 +423,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     apiConfiguration = ApiConfiguration.State(
                         publishableKey = arg.publishableKey,
                         stripeAccountId = arg.stripeAccountId,
+                        betas = arg.betas,
                     ),
                     productUsage = arg.productUsage,
                     includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,

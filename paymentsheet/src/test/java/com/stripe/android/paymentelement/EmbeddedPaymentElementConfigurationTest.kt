@@ -26,6 +26,7 @@ class EmbeddedPaymentElementConfigurationTest {
             .apiConfiguration(
                 ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
                     .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
+                    .betas(setOf("alipay_beta=v1"))
             )
             .build()
 
@@ -33,6 +34,7 @@ class EmbeddedPaymentElementConfigurationTest {
 
         assertThat(apiConfiguration?.publishableKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(apiConfiguration?.stripeAccountId).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
+        assertThat(apiConfiguration?.betas).containsExactly("alipay_beta=v1")
     }
 
     @OptIn(
@@ -90,6 +92,7 @@ class EmbeddedPaymentElementConfigurationTest {
             .apiConfiguration(
                 ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
                     .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
+                    .betas(setOf("alipay_beta=v1"))
             )
             .build()
 

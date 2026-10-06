@@ -22,6 +22,7 @@ class StripePaymentLauncherTest {
             ApiConfiguration.State(
                 publishableKey = PUBLISHABLE_KEY,
                 stripeAccountId = STRIPE_ACCOUNT_ID,
+                betas = BETAS,
             )
         },
         hostActivityLauncher = mockHostActivityLauncher,
@@ -40,7 +41,8 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.confirmStripeIntentParams == params
+                    arg.confirmStripeIntentParams == params &&
+                    arg.betas == BETAS
             }
         )
     }
@@ -104,5 +106,6 @@ class StripePaymentLauncherTest {
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
         const val CLIENT_SECRET = "clientSecret"
         const val HASHED_VALUE = "$PUBLISHABLE_KEY:$CLIENT_SECRET"
+        val BETAS = setOf("alipay_beta=v1")
     }
 }

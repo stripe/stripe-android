@@ -88,7 +88,7 @@ sealed class RequestHeadersFactory {
                 val apiRequestOptions = optionsProvider()
                 return mapOf(
                     HEADER_ACCEPT to "application/json",
-                    HEADER_STRIPE_VERSION to apiVersion,
+                    HEADER_STRIPE_VERSION to apiVersion.withBetas(apiRequestOptions.betas),
                     HEADER_AUTHORIZATION to "Bearer ${apiRequestOptions.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)
@@ -217,5 +217,14 @@ sealed class RequestHeadersFactory {
         const val KOTLIN = "kotlin"
         const val TYPE = "type"
         const val MODEL = "model"
+    }
+}
+
+private fun String.withBetas(betas: Set<String>): String {
+    if (betas.isEmpty()) return this
+
+    val existingTokens = split(';').mapTo(mutableSetOf()) { it.trim() }
+    return betas.fold(this) { version, beta ->
+        if (existingTokens.add(beta.trim())) "$version;$beta" else version
     }
 }

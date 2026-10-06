@@ -96,7 +96,8 @@ data class ApiRequest internal constructor(
     data class Options constructor(
         val apiKey: String,
         val stripeAccount: String? = null,
-        val idempotencyKey: String? = null
+        val idempotencyKey: String? = null,
+        val betas: Set<String> = emptySet(),
     ) : Parcelable {
 
         override fun toString(): String {
