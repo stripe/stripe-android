@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
@@ -76,11 +77,13 @@ class AddressElementViewModelModuleTest {
                 checkboxChecked = true,
             )
 
-            assertThat(resultStateHolder.result.value).isEqualTo(
-                AddressElementActivityContract.Result.StandaloneSucceeded(
-                    AddressDetails(
-                        address = PaymentSheet.Address(country = "US"),
-                        isCheckboxSelected = true,
+            assertThat(resultStateHolder.state.value).isEqualTo(
+                State.Finished(
+                    AddressElementActivityContract.Result.StandaloneSucceeded(
+                        AddressDetails(
+                            address = PaymentSheet.Address(country = "US"),
+                            isCheckboxSelected = true,
+                        )
                     )
                 )
             )
@@ -96,13 +99,15 @@ class AddressElementViewModelModuleTest {
                 checkboxChecked = true,
             )
 
-            assertThat(resultStateHolder.result.value).isEqualTo(
-                AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    address = AddressDetails(
-                        address = PaymentSheet.Address(country = "US"),
-                        isCheckboxSelected = true,
-                    ),
-                    checkoutSessionResponse = checkoutSessionResponse,
+            assertThat(resultStateHolder.state.value).isEqualTo(
+                State.Finished(
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded(
+                        address = AddressDetails(
+                            address = PaymentSheet.Address(country = "US"),
+                            isCheckboxSelected = true,
+                        ),
+                        checkoutSessionResponse = checkoutSessionResponse,
+                    )
                 )
             )
         }
@@ -110,8 +115,8 @@ class AddressElementViewModelModuleTest {
     @Test
     fun `providePrimaryButtonAction updates checkout shipping tax from submitted address`() =
         runCheckoutShippingScenario {
-            resultStateHolder.result.test {
-                assertThat(awaitItem()).isNull()
+            resultStateHolder.state.test {
+                assertThat(awaitItem()).isEqualTo(State.Idle)
 
                 networkRule.checkoutUpdate(
                     bodyPart("tax_region[country]", "US"),
@@ -132,7 +137,9 @@ class AddressElementViewModelModuleTest {
                     checkboxChecked = true,
                 )
 
-                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(awaitItem()).isEqualTo(State.Saving)
+                val result = (awaitItem() as State.Finished).result as
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded
                 assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
                 assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
                 assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
@@ -160,10 +167,10 @@ class AddressElementViewModelModuleTest {
             }
             assertThat(viewModel.saveError.value)
                 .isEqualTo(IllegalStateException("Invalid tax region").stripeErrorMessage())
-            assertThat(resultStateHolder.result.value).isNull()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
 
-            resultStateHolder.result.test {
-                assertThat(awaitItem()).isNull()
+            resultStateHolder.state.test {
+                assertThat(awaitItem()).isEqualTo(State.Idle)
 
                 networkRule.checkoutUpdate { response ->
                     response.testBodyFromFile("checkout-session-init.json") { json ->
@@ -177,7 +184,9 @@ class AddressElementViewModelModuleTest {
                     checkboxChecked = true,
                 )
 
-                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(awaitItem()).isEqualTo(State.Saving)
+                val result = (awaitItem() as State.Finished).result as
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded
                 assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
                 assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
             }
@@ -189,15 +198,17 @@ class AddressElementViewModelModuleTest {
         runCheckoutShippingScenario(
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         ) {
-            resultStateHolder.result.test {
-                assertThat(awaitItem()).isNull()
+            resultStateHolder.state.test {
+                assertThat(awaitItem()).isEqualTo(State.Idle)
 
                 viewModel.clickPrimaryButton(
                     completedFormValues = COMPLETED_FORM_VALUES,
                     checkboxChecked = true,
                 )
 
-                val result = awaitItem() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+                assertThat(awaitItem()).isEqualTo(State.Saving)
+                val result = (awaitItem() as State.Finished).result as
+                    AddressElementActivityContract.Result.CheckoutShippingSucceeded
                 assertThat(result.checkoutSessionResponse).isSameInstanceAs(checkoutSessionResponse)
             }
         }
