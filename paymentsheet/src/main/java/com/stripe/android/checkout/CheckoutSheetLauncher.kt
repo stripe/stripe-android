@@ -147,7 +147,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
-                clearStaleSelection()
+                reconcileSavedSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -174,14 +174,15 @@ internal class CheckoutSheetLauncher @Inject constructor(
         customerState?.let { customerStateHolder.setCustomerState(it) }
     }
 
-    private fun clearStaleSelection() {
-        val currentSelection = selectionHolder.selection.value
-        if (currentSelection is PaymentSelection.Saved) {
-            val paymentMethodId = currentSelection.paymentMethod.id
-            val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
-            if (!stillExists) {
-                selectionHolder.setSelection(null)
-            }
+    private fun reconcileSavedSelection() {
+        val currentSelection = selectionHolder.selection.value as? PaymentSelection.Saved ?: return
+        val updatedPaymentMethod = customerStateHolder.paymentMethods.value.firstOrNull {
+            it.id == currentSelection.paymentMethod.id
+        }
+        if (updatedPaymentMethod == null) {
+            selectionHolder.setSelection(null)
+        } else if (updatedPaymentMethod != currentSelection.paymentMethod) {
+            selectionHolder.setSelection(currentSelection.copy(paymentMethod = updatedPaymentMethod))
         }
     }
 

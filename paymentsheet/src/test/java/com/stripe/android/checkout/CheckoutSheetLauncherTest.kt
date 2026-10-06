@@ -7,21 +7,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
@@ -36,11 +37,13 @@ import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -949,6 +952,97 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `paymentOptionsResult cancelled projects edited saved card billing details`() = testScenario {
+        val original = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.copy(
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS.toBuilder()
+                .setAddress(PaymentMethodFixtures.BILLING_DETAILS.address!!.copy(postalCode = "94107"))
+                .build(),
+        )
+        val options = PaymentMethodOptionsParams.Card(network = "cartes_bancaires")
+        val input = UserInput.SignIn("customer@example.com")
+        val selection = PaymentSelection.Saved(original, options, input)
+        val updated = original.copy(
+            billingDetails = original.billingDetails!!.toBuilder()
+                .setAddress(original.billingDetails!!.address!!.copy(postalCode = "94110"))
+                .build(),
+            card = original.card!!.copy(expiryMonth = 12, expiryYear = 2035),
+        )
+        selectionHolder.setSelection(selection)
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(original)))
+
+        selectionHolder.session.test {
+            val initial = awaitItem()!!.paymentOption!!
+            assertThat(initial.billingDetails?.address?.postalCode).isEqualTo("94107")
+            cancelPaymentOptions(createCustomerState(paymentMethods = listOf(updated)))
+            val option = awaitItem()!!.paymentOption!!
+            assertThat(option.billingDetails?.address?.postalCode).isEqualTo("94110")
+            assertThat(option.label).isEqualTo(initial.label)
+            val saved = selectionHolder.selection.value as PaymentSelection.Saved
+            assertThat(saved.paymentMethod.id).isEqualTo(original.id)
+            assertThat(saved.paymentMethod.card?.displayBrand).isEqualTo(original.card?.displayBrand)
+            assertThat(saved.paymentMethod.card?.expiryMonth).isEqualTo(12)
+            assertThat(saved.paymentMethod.card?.expiryYear).isEqualTo(2035)
+            assertThat(saved.paymentMethodOptionsParams).isSameInstanceAs(options)
+            assertThat(saved.linkInput).isSameInstanceAs(input)
+        }
+        runCurrent()
+        expectNoRefreshCalls()
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `paymentOptionsResult cancelled editing unselected card preserves selection`() = testScenario {
+        val selected = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val other = selected.copy(id = "pm_other")
+        val updatedOther = other.copy(card = other.card!!.copy(expiryYear = 2035))
+        val selection = PaymentSelection.Saved(selected)
+        selectionHolder.setSelection(selection)
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(selected, other)))
+
+        selectionHolder.session.test {
+            awaitItem()
+            cancelPaymentOptions(
+                createCustomerState(paymentMethods = listOf(selected, updatedOther))
+            )
+            expectNoEvents()
+        }
+        assertThat(selectionHolder.selection.value).isSameInstanceAs(selection)
+        expectNoRefreshCalls()
+    }
+
+    @Test
+    fun `paymentOptionsResult cancelled without customer state preserves saved selection`() = testScenario {
+        val selected = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val selection = PaymentSelection.Saved(selected)
+        selectionHolder.setSelection(selection)
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(selected)))
+
+        cancelPaymentOptions(null)
+
+        assertThat(selectionHolder.selection.value).isSameInstanceAs(selection)
+        expectNoRefreshCalls()
+    }
+
+    @Test
+    fun `paymentOptionsResult cancelled preserves new selection`() = testScenario {
+        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        selectionHolder.setSelection(selection)
+
+        cancelPaymentOptions(createCustomerState(paymentMethods = emptyList()))
+
+        assertThat(selectionHolder.selection.value).isSameInstanceAs(selection)
+        expectNoRefreshCalls()
+    }
+
+    @Test
+    fun `paymentOptionsResult cancelled preserves null selection`() = testScenario {
+        cancelPaymentOptions(createCustomerState())
+
+        assertThat(selectionHolder.selection.value).isNull()
+        expectNoRefreshCalls()
+    }
+
+    @Test
     fun `paymentOptionsResult cancelled clears stale saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
@@ -960,11 +1054,15 @@ internal class CheckoutSheetLauncherTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
-        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
-        callback.onActivityResult(result)
+        selectionHolder.session.test {
+            assertThat(awaitItem()?.paymentOption).isNotNull()
+            registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+            assertThat(awaitItem()?.paymentOption).isNull()
+        }
 
         assertThat(selectionHolder.selection.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        expectNoRefreshCalls()
     }
 
     @Test
@@ -983,7 +1081,7 @@ internal class CheckoutSheetLauncherTest {
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
 
-        assertThat(selectionHolder.selection.value).isEqualTo(savedSelection)
+        assertThat(selectionHolder.selection.value).isSameInstanceAs(savedSelection)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -1028,7 +1126,19 @@ internal class CheckoutSheetLauncherTest {
         val testScope = this
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val linkAccountHolder = LinkAccountHolder(savedStateHandle)
+        val selectionHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle,
+            paymentOptionFactory = DefaultCheckoutPaymentOptionDisplayDataFactory(
+                iconLoader = PaymentSelection.IconLoader(
+                    resources = applicationContext.resources,
+                    imageLoader = FakeStripeImageLoader(),
+                ),
+                cardArtDrawableLoader = { null },
+                context = applicationContext,
+                linkAccountHolder = linkAccountHolder,
+            ),
+        ).apply { state = CheckoutControllerStateFactory.create() }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -1036,7 +1146,6 @@ internal class CheckoutSheetLauncherTest {
             customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
-        val linkAccountHolder = LinkAccountHolder(savedStateHandle)
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
         val sessionRefresher = FakeCheckoutSessionRefresher()
@@ -1122,7 +1231,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private class Scenario(
-        val selectionHolder: EmbeddedSelectionHolder,
+        val selectionHolder: CheckoutControllerStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val linkAccountHolder: LinkAccountHolder,
@@ -1148,6 +1257,16 @@ internal class CheckoutSheetLauncherTest {
     ) {
         fun runCurrent() {
             runCurrent.invoke()
+        }
+
+        fun cancelPaymentOptions(customerState: CustomerState?) {
+            registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
+                EmbeddedActivityResult.Cancelled(
+                    customerState = customerState,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                )
+            )
         }
 
         fun createLinkPaymentOptionsPresenter() {
