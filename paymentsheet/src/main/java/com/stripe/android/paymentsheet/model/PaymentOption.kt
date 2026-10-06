@@ -87,7 +87,7 @@ class PaymentOption internal constructor(
         _shippingDetails = null,
         billingDetails = null,
         _labels = Labels(label = label),
-        paymentOptionResource = ErrorPainterResource,
+        paymentOptionResource = ErrorPaymentOptionResource,
     )
 
     /**

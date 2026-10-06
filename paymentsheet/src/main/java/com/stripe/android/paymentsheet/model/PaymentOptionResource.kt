@@ -50,7 +50,7 @@ internal class DefaultPaymentOptionResource(
     )
 }
 
-internal object ErrorPainterResource : PaymentOptionResource {
+internal object ErrorPaymentOptionResource : PaymentOptionResource {
     override suspend fun load(isSystemDarkTheme: Boolean?): Drawable {
         throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
     }
