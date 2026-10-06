@@ -1148,30 +1148,19 @@ internal class CheckoutSheetLauncherTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
-        present(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+        sheetLauncher.launchForm(
+            code = "card",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = null,
+            promotion = null,
+        )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
         assertThat(selectionHolder.state).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
-    }
-
-    @Test
-    fun `launchForm failure clears state and allows retry`() = testScenario {
-        caller.launchError = IllegalStateException("Cannot launch")
-        selectionHolder.setTemporarySelection("existing")
-        val mode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card")
-
-        present(mode)
-
-        assertThat((caller.failedLaunches.awaitItem() as EmbeddedActivityArgs).launchMode).isEqualTo(mode)
-        assertLaunchStateCleared()
-        caller.launchError = null
-        present(mode)
-        assertThat((dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs).launchMode)
-            .isEqualTo(mode)
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     @Test
@@ -1181,30 +1170,18 @@ internal class CheckoutSheetLauncherTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
-        present(EmbeddedLaunchMode.Manage)
+        sheetLauncher.launchManage(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = createCustomerState(),
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
         assertThat(selectionHolder.state).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
-    }
-
-    @Test
-    fun `launchManage failure clears state and allows retry`() = testScenario {
-        caller.launchError = IllegalStateException("Cannot launch")
-        selectionHolder.setTemporarySelection("existing")
-        val mode = EmbeddedLaunchMode.Manage
-
-        present(mode)
-
-        assertThat((caller.failedLaunches.awaitItem() as EmbeddedActivityArgs).launchMode).isEqualTo(mode)
-        assertLaunchStateCleared()
-        caller.launchError = null
-        present(mode)
-        assertThat((dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs).launchMode)
-            .isEqualTo(mode)
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
     @Test
@@ -1214,80 +1191,18 @@ internal class CheckoutSheetLauncherTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
-        present(EmbeddedLaunchMode.PaymentOptions)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
         assertThat(selectionHolder.state).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
-    }
-
-    @Test
-    fun `launchPaymentOptions failure clears state and allows retry`() = testScenario {
-        caller.launchError = IllegalStateException("Cannot launch")
-        selectionHolder.setTemporarySelection("existing")
-        val mode = EmbeddedLaunchMode.PaymentOptions
-
-        present(mode)
-
-        assertThat((caller.failedLaunches.awaitItem() as EmbeddedActivityArgs).launchMode).isEqualTo(mode)
-        assertLaunchStateCleared()
-        caller.launchError = null
-        present(mode)
-        assertThat((dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs).launchMode)
-            .isEqualTo(mode)
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-    }
-
-    @Test
-    fun `initial loading launch failure does not schedule ready launch`() = testScenario {
-        val gate = startMutation()
-        caller.launchError = IllegalStateException("Cannot launch")
-
-        present(EmbeddedLaunchMode.PaymentOptions)
-
-        assertThat((caller.failedLaunches.awaitItem() as EmbeddedActivityArgs).presentationState)
-            .isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-        assertLaunchStateCleared()
-        caller.launchError = null
-        gate.complete(Unit)
-        runCurrent()
-        assertLaunchStateCleared()
-    }
-
-    @Test
-    fun `deferred ready launch failure clears state and allows retry`() = testScenario {
-        val gate = startMutation()
-        present(EmbeddedLaunchMode.PaymentOptions)
-        assertThat((dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs).presentationState)
-            .isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-        selectionHolder.setTemporarySelection("existing")
-        caller.launchError = IllegalStateException("Cannot launch ready")
-
-        gate.complete(Unit)
-        runCurrent()
-
-        assertThat((caller.failedLaunches.awaitItem() as EmbeddedActivityArgs).presentationState)
-            .isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertLaunchStateCleared()
-        caller.launchError = null
-        present(EmbeddedLaunchMode.PaymentOptions)
-        dummyActivityResultCallerScenario.awaitLaunchCall()
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-    }
-
-    @Test
-    fun `other launcher exceptions propagate`() = testScenario {
-        val error = IllegalArgumentException("Unexpected launch error")
-        caller.launchError = error
-
-        val result = runCatching { present(EmbeddedLaunchMode.Form("card")) }
-
-        assertThat(result.exceptionOrNull()).isSameInstanceAs(error)
-        caller.failedLaunches.awaitItem()
     }
 
     @Test
@@ -1352,13 +1267,12 @@ internal class CheckoutSheetLauncherTest {
         )
 
         DummyActivityResultCaller.test {
-            val caller = FakeCheckoutActivityResultCaller(activityResultCaller)
             fun createSheetLauncher(
                 owner: TestLifecycleOwner,
                 state: CheckoutSheetLauncherState,
             ): CheckoutSheetLauncher {
                 return CheckoutSheetLauncher(
-                    activityResultCaller = caller,
+                    activityResultCaller = activityResultCaller,
                     lifecycleOwner = owner,
                     selectionHolder = selectionHolder,
                     customerStateHolder = customerStateHolder,
@@ -1387,7 +1301,6 @@ internal class CheckoutSheetLauncherTest {
             assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
 
             Scenario(
-                caller = caller,
                 selectionHolder = selectionHolder,
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
@@ -1409,7 +1322,6 @@ internal class CheckoutSheetLauncherTest {
                 createSheetLauncher = ::createSheetLauncher,
                 runCurrent = testScheduler::runCurrent,
             ).block()
-            caller.ensureAllEventsConsumed()
         }
 
         confirmationHandler.validate()
@@ -1417,7 +1329,6 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private class Scenario(
-        val caller: FakeCheckoutActivityResultCaller,
         val selectionHolder: CheckoutControllerStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
@@ -1442,51 +1353,6 @@ internal class CheckoutSheetLauncherTest {
         ) -> CheckoutSheetLauncher,
         private val runCurrent: () -> Unit,
     ) {
-        fun present(mode: EmbeddedLaunchMode) {
-            val metadata = PaymentMethodMetadataFactory.create()
-            val configuration = EmbeddedConfigurationFactory.create()
-            when (mode) {
-                is EmbeddedLaunchMode.Form -> sheetLauncher.launchForm(
-                    code = mode.selectedPaymentMethodCode,
-                    paymentMethodMetadata = metadata,
-                    configuration = configuration,
-                    customerState = null,
-                    promotion = null,
-                )
-                EmbeddedLaunchMode.Manage -> sheetLauncher.launchManage(
-                    paymentMethodMetadata = metadata,
-                    customerState = createCustomerState(),
-                    selection = null,
-                    configuration = configuration,
-                )
-                EmbeddedLaunchMode.PaymentOptions -> sheetLauncher.launchPaymentOptions(
-                    paymentMethodMetadata = metadata,
-                    customerState = null,
-                    selection = null,
-                    configuration = configuration,
-                )
-            }
-        }
-
-        fun startMutation(): CompletableDeferred<Unit> {
-            val gate = CompletableDeferred<Unit>()
-            coroutineScope.launch {
-                operationCoordinator.runMutation {
-                    gate.await()
-                    Result.success(Unit)
-                }
-            }
-            runCurrent()
-            return gate
-        }
-
-        fun assertLaunchStateCleared() {
-            assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-            assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-            assertThat(selectionHolder.temporarySelection.value).isNull()
-            assertThat(immediateActionWasInvoked()).isFalse()
-        }
-
         fun runCurrent() {
             runCurrent.invoke()
         }

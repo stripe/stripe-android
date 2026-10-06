@@ -57,17 +57,12 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
         }
 
         sheetStateHolder.sheetIsOpen = true
-        val didLaunch = try {
-            selectionLauncher.launchIfEligible(
-                selection = state.paymentSelection,
-                configuration = state.paymentMethodMetadata.linkState?.configuration,
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
-            )
-        } catch (_: IllegalStateException) {
-            sheetStateHolder.sheetIsOpen = false
-            return
-        }
+        val didLaunch = selectionLauncher.launchIfEligible(
+            selection = state.paymentSelection,
+            configuration = state.paymentMethodMetadata.linkState?.configuration,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
+        )
         if (!didLaunch) {
             presentDefault()
         }

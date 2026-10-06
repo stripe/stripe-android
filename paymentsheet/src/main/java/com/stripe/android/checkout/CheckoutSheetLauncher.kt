@@ -223,7 +223,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
-        tryLaunch(args)
+        activityLauncher.launch(args)
     }
 
     override fun launchManage(
@@ -255,7 +255,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
-        tryLaunch(args)
+        activityLauncher.launch(args)
     }
 
     override fun launchPaymentOptions(
@@ -286,21 +286,9 @@ internal class CheckoutSheetLauncher @Inject constructor(
         )
         launcherState.isAwaitingPaymentOptionsReady =
             initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
-        if (!tryLaunch(initialArgs)) return
+        activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()
-    }
-
-    private fun tryLaunch(args: EmbeddedActivityArgs): Boolean {
-        return try {
-            activityLauncher.launch(args)
-            true
-        } catch (_: IllegalStateException) {
-            sheetStateHolder.sheetIsOpen = false
-            launcherState.isAwaitingPaymentOptionsReady = false
-            selectionHolder.setTemporarySelection(null)
-            false
-        }
     }
 
     private fun resumePendingReadyLaunch() {
@@ -320,7 +308,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 )
                 return@launch
             }
-            tryLaunch(
+            activityLauncher.launch(
                 createPaymentOptionsArgs(
                     paymentMethodMetadata = refreshedState.paymentMethodMetadata,
                     configuration = refreshedState.configuration,
