@@ -1142,6 +1142,39 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `launchForm before creation leaves state unchanged`() = testScenario(
+        initialLifecycleState = Lifecycle.State.INITIALIZED,
+    ) {
+        selectionHolder.setTemporarySelection("existing")
+        val state = selectionHolder.state
+
+        sheetLauncher.launchForm(
+            code = "card",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = null,
+            promotion = null,
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
+        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+    }
+
+    @Test
+    fun `launchForm at created launches activity`() = testScenario(
+        initialLifecycleState = Lifecycle.State.CREATED,
+    ) {
+        launchForm("card")
+
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("card")
+    }
+
+    @Test
     fun `launchForm after destruction leaves state unchanged`() = testScenario {
         selectionHolder.setTemporarySelection("existing")
         val state = selectionHolder.state
@@ -1218,11 +1251,12 @@ internal class CheckoutSheetLauncherTest {
     @Suppress("LongMethod")
     private fun testScenario(
         promotions: List<PaymentMethodMessagePromotion>? = null,
+        initialLifecycleState: Lifecycle.State = Lifecycle.State.STARTED,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         var immediateActionInvoked = false
         val testScope = this
-        val lifecycleOwner = TestLifecycleOwner()
+        val lifecycleOwner = TestLifecycleOwner(initialState = initialLifecycleState)
         val savedStateHandle = SavedStateHandle()
         val linkAccountHolder = LinkAccountHolder(savedStateHandle)
         val selectionHolder = CheckoutControllerStateFactory.createStateHolder(
