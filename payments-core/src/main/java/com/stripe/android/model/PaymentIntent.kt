@@ -414,15 +414,16 @@ constructor(
     ) : StripeModel
 
     internal data class ClientSecret(internal val value: String) {
+        init {
+            require(isMatch(value)) {
+                "Invalid PaymentIntent client secret. " +
+                    "Pass the client_secret from the PaymentIntent returned by your server."
+            }
+        }
+
         internal val paymentIntentId: String =
             value.split("_(scoped_)?secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-
-        init {
-            require(isMatch(value)) {
-                "Invalid Payment Intent client secret: $value"
-            }
-        }
 
         internal companion object {
             private val PATTERN = Pattern.compile("^pi_[^_]+_(scoped_)?secret_[^_]+$")

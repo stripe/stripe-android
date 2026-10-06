@@ -603,6 +603,116 @@ class PaymentLauncherViewModelTest {
     }
 
     @Test
+    fun `invalid PaymentIntent client secret is omitted from confirmation analytics`() = runTest {
+        whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
+            .thenReturn(Result.failure(IllegalArgumentException("Invalid PaymentIntent client secret.")))
+
+        createViewModel().confirmStripeIntent(
+            confirmPaymentIntentParams.copy(clientSecret = "person@example.com"),
+            authHost,
+        )
+
+        verifyInvalidClientSecretConfirmationAnalytics()
+    }
+
+    @Test
+    fun `invalid SetupIntent client secret is omitted from confirmation analytics`() = runTest {
+        whenever(stripeApiRepository.confirmSetupIntent(any(), any(), any()))
+            .thenReturn(Result.failure(IllegalArgumentException("Invalid SetupIntent client secret.")))
+
+        createViewModel(isPaymentIntent = false).confirmStripeIntent(
+            confirmSetupIntentParams.copy(clientSecret = "person@example.com_secret_invalid"),
+            authHost,
+        )
+
+        verifyInvalidClientSecretConfirmationAnalytics()
+    }
+
+    private fun verifyInvalidClientSecretConfirmationAnalytics() {
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
+            additionalParams = argThat { params -> !params.containsKey("intent_id") },
+            publishableKeyOverride = isNull(),
+        )
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params ->
+                !params.containsKey("intent_id") && params["status"] == "failed"
+            },
+            publishableKeyOverride = isNull(),
+        )
+    }
+
+    @Test
+    fun `valid scoped PaymentIntent client secret includes its intent ID in confirmation analytics`() = runTest {
+        val clientSecret = "pi_example_scoped_secret_example"
+        whenever(paymentIntent.clientSecret).thenReturn(clientSecret)
+
+        createViewModel().confirmStripeIntent(
+            confirmPaymentIntentParams.copy(clientSecret = clientSecret),
+            authHost,
+        )
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
+            additionalParams = argThat { params -> params["intent_id"] == "pi_example" },
+            publishableKeyOverride = isNull(),
+        )
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params -> params["intent_id"] == "pi_example" },
+            publishableKeyOverride = isNull(),
+        )
+    }
+
+    @Test
+    fun `valid SetupIntent client secret includes its intent ID in confirmation analytics`() = runTest {
+        val clientSecret = "seti_example_secret_example"
+        whenever(setupIntent.clientSecret).thenReturn(clientSecret)
+
+        createViewModel(isPaymentIntent = false).confirmStripeIntent(
+            confirmSetupIntentParams.copy(clientSecret = clientSecret),
+            authHost,
+        )
+
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted),
+            additionalParams = argThat { params -> params["intent_id"] == "seti_example" },
+            publishableKeyOverride = isNull(),
+        )
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished),
+            additionalParams = argThat { params -> params["intent_id"] == "seti_example" },
+            publishableKeyOverride = isNull(),
+        )
+    }
+
+    @Test
+    fun `invalid client secret is omitted from next action analytics`() = runTest {
+        val clientSecret = "person@example.com"
+        val error = IllegalArgumentException("Invalid client secret.")
+        whenever(stripeApiRepository.retrieveStripeIntent(eq(clientSecret), any(), any()))
+            .thenReturn(Result.failure(error))
+        val viewModel = createViewModel(savedStateHandle = SavedStateHandle())
+
+        viewModel.handleNextActionForStripeIntent(clientSecret, authHost)
+
+        val result = viewModel.internalPaymentResult.value
+        assertThat(result).isInstanceOf(InternalPaymentResult.Failed::class.java)
+        assertThat((result as InternalPaymentResult.Failed).throwable).isSameInstanceAs(error)
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted),
+            additionalParams = argThat { params -> !params.containsKey("intent_id") },
+            publishableKeyOverride = isNull(),
+        )
+        verify(analyticsRequestFactory).createRequest(
+            eq(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished),
+            additionalParams = argThat { params -> !params.containsKey("intent_id") },
+            publishableKeyOverride = isNull(),
+        )
+    }
+
+    @Test
     fun `verify confirm finished analytics includes duration parameter`() = runTest {
         whenever(paymentIntent.requiresAction()).thenReturn(false)
 

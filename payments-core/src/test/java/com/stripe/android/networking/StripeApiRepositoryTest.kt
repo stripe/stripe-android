@@ -533,6 +533,24 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun confirmPaymentIntent_withEmptyClientSecret_returnsFailureWithoutRequest() = runTest {
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            clientSecret = "",
+        )
+
+        val result = create().confirmPaymentIntent(params, DEFAULT_OPTIONS)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
+        verifyNoInteractions(stripeNetworkClient)
+    }
+
+    @Test
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() =
         runTest {
             // put a private key here to simulate the backend
@@ -825,6 +843,24 @@ internal class StripeApiRepositoryTest {
             assertThat(apiRequest.params)
                 .doesNotContainKey(ConfirmStripeIntentParams.PARAM_CLIENT_SECRET)
         }
+
+    @Test
+    fun confirmSetupIntent_withEmptyClientSecret_returnsFailureWithoutRequest() = runTest {
+        val params = ConfirmSetupIntentParams.create(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            clientSecret = "",
+        )
+
+        val result = create().confirmSetupIntent(params, DEFAULT_OPTIONS)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "Invalid SetupIntent client secret. " +
+                "Pass the client_secret from the SetupIntent returned by your server."
+        )
+        verifyNoInteractions(stripeNetworkClient)
+    }
 
     @Test
     fun confirmSetupIntent_withApiUserKey_sendsValidRequest() =

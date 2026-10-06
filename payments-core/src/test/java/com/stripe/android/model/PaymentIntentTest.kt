@@ -221,6 +221,30 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun `empty client secret throws a helpful error`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
+    }
+
+    @Test
+    fun `invalid client secret error does not include the supplied value`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("pi_example_secret_person@example.com_extra")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
+    }
+
+    @Test
     fun clientSecret_withInvalidKeys_throwsException() {
         assertFailsWith<IllegalArgumentException> {
             PaymentIntent.ClientSecret("pi_12345")

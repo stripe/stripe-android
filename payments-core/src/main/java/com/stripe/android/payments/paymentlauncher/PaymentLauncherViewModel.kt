@@ -265,7 +265,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private fun logHandleNextActionStarted(clientSecret: String): Map<String, String> {
         val analyticsParams = mapOf(
             "intent_id" to clientSecret.toStripeId(),
-        )
+        ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
@@ -484,6 +484,10 @@ private fun StripeIntentResult<StripeIntent>.type(): String? {
     }
 }
 
-private fun String.toStripeId(): String {
-    return substringBefore("_secret_")
+private fun String.toStripeId(): String? {
+    return when {
+        PaymentIntent.ClientSecret.isMatch(this) -> PaymentIntent.ClientSecret(this).paymentIntentId
+        SetupIntent.ClientSecret.isMatch(this) -> SetupIntent.ClientSecret(this).setupIntentId
+        else -> null
+    }
 }

@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### Payments
 * [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+* [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
 
 ### PaymentSheet
 * [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
