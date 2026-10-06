@@ -4,16 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal sealed class InternalCustomerSheetResult : Parcelable {
-    abstract fun toPublicResult(
-        paymentOptionFactory: PaymentOptionFactory,
+internal sealed interface InternalCustomerSheetResult : Parcelable {
+    fun toPublicResult(
+        paymentOptionSelectionFactory: PaymentOptionSelectionFactory,
     ): CustomerSheetResult
 
     /**
@@ -23,13 +21,13 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     data class Selected internal constructor(
         val paymentSelection: PaymentSelection?,
         private val appearance: PaymentSheet.Appearance
-    ) : InternalCustomerSheetResult() {
+    ) : InternalCustomerSheetResult {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionSelectionFactory: PaymentOptionSelectionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Selected(
-                selection = paymentSelection?.toPaymentOptionSelection(
-                    paymentOptionFactory,
+                selection = paymentOptionSelectionFactory.create(
+                    selection = paymentSelection,
                     canUseGooglePay = true,
                     appearance = appearance
                 )
@@ -44,13 +42,13 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     data class Canceled(
         val paymentSelection: PaymentSelection?,
         private val appearance: PaymentSheet.Appearance
-    ) : InternalCustomerSheetResult() {
+    ) : InternalCustomerSheetResult {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionSelectionFactory: PaymentOptionSelectionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Canceled(
-                selection = paymentSelection?.toPaymentOptionSelection(
-                    paymentOptionFactory,
+                selection = paymentOptionSelectionFactory.create(
+                    selection = paymentSelection,
                     canUseGooglePay = true,
                     appearance = appearance
                 )
@@ -64,15 +62,15 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     @Parcelize
     class Error internal constructor(
         val exception: Throwable
-    ) : InternalCustomerSheetResult() {
+    ) : InternalCustomerSheetResult {
         override fun toPublicResult(
-            paymentOptionFactory: PaymentOptionFactory,
+            paymentOptionSelectionFactory: PaymentOptionSelectionFactory,
         ): CustomerSheetResult {
             return CustomerSheetResult.Failed(exception)
         }
     }
 
-    internal companion object {
+    companion object {
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
         @JvmSynthetic
@@ -82,7 +80,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
         }
     }
 
-    internal fun toBundle(): Bundle {
+    fun toBundle(): Bundle {
         return bundleOf(EXTRA_RESULT to this)
     }
 }

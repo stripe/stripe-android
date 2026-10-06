@@ -1,14 +1,13 @@
 package com.stripe.android.customersheet
 
-import android.content.Context
 import android.graphics.Color
-import androidx.test.core.app.ApplicationProvider
+import android.graphics.drawable.ShapeDrawable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.testing.FakeStripeImageLoader
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,97 +15,119 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class InternalCustomerSheetResultTest {
     @Test
-    fun `Selected converts saved payment method to public result`() = runScenario {
+    fun `Selected passes saved payment method and appearance to factory`() = runScenario {
+        val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val result = InternalCustomerSheetResult.Selected(
-            paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+            paymentSelection = selection,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Selected
+        ).toPublicResult(factory) as CustomerSheetResult.Selected
 
-        val selection = result.selection as PaymentOptionSelection.PaymentMethod
-        assertThat(selection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
-        assertThat(selection.paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(selection.paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
+        assertThat(result.selection).isSameInstanceAs(factory.result)
+        assertCreateCall(selection)
     }
 
     @Test
-    fun `Canceled converts saved payment method to public result`() = runScenario {
+    fun `Canceled passes saved payment method and appearance to factory`() = runScenario {
+        val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val result = InternalCustomerSheetResult.Canceled(
-            paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+            paymentSelection = selection,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Canceled
+        ).toPublicResult(factory) as CustomerSheetResult.Canceled
 
-        val selection = result.selection as PaymentOptionSelection.PaymentMethod
-        assertThat(selection.paymentMethod).isEqualTo(CARD_PAYMENT_METHOD)
-        assertThat(selection.paymentOption.paymentMethodType).isEqualTo("card")
-        assertThat(selection.paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
+        assertThat(result.selection).isSameInstanceAs(factory.result)
+        assertCreateCall(selection)
     }
 
     @Test
-    fun `Selected converts Google Pay to public result`() = runScenario {
+    fun `Selected passes Google Pay and appearance to factory`() = runScenario {
         val result = InternalCustomerSheetResult.Selected(
             paymentSelection = PaymentSelection.GooglePay,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Selected
+        ).toPublicResult(factory) as CustomerSheetResult.Selected
 
-        val selection = result.selection as PaymentOptionSelection.GooglePay
-        assertThat(selection.paymentOption.paymentMethodType).isEqualTo("google_pay")
-        assertThat(selection.paymentOption.label).isEqualTo("Google Pay")
+        assertThat(result.selection).isSameInstanceAs(factory.result)
+        assertCreateCall(PaymentSelection.GooglePay)
     }
 
     @Test
-    fun `Canceled converts Google Pay to public result`() = runScenario {
+    fun `Canceled passes Google Pay and appearance to factory`() = runScenario {
         val result = InternalCustomerSheetResult.Canceled(
             paymentSelection = PaymentSelection.GooglePay,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Canceled
+        ).toPublicResult(factory) as CustomerSheetResult.Canceled
 
-        val selection = result.selection as PaymentOptionSelection.GooglePay
-        assertThat(selection.paymentOption.paymentMethodType).isEqualTo("google_pay")
-        assertThat(selection.paymentOption.label).isEqualTo("Google Pay")
+        assertThat(result.selection).isSameInstanceAs(factory.result)
+        assertCreateCall(PaymentSelection.GooglePay)
     }
 
     @Test
-    fun `Selected preserves null selection in public result`() = runScenario {
+    fun `Selected passes null selection and appearance to factory`() = runScenario(factoryResult = null) {
         val result = InternalCustomerSheetResult.Selected(
             paymentSelection = null,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Selected
+        ).toPublicResult(factory) as CustomerSheetResult.Selected
 
         assertThat(result.selection).isNull()
+        assertCreateCall(null)
     }
 
     @Test
-    fun `Canceled preserves null selection in public result`() = runScenario {
+    fun `Canceled passes null selection and appearance to factory`() = runScenario(factoryResult = null) {
         val result = InternalCustomerSheetResult.Canceled(
             paymentSelection = null,
             appearance = CUSTOM_APPEARANCE,
-        ).toPublicResult(paymentOptionFactory) as CustomerSheetResult.Canceled
+        ).toPublicResult(factory) as CustomerSheetResult.Canceled
 
         assertThat(result.selection).isNull()
+        assertCreateCall(null)
     }
 
-    private fun runScenario(block: Scenario.() -> Unit) {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val imageLoader = FakeStripeImageLoader()
-        val paymentOptionFactory = PaymentOptionFactory(
-            iconLoader = PaymentSelection.IconLoader(
-                resources = context.resources,
-                imageLoader = imageLoader,
-            ),
-            cardArtDrawableLoader = { null },
-            context = context,
-        )
+    @Test
+    fun `Error preserves exception without creating a payment option selection`() = runScenario {
+        val exception = IllegalStateException("Unable to load customer")
 
-        Scenario(paymentOptionFactory).block()
+        val result = InternalCustomerSheetResult.Error(exception)
+            .toPublicResult(factory) as CustomerSheetResult.Failed
 
-        imageLoader.ensureAllEventsConsumed()
+        assertThat(result.exception).isSameInstanceAs(exception)
+        factory.createCalls.expectNoEvents()
     }
 
-    private class Scenario(val paymentOptionFactory: PaymentOptionFactory)
+    private fun runScenario(
+        factoryResult: PaymentOptionSelection? = PAYMENT_OPTION_SELECTION,
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val factory = FakePaymentOptionSelectionFactory(result = factoryResult)
+
+        Scenario(factory).block()
+
+        factory.ensureAllEventsConsumed()
+    }
+
+    private class Scenario(val factory: FakePaymentOptionSelectionFactory) {
+        suspend fun assertCreateCall(selection: PaymentSelection?) {
+            val call = factory.createCalls.awaitItem()
+            assertThat(call.selection).isEqualTo(selection)
+            assertThat(call.canUseGooglePay).isTrue()
+            assertThat(call.appearance).isEqualTo(CUSTOM_APPEARANCE)
+        }
+    }
 
     private companion object {
         val CUSTOM_APPEARANCE = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.Builder.light().component(Color.BLACK).build(),
+        )
+        val PAYMENT_OPTION_SELECTION = PaymentOptionSelection.PaymentMethod(
+            paymentMethod = CARD_PAYMENT_METHOD,
+            paymentOption = PaymentOption(
+                drawableResourceId = 0,
+                label = "Converted payment option",
+                paymentMethodType = "card",
+                billingDetails = null,
+                _shippingDetails = null,
+                _labels = PaymentOption.Labels(label = "Converted payment option"),
+                imageLoader = { ShapeDrawable() },
+            ),
         )
     }
 }
