@@ -36,6 +36,7 @@ internal object CheckoutControllerStateFactory {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
+        mandateAcknowledgementId: String = "test_checkout",
     ): CheckoutControllerState {
         return CheckoutControllerState(
             configuration = configuration,
@@ -50,6 +51,7 @@ internal object CheckoutControllerStateFactory {
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
             linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
+            mandateAcknowledgementId = mandateAcknowledgementId,
         )
     }
 
@@ -57,7 +59,7 @@ internal object CheckoutControllerStateFactory {
         savedStateHandle: SavedStateHandle,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
-            CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+            CheckoutPaymentOptionDisplayDataFactory { _, _, _ -> null },
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
             FakeAvailableExpressButtonTypesFactory(),
     ): CheckoutControllerStateHolder {

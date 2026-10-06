@@ -5,6 +5,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -52,6 +53,46 @@ internal class CheckoutPaymentElementSavedSepaTest {
     }
 
     @Test
+    fun testPreselectedSavedSepaDisplaysMandateWhenEmbeddedMandateIsDisabledWithoutContent() {
+        runSavedSepaTest(
+            paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD),
+            configuration = checkoutConfiguration(
+                PaymentElement.Configuration().embeddedViewDisplaysMandateText(false)
+            ),
+            renderPaymentElementContent = false,
+        ) {
+            confirm()
+            waitForSepaMandate()
+
+            enqueueConfirmation()
+            testRules.compose.onNodeWithTag(SEPA_MANDATE_CONTINUE_BUTTON).performClick()
+        }
+    }
+
+    @Test
+    fun testPreselectedSavedSepaConfirmsDirectlyAfterContentIsAccessed() {
+        runSavedSepaTest(paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD)) {
+            contentPage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
+
+            enqueueConfirmation()
+            confirm()
+        }
+    }
+
+    @Test
+    fun testPreselectedSavedSepaConfirmsDirectlyAfterMandateTextIsAccessed() {
+        runSavedSepaTest(
+            paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD),
+            renderPaymentElementContent = false,
+        ) {
+            assertThat(controller.session.value?.paymentOption?.mandateText?.text).isNotEmpty()
+
+            enqueueConfirmation()
+            confirm()
+        }
+    }
+
+    @Test
     fun testPreselectedSavedSepaConfirmsDirectlyWhenEmbeddedMandateIsDisabled() {
         val configuration = checkoutConfiguration(
             PaymentElement.Configuration().embeddedViewDisplaysMandateText(false)
@@ -94,8 +135,8 @@ internal class CheckoutPaymentElementSavedSepaTest {
         runSavedSepaTest(
             paymentMethods = savedPaymentMethods(CARD_PAYMENT_METHOD, SEPA_PAYMENT_METHOD),
             configuration = configuration,
+            renderPaymentElementContent = false,
         ) {
-            contentPage.assertHasSelectedSavedPaymentMethod(CARD_PAYMENT_METHOD_ID)
             presentPaymentOptions()
 
             verticalModePage.waitUntilVisible()
@@ -106,10 +147,33 @@ internal class CheckoutPaymentElementSavedSepaTest {
             verticalModePage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
             clickPaymentOptionsPrimaryButton()
             verticalModePage.waitUntilMissing()
-            contentPage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
 
             enqueueConfirmation()
             confirm()
+        }
+    }
+
+    @Test
+    fun testPreselectedSavedSepaDisplaysMandateAfterPaymentOptionsAreDismissed() {
+        runSavedSepaTest(
+            paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD),
+            configuration = checkoutConfiguration(
+                PaymentElement.Configuration().paymentMethodLayout(
+                    PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                )
+            ),
+            renderPaymentElementContent = false,
+        ) {
+            presentPaymentOptions()
+            verticalModePage.waitUntilVisible()
+            pressBack()
+            verticalModePage.waitUntilMissing()
+
+            confirm()
+            waitForSepaMandate()
+
+            enqueueConfirmation()
+            testRules.compose.onNodeWithTag(SEPA_MANDATE_CONTINUE_BUTTON).performClick()
         }
     }
 

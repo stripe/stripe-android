@@ -64,6 +64,26 @@ import kotlin.time.Duration.Companion.seconds
 internal class CheckoutStateLoaderTest {
 
     @Test
+    fun `loading a new configuration starts fresh mandate acknowledgement for the same session`() = runScenario {
+        val firstState = loadInitial().state
+
+        val secondState = loadInitial().state
+
+        assertThat(secondState.checkoutSessionResponse.id).isEqualTo(firstState.checkoutSessionResponse.id)
+        assertThat(firstState.mandateAcknowledgementId).isNotEmpty()
+        assertThat(secondState.mandateAcknowledgementId).isNotEqualTo(firstState.mandateAcknowledgementId)
+    }
+
+    @Test
+    fun `reloading the current session preserves mandate acknowledgement`() = runScenario {
+        val firstState = loadInitial().state
+
+        loader.reload(firstState)
+
+        assertThat(stateHolder.state?.mandateAcknowledgementId).isEqualTo(firstState.mandateAcknowledgementId)
+    }
+
+    @Test
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 
@@ -510,6 +530,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
+        mandateAcknowledgementId = "test_checkout",
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.

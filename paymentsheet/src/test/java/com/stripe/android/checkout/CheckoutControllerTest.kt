@@ -896,7 +896,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `selectSavedPaymentMethod acknowledges the SEPA mandate`() =
+    fun `selectSavedPaymentMethod does not acknowledge the SEPA mandate`() =
         runMutationScenario(
             initModifier = combine(
                 automaticTaxFor("shipping"),
@@ -921,7 +921,7 @@ internal class CheckoutControllerTest {
             controller.selectSavedPaymentMethod(selection).getOrThrow()
 
             assertThat(committedState().paymentSelection).isEqualTo(selection)
-            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isFalse()
             assertThat(committedState().savedPaymentMethodSelectionState)
                 .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }

@@ -43,10 +43,10 @@ internal class CheckoutControllerStateHolderTest {
             label = "Google Pay",
             billingDetails = null,
             paymentMethodType = "google_pay",
-            mandateText = null,
+            mandateTextProvider = { null },
         )
         var capturedSelection: PaymentSelection? = null
-        val factory = CheckoutPaymentOptionDisplayDataFactory { selection, _ ->
+        val factory = CheckoutPaymentOptionDisplayDataFactory { selection, _, _ ->
             capturedSelection = selection
             expectedOption
         }
@@ -69,7 +69,7 @@ internal class CheckoutControllerStateHolderTest {
         )
 
         testScenario(
-            paymentOptionFactory = { _, metadata ->
+            paymentOptionFactory = { _, metadata, _ ->
                 assertThat(metadata).isSameInstanceAs(paymentElementMetadata)
                 null
             },
@@ -204,13 +204,13 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `setSelection acknowledges the SEPA mandate`() = testScenario {
+    fun `setSelection does not acknowledge the SEPA mandate`() = testScenario {
         stateHolder.state = committedState()
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
 
         stateHolder.setSelection(selection)
 
-        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isFalse()
     }
 
     @Test
@@ -300,7 +300,7 @@ internal class CheckoutControllerStateHolderTest {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
             errorReporter = FakeErrorReporter(),
-            paymentOptionFactory = { _, _ -> null },
+            paymentOptionFactory = { _, _, _ -> null },
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
         )
 
@@ -332,11 +332,12 @@ internal class CheckoutControllerStateHolderTest {
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,
+        mandateAcknowledgementId = "test_checkout",
     )
 
     private fun testScenario(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
-            CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+            CheckoutPaymentOptionDisplayDataFactory { _, _, _ -> null },
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
             FakeAvailableExpressButtonTypesFactory(),
         block: suspend Scenario.() -> Unit,
