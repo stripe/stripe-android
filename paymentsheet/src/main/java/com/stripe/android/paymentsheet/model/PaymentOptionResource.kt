@@ -1,13 +1,11 @@
 package com.stripe.android.paymentsheet.model
 
 import android.graphics.drawable.Drawable
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -52,7 +50,7 @@ internal class DefaultPaymentOptionResource(
     )
 }
 
-internal object ErrorPainterResource: PaymentOptionResource {
+internal object ErrorPainterResource : PaymentOptionResource {
     override suspend fun load(isSystemDarkTheme: Boolean?): Drawable {
         throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
     }
