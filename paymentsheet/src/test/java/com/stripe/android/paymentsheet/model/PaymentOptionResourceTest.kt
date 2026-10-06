@@ -72,7 +72,7 @@ internal class PaymentOptionResourceTest {
     ) = runTest {
         val isSystemDarkTheme = mutableStateOf(false)
         val loadCalls = Turbine<Boolean>()
-        val resource = PaymentOptionResource(
+        val resource = DefaultPaymentOptionResource(
             appearance = PaymentSheet.Appearance.Builder()
                 .colorsLight(
                     PaymentSheet.Colors.Builder.light()
@@ -86,8 +86,8 @@ internal class PaymentOptionResourceTest {
                 )
                 .themeMode(themeMode)
                 .build(),
-            loader = { useDarkThemeIcon ->
-                loadCalls.add(useDarkThemeIcon)
+            loader = { packet ->
+                loadCalls.add(packet.appearance.shouldUseDarkThemeIcon(requireNotNull(packet.isSystemDarkTheme)))
                 ColorDrawable()
             },
         )
@@ -102,7 +102,7 @@ internal class PaymentOptionResourceTest {
                 uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
             }
             CompositionLocalProvider(LocalConfiguration provides configuration) {
-                rememberPaymentOptionResource(resource)
+                resource.rememberPainter()
             }
         }
         composeRule.waitForIdle()

@@ -16,8 +16,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentOptionResource
+import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -41,10 +40,7 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `session projects the paymentOption the factory builds from the committed state`() {
         val expectedOption = PaymentOptionDisplayData(
-            paymentOptionResource = PaymentOptionResource(
-                appearance = PaymentSheet.Appearance(),
-                loader = { _ -> error("not needed for this test") },
-            ),
+            paymentOptionResource = ErrorPaymentOptionResource,
             label = "Google Pay",
             billingDetails = null,
             paymentMethodType = "google_pay",
