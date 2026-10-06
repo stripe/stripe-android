@@ -414,14 +414,20 @@ internal class CustomerSheetViewModel(
 
     private fun onDismissed() {
         _result.update {
-            InternalCustomerSheetResult.Canceled(originalPaymentSelection)
+            InternalCustomerSheetResult.Canceled(
+                paymentSelection = originalPaymentSelection,
+                appearance = configuration.appearance
+            )
         }
     }
 
     private fun onBackPressed() {
         if (backStack.value.size == 1) {
             _result.tryEmit(
-                InternalCustomerSheetResult.Canceled(originalPaymentSelection)
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = originalPaymentSelection,
+                    appearance = configuration.appearance
+                )
             )
         } else {
             backStack.update {
@@ -1040,7 +1046,8 @@ internal class CustomerSheetViewModel(
             if (paymentMethod.isUnverifiedUSBankAccount()) {
                 _result.tryEmit(
                     InternalCustomerSheetResult.Selected(
-                        paymentSelection = PaymentSelection.Saved(paymentMethod)
+                        paymentSelection = PaymentSelection.Saved(paymentMethod),
+                        appearance = configuration.appearance
                     )
                 )
             } else {
@@ -1200,6 +1207,7 @@ internal class CustomerSheetViewModel(
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
                 paymentSelection = paymentSelection,
+                appearance = configuration.appearance
             )
         )
     }

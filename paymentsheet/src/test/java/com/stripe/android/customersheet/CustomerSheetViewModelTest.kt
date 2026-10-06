@@ -164,11 +164,17 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     fun `CustomerSheetViewAction#OnBackPressed emits canceled result`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            configuration = appearanceConfiguration,
         )
         viewModel.result.test {
             assertThat(awaitItem()).isEqualTo(null)
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
-            assertThat(awaitItem()).isEqualTo(InternalCustomerSheetResult.Canceled(null))
+            assertThat(awaitItem()).isEqualTo(
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = null,
+                    appearance = appearanceConfiguration.appearance,
+                )
+            )
         }
     }
 
@@ -731,6 +737,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     fun `When primary button is pressed for saved payment method, selected payment method is emitted`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            configuration = appearanceConfiguration,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
         )
@@ -744,7 +751,12 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            assertThat(resultTurbine.awaitItem()).isInstanceOf<InternalCustomerSheetResult.Selected>()
+            assertThat(resultTurbine.awaitItem()).isEqualTo(
+                InternalCustomerSheetResult.Selected(
+                    paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                    appearance = appearanceConfiguration.appearance,
+                )
+            )
         }
     }
 
@@ -779,6 +791,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     fun `When primary button is pressed for google pay, google pay is emitted`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            configuration = appearanceConfiguration,
             isGooglePayAvailable = true,
             savedPaymentSelection = PaymentSelection.GooglePay,
             savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
@@ -789,8 +802,12 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             assertThat(awaitItem()).isNull()
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-            val result = awaitItem() as InternalCustomerSheetResult.Selected
-            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(awaitItem()).isEqualTo(
+                InternalCustomerSheetResult.Selected(
+                    paymentSelection = PaymentSelection.GooglePay,
+                    appearance = appearanceConfiguration.appearance,
+                )
+            )
         }
     }
 
@@ -1134,6 +1151,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     fun `When there is an initially selected PM, selecting another PM and cancelling should keep the original`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            configuration = appearanceConfiguration,
             customerPaymentMethods = listOf(
                 CARD_PAYMENT_METHOD.copy(id = "pm_1"),
                 CARD_PAYMENT_METHOD.copy(id = "pm_2"),
@@ -1177,9 +1195,10 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             assertThat(resultTurbine.awaitItem())
                 .isEqualTo(
                     InternalCustomerSheetResult.Canceled(
-                        PaymentSelection.Saved(
+                        paymentSelection = PaymentSelection.Saved(
                             CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-                        )
+                        ),
+                        appearance = appearanceConfiguration.appearance,
                     )
                 )
 
@@ -2204,7 +2223,10 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             assertThat(resultTurbine.awaitItem())
                 .isEqualTo(
-                    InternalCustomerSheetResult.Canceled(null)
+                    InternalCustomerSheetResult.Canceled(
+                        paymentSelection = null,
+                        appearance = PaymentSheet.Appearance(),
+                    )
                 )
 
             resultTurbine.cancel()
@@ -2478,6 +2500,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     fun `When attaching a non-verified bank account, the sheet closes and returns the account`() = confirmationTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
+            configuration = appearanceConfiguration,
             isGooglePayAvailable = false,
             confirmationHandler = handler,
             customerPaymentMethods = listOf(),
@@ -2509,7 +2532,8 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
             assertThat(awaitItem())
                 .isEqualTo(
                     InternalCustomerSheetResult.Selected(
-                        PaymentSelection.Saved(US_BANK_ACCOUNT)
+                        paymentSelection = PaymentSelection.Saved(US_BANK_ACCOUNT),
+                        appearance = appearanceConfiguration.appearance,
                     )
                 )
         }
@@ -3747,6 +3771,14 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
     }
 
     private companion object {
+        val appearanceConfiguration = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+            googlePayEnabled = true,
+            appearance = PaymentSheet.Appearance(
+                colorsLight = PaymentSheet.Colors.Builder.light().component(android.graphics.Color.BLACK).build(),
+            ),
+        )
+
         val TEST_FORM_VALUES = FormFieldValues(
             fieldValuePairs = mapOf(
                 FormFieldId.Generic("test") to FormFieldEntry("test", true)
