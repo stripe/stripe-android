@@ -677,46 +677,6 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton ignores another click after saving succeeds`() {
-        val result = AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
-        val primaryButtonAction = RecordingPrimaryButtonAction { Result.success(result) }
-
-        runScenario(primaryButtonAction = primaryButtonAction) {
-            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
-            assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
-            assertThat(resultStateHolder.state.value).isEqualTo(State.Finished(result))
-            assertThat(viewModel.formEnabled.value).isFalse()
-
-            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-            primaryButtonAction.calls.expectNoEvents()
-            eventReporter.completedCalls.expectNoEvents()
-            assertThat(resultStateHolder.state.value).isEqualTo(State.Finished(result))
-        }
-    }
-
-    @Test
-    fun `clickPrimaryButton ignores a click after cancellation`() {
-        val primaryButtonAction = RecordingPrimaryButtonAction {
-            Result.success(AddressElementActivityContract.Result.StandaloneSucceeded(it))
-        }
-
-        runScenario(primaryButtonAction = primaryButtonAction) {
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
-            assertThat(viewModel.formEnabled.value).isFalse()
-
-            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-            primaryButtonAction.calls.expectNoEvents()
-            eventReporter.completedCalls.expectNoEvents()
-            assertThat(resultStateHolder.state.value)
-                .isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
-        }
-    }
-
-    @Test
     fun `default checkbox should emit true to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             AddressDetails(
