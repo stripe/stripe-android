@@ -1,6 +1,6 @@
 # UPI app-picker device demo
 
-This module presents the real PaymentSheet with a fake **UPI Demo** payment method. It exercises the UPI PR's next-action parser, native chooser, redirect launcher, activity-result handling, and post-redirect PaymentIntent polling. The host app and all payment data are local simulations. No real UPI or Stripe backend is required.
+This module presents the real PaymentSheet with a fake **UPI Demo** payment method. It exercises the UPI PR's next-action parser, dedicated UPI app-chooser contract/activity, activity-result handling, and existing post-return PaymentIntent polling. The host app and all payment data are local simulations. No real UPI or Stripe backend is required.
 
 - Stacked on the [UPI PaymentSheet implementation PR](https://github.com/stripe/stripe-android/pull/14826), branch `tyler/upi-intent-paymentsheet`.
 - Receiver app project: [`banks/`](banks/README.md), included in this repository.
@@ -46,14 +46,14 @@ For the zero-app case, uninstall the three demo banks in Android Settings and st
 
 1. **Start fake UPI payment** creates a fresh fake PaymentIntent in app-local preferences.
 2. The demo application's `ConnectionFactory` hook supplies fake Elements Session, confirmation, and retrieval responses to the real SDK. SDK requests in this dedicated app never fall through to Stripe; unsupported requests return a mock error.
-3. Confirm returns the normal UPI next action with a `stripe-upi-demo://pay` URL. This branch permits that scheme only in debug SDK builds. The demo app declares package visibility for both the scheme and the `pay` host so Android can match the receivers' intent filters.
+3. Confirm returns the normal UPI next action with a `stripe-upi-demo://pay` URL. PaymentSheet's `UpiNextActionHandler` launches `UpiAppChooserContract` and `UpiAppChooserActivity`; the dedicated `UpiAppChooserViewModel` permits the fake scheme only in debug builds on this demo branch. No browser contract, browser starter, or browser launcher is involved. The demo app declares package visibility for both the fake scheme and the `pay` host so Android can match the receivers' intent filters.
 4. The selected receiver updates a fake ContentProvider in checkout to simulate a backend decision, independently of any `response` extra returned through Android. The provider only accepts the current fake payment ID and the `approve`/`decline` actions.
 5. **Approve and return** stores `processing` with a settlement timestamp three seconds in the future, then calls `setResult(RESULT_OK, Intent(...))` with a sample `response` extra and `finish()`. This closes the bank activity and delivers an activity result to the SDK; it does not open a callback URL. A subsequent status read after the deadline promotes the fake payment to `succeeded`.
-6. The standard redirect launcher returns to PaymentSheet, whose existing result processor polls the fake PaymentIntent responses, including `processing`, for up to 15 seconds. It does not use `PollingActivity` and does not trust the bank app's `response` extra. The fake backend state and logs survive process recreation in SharedPreferences; that is not a guarantee that every interrupted UI flow recovers.
+6. `UpiAppChooserActivity` returns an unknown-outcome `PaymentFlowResult` to PaymentSheet, whose existing result processor polls the fake PaymentIntent responses, including `processing`, for up to 15 seconds. It does not use `PollingActivity` and does not trust the bank app's `response` extra. The activity also supports manual return without a useful result and saves launch state to avoid reopening the chooser after recreation. The fake backend state and logs survive process recreation in SharedPreferences; that is not a guarantee that every interrupted UI flow recovers.
 
 ### Package visibility fix found by the demo
 
-The original scheme-only package query did not expose the receivers on the tested Android 36 emulator because their intent filters also require host `pay`. Matching both the scheme and host made all three apps visible to the SDK's handler lookup. This branch includes the corresponding `upi://pay` query fix in `payments-core/AndroidManifest.xml`, as well as the fake-scheme query in the demo manifest. The real-scheme fix should be carried into the parent implementation before shipping.
+The original scheme-only package query did not expose the receivers on the tested Android 36 emulator because their intent filters also require host `pay`. Matching both the scheme and host made all three apps visible to the SDK's handler lookup. The parent UPI implementation now includes the real `upi://pay` query in `paymentsheet/src/main/AndroidManifest.xml`. This demo adds the fake-scheme query in its own manifest; neither query needs browser infrastructure.
 
 ### Limits and safety
 
@@ -63,4 +63,6 @@ The fake API uses a dummy publishable key, advertises only UPI, and has no real 
 
 ### Validation
 
-Verified on an Android 36 emulator: the run script builds and installs all four apps; checkout shows all three banks in the native chooser; approving in Blue returns to SDK polling (`processing` → `succeeded`) and PaymentSheet reports `Completed`. Observed four `processing` retrievals followed by a fifth returning `succeeded`. Other scenarios above remain manual checks. Real UPI apps, real Stripe requests, and a physical device have not been validated by this demo.
+After the refactor: checkout and all three bank debug APKs build successfully; focused UPI debug tests (41 total, one expected release-only skip) and release ViewModel tests (18 total, one expected debug-only skip) pass. PaymentSheet Detekt and both PaymentSheet/payments-core API checks pass. No device install or payment walkthrough was run for this update.
+
+Before the dedicated-contract refactor, verified on an Android 36 emulator: the run script builds and installs all four apps; checkout shows all three banks in the native chooser; approving in Blue returns to SDK polling (`processing` → `succeeded`) and PaymentSheet reports `Completed`. Observed four `processing` retrievals followed by a fifth returning `succeeded`. That device flow has not been rerun after the refactor. The new chooser has focused unit/lifecycle coverage, including debug acceptance and release rejection of the fake scheme. Other scenarios above remain manual checks. Real UPI apps, real Stripe requests, and a physical device have not been validated by this demo.

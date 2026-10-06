@@ -14,7 +14,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
- * An [ActivityResultContract] for completing payment authentication in a browser or UPI app. This will
+ * An [ActivityResultContract] for completing payment authentication in a browser. This will
  * be handled in either [StripeBrowserLauncherActivity] or [PaymentAuthWebViewActivity].
  */
 internal class PaymentBrowserAuthContract :
@@ -25,8 +25,8 @@ internal class PaymentBrowserAuthContract :
         input: Args
     ): Intent {
         val defaultReturnUrl = DefaultReturnUrl.create(context)
-        val shouldUseBrowser = input.shouldUseAppChooser ||
-            (!input.forceInAppWebView && (input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp))
+        val shouldUseBrowser = !input.forceInAppWebView &&
+            (input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp)
 
         val extras = input.toBundle()
 
@@ -75,8 +75,6 @@ internal class PaymentBrowserAuthContract :
         val isInstantApp: Boolean,
         val referrer: String? = null,
         val forceInAppWebView: Boolean = false,
-        /** Launch the UPI URI in a native app chooser instead of a browser. */
-        val shouldUseAppChooser: Boolean,
     ) : Parcelable {
 
         /**
@@ -101,7 +99,6 @@ internal class PaymentBrowserAuthContract :
             parcel.readValue(Int::class.java.classLoader) as? Int,
             parcel.readByte() != 0.toByte(),
             parcel.readString(),
-            parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),
         )
 
@@ -133,7 +130,6 @@ internal class PaymentBrowserAuthContract :
             parcel.writeByte(if (isInstantApp) 1 else 0)
             parcel.writeString(referrer)
             parcel.writeByte(if (forceInAppWebView) 1 else 0)
-            parcel.writeByte(if (shouldUseAppChooser) 1 else 0)
         }
 
         override fun describeContents(): Int {

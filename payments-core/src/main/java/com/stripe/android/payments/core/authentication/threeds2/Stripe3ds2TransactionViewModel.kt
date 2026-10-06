@@ -223,7 +223,6 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 StripePaymentController.getRequestCode(args.stripeIntent),
                 args.stripeIntent.clientSecret.orEmpty(),
                 fallbackRedirectUrl,
-                shouldUseAppChooser = false,
                 returnUrl = null,
                 enableLogging = args.enableLogging,
                 apiConfiguration = args.apiConfiguration.copy(stripeAccountId = args.requestOptions.stripeAccount),

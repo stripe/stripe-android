@@ -1,8 +1,6 @@
 package com.stripe.android.payments
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsClient
@@ -12,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.BuildConfig
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -32,9 +29,6 @@ internal class StripeBrowserLauncherViewModel(
     private val customTabsPackage: String?,
     private val resolveErrorMessage: String,
     private val savedStateHandle: SavedStateHandle,
-    private val canResolveActivity: (Intent) -> Boolean,
-    private val appChooserTitle: String,
-    private val noCompatibleAppMessage: String,
 ) : ViewModel() {
 
     var hasLaunched: Boolean
@@ -47,16 +41,6 @@ internal class StripeBrowserLauncherViewModel(
         args: PaymentBrowserAuthContract.Args
     ): Intent {
         val url = Uri.parse(args.url)
-        if (args.shouldUseAppChooser) {
-            // Demo branch only: fake bank apps must never claim the real UPI scheme.
-            val isDemoUri = BuildConfig.DEBUG && url.scheme == "stripe-upi-demo"
-            require((url.scheme == "upi" || isDemoUri) && url.host == "pay") { "Invalid UPI mobile_auth_url" }
-            val target = Intent(Intent.ACTION_VIEW, url)
-            if (!canResolveActivity(target)) {
-                throw ActivityNotFoundException("No compatible app available")
-            }
-            return Intent.createChooser(target, appChooserTitle)
-        }
         logBrowserCapabilities()
 
         val intent = when (browserCapabilities) {
@@ -108,12 +92,11 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    fun getFailureIntent(args: PaymentBrowserAuthContract.Args, cause: Exception): Intent {
+    fun getFailureIntent(args: PaymentBrowserAuthContract.Args): Intent {
         val url = Uri.parse(args.url)
-        val noCompatibleApp = args.shouldUseAppChooser && cause is ActivityNotFoundException
         val exception = LocalStripeException(
-            displayMessage = if (noCompatibleApp) noCompatibleAppMessage else resolveErrorMessage,
-            analyticsValue = if (args.shouldUseAppChooser) "failedUpiAppLaunchError" else "failedBrowserLaunchError",
+            displayMessage = resolveErrorMessage,
+            analyticsValue = "failedBrowserLaunchError",
         )
 
         return Intent().putExtras(
@@ -147,30 +130,18 @@ internal class StripeBrowserLauncherViewModel(
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
 
+            val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
+
             return StripeBrowserLauncherViewModel(
                 analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = application,
                     publishableKeyProvider = { args.apiConfiguration.publishableKey },
                 ),
-                browserCapabilities = if (args.shouldUseAppChooser) {
-                    BrowserCapabilities.Unknown
-                } else {
-                    BrowserCapabilitiesSupplier(application).get()
-                },
-                customTabsPackage = if (args.shouldUseAppChooser) {
-                    null
-                } else {
-                    CustomTabsClient.getPackageName(application, null)
-                },
+                browserCapabilities = browserCapabilitiesSupplier.get(),
+                customTabsPackage = CustomTabsClient.getPackageName(application, null),
                 resolveErrorMessage = application.getString(R.string.stripe_failure_reason_authentication),
                 savedStateHandle = savedStateHandle,
-                canResolveActivity = { intent ->
-                    application.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-                        .isNotEmpty()
-                },
-                appChooserTitle = application.getString(R.string.stripe_upi_choose_app),
-                noCompatibleAppMessage = application.getString(R.string.stripe_upi_no_compatible_apps),
             ) as T
         }
     }
