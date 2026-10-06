@@ -108,12 +108,15 @@ internal class CheckoutStateLoader @Inject constructor(
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
         // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-        // previous selection comes from the incoming state, not a separate holder.
+        // previous selection comes from the incoming state, not a separate holder. An empty
+        // selection on reload must stay empty until the customer selects again or reconfigures.
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loadResults.paymentMethodMetadata,
             paymentMethods = loadResults.customer?.paymentMethods,
             previousSelection = carryForward.previousSelection,
-            newSelection = loadResults.paymentSelection,
+            newSelection = loadResults.paymentSelection.takeIf {
+                carryForward.isInitialLoad || carryForward.previousSelection != null
+            },
             newConfiguration = commonConfiguration,
             formSheetAction = embeddedConfig.formSheetAction,
         )
@@ -196,6 +199,7 @@ internal class CheckoutStateLoader @Inject constructor(
      * list into a single carrier.
      */
     private data class CarryForward(
+        val isInitialLoad: Boolean,
         val cachedFlagImages: Map<String, Bitmap>?,
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
@@ -204,6 +208,7 @@ internal class CheckoutStateLoader @Inject constructor(
     ) {
         companion object {
             fun initial() = CarryForward(
+                isInitialLoad = true,
                 cachedFlagImages = null,
                 previousSelection = null,
                 temporarySelection = null,
@@ -212,6 +217,7 @@ internal class CheckoutStateLoader @Inject constructor(
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
+                isInitialLoad = false,
                 cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,
                 temporarySelection = state.temporarySelection,
