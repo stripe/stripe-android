@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
 import com.stripe.android.link.LinkActivityResult
@@ -47,6 +48,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     }
 
     override fun present() {
+        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
         if (sheetStateHolder.sheetIsOpen) return
         val state = stateHolder.state
         if (state == null) {

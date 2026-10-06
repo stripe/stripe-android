@@ -210,6 +210,20 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
+    @Test
+    fun `eligible Link presentation after destruction leaves state unchanged`() = runScenario {
+        val state = stateHolder.state
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+        presenter.present()
+
+        verify(linkPaymentLauncher).unregister()
+        verifyLinkWasNotPresented()
+        verify(defaultPresenter, never()).present()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(stateHolder.state).isEqualTo(state)
+    }
+
     @Suppress("LongMethod")
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),

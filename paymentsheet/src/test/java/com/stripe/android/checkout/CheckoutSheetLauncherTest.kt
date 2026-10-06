@@ -669,6 +669,8 @@ internal class CheckoutSheetLauncherTest {
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        assertThat(SheetStateHolder(savedStateHandle).sheetIsOpen).isTrue()
+        assertThat(CheckoutSheetLauncherState(savedStateHandle).isAwaitingPaymentOptionsReady).isTrue()
         mutationGate.complete(Unit)
         runCurrent()
 
@@ -1137,6 +1139,80 @@ internal class CheckoutSheetLauncherTest {
 
         assertThat(unregisteredLauncher).isEqualTo(launcher)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `launchForm after destruction leaves state unchanged`() = testScenario {
+        selectionHolder.setTemporarySelection("existing")
+        val state = selectionHolder.state
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+
+        sheetLauncher.launchForm(
+            code = "card",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            configuration = EmbeddedConfigurationFactory.create(),
+            customerState = null,
+            promotion = null,
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
+        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `launchManage after destruction leaves state unchanged`() = testScenario {
+        selectionHolder.setTemporarySelection("existing")
+        val state = selectionHolder.state
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+
+        sheetLauncher.launchManage(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = createCustomerState(),
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
+        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `launchPaymentOptions after destruction leaves state unchanged`() = testScenario {
+        selectionHolder.setTemporarySelection("existing")
+        val state = selectionHolder.state
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
+        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
+    fun `destruction after successful form launch preserves selection and open state`() = testScenario {
+        launchForm("card")
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+
+        assertThat(SheetStateHolder(savedStateHandle).sheetIsOpen).isTrue()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("card")
     }
 
     @Suppress("LongMethod")
