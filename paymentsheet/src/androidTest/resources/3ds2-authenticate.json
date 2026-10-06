@@ -1,0 +1,13 @@
+{
+  "id": "threeds2_123",
+  "created": 1563498160,
+  "livemode": false,
+  "source": "src_1ExkUeAWhjPjYwPiLWUvXrSA",
+  "state": "succeeded",
+  "ares": {
+    "acsTransID": "34b16ea1-1206-4ee8-84d2-d292bc73c2ae",
+    "messageType": "ARes",
+    "messageVersion": "2.2.0",
+    "transStatus": "Y"
+  }
+}

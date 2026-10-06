@@ -61,6 +61,7 @@ internal suspend fun createIntentConfirmationInterceptor(
     customerMetadata: CustomerMetadata? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
+    stripeAccountId: String? = null,
     errorReporter: ErrorReporter = FakeErrorReporter(),
     intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
     intentCreationConfirmationTokenCallbackProvider: Provider<CreateIntentWithConfirmationTokenCallback?> = Provider {
@@ -70,7 +71,7 @@ internal suspend fun createIntentConfirmationInterceptor(
 ): IntentConfirmationInterceptor {
     val requestOptions = ApiRequest.Options(
         apiKey = publishableKeyProvider(),
-        stripeAccount = null,
+        stripeAccount = stripeAccountId,
     )
     val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
         intentCreationCallbackProvider = intentCreationCallbackProvider,

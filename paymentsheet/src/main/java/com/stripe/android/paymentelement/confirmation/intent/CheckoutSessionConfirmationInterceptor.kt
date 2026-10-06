@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -214,6 +215,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = Args.NextAction(
                         intent = intent,
+                        apiConfiguration = ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount),
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -39,7 +40,29 @@ fun interface CreateIntentCallback {
  */
 sealed interface CreateIntentResult {
 
-    class Success(internal val clientSecret: String) : CreateIntentResult
+    /**
+     * The client secret of the intent created by your server.
+     *
+     * To use different credentials for retrieval, confirmation, and authentication:
+     * ```kotlin
+     * CreateIntentResult.Success(clientSecret)
+     *     .apiConfiguration(ApiConfiguration(publishableKey).stripeAccountId(stripeAccountId))
+     * ```
+     * Omitting [apiConfiguration] preserves the payment UI's original credentials.
+     */
+    class Success(internal val clientSecret: String) : CreateIntentResult {
+        internal var apiConfiguration: ApiConfiguration.State? = null
+            private set
+
+        /**
+         * Replaces the publishable key and Stripe account used after this callback succeeds.
+         * A null account ID clears the original account. The configuration is snapshotted here;
+         * later changes to the supplied builder do not affect confirmation or authentication.
+         */
+        fun apiConfiguration(apiConfiguration: ApiConfiguration): Success = apply {
+            this.apiConfiguration = apiConfiguration.build()
+        }
+    }
 
     class Failure @JvmOverloads constructor(
         internal val cause: Exception,

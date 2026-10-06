@@ -10,6 +10,7 @@ NEXT_VERSION_BUMP: MINOR
 * [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
 * [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
+* [Added] `CreateIntentResult.Success.apiConfiguration` to override the publishable key and Stripe account used for intent retrieval, confirmation, and authentication after intent creation.
 
 ### Financial Connections
 * [REMOVED] Removed the test mode indicator from the header.

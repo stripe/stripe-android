@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AndroidVerificationObject
@@ -148,6 +149,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
         return when (result) {
             is CreateIntentResult.Success -> {
+                val apiConfiguration = result.apiConfiguration
+                    ?: ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
@@ -159,6 +162,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 } else {
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
+                        apiConfiguration = apiConfiguration,
                         intentConfiguration = intentConfiguration,
                         confirmationOption = confirmationOption,
                         paymentMethod = paymentMethod,
@@ -183,6 +187,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
@@ -190,15 +195,28 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         hCaptchaToken: String?,
         androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
+        val resolvedOptions = runCatching {
+            requestOptions.copy(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
+            )
+        }.getOrElse { error ->
+            return ConfirmationDefinition.Action.Fail(
+                cause = error,
+                message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = requestOptions,
+            options = resolvedOptions,
         ).mapCatching { intent ->
             when {
                 intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)
-                intent.requiresAction() -> handleIntentRequiringAction(intent, paymentMethod)
+                intent.requiresAction() -> handleIntentRequiringAction(intent, paymentMethod, apiConfiguration)
                 else -> handleIntentConfirmation(
                     clientSecret = clientSecret,
+                    apiConfiguration = apiConfiguration,
                     intent = intent,
                     intentConfiguration = intentConfiguration,
                     confirmationOption = confirmationOption,
@@ -233,13 +251,15 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private fun handleIntentRequiringAction(
         intent: StripeIntent,
-        paymentMethod: PaymentMethod
+        paymentMethod: PaymentMethod,
+        apiConfiguration: ApiConfiguration.State,
     ): ConfirmationDefinition.Action<Args> {
         return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = Args.NextAction(
                     intent = intent,
+                    apiConfiguration = apiConfiguration,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 ),
                 receivesResultInProcess = false,
@@ -255,6 +275,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private fun handleIntentConfirmation(
         clientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
         intent: StripeIntent,
         intentConfiguration: PaymentSheet.IntentConfiguration,
         confirmationOption: PaymentMethodConfirmationOption,
@@ -269,6 +290,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             intent,
             shippingValues,
             isDeferred = true,
+            apiConfiguration = apiConfiguration,
         ) {
             create(
                 paymentMethod = paymentMethod,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.utils
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -18,6 +19,7 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
         intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         isDeferred: Boolean,
+        apiConfiguration: ApiConfiguration.State,
         confirmParamsCreation:
         ConfirmStripeIntentParamsFactory<ConfirmStripeIntentParams>.() -> ConfirmStripeIntentParams
     ): ConfirmationDefinition.Action<Args> {
@@ -35,6 +37,7 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = Args.Confirm(
                 confirmNextParams = confirmParams,
+                apiConfiguration = apiConfiguration,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred }
             ),
             receivesResultInProcess = false,

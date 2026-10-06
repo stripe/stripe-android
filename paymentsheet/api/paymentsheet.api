@@ -870,6 +870,7 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Failure : 
 public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : com/stripe/android/paymentsheet/CreateIntentResult {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
+	public final fun apiConfiguration (Lcom/stripe/android/core/ApiConfiguration;)Lcom/stripe/android/paymentsheet/CreateIntentResult$Success;
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {

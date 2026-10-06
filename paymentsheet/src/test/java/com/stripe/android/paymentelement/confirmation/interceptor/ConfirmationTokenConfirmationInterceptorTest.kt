@@ -317,6 +317,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
+                        apiConfiguration = com.stripe.android.core.ApiConfiguration.State("pk", null),
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),

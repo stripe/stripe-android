@@ -274,6 +274,7 @@ class DeferredIntentConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
+                        apiConfiguration = com.stripe.android.core.ApiConfiguration.State("pk", null),
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
                             paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,

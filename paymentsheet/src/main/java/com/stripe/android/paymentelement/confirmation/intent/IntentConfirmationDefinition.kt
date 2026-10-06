@@ -97,7 +97,7 @@ internal class IntentConfirmationDefinition(
         val paymentLauncher = paymentLauncherFactory(
             launcher,
             confirmationArgs.statusBarColor,
-            confirmationArgs.paymentMethodMetadata.apiConfiguration,
+            arguments.apiConfiguration,
         )
         when (arguments) {
             is Args.Confirm -> launchConfirm(paymentLauncher, arguments.confirmNextParams)
@@ -146,17 +146,20 @@ internal class IntentConfirmationDefinition(
     }
 
     sealed interface Args : Parcelable {
+        val apiConfiguration: ApiConfiguration.State
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?
 
         @Parcelize
         data class NextAction(
             val intent: StripeIntent,
+            override val apiConfiguration: ApiConfiguration.State,
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Args
 
         @Parcelize
         data class Confirm(
             val confirmNextParams: ConfirmStripeIntentParams,
+            override val apiConfiguration: ApiConfiguration.State,
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Args
     }

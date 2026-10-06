@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
@@ -155,6 +156,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
 
         return when (result) {
             is CreateIntentResult.Success -> {
+                val apiConfiguration = result.apiConfiguration
+                    ?: ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
@@ -166,6 +169,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 } else {
                     handleDeferredIntentCreationSuccess(
                         clientSecret = result.clientSecret,
+                        apiConfiguration = apiConfiguration,
                         confirmationTokenId = confirmationToken.id,
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken,
@@ -188,14 +192,27 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
+        apiConfiguration: ApiConfiguration.State,
         confirmationTokenId: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
         androidVerificationObject: AndroidVerificationObject?
     ): ConfirmationDefinition.Action<Args> {
+        val resolvedOptions = runCatching {
+            requestOptions.copy(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
+            )
+        }.getOrElse { error ->
+            return ConfirmationDefinition.Action.Fail(
+                cause = error,
+                message = error.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        }
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = requestOptions,
+            options = resolvedOptions,
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
@@ -209,6 +226,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ConfirmationDefinition.Action.Launch<Args>(
                     launcherArguments = Args.NextAction(
                         intent = intent,
+                        apiConfiguration = apiConfiguration,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
@@ -219,6 +237,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent,
                     shippingValues,
                     isDeferred = true,
+                    apiConfiguration = apiConfiguration,
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,

@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -34,6 +35,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         val nextStep: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.Confirm(
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     confirmNextParams = confirmParams,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
                 ),
@@ -69,6 +71,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         channel.trySend(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = IntentConfirmationDefinition.Args.NextAction(
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 ),

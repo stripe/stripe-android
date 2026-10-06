@@ -290,6 +290,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = paymentIntent,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
             )
@@ -319,6 +320,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.Confirm(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
             )
@@ -341,6 +343,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
             ),
@@ -365,6 +368,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
             ),
@@ -393,6 +397,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
             ),
@@ -417,6 +422,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
             ),
@@ -442,6 +448,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
             ),
@@ -467,6 +474,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
             ),
@@ -495,6 +503,7 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = FakeActivityResultLauncher(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 deferredIntentConfirmationType = null,
             ),
@@ -518,6 +527,7 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             ),
@@ -549,6 +559,7 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
             ),
@@ -574,6 +585,7 @@ class IntentConfirmationDefinitionTest {
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                apiConfiguration = DEFAULT_API_CONFIG,
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
             ),

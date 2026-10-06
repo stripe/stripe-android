@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -16,7 +17,7 @@ import dagger.assisted.AssistedInject
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientSecret: String,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
-    requestOptions: ApiRequest.Options,
+    private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
@@ -30,6 +31,7 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             intent = intent,
             shippingValues = shippingValues,
             isDeferred = false,
+            apiConfiguration = ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount),
         ) {
             create(
                 confirmationOption.createParams,
@@ -50,6 +52,7 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
             intent = intent,
             shippingValues = shippingValues,
             isDeferred = false,
+            apiConfiguration = ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount),
         ) {
             create(
                 paymentMethod = confirmationOption.paymentMethod,
