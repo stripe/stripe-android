@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.ui.theme
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +44,8 @@ internal class LinkThemeIntegrationTest {
         assertAppearance(LinkAppearance.Style.ALWAYS_LIGHT, Configuration.UI_MODE_NIGHT_NO, Color.Red)
     }
 
+    // Verify the theme's resource context override, not the system's LocalConfiguration.
+    @SuppressLint("LocalContextConfigurationRead")
     private fun assertAppearance(style: LinkAppearance.Style, expectedUiMode: Int, expectedPrimary: Color) {
         val appearance = LinkAppearance()
             .style(style)
