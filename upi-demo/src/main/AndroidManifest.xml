@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="stripe-upi-demo" android:host="pay" />
+        </intent>
+    </queries>
+    <application
+        android:name=".DemoApplication"
+        android:allowBackup="false"
+        android:label="UPI Demo Checkout"
+        android:theme="@style/UpiDemoTheme">
+        <activity android:name=".DemoActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Fake payment state only. Receiver apps simulate a backend update through this provider. -->
+        <provider
+            android:name=".DemoStateProvider"
+            android:authorities="com.stripe.android.upidemo.state"
+            android:exported="true" />
+    </application>
+</manifest>

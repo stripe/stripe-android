@@ -7,8 +7,11 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -74,8 +77,32 @@ internal class UpiAppChooserViewModelTest {
     }
 
     @Test
-    fun `demo scheme is not accepted in production flow`() = runScenario(
+    fun `demo scheme is not accepted in release builds`() = runScenario(
         args = UpiFixtures.ARGS.copy(mobileAuthUrl = "stripe-upi-demo://pay"),
+    ) {
+        assumeFalse(BuildConfig.DEBUG)
+        assertFailsWith<IllegalArgumentException> { viewModel.createLaunchIntent() }
+    }
+
+    @Test
+    fun `debug demo payment uses native chooser and preserves URL`() = runScenario(
+        args = UpiFixtures.ARGS.copy(mobileAuthUrl = DEMO_URL),
+    ) {
+        assumeTrue(BuildConfig.DEBUG)
+        val chooser = viewModel.createLaunchIntent()
+        val target = requireNotNull(chooser.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
+
+        assertThat(chooser.action).isEqualTo(Intent.ACTION_CHOOSER)
+        assertThat(target.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(target.data.toString()).isEqualTo(DEMO_URL)
+        assertThat(target.`package`).isNull()
+        assertThat(target.component).isNull()
+        assertThat(resolver.calls.awaitItem().data).isEqualTo(target.data)
+    }
+
+    @Test
+    fun `fake scheme with nonpayment host is rejected`() = runScenario(
+        args = UpiFixtures.ARGS.copy(mobileAuthUrl = "stripe-upi-demo://collect"),
     ) {
         assertFailsWith<IllegalArgumentException> { viewModel.createLaunchIntent() }
     }
@@ -193,6 +220,10 @@ internal class UpiAppChooserViewModelTest {
         val resolver: FakeUpiActivityResolver,
         val errorReporter: FakeErrorReporter,
     )
+
+    private companion object {
+        const val DEMO_URL = "stripe-upi-demo://pay?pa=merchant%40demo&am=100.00&cu=INR&tr=pi_upidemo"
+    }
 }
 
 internal class FakeUpiActivityResolver(private val available: Boolean) {

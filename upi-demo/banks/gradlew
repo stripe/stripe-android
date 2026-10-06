@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+demo_banks_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+demo_sdk_root="${UPI_DEMO_SDK_WORKTREE:-$(cd -- "$demo_banks_root/../.." && pwd)}"
+source "$demo_sdk_root/upi-demo/sdk-env.sh"
+exec "$demo_sdk_root/gradlew" -p "$demo_banks_root" "$@"

@@ -14,6 +14,7 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.R
 
 internal class UpiAppChooserViewModel(
@@ -48,7 +49,9 @@ internal class UpiAppChooserViewModel(
     fun createLaunchIntent(): Intent {
         require(args.clientSecret.isNotBlank()) { "Missing UPI client secret" }
         val uri = Uri.parse(requireNotNull(args.mobileAuthUrl) { "Missing UPI mobile_auth_url" })
-        require(uri.scheme == "upi" && uri.host == "pay") { "Invalid UPI mobile_auth_url" }
+        // Demo branch only: fake bank apps must never claim the real UPI scheme.
+        val isDemoUri = BuildConfig.DEBUG && uri.scheme == "stripe-upi-demo"
+        require((uri.scheme == "upi" || isDemoUri) && uri.host == "pay") { "Invalid UPI mobile_auth_url" }
         val target = Intent(Intent.ACTION_VIEW, uri)
         if (!canResolveActivity(target)) {
             throw ActivityNotFoundException("No compatible UPI app available")
