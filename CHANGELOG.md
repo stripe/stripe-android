@@ -14,6 +14,7 @@ NEXT_VERSION_BUMP: MINOR
 * [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
 * [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
 * [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+* [FIXED] Fixed missing callbacks when reusing an `OnrampCoordinator` to create a new presenter after its previous host activity finishes.
 
 ### Payments
 * [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
