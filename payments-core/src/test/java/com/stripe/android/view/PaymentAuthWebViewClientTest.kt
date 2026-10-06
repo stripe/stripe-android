@@ -2,7 +2,9 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.test.core.app.ApplicationProvider
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -332,6 +335,39 @@ class PaymentAuthWebViewClientTest {
             assertThat(intent.component).isNull()
             assertThat(intent.selector).isNull()
             assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.P, Build.VERSION_CODES.R])
+    fun `intent URI preserves its supported fields`() {
+        val identifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            "identifier=auth-session;"
+        } else {
+            ""
+        }
+        val url = "intent://pay/session123?token=url_token#Intent;scheme=bankapp;" +
+            "action=com.example.bank.AUTHENTICATE;type=application/vnd.example.bank;" +
+            "package=com.example.bank;category=com.example.bank.AUTH;" +
+            "launchFlags=0x10000001;sourceBounds=1%202%203%204;" +
+            identifier +
+            "S.token=extra_token;i.attempt=2;end"
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.action).isEqualTo("com.example.bank.AUTHENTICATE")
+            assertThat(intent.dataString).isEqualTo("bankapp://pay/session123?token=url_token")
+            assertThat(intent.type).isEqualTo("application/vnd.example.bank")
+            assertThat(intent.`package`).isEqualTo("com.example.bank")
+            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.sourceBounds).isEqualTo(Rect(1, 2, 3, 4))
+            assertThat(intent.categories).containsExactly("com.example.bank.AUTH", Intent.CATEGORY_BROWSABLE)
+            assertThat(intent.getStringExtra("token")).isEqualTo("extra_token")
+            assertThat(intent.getIntExtra("attempt", -1)).isEqualTo(2)
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                assertThat(intent.identifier).isEqualTo("auth-session")
+            }
         }
     }
 
