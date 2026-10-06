@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
+import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -219,26 +220,33 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `confirmation does not start when arguments are unavailable`() = runScenario {
+    fun `confirmation fails when arguments are unavailable`() = runScenario {
         val arguments = coordinator.tryBeginConfirmation { null }
 
         assertThat(arguments).isNull()
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "Cannot create confirmation arguments for the current payment selection."
+        )
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `confirmation is ignored when a payment flow is presented`() = runScenario(
+    fun `confirmation fails when a payment flow is presented`() = runScenario(
         sheetIsOpen = true,
     ) {
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        resultTurbine.expectNoEvents()
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "Cannot confirm while a payment flow is presented."
+        )
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `confirmation is ignored while a mutation is in flight`() = runScenario {
+    fun `confirmation fails while a mutation is in flight`() = runScenario {
         val mutationStarted = CompletableDeferred<Unit>()
         val finishMutation = CompletableDeferred<Unit>()
         val mutation = async {
@@ -253,20 +261,26 @@ internal class CheckoutOperationCoordinatorTest {
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        resultTurbine.expectNoEvents()
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).hasMessageThat().isEqualTo(
+            "Cannot confirm while the checkout session is updating."
+        )
 
         finishMutation.complete(Unit)
         mutation.await()
     }
 
     @Test
-    fun `second confirmation is ignored while confirmation is in flight`() = runScenario {
+    fun `second confirmation fails while confirmation is in flight`() = runScenario {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
 
         val arguments = coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         assertThat(arguments).isNull()
-        resultTurbine.expectNoEvents()
+        val failure = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(failure.error).hasMessageThat().isEqualTo(
+            "Cannot confirm while another confirmation is in progress."
+        )
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
@@ -349,7 +363,7 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `canceled confirmation with modify payment details does not invoke callback and releases gate`() =
+    fun `canceled confirmation with modify payment details presents payment options and releases gate`() =
         runScenario {
             coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
@@ -360,6 +374,7 @@ internal class CheckoutOperationCoordinatorTest {
                 )
             )
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+            embeddedContentHelper.presentPaymentOptionsCalls.awaitItem()
             runCurrent()
 
             resultTurbine.expectNoEvents()
@@ -756,6 +771,8 @@ internal class CheckoutOperationCoordinatorTest {
         }
         val resultTurbine = Turbine<CheckoutController.Result>()
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val embeddedContentHelper = FakeEmbeddedContentHelper()
+        sheetStateHolder.embeddedContentHelper = embeddedContentHelper
         val coordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
@@ -776,12 +793,14 @@ internal class CheckoutOperationCoordinatorTest {
             refreshCalls = sessionRefresher.calls,
             sessionRefresher = sessionRefresher,
             observerJob = observerJob,
+            embeddedContentHelper = embeddedContentHelper,
             testScope = this,
         ).block()
 
         confirmationHandler.validate()
         resultTurbine.ensureAllEventsConsumed()
         sessionRefresher.ensureAllEventsConsumed()
+        embeddedContentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -791,6 +810,7 @@ internal class CheckoutOperationCoordinatorTest {
         val refreshCalls: Turbine<FakeCheckoutSessionRefresher.Call>,
         private val sessionRefresher: FakeCheckoutSessionRefresher,
         val observerJob: Job,
+        val embeddedContentHelper: FakeEmbeddedContentHelper,
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
         val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")

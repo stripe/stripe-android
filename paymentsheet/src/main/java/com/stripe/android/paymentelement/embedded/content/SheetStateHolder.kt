@@ -9,6 +9,7 @@ internal class SheetStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) {
     var sheetLauncher: EmbeddedSheetLauncher? = null
+    var embeddedContentHelper: EmbeddedContentHelper? = null
 
     var sheetIsOpen: Boolean
         get() = savedStateHandle.get<Boolean>(SHEET_IS_OPEN_KEY) == true
