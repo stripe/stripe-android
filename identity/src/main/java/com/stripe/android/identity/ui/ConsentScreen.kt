@@ -164,7 +164,8 @@ private fun SuccessUI(
             )
             ConsentLines(
                 lines = consentPage.lines,
-                bottomSheets = bottomSheets
+                bottomSheets = bottomSheets,
+                textColor = MaterialTheme.colors.onBackground
             )
         }
 

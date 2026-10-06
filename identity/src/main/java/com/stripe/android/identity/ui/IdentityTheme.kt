@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.material.createMdcTheme
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.uicore.LocalColors
@@ -89,6 +90,7 @@ internal fun AdoptForStripeTheme(
     content: @Composable () -> Unit
 ) {
     val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
+        mediumFontSize = 16.sp,
         body1FontFamily = hostingAppTypography.body1.fontFamily,
         body2FontFamily = hostingAppTypography.body2.fontFamily,
         h4 = TextStyle(
