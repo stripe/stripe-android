@@ -36,10 +36,12 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
         val paymentOptionResource = DefaultPaymentOptionResource(
-            appearance = appearance ?: ConfigurationDefaults.appearance,
+            appearance = appearance,
             loader = { packet ->
-                val isSystemDarkTheme = packet.isSystemDarkTheme ?: context.isSystemDarkTheme()
-                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(isSystemDarkTheme)
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(
+                    isSystemDarkTheme = packet.isSystemDarkTheme,
+                    context = context,
+                )
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
