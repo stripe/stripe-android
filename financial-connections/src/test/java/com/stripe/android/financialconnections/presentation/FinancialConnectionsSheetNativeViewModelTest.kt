@@ -79,7 +79,10 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
+        apiConfiguration = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
+        ),
         preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"

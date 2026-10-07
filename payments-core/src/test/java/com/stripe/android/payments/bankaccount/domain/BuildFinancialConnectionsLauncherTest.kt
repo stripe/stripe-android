@@ -35,7 +35,7 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                apiConfiguration = ApiConfiguration.State("test_key", null),
+                apiConfiguration = ApiConfiguration.State("test_key", "acct_test"),
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null
@@ -68,7 +68,7 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                apiConfiguration = ApiConfiguration.State("test_key", null),
+                apiConfiguration = ApiConfiguration.State("test_key", "acct_test"),
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null
@@ -101,7 +101,7 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                apiConfiguration = ApiConfiguration.State("test_key", null),
+                apiConfiguration = ApiConfiguration.State("test_key", "acct_test"),
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null
@@ -134,7 +134,7 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                apiConfiguration = ApiConfiguration.State("test_key", null),
+                apiConfiguration = ApiConfiguration.State("test_key", "acct_test"),
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null

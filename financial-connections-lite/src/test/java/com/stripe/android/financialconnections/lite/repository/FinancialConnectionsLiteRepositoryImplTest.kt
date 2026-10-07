@@ -32,7 +32,6 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         repository.synchronize(
             configuration = TextFixtures.configuration.copy(
-                apiConfiguration = TextFixtures.configuration.apiConfiguration.copy(stripeAccountId = "acct_test"),
                 preCollectedConsent = FinancialConnectionsPreCollectedConsent(
                     consent = "fccons_123",
                     collectedAt = 1_725_000_000L,
@@ -73,7 +72,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             params = paramsCaptor.capture()
         )
         assertThat(optionsCaptor.firstValue.apiKey).isEqualTo("pk_test_123")
-        assertThat(optionsCaptor.firstValue.stripeAccount).isNull()
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo("acct_test")
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
 

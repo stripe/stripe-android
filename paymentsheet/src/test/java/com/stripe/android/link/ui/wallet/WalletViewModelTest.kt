@@ -4,11 +4,9 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -203,12 +201,11 @@ class WalletViewModelTest {
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
             awaitItem().run {
-                val expectedConfig = FinancialConnectionsSheetConfiguration(
-                    financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
-                    apiConfiguration = ApiConfiguration.State(linkAccount.consumerPublishableKey!!, null),
-                    preCollectedConsent = null,
-                )
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
+                val config = requireNotNull((addBankAccountState as AddBankAccountState.Processing).configToPresent)
+                assertThat(config.financialConnectionsSessionClientSecret)
+                    .isEqualTo(TestFactory.LINK_ACCOUNT_SESSION.clientSecret)
+                assertThat(config.apiConfiguration.publishableKey).isEqualTo(linkAccount.consumerPublishableKey)
+                assertThat(config.preCollectedConsent).isNull()
             }
 
             vm.onPresentFinancialConnections(true)

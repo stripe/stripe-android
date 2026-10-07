@@ -4,6 +4,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
@@ -17,7 +18,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "",
-        apiConfiguration = ApiConfiguration.State("", null),
+        apiConfiguration = ApiConfiguration.State("", ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
         preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"

@@ -11,7 +11,7 @@ internal object TextFixtures {
 
     val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret_123",
-        apiConfiguration = ApiConfiguration.State("pk_test_123", null),
+        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_test"),
         preCollectedConsent = null,
     )
 

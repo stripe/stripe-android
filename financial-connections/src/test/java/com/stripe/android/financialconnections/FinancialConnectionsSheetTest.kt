@@ -10,7 +10,8 @@ class FinancialConnectionsSheetTest {
     private val financialConnectionsSheetLauncher = mock<FinancialConnectionsSheetLauncher>()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
     )
     private val financialConnectionsSheet =
         FinancialConnectionsSheet(financialConnectionsSheetLauncher)
@@ -21,7 +22,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
+                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
                 preCollectedConsent = null,
             )
         )
@@ -29,12 +30,15 @@ class FinancialConnectionsSheetTest {
 
     @Test
     fun `present() preserves the connected account in API configuration`() {
-        financialConnectionsSheet.present(configuration.copy(stripeAccountId = "acct_test"))
+        financialConnectionsSheet.present(configuration.copy(stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT))
 
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_test"),
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
+                ),
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null,
@@ -53,7 +57,10 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
+                ),
                 preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = null,
