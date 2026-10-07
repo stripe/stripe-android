@@ -165,9 +165,10 @@ class PaymentLauncherContract :
 
             @IgnoredOnParcel
             override val apiConfiguration: ApiConfiguration.State by lazy {
-                ApiConfiguration(decodedValue.getOrNull()?.first ?: UNKNOWN_KEY)
-                    .stripeAccountId(stripeAccountId)
-                    .build()
+                ApiConfiguration.State(
+                    publishableKey = decodedValue.getOrNull()?.first ?: UNKNOWN_KEY,
+                    stripeAccountId = stripeAccountId,
+                )
             }
 
             val paymentIntentClientSecret: String

@@ -793,8 +793,9 @@ class PaymentLauncherViewModelTest {
         const val RETURN_URL = "return://to.me"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
-        val API_CONFIGURATION = ApiConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            .stripeAccountId(TEST_STRIPE_ACCOUNT_ID)
-            .build()
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+        )
     }
 }

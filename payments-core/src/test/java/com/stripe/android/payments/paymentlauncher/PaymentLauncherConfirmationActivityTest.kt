@@ -12,6 +12,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,20 @@ class PaymentLauncherConfirmationActivityTest {
         on { it.internalPaymentResult } doReturn MutableStateFlow(null)
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
+
+    @Test
+    fun `payment intent args preserve API configuration through parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(PAYMENT_INTENT_NEXT_ACTION_ARGS)
+    }
+
+    @Test
+    fun `payment intent args preserve null account through parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(
+            PAYMENT_INTENT_NEXT_ACTION_ARGS.copy(
+                apiConfiguration = API_CONFIGURATION.copy(stripeAccountId = null),
+            )
+        )
+    }
 
     @Test
     fun `Ensure title is 'Confirming transaction'`() {
@@ -347,9 +362,10 @@ class PaymentLauncherConfirmationActivityTest {
         const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
-        val API_CONFIGURATION = ApiConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            .stripeAccountId(TEST_STRIPE_ACCOUNT_ID)
-            .build()
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+        )
         val PAYMENT_INTENT_NEXT_ACTION_ARGS =
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
                 apiConfiguration = API_CONFIGURATION,
