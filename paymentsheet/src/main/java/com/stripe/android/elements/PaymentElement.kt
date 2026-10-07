@@ -1,7 +1,10 @@
 package com.stripe.android.elements
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.ColorInt
+import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
@@ -11,9 +14,12 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -481,11 +487,15 @@ class PaymentElement @Inject internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         class Appearance {
             private var colorsLight = Colors.light()
             private var colorsDark = Colors.dark()
             private var themeMode = ThemeMode.Automatic
             private var primaryButton = PrimaryButton()
+            private var shapes = Shapes()
+            private var typography = Typography()
+            private var embeddedAppearance = Embedded()
             private var formInsetValues = Insets.defaultFormInsetValues
 
             /** Sets the colors used in light mode. */
@@ -500,6 +510,17 @@ class PaymentElement @Inject internal constructor(
             /** Sets the appearance of the primary button. */
             fun primaryButton(primaryButton: PrimaryButton): Appearance = apply { this.primaryButton = primaryButton }
 
+            /** Sets the typography used for text. */
+            fun typography(typography: Typography): Appearance = apply { this.typography = typography }
+
+            /** Sets the shape of inputs, tabs, and other components. */
+            fun shapes(shapes: Shapes): Appearance = apply { this.shapes = shapes }
+
+            /** Sets the appearance of embedded payment method rows. */
+            fun embeddedAppearance(embeddedAppearance: Embedded): Appearance = apply {
+                this.embeddedAppearance = embeddedAppearance
+            }
+
             /** Sets the insets used by forms. */
             fun formInsetValues(insets: Insets): Appearance = apply { formInsetValues = insets }
 
@@ -509,6 +530,9 @@ class PaymentElement @Inject internal constructor(
                 val colorsDark: Colors.State,
                 val themeMode: ThemeMode,
                 val primaryButton: PrimaryButton.State,
+                val shapes: Shapes.State,
+                val typography: Typography.State,
+                val embeddedAppearance: Embedded.State,
                 val formInsetValues: Insets.State,
             ) : Parcelable
 
@@ -517,8 +541,844 @@ class PaymentElement @Inject internal constructor(
                 colorsDark = colorsDark.build(),
                 themeMode = themeMode,
                 primaryButton = primaryButton.build(),
+                shapes = shapes.build(),
+                typography = typography.build(),
+                embeddedAppearance = embeddedAppearance.build(),
                 formInsetValues = formInsetValues.build(),
             )
+
+            /** Configures embedded payment method rows, margins, and fonts. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Embedded {
+                private var rowStyle: RowStyle = RowStyle.FlatWithRadio()
+                private var paymentMethodIconMargins: Insets? = null
+                private var titleFont: Typography.Font? = null
+                private var subtitleFont: Typography.Font? = null
+
+                fun rowStyle(rowStyle: RowStyle): Embedded = apply {
+                    this.rowStyle = rowStyle
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun paymentMethodIconMargins(margins: Insets?): Embedded = apply {
+                    this.paymentMethodIconMargins = margins
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun titleFont(font: Typography.Font?): Embedded = apply {
+                    this.titleFont = font
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun subtitleFont(font: Typography.Font?): Embedded = apply {
+                    this.subtitleFont = font
+                }
+
+                @Parcelize
+                internal data class State(
+                    val style: RowStyle.State,
+                    val paymentMethodIconMargins: Insets.State?,
+                    val titleFont: Typography.Font.State?,
+                    val subtitleFont: Typography.Font.State?,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    style = rowStyle.build(),
+                    paymentMethodIconMargins = paymentMethodIconMargins?.build(),
+                    titleFont = titleFont?.build(),
+                    subtitleFont = subtitleFont?.build(),
+                )
+
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                sealed class RowStyle {
+                    internal abstract fun build(): State
+
+                    internal sealed class State : Parcelable
+
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    class FlatWithRadio : RowStyle() {
+                        private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled: Boolean = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled: Boolean = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp: Float =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp: Float = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight: Colors = Colors.light()
+                        private var colorsDark: Colors = Colors.dark()
+
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
+                        fun separatorThicknessDp(thickness: Float): FlatWithRadio = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
+                        fun startSeparatorInsetDp(inset: Float): FlatWithRadio = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
+                        fun endSeparatorInsetDp(inset: Float): FlatWithRadio = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * Determines if the top separator is visible at the top of
+                         * the Embedded Mobile Payment Element.
+                         */
+                        fun topSeparatorEnabled(enabled: Boolean): FlatWithRadio = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Determines if the bottom separator is visible at the
+                         * bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
+                        fun bottomSeparatorEnabled(enabled: Boolean): FlatWithRadio = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
+                        fun additionalVerticalInsetsDp(insets: Float): FlatWithRadio = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
+                        fun horizontalInsetsDp(insets: Float): FlatWithRadio = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
+                        fun colorsLight(colors: Colors): FlatWithRadio = apply {
+                            this.colorsLight = colors
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
+                        fun colorsDark(colors: Colors): FlatWithRadio = apply {
+                            this.colorsDark = colors
+                        }
+
+                        @Parcelize
+                        internal data class State(
+                            val separatorThicknessDp: Float,
+                            val startSeparatorInsetDp: Float,
+                            val endSeparatorInsetDp: Float,
+                            val topSeparatorEnabled: Boolean,
+                            val bottomSeparatorEnabled: Boolean,
+                            val additionalVerticalInsetsDp: Float,
+                            val horizontalInsetsDp: Float,
+                            val colorsLight: Colors.State,
+                            val colorsDark: Colors.State,
+                        ) : RowStyle.State()
+
+                        internal override fun build(): State = State(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                        )
+
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var selectedColor: Int,
+                            @ColorInt private var unselectedColor: Int,
+                        ) {
+                            constructor() : this(
+                                separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb(),
+                            )
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int): Colors = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(color: Color): Colors = separatorColor(color.toArgb())
+
+                            /**
+                             * The color of the radio button when selected.
+                             */
+                            fun selectedColor(@ColorInt color: Int): Colors = apply {
+                                this.selectedColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when selected.
+                             */
+                            fun selectedColor(color: Color): Colors = selectedColor(color.toArgb())
+
+                            /**
+                             * The color of the radio button when unselected.
+                             */
+                            fun unselectedColor(@ColorInt color: Int): Colors = apply {
+                                this.unselectedColor = color
+                            }
+
+                            /**
+                             * The color of the radio button when unselected.
+                             */
+                            fun unselectedColor(color: Color): Colors = unselectedColor(color.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val selectedColor: Int,
+                                @ColorInt val unselectedColor: Int,
+                            ) : Parcelable
+
+                            internal fun build(): State = State(separatorColor, selectedColor, unselectedColor)
+
+                            @CheckoutSessionPreview
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            companion object {
+                                /**
+                                 * Creates a [Colors] prepopulated with default light mode values.
+                                 */
+                                fun light(): Colors = Colors(
+                                    separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Colors] prepopulated with default dark mode values.
+                                 */
+                                fun dark(): Colors = Colors(
+                                    separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                    selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                    unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                                )
+                            }
+                        }
+                    }
+
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    class FlatWithCheckmark : RowStyle() {
+                        private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled: Boolean = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled: Boolean = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var checkmarkInsetDp: Float = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp
+                        private var additionalVerticalInsetsDp: Float =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp: Float = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight: Colors = Colors.light()
+                        private var colorsDark: Colors = Colors.dark()
+
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
+                        fun separatorThicknessDp(thickness: Float): FlatWithCheckmark = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
+                        fun startSeparatorInsetDp(inset: Float): FlatWithCheckmark = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
+                        fun endSeparatorInsetDp(inset: Float): FlatWithCheckmark = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * Determines if the top separator is visible at the top of
+                         * the Embedded Mobile Payment Element.
+                         */
+                        fun topSeparatorEnabled(enabled: Boolean): FlatWithCheckmark = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Determines if the bottom separator is visible at the
+                         * bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
+                        fun bottomSeparatorEnabled(enabled: Boolean): FlatWithCheckmark = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Inset of the checkmark from the end of the row.
+                         */
+                        fun checkmarkInsetDp(insets: Float): FlatWithCheckmark = apply {
+                            this.checkmarkInsetDp = insets
+                        }
+
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
+                        fun additionalVerticalInsetsDp(insets: Float): FlatWithCheckmark = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
+                        fun horizontalInsetsDp(insets: Float): FlatWithCheckmark = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
+                        fun colorsLight(colors: Colors): FlatWithCheckmark = apply {
+                            this.colorsLight = colors
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
+                        fun colorsDark(colors: Colors): FlatWithCheckmark = apply {
+                            this.colorsDark = colors
+                        }
+
+                        @Parcelize
+                        internal data class State(
+                            val separatorThicknessDp: Float,
+                            val startSeparatorInsetDp: Float,
+                            val endSeparatorInsetDp: Float,
+                            val topSeparatorEnabled: Boolean,
+                            val bottomSeparatorEnabled: Boolean,
+                            val checkmarkInsetDp: Float,
+                            val additionalVerticalInsetsDp: Float,
+                            val horizontalInsetsDp: Float,
+                            val colorsLight: Colors.State,
+                            val colorsDark: Colors.State,
+                        ) : RowStyle.State()
+
+                        internal override fun build(): State = State(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            checkmarkInsetDp = checkmarkInsetDp,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                        )
+
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var checkmarkColor: Int,
+                        ) {
+                            constructor() : this(
+                                separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb(),
+                            )
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int): Colors = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(color: Color): Colors = separatorColor(color.toArgb())
+
+                            /**
+                             * The color of the checkmark.
+                             */
+                            fun checkmarkColor(@ColorInt color: Int): Colors = apply {
+                                this.checkmarkColor = color
+                            }
+
+                            /**
+                             * The color of the checkmark.
+                             */
+                            fun checkmarkColor(color: Color): Colors = checkmarkColor(color.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val checkmarkColor: Int,
+                            ) : Parcelable
+
+                            internal fun build(): State = State(separatorColor, checkmarkColor)
+
+                            @CheckoutSessionPreview
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            companion object {
+                                /**
+                                 * Creates a [Colors] prepopulated with default light mode values.
+                                 */
+                                fun light(): Colors = Colors(
+                                    separatorColor =
+                                        StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                    checkmarkColor =
+                                        StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Colors] prepopulated with default dark mode values.
+                                 */
+                                fun dark(): Colors = Colors(
+                                    separatorColor =
+                                        StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                    checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                                )
+                            }
+                        }
+                    }
+
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    class FloatingButton : RowStyle() {
+                        private var spacingDp: Float = StripeThemeDefaults.floating.spacing
+                        private var additionalInsetsDp: Float =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+
+                        /**
+                         * The spacing between payment method rows.
+                         */
+                        fun spacingDp(spacing: Float): FloatingButton = apply {
+                            this.spacingDp = spacing
+                        }
+
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
+                        fun additionalInsetsDp(insets: Float): FloatingButton = apply {
+                            this.additionalInsetsDp = insets
+                        }
+
+                        @Parcelize
+                        internal data class State(
+                            val spacingDp: Float,
+                            val additionalInsetsDp: Float,
+                        ) : RowStyle.State()
+
+                        internal override fun build(): State = State(
+                            spacingDp = spacingDp,
+                            additionalInsetsDp = additionalInsetsDp,
+                        )
+                    }
+
+                    @CheckoutSessionPreview
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    class FlatWithDisclosure : RowStyle() {
+                        private var separatorThicknessDp: Float = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp: Float = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled: Boolean = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled: Boolean = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp: Float =
+                            StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+                        private var horizontalInsetsDp: Float = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight: Colors = Colors.light()
+                        private var colorsDark: Colors = Colors.dark()
+                        private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
+
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
+                        fun separatorThicknessDp(thickness: Float): FlatWithDisclosure = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
+                        fun startSeparatorInsetDp(inset: Float): FlatWithDisclosure = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
+                        fun endSeparatorInsetDp(inset: Float): FlatWithDisclosure = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        /**
+                         * Determines if the top separator is visible at the top of
+                         * the Embedded Mobile Payment Element.
+                         */
+                        fun topSeparatorEnabled(enabled: Boolean): FlatWithDisclosure = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Determines if the bottom separator is visible at the
+                         * bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
+                        fun bottomSeparatorEnabled(enabled: Boolean): FlatWithDisclosure = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
+                        fun additionalVerticalInsetsDp(insets: Float): FlatWithDisclosure = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
+                        fun horizontalInsetsDp(insets: Float): FlatWithDisclosure = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
+                        fun colorsLight(colors: Colors): FlatWithDisclosure = apply {
+                            this.colorsLight = colors
+                        }
+
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
+                        fun colorsDark(colors: Colors): FlatWithDisclosure = apply {
+                            this.colorsDark = colors
+                        }
+
+                        /**
+                         * The drawable displayed on the end of the row - typically, a chevron. This should be
+                         * a resource ID value.
+                         * - Note: If not set, uses a default chevron.
+                         */
+                        @AppearanceAPIAdditionsPreview
+                        fun disclosureIconRes(@DrawableRes iconRes: Int): FlatWithDisclosure = apply {
+                            this.disclosureIconRes = iconRes
+                        }
+
+                        @Parcelize
+                        internal data class State(
+                            val separatorThicknessDp: Float,
+                            val startSeparatorInsetDp: Float,
+                            val endSeparatorInsetDp: Float,
+                            val topSeparatorEnabled: Boolean,
+                            val bottomSeparatorEnabled: Boolean,
+                            val additionalVerticalInsetsDp: Float,
+                            val horizontalInsetsDp: Float,
+                            val colorsLight: Colors.State,
+                            val colorsDark: Colors.State,
+                            val disclosureIconRes: Int,
+                        ) : RowStyle.State()
+
+                        internal override fun build(): State = State(
+                            separatorThicknessDp = separatorThicknessDp,
+                            startSeparatorInsetDp = startSeparatorInsetDp,
+                            endSeparatorInsetDp = endSeparatorInsetDp,
+                            topSeparatorEnabled = topSeparatorEnabled,
+                            bottomSeparatorEnabled = bottomSeparatorEnabled,
+                            additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                            horizontalInsetsDp = horizontalInsetsDp,
+                            colorsLight = colorsLight.build(),
+                            colorsDark = colorsDark.build(),
+                            disclosureIconRes = disclosureIconRes,
+                        )
+
+                        @CheckoutSessionPreview
+                        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                        class Colors private constructor(
+                            @ColorInt private var separatorColor: Int,
+                            @ColorInt private var disclosureColor: Int,
+                        ) {
+                            constructor() : this(
+                                separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb(),
+                            )
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(@ColorInt color: Int): Colors = apply {
+                                this.separatorColor = color
+                            }
+
+                            /**
+                             * The color of the separator line between rows.
+                             */
+                            fun separatorColor(color: Color): Colors = separatorColor(color.toArgb())
+
+                            /**
+                             * The color of the disclosure icon.
+                             */
+                            fun disclosureColor(@ColorInt color: Int): Colors = apply {
+                                this.disclosureColor = color
+                            }
+
+                            /**
+                             * The color of the disclosure icon.
+                             */
+                            fun disclosureColor(color: Color): Colors = disclosureColor(color.toArgb())
+
+                            @Parcelize
+                            internal data class State(
+                                @ColorInt val separatorColor: Int,
+                                @ColorInt val disclosureColor: Int,
+                            ) : Parcelable
+
+                            internal fun build(): State = State(separatorColor, disclosureColor)
+
+                            @CheckoutSessionPreview
+                            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                            companion object {
+                                /**
+                                 * Creates a [Colors] prepopulated with default light mode values.
+                                 */
+                                fun light(): Colors = Colors(
+                                    separatorColor =
+                                        StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                    disclosureColor =
+                                        StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
+                                )
+
+                                /**
+                                 * Creates a [Colors] prepopulated with default dark mode values.
+                                 */
+                                fun dark(): Colors = Colors(
+                                    separatorColor =
+                                        StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                    disclosureColor =
+                                        StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            /** Shapes used for inputs, tabs, buttons, and sheets. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Shapes {
+                private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
+                private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
+                private var bottomSheetCornerRadiusDp: Float? = null
+
+                /**
+                 * The corner radius used for tabs, inputs, buttons, and other components in Payment Element.
+                 *
+                 * @param cornerRadiusDp The corner radius in dp.
+                 */
+                fun cornerRadiusDp(cornerRadiusDp: Float): Shapes = apply {
+                    this.cornerRadiusDp = cornerRadiusDp
+                }
+
+                /**
+                 * The corner radius used for tabs, inputs, buttons, and other components in Payment Element.
+                 *
+                 * @param cornerRadiusRes The corner radius resource ID.
+                 */
+                fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Shapes = apply {
+                    this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
+                }
+
+                /**
+                 * The border used for inputs, tabs, and other components in Payment Element.
+                 *
+                 * @param borderStrokeWidthDp The border width in dp.
+                 */
+                fun borderStrokeWidthDp(borderStrokeWidthDp: Float): Shapes = apply {
+                    this.borderStrokeWidthDp = borderStrokeWidthDp
+                }
+
+                /**
+                 * The border used for inputs, tabs, and other components in Payment Element.
+                 *
+                 * @param borderStrokeWidthRes The border width resource ID.
+                 */
+                fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int): Shapes = apply {
+                    this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
+                }
+
+                /**
+                 * The corner radius used for sheets displayed by Payment Element. By default, this is
+                 * set to the same value as [cornerRadiusDp].
+                 */
+                fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float): Shapes = apply {
+                    this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
+                }
+
+                /**
+                 * The corner radius used for sheets displayed by Payment Element. By default, this is
+                 * set to the same value as [cornerRadiusDp].
+                 *
+                 * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
+                 */
+                fun bottomSheetCornerRadiusDp(
+                    context: Context,
+                    @DimenRes bottomSheetCornerRadiusRes: Int
+                ): Shapes = apply {
+                    this.bottomSheetCornerRadiusDp =
+                        context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
+                }
+
+                @Parcelize
+                internal data class State(
+                    val cornerRadiusDp: Float,
+                    val borderStrokeWidthDp: Float,
+                    val bottomSheetCornerRadiusDp: Float,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    cornerRadiusDp = cornerRadiusDp,
+                    borderStrokeWidthDp = borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp ?: cornerRadiusDp,
+                )
+            }
+
+            /** Typography used for Payment Element text. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Typography {
+                private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
+
+                @FontRes
+                private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
+
+                private var custom: Custom = Custom()
+
+                /**
+                 * The scale factor for all fonts in Payment Element, the default value is 1.0.
+                 * When this value increases fonts will increase in size and decrease when this value is lowered.
+                 */
+                fun sizeScaleFactor(sizeScaleFactor: Float): Typography = apply {
+                    this.sizeScaleFactor = sizeScaleFactor
+                }
+
+                /**
+                 * The font used in text. This should be a resource ID value.
+                 */
+                fun fontResId(@FontRes fontResId: Int?): Typography = apply {
+                    this.fontResId = fontResId
+                }
+
+                /**
+                 * Custom font configuration for specific text styles
+                 * Note: When set, these fonts override the default font calculations for
+                 * their respective text styles
+                 */
+                @OptIn(AppearanceAPIAdditionsPreview::class)
+                fun custom(custom: Custom): Typography = apply {
+                    this.custom = custom
+                }
+
+                @Parcelize
+                internal data class State(
+                    val sizeScaleFactor: Float,
+                    @FontRes val fontResId: Int?,
+                    val custom: Custom.State,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    sizeScaleFactor = sizeScaleFactor,
+                    fontResId = fontResId,
+                    custom = custom.build(),
+                )
+
+                @AppearanceAPIAdditionsPreview
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Custom {
+                    private var h1: Font? = null
+
+                    /** Sets the headline font override. */
+                    fun h1(font: Font?): Custom = apply { h1 = font }
+
+                    @Parcelize
+                    internal data class State(
+                        val h1: Font.State?,
+                    ) : Parcelable
+
+                    internal fun build(): State = State(
+                        h1 = h1?.build(),
+                    )
+                }
+
+                @AppearanceAPIAdditionsPreview
+                @CheckoutSessionPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Font {
+                    @FontRes
+                    private var fontFamily: Int? = null
+                    private var fontSizeSp: Float? = null
+                    private var fontWeight: Int? = null
+                    private var letterSpacingSp: Float? = null
+
+                    /** Sets the font resource. */
+                    fun fontFamily(@FontRes value: Int?): Font = apply { fontFamily = value }
+
+                    /** Sets the font size in sp. */
+                    fun fontSizeSp(value: Float?): Font = apply { fontSizeSp = value }
+
+                    /** Sets the font weight. */
+                    fun fontWeight(value: Int?): Font = apply { fontWeight = value }
+
+                    /** Sets the letter spacing in sp. */
+                    fun letterSpacingSp(value: Float?): Font = apply { letterSpacingSp = value }
+
+                    @Parcelize
+                    internal data class State(
+                        @FontRes val fontFamily: Int?,
+                        val fontSizeSp: Float?,
+                        val fontWeight: Int?,
+                        val letterSpacingSp: Float?,
+                    ) : Parcelable
+
+                    internal fun build(): State = State(
+                        fontFamily = fontFamily,
+                        fontSizeSp = fontSizeSp,
+                        fontWeight = fontWeight,
+                        letterSpacingSp = letterSpacingSp,
+                    )
+                }
+            }
 
             /** Colors used to render the Payment Element. */
             @CheckoutSessionPreview

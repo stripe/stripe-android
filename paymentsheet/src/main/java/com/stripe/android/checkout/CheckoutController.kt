@@ -510,13 +510,15 @@ class CheckoutController @Inject internal constructor(
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
+         * Possible values are `"google_pay"` and `"link"`.
+         *
          * When empty, Express Checkout Element will render empty content.
          */
-        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+        val availableExpressCheckoutPaymentMethods: List<String> =
             availableExpressButtonTypes.map { type ->
                 when (type) {
-                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
-                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
+                    is ExpressButtonType.GooglePay -> "google_pay"
+                    ExpressButtonType.Link -> "link"
                 }
             }
 
@@ -1135,6 +1137,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the payment element.
+         *
+         * This is required if using [PaymentElement].
          */
         fun paymentElement(
             configuration: PaymentElement.Configuration
@@ -1144,6 +1148,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the currency selector element.
+         *
+         * This is required if using [CurrencySelectorElement].
          */
         fun currencySelectorElement(
             configuration: CurrencySelectorElement.Configuration
@@ -1153,6 +1159,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the shipping address element.
+         *
+         * This is required if using [ShippingAddressElement].
          */
         fun shippingAddressElement(
             configuration: ShippingAddressElement.Configuration
@@ -1162,6 +1170,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the express checkout element.
+         *
+         * This is required if using [ExpressCheckoutElement].
          */
         fun expressCheckoutElement(
             configuration: ExpressCheckoutElement.Configuration
@@ -1202,7 +1212,7 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Prefill values for the customer's billing/shipping details and email.
+         * Prefill values for the customer's billing/shipping details, email, and phone number.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1210,6 +1220,7 @@ class CheckoutController @Inject internal constructor(
             private var billingDetails: ContactDetails? = null
             private var shippingDetails: ContactDetails? = null
             private var email: String? = null
+            private var phone: String? = null
 
             /**
              * The customer's known billing contact details.
@@ -1232,17 +1243,26 @@ class CheckoutController @Inject internal constructor(
                 this.email = email
             }
 
+            /**
+             * The customer's known phone number. Pass `null` to clear the default phone number.
+             */
+            fun phone(phone: String?): Defaults = apply {
+                this.phone = phone
+            }
+
             @Parcelize
             internal data class State(
                 val billingDetails: ContactDetails.State?,
                 val shippingDetails: ContactDetails.State?,
                 val email: String?,
+                val phone: String?,
             ) : Parcelable
 
             internal fun build(): State = State(
                 billingDetails = billingDetails?.build(),
                 shippingDetails = shippingDetails?.build(),
                 email = email,
+                phone = phone,
             )
 
             /**

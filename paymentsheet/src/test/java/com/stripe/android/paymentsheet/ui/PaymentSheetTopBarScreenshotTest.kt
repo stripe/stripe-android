@@ -24,7 +24,6 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testLoading() {
         val state = PaymentSheetTopBarState(
-            showTestModeLabel = false,
             showEditMenu = false,
             isEditing = false,
             onEditIconPressed = {},
@@ -44,7 +43,6 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testPaymentMethodsScreen() {
         val state = PaymentSheetTopBarState(
-            showTestModeLabel = true,
             showEditMenu = true,
             isEditing = false,
             onEditIconPressed = {},
@@ -64,7 +62,6 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testPaymentMethodsScreenEditing() {
         val state = PaymentSheetTopBarState(
-            showTestModeLabel = true,
             showEditMenu = true,
             isEditing = true,
             onEditIconPressed = {},
@@ -84,7 +81,6 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testAddPaymentMethodScreen() {
         val state = PaymentSheetTopBarState(
-            showTestModeLabel = true,
             showEditMenu = false,
             isEditing = false,
             onEditIconPressed = {},

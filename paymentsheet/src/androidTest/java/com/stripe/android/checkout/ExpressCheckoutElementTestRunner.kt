@@ -21,7 +21,8 @@ import okhttp3.mockwebserver.MockResponse
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-internal class ExpressCheckoutElementTestRunnerContext(
+internal class ExpressCheckoutElementScenario(
+    val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
 ) {
     /**
@@ -33,7 +34,7 @@ internal class ExpressCheckoutElementTestRunnerContext(
     }
 }
 
-internal fun runExpressCheckoutElementTest(
+internal fun runExpressCheckoutElementScenario(
     networkRule: NetworkRule,
     initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
@@ -42,7 +43,7 @@ internal fun runExpressCheckoutElementTest(
     successTimeoutSeconds: Long = 5L,
     assertions: (CheckoutController) -> Unit = {},
     configurationUpdates: (ExpressCheckoutElement.Configuration) -> ExpressCheckoutElement.Configuration = { it },
-    block: (ExpressCheckoutElementTestRunnerContext) -> Unit,
+    block: suspend ExpressCheckoutElementScenario.() -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -87,9 +88,14 @@ internal fun runExpressCheckoutElementTest(
         scenario.moveToState(Lifecycle.State.RESUMED)
 
         try {
-            block(
-                ExpressCheckoutElementTestRunnerContext(countDownLatch)
-            )
+            runBlocking {
+                block(
+                    ExpressCheckoutElementScenario(
+                        controller = controller,
+                        countDownLatch = countDownLatch,
+                    )
+                )
+            }
 
             val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
             assertThat(didCompleteSuccessfully).isTrue()

@@ -107,9 +107,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
     }
 
     /**
-     * Sets the current [paymentOption] to `null`.
+     * Sets the current [paymentOption] to `null` and clears previously entered payment method details.
      */
     fun clearPaymentOption() {
+        selectionHolder.previousNewSelections.clear()
         selectionHolder.setSelection(null)
     }
 

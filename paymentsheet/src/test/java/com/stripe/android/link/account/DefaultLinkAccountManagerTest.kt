@@ -1252,7 +1252,7 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `missing Link session key is retained for the same user`() = runSuspendTest {
+    fun `missing Link session key is retained for the same session`() = runSuspendTest {
         val manager = accountManager()
         manager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
@@ -1279,7 +1279,7 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `empty Link session key is retained for the same user`() = runSuspendTest {
+    fun `empty Link session key is retained for the same session`() = runSuspendTest {
         val manager = accountManager()
         manager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
@@ -1357,6 +1357,39 @@ class DefaultLinkAccountManagerTest {
             linkAuthIntentId = null,
         )
         assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo(null)
+    }
+
+    @Test
+    fun `Link session key is not carried to a new session for the same user`() = runSuspendTest {
+        val manager = accountManager()
+        val originalSession = TestFactory.CONSUMER_SESSION.copy(
+            clientSecret = "cs_original",
+            linkSessionKey = "lsk_original",
+        )
+        manager.setTestAccount(originalSession)
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+
+        manager.setTestAccount(originalSession.copy(clientSecret = "cs_new", linkSessionKey = null))
+
+        val account = requireNotNull(manager.linkAccountInfo.value.account)
+        assertThat(account.clientSecret).isEqualTo("cs_new")
+        assertThat(account.linkSessionKey).isNull()
+    }
+
+    @Test
+    fun `Link session key is not retained when both client secrets are blank`() = runSuspendTest {
+        val manager = accountManager()
+        val originalSession = TestFactory.CONSUMER_SESSION.copy(
+            clientSecret = "",
+            linkSessionKey = "lsk_original",
+        )
+        manager.setTestAccount(originalSession)
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+
+        manager.setTestAccount(originalSession.copy(linkSessionKey = null))
+
+        val account = requireNotNull(manager.linkAccountInfo.value.account)
+        assertThat(account.linkSessionKey).isNull()
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {

@@ -90,6 +90,42 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `configured default phone survives process death`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            configuration = CheckoutController.Configuration()
+                .defaults(CheckoutController.Configuration.Defaults().phone("+15555551234"))
+                .build(),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        val restoredState = requireNotNull(restoredStateHolder.state)
+        assertThat(restoredState.configuration.defaults.phone).isEqualTo("+15555551234")
+    }
+
+    @Test
+    fun `null default phone survives process death`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            configuration = CheckoutController.Configuration()
+                .defaults(CheckoutController.Configuration.Defaults().phone(null))
+                .build(),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        val restoredState = requireNotNull(restoredStateHolder.state)
+        assertThat(restoredState.configuration.defaults.phone).isNull()
+    }
+
+    @Test
     fun `restored pending saved selection is reset to idle`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)

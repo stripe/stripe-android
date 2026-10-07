@@ -3,12 +3,26 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+
+### PaymentSheet
+* [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
+* [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
+
+### Financial Connections
+* [REMOVED] Removed the test mode indicator from the header.
+
+## 23.22.0 - 2026-10-05
+
 ### Crypto Onramp
 * [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
 * [Changed] Crypto Onramp wallet collection returns contact-only `KycInfo` when available, including email, validated E.164 phone, and the original phone string.
 * [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
 * [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
 * [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+* [FIXED] Fixed missing callbacks when reusing an `OnrampCoordinator` to create a new presenter after its previous host activity finishes.
 
 ### Payments
 * [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.

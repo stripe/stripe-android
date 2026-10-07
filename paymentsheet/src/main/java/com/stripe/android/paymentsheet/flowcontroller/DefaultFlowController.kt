@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -251,7 +252,7 @@ internal class DefaultFlowController @Inject internal constructor(
         return paymentOptionFactory.create(
             selection = selection,
             linkBrand = linkBrand,
-            appearance = viewModel.state?.config?.appearance,
+            appearance = viewModel.state?.config?.appearance ?: ConfigurationDefaults.appearance,
         )
     }
 

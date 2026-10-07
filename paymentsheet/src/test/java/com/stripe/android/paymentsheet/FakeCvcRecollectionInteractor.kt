@@ -13,7 +13,6 @@ internal class FakeCvcRecollectionInteractor : CvcRecollectionInteractor {
     val _viewState = MutableStateFlow(
         value = CvcRecollectionViewState(
             lastFour = "4242",
-            isTestMode = true,
             cvcState = CvcState(
                 cvc = "",
                 cardBrand = CardBrand.Visa

@@ -1531,12 +1531,16 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelInstantDebitsFlowOnLaunch() {
-        awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
+        // Wait for the native consent pane so the back press can't land on the host activity while
+        // it hands off to the native flow.
+        awaitInstantDebitsConsentPane()
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        Espresso.pressBack()
+        // Cancelling finishes several activities in a row, so no activity may be resumed when Espresso
+        // checks. The caller waits for PaymentSheet to resume instead.
+        Espresso.pressBackUnconditionally()
     }
 
     private fun executeUsBankAccountLiteFlow() {
@@ -1605,7 +1609,7 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("done_button")
     }
 
-    private fun executeEntireInstantDebitsFlow() {
+    private fun awaitInstantDebitsConsentPane() {
         awaitActivityClass(FINANCIAL_CONNECTIONS_ACTIVITY)
 
         composeTestRule.waitUntil(
@@ -1617,6 +1621,10 @@ internal class PlaygroundTestDriver(
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
+    }
+
+    private fun executeEntireInstantDebitsFlow() {
+        awaitInstantDebitsConsentPane()
 
         clickButtonWithTag("consent_cta")
         clickButtonWithTag("existing_email-button")

@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import com.stripe.android.R as StripeR
 
 internal data class PaymentSheetTopBarState(
-    val showTestModeLabel: Boolean,
     val showEditMenu: Boolean,
     val isEditing: Boolean,
     val onEditIconPressed: () -> Unit,
@@ -30,11 +29,9 @@ internal data class PaymentSheetTopBarState(
 
 internal object PaymentSheetTopBarStateFactory {
     fun create(
-        isLiveMode: Boolean,
         editable: PaymentSheetTopBarState.Editable,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
-            showTestModeLabel = !isLiveMode,
             showEditMenu = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.canEdit == true,
             isEditing = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.isEditing == true,
             onEditIconPressed = (editable as? PaymentSheetTopBarState.Editable.Maybe)?.onEditIconPressed

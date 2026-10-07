@@ -509,11 +509,9 @@ internal class CheckoutControllerTest {
             ),
         )
 
-        assertThat(session.availableExpressCheckoutPaymentMethods).hasSize(2)
-        assertThat(session.availableExpressCheckoutPaymentMethods[0])
-            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
-        assertThat(session.availableExpressCheckoutPaymentMethods[1])
-            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
+        assertThat(session.availableExpressCheckoutPaymentMethods)
+            .containsExactly("google_pay", "link")
+            .inOrder()
     }
 
     @Test
@@ -581,6 +579,56 @@ internal class CheckoutControllerTest {
         assertThat(clearedState.paymentSelection).isNull()
         assertThat(clearedState.temporarySelection).isNull()
         assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
+    }
+
+    @Test
+    fun `clear preserves single saved card inventory through updates`() =
+        runSavedSelectionClearScenario(savedCustomerWithBillingAddress())
+
+    @Test
+    fun `clear preserves multiple saved cards through updates`() =
+        runSavedSelectionClearScenario(savedCustomerWithTwoCards())
+
+    @Test
+    fun `clear preserves saved SEPA inventory through updates`() =
+        runSavedSelectionClearScenario(
+            combine(savedCustomerWithSepaDebit(), { json ->
+                val methods = JSONArray().put("card").put("sepa_debit")
+                json.getJSONObject("elements_session").getJSONObject("payment_method_preference")
+                    .put("ordered_payment_method_types", methods)
+                json.getJSONObject("server_built_elements_session_params").getJSONObject("deferred_intent")
+                    .put("payment_method_types", methods)
+            }),
+        )
+
+    private fun runSavedSelectionClearScenario(inventory: (JSONObject) -> Unit) = runTest {
+        networkRule.enqueueSuccessfulInit(inventory)
+        val savedStateHandle = SavedStateHandle()
+        val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
+        val controller = setup.controller
+        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        val customer = requireNotNull(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
+        assertThat(customer.paymentMethods).isNotEmpty()
+        controller.session.test {
+            assertThat(requireNotNull(awaitItem()).paymentOption).isNotNull()
+            controller.clearPaymentOption().getOrThrow()
+            assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
+            controller.clearPaymentOption().getOrThrow()
+            expectNoEvents()
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+                responseFactory = successResponseFactory(inventory),
+            )
+            controller.applyPromotionCode("10OFF").getOrThrow()
+            assertThat(controller.session.value?.paymentOption).isNull()
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertThat(setup.stateHolder.state?.paymentSelection).isNull()
+        assertThat(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)?.paymentMethods)
+            .isEqualTo(customer.paymentMethods)
+        networkRule.enqueueSuccessfulInit(inventory)
+        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.session.value?.paymentOption).isNotNull()
     }
 
     @Test

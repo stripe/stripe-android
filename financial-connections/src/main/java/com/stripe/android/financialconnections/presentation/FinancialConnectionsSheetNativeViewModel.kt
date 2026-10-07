@@ -665,7 +665,6 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     return TopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
-        isTestMode = testMode,
         theme = theme,
         linkBrand = linkBrand,
     )

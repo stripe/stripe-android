@@ -10,7 +10,6 @@
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt:internal fun transformBankIconCodeToBankIcon: Int</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt:VerticalModeFormUITest.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun PaymentSheetTopBar_Preview</ID>
-    <ID>FunctionNaming:PaymentSheetTopBar.kt:@Preview @Composable internal fun TestModeBadge_Preview</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt:FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt:PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>LargeClass:CardDefinitionTest.kt:CardDefinitionTest</ID>
