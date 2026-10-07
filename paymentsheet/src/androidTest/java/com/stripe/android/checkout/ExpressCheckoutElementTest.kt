@@ -48,9 +48,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay()
-                )
+                ).contains("google_pay")
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
@@ -87,9 +85,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains(
-                    ExpressCheckoutElement.PaymentMethod.Link()
-                )
+                ).contains("link")
             },
         ) {
             enqueueSuccessfulNativeLinkPayment()
@@ -115,9 +111,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay()
-                )
+                ).containsExactly("google_pay")
             },
             configurationUpdates = {
                 it.linkConfiguration(
@@ -199,9 +193,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay()
-                )
+                ).containsExactly("google_pay")
             },
         ) {
             page.assertGooglePayButtonExists()
