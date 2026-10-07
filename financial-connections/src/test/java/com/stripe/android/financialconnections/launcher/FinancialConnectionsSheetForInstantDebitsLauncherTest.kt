@@ -17,7 +17,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "",
-        apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
+        apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"

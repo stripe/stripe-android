@@ -71,7 +71,7 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
     private fun createSender(requests: Turbine<AnalyticsRequestV2>) = DefaultFinancialConnectionsAnalyticsEventSender(
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null
         ),
         locale = Locale.US,

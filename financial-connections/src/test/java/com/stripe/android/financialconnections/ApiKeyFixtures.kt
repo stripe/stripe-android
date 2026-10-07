@@ -23,7 +23,7 @@ internal object ApiKeyFixtures {
     const val DEFAULT_STRIPE_ACCOUNT = "acct_test"
     const val DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET = "las_client_secret_asdf1234"
 
-    val DEFAUL_API_CONFIG = ApiConfiguration.State(
+    val DEFAULT_API_CONFIG = ApiConfiguration.State(
         publishableKey = DEFAULT_PUBLISHABLE_KEY,
         stripeAccountId = DEFAULT_STRIPE_ACCOUNT,
     )

@@ -32,7 +32,7 @@ internal class PollAttachPaymentAccountTest {
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret",
-        apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
+        apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
 

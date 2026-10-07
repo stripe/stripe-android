@@ -72,7 +72,7 @@ class FinancialConnectionsSheetViewModelTest {
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAUL_API_CONFIG,
+        ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
 

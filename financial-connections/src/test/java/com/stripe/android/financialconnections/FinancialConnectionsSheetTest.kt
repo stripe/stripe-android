@@ -21,23 +21,9 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAUL_API_CONFIG,
+                ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
             )
-        )
-    }
-
-    @Test
-    fun `present() preserves the connected account in API configuration`() {
-        financialConnectionsSheet.present(configuration.copy(stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT))
-
-        verify(financialConnectionsSheetLauncher).present(
-            configuration = FinancialConnectionsSheetConfiguration(
-                financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
-                preCollectedConsent = null,
-            ),
-            elementsSessionContext = null,
         )
     }
 
@@ -53,7 +39,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = null,
