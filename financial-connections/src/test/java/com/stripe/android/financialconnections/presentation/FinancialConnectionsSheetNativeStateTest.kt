@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.presentation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
@@ -12,7 +13,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
         preCollectedConsent = null,
     )
 

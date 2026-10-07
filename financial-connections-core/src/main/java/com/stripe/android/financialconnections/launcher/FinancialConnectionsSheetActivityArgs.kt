@@ -46,7 +46,7 @@ sealed class FinancialConnectionsSheetActivityArgs(
                 "The session client secret cannot be an empty string."
             )
         }
-        if (configuration.publishableKey.isBlank()) {
+        if (configuration.apiConfiguration.publishableKey.isBlank()) {
             throw InvalidParameterException(
                 "The publishable key cannot be an empty string."
             )

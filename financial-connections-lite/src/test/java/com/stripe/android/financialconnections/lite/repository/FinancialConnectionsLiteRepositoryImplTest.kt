@@ -27,10 +27,12 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - includes pre_collected_consent in request when provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
             configuration = TextFixtures.configuration.copy(
+                apiConfiguration = TextFixtures.configuration.apiConfiguration.copy(stripeAccountId = "acct_test"),
                 preCollectedConsent = FinancialConnectionsPreCollectedConsent(
                     consent = "fccons_123",
                     collectedAt = 1_725_000_000L,
@@ -41,9 +43,11 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         verify(apiRequestFactory).createPost(
             url = any(),
-            options = any(),
+            options = optionsCaptor.capture(),
             params = paramsCaptor.capture()
         )
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo("pk_test_123")
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo("acct_test")
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
                 "consent" to "fccons_123",
@@ -55,6 +59,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - omits pre_collected_consent from request when not provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
@@ -64,9 +69,11 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         verify(apiRequestFactory).createPost(
             url = any(),
-            options = any(),
+            options = optionsCaptor.capture(),
             params = paramsCaptor.capture()
         )
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo("pk_test_123")
+        assertThat(optionsCaptor.firstValue.stripeAccount).isNull()
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
 

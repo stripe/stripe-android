@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -20,9 +21,23 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
                 preCollectedConsent = null,
             )
+        )
+    }
+
+    @Test
+    fun `present() preserves the connected account in API configuration`() {
+        financialConnectionsSheet.present(configuration.copy(stripeAccountId = "acct_test"))
+
+        verify(financialConnectionsSheetLauncher).present(
+            configuration = FinancialConnectionsSheetConfiguration(
+                financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_test"),
+                preCollectedConsent = null,
+            ),
+            elementsSessionContext = null,
         )
     }
 
@@ -38,7 +53,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
                 preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = null,

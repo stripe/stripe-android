@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -70,8 +71,7 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
     private fun createSender(requests: Turbine<AnalyticsRequestV2>) = DefaultFinancialConnectionsAnalyticsEventSender(
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = "acct_test",
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_test"),
             preCollectedConsent = null
         ),
         locale = Locale.US,

@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.bankAccountToken
@@ -17,7 +18,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForTokenLauncherTest {
 
-    private val configuration = FinancialConnectionsSheetConfiguration("", "", preCollectedConsent = null)
+    private val configuration = FinancialConnectionsSheetConfiguration(
+        financialConnectionsSessionClientSecret = "",
+        apiConfiguration = ApiConfiguration.State("", null),
+        preCollectedConsent = null,
+    )
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Completed`() {

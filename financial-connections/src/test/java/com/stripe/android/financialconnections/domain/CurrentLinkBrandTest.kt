@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
@@ -22,7 +23,7 @@ internal class CurrentLinkBrandTest {
         firstInit = true,
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
             preCollectedConsent = null,
         ),
         reducedBranding = false,

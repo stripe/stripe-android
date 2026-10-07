@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
@@ -14,7 +15,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForInstantDebitsLauncherTest {
 
-    private val configuration = FinancialConnectionsSheetConfiguration("", "", preCollectedConsent = null)
+    private val configuration = FinancialConnectionsSheetConfiguration(
+        financialConnectionsSessionClientSecret = "",
+        apiConfiguration = ApiConfiguration.State("", null),
+        preCollectedConsent = null,
+    )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
     @Test

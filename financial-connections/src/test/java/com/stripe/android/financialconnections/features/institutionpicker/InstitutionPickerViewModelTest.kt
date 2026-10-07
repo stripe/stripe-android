@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.institutionpicker
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
@@ -65,7 +66,7 @@ internal class InstitutionPickerViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val defaultConfiguration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
         preCollectedConsent = null,
     )
 

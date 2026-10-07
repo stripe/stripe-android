@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.Display
@@ -22,7 +23,7 @@ class SelectNetworkedAccountsTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null),
         preCollectedConsent = null,
     )
     private val successContentRepository: SuccessContentRepository =

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.lite
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.lite.repository.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
@@ -10,7 +11,7 @@ internal object TextFixtures {
 
     val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret_123",
-        publishableKey = "pk_test_123",
+        apiConfiguration = ApiConfiguration.State("pk_test_123", null),
         preCollectedConsent = null,
     )
 

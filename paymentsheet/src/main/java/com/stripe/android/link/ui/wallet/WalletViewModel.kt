@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -471,7 +472,10 @@ internal class WalletViewModel(
                 .mapCatching { session ->
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
-                        publishableKey = linkAccount.consumerPublishableKey!!,
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = linkAccount.consumerPublishableKey!!,
+                            stripeAccountId = null,
+                        ),
                         preCollectedConsent = null,
                     )
                 }

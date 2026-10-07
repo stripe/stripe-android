@@ -4,6 +4,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -204,7 +205,7 @@ class WalletViewModelTest {
             awaitItem().run {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
-                    publishableKey = linkAccount.consumerPublishableKey!!,
+                    apiConfiguration = ApiConfiguration.State(linkAccount.consumerPublishableKey!!, null),
                     preCollectedConsent = null,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
