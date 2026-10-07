@@ -11,11 +11,12 @@ internal object GooglePayIsEmailRequiredProvider {
         configuration: CommonConfiguration,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        if (paymentMethodMetadata.integrationMetadata !is IntegrationMetadata.CheckoutSession) {
+        val integrationMetadata = paymentMethodMetadata.integrationMetadata
+        if (integrationMetadata !is IntegrationMetadata.CheckoutSession) {
             return configuration.billingDetailsCollectionConfiguration.collectsEmail
         }
 
-        val checkoutSessionIsMissingEmail = configuration.defaultBillingDetails?.email == null
+        val checkoutSessionIsMissingEmail = integrationMetadata.effectiveEmail == null
 
         return configuration.billingDetailsCollectionConfiguration.collectsEmail ||
             (

@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -188,6 +189,10 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         elementsSessionCustomerEmail: String?
     ): String? {
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email?.let { return it }
+        val integrationMetadata = paymentMethodMetadata.integrationMetadata
+        if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+            return integrationMetadata.effectiveEmail
+        }
         return retrieveCustomerEmail(
             configuration = config,
             customerMetadata = paymentMethodMetadata.customerMetadata,

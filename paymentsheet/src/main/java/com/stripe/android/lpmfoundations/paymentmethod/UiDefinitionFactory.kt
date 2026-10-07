@@ -111,6 +111,8 @@ internal sealed interface UiDefinitionFactory {
                         cbcEligibility = metadata.cbcEligibility,
                         initialValues = InitialValuesFactory.create(
                             defaultBillingDetails = metadata.defaultBillingDetails,
+                            prefillEmail = (metadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
+                                ?.effectiveEmail,
                             paymentMethodCreateParams = paymentMethodCreateParams,
                             paymentMethodExtraParams = paymentMethodExtraParams,
                         ),

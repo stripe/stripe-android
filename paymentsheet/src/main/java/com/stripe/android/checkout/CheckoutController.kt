@@ -214,7 +214,9 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Updates the customer's email address.
+     * Updates the customer's local Checkout email address.
+     *
+     * Returns a failed result if the session has an email set through `customer_email` or its customer.
      *
      * @param email The email address to set. Pass `null` to clear the customer's email.
      */
@@ -226,7 +228,13 @@ class CheckoutController @Inject internal constructor(
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
         ) {
-            kotlin.Result.success(checkoutSessionResponse)
+            if (checkoutSessionResponse.fixedEmail != null) {
+                kotlin.Result.failure(
+                    IllegalStateException("Cannot update email when the Checkout Session has a fixed email.")
+                )
+            } else {
+                kotlin.Result.success(checkoutSessionResponse)
+            }
         }
     }
 

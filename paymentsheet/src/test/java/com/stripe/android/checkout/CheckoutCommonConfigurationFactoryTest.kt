@@ -340,7 +340,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         ).defaultBillingDetails
 
         assertThat(expressCheckoutElementDefaults).isEqualTo(paymentElementDefaults)
-        assertThat(paymentElementDefaults?.email).isEqualTo("checkout@example.com")
+        assertThat(paymentElementDefaults?.email).isNull()
         assertThat(paymentElementDefaults?.name).isEqualTo("Jane Billing")
         assertThat(paymentElementDefaults?.phone).isEqualTo("+15555551234")
         assertThat(paymentElementDefaults?.address?.city).isEqualTo("Denver")
@@ -447,14 +447,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected email over the checkout session customer email`() {
+    fun `keeps collected email out of billing defaults`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result.defaultBillingDetails?.email).isNull()
     }
 
     @Test

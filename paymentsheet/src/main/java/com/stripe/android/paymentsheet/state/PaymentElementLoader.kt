@@ -133,7 +133,7 @@ internal interface PaymentElementLoader {
         }
 
         fun requiresEmailAddress(): Boolean {
-            return this is CheckoutSession && checkoutSessionResponse.customerEmail == null
+            return this is CheckoutSession && effectiveEmail == null
         }
 
         enum class WalletsDisabledReason {
@@ -230,7 +230,11 @@ internal interface PaymentElementLoader {
         data class CheckoutSession(
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
+            val collectedEmail: String?,
         ) : InitializationMode() {
+            val effectiveEmail: String?
+                get() = checkoutSessionResponse.fixedEmail ?: collectedEmail
+
             override fun validate() {
                 // Nothing to validate — the response was already loaded successfully.
             }
@@ -240,6 +244,7 @@ internal interface PaymentElementLoader {
                     id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
+                    collectedEmail = collectedEmail,
                 )
             }
         }

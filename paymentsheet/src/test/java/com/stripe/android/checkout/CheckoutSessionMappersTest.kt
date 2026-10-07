@@ -119,7 +119,7 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
-    fun `local email and shipping address override response state`() {
+    fun `fixed email takes precedence and local shipping overrides response state`() {
         val address = CheckoutController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
         val session = CheckoutSessionResponseFactory.create(customerEmail = "server@example.com").asCheckoutSession(
             collectedEmail = "local@example.com",
@@ -131,7 +131,7 @@ class CheckoutSessionMappersTest {
             locale = Locale.US,
         )
 
-        assertThat(session.email).isEqualTo("local@example.com")
+        assertThat(session.email).isEqualTo("server@example.com")
         assertThat(session.shippingAddress?.name).isEqualTo("Jenny")
         assertThat(session.shippingAddress?.address?.postalCode).isEqualTo("80202")
     }

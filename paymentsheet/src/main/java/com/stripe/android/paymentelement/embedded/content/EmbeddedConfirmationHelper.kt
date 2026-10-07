@@ -6,7 +6,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -57,10 +56,6 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             configuration = confirmationState.configuration.asCommonConfiguration(),
             linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter,
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                configuration = confirmationState.configuration.asCommonConfiguration(),
-                paymentMethodMetadata = confirmationState.paymentMethodMetadata,
-            ),
         ) ?: return null
 
         return ConfirmationHandler.Args(

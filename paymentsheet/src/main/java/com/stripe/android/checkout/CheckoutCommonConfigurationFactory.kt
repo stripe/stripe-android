@@ -44,7 +44,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
             billingDetailsCollectionConfiguration = PaymentSheetBillingDetails(
                 email = if (
-                    checkoutSessionResponse.customerEmail == null && configuration.defaults.email == null
+                    checkoutSessionResponse.fixedEmail == null && collectedDetails.email == null
                 ) {
                     PaymentSheetBillingDetails.CollectionMode.Always
                 } else {
@@ -86,10 +86,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
-        defaultBillingDetails = configuration.toBillingDetails(
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedEmail = collectedDetails.email,
-        ),
+        defaultBillingDetails = configuration.toBillingDetails(),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,

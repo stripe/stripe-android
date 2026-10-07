@@ -145,8 +145,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
-        val requiresCheckoutSessionEmail =
-            initializationMode.requiresEmailAddress() && configuration.defaultBillingDetails?.email == null
+        val requiresCheckoutSessionEmail = initializationMode.requiresEmailAddress()
         if (requiresCheckoutSessionEmail && useWebLink) {
             add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
         }
@@ -243,12 +242,16 @@ internal class DefaultCreateLinkState @Inject constructor(
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
 
-        val resolvedEmail = retrieveCustomerEmail(
-            configuration,
-            customerMetadata,
-            customerEmail = elementsSession.customer?.email,
-            apiConfiguration = apiConfiguration,
-        )
+        val resolvedEmail = if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            initializationMode.effectiveEmail
+        } else {
+            retrieveCustomerEmail(
+                configuration,
+                customerMetadata,
+                customerEmail = elementsSession.customer?.email,
+                apiConfiguration = apiConfiguration,
+            )
+        }
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = resolvedEmail,

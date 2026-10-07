@@ -230,6 +230,7 @@ internal class CreateCustomerMetadataTest {
 
     private companion object {
         val CHECKOUT_CUSTOMER = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_1",
             paymentMethods = emptyList(),
             canDetachPaymentMethod = true,
@@ -259,6 +260,7 @@ internal class CreateCustomerMetadataTest {
             savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         ): PaymentElementLoader.InitializationMode.CheckoutSession {
             return PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "instances_test",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     id = "cs_test_123",

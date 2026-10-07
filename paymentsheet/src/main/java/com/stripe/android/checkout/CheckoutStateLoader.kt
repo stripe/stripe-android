@@ -100,7 +100,11 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val loadResults = loadPaymentElements(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = response.id,
+                checkoutSessionResponse = response,
+                collectedEmail = collectedDetails.email,
+            ),
             embeddedConfiguration = embeddedConfig,
             paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
@@ -239,7 +243,7 @@ private fun CheckoutController.Configuration.State.asInitialCollectedDetails(
             checkoutSessionResponse.validateShippingCountry(shippingAddress.country).isSuccess
     }
     return CheckoutCollectedDetails(
-        email = defaults.email,
+        email = defaults.email.takeIf { checkoutSessionResponse.fixedEmail == null },
         shippingName = shippingDetails?.name,
         shippingAddress = shippingDetails?.address,
     )

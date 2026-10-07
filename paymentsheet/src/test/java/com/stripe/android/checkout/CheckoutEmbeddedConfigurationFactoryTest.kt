@@ -304,14 +304,14 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected email over the checkout session customer email`() {
+    fun `keeps collected email out of billing defaults`() {
         val result = factory().create(
             configuration = controllerConfiguration(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result.defaultBillingDetails?.email).isNull()
     }
 
     @Test
@@ -339,7 +339,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         )
 
         val billingDetails = requireNotNull(result.defaultBillingDetails)
-        assertThat(billingDetails.email).isEqualTo("checkout@example.com")
+        assertThat(billingDetails.email).isNull()
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
         assertThat(billingDetails.phone).isEqualTo("+15555551234")
         val address = requireNotNull(billingDetails.address)

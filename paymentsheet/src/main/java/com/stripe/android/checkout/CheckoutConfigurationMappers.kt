@@ -55,12 +55,10 @@ internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayCon
         }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toBillingDetails(
-    checkoutSessionResponse: CheckoutSessionResponse,
-    collectedEmail: String?,
-): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
+internal fun CheckoutController.Configuration.State.toBillingDetails():
+    PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
     address = defaults.billingDetails?.address?.asPaymentSheet(),
-    email = collectedEmail ?: checkoutSessionResponse.customerEmail,
+    email = null,
     name = defaults.billingDetails?.name,
     phone = defaults.phone,
 )

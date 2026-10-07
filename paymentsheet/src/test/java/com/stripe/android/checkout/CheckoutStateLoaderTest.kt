@@ -64,6 +64,18 @@ import kotlin.time.Duration.Companion.seconds
 internal class CheckoutStateLoaderTest {
 
     @Test
+    fun `loadInitial ignores local default when session email is fixed`() = runScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("local@example.com")
+        ).build(),
+    ) {
+        val state = loadInitial(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "fixed@example.com"),
+        ).state
+        assertThat(state.collectedDetails.email).isNull()
+    }
+
+    @Test
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 

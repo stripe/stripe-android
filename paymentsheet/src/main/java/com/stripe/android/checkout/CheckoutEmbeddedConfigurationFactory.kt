@@ -34,10 +34,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .googlePay(configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse))
             .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(
-                configuration.toBillingDetails(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    collectedEmail = collectedDetails.email,
-                ),
+                configuration.toBillingDetails(),
             )
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)

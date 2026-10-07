@@ -69,6 +69,140 @@ class CheckoutSessionConfirmationInterceptorTest {
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
+    fun `saved confirmation omits collected information for customer email`() = runScenario(
+        collectedEmail = "local@example.com",
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create().copy(
+            customer = CheckoutSessionResponse.Customer(
+                id = "cus_test", email = "fixed@example.com", paymentMethods = emptyList(),
+                canDetachPaymentMethod = false,
+            ),
+        ),
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptSavedPm()
+    }
+
+    @Test
+    fun `new confirmation omits collected information for customer email`() = runScenario(
+        collectedEmail = "local@example.com",
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create().copy(
+            customer = CheckoutSessionResponse.Customer(
+                id = "cus_test", email = "fixed@example.com", paymentMethods = emptyList(),
+                canDetachPaymentMethod = false,
+            ),
+        ),
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptNewPm()
+    }
+
+    @Test
+    fun `saved confirmation omits collected information for session email`() = runScenario(
+        collectedEmail = "local@example.com",
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "fixed@example.com"),
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptSavedPm()
+    }
+
+    @Test
+    fun `new confirmation omits collected information for session email`() = runScenario(
+        collectedEmail = "local@example.com",
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "fixed@example.com"),
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptNewPm()
+    }
+
+    @Test
+    fun `saved confirmation omits collected information for null email`() = runScenario(
+        collectedEmail = null,
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptSavedPm()
+    }
+
+    @Test
+    fun `new confirmation omits collected information for null email`() = runScenario(
+        collectedEmail = null,
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptNewPm()
+    }
+
+    @Test
+    fun `saved payment method setup confirm sends collected email`() = runScenario(
+        collectedEmail = "local+checkout@example.com",
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json")
+        }
+        interceptSavedPm(intent = SetupIntentFactory.create())
+    }
+
+    @Test
+    fun `saved payment method payment confirm sends collected email`() = runScenario(
+        collectedEmail = "local+checkout@example.com",
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptSavedPm()
+    }
+
+    @Test
+    fun `new payment method setup confirm sends collected email`() = runScenario(
+        collectedEmail = "local+checkout@example.com",
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json")
+        }
+        interceptNewPm(intent = SetupIntentFactory.create())
+    }
+
+    @Test
+    fun `new payment method payment confirm sends collected email`() = runScenario(
+        collectedEmail = "local+checkout@example.com",
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        interceptNewPm()
+    }
+
+    @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
@@ -736,6 +870,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
+        collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
@@ -760,6 +895,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = collectedEmail,
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,

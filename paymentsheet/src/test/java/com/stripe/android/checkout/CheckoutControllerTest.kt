@@ -19,6 +19,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -89,6 +90,59 @@ internal class CheckoutControllerTest {
     @After
     fun clearCallbackReferences() {
         PaymentElementCallbackReferences.clear()
+    }
+
+    @Test
+    fun `queued email update checks fixed email from the latest response`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        val holdResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
+            holdResponse.await(10, TimeUnit.SECONDS)
+            successResponseFactory { it.put("customer_email", "fixed@example.com") }.invoke(response)
+        }
+        val mutation = async { controller.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+        val emailUpdate = async { controller.updateEmail("local@example.com") }
+        testScheduler.advanceUntilIdle()
+        assertThat(emailUpdate.isCompleted).isFalse()
+
+        holdResponse.countDown()
+        mutation.await().getOrThrow()
+        assertThat(emailUpdate.await().exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(controller.session.value?.email).isEqualTo("fixed@example.com")
+        assertThat(committedState().collectedDetails.email).isNull()
+    }
+
+    @Test
+    fun `configure ignores default email when session email is fixed`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("local@example.com")
+        ),
+    ) {
+        result.getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(committedState?.collectedDetails?.email).isNull()
+    }
+
+    @Test
+    fun `customer email rejects updates and ignores local default`() = runMutationScenario(
+        configuration = CheckoutController.Configuration().defaults(
+            CheckoutController.Configuration.Defaults().email("local@example.com")
+        ),
+        initModifier = {
+            it.remove("customer_email")
+            it.put(
+                "customer",
+                JSONObject().put("id", "cus_test").put("email", "customer@example.com")
+                    .put("payment_methods", org.json.JSONArray()),
+            )
+        },
+    ) {
+        assertThat(controller.session.value?.email).isEqualTo("customer@example.com")
+        assertThat(committedState().collectedDetails.email).isNull()
+        assertThat(controller.updateEmail(null).exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(controller.session.value?.email).isEqualTo("customer@example.com")
     }
 
     @Test
@@ -544,11 +598,16 @@ internal class CheckoutControllerTest {
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
+        initModifier = { it.remove("customer_email") },
     ) {
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
         assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
-            .isEqualTo("prefill@example.com")
+            .isNull()
+        assertThat(
+            (committedState?.paymentMethodMetadata?.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("prefill@example.com")
     }
 
     @Test
@@ -981,7 +1040,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail stores email locally without a network call`() = runMutationScenario {
+    fun `updateEmail stores email locally without a network call`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
         // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
         // response, so NetworkRule will fail the test if a request is made.
         val result = controller.updateEmail("checkout@example.com")
@@ -989,7 +1050,11 @@ internal class CheckoutControllerTest {
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
+            .isNull()
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -998,21 +1063,29 @@ internal class CheckoutControllerTest {
     ) {
         controller.updateEmail("local@example.com").getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
-            .isEqualTo("local@example.com")
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("local@example.com")
 
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isNull()
     }
 
     @Test
-    fun `updateEmail takes precedence over the session customer email`() = runMutationScenario {
-        controller.updateEmail("local@example.com").getOrThrow()
+    fun `updateEmail rejects updates when the session has a fixed email`() = runMutationScenario {
+        val result = controller.updateEmail("local@example.com")
 
-        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("fixed email")
+        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -2018,6 +2091,7 @@ internal class CheckoutControllerTest {
     // every isUpdating emission and this asserts none are left over. Tests that don't care about
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
+        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
         initModifier: (JSONObject) -> Unit = {},
         configureNetworkSetup: () -> Unit = {},
         paymentSelection: PaymentSelection? = null,
@@ -2032,7 +2106,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
         paymentSelection?.let(setup.stateHolder::setSelection)
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
         if (!previousNewSelections.isEmpty) {

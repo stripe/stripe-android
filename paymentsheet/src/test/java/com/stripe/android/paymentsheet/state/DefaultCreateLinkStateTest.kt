@@ -39,6 +39,48 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultCreateLinkStateTest {
 
     @Test
+    fun `Link lookup uses local Checkout email without billing defaults`() = runTest {
+        val elementsSession = createElementsSession()
+        val initializationMode = checkoutSessionInitializationMode(
+            elementsSession = elementsSession,
+            customerEmail = null,
+        ).copy(collectedEmail = "local@example.com")
+        val result = createLinkStateFactory()(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+        assertThat(result).isInstanceOf<LinkState>()
+        val configuration = (result as LinkState).configuration
+        assertThat(configuration.customerInfo.email).isEqualTo("local@example.com")
+        assertThat(configuration.defaultBillingDetails?.email).isNull()
+    }
+
+    @Test
+    fun `Link lookup uses fixed Checkout email without billing defaults`() = runTest {
+        val elementsSession = createElementsSession()
+        val initializationMode = checkoutSessionInitializationMode(
+            elementsSession = elementsSession,
+            customerEmail = "fixed@example.com",
+        ).copy(collectedEmail = "local@example.com")
+        val result = createLinkStateFactory()(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+        assertThat(result).isInstanceOf<LinkState>()
+        val configuration = (result as LinkState).configuration
+        assertThat(configuration.customerInfo.email).isEqualTo("fixed@example.com")
+        assertThat(configuration.defaultBillingDetails?.email).isNull()
+    }
+
+    @Test
     fun `passes customer email from elements session into retrieveCustomerEmail`() = runTest {
         val retrieveCustomerEmail = FakeRetrieveCustomerEmail()
         val createLinkState = createLinkStateFactory(retrieveCustomerEmail = retrieveCustomerEmail)
@@ -95,6 +137,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,
@@ -179,6 +222,7 @@ internal class DefaultCreateLinkStateTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
         )
@@ -291,7 +335,7 @@ internal class DefaultCreateLinkStateTest {
             checkoutSessionInitializationMode(
                 elementsSession = elementsSession,
                 customerEmail = checkoutSessionCustomerEmail,
-            )
+            ).copy(collectedEmail = defaultEmail)
         } else {
             PAYMENT_INTENT_INIT_MODE
         }
@@ -319,6 +363,7 @@ internal class DefaultCreateLinkStateTest {
         customerEmail: String?,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,

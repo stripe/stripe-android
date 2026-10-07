@@ -10,6 +10,7 @@ import com.stripe.android.uicore.elements.ParameterDestination
 internal object InitialValuesFactory {
     fun create(
         defaultBillingDetails: PaymentSheet.BillingDetails?,
+        prefillEmail: String?,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?
     ): Map<FormFieldId, String?> {
@@ -25,7 +26,7 @@ internal object InitialValuesFactory {
 
         return mapOf(
             FormFieldId.Name to defaultBillingDetails?.name,
-            FormFieldId.Email to defaultBillingDetails?.email,
+            FormFieldId.Email to (prefillEmail ?: defaultBillingDetails?.email),
             FormFieldId.Phone to defaultBillingDetails?.phone,
             FormFieldId.Line1 to defaultBillingDetails?.address?.line1,
             FormFieldId.Line2 to defaultBillingDetails?.address?.line2,

@@ -42,7 +42,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         discountAmounts = recurringDetails?.totalDiscountAmounts.orEmpty().mapNotNull {
             it.asDiscountAmount(presentmentCurrency, locale)
         },
-        email = collectedEmail ?: customerEmail,
+        email = fixedEmail ?: collectedEmail,
         orderSummaryItems = checkoutItems.map { it.asOrderSummaryItem(locale) },
         minorUnitsAmountDivisor = 10.0.pow(currencyDigits(presentmentCurrency)).toInt(),
         paymentOption = paymentOption,

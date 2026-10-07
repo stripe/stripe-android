@@ -53,5 +53,9 @@ internal sealed class IntegrationMetadata : Parcelable {
         val id: String,
         val instancesKey: String,
         val checkoutSessionResponse: CheckoutSessionResponse,
-    ) : IntegrationMetadata()
+        val collectedEmail: String?,
+    ) : IntegrationMetadata() {
+        val effectiveEmail: String?
+            get() = checkoutSessionResponse.fixedEmail ?: collectedEmail
+    }
 }

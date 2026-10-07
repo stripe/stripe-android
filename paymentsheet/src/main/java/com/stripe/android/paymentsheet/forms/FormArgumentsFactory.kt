@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -15,6 +16,7 @@ internal object FormArgumentsFactory {
             merchantName = metadata.merchantName,
             amount = metadata.amount(),
             billingDetails = metadata.defaultBillingDetails,
+            prefillEmail = (metadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)?.effectiveEmail,
             shippingDetails = metadata.shippingDetails,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,

@@ -8,6 +8,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.PUBLISHABLE_KEY
 import com.stripe.android.link.repositories.FakeLinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConsumerSessionLookup
@@ -23,6 +24,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -77,6 +79,46 @@ class LogLinkGlobalHoldbackExposureTest {
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             mode = EventReporter.Mode.Complete,
         )
+    }
+
+    @Test
+    fun `disabled Link lookup uses Checkout email independently from billing email`() = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(LINK_GLOBAL_HOLD_BACK to "holdback"),
+            ),
+        )
+        val state = createElementsState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkState = null,
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    id = "cs_test",
+                    instancesKey = "test",
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    collectedEmail = "checkout@example.com",
+                ),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "billing@example.com"),
+        )
+        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
+            ConsumerSessionLookup(
+                exists = true,
+                consumerSession = CONSUMER_SESSION,
+                errorMessage = null,
+                publishableKey = PUBLISHABLE_KEY,
+            ),
+        )
+        logLinkHoldbackExperiment(
+            experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
+            elementsSession = elementsSession,
+            state = state,
+        )
+        assertThat(linkRepository.awaitLookupWithoutBackendLogging().email).isEqualTo("checkout@example.com")
+        val experiment = eventReporter.experimentExposureCalls.awaitItem().experiment
+        assertThat((experiment as LoggableExperiment.LinkHoldback).isReturningLinkUser).isTrue()
+        linkRepository.ensureAllEventsConsumed()
+        eventReporter.experimentExposureCalls.ensureAllEventsConsumed()
     }
 
     @Test

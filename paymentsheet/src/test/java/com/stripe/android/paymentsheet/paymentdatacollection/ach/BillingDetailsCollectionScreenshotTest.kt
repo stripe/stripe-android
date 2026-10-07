@@ -172,6 +172,7 @@ internal class BillingDetailsCollectionScreenshotTest {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): FormArguments {
         return FormArguments(
+            prefillEmail = null,
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = "Test Merchant",
             amount = null,

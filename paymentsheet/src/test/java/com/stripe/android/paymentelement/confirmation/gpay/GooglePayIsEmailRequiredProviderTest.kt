@@ -5,10 +5,38 @@ import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
 class GooglePayIsEmailRequiredProviderTest {
+
+    @Test
+    fun `billing email does not satisfy missing Checkout email`() {
+        val result = isEmailRequired(
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "billing@example.com"),
+            integrationMetadata = checkoutSessionMetadata(),
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `fixed customer email satisfies Checkout email requirement`() {
+        val response = CheckoutSessionResponseFactory.create().copy(
+            customer = CheckoutSessionResponse.Customer(
+                id = "cus_test",
+                email = "customer@example.com",
+                paymentMethods = emptyList(),
+                canDetachPaymentMethod = false,
+            ),
+        )
+        val result = isEmailRequired(
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            integrationMetadata = checkoutSessionMetadata().copy(checkoutSessionResponse = response),
+        )
+        assertThat(result).isFalse()
+    }
 
     @Test
     fun `returns true when email collection is always`() {
@@ -43,11 +71,11 @@ class GooglePayIsEmailRequiredProviderTest {
     }
 
     @Test
-    fun `returns false when checkout session billing details email is present and email collection is automatic`() {
+    fun `returns false when checkout session local email is present and email collection is automatic`() {
         val result = isEmailRequired(
             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
             defaultBillingDetails = PaymentSheet.BillingDetails(email = "present@example.com"),
-            integrationMetadata = checkoutSessionMetadata(),
+            integrationMetadata = checkoutSessionMetadata().copy(collectedEmail = "checkout@example.com"),
         )
 
         assertThat(result).isFalse()
@@ -58,7 +86,7 @@ class GooglePayIsEmailRequiredProviderTest {
         val result = isEmailRequired(
             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
             defaultBillingDetails = PaymentSheet.BillingDetails(),
-            integrationMetadata = checkoutSessionMetadata(),
+            integrationMetadata = checkoutSessionMetadata().copy(collectedEmail = "checkout@example.com"),
         )
 
         assertThat(result).isFalse()
@@ -69,7 +97,7 @@ class GooglePayIsEmailRequiredProviderTest {
         val result = isEmailRequired(
             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
             defaultBillingDetails = PaymentSheet.BillingDetails(email = "present@example.com"),
-            integrationMetadata = checkoutSessionMetadata(),
+            integrationMetadata = checkoutSessionMetadata().copy(collectedEmail = "checkout@example.com"),
         )
 
         assertThat(result).isFalse()
@@ -104,6 +132,7 @@ class GooglePayIsEmailRequiredProviderTest {
     private fun checkoutSessionMetadata(): IntegrationMetadata.CheckoutSession {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
         return IntegrationMetadata.CheckoutSession(
+            collectedEmail = null,
             id = checkoutSessionResponse.id,
             instancesKey = "checkout_instances_123",
             checkoutSessionResponse = checkoutSessionResponse,

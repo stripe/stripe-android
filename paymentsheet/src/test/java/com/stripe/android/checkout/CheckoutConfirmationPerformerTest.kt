@@ -57,12 +57,16 @@ internal class CheckoutConfirmationPerformerTest {
     @Test
     fun `confirm starts confirmation with a Google Pay option`() = runScenario(
         statusBarColor = STATUS_BAR_COLOR,
-        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "fixed@example.com"),
+            collectedDetails = CheckoutCollectedDetails(email = "local@example.com"),
+        ),
     ) {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
             .isEqualTo(stateHolder.state?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)

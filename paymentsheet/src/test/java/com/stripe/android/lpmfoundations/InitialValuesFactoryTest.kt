@@ -57,8 +57,31 @@ class InitialValuesFactoryTest {
     )
 
     @Test
+    fun `retains entered payment method email over prefill`() {
+        val values = InitialValuesFactory.create(
+            defaultBillingDetails = null,
+            prefillEmail = "checkout@example.com",
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            paymentMethodExtraParams = null,
+        )
+        assertThat(values[FormFieldId.Email]).isEqualTo("jenny.rosen@example.com")
+    }
+
+    @Test
+    fun `prefills email independently from billing defaults`() {
+        val values = InitialValuesFactory.create(
+            defaultBillingDetails = null,
+            prefillEmail = "checkout@example.com",
+            paymentMethodCreateParams = null,
+            paymentMethodExtraParams = null,
+        )
+        assertThat(values[FormFieldId.Email]).isEqualTo("checkout@example.com")
+    }
+
+    @Test
     fun `Verify payment method parameters overrides any billing address values`() {
         val initialValues = InitialValuesFactory.create(
+            prefillEmail = null,
             defaultBillingDetails = billingDetails,
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodExtraParams = null,
@@ -84,6 +107,7 @@ class InitialValuesFactoryTest {
     fun `Verify if only default billing address they appear in the initial values`() {
         assertThat(
             InitialValuesFactory.create(
+                prefillEmail = null,
                 defaultBillingDetails = billingDetails,
                 paymentMethodCreateParams = null,
                 paymentMethodExtraParams = null,
@@ -107,6 +131,7 @@ class InitialValuesFactoryTest {
     fun `Verify extra parameters are included if passed in`() {
         assertThat(
             InitialValuesFactory.create(
+                prefillEmail = null,
                 defaultBillingDetails = null,
                 paymentMethodCreateParams = PaymentMethodCreateParams.create(
                     bacsDebit = PaymentMethodCreateParams.BacsDebit(
