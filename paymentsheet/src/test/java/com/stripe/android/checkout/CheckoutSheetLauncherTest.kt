@@ -254,6 +254,64 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `formActivityLauncher invokes immediate action after checkout session refresh`() = testScenario {
+        val releaseRefresh = CompletableDeferred<Unit>()
+        val response = CheckoutSessionResponseFactory.create()
+        sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+
+        callback.onActivityResult(result)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+
+        releaseRefresh.complete(Unit)
+        runCurrent()
+
+        assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `formActivityLauncher skips immediate action when checkout session refresh fails`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        val expectedError = IllegalStateException("Refresh failed")
+        sessionRefresher.enqueueRefreshAction { throw expectedError }
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            checkoutSessionResponse = response,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+
+        callback.onActivityResult(result)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(logger.errorLogs).containsExactly(
+            "Failed to refresh the checkout session after the sheet closed." to expectedError
+        )
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `formActivityLauncher does not invoke immediate action when the result is confirmed`() = testScenario {
         launchForm("cashapp")
         val result = EmbeddedActivityResult.Complete(
