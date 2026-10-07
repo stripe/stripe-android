@@ -3,7 +3,10 @@ package com.stripe.android.elements
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutMandateState
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -13,8 +16,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -30,6 +35,9 @@ internal class PaymentElementTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
     fun `configuration builds default Google Pay values`() {
@@ -64,24 +72,35 @@ internal class PaymentElementTest {
     @Test
     fun `present delegates to the content helper`() = runTest {
         val contentHelper = FakeEmbeddedContentHelper()
-        val paymentElement = PaymentElement(contentHelper)
+        val mandateState = CheckoutMandateState(SavedStateHandle())
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutControllerStateFactory.create(mandateAcknowledgementId = ACKNOWLEDGEMENT_ID)
+        }
+        val paymentElement = PaymentElement(contentHelper, mandateState, stateHolder)
 
         paymentElement.present()
 
         contentHelper.presentPaymentOptionsCalls.awaitItem()
         contentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isFalse()
     }
 
     @Test
     fun `Content renders nothing when there is no embedded content`() {
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(null))
-        val paymentElement = PaymentElement(contentHelper)
+        val mandateState = CheckoutMandateState(SavedStateHandle())
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutControllerStateFactory.create(mandateAcknowledgementId = ACKNOWLEDGEMENT_ID)
+        }
+        val paymentElement = PaymentElement(contentHelper, mandateState, stateHolder)
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isFalse()
 
         composeRule.setContent {
             paymentElement.Content()
         }
 
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertDoesNotExist()
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isTrue()
     }
 
     @Test
@@ -97,13 +116,42 @@ internal class PaymentElementTest {
             isImmediateAction = false,
         )
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(content))
-        val paymentElement = PaymentElement(contentHelper)
+        val mandateState = CheckoutMandateState(SavedStateHandle())
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutControllerStateFactory.create(mandateAcknowledgementId = ACKNOWLEDGEMENT_ID)
+        }
+        val paymentElement = PaymentElement(contentHelper, mandateState, stateHolder)
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isFalse()
 
         composeRule.setContent {
             paymentElement.Content()
         }
 
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertIsDisplayed()
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isTrue()
+    }
+
+    @Test
+    fun `Content records access for the current configuration after reconfiguration`() {
+        val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(null))
+        val mandateState = CheckoutMandateState(SavedStateHandle())
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutControllerStateFactory.create(mandateAcknowledgementId = ACKNOWLEDGEMENT_ID)
+        }
+        val paymentElement = PaymentElement(contentHelper, mandateState, stateHolder)
+        composeRule.setContent {
+            paymentElement.Content()
+        }
+        composeRule.waitForIdle()
+        assertThat(mandateState.hasAccessedContent(ACKNOWLEDGEMENT_ID)).isTrue()
+        assertThat(mandateState.hasAccessedContent("new_configuration")).isFalse()
+
+        composeRule.runOnIdle {
+            stateHolder.state = requireNotNull(stateHolder.state).copy(mandateAcknowledgementId = "new_configuration")
+        }
+        composeRule.waitForIdle()
+
+        assertThat(mandateState.hasAccessedContent("new_configuration")).isTrue()
     }
 
     @Test
@@ -127,5 +175,9 @@ internal class PaymentElementTest {
         requireNotNull(immediateAction).invoke()
 
         assertThat(callbackInvoked).isTrue()
+    }
+
+    private companion object {
+        const val ACKNOWLEDGEMENT_ID = "checkout_configuration"
     }
 }

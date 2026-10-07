@@ -20,6 +20,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val analyticsPerformer: CheckoutAnalyticsPerformer,
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
+    private val mandateState: CheckoutMandateState,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
@@ -64,7 +65,13 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             ),
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                mandateState.hasAccessedContent(state.mandateAcknowledgementId) ||
+                (
+                    paymentSelection is PaymentSelection.Saved && mandateState.hasAccessedMandateText(
+                        state.mandateAcknowledgementId,
+                        paymentSelection.paymentMethod,
+                    )
+                ),
         ) ?: return null
 
         return ConfirmationHandler.Args(

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -134,6 +135,7 @@ internal class CheckoutStateLoader @Inject constructor(
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
+            mandateAcknowledgementId = carryForward.mandateAcknowledgementId,
         )
         return LoadedState(state = state, customer = loadResults.customer)
     }
@@ -205,6 +207,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val linkEagerPresentationSuppressed: Boolean,
+        val mandateAcknowledgementId: String,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -214,6 +217,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,
+                mandateAcknowledgementId = UUID.randomUUID().toString(),
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -223,6 +227,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
                 linkEagerPresentationSuppressed = state.linkEagerPresentationSuppressed,
+                mandateAcknowledgementId = state.mandateAcknowledgementId,
             )
         }
     }

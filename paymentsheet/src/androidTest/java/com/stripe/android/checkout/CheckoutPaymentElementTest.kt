@@ -23,9 +23,10 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.VerticalModePage
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.junit.After
@@ -130,7 +131,7 @@ internal class CheckoutPaymentElementTest {
                     }
                 }
 
-                val update = async(start = CoroutineStart.UNDISPATCHED) {
+                val update = async(Dispatchers.Main) {
                     controller.applyPromotionCode("10OFF")
                 }
                 try {
@@ -214,7 +215,9 @@ internal class CheckoutPaymentElementTest {
             verticalModePage.waitUntilMissing()
 
             networkRule.checkoutInit(responseFactory = checkoutInitResponse)
-            controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            withContext(Dispatchers.Main) {
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            }
             markTestSucceeded()
         }
     }

@@ -143,6 +143,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
+                result.selection?.hasAcknowledgedSepaMandate = true
                 applyCompleteResult(result)
                 refreshCheckoutSession(result.checkoutSessionResponse)
             }

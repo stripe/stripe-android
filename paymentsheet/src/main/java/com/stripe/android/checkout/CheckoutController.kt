@@ -959,12 +959,15 @@ class CheckoutController @Inject internal constructor(
              * - If this is Google Pay, the value is "google_pay".
              */
             val paymentMethodType: String,
+            private val mandateTextProvider: () -> AnnotatedString?,
+        ) {
             /**
              * If you set [PaymentElement.Configuration.embeddedViewDisplaysMandateText] to `false`, this text
              * must be displayed to the customer near your "Buy" button to comply with regulations.
              */
-            val mandateText: AnnotatedString?,
-        ) {
+            val mandateText: AnnotatedString?
+                get() = mandateTextProvider()
+
             /**
              * The billing details collected for a payment method.
              */

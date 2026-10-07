@@ -32,7 +32,9 @@ internal class CheckoutPaymentElementScenario(
     private val renderPaymentElementContent: Boolean,
 ) {
     fun presentPaymentOptions() {
-        presenter.paymentElement().present()
+        scenario.onActivity {
+            presenter.paymentElement().present()
+        }
     }
 
     fun confirm() {

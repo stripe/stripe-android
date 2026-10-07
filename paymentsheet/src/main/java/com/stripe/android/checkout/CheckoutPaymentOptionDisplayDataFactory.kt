@@ -25,6 +25,7 @@ internal fun interface CheckoutPaymentOptionDisplayDataFactory {
     fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        mandateAcknowledgementId: String,
     ): PaymentOptionDisplayData?
 }
 
@@ -34,10 +35,12 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
     private val linkAccountHolder: LinkAccountHolder,
+    private val mandateState: CheckoutMandateState,
 ) : CheckoutPaymentOptionDisplayDataFactory {
     override fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        mandateAcknowledgementId: String,
     ): PaymentOptionDisplayData? {
         if (selection == null) {
             return null
@@ -74,7 +77,15 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
             ).resolve(context),
             billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
-            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
+            mandateTextProvider = {
+                mandate?.let {
+                    val text = AnnotatedString(it.resolve(context))
+                    if (selection is PaymentSelection.Saved) {
+                        mandateState.recordMandateTextAccess(mandateAcknowledgementId, selection.paymentMethod)
+                    }
+                    text
+                }
+            },
         )
     }
 }

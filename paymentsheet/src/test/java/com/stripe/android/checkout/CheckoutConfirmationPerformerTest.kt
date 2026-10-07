@@ -1,9 +1,12 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -21,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -79,7 +83,7 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm keeps saved SEPA unacknowledged when embedded view displays mandate text`() = runScenario(
+    fun `confirm requires a mandate for saved SEPA before the merchant accesses content`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = true),
     ) {
         performer.confirm()
@@ -90,9 +94,143 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm acknowledges saved SEPA when embedded view omits mandate text`() = runScenario(
+    fun `disabling embedded mandate text does not acknowledge saved SEPA`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = false),
     ) {
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `confirm acknowledges saved SEPA after content is accessed`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = true),
+    ) {
+        mandateState.recordContentAccess(requireNotNull(stateHolder.state).mandateAcknowledgementId)
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `content access acknowledges saved SEPA when embedded mandate text is disabled`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        mandateState.recordContentAccess(requireNotNull(stateHolder.state).mandateAcknowledgementId)
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `confirm acknowledges saved SEPA after mandate text is accessed`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        mandateState.recordMandateTextAccess(
+            requireNotNull(stateHolder.state).mandateAcknowledgementId,
+            PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+        )
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `confirm preserves saved SEPA acknowledgement from continuing the sheet`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = true).apply {
+            paymentSelection?.hasAcknowledgedSepaMandate = true
+        },
+    ) {
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `reading a null card mandate does not acknowledge a later saved SEPA selection`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+    ) {
+        val cardOption = requireNotNull(stateHolder.session.value?.paymentOption)
+        assertThat(cardOption.mandateText).isNull()
+        stateHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD))
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `reading one saved SEPA mandate does not acknowledge another saved SEPA selection`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        assertThat(stateHolder.session.value?.paymentOption?.mandateText).isNotNull()
+        val anotherPaymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.copy(id = "pm_another_sepa")
+        stateHolder.setSelection(PaymentSelection.Saved(anotherPaymentMethod))
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `content access for an earlier configuration does not acknowledge saved SEPA`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+    ) {
+        mandateState.recordContentAccess(requireNotNull(stateHolder.state).mandateAcknowledgementId)
+        stateHolder.state = savedSepaState(embeddedViewDisplaysMandateText = true).copy(
+            mandateAcknowledgementId = "new_configuration",
+        )
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `reading an old payment option does not acknowledge saved SEPA after reconfiguration`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        val oldOption = requireNotNull(stateHolder.session.value?.paymentOption)
+        stateHolder.state = requireNotNull(stateHolder.state).copy(mandateAcknowledgementId = "new_configuration")
+        assertThat(oldOption.mandateText).isNotNull()
+
+        performer.confirm()
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.Saved
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `reading the current payment option acknowledges saved SEPA after reconfiguration`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        stateHolder.state = requireNotNull(stateHolder.state).copy(mandateAcknowledgementId = "new_configuration")
+        assertThat(stateHolder.session.value?.paymentOption?.mandateText).isNotNull()
+
         performer.confirm()
 
         val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
@@ -154,7 +292,19 @@ internal class CheckoutConfirmationPerformerTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val mandateState = CheckoutMandateState(savedStateHandle)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val imageLoader = FakeStripeImageLoader()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle,
+            paymentOptionFactory = DefaultCheckoutPaymentOptionDisplayDataFactory(
+                iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader),
+                cardArtDrawableLoader = { null },
+                context = context,
+                linkAccountHolder = LinkAccountHolder(savedStateHandle),
+                mandateState = mandateState,
+            ),
+        )
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val operationCoordinator = CheckoutOperationCoordinator(
@@ -180,6 +330,7 @@ internal class CheckoutConfirmationPerformerTest {
             operationCoordinator = operationCoordinator,
             analyticsPerformer = analyticsPerformer,
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Test App"),
+            mandateState = mandateState,
             statusBarColor = statusBarColor,
             viewModelScope = backgroundScope,
         )
@@ -189,11 +340,13 @@ internal class CheckoutConfirmationPerformerTest {
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
+            mandateState = mandateState,
         ).block()
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         eventReporter.validate()
+        imageLoader.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -201,6 +354,7 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
+        val mandateState: CheckoutMandateState,
     )
 
     private companion object {

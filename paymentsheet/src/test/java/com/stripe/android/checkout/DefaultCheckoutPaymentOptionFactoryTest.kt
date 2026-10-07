@@ -29,22 +29,23 @@ import kotlin.test.Test
 internal class DefaultCheckoutPaymentOptionFactoryTest {
     @Test
     fun `create returns null when there is no selection`() = runScenario {
-        assertThat(factory.create(selection = null, paymentMethodMetadata = metadata)).isNull()
+        assertThat(createOption(selection = null, paymentMethodMetadata = metadata)).isNull()
     }
 
     @Test
     fun `create maps a Google Pay selection`() = runScenario {
-        val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
+        val option = createOption(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
 
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("google_pay")
         assertThat(option?.label).isEqualTo("Google Pay")
         assertThat(option?.mandateText).isNull()
+        assertThat(hasAccessedSepaMandate).isFalse()
     }
 
     @Test
     fun `create maps a new card selection`() = runScenario {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             paymentMethodMetadata = metadata,
         )
@@ -61,17 +62,18 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
             stripeIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(paymentMethodTypes = listOf("card")),
         ),
     ) {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
             paymentMethodMetadata = metadata,
         )
 
         assertThat(option?.mandateText).isNotNull()
+        assertThat(hasAccessedSepaMandate).isFalse()
     }
 
     @Test
     fun `create does not attach mandate text for a saved card`() = runScenario {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             paymentMethodMetadata = metadata,
         )
@@ -79,11 +81,36 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("card")
         assertThat(option?.mandateText).isNull()
+        assertThat(hasAccessedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `creating a saved SEPA option does not count as accessing mandate text`() = runScenario {
+        val option = createOption(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(option?.paymentMethodType).isEqualTo("sepa_debit")
+        assertThat(hasAccessedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `reading a saved SEPA option mandate text records access`() = runScenario {
+        val option = createOption(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+            paymentMethodMetadata = metadata,
+        )
+        assertThat(hasAccessedSepaMandate).isFalse()
+
+        assertThat(option?.mandateText?.text).contains(metadata.merchantName)
+
+        assertThat(hasAccessedSepaMandate).isTrue()
     }
 
     @Test
     fun `create populates billing details from a saved payment method`() = runScenario {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             paymentMethodMetadata = metadata,
         )
@@ -101,14 +128,14 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
     @Test
     fun `create leaves billing details null for Google Pay`() = runScenario {
-        val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
+        val option = createOption(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
 
         assertThat(option?.billingDetails).isNull()
     }
 
     @Test
     fun `create leaves address null when the payment method has billing details but no address`() = runScenario {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                     billingDetails = PaymentMethod.BillingDetails(
@@ -132,7 +159,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         cardArt = ColorDrawable(),
     ) {
         // Card art is only ever loaded for saved payment methods.
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             paymentMethodMetadata = metadata,
         )
@@ -142,7 +169,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
     @Test
     fun `imageLoader falls back to the icon loader when there is no card art`() = runScenario {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.GooglePay,
             paymentMethodMetadata = metadata,
         )
@@ -156,7 +183,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
             TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
         )
     ) {
-        val option = factory.create(
+        val option = createOption(
             selection = PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true),
             ),
@@ -175,6 +202,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
+        val mandateState = CheckoutMandateState(SavedStateHandle())
         Scenario(
             factory = DefaultCheckoutPaymentOptionDisplayDataFactory(
                 iconLoader = PaymentSelection.IconLoader(
@@ -186,9 +214,11 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply {
                     set(LinkAccountUpdate.Value(linkAccount))
                 },
+                mandateState = mandateState,
             ),
             metadata = metadata,
             cardArt = cardArt,
+            mandateState = mandateState,
         ).block()
     }
 
@@ -196,5 +226,22 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         val factory: DefaultCheckoutPaymentOptionDisplayDataFactory,
         val metadata: PaymentMethodMetadata,
         val cardArt: Drawable?,
-    )
+        val mandateState: CheckoutMandateState,
+    ) {
+        val hasAccessedSepaMandate: Boolean
+            get() = mandateState.hasAccessedMandateText(
+                ACKNOWLEDGEMENT_ID,
+                PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            )
+
+        fun createOption(
+            selection: PaymentSelection?,
+            paymentMethodMetadata: PaymentMethodMetadata = metadata,
+            mandateAcknowledgementId: String = ACKNOWLEDGEMENT_ID,
+        ) = factory.create(selection, paymentMethodMetadata, mandateAcknowledgementId)
+    }
+
+    private companion object {
+        const val ACKNOWLEDGEMENT_ID = "checkout_configuration"
+    }
 }
