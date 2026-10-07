@@ -678,6 +678,76 @@ class PaymentLauncherViewModelTest {
             )
         }
 
+    @Test
+    fun `invalid PaymentIntent client secret preserves confirmation failure`() =
+        runScenario {
+            val clientSecret = "person@example.com"
+            val error = IllegalArgumentException("Invalid PaymentIntent client secret.")
+            repository.confirmPaymentIntentResult = Result.failure(error)
+
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+        }
+
+    @Test
+    fun `invalid SetupIntent client secret preserves confirmation failure`() =
+        runScenario(isPaymentIntent = false) {
+            val clientSecret = "person@example.com_secret_invalid"
+            val error = IllegalArgumentException("Invalid SetupIntent client secret.")
+            repository.confirmSetupIntentResult = Result.failure(error)
+
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
+            assertThat(repository.confirmSetupIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+        }
+
+    @Test
+    fun `valid scoped PaymentIntent client secret completes confirmation`() =
+        runScenario {
+            val clientSecret = "pi_example_scoped_secret_example"
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(clientSecret = clientSecret)
+            repository.confirmPaymentIntentResult = Result.success(intent)
+
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+
+            assertThat(paymentResults.awaitItem()).isEqualTo(InternalPaymentResult.Completed(intent))
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+        }
+
+    @Test
+    fun `valid SetupIntent client secret completes confirmation`() =
+        runScenario(isPaymentIntent = false) {
+            val clientSecret = "seti_example_secret_example"
+            val intent = SetupIntentFixtures.SI_SUCCEEDED.copy(clientSecret = clientSecret)
+            repository.confirmSetupIntentResult = Result.success(intent)
+
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+
+            assertThat(paymentResults.awaitItem()).isEqualTo(InternalPaymentResult.Completed(intent))
+            assertThat(repository.confirmSetupIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+        }
+
+    @Test
+    fun `invalid client secret preserves next action retrieval failure`() =
+        runScenario {
+            val clientSecret = "person@example.com"
+            val error = IllegalArgumentException("Invalid client secret.")
+            repository.retrieveStripeIntentResult = Result.failure(error)
+
+            viewModel.handleNextActionForStripeIntent(clientSecret, authHost)
+
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
+            assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(clientSecret, API_REQUEST_OPTIONS, emptyList())
+            )
+        }
+
     private fun runScenario(
         isPaymentIntent: Boolean = true,
         isInstantApp: Boolean = false,

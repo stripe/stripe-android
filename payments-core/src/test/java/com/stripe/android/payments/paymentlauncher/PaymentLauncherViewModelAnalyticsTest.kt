@@ -5,7 +5,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
@@ -468,24 +467,19 @@ class PaymentLauncherViewModelAnalyticsTest {
             val error = IllegalArgumentException("Invalid PaymentIntent client secret.")
             repository.confirmPaymentIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                )
-                expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                    analyticsPayloadField("status", "failed"),
-                )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+                analyticsPayloadField("status", "failed"),
+            )
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
-            assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmPaymentIntentCalls.awaitItem()
         }
 
     @Test
@@ -495,24 +489,19 @@ class PaymentLauncherViewModelAnalyticsTest {
             val error = IllegalArgumentException("Invalid SetupIntent client secret.")
             repository.confirmSetupIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                )
-                expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                    analyticsPayloadField("status", "failed"),
-                )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+                analyticsPayloadField("status", "failed"),
+            )
 
-                viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
-            assertThat(repository.confirmSetupIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmSetupIntentCalls.awaitItem()
         }
 
     @Test
@@ -522,22 +511,18 @@ class PaymentLauncherViewModelAnalyticsTest {
             val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(clientSecret = clientSecret)
             repository.confirmPaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
-                    analyticsPayloadField("intent_id", "pi_example"),
-                )
-                expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
-                    analyticsPayloadField("intent_id", "pi_example"),
-                )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                analyticsPayloadField("intent_id", "pi_example"),
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("intent_id", "pi_example"),
+            )
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(intent))
-            }
-            assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmPaymentIntentCalls.awaitItem()
         }
 
     @Test
@@ -547,22 +532,18 @@ class PaymentLauncherViewModelAnalyticsTest {
             val intent = SetupIntentFixtures.SI_SUCCEEDED.copy(clientSecret = clientSecret)
             repository.confirmSetupIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
-                    analyticsPayloadField("intent_id", "seti_example"),
-                )
-                expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
-                    analyticsPayloadField("intent_id", "seti_example"),
-                )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                analyticsPayloadField("intent_id", "seti_example"),
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("intent_id", "seti_example"),
+            )
 
-                viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(intent))
-            }
-            assertThat(repository.confirmSetupIntentCalls.awaitItem().params.clientSecret).isEqualTo(clientSecret)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmSetupIntentCalls.awaitItem()
         }
 
     @Test
@@ -572,24 +553,17 @@ class PaymentLauncherViewModelAnalyticsTest {
             val error = IllegalArgumentException("Invalid client secret.")
             repository.retrieveStripeIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                )
-                expectEvent(
-                    PaymentAnalyticsEvent.PaymentLauncherNextActionFinished,
-                    RequestMatcher { !it.queryParams.containsKey("intent_id") },
-                )
-
-                viewModel.handleNextActionForStripeIntent(clientSecret, authHost)
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
-            assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
-                FakeStripeRepository.RetrieveIntentCall(clientSecret, API_REQUEST_OPTIONS, emptyList())
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
             )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherNextActionFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+
+            viewModel.handleNextActionForStripeIntent(clientSecret, authHost)
+            repository.retrieveStripeIntentCalls.awaitItem()
         }
 
     private fun expectEvent(event: PaymentAnalyticsEvent, vararg matchers: RequestMatcher) {
