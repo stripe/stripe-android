@@ -51,14 +51,14 @@ import kotlin.coroutines.CoroutineContext
 internal class StripePaymentController
 constructor(
     context: Context,
-    private val publishableKeyProvider: () -> String,
+    private val apiConfiguration: ApiConfiguration.State,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
     workContext: CoroutineContext = Dispatchers.IO,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
+        PaymentAnalyticsRequestFactory(context.applicationContext, { apiConfiguration.publishableKey }),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
@@ -68,12 +68,7 @@ constructor(
         analyticsRequestExecutor,
         paymentAnalyticsRequestFactory,
     )
-    private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
-        ApiConfiguration.State(
-            publishableKey = publishableKeyProvider(),
-            stripeAccountId = null,
-        )
-    }
+    private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider { apiConfiguration }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
         apiConfigProvider,
@@ -115,7 +110,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            apiConfigurationState = apiConfigProvider.get(),
+            apiConfigurationState = apiConfiguration,
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
@@ -386,7 +381,7 @@ constructor(
         val clientSecret = result.clientSecret.orEmpty()
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
+            apiKey = apiConfiguration.publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
@@ -528,7 +523,10 @@ constructor(
         ): PaymentController {
             return StripePaymentController(
                 context.applicationContext,
-                { publishableKey },
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                ),
                 stripeRepository,
                 enableLogging
             )
