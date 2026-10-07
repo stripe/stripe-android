@@ -24,7 +24,7 @@ internal object CheckoutSessionParamsFactory {
         val email = resolvedEmail(settings)
         val currency = settings[session.currency].value
 
-        return buildJsonObject {
+        val request = buildJsonObject {
             put("ui_mode", "elements")
             put("currency", currency)
             putCart(currency)
@@ -40,6 +40,22 @@ internal object CheckoutSessionParamsFactory {
             )
             putSavedPaymentMethodOptions(customerId, paymentMethodSave, paymentMethodRemove)
         }
+        return if (settings[session.invoiceCreation]) invoice(request) else request
+    }
+
+    private fun invoice(request: JsonObject): JsonObject {
+        check(request["mode"] == null) { "Invoice live tests must keep mode unset" }
+        val invoiceCreation = buildJsonObject {
+            put("enabled", true)
+            put(
+                "invoice_data",
+                buildJsonObject {
+                    put("description", "Checkout live post-purchase invoice")
+                    put("metadata", buildJsonObject { put("suite", "checkout_live_billing_invoice") })
+                },
+            )
+        }
+        return JsonObject(request + ("invoice_creation" to invoiceCreation))
     }
 
     fun resolvedEmail(settings: CheckoutPlaygroundSettings.Snapshot): String? {
