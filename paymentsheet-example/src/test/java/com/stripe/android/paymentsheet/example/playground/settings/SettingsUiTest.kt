@@ -43,7 +43,10 @@ internal class SettingsUiTest {
             .performTextReplacement("custom@example.com")
 
         assertThat(playgroundSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
-            DefaultBillingAddress.WithEmail("custom@example.com")
+            DefaultBillingAddress.WithEmail(
+                email = "custom@example.com",
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         )
     }
 
@@ -63,7 +66,10 @@ internal class SettingsUiTest {
     @Test
     fun `custom billing email remains when integration type changes`() {
         val playgroundSettings = PlaygroundSettings.createFromDefaults().apply {
-            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail("custom@example.com")
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(
+                email = "custom@example.com",
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         }
 
         playgroundSettings.updateConfigurationData { configurationData ->
@@ -72,21 +78,30 @@ internal class SettingsUiTest {
             )
         }
         assertThat(playgroundSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
-            DefaultBillingAddress.WithEmail("custom@example.com")
+            DefaultBillingAddress.WithEmail(
+                email = "custom@example.com",
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         )
     }
 
     @Test
     fun `custom billing email is restored`() {
         val playgroundSettings = PlaygroundSettings.createFromDefaults().apply {
-            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail("custom@example.com")
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(
+                email = "custom@example.com",
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         }
 
         val restoredSettings = PlaygroundSettings.createFromJsonString(
             playgroundSettings.snapshot().asJsonString()
         )
         assertThat(restoredSettings[DefaultBillingAddressSettingsDefinition].value).isEqualTo(
-            DefaultBillingAddress.WithEmail("custom@example.com")
+            DefaultBillingAddress.WithEmail(
+                email = "custom@example.com",
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
         )
     }
 
