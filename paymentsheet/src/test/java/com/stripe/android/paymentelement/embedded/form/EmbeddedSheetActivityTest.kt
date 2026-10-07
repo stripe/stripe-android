@@ -29,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -37,6 +38,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.createCustomerState
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
@@ -172,6 +174,42 @@ internal class EmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `reopening bank form returns the collected account without collecting again`() {
+        val selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.copy(
+            input = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.input.copy(
+                name = "Jane Doe",
+                email = "janedoe@example.com",
+            ),
+        )
+        launch(
+            selectedPaymentMethodCode = "us_bank_account",
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("us_bank_account"),
+                    paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
+                ),
+            ),
+            selection = selection,
+        ) { scenario ->
+            formPage.waitUntilVisible()
+            primaryButton.performScrollTo().assertIsEnabled().performClick()
+            onIdle()
+
+            val result = EmbeddedSheetContract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            ) as EmbeddedActivityResult.Complete
+            val returnedSelection = result.selection as PaymentSelection.New.USBankAccount
+            assertThat(returnedSelection.screenState.linkedBankAccount?.resultIdentifier)
+                .isEqualTo(requireNotNull(selection.screenState.linkedBankAccount).resultIdentifier)
+            assertThat(returnedSelection.input.name).isEqualTo(selection.input.name)
+            assertThat(returnedSelection.input.email).isEqualTo(selection.input.email)
+            assertThat(result.hasBeenConfirmed).isFalse()
+            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.Form("us_bank_account"))
+        }
+    }
+
+    @Test
     fun `Primary button label is correctly applied`() = launch(
         configuration = EmbeddedPaymentElement.Configuration
             .Builder("Example, Inc.")
@@ -249,6 +287,7 @@ internal class EmbeddedSheetActivityTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        selection: PaymentSelection? = null,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
@@ -260,7 +299,7 @@ internal class EmbeddedSheetActivityTest {
                     productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
-                    selection = null,
+                    selection = selection,
                     previousNewSelections = Bundle(),
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     linkAccountInfo = LinkAccountUpdate.Value(null),
