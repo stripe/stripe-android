@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.os.Parcel
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,13 +25,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -42,7 +37,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.EmbeddedPaymentElementIntegration
+import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -55,7 +50,6 @@ import kotlinx.serialization.json.Json
 
 internal class EmbeddedExampleActivity : AppCompatActivity() {
     private var mountedInstances by mutableStateOf(0)
-    private val integrationViewModel: EmbeddedExampleIntegrationViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +60,7 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
                 val snapshot = PlaygroundSettings.createFromSharedPreferences(applicationContext).snapshot()
                 UseApiConfigurationSettingsDefinition.isEnabled(snapshot)
             }
-            var checkoutVisible by rememberSaveable { mutableStateOf(false) }
+            var checkoutVisible by remember { mutableStateOf(false) }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -75,9 +69,6 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
                 Text(getString(R.string.embedded_example_title), modifier = Modifier.padding(16.dp))
                 Button(
                     onClick = {
-                        if (checkoutVisible) {
-                            integrationViewModel.destroyIntegration()
-                        }
                         if (!checkoutVisible) mountedInstances += 1
                         checkoutVisible = !checkoutVisible
                     },
@@ -88,11 +79,7 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
                 Text("Created instances: $mountedInstances", modifier = Modifier.padding(horizontal = 16.dp))
                 if (checkoutVisible) {
                     Box(modifier = Modifier.weight(1f)) {
-                        CheckoutScreen(
-                            useApiConfiguration = useApiConfiguration,
-                            integration = integrationViewModel.getIntegration(this@EmbeddedExampleActivity),
-                            activity = this@EmbeddedExampleActivity,
-                        )
+                        CheckoutScreen(useApiConfiguration)
                     }
                 }
             }
@@ -116,11 +103,7 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
 
 @Composable
 @OptIn(ApiConfigurationPreview::class)
-private fun CheckoutScreen(
-    useApiConfiguration: Boolean,
-    integration: EmbeddedPaymentElementIntegration,
-    activity: ComponentActivity,
-) {
+fun CheckoutScreen(useApiConfiguration: Boolean = false) {
     val context = LocalContext.current.applicationContext
     var prefetchedCheckout by remember { mutableStateOf<CheckoutResult?>(null) }
     val embeddedBuilder = remember {
@@ -129,15 +112,12 @@ private fun CheckoutScreen(
                 (prefetchedCheckout ?: checkout(context, initializePaymentConfiguration = true)).createIntentResult
             },
             resultCallback = { result -> handlePaymentResult(context, result) },
-        )
+        ).integrationName()
     }
 
-    val embeddedPaymentElement = remember(integration, activity, embeddedBuilder) {
-        integration.createElement(activity, embeddedBuilder)
-    }
+    val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
     LaunchedEffect(embeddedPaymentElement) {
-        if (embeddedPaymentElement.state != null) return@LaunchedEffect
         val checkoutResult = if (useApiConfiguration) {
             checkout(context, initializePaymentConfiguration = false).also {
                 prefetchedCheckout = it
@@ -183,29 +163,6 @@ private fun CheckoutScreen(
         ) {
             Text("Confirm payment")
         }
-    }
-}
-
-internal class EmbeddedExampleIntegrationViewModel(
-    private val savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    private var integration: EmbeddedPaymentElementIntegration? = null
-
-    fun getIntegration(activity: ComponentActivity): EmbeddedPaymentElementIntegration {
-        return integration ?: EmbeddedPaymentElementIntegration.create(
-            activity = activity,
-            savedStateHandle = savedStateHandle,
-            integrationName = "embedded_example",
-        ).also { integration = it }
-    }
-
-    fun destroyIntegration() {
-        integration?.destroy()
-        integration = null
-    }
-
-    override fun onCleared() {
-        destroyIntegration()
     }
 }
 

@@ -90,15 +90,6 @@ import javax.inject.Singleton
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
     val viewModel: EmbeddedPaymentElementViewModel
-    val embeddedPaymentElementSubcomponentFactory: EmbeddedPaymentElementSubcomponent.Factory
-    val contentHelper: EmbeddedContentHelper
-    val selectionHolder: EmbeddedSelectionHolder
-    val paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder
-    val configurationCoordinator: EmbeddedConfigurationCoordinator
-    val stateHelper: EmbeddedStateHelper
-
-    @get:ViewModelScope
-    val coroutineScope: CoroutineScope
 
     @Component.Factory
     interface Factory {
@@ -192,6 +183,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): LinkAccountStatusProvider
 
     @Binds
+    @Singleton
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds

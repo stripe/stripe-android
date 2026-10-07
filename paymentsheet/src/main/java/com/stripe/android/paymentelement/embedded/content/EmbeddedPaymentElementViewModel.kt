@@ -1,11 +1,17 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.annotation.MainThread
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
@@ -16,10 +22,48 @@ import kotlin.reflect.KClass
 internal class EmbeddedPaymentElementViewModel @Inject constructor(
     val embeddedPaymentElementSubcomponentFactory: EmbeddedPaymentElementSubcomponent.Factory,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : ViewModel() {
+    private var presentation: Presentation? = null
+
+    @MainThread
+    fun getOrCreateElement(
+        lifecycleOwner: LifecycleOwner,
+        resultCallback: EmbeddedPaymentElement.ResultCallback,
+        create: (EmbeddedPaymentElement.ResultCallback) -> EmbeddedPaymentElement,
+    ): EmbeddedPaymentElement {
+        presentation?.takeIf { it.lifecycleOwner === lifecycleOwner }?.let {
+            it.updateResultCallback(resultCallback)
+            return it.element
+        }
+
+        var currentResultCallback: EmbeddedPaymentElement.ResultCallback? = resultCallback
+        val element = create { currentResultCallback?.onResult(it) }
+        val binding = Presentation(lifecycleOwner, element) { currentResultCallback = it }
+        presentation = binding
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    currentResultCallback = null
+                    if (presentation === binding) presentation = null
+                }
+            }
+        )
+        return element
+    }
+
     override fun onCleared() {
         customViewModelScope.cancel()
+        presentation?.updateResultCallback(null)
+        presentation = null
+        PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
     }
+
+    private class Presentation(
+        val lifecycleOwner: LifecycleOwner,
+        val element: EmbeddedPaymentElement,
+        val updateResultCallback: (EmbeddedPaymentElement.ResultCallback?) -> Unit,
+    )
 
     class Factory(
         private val paymentElementCallbackIdentifier: String,

@@ -78,11 +78,6 @@ internal data class PaymentElementCallbacks private constructor(
         fun rowSelectionImmediateActionCallback(
             rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior,
             element: EmbeddedPaymentElement,
-        ) = rowSelectionImmediateActionCallback(rowSelectionBehavior) { element }
-
-        fun rowSelectionImmediateActionCallback(
-            rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior,
-            element: () -> EmbeddedPaymentElement,
         ) = apply {
             this.rowSelectionCallback = getInternalRowSelectionCallback(
                 rowSelectionBehavior = rowSelectionBehavior,
