@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
@@ -58,6 +59,34 @@ interface CollectBankAccountLauncher {
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithPaymentIntent(
+        apiConfiguration: ApiConfiguration.State,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) = presentWithPaymentIntent(
+        publishableKey = apiConfiguration.publishableKey,
+        stripeAccountId = apiConfiguration.stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = preCollectedConsent,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithSetupIntent(
+        apiConfiguration: ApiConfiguration.State,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) = presentWithSetupIntent(
+        publishableKey = apiConfiguration.publishableKey,
+        stripeAccountId = apiConfiguration.stripeAccountId,
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = preCollectedConsent,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun presentWithDeferredPayment(
         publishableKey: String,
         stripeAccountId: String? = null,
@@ -66,7 +95,27 @@ interface CollectBankAccountLauncher {
         customerId: String?,
         onBehalfOf: String?,
         amount: Int?,
+        currency: String?,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithDeferredPayment(
+        apiConfiguration: ApiConfiguration.State,
+        configuration: CollectBankAccountConfiguration,
+        elementsSessionId: String,
+        customerId: String?,
+        onBehalfOf: String?,
+        amount: Int?,
         currency: String?
+    ) = presentWithDeferredPayment(
+        publishableKey = apiConfiguration.publishableKey,
+        stripeAccountId = apiConfiguration.stripeAccountId,
+        configuration = configuration,
+        elementsSessionId = elementsSessionId,
+        customerId = customerId,
+        onBehalfOf = onBehalfOf,
+        amount = amount,
+        currency = currency,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -77,6 +126,22 @@ interface CollectBankAccountLauncher {
         elementsSessionId: String,
         customerId: String?,
         onBehalfOf: String?,
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithDeferredSetup(
+        apiConfiguration: ApiConfiguration.State,
+        configuration: CollectBankAccountConfiguration,
+        elementsSessionId: String,
+        customerId: String?,
+        onBehalfOf: String?,
+    ) = presentWithDeferredSetup(
+        publishableKey = apiConfiguration.publishableKey,
+        stripeAccountId = apiConfiguration.stripeAccountId,
+        configuration = configuration,
+        elementsSessionId = elementsSessionId,
+        customerId = customerId,
+        onBehalfOf = onBehalfOf,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

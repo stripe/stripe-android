@@ -159,10 +159,10 @@ class USBankAccountFormViewModelTest {
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
             verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
-                eq(DEFAULT_API_CONFIG.publishableKey),
-                eq(DEFAULT_API_CONFIG.stripeAccountId),
+                eq(DEFAULT_API_CONFIG),
                 any(),
                 any(),
+                eq(null),
             )
         }
 
@@ -273,7 +273,12 @@ class USBankAccountFormViewModelTest {
 
             viewModel.handlePrimaryButtonClick()
 
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+                apiConfiguration = eq(DEFAULT_API_CONFIG),
+                clientSecret = any(),
+                configuration = any(),
+                preCollectedConsent = eq(null),
+            )
         }
 
     @Test
@@ -887,8 +892,7 @@ class USBankAccountFormViewModelTest {
         viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
-            publishableKey = any(),
-            stripeAccountId = any(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
@@ -937,8 +941,7 @@ class USBankAccountFormViewModelTest {
         viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
-            publishableKey = any(),
-            stripeAccountId = any(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
                     name = "Jenny Rose",
@@ -1110,8 +1113,7 @@ class USBankAccountFormViewModelTest {
         viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
-            publishableKey = any(),
-            stripeAccountId = anyOrNull(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
             clientSecret = any(),
             configuration = eq(
                 CollectBankAccountConfiguration.USBankAccountInternal(
@@ -1135,6 +1137,7 @@ class USBankAccountFormViewModelTest {
                     ),
                 )
             ),
+            preCollectedConsent = eq(null),
         )
     }
 
@@ -1154,8 +1157,7 @@ class USBankAccountFormViewModelTest {
         viewModel.handlePrimaryButtonClick()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
-            publishableKey = any(),
-            stripeAccountId = anyOrNull(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
             clientSecret = any(),
             configuration = eq(
                 CollectBankAccountConfiguration.InstantDebits(
@@ -1177,6 +1179,7 @@ class USBankAccountFormViewModelTest {
                     ),
                 )
             ),
+            preCollectedConsent = eq(null),
         )
     }
 
@@ -1987,10 +1990,10 @@ class USBankAccountFormViewModelTest {
         val argumentCaptor = argumentCaptor<CollectBankAccountConfiguration>()
 
         verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
-            publishableKey = any(),
-            stripeAccountId = anyOrNull(),
+            apiConfiguration = eq(DEFAULT_API_CONFIG),
             clientSecret = any(),
             configuration = argumentCaptor.capture(),
+            preCollectedConsent = eq(null),
         )
 
         val instantDebitsConfiguration = argumentCaptor.firstValue as CollectBankAccountConfiguration.InstantDebits

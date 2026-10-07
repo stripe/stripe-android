@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
@@ -21,11 +22,25 @@ class CollectBankAccountForInstantDebitsLauncher(
         stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    ) = presentWithPaymentIntent(
+        apiConfiguration = ApiConfiguration.State(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+        ),
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = null,
+    )
+
+    override fun presentWithPaymentIntent(
+        apiConfiguration: ApiConfiguration.State,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
@@ -54,11 +69,25 @@ class CollectBankAccountForInstantDebitsLauncher(
         stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    ) = presentWithSetupIntent(
+        apiConfiguration = ApiConfiguration.State(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+        ),
+        clientSecret = clientSecret,
+        configuration = configuration,
+        preCollectedConsent = null,
+    )
+
+    override fun presentWithSetupIntent(
+        apiConfiguration: ApiConfiguration.State,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
@@ -90,12 +119,32 @@ class CollectBankAccountForInstantDebitsLauncher(
         customerId: String?,
         onBehalfOf: String?,
         amount: Int?,
+        currency: String?,
+    ) = presentWithDeferredPayment(
+        apiConfiguration = ApiConfiguration.State(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+        ),
+        configuration = configuration,
+        elementsSessionId = elementsSessionId,
+        customerId = customerId,
+        onBehalfOf = onBehalfOf,
+        amount = amount,
+        currency = currency,
+    )
+
+    override fun presentWithDeferredPayment(
+        apiConfiguration: ApiConfiguration.State,
+        configuration: CollectBankAccountConfiguration,
+        elementsSessionId: String,
+        customerId: String?,
+        onBehalfOf: String?,
+        amount: Int?,
         currency: String?
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,
@@ -115,11 +164,27 @@ class CollectBankAccountForInstantDebitsLauncher(
         elementsSessionId: String,
         customerId: String?,
         onBehalfOf: String?,
+    ) = presentWithDeferredSetup(
+        apiConfiguration = ApiConfiguration.State(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
+        ),
+        configuration = configuration,
+        elementsSessionId = elementsSessionId,
+        customerId = customerId,
+        onBehalfOf = onBehalfOf,
+    )
+
+    override fun presentWithDeferredSetup(
+        apiConfiguration: ApiConfiguration.State,
+        configuration: CollectBankAccountConfiguration,
+        elementsSessionId: String,
+        customerId: String?,
+        onBehalfOf: String?,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,

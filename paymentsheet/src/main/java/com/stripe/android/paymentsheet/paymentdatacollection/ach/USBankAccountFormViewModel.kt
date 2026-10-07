@@ -554,17 +554,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
-                publishableKey = args.apiConfiguration.publishableKey,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                apiConfiguration = args.apiConfiguration,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                preCollectedConsent = null,
             )
         } else {
             collectBankAccountLauncher?.presentWithSetupIntent(
-                publishableKey = args.apiConfiguration.publishableKey,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                apiConfiguration = args.apiConfiguration,
                 clientSecret = clientSecret,
                 configuration = configuration,
+                preCollectedConsent = null,
             )
         }
     }
@@ -673,8 +673,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithDeferredPayment(
-                publishableKey = args.apiConfiguration.publishableKey,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                apiConfiguration = args.apiConfiguration,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -684,8 +683,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         } else {
             collectBankAccountLauncher?.presentWithDeferredSetup(
-                publishableKey = args.apiConfiguration.publishableKey,
-                stripeAccountId = args.apiConfiguration.stripeAccountId,
+                apiConfiguration = args.apiConfiguration,
                 configuration = configuration,
                 elementsSessionId = elementsSessionId,
                 customerId = null,
