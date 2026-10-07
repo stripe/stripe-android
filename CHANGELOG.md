@@ -8,6 +8,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### PaymentSheet
 * [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
 * [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
 
