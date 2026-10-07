@@ -47,19 +47,6 @@ jobs:
             **/build/reports/tests/
             **/out/failures/
 
-  payment-sheet-apk-size-analysis:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - uses: ./.github/actions/stripe_setup
-      - name: Upload release bundle to Emerge
-        run: ./gradlew :paymentsheet-example:emergeUploadBaseReleaseAab
-        env:
-          EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_KEY }}
-          EMERGE_TAG: pull_request
-
   check-for-untranslated-strings:
     name: Check for untranslated strings
     runs-on: ubuntu-latest
