@@ -448,6 +448,137 @@ class CheckoutPlaygroundSettingsTest {
         assertThat(settings[session.merchant]).isEqualTo(Merchant.JP)
     }
 
+    @Test
+    fun `express grid accepts blank limits`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "")
+        settings.updateSerialized(layout.rows, "")
+
+        assertThat(settings.validationErrors()).isEmpty()
+        assertThat(settings.snapshot()[layout.columns]).isNull()
+        assertThat(settings.snapshot()[layout.rows]).isNull()
+    }
+
+    @Test
+    fun `express grid accepts minimum limits`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "1")
+        settings.updateSerialized(layout.rows, "1")
+
+        assertThat(settings.validationErrors()).isEmpty()
+        assertThat(settings.snapshot()[layout.columns]).isEqualTo(1)
+        assertThat(settings.snapshot()[layout.rows]).isEqualTo(1)
+    }
+
+    @Test
+    fun `express grid accepts maximum limits`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "10")
+        settings.updateSerialized(layout.rows, "10")
+
+        assertThat(settings.validationErrors()).isEmpty()
+        assertThat(settings.snapshot()[layout.columns]).isEqualTo(10)
+        assertThat(settings.snapshot()[layout.rows]).isEqualTo(10)
+    }
+
+    @Test
+    fun `express grid rejects negative limits and prevents snapshot`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "-1")
+        settings.updateSerialized(layout.rows, "-1")
+
+        assertThat(settings.validationErrors()).containsExactly(
+            layout.columns, "Must be at least 1",
+            layout.rows, "Must be at least 1",
+        )
+        assertThat(runCatching { settings.snapshot() }.exceptionOrNull())
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `express grid rejects zero limits and prevents snapshot`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "0")
+        settings.updateSerialized(layout.rows, "0")
+
+        assertThat(settings.validationErrors()).containsExactly(
+            layout.columns, "Must be at least 1",
+            layout.rows, "Must be at least 1",
+        )
+        assertThat(runCatching { settings.snapshot() }.exceptionOrNull())
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `express grid rejects above maximum limits and prevents snapshot`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "11")
+        settings.updateSerialized(layout.rows, "11")
+
+        assertThat(settings.validationErrors()).containsExactly(
+            layout.columns, "Must be at most 10",
+            layout.rows, "Must be at most 10",
+        )
+        assertThat(runCatching { settings.snapshot() }.exceptionOrNull())
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `express grid rejects legacy oversized limits and prevents snapshot`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "65536")
+        settings.updateSerialized(layout.rows, "65536")
+
+        assertThat(settings.validationErrors()).containsExactly(
+            layout.columns, "Must be at most 10",
+            layout.rows, "Must be at most 10",
+        )
+        assertThat(runCatching { settings.snapshot() }.exceptionOrNull())
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `express grid rejects maximum integer limits and prevents snapshot`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.updateSerialized(layout.columns, "2147483647")
+        settings.updateSerialized(layout.rows, "2147483647")
+
+        assertThat(settings.validationErrors()).containsExactly(
+            layout.columns, "Must be at most 10",
+            layout.rows, "Must be at most 10",
+        )
+        assertThat(runCatching { settings.snapshot() }.exceptionOrNull())
+            .isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `import rejects oversized express grid columns without replacing settings`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.update(layout.columns, 2)
+        val original = settings.asJsonString()
+
+        val result = settings.importJson("""{"express.appearance.layout.columns":"65536"}""")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("express.appearance.layout.columns (Must be at most 10)")
+        assertThat(settings.asJsonString()).isEqualTo(original)
+    }
+
+    @Test
+    fun `import rejects oversized express grid rows without replacing settings`() = runScenario {
+        val layout = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout
+        settings.update(layout.rows, 2)
+        val original = settings.asJsonString()
+
+        val result = settings.importJson("""{"express.appearance.layout.rows":"65536"}""")
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("express.appearance.layout.rows (Must be at most 10)")
+        assertThat(settings.asJsonString()).isEqualTo(original)
+    }
+
     private fun runScenario(
         json: String? = null,
         block: Scenario.() -> Unit,

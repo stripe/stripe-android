@@ -83,6 +83,58 @@ internal object VisibleButtonCountCaseProvider : TestParameterValuesProvider() {
             maxRows = 2,
             expected = 3,
         ),
+        VisibleButtonCountCase(
+            name = "Maximum supported grid capacity",
+            buttonCount = 101,
+            maxColumns = 10,
+            maxRows = 10,
+            expected = 100,
+        ),
+    ) + legacyGridCases()
+
+    private fun legacyGridCases(): List<VisibleButtonCountCase> = listOf(
+        VisibleButtonCountCase(
+            name = "Legacy negative overflow",
+            buttonCount = 2,
+            maxColumns = 46341,
+            maxRows = 46341,
+            expected = 2,
+        ),
+        VisibleButtonCountCase(
+            name = "Legacy zero overflow",
+            buttonCount = 2,
+            maxColumns = 65536,
+            maxRows = 65536,
+            expected = 2,
+        ),
+        VisibleButtonCountCase(
+            name = "Legacy maximum columns",
+            buttonCount = 2,
+            maxColumns = Int.MAX_VALUE,
+            maxRows = 2,
+            expected = 2,
+        ),
+        VisibleButtonCountCase(
+            name = "Legacy maximum dimensions",
+            buttonCount = 2,
+            maxColumns = Int.MAX_VALUE,
+            maxRows = Int.MAX_VALUE,
+            expected = 2,
+        ),
+        VisibleButtonCountCase(
+            name = "No buttons with legacy negative overflow",
+            buttonCount = 0,
+            maxColumns = 46341,
+            maxRows = 46341,
+            expected = 0,
+        ),
+        VisibleButtonCountCase(
+            name = "No buttons with legacy zero overflow",
+            buttonCount = 0,
+            maxColumns = 65536,
+            maxRows = 65536,
+            expected = 0,
+        ),
     )
 }
 

@@ -1,17 +1,21 @@
 package com.stripe.android.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @OptIn(
     CheckoutSessionPreview::class,
     CollectMissingLinkBillingDetailsPreview::class,
     LinkDisallowFundingSourceCreationPreview::class,
 )
+@RunWith(TestParameterInjector::class)
 internal class ExpressCheckoutElementTest {
     @Test
     fun `configuration builds default values`() {
@@ -122,20 +126,48 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun `button layout rejects non-positive maximum columns`() {
-        val exception = runCatching {
-            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(0)
-        }.exceptionOrNull()
+    fun `button layout accepts maximum columns`(
+        @TestParameter(value = ["null", "1", "10"]) limit: Int?,
+    ) {
+        val layout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(2)
 
-        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(layout.maxColumns(limit)).isSameInstanceAs(layout)
+        assertThat(layout.build().maxColumns).isEqualTo(limit)
     }
 
     @Test
-    fun `button layout rejects non-positive maximum rows`() {
-        val exception = runCatching {
-            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(-1)
-        }.exceptionOrNull()
+    fun `button layout accepts maximum rows`(
+        @TestParameter(value = ["null", "1", "10"]) limit: Int?,
+    ) {
+        val layout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(2)
+
+        assertThat(layout.maxRows(limit)).isSameInstanceAs(layout)
+        assertThat(layout.build().maxRows).isEqualTo(limit)
+    }
+
+    @Test
+    fun `button layout rejects invalid maximum columns without changing state`(
+        @TestParameter(value = ["-1", "0", "11", "65536", "2147483647"]) limit: Int,
+    ) {
+        val layout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(2)
+
+        val exception = runCatching { layout.maxColumns(limit) }.exceptionOrNull()
 
         assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(exception).hasMessageThat().isEqualTo("maxColumns must be between 1 and 10 or null.")
+        assertThat(layout.build().maxColumns).isEqualTo(2)
+    }
+
+    @Test
+    fun `button layout rejects invalid maximum rows without changing state`(
+        @TestParameter(value = ["-1", "0", "11", "65536", "2147483647"]) limit: Int,
+    ) {
+        val layout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(2)
+
+        val exception = runCatching { layout.maxRows(limit) }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(exception).hasMessageThat().isEqualTo("maxRows must be between 1 and 10 or null.")
+        assertThat(layout.build().maxRows).isEqualTo(2)
     }
 }

@@ -3,6 +3,7 @@
 package com.stripe.android.elements.ece
 
 import android.content.Context
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -67,6 +68,34 @@ internal class ExpressCheckoutElementContentTest {
         composeRule.onNodeWithTag(LinkButtonTestTag).assertIsEnabled()
         assertThat(viewActionRecorder.viewActions)
             .containsExactly(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+    }
+
+    @Test
+    fun `renders wallet buttons when restored grid capacity would overflow to negative`() =
+        assertRestoredGridRendersWalletButtons(limit = 46_341)
+
+    @Test
+    fun `renders wallet buttons when restored grid capacity would overflow to zero`() =
+        assertRestoredGridRendersWalletButtons(limit = 65_536)
+
+    private fun assertRestoredGridRendersWalletButtons(limit: Int) {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create(
+                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State(
+                        maxColumns = limit,
+                        maxRows = limit,
+                    ),
+                )
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
     }
 
     @Test

@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.ui.GooglePayButtonTheme
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
-import kotlin.math.min
 
 @Composable
 internal fun ExpressCheckoutElementContent(
@@ -119,12 +118,9 @@ internal fun calculateVisibleButtonCount(
         return buttonCount
     }
 
-    val displayableInGrid = maxRows * maxColumns
+    val displayableInGrid = maxRows.toLong() * maxColumns.toLong()
 
-    return min(
-        displayableInGrid,
-        buttonCount,
-    )
+    return displayableInGrid.coerceAtMost(buttonCount.toLong()).toInt()
 }
 
 @VisibleForTesting

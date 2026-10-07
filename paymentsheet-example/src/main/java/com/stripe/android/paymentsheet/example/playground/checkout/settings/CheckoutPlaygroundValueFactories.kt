@@ -65,6 +65,7 @@ internal fun optionalText(
 internal fun optionalInt(
     key: String,
     displayName: String,
+    maximum: Int,
     defaultValue: Int? = null,
     minimum: Int = 1,
 ): CheckoutPlaygroundSettingDefinition.Value<Int?> {
@@ -79,7 +80,11 @@ internal fun optionalInt(
                 Result.success(null)
             } else {
                 val number = serialized.toIntOrNull() ?: return@value invalid(message = "Enter a whole number")
-                if (number < minimum) invalid(message = "Must be at least $minimum") else Result.success(number)
+                when {
+                    number < minimum -> invalid(message = "Must be at least $minimum")
+                    number > maximum -> invalid(message = "Must be at most $maximum")
+                    else -> Result.success(number)
+                }
             }
         },
     )

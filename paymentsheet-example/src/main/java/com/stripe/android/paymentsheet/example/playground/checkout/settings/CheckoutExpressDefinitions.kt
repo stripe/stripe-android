@@ -55,10 +55,12 @@ internal object CheckoutExpressDefinitions {
             val columns = optionalInt(
                 key = "express.appearance.layout.columns",
                 displayName = "Maximum columns",
+                maximum = 10,
             )
             val rows = optionalInt(
                 key = "express.appearance.layout.rows",
                 displayName = "Maximum rows",
+                maximum = 10,
             )
             val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
                 key = "express.appearance.layout",

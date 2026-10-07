@@ -290,6 +290,40 @@ class CheckoutPlaygroundSettingsUiTest {
             .assertIsDisplayed()
     }
 
+    @Test
+    fun `oversized express grid columns displays validation error`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout.columns
+
+        page.value(definition).performTextReplacement("11")
+
+        composeRule.onNodeWithText("Must be at most 10").assertIsDisplayed()
+        assertThat(settings.validationErrors()).containsKey(definition)
+
+        page.value(definition).performTextReplacement("10")
+
+        composeRule.onNodeWithText("Must be at most 10").assertDoesNotExist()
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
+    @Test
+    fun `oversized express grid rows displays validation error`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout.configuration,
+    ) {
+        val definition = CheckoutPlaygroundDefinitions.Controller.express.appearance.layout.rows
+
+        page.value(definition).performTextReplacement("11")
+
+        composeRule.onNodeWithText("Must be at most 10").assertIsDisplayed()
+        assertThat(settings.validationErrors()).containsKey(definition)
+
+        page.value(definition).performTextReplacement("10")
+
+        composeRule.onNodeWithText("Must be at most 10").assertDoesNotExist()
+        assertThat(settings.validationErrors()).isEmpty()
+    }
+
     private fun runScenario(
         initialConfiguration: CheckoutPlaygroundSettingDefinition.Configuration = CheckoutPlaygroundDefinitions.root,
         configureSettings: CheckoutPlaygroundSettings.() -> Unit = {},
