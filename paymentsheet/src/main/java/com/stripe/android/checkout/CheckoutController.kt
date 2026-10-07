@@ -1135,6 +1135,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the payment element.
+         *
+         * This is required if using [PaymentElement].
          */
         fun paymentElement(
             configuration: PaymentElement.Configuration
@@ -1144,6 +1146,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the currency selector element.
+         *
+         * This is required if using [CurrencySelectorElement].
          */
         fun currencySelectorElement(
             configuration: CurrencySelectorElement.Configuration
@@ -1153,6 +1157,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the shipping address element.
+         *
+         * This is required if using [ShippingAddressElement].
          */
         fun shippingAddressElement(
             configuration: ShippingAddressElement.Configuration
@@ -1162,6 +1168,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the express checkout element.
+         *
+         * This is required if using [ExpressCheckoutElement].
          */
         fun expressCheckoutElement(
             configuration: ExpressCheckoutElement.Configuration
