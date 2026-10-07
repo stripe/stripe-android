@@ -221,11 +221,12 @@ private fun CheckoutPlaygroundSettings.Snapshot.currencySelectorConfiguration():
 
 private fun CheckoutPlaygroundSettings.Snapshot.shippingAddressElementConfiguration():
     ShippingAddressElement.Configuration {
+    val definitions = Controller.shippingAddress
     return ShippingAddressElement.Configuration()
         .appearance(shippingAppearance())
         .apply {
-            this@shippingAddressElementConfiguration[Controller.shippingAddress.title]?.let(::title)
-            this@shippingAddressElementConfiguration[Controller.shippingAddress.buttonTitle]?.let(::buttonTitle)
+            this@shippingAddressElementConfiguration[definitions.title]?.let(::title)
+            this@shippingAddressElementConfiguration[definitions.buttonTitle]?.let(::buttonTitle)
         }
 }
 
