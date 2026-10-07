@@ -8,6 +8,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -63,13 +64,8 @@ class PaymentLauncherViewModelTest {
             val intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             repository.confirmPaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-
-                expectNoEvents()
-            }
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmPaymentIntentCall(
@@ -97,13 +93,8 @@ class PaymentLauncherViewModelTest {
             repository.confirmPaymentIntentResult = Result.success(intent)
             confirmPaymentIntentParams.returnUrl = RETURN_URL
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-
-                expectNoEvents()
-            }
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmPaymentIntentCall(
@@ -129,13 +120,11 @@ class PaymentLauncherViewModelTest {
         runScenario {
             confirmPaymentIntentParams.returnUrl = RETURN_URL
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmPaymentIntentCall(
@@ -160,13 +149,8 @@ class PaymentLauncherViewModelTest {
             val intent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
             repository.confirmSetupIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
-
-                expectNoEvents()
-            }
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmSetupIntentCall(
@@ -194,13 +178,8 @@ class PaymentLauncherViewModelTest {
             repository.confirmSetupIntentResult = Result.success(intent)
             confirmSetupIntentParams.returnUrl = RETURN_URL
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
-
-                expectNoEvents()
-            }
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmSetupIntentCall(
@@ -224,13 +203,11 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify instantApp confirm PaymentIntent without returnUrl gets null returnUrl`() =
         runScenario(isInstantApp = true) {
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmPaymentIntentCall(
                     params = ConfirmPaymentIntentParams(
@@ -252,14 +229,10 @@ class PaymentLauncherViewModelTest {
             val error = APIConnectionException()
             repository.confirmPaymentIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
             assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmPaymentIntentCall(
                     params = ConfirmPaymentIntentParams(
@@ -281,14 +254,10 @@ class PaymentLauncherViewModelTest {
             val error = APIConnectionException()
             repository.confirmSetupIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
-                viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
-
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
             assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.ConfirmSetupIntentCall(
                     params = ConfirmSetupIntentParams(
@@ -326,14 +295,10 @@ class PaymentLauncherViewModelTest {
             val error = APIConnectionException()
             repository.retrieveStripeIntentResult = Result.failure(error)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
-                viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
-
-                val result = awaitItem() as InternalPaymentResult.Failed
-                assertThat(result.throwable).isSameInstanceAs(error)
-            }
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
             assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
             )
@@ -375,19 +340,17 @@ class PaymentLauncherViewModelTest {
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
             assertThat(registration.caller).isSameInstanceAs(caller)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-
-                registration.callback.onActivityResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = CLIENT_SECRET,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                        stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
-                    )
+            registration.callback.onActivityResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                 )
+            )
 
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -401,19 +364,17 @@ class PaymentLauncherViewModelTest {
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
             assertThat(registration.caller).isSameInstanceAs(caller)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-
-                registration.callback.onActivityResult(
-                    PaymentFlowResult.Unvalidated(
-                        clientSecret = SETUP_CLIENT_SECRET,
-                        flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                        stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
-                    )
+            registration.callback.onActivityResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = SETUP_CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
                 )
+            )
 
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(SetupIntentFixtures.SI_SUCCEEDED))
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(SetupIntentFixtures.SI_SUCCEEDED)
+            )
             assertThat(repository.retrieveSetupIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(SETUP_CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -422,13 +383,11 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify success paymentIntentFlowResult is processed correctly`() =
         runScenario {
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
-
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -443,13 +402,9 @@ class PaymentLauncherViewModelTest {
             )
             repository.retrievePaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.FAILED))
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.FAILED))
-
-                assertThat(awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
-            }
+            assertThat(paymentResults.awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -464,13 +419,9 @@ class PaymentLauncherViewModelTest {
             )
             repository.retrievePaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.CANCELED))
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.CANCELED))
-
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Canceled)
-            }
+            assertThat(paymentResults.awaitItem()).isEqualTo(InternalPaymentResult.Canceled)
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -506,13 +457,9 @@ class PaymentLauncherViewModelTest {
             )
             repository.retrievePaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.TIMEDOUT))
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.TIMEDOUT))
-
-                assertThat(awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
-            }
+            assertThat(paymentResults.awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -528,13 +475,9 @@ class PaymentLauncherViewModelTest {
             )
             repository.retrievePaymentIntentResult = Result.success(intent)
 
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.UNKNOWN))
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.UNKNOWN))
-
-                assertThat(awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
-            }
+            assertThat(paymentResults.awaitItem()).isInstanceOf(InternalPaymentResult.Failed::class.java)
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
             )
@@ -586,93 +529,87 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify only first terminal result is emitted`() =
         runScenario {
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
 
-                assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.ConfirmPaymentIntentCall(
-                        params = ConfirmPaymentIntentParams(
-                            clientSecret = CLIENT_SECRET,
-                            paymentMethodId = PM_ID,
-                            returnUrl = defaultReturnUrl.value,
-                            useStripeSdk = true,
-                            paymentMethodCode = "card",
-                        ),
-                        options = API_REQUEST_OPTIONS,
-                        expandFields = EXPAND_PAYMENT_METHOD,
-                    )
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
                 )
+            )
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
-                assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
-                )
-                expectNoEvents()
-            }
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
+            assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+            )
         }
 
     @Test
     fun `verify guard blocks different result types`() =
         runScenario {
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
 
-                assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.ConfirmPaymentIntentCall(
-                        params = ConfirmPaymentIntentParams(
-                            clientSecret = CLIENT_SECRET,
-                            paymentMethodId = PM_ID,
-                            returnUrl = defaultReturnUrl.value,
-                            useStripeSdk = true,
-                            paymentMethodCode = "card",
-                        ),
-                        options = API_REQUEST_OPTIONS,
-                        expandFields = EXPAND_PAYMENT_METHOD,
-                    )
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
                 )
+            )
 
-                repository.retrievePaymentIntentResult = Result.success(
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethod = null, nextActionData = null)
-                )
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.FAILED))
-                assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
-                )
-                expectNoEvents()
-            }
+            repository.retrievePaymentIntentResult = Result.success(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethod = null, nextActionData = null)
+            )
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.FAILED))
+            assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+            )
         }
 
     @Test
     fun `verify guard works for next action flows`() =
         runScenario {
             val intent = repository.retrieveStripeIntentResult.getOrThrow()
-            viewModel.internalPaymentResult.test {
-                assertThat(awaitItem()).isNull()
-                viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
-                assertThat(awaitItem()).isEqualTo(InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED))
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
+            assertThat(paymentResults.awaitItem()).isEqualTo(
+                InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+            )
 
-                assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
-                )
-                assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
-                assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                    FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
-                )
-                assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
-                )
+            assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
+            )
+            assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
+            assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+            )
+            assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+            )
 
-                viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
-                assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
-                    FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
-                )
-                expectNoEvents()
-            }
+            viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
+            assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+            )
         }
 
     private fun runScenario(
@@ -715,19 +652,24 @@ class PaymentLauncherViewModelTest {
             durationProvider = durationProvider,
         ).also { viewModelStoreRule.track(it) }
 
-        Scenario(
-            viewModel = viewModel,
-            repository = repository,
-            nextActionHandlerRegistry = nextActionHandlerRegistry,
-            authHost = authHost,
-            savedStateHandle = savedStateHandle,
-            defaultReturnUrl = defaultReturnUrl,
-        ).apply { block() }
+        viewModel.internalPaymentResult.test {
+            assertThat(awaitItem()).isNull()
 
-        repository.ensureAllEventsConsumed()
-        nextActionHandlerRegistry.ensureAllEventsConsumed()
-        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
-        authHost.ensureAllEventsConsumed()
+            Scenario(
+                viewModel = viewModel,
+                paymentResults = this@test,
+                repository = repository,
+                nextActionHandlerRegistry = nextActionHandlerRegistry,
+                authHost = authHost,
+                savedStateHandle = savedStateHandle,
+                defaultReturnUrl = defaultReturnUrl,
+            ).apply { block() }
+
+            repository.ensureAllEventsConsumed()
+            nextActionHandlerRegistry.ensureAllEventsConsumed()
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+            authHost.ensureAllEventsConsumed()
+        }
     }
 
     private fun createResultProcessors(
@@ -764,6 +706,7 @@ class PaymentLauncherViewModelTest {
 
     private data class Scenario(
         val viewModel: PaymentLauncherViewModel,
+        val paymentResults: ReceiveTurbine<InternalPaymentResult?>,
         val repository: FakeStripeRepository,
         val nextActionHandlerRegistry: FakeNextActionHandlerRegistry,
         val authHost: FakeAuthActivityStarterHost,
