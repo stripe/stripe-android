@@ -1538,7 +1538,9 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        Espresso.pressBack()
+        // Cancelling finishes several activities in a row, so no activity may be resumed when Espresso
+        // checks. The caller waits for PaymentSheet to resume instead.
+        Espresso.pressBackUnconditionally()
     }
 
     private fun executeUsBankAccountLiteFlow() {
