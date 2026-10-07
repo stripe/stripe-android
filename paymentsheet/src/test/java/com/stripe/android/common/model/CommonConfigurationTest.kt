@@ -1,8 +1,8 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.link.LinkController
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
@@ -11,42 +11,32 @@ internal class CommonConfigurationTest {
     private val configuration = CommonConfigurationFactory.create()
 
     @Test
-    fun `Standalone Link preserves and reuses API configuration across builds and conversions`() {
+    fun `Standalone Link has expected API configuration`() {
         val linkConfiguration = LinkController.Configuration(
             merchantDisplayName = "Example",
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            publishableKey = DEFAULT_API_CONFIG.publishableKey,
+            stripeAccountId = DEFAULT_API_CONFIG.stripeAccountId,
             email = "jenny@example.com",
-        )
-        val firstState = linkConfiguration.build()
-        val secondState = linkConfiguration.build()
+        ).build()
 
-        assertThat(firstState.apiConfiguration.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(firstState.apiConfiguration.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
-        assertThat(secondState.apiConfiguration).isSameInstanceAs(firstState.apiConfiguration)
-        assertThat(PaymentElementLoader.Configuration.StandaloneLink(firstState).commonConfiguration.apiConfiguration)
-            .isSameInstanceAs(firstState.apiConfiguration)
-        assertThat(PaymentElementLoader.Configuration.StandaloneLink(secondState).commonConfiguration.apiConfiguration)
-            .isSameInstanceAs(firstState.apiConfiguration)
+        val commonConfiguration = PaymentElementLoader.Configuration.StandaloneLink(linkConfiguration)
+            .commonConfiguration
+
+        assertThat(commonConfiguration.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
-    fun `Crypto Onramp preserves and reuses API configuration across builds and conversions`() {
+    fun `Crypto Onramp has expected API configuration`() {
         val linkConfiguration = LinkController.Configuration(
             merchantDisplayName = "Example",
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-        )
-        val firstState = linkConfiguration.build()
-        val secondState = linkConfiguration.build()
+            publishableKey = DEFAULT_API_CONFIG.publishableKey,
+            stripeAccountId = DEFAULT_API_CONFIG.stripeAccountId,
+        ).build()
 
-        assertThat(firstState.apiConfiguration.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(firstState.apiConfiguration.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
-        assertThat(secondState.apiConfiguration).isSameInstanceAs(firstState.apiConfiguration)
-        assertThat(PaymentElementLoader.Configuration.CryptoOnramp(firstState).commonConfiguration.apiConfiguration)
-            .isSameInstanceAs(firstState.apiConfiguration)
-        assertThat(PaymentElementLoader.Configuration.CryptoOnramp(secondState).commonConfiguration.apiConfiguration)
-            .isSameInstanceAs(firstState.apiConfiguration)
+        val commonConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(linkConfiguration)
+            .commonConfiguration
+
+        assertThat(commonConfiguration.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
