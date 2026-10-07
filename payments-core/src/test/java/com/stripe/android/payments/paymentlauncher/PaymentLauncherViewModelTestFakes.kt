@@ -11,7 +11,6 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -24,8 +23,6 @@ import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 internal object PaymentLauncherViewModelTestFakes {
     internal class FakeStripeRepository : AbsFakeStripeRepository() {
@@ -215,46 +212,6 @@ internal object PaymentLauncherViewModelTestFakes {
 
         fun ensureAllEventsConsumed() {
             requests.ensureAllEventsConsumed()
-        }
-    }
-
-    internal class FakeDurationProvider : DurationProvider {
-        val calls = Turbine<Call>()
-
-        override fun start(key: DurationProvider.Key, reset: Boolean) {
-            calls.add(Call.Start(key, reset))
-        }
-
-        override fun elapsed(key: DurationProvider.Key): Duration {
-            calls.add(Call.Elapsed(key))
-            return 1.seconds
-        }
-
-        override fun end(key: DurationProvider.Key): Duration {
-            calls.add(Call.End(key))
-            return 1.seconds
-        }
-
-        override fun completedDuration(key: DurationProvider.Key): Duration {
-            calls.add(Call.CompletedDuration(key))
-            return 1.seconds
-        }
-
-        override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
-            calls.add(Call.Measure(key))
-            return block()
-        }
-
-        fun ensureAllEventsConsumed() {
-            calls.ensureAllEventsConsumed()
-        }
-
-        sealed interface Call {
-            data class Start(val key: DurationProvider.Key, val reset: Boolean) : Call
-            data class Elapsed(val key: DurationProvider.Key) : Call
-            data class End(val key: DurationProvider.Key) : Call
-            data class CompletedDuration(val key: DurationProvider.Key) : Call
-            data class Measure(val key: DurationProvider.Key) : Call
         }
     }
 }

@@ -12,11 +12,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.analytics.FakeDurationProvider
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -31,7 +31,6 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeAnalyticsRequestExecutor
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeAuthActivityStarterHost
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeDurationProvider
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeNextActionHandler
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeNextActionHandlerRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeStripeRepository
@@ -77,16 +76,19 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -112,16 +114,19 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlCustom.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = RETURN_URL,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(RETURN_URL)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -145,23 +150,23 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlCustom.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = RETURN_URL,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(RETURN_URL)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             nextActionHandlerRegistry.getNextActionHandlerCalls.expectNoEvents()
             nextActionHandlerRegistry.handler.nextActionCalls.expectNoEvents()
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -182,16 +187,19 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmSetupIntentCall(
+                    params = ConfirmSetupIntentParams(
+                        clientSecret = SETUP_CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmSetupIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(SETUP_CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -217,16 +225,19 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlCustom.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmSetupIntentCall(
+                    params = ConfirmSetupIntentParams(
+                        clientSecret = SETUP_CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = RETURN_URL,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmSetupIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(RETURN_URL)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(SETUP_CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -247,21 +258,21 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = null,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(null)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -282,23 +293,23 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             val finished = analyticsRequestExecutor.requests.awaitItem()
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("status", "failed")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -319,23 +330,23 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmSetupIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmSetupIntentCall(
+                    params = ConfirmSetupIntentParams(
+                        clientSecret = SETUP_CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmSetupIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(SETUP_CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             val finished = analyticsRequestExecutor.requests.awaitItem()
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("status", "failed")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -347,9 +358,6 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
             )
@@ -375,17 +383,11 @@ class PaymentLauncherViewModelTest {
             }
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -395,9 +397,6 @@ class PaymentLauncherViewModelTest {
             viewModel.handleNextActionForStripeIntent(intent, authHost)
 
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -412,9 +411,6 @@ class PaymentLauncherViewModelTest {
             viewModel.handleNextActionForStripeIntent(intent, authHost)
 
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
@@ -448,9 +444,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -479,9 +472,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -499,9 +489,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -525,9 +512,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -551,9 +535,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -570,9 +551,6 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
             )
@@ -603,9 +581,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -630,9 +605,6 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -701,12 +673,6 @@ class PaymentLauncherViewModelTest {
             assertThat(finished).containsEntry("event", PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished).doesNotContainKey("intent_id")
             assertThat(finished).containsEntry("status", "failed")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -732,12 +698,6 @@ class PaymentLauncherViewModelTest {
             assertThat(finished).containsEntry("event", PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished).doesNotContainKey("intent_id")
             assertThat(finished).containsEntry("status", "failed")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -761,12 +721,6 @@ class PaymentLauncherViewModelTest {
             val finished = analyticsRequestExecutor.requests.awaitItem().params
             assertThat(finished).containsEntry("event", PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished).containsEntry("intent_id", "pi_example")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -790,12 +744,6 @@ class PaymentLauncherViewModelTest {
             val finished = analyticsRequestExecutor.requests.awaitItem().params
             assertThat(finished).containsEntry("event", PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished).containsEntry("intent_id", "seti_example")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -822,12 +770,6 @@ class PaymentLauncherViewModelTest {
             assertThat(finished["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished.toString())
             assertThat(finished).doesNotContainKey("intent_id")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -846,24 +788,24 @@ class PaymentLauncherViewModelTest {
             assertThat(started.params).containsEntry("publishable_key", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             val finished = analyticsRequestExecutor.requests.awaitItem()
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("duration", 1L)
             assertThat(finished.params).containsEntry("publishable_key", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -880,23 +822,23 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             val finished = analyticsRequestExecutor.requests.awaitItem()
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("status", "succeeded")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -916,23 +858,23 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
             assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = defaultReturnUrl.value,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
-            val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-            assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-            assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-            assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-            assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-            assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-            assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
             val finished = analyticsRequestExecutor.requests.awaitItem()
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("status", "failed")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -958,9 +900,6 @@ class PaymentLauncherViewModelTest {
             assertThat(finished.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
             assertThat(finished.params).containsEntry("status", "canceled")
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -979,9 +918,6 @@ class PaymentLauncherViewModelTest {
             assertThat(started.params["event"])
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted.toString())
             assertThat(started.params).containsEntry("publishable_key", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-            )
             assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
             )
@@ -997,9 +933,6 @@ class PaymentLauncherViewModelTest {
                 .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished.toString())
             assertThat(finished.params).containsEntry("duration", 1L)
             assertThat(finished.params).containsEntry("publishable_key", ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-            )
         }
 
     @Test
@@ -1014,23 +947,23 @@ class PaymentLauncherViewModelTest {
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
                 assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+                assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                    FakeStripeRepository.ConfirmPaymentIntentCall(
+                        params = ConfirmPaymentIntentParams(
+                            clientSecret = CLIENT_SECRET,
+                            paymentMethodId = PM_ID,
+                            returnUrl = defaultReturnUrl.value,
+                            useStripeSdk = true,
+                            paymentMethodCode = "card",
+                        ),
+                        options = API_REQUEST_OPTIONS,
+                        expandFields = EXPAND_PAYMENT_METHOD,
+                    )
                 )
-                val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-                assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-                assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-                assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-                assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-                assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-                assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
                 val finished = analyticsRequestExecutor.requests.awaitItem()
                 assertThat(finished.params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
                 assertThat(finished.params).containsEntry("status", "succeeded")
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-                )
 
                 viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
                 assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
@@ -1038,7 +971,6 @@ class PaymentLauncherViewModelTest {
                 )
                 expectNoEvents()
                 analyticsRequestExecutor.requests.expectNoEvents()
-                durationProvider.calls.expectNoEvents()
             }
         }
 
@@ -1054,23 +986,23 @@ class PaymentLauncherViewModelTest {
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted.toString())
                 assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.ConfirmReturnUrlNull.toString())
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
+                assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                    FakeStripeRepository.ConfirmPaymentIntentCall(
+                        params = ConfirmPaymentIntentParams(
+                            clientSecret = CLIENT_SECRET,
+                            paymentMethodId = PM_ID,
+                            returnUrl = defaultReturnUrl.value,
+                            useStripeSdk = true,
+                            paymentMethodCode = "card",
+                        ),
+                        options = API_REQUEST_OPTIONS,
+                        expandFields = EXPAND_PAYMENT_METHOD,
+                    )
                 )
-                val confirmCall = repository.confirmPaymentIntentCalls.awaitItem()
-                assertThat(confirmCall.params.returnUrl).isEqualTo(defaultReturnUrl.value)
-                assertThat(confirmCall.params.paymentMethodId).isEqualTo(PM_ID)
-                assertThat(confirmCall.params.clientSecret).isEqualTo(CLIENT_SECRET)
-                assertThat(confirmCall.params.shouldUseStripeSdk()).isTrue()
-                assertThat(confirmCall.options).isEqualTo(API_REQUEST_OPTIONS)
-                assertThat(confirmCall.expandFields).isEqualTo(EXPAND_PAYMENT_METHOD)
                 val finished = analyticsRequestExecutor.requests.awaitItem()
                 assertThat(finished.params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherConfirmFinished.toString())
                 assertThat(finished.params).containsEntry("status", "succeeded")
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-                )
 
                 repository.retrievePaymentIntentResult = Result.success(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethod = null, nextActionData = null)
@@ -1081,7 +1013,6 @@ class PaymentLauncherViewModelTest {
                 )
                 expectNoEvents()
                 analyticsRequestExecutor.requests.expectNoEvents()
-                durationProvider.calls.expectNoEvents()
             }
         }
 
@@ -1097,9 +1028,6 @@ class PaymentLauncherViewModelTest {
 
                 assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionStarted.toString())
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.Start(DurationProvider.Key.PaymentLauncher, reset = true)
-                )
                 assertThat(repository.retrieveStripeIntentCalls.awaitItem()).isEqualTo(
                     FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, emptyList())
                 )
@@ -1114,9 +1042,6 @@ class PaymentLauncherViewModelTest {
                 assertThat(finished.params["event"])
                     .isEqualTo(PaymentAnalyticsEvent.PaymentLauncherNextActionFinished.toString())
                 assertThat(finished.params).containsEntry("status", "succeeded")
-                assertThat(durationProvider.calls.awaitItem()).isEqualTo(
-                    FakeDurationProvider.Call.End(DurationProvider.Key.PaymentLauncher)
-                )
 
                 viewModel.onPaymentFlowResult(paymentFlowResult(StripeIntentResult.Outcome.SUCCEEDED))
                 assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
@@ -1124,7 +1049,6 @@ class PaymentLauncherViewModelTest {
                 )
                 expectNoEvents()
                 analyticsRequestExecutor.requests.expectNoEvents()
-                durationProvider.calls.expectNoEvents()
             }
         }
 
@@ -1174,7 +1098,6 @@ class PaymentLauncherViewModelTest {
             repository = repository,
             nextActionHandlerRegistry = nextActionHandlerRegistry,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = durationProvider,
             authHost = authHost,
             savedStateHandle = savedStateHandle,
             defaultReturnUrl = defaultReturnUrl,
@@ -1183,7 +1106,6 @@ class PaymentLauncherViewModelTest {
         repository.ensureAllEventsConsumed()
         nextActionHandlerRegistry.ensureAllEventsConsumed()
         analyticsRequestExecutor.ensureAllEventsConsumed()
-        durationProvider.ensureAllEventsConsumed()
         pollingAnalyticsEventReporter.ensureAllEventsConsumed()
         authHost.ensureAllEventsConsumed()
     }
@@ -1225,7 +1147,6 @@ class PaymentLauncherViewModelTest {
         val repository: FakeStripeRepository,
         val nextActionHandlerRegistry: FakeNextActionHandlerRegistry,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
-        val durationProvider: FakeDurationProvider,
         val authHost: FakeAuthActivityStarterHost,
         val savedStateHandle: SavedStateHandle,
         val defaultReturnUrl: DefaultReturnUrl,
