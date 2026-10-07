@@ -517,16 +517,13 @@ constructor(
         @JvmOverloads
         fun create(
             context: Context,
-            publishableKey: String,
+            apiConfiguration: ApiConfiguration.State,
             stripeRepository: StripeRepository,
             enableLogging: Boolean = false
         ): PaymentController {
             return StripePaymentController(
                 context.applicationContext,
-                ApiConfiguration.State(
-                    publishableKey = publishableKey,
-                    stripeAccountId = null,
-                ),
+                apiConfiguration,
                 stripeRepository,
                 enableLogging
             )
