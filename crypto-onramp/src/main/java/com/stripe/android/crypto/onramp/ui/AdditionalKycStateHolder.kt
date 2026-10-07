@@ -199,8 +199,16 @@ internal class AdditionalKycStateHolder(
         refreshState()
     }
 
+    fun canSelectFile(slotIndex: Int): Boolean {
+        val document = requirement?.document ?: return false
+        val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return false
+        return canEdit() && slot.subtypeId != null && documentSlots.count {
+            it.index != slotIndex && it.subtypeId == slot.subtypeId && it.file != null
+        } < document.maxFilesPerDocumentType
+    }
+
     fun onFileSelectionStarted(slotIndex: Int) {
-        if (!canEdit() || documentSlots.none { slot -> slot.index == slotIndex }) {
+        if (!canSelectFile(slotIndex)) {
             return
         }
 
@@ -261,7 +269,8 @@ internal class AdditionalKycStateHolder(
     }
 
     fun onFileSelected(slotIndex: Int, file: File, displayName: String, fileId: String): File? {
-        if (!canEdit()) {
+        if (!canSelectFile(slotIndex)) {
+            onFileSelectionCancelled()
             return file
         }
         var replacedFile: File? = null
@@ -452,6 +461,7 @@ internal class AdditionalKycStateHolder(
                         ?.toInt(),
                     minDocumentTypes = it.minDocumentTypes.coerceAtLeast(MINIMUM_DOCUMENT_COUNT),
                     maxDocumentTypes = it.maxDocumentTypes,
+                    maxFilesPerDocumentType = it.maxFilesPerDocumentType,
                     editingSlotIndex = editingDocumentSlot,
                     slots = documentSlots.map { slot ->
                         AdditionalKycDocumentSlotState(
@@ -524,9 +534,14 @@ internal class AdditionalKycStateHolder(
             val document = requirement.document
             val completedSlots = documentSlots.filter { slot -> slot.file != null }
             val completedTypes = completedSlots.mapNotNull { it.subtypeId }.toSet()
+            val exceedsFileLimit = completedSlots.groupingBy { it.subtypeId }.eachCount().values.any {
+                it > document.maxFilesPerDocumentType
+            }
+            val missingProofOfAddress = requirement.description == PROOF_OF_ADDRESS && completedSlots.isEmpty()
             if (completedTypes.size < document.minDocumentTypes ||
                 completedTypes.size > document.maxDocumentTypes ||
-                (requirement.description == PROOF_OF_ADDRESS && completedSlots.isEmpty())
+                exceedsFileLimit ||
+                missingProofOfAddress
             ) {
                 return AdditionalKycValidationError.MissingDocuments
             }
@@ -552,7 +567,11 @@ internal class AdditionalKycStateHolder(
         val document = requirement?.document ?: return false
         val selectedTypes = documentSlots.filter { it.index != slotIndex && it.file != null }
             .mapNotNull { it.subtypeId }.toSet()
-        return subtypeId in selectedTypes || selectedTypes.size < document.maxDocumentTypes
+        val fileCount = documentSlots.count {
+            it.index != slotIndex && it.subtypeId == subtypeId && it.file != null
+        }
+        return fileCount < document.maxFilesPerDocumentType &&
+            (subtypeId in selectedTypes || selectedTypes.size < document.maxDocumentTypes)
     }
 
     private fun addNextUploadSlotIfNeeded(completedSlotIndex: Int) {

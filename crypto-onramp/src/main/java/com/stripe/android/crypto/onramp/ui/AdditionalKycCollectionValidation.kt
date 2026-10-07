@@ -19,6 +19,7 @@ internal fun AdditionalKycRequirement.isSupportedForCollection(): Boolean {
         document.maxDocumentTypes >= maxOf(1, document.minDocumentTypes) &&
         document.minDocumentTypes <= subtypes.size &&
         document.maxFileSizeBytes > 0 &&
+        document.maxFilesPerDocumentType > 0 &&
         subtypes.isNotEmpty() &&
         subtypes.all { it.id.isNotBlank() } &&
         subtypes.map { it.id }.distinct().size == subtypes.size &&
@@ -31,14 +32,15 @@ internal fun limitAdditionalKycAnswer(answer: String): String {
     }
     val iterator = BreakIterator.getCharacterInstance().apply { setText(answer) }
     var end = iterator.first()
-    repeat(MAXIMUM_ANSWER_LENGTH) {
+    var scalarCount = 0
+    while (true) {
         val next = iterator.next()
-        if (next == BreakIterator.DONE) {
-            return answer
-        }
+        if (next == BreakIterator.DONE) return answer
+        val nextCount = answer.codePointCount(end, next)
+        if (scalarCount + nextCount > MAXIMUM_ANSWER_LENGTH) return answer.substring(0, end)
+        scalarCount += nextCount
         end = next
     }
-    return answer.substring(0, end)
 }
 
 private const val MAXIMUM_ANSWER_LENGTH = 5_000

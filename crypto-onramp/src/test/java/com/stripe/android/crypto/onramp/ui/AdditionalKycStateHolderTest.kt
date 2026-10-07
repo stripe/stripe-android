@@ -544,10 +544,38 @@ internal class AdditionalKycStateHolderTest {
         assertThat(requirement.documents.single().uploadedFileIds).containsExactly("file_salary")
     }
 
+    @Test
+    fun `per source limit blocks additional uploads and removal restores capacity`() = runDocumentScenario(
+        maxFilesPerDocumentType = 1,
+    ) {
+        onFileSelected(0, File("first.pdf"), "first.pdf", "file_first")
+        assertThat(canSelectFile(1)).isFalse()
+        onFileSelectionStarted(1)
+        assertThat(state.selectingFileSlot).isNull()
+        val rejected = File("second.pdf")
+        assertThat(onFileSelected(1, rejected, "second.pdf", "file_second")).isEqualTo(rejected)
+        assertThat(createSubmission()?.requirements?.values?.single()?.documents?.single()?.uploadedFileIds)
+            .containsExactly("file_first")
+        onFileRemoved(0)
+        assertThat(canSelectFile(1)).isTrue()
+    }
+
+    @Test
+    fun `file allowance is independent for each source`() = runDocumentScenario(
+        maxFilesPerDocumentType = 1,
+    ) {
+        onFileSelected(0, File("bank.pdf"), "bank.pdf", "file_bank")
+        onDocumentSubtypeSelected(1, "payslip")
+        assertThat(canSelectFile(1)).isTrue()
+        onFileSelected(1, File("salary.pdf"), "salary.pdf", "file_salary")
+        assertThat(createSubmission()?.requirements?.values?.single()?.documents).hasSize(2)
+    }
+
     private fun runDocumentScenario(
         minDocumentTypes: Int = 1,
         maxDocumentTypes: Int = 2,
         maxFileSizeBytes: Long = 5_000_000L,
+        maxFilesPerDocumentType: Int = 10,
         block: AdditionalKycStateHolder.() -> Unit,
     ) {
         val requirement = documentRequirement(minDocumentTypes)
@@ -558,6 +586,7 @@ internal class AdditionalKycStateHolderTest {
                         description = "source_of_funds",
                         document = requireNotNull(requirement.document).copy(
                             maxDocumentTypes = maxDocumentTypes,
+                            maxFilesPerDocumentType = maxFilesPerDocumentType,
                             maxFileSizeBytes = maxFileSizeBytes,
                         ),
                     )
@@ -654,6 +683,7 @@ internal class AdditionalKycStateHolderTest {
                     acceptedFormats = listOf("pdf", "jpeg", "png"),
                     minDocumentTypes = minDocumentTypes,
                     maxDocumentTypes = 2,
+                    maxFilesPerDocumentType = 10,
                     maxFileSizeBytes = 5_000_000L,
                     fileRequirements = "PDF, JPEG, or PNG, up to 5 MB per file.",
                     instructions = listOf("Show your full name and address"),

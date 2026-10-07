@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
         <package android:name="com.samsung.android.spay" />
     </queries>
 
     <application>
+        <provider
+            android:name="com.stripe.android.crypto.onramp.ui.AdditionalKycCameraFileProvider"
+            android:authorities="${applicationId}.stripe.onramp.kyc.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/stripe_onramp_camera_paths" />
+        </provider>
+
         <activity
             android:name="com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivity"
             android:theme="@style/StripeOnrampTheme"

@@ -1,10 +1,14 @@
 package com.stripe.android.crypto.onramp.ui
 
+import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
@@ -14,18 +18,25 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandler
 import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandlerRegistry
+import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -39,6 +50,7 @@ import java.util.Locale
 
 internal class AdditionalKycActivity : ComponentActivity() {
     private var fileSelectionJob: Job? = null
+    private var sourceDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +61,16 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return KycViewModel(AdditionalKycStateHolder(args.requirements)) as T
+            }
+        }
+        val viewModel = ViewModelProvider(this, factory)[KycViewModel::class.java]
         setContent {
             AdditionalKycActivityContent(
+                stateHolder = viewModel.stateHolder,
                 args = args,
                 submissionHandler = AdditionalKycSubmissionHandlerRegistry[args.submissionHandlerKey]
                     ?: missingSubmissionHandler(args.submissionHandlerKey),
@@ -60,12 +80,10 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
     @Composable
     private fun AdditionalKycActivityContent(
+        stateHolder: AdditionalKycStateHolder,
         args: AdditionalKycArgs,
         submissionHandler: AdditionalKycSubmissionHandler,
     ) {
-        val stateHolder = remember(args.requirements) {
-            AdditionalKycStateHolder(args.requirements)
-        }
         val scope = rememberCoroutineScope()
         val chooseFile = rememberFilePicker(stateHolder, args.submissionHandlerKey)
 
@@ -113,7 +131,8 @@ internal class AdditionalKycActivity : ComponentActivity() {
         handlerKey: String,
     ): (Int) -> Unit {
         val scope = rememberCoroutineScope()
-        var pendingFileSlot by remember { mutableStateOf<Int?>(null) }
+        val takePhoto = rememberCameraPicker(stateHolder, handlerKey)
+        var pendingFileSlot by rememberSaveable { mutableStateOf<Int?>(null) }
         val filePicker = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
         ) { uri ->
@@ -136,17 +155,154 @@ internal class AdditionalKycActivity : ComponentActivity() {
         }
 
         return chooseFile@{ slotIndex ->
-            if (stateHolder.state.submissionState !in setOf(
-                    AdditionalKycSubmissionState.Collecting,
-                    AdditionalKycSubmissionState.Failed,
-                )
-            ) {
+            if (!stateHolder.canSelectFile(slotIndex)) {
                 return@chooseFile
             }
             fileSelectionJob?.cancel()
             stateHolder.onFileSelectionStarted(slotIndex)
-            pendingFileSlot = slotIndex
-            filePicker.launch(acceptedMimeTypes(stateHolder.acceptedFormats))
+            val chooseExisting = {
+                pendingFileSlot = slotIndex
+                filePicker.launch(acceptedMimeTypes(stateHolder.acceptedFormats))
+            }
+            val cameraAvailable = additionalKycCameraFormat(stateHolder.acceptedFormats) != null &&
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE).resolveActivity(packageManager) != null
+            if (cameraAvailable) {
+                var selected = false
+                sourceDialog = AlertDialog.Builder(this)
+                    .setTitle(R.string.stripe_onramp_kyc_document_source)
+                    .setItems(
+                        arrayOf(
+                            getString(R.string.stripe_onramp_kyc_take_photo),
+                            getString(R.string.stripe_onramp_kyc_choose_file),
+                        )
+                    ) { _, index ->
+                        selected = true
+                        if (index == 0) takePhoto(slotIndex) else chooseExisting()
+                    }
+                    .setOnDismissListener {
+                        if (!selected) stateHolder.onFileSelectionCancelled()
+                        sourceDialog = null
+                    }
+                    .show()
+            } else {
+                chooseExisting()
+            }
+        }
+    }
+
+    @Composable
+    @Suppress("LongMethod") // Keep the two activity-result launchers with their shared pending capture state.
+    private fun rememberCameraPicker(
+        stateHolder: AdditionalKycStateHolder,
+        handlerKey: String,
+    ): (Int) -> Unit {
+        val scope = rememberCoroutineScope()
+        var pendingPath by rememberSaveable { mutableStateOf<String?>(null) }
+        var pendingSlot by rememberSaveable { mutableStateOf<Int?>(null) }
+        DisposableEffect(Unit) {
+            onDispose {
+                if (!isChangingConfigurations) pendingPath?.let { File(it).delete() }
+            }
+        }
+        val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            val source = pendingPath?.let(::File)
+            val slot = pendingSlot
+            pendingPath = null
+            pendingSlot = null
+            if (!success || source == null || slot == null || stateHolder.state.selectingFileSlot != slot) {
+                source?.delete()
+                stateHolder.onFileSelectionCancelled()
+            } else {
+                fileSelectionJob?.cancel()
+                fileSelectionJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                    handleCameraImage(source, slot, stateHolder, handlerKey)
+                }
+            }
+        }
+        fun clearPendingCapture() {
+            pendingPath?.let { File(it).delete() }
+            pendingPath = null
+            pendingSlot = null
+        }
+        fun captureFailed() {
+            clearPendingCapture()
+            stateHolder.onFileSelectionFailed()
+        }
+        val launchCamera = {
+            try {
+                val directory = File(cacheDir, "stripe-onramp-camera").apply { mkdirs() }
+                val file = File.createTempFile("capture-", ".jpg", directory)
+                pendingPath = file.path
+                camera.launch(
+                    FileProvider.getUriForFile(this, "$packageName.stripe.onramp.kyc.fileprovider", file)
+                )
+            } catch (_: Exception) {
+                captureFailed()
+            }
+        }
+        val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                launchCamera()
+            } else {
+                clearPendingCapture()
+                stateHolder.onFileSelectionCancelled()
+                showCameraPermissionDenied()
+            }
+        }
+        return { slot ->
+            pendingSlot = slot
+            try {
+                if (needsCameraPermission()) permission.launch(Manifest.permission.CAMERA) else launchCamera()
+            } catch (_: Exception) {
+                captureFailed()
+            }
+        }
+    }
+
+    private fun showCameraPermissionDenied() {
+        sourceDialog = AlertDialog.Builder(this)
+            .setMessage(R.string.stripe_onramp_kyc_camera_permission)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun needsCameraPermission(): Boolean {
+        // Delegating to a camera app requires no permission unless the host declares CAMERA itself.
+        val declared = packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+            .requestedPermissions.orEmpty().contains(Manifest.permission.CAMERA)
+        return declared && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
+            PackageManager.PERMISSION_GRANTED
+    }
+
+    private suspend fun handleCameraImage(
+        source: File,
+        slot: Int,
+        stateHolder: AdditionalKycStateHolder,
+        handlerKey: String,
+    ) {
+        var prepared: File? = null
+        try {
+            val format = additionalKycCameraFormat(stateHolder.acceptedFormats)
+                ?: throw IOException("Camera format is no longer accepted")
+            if (stateHolder.state.selectingFileSlot != slot) return
+            stateHolder.onFileUploadStarted(slot, "photo.$format")
+            val file = withContext(Dispatchers.IO) {
+                prepareAdditionalKycCameraImage(
+                    source, format, stateHolder.maximumFileSizeBytes ?: Long.MAX_VALUE,
+                ).also { prepared = it }
+            }
+            uploadSelectedFile(SelectedFile(file, "photo.$format", format), slot, stateHolder, handlerKey)
+        } catch (error: CancellationException) {
+            stateHolder.onFileSelectionCancelled()
+            throw error
+        } catch (_: AdditionalKycFileTooLargeException) {
+            stateHolder.onFileTooLarge()
+        } catch (_: Exception) {
+            stateHolder.onFileSelectionFailed()
+        } finally {
+            prepared?.delete()
+            source.delete()
         }
     }
 
@@ -276,6 +432,12 @@ internal class AdditionalKycActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        sourceDialog?.dismiss()
+        sourceDialog = null
+        super.onDestroy()
+    }
+
     override fun finish() {
         super.finish()
         fadeOut()
@@ -353,6 +515,8 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
         return queriedName ?: uri.lastPathSegment ?: DEFAULT_FILE_NAME
     }
+
+    private class KycViewModel(val stateHolder: AdditionalKycStateHolder) : ViewModel()
 
     private data class SelectedFile(
         val file: File,

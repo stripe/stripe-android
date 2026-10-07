@@ -627,7 +627,7 @@ private fun DocumentEditorContent(
             completedSlots.forEach { slot ->
                 UploadedFileCard(slot = slot, onRemoveFile = onRemoveFile)
             }
-            if (editingSlot.fileName == null) {
+            if (editingSlot.fileName == null && completedSlots.size < document.maxFilesPerDocumentType) {
                 UploadDocumentControl(
                     slot = editingSlot,
                     fileRequirements = document.fileRequirements,
@@ -1373,6 +1373,7 @@ internal data class AdditionalKycDocumentState(
     val maxFileSizeMegabytes: Int?,
     val minDocumentTypes: Int,
     val maxDocumentTypes: Int,
+    val maxFilesPerDocumentType: Int,
     val editingSlotIndex: Int?,
     val slots: List<AdditionalKycDocumentSlotState>,
 )
