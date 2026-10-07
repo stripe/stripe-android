@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
