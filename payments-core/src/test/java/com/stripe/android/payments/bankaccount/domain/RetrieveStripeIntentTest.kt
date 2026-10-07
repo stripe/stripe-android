@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
@@ -24,7 +25,6 @@ class RetrieveStripeIntentTest {
     fun `retrieve - given payment intent client secret, payment intent is retrieved`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
             givenRetrieveStripeIntentReturns {
                 Result.success(mock<PaymentIntent>())
@@ -32,15 +32,17 @@ class RetrieveStripeIntentTest {
 
             // When
             val intent = retrieveStripeIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 clientSecret = clientSecret
             ).getOrNull()
 
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "pi_1234_secret_5678",
-                options = ApiRequest.Options(publishableKey)
+                options = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
 
             assertThat(intent).isInstanceOf(PaymentIntent::class.java)
@@ -51,7 +53,6 @@ class RetrieveStripeIntentTest {
     fun `retrieve - given invalid payment intent client secret, exception is thrown`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "pi_invalid"
             val expectedException = APIException()
             givenRetrieveStripeIntentReturns {
@@ -60,15 +61,17 @@ class RetrieveStripeIntentTest {
 
             // When
             val intent = retrieveStripeIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 clientSecret = clientSecret
             )
 
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "pi_invalid",
-                options = ApiRequest.Options(publishableKey)
+                options = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
 
             assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)
@@ -79,7 +82,6 @@ class RetrieveStripeIntentTest {
     fun `retrieve - given setup intent client secret, setup intent is retrieved`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
             givenRetrieveStripeIntentReturns {
                 Result.success(mock<SetupIntent>())
@@ -87,15 +89,17 @@ class RetrieveStripeIntentTest {
 
             // When
             val intent = retrieveStripeIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 clientSecret = clientSecret
             ).getOrNull()
 
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "seti_1234_secret_5678",
-                options = ApiRequest.Options(publishableKey)
+                options = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
             assertThat(intent).isInstanceOf(SetupIntent::class.java)
         }
@@ -105,7 +109,6 @@ class RetrieveStripeIntentTest {
     fun `retrieve - given invalid setup intent client secret, exception is thrown`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "seti_invalid"
             val expectedException = APIException()
             givenRetrieveStripeIntentReturns {
@@ -114,15 +117,17 @@ class RetrieveStripeIntentTest {
 
             // When
             val intent = retrieveStripeIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = null,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 clientSecret = clientSecret
             )
 
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "seti_invalid",
-                options = ApiRequest.Options(publishableKey)
+                options = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
 
             assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)

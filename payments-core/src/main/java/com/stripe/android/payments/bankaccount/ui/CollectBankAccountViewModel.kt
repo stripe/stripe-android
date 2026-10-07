@@ -227,8 +227,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 Result.success(null)
             } else {
                 retrieveStripeIntent(
-                    args.apiConfiguration.publishableKey,
-                    args.apiConfiguration.stripeAccountId,
+                    apiConfiguration,
                     clientSecret
                 )
             }

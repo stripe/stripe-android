@@ -51,8 +51,6 @@ class CollectBankAccountViewModelTest {
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession = mock()
     private val retrieveStripeIntent: RetrieveStripeIntent = mock()
 
-    private val publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-    private val stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
     private val apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG
     private val clientSecret = "client_secret"
     private val name = "name"
@@ -284,8 +282,7 @@ class CollectBankAccountViewModelTest {
                 any()
             )
             verify(retrieveStripeIntent).invoke(
-                publishableKey,
-                stripeAccountId,
+                apiConfiguration,
                 clientSecret,
             )
         }
@@ -313,8 +310,7 @@ class CollectBankAccountViewModelTest {
                 any()
             )
             verify(retrieveStripeIntent).invoke(
-                publishableKey,
-                stripeAccountId,
+                apiConfiguration,
                 clientSecret,
             )
         }
@@ -598,8 +594,7 @@ class CollectBankAccountViewModelTest {
         retrieveStripeIntent.stub {
             on {
                 this(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret
                 )
             }.doReturn(result)
