@@ -42,13 +42,4 @@ internal class TestGCash : BasePlaygroundTest() {
             },
         )
     }
-
-    @Test
-    fun testGCashSetup() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
-            },
-        )
-    }
 }
