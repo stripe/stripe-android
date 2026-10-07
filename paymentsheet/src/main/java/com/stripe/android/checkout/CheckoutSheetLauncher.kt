@@ -194,14 +194,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         customerState: CustomerState?,
         promotion: PaymentMethodMessagePromotion?,
     ) {
-        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
-        if (configuration == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
-            )
-            return
-        }
-        if (sheetStateHolder.sheetIsOpen) return
+        val launchConfiguration = getLaunchConfiguration(configuration) ?: return
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporarySelection(code)
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
@@ -209,7 +202,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             ?: selectionHolder.getPreviousNewSelection(code)
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
+            configuration = launchConfiguration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
@@ -232,18 +225,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
-        if (configuration == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
-            )
-            return
-        }
-        if (sheetStateHolder.sheetIsOpen) return
+        val launchConfiguration = getLaunchConfiguration(configuration) ?: return
         sheetStateHolder.sheetIsOpen = true
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
+            configuration = launchConfiguration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
@@ -264,18 +250,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
-        if (configuration == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
-            )
-            return
-        }
-        if (sheetStateHolder.sheetIsOpen) return
+        val launchConfiguration = getLaunchConfiguration(configuration) ?: return
         sheetStateHolder.sheetIsOpen = true
         val initialArgs = createPaymentOptionsArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
+            configuration = launchConfiguration,
             selection = selection,
             customerState = customerState,
             presentationState = if (operationCoordinator.isUpdating.value) {
@@ -289,6 +268,20 @@ internal class CheckoutSheetLauncher @Inject constructor(
         activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()
+    }
+
+    private fun getLaunchConfiguration(
+        configuration: EmbeddedPaymentElement.Configuration?,
+    ): EmbeddedPaymentElement.Configuration? {
+        if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return null
+        if (configuration == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return null
+        }
+        if (sheetStateHolder.sheetIsOpen) return null
+        return configuration
     }
 
     private fun resumePendingReadyLaunch() {

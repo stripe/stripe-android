@@ -2240,8 +2240,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/Co
 public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$-1155375669$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-1739181525$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$208423591$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt {
@@ -2280,8 +2280,8 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Payme
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
 	public fun <init> ()V
-	public final fun getLambda$-2123154384$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1159340481$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1485633716$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt {

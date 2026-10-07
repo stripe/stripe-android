@@ -97,7 +97,6 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     fun displaysSavedPaymentMethodConfirm() {
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = true),
-            isLiveMode = false,
             sheetActivityStateHolder = createSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
@@ -174,7 +173,6 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = createPaymentOptionsMetadata(PaymentSheet.PaymentMethodLayout.Vertical),
             ),
-            isLiveMode = false,
             sheetActivityState = createSheetActivityStateHolder().state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},

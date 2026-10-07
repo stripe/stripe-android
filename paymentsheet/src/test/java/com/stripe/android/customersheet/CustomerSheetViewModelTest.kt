@@ -19,7 +19,6 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -442,19 +441,6 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                 )
             }
             assertThat(error.message).contains("Unsupported payment selection")
-        }
-    }
-
-    @Test
-    fun `When the API configuration is test, isLiveMode should be false`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            apiConfiguration = DEFAULT_API_CONFIG,
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem().isLiveMode)
-                .isFalse()
         }
     }
 

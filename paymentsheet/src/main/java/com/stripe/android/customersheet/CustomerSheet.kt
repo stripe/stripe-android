@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeCdnImageOptimizer
@@ -598,7 +598,7 @@ class CustomerSheet internal constructor(
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 integrationType = integration.type,
                 paymentOptionSelectionFactory = DefaultPaymentOptionSelectionFactory(
-                    paymentOptionFactory = PaymentOptionFactory(
+                    paymentOptionFactory = DefaultPaymentOptionFactory(
                         iconLoader = PaymentSelection.IconLoader(
                             resources = application.resources,
                             imageLoader = DefaultStripeImageLoader(application),

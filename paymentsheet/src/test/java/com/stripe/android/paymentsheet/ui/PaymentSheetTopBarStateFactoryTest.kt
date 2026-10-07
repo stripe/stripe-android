@@ -7,24 +7,6 @@ import com.stripe.android.R as StripeR
 class PaymentSheetTopBarStateFactoryTest {
 
     @Test
-    fun `showTestModeLabel=true when isLiveMode=false`() {
-        val state = buildTopBarState(
-            isLiveMode = false,
-        )
-
-        assertThat(state.showTestModeLabel).isTrue()
-    }
-
-    @Test
-    fun `showTestModeLabel=false when isLiveMode=true`() {
-        val state = buildTopBarState(
-            isLiveMode = true,
-        )
-
-        assertThat(state.showTestModeLabel).isFalse()
-    }
-
-    @Test
     fun `showEditMenu=true when canEdit=true`() {
         val state = buildTopBarState(
             editable = PaymentSheetTopBarState.Editable.Maybe(
@@ -97,11 +79,9 @@ class PaymentSheetTopBarStateFactoryTest {
     }
 
     private fun buildTopBarState(
-        isLiveMode: Boolean = false,
         editable: PaymentSheetTopBarState.Editable = PaymentSheetTopBarState.Editable.Never,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarStateFactory.create(
-            isLiveMode = isLiveMode,
             editable,
         )
     }

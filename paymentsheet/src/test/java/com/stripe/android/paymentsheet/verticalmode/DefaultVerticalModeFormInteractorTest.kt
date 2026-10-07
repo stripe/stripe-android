@@ -420,7 +420,6 @@ internal class DefaultVerticalModeFormInteractorTest {
                 reportFieldInteractionTurbine.add(it)
             },
             headerInformation = null,
-            isLiveMode = true,
             processing = processing,
             validationRequested = validationRequested,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),

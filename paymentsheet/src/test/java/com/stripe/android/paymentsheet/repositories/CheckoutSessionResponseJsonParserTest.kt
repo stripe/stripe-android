@@ -240,6 +240,26 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses tax rate with empty display name`() {
+        val json = base()
+        item(json).put(
+            "tax_amounts",
+            JSONArray().put(
+                taxAmount().apply {
+                    getJSONObject("tax_rate").put("display_name", "")
+                }
+            )
+        )
+
+        val result = requireNotNull(parse(json))
+        val taxRate = result.checkoutItems.single().oneTimePrice.items.single().taxAmounts.single().taxRate
+
+        assertThat(taxRate.displayName).isEmpty()
+        assertThat(taxRate.percentage).isEqualTo(8.0)
+        assertThat(taxRate.rateType).isEqualTo(CheckoutSessionResponse.TaxRateType.PERCENTAGE)
+    }
+
+    @Test
     fun `rejects malformed tax rate`() {
         val json = base()
         item(json).put(

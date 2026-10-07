@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.ElementsSessionContext
@@ -44,6 +45,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private val args: CollectBankAccountContract.Args,
     private val _viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
     // injected instances
+    private val apiConfiguration: ApiConfiguration.State,
     private val createFinancialConnectionsSession: CreateFinancialConnectionsSession,
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession,
     private val retrieveStripeIntent: RetrieveStripeIntent,
@@ -126,8 +128,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 _viewEffect.emit(
                     OpenConnectionsFlow(
                         financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         elementsSessionContext = elementsSessionContext,
                         preCollectedConsent = args.preCollectedConsent.takeIf {
                             args.hostedSurface == null && args.configuration !is InstantDebits
