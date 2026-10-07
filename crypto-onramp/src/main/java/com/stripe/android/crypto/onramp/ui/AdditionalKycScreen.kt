@@ -1396,7 +1396,6 @@ internal enum class AdditionalKycValidationError {
     MissingRequiredAnswers,
     MissingDocumentType,
     MissingDocuments,
-    DuplicateDocumentType,
     UnsupportedFileType,
     FileUnavailable,
     FileTooLarge,
@@ -1423,9 +1422,6 @@ internal fun additionalKycFileNameTag(slotIndex: Int): String =
 internal fun additionalKycDocumentGroupTag(slotIndex: Int): String =
     "AdditionalKycDocumentGroup-$slotIndex"
 
-internal fun additionalKycPendingRequirementTag(index: Int): String =
-    "AdditionalKycPendingRequirement-$index"
-
 private const val DEFAULT_MAX_FILE_SIZE_MEGABYTES = 5
 internal const val ADDITIONAL_KYC_CANCEL_BUTTON_TAG = "AdditionalKycCancelButton"
 internal const val ADDITIONAL_KYC_BACK_BUTTON_TAG = "AdditionalKycBackButton"
@@ -1433,7 +1429,6 @@ internal const val ADDITIONAL_KYC_SELECTOR_CLOSE_TAG = "AdditionalKycSelectorClo
 internal const val ADDITIONAL_KYC_ADD_DOCUMENTS_TAG = "AdditionalKycAddDocuments"
 internal const val ADDITIONAL_KYC_SUBMIT_BUTTON_TAG = "AdditionalKycSubmitButton"
 internal const val ADDITIONAL_KYC_VALIDATION_ERROR_TAG = "AdditionalKycValidationError"
-internal const val ADDITIONAL_KYC_SUBMISSION_ERROR_TAG = "AdditionalKycSubmissionError"
 internal const val ADDITIONAL_KYC_SUBMITTED_TITLE_TAG = "AdditionalKycSubmittedTitle"
 
 private val MessageErrorBackground = Color(0xFFE61947)
