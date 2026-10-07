@@ -20,18 +20,18 @@ import kotlinx.serialization.json.encodeToJsonElement
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-internal data class RetrieveAdditionalKycRequirementsResponse(
-    val requirements: AdditionalKycRequirementsResponse,
+internal data class RetrieveKycRequirementsResponse(
+    val requirements: KycRequirementsResponse,
 )
 
 @JvmInline
 @Serializable
-internal value class AdditionalKycRequirementsResponse(
-    val entries: Map<String, AdditionalKycRequirementResponse>,
+internal value class KycRequirementsResponse(
+    val entries: Map<String, KycRequirementResponse>,
 ) {
-    fun toAdditionalKycRequirements(): AdditionalKycRequirements {
-        val requirements = entries.map { (name, requirement) -> requirement.toAdditionalKycRequirement(name) }
-        return AdditionalKycRequirements(
+    fun toKycRequirements(): KycRequirements {
+        val requirements = entries.map { (name, requirement) -> requirement.toKycRequirement(name) }
+        return KycRequirements(
             userActionRequired = requirements.filter { it.awaitingActionFrom == USER },
             pendingPartnerAction = requirements.filter { it.awaitingActionFrom == PARTNER },
             pendingStripeAction = requirements.filter { it.awaitingActionFrom == STRIPE },
@@ -50,29 +50,29 @@ internal value class AdditionalKycRequirementsResponse(
 }
 
 @Serializable
-internal data class AdditionalKycRequirementResponse(
+internal data class KycRequirementResponse(
     @SerialName("requested_by")
     val requestedBy: String,
     @SerialName("awaiting_action_from")
     val awaitingActionFrom: String,
-    val errors: List<AdditionalKycRequirementErrorResponse>,
+    val errors: List<KycRequirementErrorResponse>,
     @Serializable(with = EmptyArrayAsNullDocumentRequirementSerializer::class)
-    val document: AdditionalKycDocumentRequirementResponse? = null,
+    val document: KycDocumentRequirementResponse? = null,
     @SerialName("additional_requirements")
     @Serializable(with = EmptyArrayAsNullCollectionRequirementsSerializer::class)
-    val additionalRequirements: AdditionalKycCollectionRequirementsResponse? = null,
+    val collectionRequirements: KycCollectionRequirementsResponse? = null,
 )
 
 @Serializable
-internal data class AdditionalKycRequirementErrorResponse(
+internal data class KycRequirementErrorResponse(
     val code: String,
     val description: String,
 )
 
 @Serializable
-internal data class AdditionalKycDocumentRequirementResponse(
+internal data class KycDocumentRequirementResponse(
     @SerialName("accepted_subtypes")
-    val acceptedSubtypes: List<AdditionalKycDocumentSubtypeResponse>,
+    val acceptedSubtypes: List<KycDocumentSubtypeResponse>,
     @SerialName("accepted_formats")
     val acceptedFormats: List<String>,
     @SerialName("max_file_size_bytes")
@@ -89,25 +89,25 @@ internal data class AdditionalKycDocumentRequirementResponse(
 )
 
 @Serializable
-internal data class AdditionalKycDocumentSubtypeResponse(
+internal data class KycDocumentSubtypeResponse(
     val id: String,
     val label: String,
     val description: String? = null,
 )
 
 @Serializable
-internal data class AdditionalKycCollectionRequirementsResponse(
+internal data class KycCollectionRequirementsResponse(
     @Serializable(with = EmptyArrayAsNullQuestionnaireSerializer::class)
-    val questionnaire: AdditionalKycQuestionnaireResponse? = null,
+    val questionnaire: KycQuestionnaireResponse? = null,
 )
 
 @Serializable
-internal data class AdditionalKycQuestionnaireResponse(
-    val questions: List<AdditionalKycQuestionResponse>,
+internal data class KycQuestionnaireResponse(
+    val questions: List<KycQuestionResponse>,
 )
 
 @Serializable
-internal data class AdditionalKycQuestionResponse(
+internal data class KycQuestionResponse(
     val id: String,
     val prompt: String,
     @SerialName("answer_type")
@@ -115,27 +115,27 @@ internal data class AdditionalKycQuestionResponse(
     val required: Boolean,
 )
 
-private fun AdditionalKycRequirementResponse.toAdditionalKycRequirement(name: String): AdditionalKycRequirement {
-    return AdditionalKycRequirement(
+private fun KycRequirementResponse.toKycRequirement(name: String): KycRequirement {
+    return KycRequirement(
         description = name,
         requestedBy = requestedBy,
         awaitingActionFrom = awaitingActionFrom,
         errors = errors.map { error ->
-            AdditionalKycRequirementError(
+            KycRequirementError(
                 code = error.code,
                 developerMessage = error.description,
             )
         },
-        document = document?.toAdditionalKycDocumentRequirement(),
-        questionnaire = additionalRequirements?.questionnaire?.toAdditionalKycQuestionnaire(),
+        document = document?.toKycDocumentRequirement(),
+        questionnaire = collectionRequirements?.questionnaire?.toKycQuestionnaire(),
     )
 }
 
-private fun AdditionalKycDocumentRequirementResponse.toAdditionalKycDocumentRequirement():
-    AdditionalKycDocumentRequirement {
-    return AdditionalKycDocumentRequirement(
+private fun KycDocumentRequirementResponse.toKycDocumentRequirement():
+    KycDocumentRequirement {
+    return KycDocumentRequirement(
         acceptedSubtypes = acceptedSubtypes.map { subtype ->
-            AdditionalKycDocumentSubtype(
+            KycDocumentSubtype(
                 id = subtype.id,
                 label = subtype.label,
                 description = subtype.description,
@@ -151,10 +151,10 @@ private fun AdditionalKycDocumentRequirementResponse.toAdditionalKycDocumentRequ
     )
 }
 
-private fun AdditionalKycQuestionnaireResponse.toAdditionalKycQuestionnaire(): AdditionalKycQuestionnaire {
-    return AdditionalKycQuestionnaire(
+private fun KycQuestionnaireResponse.toKycQuestionnaire(): KycQuestionnaire {
+    return KycQuestionnaire(
         questions = questions.map { question ->
-            AdditionalKycQuestion(
+            KycQuestion(
                 id = question.id,
                 prompt = question.prompt,
                 answerType = question.answerType,
@@ -165,18 +165,18 @@ private fun AdditionalKycQuestionnaireResponse.toAdditionalKycQuestionnaire(): A
 }
 
 internal object EmptyArrayAsNullDocumentRequirementSerializer :
-    EmptyArrayAsNullSerializer<AdditionalKycDocumentRequirementResponse>(
-        AdditionalKycDocumentRequirementResponse.serializer()
+    EmptyArrayAsNullSerializer<KycDocumentRequirementResponse>(
+        KycDocumentRequirementResponse.serializer()
     )
 
 internal object EmptyArrayAsNullCollectionRequirementsSerializer :
-    EmptyArrayAsNullSerializer<AdditionalKycCollectionRequirementsResponse>(
-        AdditionalKycCollectionRequirementsResponse.serializer()
+    EmptyArrayAsNullSerializer<KycCollectionRequirementsResponse>(
+        KycCollectionRequirementsResponse.serializer()
     )
 
 internal object EmptyArrayAsNullQuestionnaireSerializer :
-    EmptyArrayAsNullSerializer<AdditionalKycQuestionnaireResponse>(
-        AdditionalKycQuestionnaireResponse.serializer()
+    EmptyArrayAsNullSerializer<KycQuestionnaireResponse>(
+        KycQuestionnaireResponse.serializer()
     )
 
 internal abstract class EmptyArrayAsNullSerializer<T>(

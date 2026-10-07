@@ -9,11 +9,11 @@ import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.crypto.onramp.model.AdditionalKycCollectionSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycCollectionSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycDocumentSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswerRequest
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository.Companion.CRYPTO_ONRAMP_API_VERSION
 import com.stripe.android.link.LinkController
@@ -28,7 +28,7 @@ import java.io.File
 import java.net.URLDecoder
 
 @RunWith(RobolectricTestRunner::class)
-class CryptoApiRepositoryAdditionalKycTest {
+class CryptoApiRepositoryKycTest {
     @Test
     fun `keyed requirements use Link authentication and accept an empty response`() = runScenario {
         val result = repository.fulfillKycRequirements(
@@ -41,7 +41,7 @@ class CryptoApiRepositoryAdditionalKycTest {
                         document("payslip", "file_payslip_1", "file_payslip_2"),
                         document("bank_statement", "file_bank_statement"),
                     ),
-                    additionalRequirements = questionnaire(),
+                    collectionRequirements = questionnaire(),
                 ),
             ),
             linkSessionKey = LINK_SESSION_KEY,
@@ -220,16 +220,16 @@ class CryptoApiRepositoryAdditionalKycTest {
         const val LINK_SESSION_KEY = "lsk_test_123"
 
         fun requirement(
-            documents: List<AdditionalKycDocumentSubmissionRequest>,
-            additionalRequirements: AdditionalKycCollectionSubmissionRequest? = null,
-        ) = AdditionalKycRequirementSubmissionRequest("swapped", documents, additionalRequirements)
+            documents: List<KycDocumentSubmissionRequest>,
+            collectionRequirements: KycCollectionSubmissionRequest? = null,
+        ) = KycRequirementSubmissionRequest("swapped", documents, collectionRequirements)
 
         fun document(subtype: String, vararg fileIds: String) =
-            AdditionalKycDocumentSubmissionRequest(subtype, fileIds.toList())
+            KycDocumentSubmissionRequest(subtype, fileIds.toList())
 
-        fun questionnaire() = AdditionalKycCollectionSubmissionRequest(
-            questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
-                answers = listOf(AdditionalKycQuestionnaireAnswerRequest("purchase_purpose", "Personal investment"))
+        fun questionnaire() = KycCollectionSubmissionRequest(
+            questionnaire = KycQuestionnaireSubmissionRequest(
+                answers = listOf(KycQuestionnaireAnswerRequest("purchase_purpose", "Personal investment"))
             )
         )
     }

@@ -21,7 +21,7 @@ class OnrampCallbacks {
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var userAttestationCallback: OnrampUserAttestationCallback? = null
-    private var additionalKycCallback: OnrampAdditionalKycCallback? = null
+    private var kycCallback: OnrampKycCallback? = null
     private var termsAndConditionsCallback: OnrampPartnerTermsCallback? = null
     private var termsOfServiceCallback: OnrampPartnerTermsCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
@@ -71,10 +71,10 @@ class OnrampCallbacks {
     }
 
     /**
-     * Callback invoked when the additional KYC collection flow completes.
+     * Callback invoked when the KYC collection flow completes.
      */
-    fun additionalKycCallback(callback: OnrampAdditionalKycCallback) = apply {
-        this.additionalKycCallback = callback
+    fun kycCallback(callback: OnrampKycCallback) = apply {
+        this.kycCallback = callback
     }
 
     /**
@@ -131,7 +131,7 @@ class OnrampCallbacks {
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
         val userAttestationCallback: OnrampUserAttestationCallback?,
-        val additionalKycCallback: OnrampAdditionalKycCallback?,
+        val kycCallback: OnrampKycCallback?,
         val termsAndConditionsCallback: OnrampPartnerTermsCallback?,
         val termsOfServiceCallback: OnrampPartnerTermsCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
@@ -157,7 +157,7 @@ class OnrampCallbacks {
                 "checkoutCallback must not be null"
             },
             userAttestationCallback = userAttestationCallback,
-            additionalKycCallback = additionalKycCallback,
+            kycCallback = kycCallback,
             termsAndConditionsCallback = termsAndConditionsCallback,
             termsOfServiceCallback = termsOfServiceCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {

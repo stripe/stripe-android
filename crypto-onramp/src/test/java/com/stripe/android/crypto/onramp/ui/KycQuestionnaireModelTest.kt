@@ -1,8 +1,8 @@
 package com.stripe.android.crypto.onramp.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestion
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
+import com.stripe.android.crypto.onramp.model.KycQuestion
+import com.stripe.android.crypto.onramp.model.KycQuestionnaire
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -47,10 +47,10 @@ internal class KycQuestionnaireModelTest {
     }
 
     private fun model() = KycQuestionnaireModel(
-        AdditionalKycQuestionnaire(
+        KycQuestionnaire(
             listOf(
-                AdditionalKycQuestion("required", "Source of funds", "free_text", true),
-                AdditionalKycQuestion("optional", "Details", "free_text", false),
+                KycQuestion("required", "Source of funds", "free_text", true),
+                KycQuestion("optional", "Details", "free_text", false),
             )
         )
     )

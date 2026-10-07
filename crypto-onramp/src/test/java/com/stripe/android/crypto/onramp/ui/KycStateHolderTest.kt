@@ -1,14 +1,14 @@
 package com.stripe.android.crypto.onramp.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentRequirement
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubtype
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestion
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementError
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
-import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.KycDocumentRequirement
+import com.stripe.android.crypto.onramp.model.KycDocumentSubtype
+import com.stripe.android.crypto.onramp.model.KycQuestion
+import com.stripe.android.crypto.onramp.model.KycQuestionnaire
+import com.stripe.android.crypto.onramp.model.KycRequirement
+import com.stripe.android.crypto.onramp.model.KycRequirementError
+import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.io.File
@@ -43,7 +43,7 @@ internal class KycStateHolderTest {
 
         assertThat(stateHolder.isAcceptedFileSize(50_000_000L)).isTrue()
         assertThat(stateHolder.isAcceptedFileSize(50_000_001L)).isFalse()
-        assertThat(stateHolder.state.validationError).isEqualTo(AdditionalKycValidationError.FileTooLarge)
+        assertThat(stateHolder.state.validationError).isEqualTo(KycValidationError.FileTooLarge)
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class KycStateHolderTest {
         val stateHolder = stateHolderFromFixture("source_of_funds_required.json")
         stateHolder.onContinue()
 
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Questionnaire)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Questionnaire)
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "Long-term investment")
         stateHolder.state.questions.filter { it.id != "purchase_purpose" }.forEach {
             stateHolder.onQuestionAnswerChanged(it.id, "Salary")
@@ -71,10 +71,10 @@ internal class KycStateHolderTest {
 
     private fun stateHolderFromFixture(fileName: String): KycStateHolder {
         val fixture = requireNotNull(
-            javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
+            javaClass.classLoader?.getResourceAsStream("kyc_requirements/$fileName")
         ).bufferedReader().use { it.readText() }
-        val response = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(fixture)
-        return KycStateHolder(response.requirements.toAdditionalKycRequirements())
+        val response = Json.decodeFromString<RetrieveKycRequirementsResponse>(fixture)
+        return KycStateHolder(response.requirements.toKycRequirements())
     }
 
     @Test
@@ -87,11 +87,11 @@ internal class KycStateHolderTest {
             )
         )
 
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Context)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Context)
 
         assertThat(stateHolder.onContinue()).isTrue()
 
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentEditor)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.DocumentEditor)
         assertThat(stateHolder.state.document?.editingSlotIndex).isEqualTo(0)
     }
 
@@ -102,7 +102,7 @@ internal class KycStateHolderTest {
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(
                         description = "source_of_funds",
-                        questionnaire = AdditionalKycQuestionnaire(
+                        questionnaire = KycQuestionnaire(
                             questions = listOf(
                                 question(id = "purchase_purpose"),
                                 question(id = "third_party_advised"),
@@ -117,16 +117,16 @@ internal class KycStateHolderTest {
         )
 
         stateHolder.onContinue()
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Questionnaire)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Questionnaire)
 
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "For investment")
         stateHolder.onQuestionAnswerChanged("third_party_advised", "No")
         stateHolder.onQuestionAnswerChanged("funding_sources", "Salary")
         assertThat(stateHolder.onContinue()).isTrue()
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentOverview)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.DocumentOverview)
 
         stateHolder.onAddDocuments()
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.DocumentEditor)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.DocumentEditor)
     }
 
     @Test
@@ -140,10 +140,10 @@ internal class KycStateHolderTest {
         )
 
         assertThat(stateHolder.state.requirementType)
-            .isEqualTo(AdditionalKycRequirementType.ProofOfAddress)
+            .isEqualTo(KycRequirementType.ProofOfAddress)
         assertThat(stateHolder.state.document?.slots).hasSize(1)
         assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isEqualTo(5)
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Context)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Context)
         assertThat(stateHolder.state.errorMessages).containsExactly("The previous document was too old")
         assertThat(stateHolder.state.canSubmit).isFalse()
         assertThat(stateHolder.state.pendingRequirements).isEmpty()
@@ -161,7 +161,7 @@ internal class KycStateHolderTest {
 
         assertThat(stateHolder.createSubmission()).isNull()
         assertThat(stateHolder.state.validationError)
-            .isEqualTo(AdditionalKycValidationError.MissingRequiredAnswers)
+            .isEqualTo(KycValidationError.MissingRequiredAnswers)
 
         stateHolder.onQuestionAnswerChanged("purchase_purpose", "  Long-term investment  ")
         val submission = stateHolder.createSubmission()
@@ -183,9 +183,9 @@ internal class KycStateHolderTest {
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(
                         description = "source_of_funds",
-                        questionnaire = AdditionalKycQuestionnaire(
+                        questionnaire = KycQuestionnaire(
                             questions = listOf(
-                                AdditionalKycQuestion(
+                                KycQuestion(
                                     id = "funding_sources",
                                     prompt = "How are you funding your transactions?",
                                     answerType = "free_text",
@@ -249,7 +249,7 @@ internal class KycStateHolderTest {
         assertThat(accepted).isFalse()
         assertThat(stateHolder.state.selectingFileSlot).isNull()
         assertThat(stateHolder.state.validationError)
-            .isEqualTo(AdditionalKycValidationError.UnsupportedFileType)
+            .isEqualTo(KycValidationError.UnsupportedFileType)
         assertThat(stateHolder.state.validationFileName).isEqualTo("malware.exe")
     }
 
@@ -303,7 +303,7 @@ internal class KycStateHolderTest {
         assertThat(accepted).isFalse()
         assertThat(stateHolder.state.selectingFileSlot).isNull()
         assertThat(stateHolder.state.validationError)
-            .isEqualTo(AdditionalKycValidationError.FileTooLarge)
+            .isEqualTo(KycValidationError.FileTooLarge)
     }
 
     @Test
@@ -324,7 +324,7 @@ internal class KycStateHolderTest {
         assertThat(accepted).isFalse()
         assertThat(stateHolder.state.document?.maxFileSizeMegabytes).isEqualTo(5)
         assertThat(stateHolder.state.validationError)
-            .isEqualTo(AdditionalKycValidationError.FileTooLarge)
+            .isEqualTo(KycValidationError.FileTooLarge)
     }
 
     @Test
@@ -361,9 +361,9 @@ internal class KycStateHolderTest {
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
         assertThat(stateHolder.state.canSubmit).isFalse()
         assertThat(stateHolder.state.pendingRequirements.single().requirementType)
-            .isEqualTo(AdditionalKycRequirementType.ProofOfAddress)
+            .isEqualTo(KycRequirementType.ProofOfAddress)
         assertThat(stateHolder.state.pendingRequirements.single().status)
-            .isEqualTo(AdditionalKycPendingRequirementStatus.WaitingForReview)
+            .isEqualTo(KycPendingRequirementStatus.WaitingForReview)
         assertThat(stateHolder.createSubmission()).isNull()
     }
 
@@ -381,9 +381,9 @@ internal class KycStateHolderTest {
 
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
         assertThat(stateHolder.state.pendingRequirements.single().requirementType)
-            .isEqualTo(AdditionalKycRequirementType.SourceOfFunds)
+            .isEqualTo(KycRequirementType.SourceOfFunds)
         assertThat(stateHolder.state.pendingRequirements.single().status)
-            .isEqualTo(AdditionalKycPendingRequirementStatus.Processing)
+            .isEqualTo(KycPendingRequirementStatus.Processing)
     }
 
     @Test
@@ -402,8 +402,8 @@ internal class KycStateHolderTest {
 
         assertThat(stateHolder.state.pendingRequirements.map { requirement -> requirement.status })
             .containsExactly(
-                AdditionalKycPendingRequirementStatus.WaitingForReview,
-                AdditionalKycPendingRequirementStatus.Processing,
+                KycPendingRequirementStatus.WaitingForReview,
+                KycPendingRequirementStatus.Processing,
             )
             .inOrder()
     }
@@ -420,7 +420,7 @@ internal class KycStateHolderTest {
 
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
         assertThat(stateHolder.state.pendingRequirements).isEmpty()
-        assertThat(stateHolder.state.page).isEqualTo(AdditionalKycCollectionPage.Unavailable)
+        assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Unavailable)
         assertThat(stateHolder.createSubmission()).isNull()
     }
 
@@ -438,13 +438,13 @@ internal class KycStateHolderTest {
         val firstSubmission = stateHolder.startSubmission()
         assertThat(firstSubmission).isNotNull()
         assertThat(stateHolder.state.submissionState)
-            .isEqualTo(AdditionalKycSubmissionState.Submitting)
+            .isEqualTo(KycSubmissionState.Submitting)
         assertThat(stateHolder.state.canSubmit).isFalse()
 
         stateHolder.onSubmissionFailed()
 
         assertThat(stateHolder.state.submissionState)
-            .isEqualTo(AdditionalKycSubmissionState.Failed)
+            .isEqualTo(KycSubmissionState.Failed)
         assertThat(stateHolder.state.questions.single().answer).isEqualTo("Long-term investment")
         assertThat(stateHolder.state.canSubmit).isTrue()
         assertThat(stateHolder.startSubmission()).isNotNull()
@@ -467,14 +467,14 @@ internal class KycStateHolderTest {
         stateHolder.onSubmissionSucceeded()
 
         assertThat(stateHolder.state.submissionState)
-            .isEqualTo(AdditionalKycSubmissionState.Submitted)
+            .isEqualTo(KycSubmissionState.Submitted)
         assertThat(stateHolder.state.currentRequirement).isEqualTo(1)
         assertThat(stateHolder.state.totalRequirements).isEqualTo(2)
         assertThat(stateHolder.state.hasMoreRequirements).isTrue()
 
         assertThat(stateHolder.advanceToNextRequirement()).isTrue()
         assertThat(stateHolder.state.submissionState)
-            .isEqualTo(AdditionalKycSubmissionState.Collecting)
+            .isEqualTo(KycSubmissionState.Collecting)
         assertThat(stateHolder.state.currentRequirement).isEqualTo(2)
         assertThat(stateHolder.state.questions.single().id).isEqualTo("funding_sources")
         assertThat(stateHolder.state.questions.single().answer).isEmpty()
@@ -495,7 +495,7 @@ internal class KycStateHolderTest {
         onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
 
         assertThat(createSubmission()).isNull()
-        assertThat(state.validationError).isEqualTo(AdditionalKycValidationError.MissingDocuments)
+        assertThat(state.validationError).isEqualTo(KycValidationError.MissingDocuments)
 
         onDocumentSubtypeSelected(1, "payslip")
 
@@ -533,7 +533,7 @@ internal class KycStateHolderTest {
     @Test
     fun `source of funds without questions skips questionnaire and omits answers`() = runDocumentScenario {
         assertThat(onContinue()).isTrue()
-        assertThat(state.page).isEqualTo(AdditionalKycCollectionPage.DocumentOverview)
+        assertThat(state.page).isEqualTo(KycCollectionPage.DocumentOverview)
 
         onAddDocuments()
         val slot = requireNotNull(state.document?.editingSlotIndex)
@@ -598,8 +598,8 @@ internal class KycStateHolderTest {
     }
 
     private companion object {
-        fun question(id: String): AdditionalKycQuestion {
-            return AdditionalKycQuestion(
+        fun question(id: String): KycQuestion {
+            return KycQuestion(
                 id = id,
                 prompt = "Question $id",
                 answerType = "free_text",
@@ -608,11 +608,11 @@ internal class KycStateHolderTest {
         }
 
         fun requirements(
-            userActionRequired: List<AdditionalKycRequirement>,
-            pendingPartnerAction: List<AdditionalKycRequirement>,
-            pendingStripeAction: List<AdditionalKycRequirement>,
-        ): AdditionalKycRequirements {
-            return AdditionalKycRequirements(
+            userActionRequired: List<KycRequirement>,
+            pendingPartnerAction: List<KycRequirement>,
+            pendingStripeAction: List<KycRequirement>,
+        ): KycRequirements {
+            return KycRequirements(
                 userActionRequired = userActionRequired,
                 pendingPartnerAction = pendingPartnerAction,
                 pendingStripeAction = pendingStripeAction,
@@ -620,16 +620,16 @@ internal class KycStateHolderTest {
             )
         }
 
-        fun questionnaireRequirement(): AdditionalKycRequirement {
-            return AdditionalKycRequirement(
+        fun questionnaireRequirement(): KycRequirement {
+            return KycRequirement(
                 description = "source_of_funds",
                 requestedBy = "swapped",
                 awaitingActionFrom = "user",
                 errors = emptyList(),
                 document = null,
-                questionnaire = AdditionalKycQuestionnaire(
+                questionnaire = KycQuestionnaire(
                     questions = listOf(
-                        AdditionalKycQuestion(
+                        KycQuestion(
                             id = "purchase_purpose",
                             prompt = "Why are you purchasing cryptocurrency?",
                             answerType = "free_text",
@@ -640,12 +640,12 @@ internal class KycStateHolderTest {
             )
         }
 
-        fun secondQuestionnaireRequirement(): AdditionalKycRequirement {
+        fun secondQuestionnaireRequirement(): KycRequirement {
             return questionnaireRequirement().copy(
                 description = "source_of_funds_questions",
-                questionnaire = AdditionalKycQuestionnaire(
+                questionnaire = KycQuestionnaire(
                     questions = listOf(
-                        AdditionalKycQuestion(
+                        KycQuestion(
                             id = "funding_sources",
                             prompt = "How are you funding your transactions?",
                             answerType = "free_text",
@@ -656,25 +656,25 @@ internal class KycStateHolderTest {
             )
         }
 
-        fun documentRequirement(minDocumentTypes: Int): AdditionalKycRequirement {
-            return AdditionalKycRequirement(
+        fun documentRequirement(minDocumentTypes: Int): KycRequirement {
+            return KycRequirement(
                 description = "proof_of_address",
                 requestedBy = "swapped",
                 awaitingActionFrom = "user",
                 errors = listOf(
-                    AdditionalKycRequirementError(
+                    KycRequirementError(
                         code = "document_too_old",
                         developerMessage = "The previous document was too old",
                     )
                 ),
-                document = AdditionalKycDocumentRequirement(
+                document = KycDocumentRequirement(
                     acceptedSubtypes = listOf(
-                        AdditionalKycDocumentSubtype(
+                        KycDocumentSubtype(
                             id = "bank_statement",
                             label = "Bank statement",
                             description = "Statements from your bank",
                         ),
-                        AdditionalKycDocumentSubtype(
+                        KycDocumentSubtype(
                             id = "payslip",
                             label = "Payslip",
                             description = "Recent payslips",

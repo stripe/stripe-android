@@ -9,22 +9,22 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.CheckoutState.Status
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestion
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
-import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycCallback
-import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
+import com.stripe.android.crypto.onramp.model.KycQuestion
+import com.stripe.android.crypto.onramp.model.KycQuestionnaire
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswer
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmission
+import com.stripe.android.crypto.onramp.model.KycRequirement
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
+import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodCallback
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampKycCallback
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
@@ -45,12 +45,12 @@ import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncher
 import com.stripe.android.crypto.onramp.samsungpay.FakeSamsungPayLauncherFactory
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.AdditionalKycActivity
-import com.stripe.android.crypto.onramp.ui.AdditionalKycScreenAction
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivity
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
+import com.stripe.android.crypto.onramp.ui.KycActivity
+import com.stripe.android.crypto.onramp.ui.KycScreenAction
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -162,60 +162,60 @@ class OnrampPresenterCoordinatorTest {
     }
 
     @Test
-    fun `additional KYC retrieves requirements and launches activity`() = runTest {
-        val requirements = additionalKycRequirements()
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+    fun `KYC retrieves requirements and launches activity`() = runTest {
+        val requirements = kycRequirements()
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
         val coordinator = createCoordinator(
             onrampStateFlow = MutableStateFlow(
                 OnrampState(configurationState = createConfiguration()),
             ),
         )
 
-        coordinator.fulfillAdditionalKycRequirement()
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
 
         val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
-        assertThat(startedIntent.component?.className).isEqualTo(AdditionalKycActivity::class.java.name)
-        assertThat(AdditionalKycActivity.argsFrom(startedIntent)?.requirements).isEqualTo(requirements)
-        assertThat(AdditionalKycActivity.argsFrom(startedIntent)?.submissionHandlerKey)
+        assertThat(startedIntent.component?.className).isEqualTo(KycActivity::class.java.name)
+        assertThat(KycActivity.argsFrom(startedIntent)?.requirements).isEqualTo(requirements)
+        assertThat(KycActivity.argsFrom(startedIntent)?.submissionHandlerKey)
             .isEqualTo(DEFAULT_ONRAMP_INSTANCE_KEY)
     }
 
     @Test
-    fun `additional KYC retrieval failure calls failed callback`() = runTest {
+    fun `KYC retrieval failure calls failed callback`() = runTest {
         val error = IllegalStateException("Could not retrieve requirements")
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.failure(error))
-        var callbackResult: OnrampAdditionalKycResult? = null
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.failure(error))
+        var callbackResult: OnrampKycResult? = null
         val coordinator = createCoordinator(
-            additionalKycCallback = { callbackResult = it },
+            kycCallback = { callbackResult = it },
         )
 
-        coordinator.fulfillAdditionalKycRequirement()
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
 
-        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Failed::class.java)
-        assertThat((callbackResult as OnrampAdditionalKycResult.Failed).error).isSameInstanceAs(error)
+        assertThat(callbackResult).isInstanceOf(OnrampKycResult.Failed::class.java)
+        assertThat((callbackResult as OnrampKycResult.Failed).error).isSameInstanceAs(error)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
     }
 
     @Test
-    fun `additional KYC submission handler fulfills requirement`() = runTest {
-        val requirements = additionalKycRequirements()
-        val submission = additionalKycSubmission()
-        var callbackResult: OnrampAdditionalKycResult? = null
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
+    fun `KYC submission handler fulfills requirement`() = runTest {
+        val requirements = kycRequirements()
+        val submission = kycSubmission()
+        var callbackResult: OnrampKycResult? = null
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
         whenever(interactor.fulfillKycRequirements(submission)).thenReturn(
             Result.success(Unit)
         )
         val coordinator = createCoordinator(
-            additionalKycCallback = { callbackResult = it },
+            kycCallback = { callbackResult = it },
         )
 
-        coordinator.fulfillAdditionalKycRequirement()
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
         val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
-        val handlerKey = requireNotNull(AdditionalKycActivity.argsFrom(startedIntent)).submissionHandlerKey
-        val result = requireNotNull(AdditionalKycSubmissionHandlerRegistry[handlerKey]).submit(submission)
+        val handlerKey = requireNotNull(KycActivity.argsFrom(startedIntent)).submissionHandlerKey
+        val result = requireNotNull(KycSubmissionHandlerRegistry[handlerKey]).submit(submission)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(callbackResult).isNull()
@@ -223,44 +223,44 @@ class OnrampPresenterCoordinatorTest {
     }
 
     @Test
-    fun `additional KYC submitted action calls submitted callback`() = runTest {
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(
-            Result.success(additionalKycRequirements())
+    fun `KYC submitted action calls submitted callback`() = runTest {
+        whenever(interactor.retrieveKycRequirements()).thenReturn(
+            Result.success(kycRequirements())
         )
-        var callbackResult: OnrampAdditionalKycResult? = null
+        var callbackResult: OnrampKycResult? = null
         val coordinator = createCoordinator(
-            additionalKycCallback = { callbackResult = it },
+            kycCallback = { callbackResult = it },
         )
 
-        coordinator.fulfillAdditionalKycRequirement()
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
         val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
         shadowOf(activity).receiveResult(
             startedIntent,
             Activity.RESULT_OK,
-            AdditionalKycActivity.createResultIntent(AdditionalKycScreenAction.Submitted),
+            KycActivity.createResultIntent(KycScreenAction.Submitted),
         )
 
-        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Submitted::class.java)
+        assertThat(callbackResult).isInstanceOf(OnrampKycResult.Submitted::class.java)
     }
 
     @Test
-    fun `additional KYC cancelled action calls cancelled callback`() = runTest {
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(
-            Result.success(additionalKycRequirements())
+    fun `KYC cancelled action calls cancelled callback`() = runTest {
+        whenever(interactor.retrieveKycRequirements()).thenReturn(
+            Result.success(kycRequirements())
         )
-        var callbackResult: OnrampAdditionalKycResult? = null
+        var callbackResult: OnrampKycResult? = null
         val coordinator = createCoordinator(
-            additionalKycCallback = { callbackResult = it },
+            kycCallback = { callbackResult = it },
         )
 
-        coordinator.fulfillAdditionalKycRequirement()
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
         val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
         shadowOf(activity).receiveResult(startedIntent, Activity.RESULT_CANCELED, null)
         testScope.testScheduler.advanceUntilIdle()
 
-        assertThat(callbackResult).isInstanceOf(OnrampAdditionalKycResult.Cancelled::class.java)
+        assertThat(callbackResult).isInstanceOf(OnrampKycResult.Cancelled::class.java)
         verify(interactor, never()).fulfillKycRequirements(any())
     }
 
@@ -746,7 +746,7 @@ class OnrampPresenterCoordinatorTest {
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
-        additionalKycCallback: OnrampAdditionalKycCallback? = null,
+        kycCallback: OnrampKycCallback? = null,
         termsAndConditionsCallback: OnrampPartnerTermsCallback? = null,
         termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
         userAttestationCallback: OnrampUserAttestationCallback? = null,
@@ -779,7 +779,7 @@ class OnrampPresenterCoordinatorTest {
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
-        additionalKycCallback?.let(callbacks::additionalKycCallback)
+        kycCallback?.let(callbacks::kycCallback)
         termsAndConditionsCallback?.let(callbacks::termsAndConditionsCallback)
         termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
         userAttestationCallback?.let(callbacks::userAttestationCallback)
@@ -817,18 +817,18 @@ class OnrampPresenterCoordinatorTest {
             .build()
     }
 
-    private fun additionalKycRequirements(): AdditionalKycRequirements {
-        return AdditionalKycRequirements(
+    private fun kycRequirements(): KycRequirements {
+        return KycRequirements(
             userActionRequired = listOf(
-                AdditionalKycRequirement(
+                KycRequirement(
                     description = "source_of_funds",
                     requestedBy = "swapped",
                     awaitingActionFrom = "user",
                     errors = emptyList(),
                     document = null,
-                    questionnaire = AdditionalKycQuestionnaire(
+                    questionnaire = KycQuestionnaire(
                         questions = listOf(
-                            AdditionalKycQuestion(
+                            KycQuestion(
                                 id = "purchase_purpose",
                                 prompt = "Why are you purchasing cryptocurrency?",
                                 answerType = "free_text",
@@ -846,77 +846,77 @@ class OnrampPresenterCoordinatorTest {
 
     @Test
     fun `empty requirements return not required`() = runTest {
-        val requirements = additionalKycRequirements().copy(userActionRequired = emptyList())
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
-        var result: OnrampAdditionalKycResult? = null
-        val coordinator = createCoordinator(additionalKycCallback = { result = it })
-        coordinator.fulfillAdditionalKycRequirement()
+        val requirements = kycRequirements().copy(userActionRequired = emptyList())
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampKycResult? = null
+        val coordinator = createCoordinator(kycCallback = { result = it })
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
-        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.NotRequired::class.java)
+        assertThat(result).isInstanceOf(OnrampKycResult.NotRequired::class.java)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
-        verify(interactor).onAdditionalKycFlowStarted()
-        verify(interactor, never()).onAdditionalKycFlowCompleted()
+        verify(interactor).onKycFlowStarted()
+        verify(interactor, never()).onKycFlowCompleted()
     }
 
     @Test
     fun `partner review returns pending verification`() = runTest {
-        val requirements = additionalKycRequirements().copy(
+        val requirements = kycRequirements().copy(
             userActionRequired = emptyList(),
-            pendingPartnerAction = additionalKycRequirements().userActionRequired,
+            pendingPartnerAction = kycRequirements().userActionRequired,
         )
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
-        var result: OnrampAdditionalKycResult? = null
-        val coordinator = createCoordinator(additionalKycCallback = { result = it })
-        coordinator.fulfillAdditionalKycRequirement()
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampKycResult? = null
+        val coordinator = createCoordinator(kycCallback = { result = it })
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
-        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.PendingVerification::class.java)
+        assertThat(result).isInstanceOf(OnrampKycResult.PendingVerification::class.java)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
-        verify(interactor).onAdditionalKycFlowStarted()
-        verify(interactor).onAdditionalKycFlowCompleted()
+        verify(interactor).onKycFlowStarted()
+        verify(interactor).onKycFlowCompleted()
     }
 
     @Test
     fun `stripe review returns pending verification`() = runTest {
-        val requirements = additionalKycRequirements().copy(
+        val requirements = kycRequirements().copy(
             userActionRequired = emptyList(),
-            pendingStripeAction = additionalKycRequirements().userActionRequired,
+            pendingStripeAction = kycRequirements().userActionRequired,
         )
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
-        var result: OnrampAdditionalKycResult? = null
-        val coordinator = createCoordinator(additionalKycCallback = { result = it })
-        coordinator.fulfillAdditionalKycRequirement()
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampKycResult? = null
+        val coordinator = createCoordinator(kycCallback = { result = it })
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
-        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.PendingVerification::class.java)
+        assertThat(result).isInstanceOf(OnrampKycResult.PendingVerification::class.java)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
-        verify(interactor).onAdditionalKycFlowStarted()
-        verify(interactor).onAdditionalKycFlowCompleted()
+        verify(interactor).onKycFlowStarted()
+        verify(interactor).onKycFlowCompleted()
     }
 
     @Test
     fun `unsupported requirement returns failure`() = runTest {
-        val requirements = additionalKycRequirements().copy(
-            userActionRequired = additionalKycRequirements().userActionRequired.map { it.copy(description = "future") }
+        val requirements = kycRequirements().copy(
+            userActionRequired = kycRequirements().userActionRequired.map { it.copy(description = "future") }
         )
-        whenever(interactor.retrieveAdditionalKycRequirements()).thenReturn(Result.success(requirements))
-        var result: OnrampAdditionalKycResult? = null
-        val coordinator = createCoordinator(additionalKycCallback = { result = it })
-        coordinator.fulfillAdditionalKycRequirement()
+        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
+        var result: OnrampKycResult? = null
+        val coordinator = createCoordinator(kycCallback = { result = it })
+        coordinator.fulfillKycRequirements()
         testScope.testScheduler.advanceUntilIdle()
-        assertThat(result).isInstanceOf(OnrampAdditionalKycResult.Failed::class.java)
+        assertThat(result).isInstanceOf(OnrampKycResult.Failed::class.java)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
-        verify(interactor).onAdditionalKycFlowStarted()
-        verify(interactor, never()).onAdditionalKycFlowCompleted()
+        verify(interactor).onKycFlowStarted()
+        verify(interactor, never()).onKycFlowCompleted()
     }
 
-    private fun additionalKycSubmission(): AdditionalKycSubmission {
-        return AdditionalKycSubmission(
+    private fun kycSubmission(): KycSubmission {
+        return KycSubmission(
             requirements = mapOf(
-                "source_of_funds" to AdditionalKycRequirementSubmission(
+                "source_of_funds" to KycRequirementSubmission(
                     requestedBy = "swapped",
                     documents = emptyList(),
-                    questionnaire = AdditionalKycQuestionnaireSubmission(
+                    questionnaire = KycQuestionnaireSubmission(
                         answers = listOf(
-                            AdditionalKycQuestionnaireAnswer(
+                            KycQuestionnaireAnswer(
                                 questionId = "purchase_purpose",
                                 value = "Long-term investment",
                             )

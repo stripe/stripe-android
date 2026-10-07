@@ -194,7 +194,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
+    fun `retrieve KYC requirements uses dedicated endpoint`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             """
@@ -227,7 +227,7 @@ class CryptoApiRepositoryTest {
         )
         whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
 
-        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
+        val result = cryptoApiRepository.retrieveKycRequirements(
             consumerSessionClientSecret = "test-secret",
         )
 

@@ -1,23 +1,23 @@
 package com.stripe.android.crypto.onramp.ui
 
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentRequirement
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
+import com.stripe.android.crypto.onramp.model.KycDocumentRequirement
+import com.stripe.android.crypto.onramp.model.KycDocumentSubmission
 import java.io.File
 import java.util.Locale
 
 @Suppress("TooManyFunctions")
 internal class KycDocumentCollectionModel(
-    private val document: AdditionalKycDocumentRequirement?,
-    private val requirementType: AdditionalKycRequirementType,
+    private val document: KycDocumentRequirement?,
+    private val requirementType: KycRequirementType,
 ) {
     private var documentSlots = if (document == null) {
         emptyList()
     } else {
         listOf(DocumentSlot(0, document.acceptedSubtypes.firstOrNull()?.id, null))
     }
-    var editingDocumentSlot: Int? = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) 0 else null
+    var editingDocumentSlot: Int? = if (requirementType == KycRequirementType.ProofOfAddress) 0 else null
         private set
-    var validationError: AdditionalKycValidationError? = null
+    var validationError: KycValidationError? = null
         private set
     var validationFileName: String? = null
         private set
@@ -151,7 +151,7 @@ internal class KycDocumentCollectionModel(
         if (!isAccepted) {
             selectingFileSlot = null
             selectingFileName = null
-            validationError = AdditionalKycValidationError.UnsupportedFileType
+            validationError = KycValidationError.UnsupportedFileType
             validationFileName = displayName
         }
         return isAccepted
@@ -187,13 +187,13 @@ internal class KycDocumentCollectionModel(
     fun onFileSelectionFailed() {
         selectingFileSlot = null
         selectingFileName = null
-        validationError = AdditionalKycValidationError.FileUnavailable
+        validationError = KycValidationError.FileUnavailable
         validationFileName = null
     }
 
     fun onFileTooLarge(displayName: String?) {
         selectingFileSlot = null
-        validationError = AdditionalKycValidationError.FileTooLarge
+        validationError = KycValidationError.FileTooLarge
         validationFileName = displayName ?: selectingFileName
         selectingFileName = null
     }
@@ -239,7 +239,7 @@ internal class KycDocumentCollectionModel(
             ?.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)
             ?: MINIMUM_DOCUMENT_COUNT
         if (
-            requirementType == AdditionalKycRequirementType.ProofOfAddress &&
+            requirementType == KycRequirementType.ProofOfAddress &&
             completedDocumentCount >= minimumDocumentCount
         ) {
             editingDocumentSlot = completedSlotIndex
@@ -307,11 +307,11 @@ internal class KycDocumentCollectionModel(
         val fileId: String,
     )
 
-    fun createSubmission(): List<AdditionalKycDocumentSubmission> {
+    fun createSubmission(): List<KycDocumentSubmission> {
         val completedSlots = documentSlots.filter { it.file != null }
         return if (document != null) {
             completedSlots.groupBy { it.subtypeId }.map { (subtypeId, slots) ->
-                AdditionalKycDocumentSubmission(
+                KycDocumentSubmission(
                     documentSubtype = requireNotNull(subtypeId),
                     files = emptyList(),
                     uploadedFileIds = slots.map { requireNotNull(it.file).fileId },
@@ -322,8 +322,8 @@ internal class KycDocumentCollectionModel(
         }
     }
 
-    fun buildState(): AdditionalKycDocumentState? = document?.let {
-        AdditionalKycDocumentState(
+    fun buildState(): KycDocumentState? = document?.let {
+        KycDocumentState(
             acceptedFormats = it.acceptedFormats,
             instructions = it.instructions,
             fileRequirements = it.fileRequirements,
@@ -335,10 +335,10 @@ internal class KycDocumentCollectionModel(
             maxFilesPerDocumentType = it.maxFilesPerDocumentType,
             editingSlotIndex = editingDocumentSlot,
             slots = documentSlots.map { slot ->
-                AdditionalKycDocumentSlotState(
+                KycDocumentSlotState(
                     index = slot.index,
                     subtypes = it.acceptedSubtypes.map { subtype ->
-                        AdditionalKycDocumentSubtypeState(
+                        KycDocumentSubtypeState(
                             id = subtype.id,
                             label = subtype.label,
                             description = subtype.description,
@@ -353,24 +353,24 @@ internal class KycDocumentCollectionModel(
         )
     }
 
-    fun currentValidationError(): AdditionalKycValidationError? {
+    fun currentValidationError(): KycValidationError? {
         if (document != null) {
             val completedSlots = documentSlots.filter { slot -> slot.file != null }
             val completedTypes = completedSlots.mapNotNull { it.subtypeId }.toSet()
             val exceedsFileLimit = completedSlots.groupingBy { it.subtypeId }.eachCount().values.any {
                 it > document.maxFilesPerDocumentType
             }
-            val missingProofOfAddress = requirementType == AdditionalKycRequirementType.ProofOfAddress &&
+            val missingProofOfAddress = requirementType == KycRequirementType.ProofOfAddress &&
                 completedSlots.isEmpty()
             if (completedTypes.size < document.minDocumentTypes ||
                 completedTypes.size > document.maxDocumentTypes ||
                 exceedsFileLimit ||
                 missingProofOfAddress
             ) {
-                return AdditionalKycValidationError.MissingDocuments
+                return KycValidationError.MissingDocuments
             }
             if (document.acceptedSubtypes.isNotEmpty() && completedSlots.any { it.subtypeId == null }) {
-                return AdditionalKycValidationError.MissingDocumentType
+                return KycValidationError.MissingDocumentType
             }
         }
 

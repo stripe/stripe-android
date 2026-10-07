@@ -1,9 +1,9 @@
 package com.stripe.android.crypto.onramp.ui
 
 import android.icu.text.BreakIterator
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
+import com.stripe.android.crypto.onramp.model.KycRequirement
 
-internal fun AdditionalKycRequirement.isSupportedForCollection(): Boolean {
+internal fun KycRequirement.isSupportedForCollection(): Boolean {
     if (description !in setOf("proof_of_address", "source_of_funds", "source_of_funds_questions")) {
         return false
     }
@@ -26,7 +26,7 @@ internal fun AdditionalKycRequirement.isSupportedForCollection(): Boolean {
         (description != "proof_of_address" || document.minDocumentTypes <= 1)
 }
 
-internal fun limitAdditionalKycAnswer(answer: String): String {
+internal fun limitKycAnswer(answer: String): String {
     if (answer.length <= MAXIMUM_ANSWER_LENGTH) {
         return answer
     }

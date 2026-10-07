@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.io.File
@@ -31,20 +31,20 @@ internal class KycDocumentCollectionModelTest {
         model.onFileSelectionFailed()
         assertThat(model.selectingFileSlot).isNull()
         assertThat(model.selectingFileName).isNull()
-        assertThat(model.validationError).isEqualTo(AdditionalKycValidationError.FileUnavailable)
+        assertThat(model.validationError).isEqualTo(KycValidationError.FileUnavailable)
         assertThat(model.onFileSelectionStarted(slot)).isTrue()
         assertThat(model.validationError).isNull()
     }
 
     private fun model(): KycDocumentCollectionModel {
         val fixture = requireNotNull(
-            javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/source_of_funds_required.json")
+            javaClass.classLoader?.getResourceAsStream("kyc_requirements/source_of_funds_required.json")
         ).bufferedReader().use { it.readText() }
-        val requirement = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(fixture)
-            .requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val requirement = Json.decodeFromString<RetrieveKycRequirementsResponse>(fixture)
+            .requirements.toKycRequirements().userActionRequired.single()
         return KycDocumentCollectionModel(
             requireNotNull(requirement.document).copy(maxFilesPerDocumentType = 1),
-            AdditionalKycRequirementType.SourceOfFunds,
+            KycRequirementType.SourceOfFunds,
         )
     }
 }

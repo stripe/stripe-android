@@ -5,21 +5,21 @@ import org.junit.Test
 
 class OnrampCallbacksTest {
     @Test
-    fun `additional KYC callback is optional`() = runScenario {
-        assertThat(callbacks.additionalKycCallback).isNull()
+    fun `KYC callback is optional`() = runScenario {
+        assertThat(callbacks.kycCallback).isNull()
     }
 
     @Test
-    fun `additional KYC callback is retained`() {
-        val callback = OnrampAdditionalKycCallback {}
+    fun `KYC callback is retained`() {
+        val callback = OnrampKycCallback {}
 
-        runScenario(additionalKycCallback = callback) {
-            assertThat(callbacks.additionalKycCallback).isSameInstanceAs(callback)
+        runScenario(kycCallback = callback) {
+            assertThat(callbacks.kycCallback).isSameInstanceAs(callback)
         }
     }
 
     private fun runScenario(
-        additionalKycCallback: OnrampAdditionalKycCallback? = null,
+        kycCallback: OnrampKycCallback? = null,
         block: Scenario.() -> Unit,
     ) {
         val callbacks = OnrampCallbacks()
@@ -30,7 +30,7 @@ class OnrampCallbacksTest {
             .checkoutCallback {}
             .onrampSessionClientSecretProvider { "secret_123" }
 
-        additionalKycCallback?.let(callbacks::additionalKycCallback)
+        kycCallback?.let(callbacks::kycCallback)
 
         Scenario(callbacks = callbacks.build()).block()
     }

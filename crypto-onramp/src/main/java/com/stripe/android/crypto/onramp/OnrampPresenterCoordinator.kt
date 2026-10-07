@@ -15,8 +15,8 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
-import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
@@ -35,14 +35,14 @@ import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
-import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityArgs
-import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityContract
-import com.stripe.android.crypto.onramp.ui.AdditionalKycActivityResult
-import com.stripe.android.crypto.onramp.ui.AdditionalKycScreenAction
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityContract
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
+import com.stripe.android.crypto.onramp.ui.KycActivityArgs
+import com.stripe.android.crypto.onramp.ui.KycActivityContract
+import com.stripe.android.crypto.onramp.ui.KycActivityResult
+import com.stripe.android.crypto.onramp.ui.KycScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -127,11 +127,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleUserAttestationResult
         )
 
-    private val additionalKycResultLauncher: ActivityResultLauncher<AdditionalKycActivityArgs> =
+    private val kycResultLauncher: ActivityResultLauncher<KycActivityArgs> =
         activity.activityResultRegistry.register(
-            key = "OnrampPresenterCoordinator_AdditionalKycResultLauncher($onrampCallbackIdentifier)",
-            contract = AdditionalKycActivityContract(),
-            callback = ::handleAdditionalKycResult,
+            key = "OnrampPresenterCoordinator_KycResultLauncher($onrampCallbackIdentifier)",
+            contract = KycActivityContract(),
+            callback = ::handleKycResult,
         )
 
     private val termsAndConditionsResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
@@ -149,12 +149,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
 
     init {
-        AdditionalKycSubmissionHandlerRegistry.setUploader(
+        KycSubmissionHandlerRegistry.setUploader(
             onrampCallbackIdentifier,
-            AdditionalKycDocumentUploader(interactor::uploadAdditionalKycDocument),
+            KycDocumentUploader(interactor::uploadKycDocument),
         )
-        AdditionalKycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
-            AdditionalKycSubmissionHandler { submission ->
+        KycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
+            KycSubmissionHandler { submission ->
                 interactor.fulfillKycRequirements(submission)
             }
 
@@ -184,12 +184,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     samsungPayLauncher?.destroy()
                     verifyKycResultLauncher.unregister()
                     userAttestationResultLauncher.unregister()
-                    additionalKycResultLauncher.unregister()
+                    kycResultLauncher.unregister()
                     termsAndConditionsResultLauncher.unregister()
                     termsOfServiceResultLauncher.unregister()
 
                     if (activity.isFinishing) {
-                        AdditionalKycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
+                        KycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
                     }
                 }
@@ -264,38 +264,38 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun fulfillAdditionalKycRequirement() {
-        interactor.onAdditionalKycFlowStarted()
+    fun fulfillKycRequirements() {
+        interactor.onKycFlowStarted()
         coroutineScope.launch {
-            interactor.retrieveAdditionalKycRequirements().fold(
+            interactor.retrieveKycRequirements().fold(
                 onSuccess = { requirements ->
-                    val callback = onrampCallbacksState.additionalKycCallback
+                    val callback = onrampCallbacksState.kycCallback
                     if (requirements.userActionRequired.isEmpty()) {
                         when {
                             requirements.unrecognizedActionOwner.isNotEmpty() -> callback?.onResult(
-                                OnrampAdditionalKycResult.Failed(
-                                    IllegalArgumentException("Unsupported additional KYC requirement")
+                                OnrampKycResult.Failed(
+                                    IllegalArgumentException("Unsupported KYC requirement")
                                 )
                             )
                             requirements.pendingPartnerAction.isNotEmpty() ||
                                 requirements.pendingStripeAction.isNotEmpty() -> {
-                                interactor.onAdditionalKycFlowCompleted()
-                                callback?.onResult(OnrampAdditionalKycResult.PendingVerification())
+                                interactor.onKycFlowCompleted()
+                                callback?.onResult(OnrampKycResult.PendingVerification())
                             }
-                            else -> callback?.onResult(OnrampAdditionalKycResult.NotRequired())
+                            else -> callback?.onResult(OnrampKycResult.NotRequired())
                         }
                         return@fold
                     }
                     if (requirements.userActionRequired.any { !it.isSupportedForCollection() }) {
                         callback?.onResult(
-                            OnrampAdditionalKycResult.Failed(
-                                IllegalArgumentException("Unsupported additional KYC requirement")
+                            OnrampKycResult.Failed(
+                                IllegalArgumentException("Unsupported KYC requirement")
                             )
                         )
                         return@fold
                     }
-                    additionalKycResultLauncher.launch(
-                        AdditionalKycActivityArgs(
+                    kycResultLauncher.launch(
+                        KycActivityArgs(
                             requirements = requirements,
                             linkAppearance = interactor.state.value.configurationState?.appearance,
                             submissionHandlerKey = onrampCallbackIdentifier,
@@ -303,8 +303,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    onrampCallbacksState.additionalKycCallback?.onResult(
-                        OnrampAdditionalKycResult.Failed(error)
+                    onrampCallbacksState.kycCallback?.onResult(
+                        OnrampKycResult.Failed(error)
                     )
                 },
             )
@@ -591,18 +591,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleAdditionalKycResult(result: AdditionalKycActivityResult) {
-        val additionalKycResult = when (result.action) {
-            is AdditionalKycScreenAction.Cancelled -> {
-                OnrampAdditionalKycResult.Cancelled()
+    private fun handleKycResult(result: KycActivityResult) {
+        val kycResult = when (result.action) {
+            is KycScreenAction.Cancelled -> {
+                OnrampKycResult.Cancelled()
             }
-            is AdditionalKycScreenAction.Submitted -> {
-                interactor.onAdditionalKycFlowCompleted()
-                OnrampAdditionalKycResult.Submitted()
+            is KycScreenAction.Submitted -> {
+                interactor.onKycFlowCompleted()
+                OnrampKycResult.Submitted()
             }
         }
 
-        onrampCallbacksState.additionalKycCallback?.onResult(additionalKycResult)
+        onrampCallbacksState.kycCallback?.onResult(kycResult)
     }
 
     private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =

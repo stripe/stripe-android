@@ -287,11 +287,11 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents UI to collect and submit outstanding additional KYC requirements.
-         * The result will be delivered through the additional KYC callback provided in [OnrampCallbacks].
+         * Presents UI to collect and submit outstanding KYC requirements.
+         * The result will be delivered through the KYC callback provided in [OnrampCallbacks].
          */
-        fun fulfillAdditionalKycRequirement() {
-            coordinator.fulfillAdditionalKycRequirement()
+        fun fulfillKycRequirements() {
+            coordinator.fulfillKycRequirements()
         }
 
         /**

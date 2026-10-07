@@ -30,7 +30,6 @@ import com.stripe.android.crypto.onramp.example.store.OnrampUserDataStore
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampAdditionalKycResult
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -41,6 +40,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -84,7 +84,7 @@ internal class OnrampViewModel(
     internal val callbacks = OnrampCallbacks()
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
-        .additionalKycCallback(callback = ::onAdditionalKycResult)
+        .kycCallback(callback = ::onKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
@@ -406,13 +406,13 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onAdditionalKycResult(result: OnrampAdditionalKycResult) {
+    fun onKycResult(result: OnrampKycResult) {
         _message.value = when (result) {
-            is OnrampAdditionalKycResult.NotRequired -> "Additional KYC Not Required"
-            is OnrampAdditionalKycResult.PendingVerification -> "Additional KYC Pending Verification"
-            is OnrampAdditionalKycResult.Submitted -> "Additional KYC Submitted"
-            is OnrampAdditionalKycResult.Cancelled -> "Additional KYC Cancelled"
-            is OnrampAdditionalKycResult.Failed -> "Additional KYC Failed: ${result.error.message}"
+            is OnrampKycResult.NotRequired -> "KYC Not Required"
+            is OnrampKycResult.PendingVerification -> "KYC Pending Verification"
+            is OnrampKycResult.Submitted -> "KYC Submitted"
+            is OnrampKycResult.Cancelled -> "KYC Cancelled"
+            is OnrampKycResult.Failed -> "KYC Failed: ${result.error.message}"
         }
     }
 

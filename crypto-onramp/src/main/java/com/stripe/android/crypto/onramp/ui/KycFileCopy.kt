@@ -4,7 +4,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-internal fun copyAdditionalKycFile(
+internal fun copyKycFile(
     input: InputStream,
     output: OutputStream,
     maximumFileSizeBytes: Long?,
@@ -20,10 +20,10 @@ internal fun copyAdditionalKycFile(
 
         copiedBytes += bytesRead
         if (maximumFileSizeBytes != null && copiedBytes > maximumFileSizeBytes) {
-            throw AdditionalKycFileTooLargeException()
+            throw KycFileTooLargeException()
         }
         output.write(buffer, 0, bytesRead)
     }
 }
 
-internal class AdditionalKycFileTooLargeException : IOException()
+internal class KycFileTooLargeException : IOException()

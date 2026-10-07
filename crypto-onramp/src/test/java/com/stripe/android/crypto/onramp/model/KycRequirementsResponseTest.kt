@@ -3,7 +3,7 @@ package com.stripe.android.crypto.onramp.model
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-class AdditionalKycRequirementsResponseTest {
+class KycRequirementsResponseTest {
     @Test
     fun `requirements are classified by action owner`() = runScenario(
         entries = listOf(
@@ -67,7 +67,7 @@ class AdditionalKycRequirementsResponseTest {
                 description = "proof_of_address",
                 awaitingActionFrom = "user",
                 errors = listOf(
-                    AdditionalKycRequirementErrorResponse(
+                    KycRequirementErrorResponse(
                         code = "document_unreadable",
                         description = "Raw verification detail",
                     )
@@ -82,38 +82,38 @@ class AdditionalKycRequirementsResponseTest {
     }
 
     private fun runScenario(
-        entries: List<Pair<String, AdditionalKycRequirementResponse>> = emptyList(),
+        entries: List<Pair<String, KycRequirementResponse>> = emptyList(),
         block: Scenario.() -> Unit,
     ) {
         Scenario(
-            requirements = AdditionalKycRequirementsResponse(entries.toMap()).toAdditionalKycRequirements(),
+            requirements = KycRequirementsResponse(entries.toMap()).toKycRequirements(),
         ).block()
     }
 
     private data class Scenario(
-        val requirements: AdditionalKycRequirements,
+        val requirements: KycRequirements,
     )
 
     private companion object {
         fun requirement(
             description: String,
             awaitingActionFrom: String,
-            questionnaire: AdditionalKycQuestionnaireResponse? = null,
-            errors: List<AdditionalKycRequirementErrorResponse> = emptyList(),
-        ): Pair<String, AdditionalKycRequirementResponse> {
-            return description to AdditionalKycRequirementResponse(
+            questionnaire: KycQuestionnaireResponse? = null,
+            errors: List<KycRequirementErrorResponse> = emptyList(),
+        ): Pair<String, KycRequirementResponse> {
+            return description to KycRequirementResponse(
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
                 errors = errors,
                 document = null,
-                additionalRequirements = AdditionalKycCollectionRequirementsResponse(questionnaire),
+                collectionRequirements = KycCollectionRequirementsResponse(questionnaire),
             )
         }
 
-        fun questionnaire(questionId: String): AdditionalKycQuestionnaireResponse {
-            return AdditionalKycQuestionnaireResponse(
+        fun questionnaire(questionId: String): KycQuestionnaireResponse {
+            return KycQuestionnaireResponse(
                 questions = listOf(
-                    AdditionalKycQuestionResponse(
+                    KycQuestionResponse(
                         id = questionId,
                         prompt = "Question prompt",
                         answerType = "free_text",

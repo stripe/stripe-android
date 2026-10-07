@@ -1,11 +1,11 @@
 package com.stripe.android.crypto.onramp.ui
 
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
+import com.stripe.android.crypto.onramp.model.KycQuestionnaire
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswer
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmission
 
 internal class KycQuestionnaireModel(
-    private val questionnaire: AdditionalKycQuestionnaire?,
+    private val questionnaire: KycQuestionnaire?,
 ) {
     private val questions = questionnaire?.questions.orEmpty()
     private val answers = questions.associate { it.id to "" }.toMutableMap()
@@ -14,23 +14,23 @@ internal class KycQuestionnaireModel(
     val hasMissingAnswers: Boolean
         get() = questions.any { it.required && answers[it.id].isNullOrBlank() }
 
-    val state: List<AdditionalKycQuestionState>
+    val state: List<KycQuestionState>
         get() = questions.map {
-            AdditionalKycQuestionState(it.id, it.prompt, answers[it.id].orEmpty(), it.required)
+            KycQuestionState(it.id, it.prompt, answers[it.id].orEmpty(), it.required)
         }
 
     fun updateAnswer(questionId: String, answer: String): Boolean {
         if (questionId !in answers) return false
-        answers[questionId] = limitAdditionalKycAnswer(answer)
+        answers[questionId] = limitKycAnswer(answer)
         return true
     }
 
-    fun createSubmission(): AdditionalKycQuestionnaireSubmission? = questionnaire?.let {
-        AdditionalKycQuestionnaireSubmission(
+    fun createSubmission(): KycQuestionnaireSubmission? = questionnaire?.let {
+        KycQuestionnaireSubmission(
             answers = questions.mapNotNull { question ->
                 answers[question.id]
                     ?.takeIf { it.isNotBlank() || question.required }
-                    ?.let { AdditionalKycQuestionnaireAnswer(question.id, it.trim()) }
+                    ?.let { KycQuestionnaireAnswer(question.id, it.trim()) }
             },
         )
     }

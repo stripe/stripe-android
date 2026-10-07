@@ -8,10 +8,10 @@ import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedExceptio
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.UnexpectedException
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementResponse
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.KycRequirementResponse
+import com.stripe.android.crypto.onramp.model.KycRequirementsResponse
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
-import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
-class OnrampInteractorAdditionalKycRequirementsTest {
+class OnrampInteractorKycRequirementsTest {
     private val expectedRepositoryError = IllegalStateException("Could not retrieve customer")
 
     @Test
@@ -41,13 +41,13 @@ class OnrampInteractorAdditionalKycRequirementsTest {
             )
         )
     ) {
-        val result = interactor.retrieveAdditionalKycRequirements().getOrThrow()
+        val result = interactor.retrieveKycRequirements().getOrThrow()
 
         assertThat(result.userActionRequired.single().description).isEqualTo("proof_of_address")
         assertThat(result.pendingPartnerAction.single().description).isEqualTo("source_of_funds")
         assertThat(result.pendingStripeAction).isEmpty()
         assertThat(result.unrecognizedActionOwner).isEmpty()
-        verify(cryptoApiRepository).retrieveAdditionalKycRequirements(
+        verify(cryptoApiRepository).retrieveKycRequirements(
             consumerSessionClientSecret = CONSUMER_SESSION_CLIENT_SECRET,
         )
     }
@@ -55,12 +55,12 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     @Test
     fun `customer with no requirement entries returns empty classifications`() = runScenario(
         repositoryResult = Result.success(
-            RetrieveAdditionalKycRequirementsResponse(
-                requirements = AdditionalKycRequirementsResponse(entries = emptyMap())
+            RetrieveKycRequirementsResponse(
+                requirements = KycRequirementsResponse(entries = emptyMap())
             )
         ),
     ) {
-        val result = interactor.retrieveAdditionalKycRequirements().getOrThrow()
+        val result = interactor.retrieveKycRequirements().getOrThrow()
 
         assertThat(result.userActionRequired).isEmpty()
         assertThat(result.pendingPartnerAction).isEmpty()
@@ -70,37 +70,37 @@ class OnrampInteractorAdditionalKycRequirementsTest {
 
     @Test
     fun `requirements are retrieved without a crypto customer ID`() = runScenario {
-        val result = interactor.retrieveAdditionalKycRequirements()
+        val result = interactor.retrieveKycRequirements()
 
         assertThat(result.isSuccess).isTrue()
-        verify(cryptoApiRepository).retrieveAdditionalKycRequirements(CONSUMER_SESSION_CLIENT_SECRET)
+        verify(cryptoApiRepository).retrieveKycRequirements(CONSUMER_SESSION_CLIENT_SECRET)
     }
 
     @Test
     fun `missing consumer secret returns failure without requesting customer`() = runScenario(
         consumerSessionClientSecret = null,
     ) {
-        val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
+        val error = interactor.retrieveKycRequirements().exceptionOrNull()
 
         assertUnexpectedError<MissingConsumerSecretException>(error)
-        verify(cryptoApiRepository, never()).retrieveAdditionalKycRequirements(any())
+        verify(cryptoApiRepository, never()).retrieveKycRequirements(any())
     }
 
     @Test
     fun `unverified Link account returns failure without requesting customer`() = runScenario(
         linkSessionState = LinkController.SessionState.NeedsVerification,
     ) {
-        val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
+        val error = interactor.retrieveKycRequirements().exceptionOrNull()
 
         assertUnexpectedError<LinkAccountNotVerifiedException>(error)
-        verify(cryptoApiRepository, never()).retrieveAdditionalKycRequirements(any())
+        verify(cryptoApiRepository, never()).retrieveKycRequirements(any())
     }
 
     @Test
     fun `repository failure is propagated`() = runScenario(
         repositoryResult = Result.failure(expectedRepositoryError),
     ) {
-        val error = interactor.retrieveAdditionalKycRequirements().exceptionOrNull()
+        val error = interactor.retrieveKycRequirements().exceptionOrNull()
 
         val unexpectedError = assertUnexpectedError<IllegalStateException>(error)
         assertThat(unexpectedError.underlyingError).isSameInstanceAs(expectedRepositoryError)
@@ -109,7 +109,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
     private fun runScenario(
         consumerSessionClientSecret: String? = CONSUMER_SESSION_CLIENT_SECRET,
         linkSessionState: LinkController.SessionState = LinkController.SessionState.LoggedIn,
-        repositoryResult: Result<RetrieveAdditionalKycRequirementsResponse> = Result.success(customerResponse()),
+        repositoryResult: Result<RetrieveKycRequirementsResponse> = Result.success(customerResponse()),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = createApplication()
@@ -120,7 +120,7 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(linkState))
         if (consumerSessionClientSecret != null) {
             whenever(
-                cryptoApiRepository.retrieveAdditionalKycRequirements(
+                cryptoApiRepository.retrieveKycRequirements(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                 )
             ).thenReturn(repositoryResult)
@@ -185,18 +185,18 @@ class OnrampInteractorAdditionalKycRequirementsTest {
         }
 
         fun customerResponse(
-            entries: List<Pair<String, AdditionalKycRequirementResponse>> = emptyList(),
-        ): RetrieveAdditionalKycRequirementsResponse {
-            return RetrieveAdditionalKycRequirementsResponse(
-                requirements = AdditionalKycRequirementsResponse(entries.toMap()),
+            entries: List<Pair<String, KycRequirementResponse>> = emptyList(),
+        ): RetrieveKycRequirementsResponse {
+            return RetrieveKycRequirementsResponse(
+                requirements = KycRequirementsResponse(entries.toMap()),
             )
         }
 
         fun requirement(
             description: String,
             awaitingActionFrom: String,
-        ): Pair<String, AdditionalKycRequirementResponse> {
-            return description to AdditionalKycRequirementResponse(
+        ): Pair<String, KycRequirementResponse> {
+            return description to KycRequirementResponse(
                 requestedBy = "swapped",
                 awaitingActionFrom = awaitingActionFrom,
                 errors = emptyList(),

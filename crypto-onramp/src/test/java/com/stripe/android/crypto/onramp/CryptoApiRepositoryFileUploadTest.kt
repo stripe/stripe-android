@@ -30,9 +30,9 @@ class CryptoApiRepositoryFileUploadTest {
     val temporaryFolder = TemporaryFolder()
 
     @Test
-    fun `additional KYC document uses Link authentication and preserves file bytes`() = runScenario {
+    fun `KYC document uses Link authentication and preserves file bytes`() = runScenario {
         val file = temporaryFolder.newFile("document.pdf").apply { writeBytes(byteArrayOf(0, 1, -1, 42)) }
-        val result = repository.uploadAdditionalKycDocument(file, "lsk_test_123")
+        val result = repository.uploadKycDocument(file, "lsk_test_123")
         val request = network.requests.awaitItem()
 
         assertThat(result.getOrThrow().id).isEqualTo("file_123")
@@ -78,7 +78,7 @@ class CryptoApiRepositoryFileUploadTest {
         val error = IllegalStateException("Upload failed")
         network.result = Result.failure(error)
 
-        val result = repository.uploadAdditionalKycDocument(File("document.pdf"), "lsk_test_123")
+        val result = repository.uploadKycDocument(File("document.pdf"), "lsk_test_123")
         network.requests.awaitItem()
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
@@ -91,7 +91,7 @@ class CryptoApiRepositoryFileUploadTest {
             StripeResponse(400, """{"error":{"message":"Invalid file","type":"invalid_request_error"}}""")
         )
 
-        val result = repository.uploadAdditionalKycDocument(File("document.pdf"), "lsk_test_123")
+        val result = repository.uploadKycDocument(File("document.pdf"), "lsk_test_123")
         network.requests.awaitItem()
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
@@ -102,7 +102,7 @@ class CryptoApiRepositoryFileUploadTest {
     fun `malformed upload response fails parsing`() = runScenario {
         network.result = Result.success(StripeResponse(200, "not JSON"))
 
-        val result = repository.uploadAdditionalKycDocument(File("document.pdf"), "lsk_test_123")
+        val result = repository.uploadKycDocument(File("document.pdf"), "lsk_test_123")
         network.requests.awaitItem()
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
@@ -110,7 +110,7 @@ class CryptoApiRepositoryFileUploadTest {
 
     private fun assertFileContentType(fileName: String, contentType: String) = runScenario {
         val file = temporaryFolder.newFile(fileName).apply { writeText("document contents") }
-        assertThat(repository.uploadAdditionalKycDocument(file, "lsk_test_123").isSuccess).isTrue()
+        assertThat(repository.uploadKycDocument(file, "lsk_test_123").isSuccess).isTrue()
         val request = network.requests.awaitItem()
         val body = ByteArrayOutputStream().also(request::writePostBody).toString(Charsets.UTF_8.name())
 

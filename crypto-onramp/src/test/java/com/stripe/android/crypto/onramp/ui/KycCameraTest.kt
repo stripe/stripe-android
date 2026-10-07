@@ -53,7 +53,7 @@ internal class KycCameraTest {
     fun `oversized png is rejected without leaking converted file`() {
         val source = image()
         val result = runCatching { prepareKycCameraImage(source, "png", 1) }
-        assertThat(result.exceptionOrNull()).isInstanceOf(AdditionalKycFileTooLargeException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(KycFileTooLargeException::class.java)
         assertThat(folder.root.listFiles()?.toList()).containsExactly(source)
     }
 

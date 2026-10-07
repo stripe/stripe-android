@@ -29,10 +29,10 @@ import androidx.core.content.FileProvider
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandler
-import com.stripe.android.crypto.onramp.AdditionalKycSubmissionHandlerRegistry
+import com.stripe.android.crypto.onramp.KycSubmissionHandler
+import com.stripe.android.crypto.onramp.KycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.R
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
+import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.CancellationException
@@ -48,7 +48,7 @@ import java.io.File
 import java.io.IOException
 import java.util.Locale
 
-internal class AdditionalKycActivity : ComponentActivity() {
+internal class KycActivity : ComponentActivity() {
     private var fileSelectionJob: Job? = null
     private var sourceDialog: AlertDialog? = null
 
@@ -56,38 +56,38 @@ internal class AdditionalKycActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val args = intent.extras?.let {
-            BundleCompat.getParcelable(it, EXTRA_ARGS, AdditionalKycArgs::class.java)
-        } ?: error("Missing AdditionalKycArgs")
+            BundleCompat.getParcelable(it, EXTRA_ARGS, KycArgs::class.java)
+        } ?: error("Missing KycArgs")
 
         enableEdgeToEdge()
 
         val factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
-                return KycViewModel(AdditionalKycStateHolder(args.requirements)) as T
+                return KycViewModel(KycStateHolder(args.requirements)) as T
             }
         }
         val viewModel = ViewModelProvider(this, factory)[KycViewModel::class.java]
         setContent {
-            AdditionalKycActivityContent(
+            KycActivityContent(
                 stateHolder = viewModel.stateHolder,
                 args = args,
-                submissionHandler = AdditionalKycSubmissionHandlerRegistry[args.submissionHandlerKey]
+                submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
                     ?: missingSubmissionHandler(args.submissionHandlerKey),
             )
         }
     }
 
     @Composable
-    private fun AdditionalKycActivityContent(
-        stateHolder: AdditionalKycStateHolder,
-        args: AdditionalKycArgs,
-        submissionHandler: AdditionalKycSubmissionHandler,
+    private fun KycActivityContent(
+        stateHolder: KycStateHolder,
+        args: KycArgs,
+        submissionHandler: KycSubmissionHandler,
     ) {
         val scope = rememberCoroutineScope()
         val chooseFile = rememberFilePicker(stateHolder, args.submissionHandlerKey)
 
-        AdditionalKycScreen(
+        KycScreen(
             appearance = args.appearance,
             state = stateHolder.state,
             onClose = { cancel(stateHolder) },
@@ -114,7 +114,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
                 }
             },
             onContinue = {
-                if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitted) {
+                if (stateHolder.state.submissionState == KycSubmissionState.Submitted) {
                     if (!stateHolder.advanceToNextRequirement()) {
                         finishSubmitted()
                     }
@@ -127,7 +127,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
     @Composable
     private fun rememberFilePicker(
-        stateHolder: AdditionalKycStateHolder,
+        stateHolder: KycStateHolder,
         handlerKey: String,
     ): (Int) -> Unit {
         val scope = rememberCoroutineScope()
@@ -164,7 +164,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
                 pendingFileSlot = slotIndex
                 filePicker.launch(acceptedMimeTypes(stateHolder.acceptedFormats))
             }
-            val cameraAvailable = additionalKycCameraFormat(stateHolder.acceptedFormats) != null &&
+            val cameraAvailable = kycCameraFormat(stateHolder.acceptedFormats) != null &&
                 Intent(MediaStore.ACTION_IMAGE_CAPTURE).resolveActivity(packageManager) != null
             if (cameraAvailable) {
                 var selected = false
@@ -193,7 +193,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
     @Composable
     @Suppress("LongMethod") // Keep the two activity-result launchers with their shared pending capture state.
     private fun rememberCameraPicker(
-        stateHolder: AdditionalKycStateHolder,
+        stateHolder: KycStateHolder,
         handlerKey: String,
     ): (Int) -> Unit {
         val scope = rememberCoroutineScope()
@@ -278,17 +278,17 @@ internal class AdditionalKycActivity : ComponentActivity() {
     private suspend fun handleCameraImage(
         source: File,
         slot: Int,
-        stateHolder: AdditionalKycStateHolder,
+        stateHolder: KycStateHolder,
         handlerKey: String,
     ) {
         var prepared: File? = null
         try {
-            val format = additionalKycCameraFormat(stateHolder.acceptedFormats)
+            val format = kycCameraFormat(stateHolder.acceptedFormats)
                 ?: throw IOException("Camera format is no longer accepted")
             if (stateHolder.state.selectingFileSlot != slot) return
             stateHolder.onFileUploadStarted(slot, "photo.$format")
             val file = withContext(Dispatchers.IO) {
-                prepareAdditionalKycCameraImage(
+                prepareKycCameraImage(
                     source, format, stateHolder.maximumFileSizeBytes ?: Long.MAX_VALUE,
                 ).also { prepared = it }
             }
@@ -296,7 +296,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
         } catch (error: CancellationException) {
             stateHolder.onFileSelectionCancelled()
             throw error
-        } catch (_: AdditionalKycFileTooLargeException) {
+        } catch (_: KycFileTooLargeException) {
             stateHolder.onFileTooLarge()
         } catch (_: Exception) {
             stateHolder.onFileSelectionFailed()
@@ -309,7 +309,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
     private suspend fun handleSelectedFile(
         uri: Uri,
         slotIndex: Int,
-        stateHolder: AdditionalKycStateHolder,
+        stateHolder: KycStateHolder,
         handlerKey: String,
     ) {
         val displayName = withContext(Dispatchers.IO) {
@@ -343,7 +343,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
                     }
                 },
                 onFailure = { error ->
-                    if (error is AdditionalKycFileTooLargeException) {
+                    if (error is KycFileTooLargeException) {
                         stateHolder.onFileTooLarge()
                     } else {
                         stateHolder.onFileSelectionFailed()
@@ -358,10 +358,10 @@ internal class AdditionalKycActivity : ComponentActivity() {
     private suspend fun uploadSelectedFile(
         selection: SelectedFile,
         slotIndex: Int,
-        stateHolder: AdditionalKycStateHolder,
+        stateHolder: KycStateHolder,
         handlerKey: String,
     ) {
-        val uploader = AdditionalKycSubmissionHandlerRegistry.uploader(handlerKey)
+        val uploader = KycSubmissionHandlerRegistry.uploader(handlerKey)
         val result = uploader?.upload(selection.file)
             ?: Result.failure(IllegalStateException("Missing KYC document uploader"))
         currentCoroutineContext().ensureActive()
@@ -382,10 +382,10 @@ internal class AdditionalKycActivity : ComponentActivity() {
         )
     }
 
-    private fun cancel(stateHolder: AdditionalKycStateHolder) {
-        if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitting) return
+    private fun cancel(stateHolder: KycStateHolder) {
+        if (stateHolder.state.submissionState == KycSubmissionState.Submitting) return
         fileSelectionJob?.cancel()
-        if (stateHolder.state.submissionState == AdditionalKycSubmissionState.Submitted) {
+        if (stateHolder.state.submissionState == KycSubmissionState.Submitted) {
             finishSubmitted()
             return
         }
@@ -393,14 +393,14 @@ internal class AdditionalKycActivity : ComponentActivity() {
         stateHolder.currentFiles().forEach { file -> file.delete() }
         setResult(
             RESULT_CANCELED,
-            createResultIntent(AdditionalKycScreenAction.Cancelled),
+            createResultIntent(KycScreenAction.Cancelled),
         )
         finish()
     }
 
     private suspend fun submit(
-        stateHolder: AdditionalKycStateHolder,
-        submissionHandler: AdditionalKycSubmissionHandler,
+        stateHolder: KycStateHolder,
+        submissionHandler: KycSubmissionHandler,
     ) {
         val submission = stateHolder.startSubmission() ?: return
         val submittedFiles = stateHolder.currentFiles()
@@ -419,15 +419,15 @@ internal class AdditionalKycActivity : ComponentActivity() {
     private fun finishSubmitted() {
         setResult(
             RESULT_OK,
-            createResultIntent(AdditionalKycScreenAction.Submitted),
+            createResultIntent(KycScreenAction.Submitted),
         )
         finish()
     }
 
-    private fun missingSubmissionHandler(key: String): AdditionalKycSubmissionHandler {
-        return AdditionalKycSubmissionHandler {
+    private fun missingSubmissionHandler(key: String): KycSubmissionHandler {
+        return KycSubmissionHandler {
             Result.failure(
-                IllegalStateException("No additional KYC submission handler registered for key: $key")
+                IllegalStateException("No KYC submission handler registered for key: $key")
             )
         }
     }
@@ -482,7 +482,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
                 ?: throw IOException("Unable to open the selected file")
             inputStream.use { input ->
                 destination.outputStream().use { output ->
-                    copyAdditionalKycFile(
+                    copyKycFile(
                         input = input,
                         output = output,
                         maximumFileSizeBytes = maximumFileSizeBytes,
@@ -516,7 +516,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
         return queriedName ?: uri.lastPathSegment ?: DEFAULT_FILE_NAME
     }
 
-    private class KycViewModel(val stateHolder: AdditionalKycStateHolder) : ViewModel()
+    private class KycViewModel(val stateHolder: KycStateHolder) : ViewModel()
 
     private data class SelectedFile(
         val file: File,
@@ -525,7 +525,7 @@ internal class AdditionalKycActivity : ComponentActivity() {
     )
 
     internal companion object {
-        private const val EXTRA_ARGS = "additional_kyc_args"
+        private const val EXTRA_ARGS = "kyc_args"
         private const val ACTION_ARG = "action"
         private const val FILE_NAME_PREFIX = "stripe-onramp-kyc-"
         private const val DEFAULT_FILE_NAME = "document"
@@ -533,25 +533,25 @@ internal class AdditionalKycActivity : ComponentActivity() {
 
         fun createIntent(
             context: Context,
-            args: AdditionalKycArgs,
+            args: KycArgs,
         ): Intent {
-            return Intent(context, AdditionalKycActivity::class.java)
+            return Intent(context, KycActivity::class.java)
                 .putExtra(EXTRA_ARGS, args)
         }
 
-        fun createResultIntent(action: AdditionalKycScreenAction): Intent {
+        fun createResultIntent(action: KycScreenAction): Intent {
             return Intent().putExtra(ACTION_ARG, action)
         }
 
-        fun argsFrom(intent: Intent): AdditionalKycArgs? {
+        fun argsFrom(intent: Intent): KycArgs? {
             return intent.extras?.let {
-                BundleCompat.getParcelable(it, EXTRA_ARGS, AdditionalKycArgs::class.java)
+                BundleCompat.getParcelable(it, EXTRA_ARGS, KycArgs::class.java)
             }
         }
 
-        fun actionFrom(intent: Intent?): AdditionalKycScreenAction? {
+        fun actionFrom(intent: Intent?): KycScreenAction? {
             return intent?.extras?.let {
-                BundleCompat.getParcelable(it, ACTION_ARG, AdditionalKycScreenAction::class.java)
+                BundleCompat.getParcelable(it, ACTION_ARG, KycScreenAction::class.java)
             }
         }
 
@@ -578,32 +578,32 @@ internal class AdditionalKycActivity : ComponentActivity() {
     }
 }
 
-internal data class AdditionalKycActivityArgs(
-    val requirements: AdditionalKycRequirements,
+internal data class KycActivityArgs(
+    val requirements: KycRequirements,
     val linkAppearance: LinkAppearance?,
     val submissionHandlerKey: String,
 )
 
-internal sealed interface AdditionalKycScreenAction : Parcelable {
+internal sealed interface KycScreenAction : Parcelable {
     @Parcelize
-    data object Cancelled : AdditionalKycScreenAction
+    data object Cancelled : KycScreenAction
 
     @Parcelize
-    data object Submitted : AdditionalKycScreenAction
+    data object Submitted : KycScreenAction
 }
 
-internal data class AdditionalKycActivityResult(
-    val action: AdditionalKycScreenAction,
+internal data class KycActivityResult(
+    val action: KycScreenAction,
 )
 
-internal class AdditionalKycActivityContract : ActivityResultContract<
-    AdditionalKycActivityArgs,
-    AdditionalKycActivityResult
+internal class KycActivityContract : ActivityResultContract<
+    KycActivityArgs,
+    KycActivityResult
     >() {
-    override fun createIntent(context: Context, input: AdditionalKycActivityArgs): Intent {
-        return AdditionalKycActivity.createIntent(
+    override fun createIntent(context: Context, input: KycActivityArgs): Intent {
+        return KycActivity.createIntent(
             context = context,
-            args = AdditionalKycArgs(
+            args = KycArgs(
                 requirements = input.requirements,
                 appearance = input.linkAppearance?.build(),
                 submissionHandlerKey = input.submissionHandlerKey,
@@ -611,15 +611,15 @@ internal class AdditionalKycActivityContract : ActivityResultContract<
         )
     }
 
-    override fun parseResult(resultCode: Int, intent: Intent?): AdditionalKycActivityResult {
-        val action = AdditionalKycActivity.actionFrom(intent) ?: AdditionalKycScreenAction.Cancelled
-        return AdditionalKycActivityResult(action)
+    override fun parseResult(resultCode: Int, intent: Intent?): KycActivityResult {
+        val action = KycActivity.actionFrom(intent) ?: KycScreenAction.Cancelled
+        return KycActivityResult(action)
     }
 }
 
 @Parcelize
-internal data class AdditionalKycArgs(
-    val requirements: AdditionalKycRequirements,
+internal data class KycArgs(
+    val requirements: KycRequirements,
     val appearance: LinkAppearance.State?,
     val submissionHandlerKey: String,
 ) : Parcelable

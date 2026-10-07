@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.crypto.onramp.example.COLLECT_KYC_BUTTON_TAG
-import com.stripe.android.crypto.onramp.example.FULFILL_ADDITIONAL_KYC_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.FULFILL_KYC_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_CITY_TAG
 import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_COUNTRY_TAG
 import com.stripe.android.crypto.onramp.example.KYC_ADDRESS_LINE_1_TAG
@@ -70,7 +70,7 @@ internal fun KycSection(
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
-    onFulfillAdditionalKycRequirement: () -> Unit,
+    onFulfillKycRequirement: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -119,13 +119,13 @@ internal fun KycSection(
             }
 
             Button(
-                onClick = onFulfillAdditionalKycRequirement,
+                onClick = onFulfillKycRequirement,
                 modifier = Modifier
-                    .testTag(FULFILL_ADDITIONAL_KYC_BUTTON_TAG)
+                    .testTag(FULFILL_KYC_BUTTON_TAG)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             ) {
-                Text("Fulfill Additional KYC Requirement")
+                Text("Fulfill KYC Requirement")
             }
         }
     }

@@ -3,41 +3,41 @@ package com.stripe.android.crypto.onramp.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
+import com.stripe.android.crypto.onramp.model.KycRequirement
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
+import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycSubmission
 import java.io.File
 
 @Suppress("TooManyFunctions")
 internal class KycStateHolder(
-    requirements: AdditionalKycRequirements,
+    requirements: KycRequirements,
 ) {
     private val userActionRequirements = requirements.userActionRequired.sortedBy {
         if (it.description == PROOF_OF_ADDRESS) 0 else 1
     }
     private val pendingRequirements = if (userActionRequirements.isEmpty()) {
         requirements.pendingPartnerAction.map { requirement ->
-            AdditionalKycPendingRequirementState(
+            KycPendingRequirementState(
                 requirementType = requirement.toRequirementType(),
-                status = AdditionalKycPendingRequirementStatus.WaitingForReview,
+                status = KycPendingRequirementStatus.WaitingForReview,
             )
         } + requirements.pendingStripeAction.map { requirement ->
-            AdditionalKycPendingRequirementState(
+            KycPendingRequirementState(
                 requirementType = requirement.toRequirementType(),
-                status = AdditionalKycPendingRequirementStatus.Processing,
+                status = KycPendingRequirementStatus.Processing,
             )
         }
     } else {
         emptyList()
     }
     private var requirementIndex = 0
-    private val requirement: AdditionalKycRequirement?
+    private val requirement: KycRequirement?
         get() = userActionRequirements.getOrNull(requirementIndex)
     private var questionnaire = KycQuestionnaireModel(requirement?.questionnaire)
     private var documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
-    private var validationError: AdditionalKycValidationError? = null
-    private var submissionState = AdditionalKycSubmissionState.Collecting
+    private var validationError: KycValidationError? = null
+    private var submissionState = KycSubmissionState.Collecting
     private var page = initialPage(requirement, pendingRequirements)
 
     var state by mutableStateOf(buildState())
@@ -55,33 +55,33 @@ internal class KycStateHolder(
         }
 
         when (page) {
-            AdditionalKycCollectionPage.Context -> page = firstCollectionPage(requirement)
-            AdditionalKycCollectionPage.Questionnaire -> {
+            KycCollectionPage.Context -> page = firstCollectionPage(requirement)
+            KycCollectionPage.Questionnaire -> {
                 if (questionnaire.hasMissingAnswers) {
-                    validationError = AdditionalKycValidationError.MissingRequiredAnswers
+                    validationError = KycValidationError.MissingRequiredAnswers
                     refreshState()
                     return false
                 }
                 page = if (requirement?.document == null) {
-                    AdditionalKycCollectionPage.Questionnaire
-                } else if (requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds) {
-                    AdditionalKycCollectionPage.DocumentOverview
+                    KycCollectionPage.Questionnaire
+                } else if (requirement.toRequirementType() == KycRequirementType.SourceOfFunds) {
+                    KycCollectionPage.DocumentOverview
                 } else {
-                    AdditionalKycCollectionPage.DocumentEditor
+                    KycCollectionPage.DocumentEditor
                 }
             }
-            AdditionalKycCollectionPage.DocumentEditor -> {
-                if (requirement.toRequirementType() != AdditionalKycRequirementType.SourceOfFunds) {
+            KycCollectionPage.DocumentEditor -> {
+                if (requirement.toRequirementType() != KycRequirementType.SourceOfFunds) {
                     return false
                 }
                 if (!canContinue()) return false
                 documents.finishEditing()
-                page = AdditionalKycCollectionPage.DocumentOverview
+                page = KycCollectionPage.DocumentOverview
             }
-            AdditionalKycCollectionPage.DocumentOverview,
-            AdditionalKycCollectionPage.Pending,
-            AdditionalKycCollectionPage.Submitted,
-            AdditionalKycCollectionPage.Unavailable,
+            KycCollectionPage.DocumentOverview,
+            KycCollectionPage.Pending,
+            KycCollectionPage.Submitted,
+            KycCollectionPage.Unavailable,
             -> return false
         }
 
@@ -97,12 +97,12 @@ internal class KycStateHolder(
         }
 
         page = when (page) {
-            AdditionalKycCollectionPage.Questionnaire -> AdditionalKycCollectionPage.Context
-            AdditionalKycCollectionPage.DocumentOverview -> previousPageBeforeDocuments()
-            AdditionalKycCollectionPage.DocumentEditor -> {
-                if (requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds) {
+            KycCollectionPage.Questionnaire -> KycCollectionPage.Context
+            KycCollectionPage.DocumentOverview -> previousPageBeforeDocuments()
+            KycCollectionPage.DocumentEditor -> {
+                if (requirement.toRequirementType() == KycRequirementType.SourceOfFunds) {
                     documents.finishEditing()
-                    AdditionalKycCollectionPage.DocumentOverview
+                    KycCollectionPage.DocumentOverview
                 } else {
                     previousPageBeforeDocuments()
                 }
@@ -118,28 +118,28 @@ internal class KycStateHolder(
 
     fun onAddDocuments() {
         if (!canEdit() || !documents.onAddDocuments()) return
-        page = AdditionalKycCollectionPage.DocumentEditor
+        page = KycCollectionPage.DocumentEditor
         validationError = null
         refreshState()
     }
 
     fun onEditDocuments(slotIndex: Int) {
         if (!canEdit() || !documents.onEditDocuments(slotIndex)) return
-        page = AdditionalKycCollectionPage.DocumentEditor
+        page = KycCollectionPage.DocumentEditor
         validationError = null
         refreshState()
     }
 
     fun onQuestionAnswerChanged(questionId: String, answer: String) {
         if (!canEdit() || !questionnaire.updateAnswer(questionId, answer)) return
-        submissionState = AdditionalKycSubmissionState.Collecting
+        submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
     }
 
     fun onDocumentSubtypeSelected(slotIndex: Int, subtypeId: String) {
         if (!canEdit() || !documents.onDocumentSubtypeSelected(slotIndex, subtypeId)) return
-        submissionState = AdditionalKycSubmissionState.Collecting
+        submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
     }
@@ -150,7 +150,7 @@ internal class KycStateHolder(
 
     fun onFileSelectionStarted(slotIndex: Int) {
         if (!canEdit() || !documents.onFileSelectionStarted(slotIndex)) return
-        submissionState = AdditionalKycSubmissionState.Collecting
+        submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
     }
@@ -189,7 +189,7 @@ internal class KycStateHolder(
             return file
         }
         val replacedFile = documents.onFileSelected(slotIndex, file, displayName, fileId)
-        submissionState = AdditionalKycSubmissionState.Collecting
+        submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
         return replacedFile
@@ -209,16 +209,16 @@ internal class KycStateHolder(
 
     fun onFileRemoved(slotIndex: Int): File? {
         if (!canEdit() || !documents.containsSlot(slotIndex)) return null
-        val removedFile = documents.onFileRemoved(slotIndex, page == AdditionalKycCollectionPage.DocumentEditor)
-        submissionState = AdditionalKycSubmissionState.Collecting
+        val removedFile = documents.onFileRemoved(slotIndex, page == KycCollectionPage.DocumentEditor)
+        submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
         return removedFile
     }
 
-    fun startSubmission(): AdditionalKycSubmission? {
+    fun startSubmission(): KycSubmission? {
         val submission = createSubmission() ?: return null
-        submissionState = AdditionalKycSubmissionState.Submitting
+        submissionState = KycSubmissionState.Submitting
         validationError = null
         documents.clearValidation()
         documents.onFileSelectionCancelled()
@@ -227,25 +227,25 @@ internal class KycStateHolder(
     }
 
     fun onSubmissionFailed() {
-        if (submissionState != AdditionalKycSubmissionState.Submitting) {
+        if (submissionState != KycSubmissionState.Submitting) {
             return
         }
-        submissionState = AdditionalKycSubmissionState.Failed
+        submissionState = KycSubmissionState.Failed
         refreshState()
     }
 
     fun onSubmissionSucceeded() {
-        if (submissionState != AdditionalKycSubmissionState.Submitting) {
+        if (submissionState != KycSubmissionState.Submitting) {
             return
         }
-        submissionState = AdditionalKycSubmissionState.Submitted
-        page = AdditionalKycCollectionPage.Submitted
+        submissionState = KycSubmissionState.Submitted
+        page = KycCollectionPage.Submitted
         refreshState()
     }
 
     fun advanceToNextRequirement(): Boolean {
         if (
-            submissionState != AdditionalKycSubmissionState.Submitted ||
+            submissionState != KycSubmissionState.Submitted ||
             requirementIndex >= userActionRequirements.lastIndex
         ) {
             return false
@@ -257,7 +257,7 @@ internal class KycStateHolder(
         validationError = null
         documents.clearValidation()
         documents.onFileSelectionCancelled()
-        submissionState = AdditionalKycSubmissionState.Collecting
+        submissionState = KycSubmissionState.Collecting
         page = initialPage(requirement, emptyList())
         refreshState()
         return true
@@ -265,7 +265,7 @@ internal class KycStateHolder(
 
     fun currentFiles(): List<File> = documents.currentFiles()
 
-    fun createSubmission(): AdditionalKycSubmission? {
+    fun createSubmission(): KycSubmission? {
         val requirement = requirement ?: return null
         if (!canEdit() || !isCollectionAvailable() || documents.selectingFileSlot != null) return null
         val error = currentValidationError()
@@ -274,9 +274,9 @@ internal class KycStateHolder(
             refreshState()
             return null
         }
-        return AdditionalKycSubmission(
+        return KycSubmission(
             requirements = mapOf(
-                requirement.description to AdditionalKycRequirementSubmission(
+                requirement.description to KycRequirementSubmission(
                     requestedBy = requirement.requestedBy,
                     documents = documents.createSubmission(),
                     questionnaire = questionnaire.createSubmission(),
@@ -289,8 +289,8 @@ internal class KycStateHolder(
         state = buildState()
     }
 
-    private fun buildState(): AdditionalKycScreenState {
-        return AdditionalKycScreenState(
+    private fun buildState(): KycScreenState {
+        return KycScreenState(
             page = page,
             requirementType = requirement.toRequirementType(),
             errorMessages = requirement?.errors?.map { it.developerMessage }.orEmpty(),
@@ -315,22 +315,22 @@ internal class KycStateHolder(
 
     private fun canContinue(): Boolean {
         return when (page) {
-            AdditionalKycCollectionPage.Context -> isCollectionAvailable()
-            AdditionalKycCollectionPage.Questionnaire -> !questionnaire.hasMissingAnswers
-            AdditionalKycCollectionPage.DocumentEditor ->
-                requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds && documents.canContinue
+            KycCollectionPage.Context -> isCollectionAvailable()
+            KycCollectionPage.Questionnaire -> !questionnaire.hasMissingAnswers
+            KycCollectionPage.DocumentEditor ->
+                requirement.toRequirementType() == KycRequirementType.SourceOfFunds && documents.canContinue
             else -> false
         }
     }
 
     private fun canEdit(): Boolean {
-        return submissionState == AdditionalKycSubmissionState.Collecting ||
-            submissionState == AdditionalKycSubmissionState.Failed
+        return submissionState == KycSubmissionState.Collecting ||
+            submissionState == KycSubmissionState.Failed
     }
 
-    private fun currentValidationError(): AdditionalKycValidationError? {
+    private fun currentValidationError(): KycValidationError? {
         return if (questionnaire.hasMissingAnswers) {
-            AdditionalKycValidationError.MissingRequiredAnswers
+            KycValidationError.MissingRequiredAnswers
         } else {
             documents.currentValidationError()
         }
@@ -338,21 +338,21 @@ internal class KycStateHolder(
 
     private fun isCollectionAvailable(): Boolean = requirement?.isSupportedForCollection() == true
 
-    private fun previousPageBeforeDocuments(): AdditionalKycCollectionPage {
+    private fun previousPageBeforeDocuments(): KycCollectionPage {
         return if (!questionnaire.hasQuestions) {
-            AdditionalKycCollectionPage.Context
+            KycCollectionPage.Context
         } else {
-            AdditionalKycCollectionPage.Questionnaire
+            KycCollectionPage.Questionnaire
         }
     }
 
-    private fun AdditionalKycRequirement?.toRequirementType(): AdditionalKycRequirementType {
+    private fun KycRequirement?.toRequirementType(): KycRequirementType {
         return when (this?.description) {
-            PROOF_OF_ADDRESS -> AdditionalKycRequirementType.ProofOfAddress
+            PROOF_OF_ADDRESS -> KycRequirementType.ProofOfAddress
             SOURCE_OF_FUNDS,
             SOURCE_OF_FUNDS_QUESTIONS,
-            -> AdditionalKycRequirementType.SourceOfFunds
-            else -> AdditionalKycRequirementType.AdditionalVerification
+            -> KycRequirementType.SourceOfFunds
+            else -> KycRequirementType.Verification
         }
     }
 
@@ -361,31 +361,31 @@ internal class KycStateHolder(
         private const val SOURCE_OF_FUNDS = "source_of_funds"
         private const val SOURCE_OF_FUNDS_QUESTIONS = "source_of_funds_questions"
         private fun initialPage(
-            requirement: AdditionalKycRequirement?,
-            pendingRequirements: List<AdditionalKycPendingRequirementState>,
-        ): AdditionalKycCollectionPage {
+            requirement: KycRequirement?,
+            pendingRequirements: List<KycPendingRequirementState>,
+        ): KycCollectionPage {
             return when {
-                pendingRequirements.isNotEmpty() -> AdditionalKycCollectionPage.Pending
-                requirement == null -> AdditionalKycCollectionPage.Unavailable
+                pendingRequirements.isNotEmpty() -> KycCollectionPage.Pending
+                requirement == null -> KycCollectionPage.Unavailable
                 !requirement.isSupportedForCollection() ->
-                    AdditionalKycCollectionPage.Unavailable
+                    KycCollectionPage.Unavailable
                 requirement.description !in setOf(
                     PROOF_OF_ADDRESS,
                     SOURCE_OF_FUNDS,
                     SOURCE_OF_FUNDS_QUESTIONS,
-                ) -> AdditionalKycCollectionPage.Unavailable
-                else -> AdditionalKycCollectionPage.Context
+                ) -> KycCollectionPage.Unavailable
+                else -> KycCollectionPage.Context
             }
         }
 
-        private fun firstCollectionPage(requirement: AdditionalKycRequirement?): AdditionalKycCollectionPage {
+        private fun firstCollectionPage(requirement: KycRequirement?): KycCollectionPage {
             val hasVisibleQuestions = !requirement?.questionnaire?.questions.isNullOrEmpty()
             return when {
-                hasVisibleQuestions -> AdditionalKycCollectionPage.Questionnaire
+                hasVisibleQuestions -> KycCollectionPage.Questionnaire
                 requirement?.description == SOURCE_OF_FUNDS && requirement.document != null ->
-                    AdditionalKycCollectionPage.DocumentOverview
-                requirement?.document != null -> AdditionalKycCollectionPage.DocumentEditor
-                else -> AdditionalKycCollectionPage.Questionnaire
+                    KycCollectionPage.DocumentOverview
+                requirement?.document != null -> KycCollectionPage.DocumentEditor
+                else -> KycCollectionPage.Questionnaire
             }
         }
     }

@@ -30,7 +30,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 	public static final field $stable I
 	public final fun authorize (Ljava/lang/String;)V
 	public final fun collectPaymentMethod (Lcom/stripe/android/crypto/onramp/model/PaymentMethodSelection;)V
-	public final fun fulfillAdditionalKycRequirement ()V
+	public final fun fulfillKycRequirements ()V
 	public final fun performCheckout (Ljava/lang/String;)V
 	public final fun presentTermsAndConditionsIfNeeded ()V
 	public final fun presentTermsOfServiceIfNeeded ()V
@@ -295,34 +295,6 @@ public final class com/stripe/android/crypto/onramp/model/LinkUserInfo : android
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycCallback {
-	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult;)V
-}
-
-public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Failed : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-	public static final field $stable I
-	public final fun getError ()Ljava/lang/Throwable;
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$PendingVerification : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult$Submitted : com/stripe/android/crypto/onramp/model/OnrampAdditionalKycResult {
-	public static final field $stable I
-}
-
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
 }
 
@@ -363,11 +335,11 @@ public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public static final field $stable I
 	public fun <init> ()V
-	public final fun additionalKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampAdditionalKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun authorizeCallback (Lcom/stripe/android/crypto/onramp/model/OnrampAuthorizeCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun checkoutCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun collectPaymentCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun googlePayIsReadyCallback (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun kycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun onrampSessionClientSecretProvider (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun samsungPayIsReadyCallback (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun termsAndConditionsCallback (Lcom/stripe/android/crypto/onramp/model/OnrampPartnerTermsCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
@@ -504,6 +476,34 @@ public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountRe
 public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult$Failed : com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult {
 	public static final field $stable I
 	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampKycCallback {
+	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampKycResult;)V
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampKycResult {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKycResult$Cancelled : com/stripe/android/crypto/onramp/model/OnrampKycResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKycResult$Failed : com/stripe/android/crypto/onramp/model/OnrampKycResult {
+	public static final field $stable I
+	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKycResult$NotRequired : com/stripe/android/crypto/onramp/model/OnrampKycResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKycResult$PendingVerification : com/stripe/android/crypto/onramp/model/OnrampKycResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampKycResult$Submitted : com/stripe/android/crypto/onramp/model/OnrampKycResult {
+	public static final field $stable I
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampLogOutResult {
@@ -895,10 +895,10 @@ public final class com/stripe/android/crypto/onramp/model/compliance/SubmitIdent
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/ui/ComposableSingletons$AdditionalKycScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/ui/ComposableSingletons$AdditionalKycScreenKt;
+public final class com/stripe/android/crypto/onramp/ui/ComposableSingletons$KycScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/ui/ComposableSingletons$KycScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$136789293$crypto_onramp_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1864343240$crypto_onramp_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1816014815$crypto_onramp_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-761184410$crypto_onramp_release ()Lkotlin/jvm/functions/Function2;
 }
 

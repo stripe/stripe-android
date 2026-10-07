@@ -1,29 +1,29 @@
 package com.stripe.android.crypto.onramp.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class AdditionalKycCollectionValidationTest {
+internal class KycCollectionValidationTest {
     @Test
     fun `answers stop at five thousand characters`() {
-        assertThat(limitAdditionalKycAnswer("a".repeat(5_001))).isEqualTo("a".repeat(5_000))
+        assertThat(limitKycAnswer("a".repeat(5_001))).isEqualTo("a".repeat(5_000))
     }
 
     @Test
     fun `answer limit preserves composed characters and emoji`() {
         val character = "👨‍👩‍👧‍👦"
-        assertThat(limitAdditionalKycAnswer(character.repeat(5_001))).isEqualTo(character.repeat(714))
-        assertThat(limitAdditionalKycAnswer("e\u0301".repeat(5_001))).isEqualTo("e\u0301".repeat(2_500))
+        assertThat(limitKycAnswer(character.repeat(5_001))).isEqualTo(character.repeat(714))
+        assertThat(limitKycAnswer("e\u0301".repeat(5_001))).isEqualTo("e\u0301".repeat(2_500))
     }
 
     @Test
     fun `short answers remain unchanged`() {
-        assertThat(limitAdditionalKycAnswer("Savings")).isEqualTo("Savings")
+        assertThat(limitKycAnswer("Savings")).isEqualTo("Savings")
     }
 
     @Test
@@ -61,9 +61,9 @@ internal class AdditionalKycCollectionValidationTest {
 
     @Test
     fun `scalar boundary never splits a composed character`() {
-        assertThat(limitAdditionalKycAnswer("a".repeat(4_999) + "e\u0301"))
+        assertThat(limitKycAnswer("a".repeat(4_999) + "e\u0301"))
             .isEqualTo("a".repeat(4_999))
-        assertThat(limitAdditionalKycAnswer("😀".repeat(5_001))).isEqualTo("😀".repeat(5_000))
+        assertThat(limitKycAnswer("😀".repeat(5_001))).isEqualTo("😀".repeat(5_000))
     }
 
     @Test
@@ -84,11 +84,11 @@ internal class AdditionalKycCollectionValidationTest {
         assertThat(requirement().document?.maxFilesPerDocumentType).isEqualTo(10)
     }
 
-    private fun requirement() = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(
+    private fun requirement() = Json.decodeFromString<RetrieveKycRequirementsResponse>(
         requireNotNull(
             javaClass.classLoader?.getResourceAsStream(
-                "additional_kyc_requirements/source_of_funds_required.json"
+                "kyc_requirements/source_of_funds_required.json"
             )
         ).bufferedReader().use { it.readText() }
-    ).requirements.toAdditionalKycRequirements().userActionRequired.single()
+    ).requirements.toKycRequirements().userActionRequired.single()
 }

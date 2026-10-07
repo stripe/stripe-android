@@ -5,13 +5,13 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
-internal class AdditionalKycFileCopyTest {
+internal class KycFileCopyTest {
     @Test
     fun `file at size limit is copied`() {
         val inputBytes = ByteArray(16) { index -> index.toByte() }
         val output = ByteArrayOutputStream()
 
-        copyAdditionalKycFile(
+        copyKycFile(
             input = ByteArrayInputStream(inputBytes),
             output = output,
             maximumFileSizeBytes = 16,
@@ -25,14 +25,14 @@ internal class AdditionalKycFileCopyTest {
         val output = ByteArrayOutputStream()
 
         val error = runCatching {
-            copyAdditionalKycFile(
+            copyKycFile(
                 input = ByteArrayInputStream(ByteArray(17)),
                 output = output,
                 maximumFileSizeBytes = 16,
             )
         }.exceptionOrNull()
 
-        assertThat(error).isInstanceOf(AdditionalKycFileTooLargeException::class.java)
+        assertThat(error).isInstanceOf(KycFileTooLargeException::class.java)
         assertThat(output.size()).isAtMost(16)
     }
 
@@ -41,7 +41,7 @@ internal class AdditionalKycFileCopyTest {
         val inputBytes = ByteArray(17)
         val output = ByteArrayOutputStream()
 
-        copyAdditionalKycFile(
+        copyKycFile(
             input = ByteArrayInputStream(inputBytes),
             output = output,
             maximumFileSizeBytes = null,

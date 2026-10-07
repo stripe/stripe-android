@@ -9,7 +9,7 @@
 
     <application>
         <provider
-            android:name="com.stripe.android.crypto.onramp.ui.AdditionalKycCameraFileProvider"
+            android:name="com.stripe.android.crypto.onramp.ui.KycCameraFileProvider"
             android:authorities="${applicationId}.stripe.onramp.kyc.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -29,7 +29,7 @@
             android:exported="false" />
 
         <activity
-            android:name="com.stripe.android.crypto.onramp.ui.AdditionalKycActivity"
+            android:name="com.stripe.android.crypto.onramp.ui.KycActivity"
             android:theme="@style/StripeOnrampTheme"
             android:exported="false" />
 

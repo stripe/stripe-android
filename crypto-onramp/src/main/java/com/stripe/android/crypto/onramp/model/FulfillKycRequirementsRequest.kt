@@ -8,7 +8,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
 internal data class FulfillKycRequirementsRequest(
-    val requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
+    val requirements: Map<String, KycRequirementSubmissionRequest>,
 ) {
     fun toParamMap(): Map<String, *> {
         return mapOf(
@@ -26,16 +26,16 @@ internal data class FulfillKycRequirementsRequest(
 }
 
 @Serializable
-internal data class AdditionalKycRequirementSubmissionRequest(
+internal data class KycRequirementSubmissionRequest(
     @SerialName("requested_by")
     val requestedBy: String,
-    val documents: List<AdditionalKycDocumentSubmissionRequest>,
+    val documents: List<KycDocumentSubmissionRequest>,
     @SerialName("additional_requirements")
-    val additionalRequirements: AdditionalKycCollectionSubmissionRequest?,
+    val collectionRequirements: KycCollectionSubmissionRequest?,
 )
 
 @Serializable
-internal data class AdditionalKycDocumentSubmissionRequest(
+internal data class KycDocumentSubmissionRequest(
     @SerialName("document_subtype")
     val documentSubtype: String,
     @SerialName("file_ids")
@@ -43,17 +43,17 @@ internal data class AdditionalKycDocumentSubmissionRequest(
 )
 
 @Serializable
-internal data class AdditionalKycCollectionSubmissionRequest(
-    val questionnaire: AdditionalKycQuestionnaireSubmissionRequest,
+internal data class KycCollectionSubmissionRequest(
+    val questionnaire: KycQuestionnaireSubmissionRequest,
 )
 
 @Serializable
-internal data class AdditionalKycQuestionnaireSubmissionRequest(
-    val answers: List<AdditionalKycQuestionnaireAnswerRequest>,
+internal data class KycQuestionnaireSubmissionRequest(
+    val answers: List<KycQuestionnaireAnswerRequest>,
 )
 
 @Serializable
-internal data class AdditionalKycQuestionnaireAnswerRequest(
+internal data class KycQuestionnaireAnswerRequest(
     @SerialName("question_id")
     val questionId: String,
     val value: String,
