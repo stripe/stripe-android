@@ -178,7 +178,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             amount = json.requiredLong("amount").also { require(it >= 0) },
             inclusive = json.requiredBoolean("inclusive"),
             taxRate = CheckoutSessionResponse.TaxRate(
-                displayName = taxRate.requiredString("display_name"),
+                displayName = taxRate.getString("display_name"),
                 percentage = taxRate.requiredFiniteDouble("percentage"),
                 rateType = rateType,
             ),
