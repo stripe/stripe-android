@@ -12,7 +12,7 @@ import com.stripe.android.model.ClientAttributionMetadata
  * [savePaymentMethod] is only applicable in payment/subscription mode and should be null for setup mode.
  */
 internal data class ConfirmCheckoutSessionParams(
-    private val paymentMethodId: String,
+    private val paymentMethodId: String?,
     private val expectedPaymentMethodType: String?,
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,
@@ -20,10 +20,13 @@ internal data class ConfirmCheckoutSessionParams(
     private val savePaymentMethod: Boolean?,
     private val shipping: Shipping?,
     private val collectedInformation: CollectedInformation?,
+    private val customerEmail: String?,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
-            put("payment_method", paymentMethodId)
+            if (paymentMethodId != null) {
+                put("payment_method", paymentMethodId)
+            }
             if (expectedPaymentMethodType != null) {
                 put("expected_payment_method_type", expectedPaymentMethodType)
             }
@@ -38,6 +41,9 @@ internal data class ConfirmCheckoutSessionParams(
             }
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())
+            }
+            if (customerEmail != null) {
+                put("customer_data", mapOf("email" to customerEmail))
             }
         }
     }

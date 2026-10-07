@@ -221,6 +221,25 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `Session only completion succeeds without saving an Intent`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Complete(
+            intent = null,
+            completedFullPaymentFlow = true,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            val completeState = awaitCompleteState()
+            assertThat(completeState.result.assertSucceeded().intent).isNull()
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+            confirmationSaverTurbine.expectNoEvents()
+        }
+    }
+
+    @Test
     fun `On complete action, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,

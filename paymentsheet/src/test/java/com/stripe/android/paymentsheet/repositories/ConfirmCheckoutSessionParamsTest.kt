@@ -123,6 +123,7 @@ class ConfirmCheckoutSessionParamsTest {
             expectedAmount = expectedAmount,
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
+            customerEmail = null,
         )
     }
 

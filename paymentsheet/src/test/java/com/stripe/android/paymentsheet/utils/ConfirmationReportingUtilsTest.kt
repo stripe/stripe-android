@@ -18,6 +18,17 @@ import org.junit.Test
 class ConfirmationReportingUtilsTest {
 
     @Test
+    fun `Session only success skips Intent dependent reporting`() = runTest {
+        val eventReporter = FakeEventReporter()
+        eventReporter.reportPaymentResult(
+            ConfirmationHandler.Result.Succeeded(intent = null),
+            PaymentSelection.GooglePay,
+        )
+        eventReporter.paymentSuccessCalls.expectNoEvents()
+        eventReporter.validate()
+    }
+
+    @Test
     fun `toConfirmationError returns correct error for external payment method error`() {
         val epmError = ConfirmationHandler.Result.Failed(
             cause = Exception(),

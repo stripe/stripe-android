@@ -17,6 +17,11 @@ import javax.inject.Inject
 internal interface IntentConfirmationInterceptor {
 
     suspend fun intercept(
+        confirmationOption: CheckoutSessionConfirmationOption.WithoutPaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationDefinition.Action<Args> = error("Confirmation without a payment method requires a Checkout Session.")
+
+    suspend fun intercept(
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,

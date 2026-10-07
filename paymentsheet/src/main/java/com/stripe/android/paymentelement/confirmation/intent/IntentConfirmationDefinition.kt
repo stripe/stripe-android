@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -18,29 +19,42 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
     private val paymentLauncherFactory:
         (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, ApiConfiguration.State) -> PaymentLauncher,
+    private val checkoutSessionFinalizer: CheckoutSessionConfirmationFinalizer,
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption,
+    ConfirmationHandler.Option,
     ActivityResultLauncher<PaymentLauncherContract.Args>,
     IntentConfirmationDefinition.Args,
     InternalPaymentResult
     > {
     override val key: String = "IntentConfirmation"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
-        return confirmationOption as? PaymentMethodConfirmationOption
+    override fun option(confirmationOption: ConfirmationHandler.Option): ConfirmationHandler.Option? {
+        return confirmationOption.takeIf {
+            it is PaymentMethodConfirmationOption || it is CheckoutSessionConfirmationOption
+        }
     }
 
+    override fun canConfirm(
+        confirmationOption: ConfirmationHandler.Option,
+        confirmationArgs: ConfirmationHandler.Args,
+    ): Boolean = confirmationOption !is CheckoutSessionConfirmationOption ||
+        confirmationArgs.paymentMethodMetadata.integrationMetadata is IntegrationMetadata.CheckoutSession
+
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: ConfirmationHandler.Option,
         confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<Args> {
         val paymentMethodMetadata = confirmationArgs.paymentMethodMetadata
+        if (confirmationOption is CheckoutSessionConfirmationOption.Finalize) {
+            return checkoutSessionFinalizer.finalize(confirmationOption.response, confirmationOption.intent)
+        }
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
@@ -70,6 +84,11 @@ internal class IntentConfirmationDefinition(
                     confirmationOption = confirmationOption,
                     shippingValues = shippingValues,
                 )
+            is CheckoutSessionConfirmationOption.WithoutPaymentMethod -> interceptor.intercept(
+                confirmationOption = confirmationOption,
+                shippingValues = shippingValues,
+            )
+            else -> error("Unsupported Intent confirmation option: $confirmationOption")
         }
     }
 
@@ -91,7 +110,7 @@ internal class IntentConfirmationDefinition(
     override fun launch(
         launcher: ActivityResultLauncher<PaymentLauncherContract.Args>,
         arguments: Args,
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: ConfirmationHandler.Option,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
         val paymentLauncher = paymentLauncherFactory(
@@ -102,15 +121,38 @@ internal class IntentConfirmationDefinition(
         when (arguments) {
             is Args.Confirm -> launchConfirm(paymentLauncher, arguments.confirmNextParams)
             is Args.NextAction -> paymentLauncher.handleNextActionForStripeIntent(arguments.intent)
+            is Args.CheckoutNextAction -> paymentLauncher.handleNextActionForStripeIntent(arguments.intent)
         }
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption,
+        confirmationOption: ConfirmationHandler.Option,
         confirmationArgs: ConfirmationHandler.Args,
         launcherArgs: Args,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
+        if (launcherArgs is Args.CheckoutNextAction) {
+            val metadata = CheckoutSessionConfirmationFinalizer.metadata(launcherArgs.response)
+            return when (result) {
+                is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = CheckoutSessionConfirmationOption.Finalize(
+                        launcherArgs.response,
+                        result.intent,
+                    ),
+                    arguments = confirmationArgs,
+                )
+                is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
+                    cause = result.throwable,
+                    message = result.throwable.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    metadata = metadata,
+                )
+                is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                    metadata = metadata,
+                )
+            }
+        }
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
@@ -147,6 +189,15 @@ internal class IntentConfirmationDefinition(
 
     sealed interface Args : Parcelable {
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+
+        @Parcelize
+        data class CheckoutNextAction(
+            val intent: StripeIntent,
+            val response: CheckoutSessionResponse,
+        ) : Args {
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType
+                get() = DeferredIntentConfirmationType.Server
+        }
 
         @Parcelize
         data class NextAction(

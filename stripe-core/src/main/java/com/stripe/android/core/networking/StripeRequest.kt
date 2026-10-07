@@ -33,6 +33,9 @@ abstract class StripeRequest {
      */
     abstract val headers: Map<String, String>
 
+    open val connectTimeoutMillis: Int? get() = null
+    open val readTimeoutMillis: Int? get() = null
+
     /**
      * Additional HTTP headers attached if this is a POST request
      */
