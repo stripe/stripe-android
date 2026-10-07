@@ -281,7 +281,6 @@ class CollectBankAccountViewModelTest {
             verify(attachFinancialConnectionsSession, never()).forPaymentIntent(
                 any(),
                 any(),
-                any(),
                 any()
             )
             verify(retrieveStripeIntent).invoke(
@@ -309,7 +308,6 @@ class CollectBankAccountViewModelTest {
             // Then
             cancelAndConsumeRemainingEvents()
             verify(attachFinancialConnectionsSession, never()).forSetupIntent(
-                any(),
                 any(),
                 any(),
                 any()
@@ -499,9 +497,8 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId,
                     configuration = configuration,
                     hostedSurface = hostedSurface,
                 )
@@ -515,10 +512,9 @@ class CollectBankAccountViewModelTest {
         attachFinancialConnectionsSession.stub {
             on {
                 forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -530,10 +526,9 @@ class CollectBankAccountViewModelTest {
         attachFinancialConnectionsSession.stub {
             on {
                 forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -545,9 +540,8 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = name,
                         email = email
@@ -564,8 +558,7 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
@@ -585,8 +578,7 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
