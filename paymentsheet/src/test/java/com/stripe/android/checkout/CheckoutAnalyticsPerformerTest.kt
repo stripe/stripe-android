@@ -27,7 +27,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val call = eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(call.paymentSelection).isEqualTo(selection)
-        assertThat(call.intentId).isEqualTo(successResult.intent.id)
+        assertThat(call.intentId).isEqualTo(successResult.intent?.id)
 
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)

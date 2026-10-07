@@ -90,6 +90,18 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             requiresBillingAddress = json.optString("billing_address_collection") == "required",
             merchantCountry = merchantCountry,
             businessName = StripeJsonUtils.optString(elementsJson, "business_name"),
+            submissionAttempt = json.optionalObject("submission_attempt")?.let {
+                CheckoutSessionResponse.SubmissionAttempt(
+                    state = when (it.requiredString("state")) {
+                        "processing" -> CheckoutSessionResponse.SubmissionAttempt.State.PROCESSING
+                        "requires_approval" -> CheckoutSessionResponse.SubmissionAttempt.State.REQUIRES_APPROVAL
+                        "complete" -> CheckoutSessionResponse.SubmissionAttempt.State.COMPLETE
+                        "failed" -> CheckoutSessionResponse.SubmissionAttempt.State.FAILED
+                        else -> error("Unsupported submission attempt state")
+                    },
+                )
+            },
+            routeToOrchestrationInterface = json.optionalBoolean("route_to_orchestration_interface"),
         )
     }.getOrNull()
 

@@ -144,6 +144,7 @@ internal class ConfirmationMediator<
                     cause = action.cause,
                     message = action.message,
                     errorType = action.errorType,
+                    metadata = action.metadata,
                 )
             }
         }
@@ -159,10 +160,17 @@ internal class ConfirmationMediator<
             val cause: Throwable,
             val message: ResolvableString,
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
-        ) : Action
+            val metadata: ConfirmationMetadata,
+        ) : Action {
+            constructor(
+                cause: Throwable,
+                message: ResolvableString,
+                errorType: ConfirmationHandler.Result.Failed.ErrorType,
+            ) : this(cause, message, errorType, MutableConfirmationMetadata())
+        }
 
         data class Complete(
-            val intent: StripeIntent,
+            val intent: StripeIntent?,
             val metadata: ConfirmationMetadata,
             val completedFullPaymentFlow: Boolean,
         ) : Action

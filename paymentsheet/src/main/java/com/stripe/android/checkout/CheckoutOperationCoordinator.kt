@@ -81,10 +81,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
                 completeConfirmation { wasRestored ->
-                    // A confirmation returning through an activity result has no fresh response to
-                    // commit, but the session changed server-side, so re-fetch it.
-                    val response = (state.result as? ConfirmationHandler.Result.Succeeded)
-                        ?.metadata?.get(CheckoutSessionResponseKey)
+                    val response = state.result.metadata[CheckoutSessionResponseKey]
                     refreshSession {
                         if (response != null) {
                             sessionRefresher.refresh(response)

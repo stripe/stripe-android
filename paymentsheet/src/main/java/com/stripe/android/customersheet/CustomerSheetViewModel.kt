@@ -1018,7 +1018,7 @@ internal class CustomerSheetViewModel(
 
             when (val result = confirmationHandler.awaitResult()) {
                 is ConfirmationHandler.Result.Succeeded ->
-                    onSavePaymentMethodSuccess(result.intent, integrationMetadata)
+                    result.intent?.let { onSavePaymentMethodSuccess(it, integrationMetadata) }
                 is ConfirmationHandler.Result.Failed -> onSavePaymentMethodFailed(result.message, integrationMetadata)
                 is ConfirmationHandler.Result.Canceled,
                 null -> onSavePaymentMethodCancel()

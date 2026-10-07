@@ -195,6 +195,7 @@ internal class DefaultConfirmationHandler(
                         cause = action.cause,
                         message = action.message,
                         type = action.errorType,
+                        metadata = action.metadata,
                     )
                 )
             }
@@ -234,9 +235,11 @@ internal class DefaultConfirmationHandler(
                 cause = result.cause,
                 type = result.type,
                 message = result.message,
+                metadata = result.metadata,
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,
+                metadata = result.metadata,
             )
         }
 
@@ -248,7 +251,7 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Complete(result)
 
-        if (result is ConfirmationHandler.Result.Succeeded) {
+        if (result is ConfirmationHandler.Result.Succeeded && result.intent != null) {
             initialConfirmationArguments?.let { arguments ->
                 confirmationSaver.save(
                     result.intent,

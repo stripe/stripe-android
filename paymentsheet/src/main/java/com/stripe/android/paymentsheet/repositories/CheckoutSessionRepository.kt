@@ -7,6 +7,7 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -75,6 +76,30 @@ internal class CheckoutSessionRepository @Inject constructor(
         url = confirmUrl(id),
         params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
     )
+
+    suspend fun retrieve(sessionId: String): Result<CheckoutSessionResponse> = executeRequestWithResultParser(
+        stripeErrorJsonParser = stripeErrorJsonParser,
+        stripeNetworkClient = stripeNetworkClient,
+        request = apiRequestFactory.createGet(
+            url = updateUrl(sessionId),
+            options = apiRequestOptionsProvider.get(),
+            params = mapOf("elements_session_client[is_aggregation_expected]" to "true"),
+        ),
+        responseJsonParser = CheckoutSessionResponseJsonParser,
+    )
+
+    suspend fun poll(sessionId: String, timeoutMillis: Long): Result<CheckoutSessionPollResponse> {
+        val request = apiRequestFactory.createGet(
+            url = "${updateUrl(sessionId)}/poll",
+            options = apiRequestOptionsProvider.get(),
+        )
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = PollingRequest(request, timeoutMillis),
+            responseJsonParser = CheckoutSessionPollResponseJsonParser,
+        )
+    }
 
     suspend fun detachPaymentMethod(
         sessionId: String,
@@ -175,6 +200,20 @@ internal class CheckoutSessionRepository @Inject constructor(
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
     }
+}
+
+/** Polling owns retries and divides the remaining budget between connection and response I/O. */
+private class PollingRequest(
+    private val request: ApiRequest,
+    timeoutMillis: Long,
+) : StripeRequest() {
+    override val method = request.method
+    override val mimeType = request.mimeType
+    override val url = request.url
+    override val headers = request.headers
+    override val retryResponseCodes: Iterable<Int> = emptyList()
+    override val connectTimeoutMillis = (timeoutMillis / 2).coerceIn(1, Int.MAX_VALUE.toLong()).toInt()
+    override val readTimeoutMillis = (timeoutMillis - connectTimeoutMillis).coerceIn(1, Int.MAX_VALUE.toLong()).toInt()
 }
 
 private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {

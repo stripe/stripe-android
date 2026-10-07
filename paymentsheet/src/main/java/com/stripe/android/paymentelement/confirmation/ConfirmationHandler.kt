@@ -117,6 +117,8 @@ internal interface ConfirmationHandler {
      * Defines the result types that can be returned after completing a confirmation process.
      */
     sealed interface Result {
+        val metadata: ConfirmationMetadata
+
         fun log(logger: Logger)
 
         /**
@@ -124,7 +126,10 @@ internal interface ConfirmationHandler {
          */
         data class Canceled(
             val action: Action,
+            override val metadata: ConfirmationMetadata,
         ) : Result {
+            constructor(action: Action) : this(action, MutableConfirmationMetadata())
+
             /**
              * Action to perform if a user cancels a running confirmation process.
              */
@@ -157,8 +162,8 @@ internal interface ConfirmationHandler {
          * state is returned as part of the result as well.
          */
         data class Succeeded(
-            val intent: StripeIntent,
-            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
+            val intent: StripeIntent?,
+            override val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
         ) : Result {
             override fun log(logger: Logger) {
@@ -174,7 +179,11 @@ internal interface ConfirmationHandler {
             val cause: Throwable,
             val message: ResolvableString,
             val type: ErrorType,
+            override val metadata: ConfirmationMetadata,
         ) : Result {
+            constructor(cause: Throwable, message: ResolvableString, type: ErrorType) :
+                this(cause, message, type, MutableConfirmationMetadata())
+
             override fun log(logger: Logger) {
                 logger.error("ConfirmationHandler.Result.Failed", cause)
             }
