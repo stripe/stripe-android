@@ -31,6 +31,10 @@ internal object CheckoutExpressDefinitions {
         displayOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.entries,
         buttonTypeOptions = ExpressCheckoutElement.Configuration.GooglePayConfiguration.ButtonType.entries,
     )
+    val paymentMethodOrder = stringCsv(
+        key = "express.payment_method_order",
+        displayName = "Payment method order (comma separated)",
+    )
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
@@ -73,6 +77,7 @@ internal object CheckoutExpressDefinitions {
                 shouldSetConfiguration,
                 link.configuration,
                 googlePay.configuration,
+                paymentMethodOrder,
                 appearance.configuration,
             ),
         )

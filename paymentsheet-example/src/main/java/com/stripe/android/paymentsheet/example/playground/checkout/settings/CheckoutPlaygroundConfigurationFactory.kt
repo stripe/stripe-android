@@ -307,6 +307,7 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
                 .display(this[Controller.express.link.display])
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
+        .paymentMethodOrder(this[Controller.express.paymentMethodOrder])
         .appearance(
             ExpressCheckoutElement.Configuration.Appearance()
                 .buttonTheme(this[Controller.express.appearance.theme])
