@@ -73,7 +73,6 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                             PaymentSheetTopBar(
                                 state = PaymentSheetTopBarState(
                                     showEditMenu = false,
-                                    showTestModeLabel = false,
                                     isEditing = false,
                                     onEditIconPressed = {},
                                 ),

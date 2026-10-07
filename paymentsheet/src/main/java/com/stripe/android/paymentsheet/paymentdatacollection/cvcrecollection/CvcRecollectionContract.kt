@@ -26,7 +26,6 @@ internal class CvcRecollectionContract :
         val lastFour: String,
         val cardBrand: CardBrand,
         val appearance: PaymentSheet.Appearance,
-        val isTestMode: Boolean
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

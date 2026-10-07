@@ -65,7 +65,6 @@ internal class CvcRecollectionScreenTest {
         interactor._viewState.update {
             CvcRecollectionViewState(
                 lastFour = "4242",
-                isTestMode = false,
                 cvcState = CvcState(
                     cvc = "555",
                     cardBrand = CardBrand.Visa,

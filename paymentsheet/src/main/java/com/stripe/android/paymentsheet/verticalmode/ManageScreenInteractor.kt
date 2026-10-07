@@ -28,8 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
 internal interface ManageScreenInteractor {
-    val isLiveMode: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -84,7 +82,6 @@ internal interface ManageScreenInteractor {
 
         fun topBarState(interactor: ManageScreenInteractor): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                isLiveMode = interactor.isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Maybe(
                     isEditing = isEditing,
                     canEdit = canEdit,
@@ -122,8 +119,6 @@ internal class DefaultManageScreenInteractor(
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
-
-    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
         paymentMethods,

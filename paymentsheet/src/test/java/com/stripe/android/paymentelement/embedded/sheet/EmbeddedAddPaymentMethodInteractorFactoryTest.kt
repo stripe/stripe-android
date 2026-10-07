@@ -46,11 +46,6 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     }
 
     @Test
-    fun `is not live mode for a test intent`() = runScenario {
-        assertThat(interactor.isLiveMode).isFalse()
-    }
-
-    @Test
     fun `initial code defaults to the first supported payment method when there is no new selection`() = runScenario {
         assertThat(interactor.state.value.selectedPaymentMethodCode)
             .isEqualTo(paymentMethodMetadata.supportedPaymentMethodTypes().first())

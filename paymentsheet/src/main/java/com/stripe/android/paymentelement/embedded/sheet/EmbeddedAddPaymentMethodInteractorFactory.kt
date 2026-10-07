@@ -96,7 +96,6 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
                     isVerticalLayout = false,
                 )
             },
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
         )
     }
 

@@ -93,7 +93,6 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                 code = paymentMethodCode,
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
             validationRequested = sheetActivityStateHolder.validationRequested,

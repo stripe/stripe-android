@@ -19,23 +19,6 @@ internal class PaymentSheetScreenVerticalModeFormTest {
     }
 
     @Test
-    fun `topBarState reflects live mode`() = runTest {
-        val trueInteractor = FakeVerticalModeFormInteractor(isLiveMode = true)
-        PaymentSheetScreen.VerticalModeForm(trueInteractor).topBarState().test {
-            awaitItem()!!.apply {
-                assertThat(showTestModeLabel).isFalse()
-            }
-        }
-
-        val falseInteractor = FakeVerticalModeFormInteractor(isLiveMode = false)
-        PaymentSheetScreen.VerticalModeForm(falseInteractor).topBarState().test {
-            awaitItem()!!.apply {
-                assertThat(showTestModeLabel).isTrue()
-            }
-        }
-    }
-
-    @Test
     fun `screen close delegates to interactor close`() = runTest {
         var hasCalledOnClose = false
         val interactor = FakeVerticalModeFormInteractor(onClose = { hasCalledOnClose = true })
@@ -45,7 +28,6 @@ internal class PaymentSheetScreenVerticalModeFormTest {
 
     private class FakeVerticalModeFormInteractor(
         override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(mock()),
-        override val isLiveMode: Boolean = false,
         private val onClose: () -> Unit = {},
     ) : VerticalModeFormInteractor {
         override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
