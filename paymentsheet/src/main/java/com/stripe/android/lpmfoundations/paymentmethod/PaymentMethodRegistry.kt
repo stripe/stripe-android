@@ -28,6 +28,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MbWayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MonduDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
@@ -85,6 +86,7 @@ internal object PaymentMethodRegistry {
         MbWayDefinition,
         MoMoDefinition,
         MobilePayDefinition,
+        MonduDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
         OxxoDefinition,

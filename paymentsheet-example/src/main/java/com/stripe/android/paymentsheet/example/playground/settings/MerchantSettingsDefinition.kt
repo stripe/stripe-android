@@ -43,6 +43,7 @@ internal object MerchantSettingsDefinition :
         }.map { country ->
             option(country.name, convertToValue(country.code.value))
         }.toList() + listOf(
+            option("Mondu", Merchant.MONDU),
             option(Merchant.US_TAX.name, convertToValue(Merchant.US_TAX.value)),
             option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value)),
             option(Merchant.Custom.name, convertToValue(Merchant.Custom.value))
@@ -100,6 +101,7 @@ internal object MerchantSettingsDefinition :
                 Merchant.ES -> Currency.EUR
                 Merchant.IT -> Currency.EUR
                 Merchant.TH -> Currency.THB
+                Merchant.MONDU -> Currency.EUR
                 Merchant.StripeShop -> Currency.USD
                 Merchant.US_TAX -> Currency.USD
                 Merchant.Custom -> Currency.USD
@@ -123,6 +125,7 @@ enum class Merchant(override val value: String) : ValueEnum {
     ES("ES"),
     IT("IT"),
     TH("TH"),
+    MONDU("mondu"),
     StripeShop("stripe_shop_test"),
     US_TAX("us_tax"),
     Custom("custom")
@@ -146,6 +149,7 @@ val Merchant.countryCode: String
             Merchant.ES -> value
             Merchant.IT -> value
             Merchant.TH -> value
+            Merchant.MONDU -> "DE"
             Merchant.StripeShop -> "US"
             Merchant.US_TAX -> "US"
             Merchant.Custom -> "US"
