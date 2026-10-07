@@ -335,6 +335,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify paymentIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = true) {
+            val callbackAccount = "acct_callback"
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -344,7 +345,7 @@ class PaymentLauncherViewModelTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = CLIENT_SECRET,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    stripeAccountId = callbackAccount,
                 )
             )
 
@@ -352,13 +353,21 @@ class PaymentLauncherViewModelTest {
                 InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
             )
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
-                FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+                FakeStripeRepository.RetrieveIntentCall(
+                    clientSecret = CLIENT_SECRET,
+                    options = ApiRequest.Options(
+                        apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccount = callbackAccount,
+                    ),
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
         }
 
     @Test
     fun `verify setupIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = false) {
+            val callbackAccount = "acct_callback"
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -368,7 +377,7 @@ class PaymentLauncherViewModelTest {
                 PaymentFlowResult.Unvalidated(
                     clientSecret = SETUP_CLIENT_SECRET,
                     flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    stripeAccountId = callbackAccount,
                 )
             )
 
@@ -376,8 +385,65 @@ class PaymentLauncherViewModelTest {
                 InternalPaymentResult.Completed(SetupIntentFixtures.SI_SUCCEEDED)
             )
             assertThat(repository.retrieveSetupIntentCalls.awaitItem()).isEqualTo(
-                FakeStripeRepository.RetrieveIntentCall(SETUP_CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
+                FakeStripeRepository.RetrieveIntentCall(
+                    clientSecret = SETUP_CLIENT_SECRET,
+                    options = ApiRequest.Options(
+                        apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccount = callbackAccount,
+                    ),
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
             )
+        }
+
+    @Test
+    fun `verify PaymentIntent callback exception is returned without retrieving intent`() =
+        runScenario(isPaymentIntent = true) {
+            val error = APIConnectionException()
+            val caller = DummyActivityResultCaller.noOp()
+            viewModel.register(caller, authHost.lifecycleOwner)
+            val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
+            assertThat(registration.caller).isSameInstanceAs(caller)
+
+            registration.callback.onActivityResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.FAILED,
+                    exception = error,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                )
+            )
+
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
+            repository.retrievePaymentIntentCalls.expectNoEvents()
+            repository.retrieveSetupIntentCalls.expectNoEvents()
+            repository.retrieveStripeIntentCalls.expectNoEvents()
+        }
+
+    @Test
+    fun `verify SetupIntent callback exception is returned without retrieving intent`() =
+        runScenario(isPaymentIntent = false) {
+            val error = APIConnectionException()
+            val caller = DummyActivityResultCaller.noOp()
+            viewModel.register(caller, authHost.lifecycleOwner)
+            val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
+            assertThat(registration.caller).isSameInstanceAs(caller)
+
+            registration.callback.onActivityResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = SETUP_CLIENT_SECRET,
+                    flowOutcome = StripeIntentResult.Outcome.FAILED,
+                    exception = error,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                )
+            )
+
+            val result = paymentResults.awaitItem() as InternalPaymentResult.Failed
+            assertThat(result.throwable).isSameInstanceAs(error)
+            repository.retrievePaymentIntentCalls.expectNoEvents()
+            repository.retrieveSetupIntentCalls.expectNoEvents()
+            repository.retrieveStripeIntentCalls.expectNoEvents()
         }
 
     @Test

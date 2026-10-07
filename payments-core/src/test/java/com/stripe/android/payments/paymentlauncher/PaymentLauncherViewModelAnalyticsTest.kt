@@ -114,6 +114,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             expectEvent(
                 PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
                 analyticsPayloadField("status", "succeeded"),
+                analyticsPayloadField("duration", "1"),
             )
 
             viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
@@ -240,6 +241,89 @@ class PaymentLauncherViewModelAnalyticsTest {
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
                 FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
             )
+        }
+
+    @Test
+    fun `verify custom PaymentIntent return URL sends analytics while next action is pending`() =
+        runScenario {
+            val intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+            repository.confirmPaymentIntentResult = Result.success(intent)
+            val confirmParams = ConfirmPaymentIntentParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodId = PM_ID,
+                returnUrl = RETURN_URL,
+                paymentMethodCode = "card",
+            )
+            expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted)
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlCustom)
+
+            viewModel.confirmStripeIntent(confirmParams, authHost)
+
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = RETURN_URL,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
+            )
+            assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
+            assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+            )
+        }
+
+    @Test
+    fun `verify custom PaymentIntent return URL sends analytics for immediate success`() =
+        runScenario {
+            val confirmParams = ConfirmPaymentIntentParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodId = PM_ID,
+                returnUrl = RETURN_URL,
+                paymentMethodCode = "card",
+            )
+            expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted)
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlCustom)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("status", "succeeded"),
+            )
+
+            viewModel.confirmStripeIntent(confirmParams, authHost)
+
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem()).isEqualTo(
+                FakeStripeRepository.ConfirmPaymentIntentCall(
+                    params = ConfirmPaymentIntentParams(
+                        clientSecret = CLIENT_SECRET,
+                        paymentMethodId = PM_ID,
+                        returnUrl = RETURN_URL,
+                        useStripeSdk = true,
+                        paymentMethodCode = "card",
+                    ),
+                    options = API_REQUEST_OPTIONS,
+                    expandFields = EXPAND_PAYMENT_METHOD,
+                )
+            )
+        }
+
+    @Test
+    fun `verify instant app confirmation preserves null return URL and sends analytics`() =
+        runScenario(isInstantApp = true) {
+            expectEvent(PaymentAnalyticsEvent.PaymentLauncherConfirmStarted)
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("status", "succeeded"),
+            )
+
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
+
+            assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.returnUrl).isNull()
         }
 
     @Test
