@@ -11,6 +11,24 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     }
 
     @Test
+    fun `server per source file allowance is preserved`() {
+        val response = parseFixture("source_of_funds_required.json") {
+            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": 3, \"max_document_types\":")
+        }
+        val document = response.requirements.toAdditionalKycRequirements().userActionRequired.single().document
+        assertThat(document?.maxFilesPerDocumentType).isEqualTo(3)
+    }
+
+    @Test
+    fun `null per source file allowance uses fallback`() {
+        val response = parseFixture("source_of_funds_required.json") {
+            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": null, \"max_document_types\":")
+        }
+        val document = response.requirements.toAdditionalKycRequirements().userActionRequired.single().document
+        assertThat(document?.maxFilesPerDocumentType).isEqualTo(10)
+    }
+
+    @Test
     fun `proof of address requirement is parsed`() {
         val requirement = parseFixture("proof_of_address_required.json")
             .requirements.entries.getValue("proof_of_address")

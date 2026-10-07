@@ -81,6 +81,8 @@ internal data class AdditionalKycDocumentRequirementResponse(
     val minDocumentTypes: Int,
     @SerialName("max_document_types")
     val maxDocumentTypes: Int,
+    @SerialName("max_files_per_document_type")
+    val maxFilesPerDocumentType: Int? = null,
     @SerialName("file_requirements")
     val fileRequirements: String,
     val instructions: List<String>,
@@ -142,6 +144,7 @@ private fun AdditionalKycDocumentRequirementResponse.toAdditionalKycDocumentRequ
         acceptedFormats = acceptedFormats,
         minDocumentTypes = minDocumentTypes,
         maxDocumentTypes = maxDocumentTypes,
+        maxFilesPerDocumentType = maxFilesPerDocumentType ?: 10,
         maxFileSizeBytes = maxFileSizeBytes,
         fileRequirements = fileRequirements,
         instructions = instructions,
