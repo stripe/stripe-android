@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -315,6 +316,16 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
+    fun `reopening selected horizontal bank restores details and enables Continue`() = runReopenedBankScenario(
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+    )
+
+    @Test
+    fun `reopening selected vertical bank restores details and enables Continue`() = runReopenedBankScenario(
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+    )
+
+    @Test
     fun `horizontal saved payment options add opens payment method form`() {
         launchHorizontal(customerState = customerStateWith(PaymentMethodFixtures.CARD_PAYMENT_METHOD)) {
             composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
@@ -537,6 +548,47 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
         )
+    }
+
+    private fun runReopenedBankScenario(paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
+        val selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.copy(
+            input = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.input.copy(
+                name = "Jane Doe",
+                email = "janedoe@example.com",
+            ),
+        )
+        val linkedBankAccount = requireNotNull(selection.screenState.linkedBankAccount)
+        launch(
+            selection = selection,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("us_bank_account"),
+                    paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
+                ),
+                paymentMethodLayout = paymentMethodLayout,
+            ),
+        ) { scenario ->
+            formPage.waitUntilVisible()
+            composeTestRule.onNodeWithText("Full name").assertTextContains(selection.input.name)
+            composeTestRule.onNodeWithText("Email").assertTextContains(requireNotNull(selection.input.email))
+            composeTestRule.onNodeWithText("${linkedBankAccount.bankName} •••• ${linkedBankAccount.last4}")
+                .performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                .performScrollTo().assertIsEnabled().performClick()
+            onIdle()
+
+            val result = EmbeddedSheetContract.parseResult(
+                scenario.result.resultCode,
+                scenario.result.resultData,
+            ) as EmbeddedActivityResult.Complete
+            val returnedSelection = result.selection as PaymentSelection.New.USBankAccount
+            assertThat(returnedSelection.input.name).isEqualTo(selection.input.name)
+            assertThat(returnedSelection.input.email).isEqualTo(selection.input.email)
+            assertThat(returnedSelection.screenState.linkedBankAccount?.resultIdentifier)
+                .isEqualTo(linkedBankAccount.resultIdentifier)
+            assertThat(returnedSelection.screenState.linkedBankAccount?.last4).isEqualTo(linkedBankAccount.last4)
+            assertThat(result.hasBeenConfirmed).isFalse()
+        }
     }
 
     private fun collectedBankAccountResult(): CollectBankAccountContract.Result {
