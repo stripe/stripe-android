@@ -72,8 +72,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
             is CollectBankAccountContract.Args.ForDeferredPaymentIntent -> {
                 val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
@@ -88,8 +87,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
             is CollectBankAccountContract.Args.ForDeferredSetupIntent -> {
                 val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
@@ -103,8 +101,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
             is CollectBankAccountContract.Args.ForPaymentIntent ->
                 createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
@@ -112,8 +109,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
             is CollectBankAccountContract.Args.ForSetupIntent ->
                 createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
@@ -230,7 +226,10 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 // client secret is null for deferred intents.
                 Result.success(null)
             } else {
-                retrieveStripeIntent(args.publishableKey, args.stripeAccountId, clientSecret)
+                retrieveStripeIntent(
+                    apiConfiguration,
+                    clientSecret
+                )
             }
 
             retrieveIntentResult.onFailure {
@@ -251,16 +250,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
                 is CollectBankAccountContract.Args.ForPaymentIntent ->
                     attachFinancialConnectionsSession.forPaymentIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         clientSecret = args.clientSecret,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
 
                 is CollectBankAccountContract.Args.ForSetupIntent ->
                     attachFinancialConnectionsSession.forSetupIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         clientSecret = args.clientSecret,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
