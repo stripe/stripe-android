@@ -510,6 +510,8 @@ class CheckoutController @Inject internal constructor(
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
+         * Possible values are `"google_pay"` and `"link"`.
+         *
          * When empty, Express Checkout Element will render empty content.
          */
         val availableExpressCheckoutPaymentMethods: List<String> =
