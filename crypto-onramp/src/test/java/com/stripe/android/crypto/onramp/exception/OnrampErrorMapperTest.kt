@@ -29,7 +29,7 @@ class OnrampErrorMapperTest {
         assertThat(error.code).isEqualTo("unexpected_error")
         assertThat(error.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(error.developerMessage).contains("Unexpected SDK failure")
-        assertThat(error.developerMessage).contains("operation: fulfill_additional_kyc_requirement")
+        assertThat(error.developerMessage).contains("operation: fulfill_kyc_requirement")
         assertThat(error.underlyingError).isSameInstanceAs(underlyingError)
         assertThat(error.docUrl).isNull()
     }
