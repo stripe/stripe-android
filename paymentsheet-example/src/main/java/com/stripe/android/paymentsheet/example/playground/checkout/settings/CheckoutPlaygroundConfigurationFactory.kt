@@ -1,6 +1,4 @@
 @file:OptIn(
-    com.stripe.android.CollectMissingLinkBillingDetailsPreview::class,
-    com.stripe.android.LinkDisallowFundingSourceCreationPreview::class,
     com.stripe.android.paymentelement.CheckoutSessionPreview::class,
 )
 
@@ -307,10 +305,6 @@ private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): 
         .linkConfiguration(
             ExpressCheckoutElement.Configuration.LinkConfiguration()
                 .display(this[Controller.express.link.display])
-                .collectMissingBillingDetailsForExistingPaymentMethods(
-                    this[Controller.express.link.collectMissingBilling]
-                )
-                .disallowFundingSourceCreation(this[Controller.express.link.disallowedFunding].toSet())
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
         .appearance(
