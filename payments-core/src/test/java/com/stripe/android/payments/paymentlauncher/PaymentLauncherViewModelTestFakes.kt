@@ -8,8 +8,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
-import com.stripe.android.core.networking.AnalyticsRequest
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -201,17 +199,5 @@ internal object PaymentLauncherViewModelTestFakes {
         }
 
         data class StartActivityCall(val target: Class<*>, val extras: Bundle, val requestCode: Int)
-    }
-
-    internal class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
-        val requests = Turbine<AnalyticsRequest>()
-
-        override fun executeAsync(request: AnalyticsRequest) {
-            requests.add(request)
-        }
-
-        fun ensureAllEventsConsumed() {
-            requests.ensureAllEventsConsumed()
-        }
     }
 }
