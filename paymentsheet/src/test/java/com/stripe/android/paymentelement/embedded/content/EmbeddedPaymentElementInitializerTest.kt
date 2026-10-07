@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
@@ -17,10 +18,13 @@ internal class EmbeddedPaymentElementInitializerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
+    @get:Rule
+    val callbackTestRule = PaymentElementCallbackTestRule()
+
     @Test
     fun `initialize init and clear sheetLauncher`() = testScenario {
         assertThat(sheetStateHolder.sheetLauncher).isNull()
-        initializer.initialize(true)
+        initializer.initialize(applicationIsTaskOwner = true, removeCallbacksOnDestroy = true)
         assertThat(sheetStateHolder.sheetLauncher).isNotNull()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(sheetStateHolder.sheetLauncher).isNull()
@@ -28,15 +32,15 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     @Test
     fun `initialize when not applicationIsTaskOwner emits analytics event once`() = testScenario {
-        initializer.initialize(false)
+        initializer.initialize(applicationIsTaskOwner = false, removeCallbacksOnDestroy = true)
         assertThat(eventReporter.cannotProperlyReturnFromLinkAndOtherLPMsCalls.awaitItem()).isEqualTo(Unit)
-        initializer.initialize(false)
+        initializer.initialize(applicationIsTaskOwner = false, removeCallbacksOnDestroy = true)
         eventReporter.cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
     }
 
     @Test
     fun `when lifecycle is destroyed, should un-initialize callbacks`() {
-        val owner = TestLifecycleOwner()
+        val owner = TestLifecycleOwner(initialState = Lifecycle.State.CREATED)
         val callbacks = PaymentElementCallbacks.Builder()
             .createIntentCallback { _, _ ->
                 error("Not implemented")
@@ -52,7 +56,7 @@ internal class EmbeddedPaymentElementInitializerTest {
         PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
 
         testScenario(owner, PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER) {
-            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            initializer.initialize(applicationIsTaskOwner = true, removeCallbacksOnDestroy = true)
 
             assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
                 .isEqualTo(callbacks)
@@ -70,7 +74,7 @@ internal class EmbeddedPaymentElementInitializerTest {
             lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
             assertThat(PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER])
-                .isNotNull()
+                .isNull()
         }
     }
 

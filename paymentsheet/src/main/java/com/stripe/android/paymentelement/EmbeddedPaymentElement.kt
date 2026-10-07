@@ -771,10 +771,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
             internal fun getInternalRowSelectionCallback(
                 rowSelectionBehavior: RowSelectionBehavior,
-                embeddedPaymentElement: EmbeddedPaymentElement
+                embeddedPaymentElement: () -> EmbeddedPaymentElement
             ): (() -> Unit)? {
                 return if (rowSelectionBehavior is ImmediateAction) {
-                    { rowSelectionBehavior.didSelectPaymentOption(embeddedPaymentElement) }
+                    { rowSelectionBehavior.didSelectPaymentOption(embeddedPaymentElement()) }
                 } else {
                     null
                 }
@@ -819,7 +819,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 resultCallback = resultCallback,
             )
 
-            embeddedPaymentElementSubcomponent.initializer.initialize(activity.applicationIsTaskOwner())
+            embeddedPaymentElementSubcomponent.initializer.initialize(
+                applicationIsTaskOwner = activity.applicationIsTaskOwner(),
+                removeCallbacksOnDestroy = true,
+            )
 
             return embeddedPaymentElementSubcomponent.embeddedPaymentElement
         }

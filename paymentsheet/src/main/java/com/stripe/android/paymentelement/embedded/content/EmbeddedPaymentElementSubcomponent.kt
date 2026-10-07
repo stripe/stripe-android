@@ -18,6 +18,7 @@ import dagger.Subcomponent
 @EmbeddedPaymentElementScope
 internal interface EmbeddedPaymentElementSubcomponent {
     val embeddedPaymentElement: EmbeddedPaymentElement
+    val confirmationHelper: EmbeddedConfirmationHelper
     val initializer: EmbeddedPaymentElementInitializer
 
     @Subcomponent.Factory

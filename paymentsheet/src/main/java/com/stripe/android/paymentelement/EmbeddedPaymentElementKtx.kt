@@ -8,10 +8,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
 import java.util.UUID
 
@@ -58,33 +56,7 @@ fun rememberEmbeddedPaymentElement(
     }
 
     val callbacks = remember(builder) {
-        @OptIn(
-            ExperimentalAnalyticEventCallbackApi::class,
-            SharedPaymentTokenSessionPreview::class,
-            TapToAddPreview::class
-        )
-        PaymentElementCallbacks.Builder()
-            .apply {
-                when (val deferredHandler = builder.deferredHandler) {
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
-                        createIntentCallback(deferredHandler.createIntentCallback)
-                    }
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
-                        createIntentCallback(
-                            deferredHandler.createIntentWithConfirmationTokenCallback
-                        )
-                    }
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
-                        preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
-                    }
-                }
-            }
-            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
-            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-            .analyticEventCallback(builder.analyticEventCallback)
-            .createCardPresentSetupIntentCallback(builder.createCardPresentSetupIntentCallback)
-            .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
-            .build()
+        builder.createCallbacks { embeddedPaymentElement }
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
