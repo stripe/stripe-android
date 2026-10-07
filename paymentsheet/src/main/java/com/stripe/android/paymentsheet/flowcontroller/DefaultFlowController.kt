@@ -599,11 +599,11 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun onIntentResult(result: ConfirmationHandler.Result) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> {
-                viewModel.paymentSelection?.let { paymentSelection ->
+                viewModel.paymentSelection?.takeIf { result.intent != null }?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
-                        intentId = result.intent.id,
+                        intentId = result.intent?.id,
                     )
                     viewModel.handle.reportBillingAddressCompleted(paymentSelection, eventReporter)
                 }
@@ -613,7 +613,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
-                    intentId = result.intent.id,
+                    intentId = result.intent?.id,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {

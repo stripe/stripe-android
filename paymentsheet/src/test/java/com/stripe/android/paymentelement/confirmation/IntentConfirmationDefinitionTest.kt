@@ -603,6 +603,7 @@ class IntentConfirmationDefinitionTest {
             { _, _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
+            checkoutSessionFinalizer = createTestCheckoutSessionFinalizer(),
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             paymentLauncherFactory = paymentLauncherFactory,
         )

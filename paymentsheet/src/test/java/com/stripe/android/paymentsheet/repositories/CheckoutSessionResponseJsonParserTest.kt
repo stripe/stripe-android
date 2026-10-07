@@ -1,14 +1,54 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class CheckoutSessionResponseJsonParserTest {
+@RunWith(TestParameterInjector::class)
+internal class CheckoutSessionResponseJsonParserTest {
+    @Test
+    fun `parses supported submission states`(@TestParameter state: CheckoutSessionResponse.SubmissionAttempt.State) {
+        val result = parse(base().put("submission_attempt", JSONObject().put("state", state.name.lowercase())))
+        assertThat(result?.submissionAttempt?.state).isEqualTo(state)
+    }
+
+    @Test
+    fun `confirmation fields can be absent`() {
+        val result = parse(base())
+        assertThat(result).isNotNull()
+        assertThat(result?.submissionAttempt).isNull()
+        assertThat(result?.routeToOrchestrationInterface).isNull()
+    }
+
+    @Test
+    fun `confirmation fields can be null`() {
+        val result = parse(
+            base().put("submission_attempt", JSONObject.NULL)
+                .put("route_to_orchestration_interface", JSONObject.NULL)
+        )
+        assertThat(result).isNotNull()
+        assertThat(result?.submissionAttempt).isNull()
+        assertThat(result?.routeToOrchestrationInterface).isNull()
+    }
+
+    @Test
+    fun `parses the orchestration flag`(@TestParameter orchestration: Boolean) {
+        val result = parse(base().put("route_to_orchestration_interface", orchestration))
+        assertThat(result?.routeToOrchestrationInterface).isEqualTo(orchestration)
+    }
+
+    @Test
+    fun `rejects an unsupported submission state`() {
+        assertThat(parse(base().put("submission_attempt", JSONObject().put("state", "unsupported")))).isNull()
+    }
+
     @Test
     fun `parses nested unified one-time price group`() {
         val result = parse(base())

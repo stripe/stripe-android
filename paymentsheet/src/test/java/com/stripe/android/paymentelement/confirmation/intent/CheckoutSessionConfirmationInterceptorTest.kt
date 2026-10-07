@@ -2,7 +2,9 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -33,7 +35,9 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.doesNotContainBodyPartsWithPrefix
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -48,15 +52,18 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 
 @OptIn(CheckoutSessionPreview::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class CheckoutSessionConfirmationInterceptorTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -66,6 +73,135 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `failed submissions return the last Intent error before handling next actions`(@TestParameter setup: Boolean) =
+        runScenario {
+            networkRule.checkoutConfirm { response ->
+                val fixture = if (setup) "checkout-session-confirm-setup.json" else "checkout-session-confirm.json"
+                response.testBodyFromFile(fixture) {
+                    it.put("submission_attempt", JSONObject().put("state", "failed"))
+                    it.getJSONObject(if (setup) "setup_intent" else "payment_intent")
+                        .put("status", "requires_action")
+                        .put(
+                            if (setup) "last_setup_error" else "last_payment_error",
+                            JSONObject()
+                                .put("message", "Your card was declined")
+                                .put("code", "card_declined")
+                                .put("decline_code", "insufficient_funds")
+                                .put("type", "card_error")
+                        )
+                }
+            }
+            val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+            val error = result.cause as LocalStripeException
+            assertThat(error.message).isEqualTo("Your card was declined")
+            assertThat(error.stripeError?.code).isEqualTo("card_declined")
+            assertThat(error.stripeError?.declineCode).isEqualTo("insufficient_funds")
+            assertThat(result.metadata[CheckoutSessionResponseKey]).isNotNull()
+        }
+
+    @Test
+    fun `failed submission without a last error uses the generic payment error`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") {
+                it.put("submission_attempt", JSONObject().put("state", "failed"))
+            }
+        }
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+        assertThat(result.cause.message).isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+    }
+
+    @Test
+    fun `manual approval and expired responses fail before authentication`(
+        @TestParameter expired: Boolean,
+    ) = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") {
+                if (expired) {
+                    it.put("status", "expired")
+                } else {
+                    it.put("submission_attempt", JSONObject().put("state", "requires_approval"))
+                }
+                it.getJSONObject("payment_intent").put("status", "requires_action")
+            }
+        }
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+        assertThat(result.cause.message).contains(if (expired) "expired after confirmation" else "manual approval")
+        assertThat(result.metadata[CheckoutSessionResponseKey]).isNotNull()
+    }
+
+    @Test
+    fun `orchestration fails before authentication`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") {
+                it.put("route_to_orchestration_interface", true)
+                it.getJSONObject("payment_intent").put("status", "requires_action")
+            }
+        }
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+        assertThat(result.cause.message).contains("orchestration")
+        assertThat(result.metadata[CheckoutSessionResponseKey]?.routeToOrchestrationInterface).isTrue()
+    }
+
+    @Test
+    fun `zero amount without a payment method sends the local or server email`(@TestParameter collected: Boolean) =
+        runScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                amount = 0,
+                customerEmail = "server@example.com",
+            )
+        ) {
+            val email = if (collected) "local@example.com" else "server@example.com"
+            networkRule.checkoutConfirm(
+                not(hasBodyPart("payment_method")),
+                bodyPart("expected_amount", "0"),
+                bodyPart("customer_data[email]", email),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") {
+                    it.put("status", "complete")
+                    it.put("payment_status", "no_payment_required")
+                    it.getJSONArray("checkout_items").getJSONObject(0).getJSONObject("one_time_price")
+                        .getJSONArray("items").getJSONObject(0).put("total", 0)
+                }
+            }
+            val result = interceptor.intercept(
+                confirmationOption = CheckoutSessionConfirmationOption.WithoutPaymentMethod(email.takeIf { collected }),
+                shippingValues = null,
+            ) as ConfirmationDefinition.Action.Complete
+            assertThat(result.intent).isNull()
+            assertThat(result.metadata[CheckoutSessionResponseKey]?.noPaymentRequired).isTrue()
+            assertThat(result.metadata[CheckoutSessionResponseKey]?.paymentIntent).isNull()
+            assertThat(result.metadata[CheckoutSessionResponseKey]?.setupIntent).isNull()
+        }
+
+    @Test
+    fun `positive amount without a payment method lets confirm return its rejection`() = runScenario {
+        networkRule.checkoutConfirm(not(hasBodyPart("payment_method")), bodyPart("expected_amount", "1000")) {
+            it.setResponseCode(400)
+            it.setBody("""{"error":{"message":"Payment method required"}}""")
+        }
+        val result = interceptor.intercept(
+            confirmationOption = CheckoutSessionConfirmationOption.WithoutPaymentMethod(null),
+            shippingValues = null,
+        ) as ConfirmationDefinition.Action.Fail
+        assertThat(result.cause.message).isEqualTo("Payment method required")
+    }
+
+    @Test
+    fun `zero amount with a payment method can complete through a setup intent`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 0),
+    ) {
+        networkRule.checkoutConfirm(hasBodyPart("payment_method")) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json") {
+                it.put("payment_status", "no_payment_required")
+            }
+        }
+        val result = interceptNewPm(intent = SetupIntentFactory.createDeferredIntent())
+            as ConfirmationDefinition.Action.Complete
+        assertThat(result.intent).isInstanceOf<SetupIntent>()
+        assertThat(result.metadata[CheckoutSessionResponseKey]?.noPaymentRequired).isTrue()
+    }
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
@@ -102,7 +238,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
 
         val launchAction = result as ConfirmationDefinition.Action.Launch
-        val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.NextAction
+        val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.CheckoutNextAction
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
@@ -219,18 +355,20 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept fails when confirm response has no intent`() = runScenario {
+    fun `intercept without an intent completes after polling`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
+        networkRule.enqueue(method("GET"), path("/v1/payment_pages/cs_test_abc123/poll")) {
+            it.setBody("""{"session_id":"cs_test_abc123","state":"succeeded"}""")
+        }
 
-        val result = interceptNewPm()
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-
-        val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        val result = withContext(Dispatchers.Default) { interceptNewPm() } as ConfirmationDefinition.Action.Complete
+        assertThat(result.intent).isNull()
+        assertThat(result.metadata[CheckoutSessionResponseKey]?.status)
+            .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+        assertThat(result.metadata[CheckoutSessionResponseKey]?.paymentIntent).isNull()
+        assertThat(result.metadata[CheckoutSessionResponseKey]?.setupIntent).isNull()
     }
 
     @Test
@@ -276,7 +414,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
 
         val launchAction = result as ConfirmationDefinition.Action.Launch
-        assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.NextAction>()
+        assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.CheckoutNextAction>()
         assertThat(launchAction.launcherArguments.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
@@ -318,7 +456,8 @@ class CheckoutSessionConfirmationInterceptorTest {
             assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
 
             val launchAction = result as ConfirmationDefinition.Action.Launch
-            assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.NextAction>()
+            assertThat(launchAction.launcherArguments)
+                .isInstanceOf<IntentConfirmationDefinition.Args.CheckoutNextAction>()
             assertThat(launchAction.launcherArguments.deferredIntentConfirmationType)
                 .isEqualTo(DeferredIntentConfirmationType.Server)
             assertThat(launchAction.receivesResultInProcess).isFalse()
@@ -604,30 +743,42 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+            finalizer = CheckoutSessionConfirmationFinalizer(
+                DefaultCheckoutSessionPoller(checkoutSessionRepository),
+                checkoutSessionRepository,
+                applicationContext,
+            ),
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
         )
 
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
+                stripeRepository = stripeRepository,
             )
 
             scenario.block()
+            stripeRepository.calls.ensureAllEventsConsumed()
         }
     }
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
+        val stripeRepository: FakeCreatePaymentMethodRepository,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
             intent: StripeIntent = PaymentIntentFactory.create(),
             shippingValues: ConfirmPaymentIntentParams.Shipping? = null,
-        ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
-            intent = intent,
-            confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
-            shippingValues = shippingValues,
-        )
+        ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> {
+            val result = interceptor.intercept(
+                intent = intent,
+                confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
+                shippingValues = shippingValues,
+            )
+            assertThat(stripeRepository.calls.awaitItem()).isEqualTo(NEW_PM_OPTION.createParams)
+            return result
+        }
 
         suspend fun interceptSavedPm(
             intent: StripeIntent = PaymentIntentFactory.create(),
@@ -647,11 +798,13 @@ class CheckoutSessionConfirmationInterceptorTest {
         private val createPaymentMethodResult: Result<PaymentMethod> =
             Result.failure(NotImplementedError()),
     ) : AbsFakeStripeRepository() {
+        val calls = Turbine<PaymentMethodCreateParams>()
 
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): Result<PaymentMethod> {
+            calls.add(paymentMethodCreateParams)
             return createPaymentMethodResult
         }
     }

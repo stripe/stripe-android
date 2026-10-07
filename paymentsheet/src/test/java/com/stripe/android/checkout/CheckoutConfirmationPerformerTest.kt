@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -38,10 +39,12 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm does nothing when there is no selection`() = runScenario(
+    fun `confirm starts confirmation without a payment method when there is no selection`() = runScenario(
         state = CheckoutControllerStateFactory.create(paymentSelection = null),
     ) {
         performer.confirm()
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isEqualTo(CheckoutSessionConfirmationOption.WithoutPaymentMethod(null))
     }
 
     @Test

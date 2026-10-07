@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
@@ -144,7 +145,7 @@ private fun apiException(
     )
 }
 
-private fun connectionException(request: StripeRequest, cause: Throwable) = APIConnectionException(
-    "Failed to execute $request",
-    cause = cause
-)
+private fun connectionException(request: StripeRequest, cause: Throwable): APIConnectionException {
+    if (cause is CancellationException) throw cause
+    return APIConnectionException("Failed to execute $request", cause = cause)
+}

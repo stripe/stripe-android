@@ -131,7 +131,11 @@ internal interface ConfirmationDefinition<
              * The action that the consumer should take if the customer manually cancels.
              */
             val action: ConfirmationHandler.Result.Canceled.Action,
-        ) : Result
+            val metadata: ConfirmationMetadata,
+        ) : Result {
+            constructor(action: ConfirmationHandler.Result.Canceled.Action) :
+                this(action, MutableConfirmationMetadata())
+        }
 
         /**
          * Indicates that the customer has successfully completed the confirmation flow
@@ -140,7 +144,7 @@ internal interface ConfirmationDefinition<
             /**
              * The [StripeIntent] that may or may not have been confirmed
              */
-            val intent: StripeIntent,
+            val intent: StripeIntent?,
             /**
              * Metadata associated with final confirmation result
              */
@@ -187,7 +191,14 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val type: ConfirmationHandler.Result.Failed.ErrorType,
-        ) : Result
+            val metadata: ConfirmationMetadata,
+        ) : Result {
+            constructor(
+                cause: Throwable,
+                message: ResolvableString,
+                type: ConfirmationHandler.Result.Failed.ErrorType,
+            ) : this(cause, message, type, MutableConfirmationMetadata())
+        }
     }
 
     /**
@@ -203,7 +214,7 @@ internal interface ConfirmationDefinition<
             /**
              * The [StripeIntent] that may or may not have been confirmed
              */
-            val intent: StripeIntent,
+            val intent: StripeIntent?,
             /**
              * Metadata associated with final confirmation result
              */
@@ -232,7 +243,14 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
-        ) : Action<TLauncherArgs>
+            val metadata: ConfirmationMetadata,
+        ) : Action<TLauncherArgs> {
+            constructor(
+                cause: Throwable,
+                message: ResolvableString,
+                errorType: ConfirmationHandler.Result.Failed.ErrorType,
+            ) : this(cause, message, errorType, MutableConfirmationMetadata())
+        }
 
         /**
          * A launch action indicating that the definition has determined the need to launch into the primary

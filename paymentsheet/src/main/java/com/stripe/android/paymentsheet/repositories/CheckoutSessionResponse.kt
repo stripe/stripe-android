@@ -31,6 +31,8 @@ internal data class CheckoutSessionResponse(
     val requiresBillingAddress: Boolean,
     val merchantCountry: String?,
     val businessName: String?,
+    val submissionAttempt: SubmissionAttempt?,
+    val routeToOrchestrationInterface: Boolean?,
 ) : StripeModel {
     val amount: Long
         get() = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } }
@@ -44,6 +46,11 @@ internal data class CheckoutSessionResponse(
     enum class TaxAddressSource { SHIPPING, BILLING }
     enum class PaymentStatus { PAID, UNPAID, NO_PAYMENT_REQUIRED }
     enum class Status { OPEN, COMPLETE, EXPIRED }
+
+    @Parcelize
+    data class SubmissionAttempt(val state: State) : StripeModel {
+        enum class State { PROCESSING, REQUIRES_APPROVAL, COMPLETE, FAILED }
+    }
 
     @Parcelize
     data class SavedPaymentMethodsOfferSave(val enabled: Boolean, val status: Status) : StripeModel {

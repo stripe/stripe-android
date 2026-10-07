@@ -451,6 +451,46 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `canceled response is committed before cancellation is delivered`() = runScenario {
+        val releaseCommit = CompletableDeferred<Unit>()
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        enqueueRefreshAction { releaseCommit.await() }
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                metadata = MutableConfirmationMetadata().apply { set(CheckoutSessionResponseKey, response) },
+            )
+        )
+        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        resultTurbine.expectNoEvents()
+        assertThat(coordinator.isUpdating.value).isTrue()
+        releaseCommit.complete(Unit)
+        assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutController.Result.Canceled>()
+    }
+
+    @Test
+    fun `failed response is committed before the failure is delivered`() = runScenario {
+        val releaseCommit = CompletableDeferred<Unit>()
+        val error = IllegalStateException("Failed")
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        enqueueRefreshAction { releaseCommit.await() }
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = error,
+                message = "Failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                metadata = MutableConfirmationMetadata().apply { set(CheckoutSessionResponseKey, response) },
+            )
+        )
+        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        resultTurbine.expectNoEvents()
+        assertThat(coordinator.isUpdating.value).isTrue()
+        releaseCommit.complete(Unit)
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+        assertThat(result.error).isSameInstanceAs(error)
+    }
+
+    @Test
     fun `successful response is committed under operation gate before delivering result`() {
         val releaseCommit = CompletableDeferred<Unit>()
         runScenario {

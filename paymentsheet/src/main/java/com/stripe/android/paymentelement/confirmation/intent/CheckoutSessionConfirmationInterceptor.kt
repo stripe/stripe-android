@@ -19,7 +19,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
@@ -52,12 +51,28 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val requestOptions: ApiRequest.Options,
+    private val finalizer: CheckoutSessionConfirmationFinalizer,
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
     private val genericErrorMessage: String = context.getString(R.string.stripe_something_went_wrong)
     private val isSaveEnabled: Boolean =
         customerMetadata?.saveConsent is PaymentMethodSaveConsentBehavior.Enabled
+
+    override suspend fun intercept(
+        confirmationOption: CheckoutSessionConfirmationOption.WithoutPaymentMethod,
+        shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    ): ConfirmationDefinition.Action<Args> = confirmCheckoutSession(
+        ConfirmCheckoutSessionParams(
+            paymentMethodId = null,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
+            savePaymentMethod = null,
+            shipping = shippingValues.toCheckoutSessionShipping(),
+            customerEmail = confirmationOption.email ?: integrationMetadata.checkoutSessionResponse.customerEmail,
+        )
+    )
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -157,12 +172,16 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
             shipping = shipping,
+            customerEmail = null,
         )
         else -> ConfirmCheckoutSessionParams(
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
+            expectedAmount = null,
+            savePaymentMethod = null,
             shipping = shipping,
+            customerEmail = null,
         )
     }
 
@@ -173,7 +192,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             id = integrationMetadata.id,
             params = params,
         ).fold(
-            onSuccess = ::handleConfirmResponse,
+            onSuccess = { handleConfirmResponse(it) },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
@@ -184,48 +203,38 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         )
     }
 
-    private fun handleConfirmResponse(
+    private suspend fun handleConfirmResponse(
         response: CheckoutSessionResponse,
     ): ConfirmationDefinition.Action<Args> {
-        val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
-            ?: run {
-                val exception = IllegalStateException(
-                    "No PaymentIntent or SetupIntent in checkout session confirm response"
+        when {
+            response.submissionAttempt?.state == CheckoutSessionResponse.SubmissionAttempt.State.FAILED ->
+                return finalizer.fail(response, finalizer.paymentError(response))
+            response.submissionAttempt?.state == CheckoutSessionResponse.SubmissionAttempt.State.REQUIRES_APPROVAL ->
+                return finalizer.fail(
+                    response,
+                    finalizer.unexpectedError("Checkout Session confirmation unexpectedly requires manual approval."),
                 )
-                return ConfirmationDefinition.Action.Fail(
-                    cause = exception,
-                    message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
+            response.routeToOrchestrationInterface == true -> return finalizer.fail(
+                response,
+                finalizer.unexpectedError("Checkout Session confirmation unexpectedly requires orchestration."),
+            )
+        }
+        val intent: StripeIntent? = response.paymentIntent ?: response.setupIntent
 
         return when {
-            intent.isConfirmed -> {
-                ConfirmationDefinition.Action.Complete(
-                    intent = intent,
-                    metadata = MutableConfirmationMetadata().apply {
-                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-                        set(CheckoutSessionResponseKey, response)
-                    },
-                    completedFullPaymentFlow = true,
-                )
-            }
+            response.status == CheckoutSessionResponse.Status.EXPIRED -> finalizer.finalize(response, intent)
+            intent == null || intent.isConfirmed -> finalizer.finalize(response, intent)
             intent.requiresAction() -> {
                 ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.NextAction(
+                    launcherArguments = Args.CheckoutNextAction(
                         intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        response = response,
                     ),
                     receivesResultInProcess = false,
                 )
             }
             else -> {
-                val exception = IllegalStateException("Intent has not attempted confirm.")
-                ConfirmationDefinition.Action.Fail(
-                    cause = exception,
-                    message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
+                finalizer.fail(response, finalizer.paymentError(response))
             }
         }
     }

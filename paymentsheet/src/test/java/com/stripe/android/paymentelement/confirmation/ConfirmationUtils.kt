@@ -28,8 +28,10 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefin
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationFinalizer
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.ConfirmationTokenConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DefaultCheckoutSessionPoller
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationInterceptor
@@ -169,6 +171,11 @@ internal suspend fun createIntentConfirmationInterceptor(
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+                    finalizer = CheckoutSessionConfirmationFinalizer(
+                        DefaultCheckoutSessionPoller(checkoutSessionRepository),
+                        checkoutSessionRepository,
+                        ApplicationProvider.getApplicationContext(),
+                    ),
                     requestOptions = requestOptions,
                 )
             }
@@ -199,6 +206,7 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
+                    checkoutSessionFinalizer = createNetworkTestCheckoutSessionFinalizer(),
                     paymentLauncherFactory = { launcher, _, apiConfiguration ->
                         stripePaymentLauncherAssistedFactory.create(
                             apiConfigurationProvider = { apiConfiguration },
@@ -263,4 +271,17 @@ internal class FakeLinkEventsReporterForConfirmation(
     override fun onPopupSuccess() {
         // No-op
     }
+}
+
+private fun createNetworkTestCheckoutSessionFinalizer(): CheckoutSessionConfirmationFinalizer {
+    val context = ApplicationProvider.getApplicationContext<android.app.Application>()
+    val repository = CheckoutSessionRepository(
+        stripeNetworkClient = DefaultStripeNetworkClient(),
+        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(context, "pk_test_123"),
+        apiRequestOptionsProvider = {
+            ApiRequest.Options(DEFAULT_API_CONFIG.publishableKey, DEFAULT_API_CONFIG.stripeAccountId)
+        },
+    )
+    return CheckoutSessionConfirmationFinalizer(DefaultCheckoutSessionPoller(repository), repository, context)
 }

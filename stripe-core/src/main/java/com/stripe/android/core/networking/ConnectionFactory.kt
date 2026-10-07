@@ -72,8 +72,8 @@ interface ConnectionFactory {
             originalRequest: StripeRequest
         ): HttpsURLConnection {
             return connectionOpener.open(originalRequest) { request ->
-                connectTimeout = CONNECT_TIMEOUT
-                readTimeout = READ_TIMEOUT
+                connectTimeout = request.connectTimeoutMillis ?: CONNECT_TIMEOUT
+                readTimeout = request.readTimeoutMillis ?: READ_TIMEOUT
                 useCaches = false
                 requestMethod = request.method.code
 
