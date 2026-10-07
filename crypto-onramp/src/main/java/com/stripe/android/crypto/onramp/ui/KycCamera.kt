@@ -10,7 +10,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.util.Locale
 
-internal fun additionalKycCameraFormat(formats: List<String>): String? {
+internal fun kycCameraFormat(formats: List<String>): String? {
     val normalized = formats.map { it.trim().removePrefix(".").lowercase(Locale.ROOT) }
     return when {
         normalized.any { it == "jpg" || it == "jpeg" } -> "jpg"
@@ -20,7 +20,7 @@ internal fun additionalKycCameraFormat(formats: List<String>): String? {
 }
 
 /** Camera apps write JPEG regardless of the output suffix. Re-encode and normalize orientation before upload. */
-internal fun prepareAdditionalKycCameraImage(source: File, format: String, maximumBytes: Long): File {
+internal fun prepareKycCameraImage(source: File, format: String, maximumBytes: Long): File {
     var bitmap = BitmapFactory.decodeFile(source.path) ?: throw IOException("Unreadable camera image")
     val destination = File.createTempFile("photo-", ".$format", source.parentFile)
     var completed = false

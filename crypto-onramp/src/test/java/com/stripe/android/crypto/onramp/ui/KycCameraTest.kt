@@ -14,24 +14,24 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-internal class AdditionalKycCameraTest {
+internal class KycCameraTest {
     @get:Rule
     val folder = TemporaryFolder()
 
     @Test
     fun `camera prefers jpeg and normalizes extensions`() {
-        assertThat(additionalKycCameraFormat(listOf("PNG", ".JPEG"))).isEqualTo("jpg")
-        assertThat(additionalKycCameraFormat(listOf("jpg"))).isEqualTo("jpg")
+        assertThat(kycCameraFormat(listOf("PNG", ".JPEG"))).isEqualTo("jpg")
+        assertThat(kycCameraFormat(listOf("jpg"))).isEqualTo("jpg")
     }
 
     @Test
     fun `camera supports png only requirements`() {
-        assertThat(additionalKycCameraFormat(listOf("png"))).isEqualTo("png")
+        assertThat(kycCameraFormat(listOf("png"))).isEqualTo("png")
     }
 
     @Test
     fun `camera is unavailable for non image formats`() {
-        assertThat(additionalKycCameraFormat(listOf("pdf", "docx"))).isNull()
+        assertThat(kycCameraFormat(listOf("pdf", "docx"))).isNull()
     }
 
     @Test
@@ -41,7 +41,7 @@ internal class AdditionalKycCameraTest {
             setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90.toString())
             saveAttributes()
         }
-        val result = prepareAdditionalKycCameraImage(source, "png", 100_000)
+        val result = prepareKycCameraImage(source, "png", 100_000)
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(result.path, bounds)
         assertThat(bounds.outMimeType).isEqualTo("image/png")
@@ -52,14 +52,14 @@ internal class AdditionalKycCameraTest {
     @Test
     fun `oversized png is rejected without leaking converted file`() {
         val source = image()
-        val result = runCatching { prepareAdditionalKycCameraImage(source, "png", 1) }
+        val result = runCatching { prepareKycCameraImage(source, "png", 1) }
         assertThat(result.exceptionOrNull()).isInstanceOf(AdditionalKycFileTooLargeException::class.java)
         assertThat(folder.root.listFiles()?.toList()).containsExactly(source)
     }
 
     @Test
     fun `jpeg capture produces an uploadable jpeg within the size limit`() {
-        val result = prepareAdditionalKycCameraImage(image(), "jpg", 100_000)
+        val result = prepareKycCameraImage(image(), "jpg", 100_000)
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(result.path, bounds)
         assertThat(bounds.outMimeType).isEqualTo("image/jpeg")
@@ -70,7 +70,7 @@ internal class AdditionalKycCameraTest {
     @Test
     fun `unreadable capture does not leave a converted file`() {
         val source = folder.newFile("invalid.jpg")
-        val result = runCatching { prepareAdditionalKycCameraImage(source, "jpg", 100_000) }
+        val result = runCatching { prepareKycCameraImage(source, "jpg", 100_000) }
         assertThat(result.isFailure).isTrue()
         assertThat(folder.root.listFiles()?.toList()).containsExactly(source)
     }
@@ -82,7 +82,7 @@ internal class AdditionalKycCameraTest {
         source.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
         bitmap.recycle()
 
-        val result = prepareAdditionalKycCameraImage(source, "jpg", 1_000_000)
+        val result = prepareKycCameraImage(source, "jpg", 1_000_000)
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(result.path, bounds)
         assertThat(bounds.outWidth).isEqualTo(5_000)
