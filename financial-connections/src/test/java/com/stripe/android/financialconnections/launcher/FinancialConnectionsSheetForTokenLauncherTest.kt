@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
@@ -21,7 +20,7 @@ class FinancialConnectionsSheetForTokenLauncherTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "",
-        apiConfiguration = ApiConfiguration.State("", ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+        apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
         preCollectedConsent = null,
     )
 

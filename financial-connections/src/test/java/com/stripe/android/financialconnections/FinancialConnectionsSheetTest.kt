@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -22,7 +21,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+                ApiKeyFixtures.DEFAUL_API_CONFIG,
                 preCollectedConsent = null,
             )
         )
@@ -35,10 +34,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                    stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
-                ),
+                apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
                 preCollectedConsent = null,
             ),
             elementsSessionContext = null,
@@ -57,10 +53,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                apiConfiguration = ApiConfiguration.State(
-                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                    stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
-                ),
+                apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
                 preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = null,

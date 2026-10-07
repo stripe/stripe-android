@@ -9,9 +9,14 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 
 internal object TextFixtures {
 
+    val DEFAUL_API_CONFIG = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = "acct_test",
+    )
+
     val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret_123",
-        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_test"),
+        apiConfiguration = DEFAUL_API_CONFIG,
         preCollectedConsent = null,
     )
 

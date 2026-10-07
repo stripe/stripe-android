@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.repository
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -29,7 +28,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private val apiRequestFactory = mock<ApiRequest.Factory>()
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+        ApiKeyFixtures.DEFAUL_API_CONFIG,
         preCollectedConsent = null,
     )
     private val authSessionId = "AuthSessionId"

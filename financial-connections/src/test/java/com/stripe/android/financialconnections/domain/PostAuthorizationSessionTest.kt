@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -26,7 +25,7 @@ internal class PostAuthorizationSessionTest {
         repository = repository,
         configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAUL_API_CONFIG,
             preCollectedConsent = null,
         ),
         APPLICATION_ID

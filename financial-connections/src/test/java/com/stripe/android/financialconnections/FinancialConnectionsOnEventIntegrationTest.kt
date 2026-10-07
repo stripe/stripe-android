@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
@@ -64,10 +63,7 @@ internal class FinancialConnectionsOnEventIntegrationTest {
     }
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        apiConfiguration = ApiConfiguration.State(
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
-        ),
+        apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
         preCollectedConsent = null
     )
 

@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import org.junit.Test
@@ -26,7 +25,7 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() valid args`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAUL_API_CONFIG,
             preCollectedConsent = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
@@ -37,7 +36,7 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() missing session client secret`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             " ",
-            ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAUL_API_CONFIG,
             preCollectedConsent = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
@@ -52,7 +51,7 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() missing publishable key`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiConfiguration.State(" ", ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAUL_API_CONFIG.copy(publishableKey = " "),
             preCollectedConsent = null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)

@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.domain
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
@@ -274,7 +273,7 @@ internal class SaveAccountToLinkTest {
             locale = Locale.getDefault(),
             configuration = FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+                ApiKeyFixtures.DEFAUL_API_CONFIG,
                 preCollectedConsent = null,
             ),
             successContentRepository = successRepository,

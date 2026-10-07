@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
@@ -20,7 +19,7 @@ internal class PollAuthorizationSessionOAuthResultsTest {
         repository = repository,
         configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAUL_API_CONFIG,
             preCollectedConsent = null,
         )
     )

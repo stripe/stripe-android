@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
@@ -79,10 +78,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        apiConfiguration = ApiConfiguration.State(
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
-        ),
+        apiConfiguration = ApiKeyFixtures.DEFAUL_API_CONFIG,
         preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
