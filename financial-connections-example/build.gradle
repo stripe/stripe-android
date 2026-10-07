@@ -55,7 +55,8 @@ android {
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
-    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?:
+        System.getenv('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
 }
 
 dependencies {
@@ -88,4 +89,17 @@ dependencies {
 
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.truth
+}
+
+emulatorwtf {
+    recordVideo.set(true)
+    outputs.add(wtf.emulator.OutputType.CAPTURED_VIDEO)
+    // These tests create real sessions; backend results must not be cached.
+    sideEffects.set(true)
 }

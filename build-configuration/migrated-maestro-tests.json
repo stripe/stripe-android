@@ -1,0 +1,50 @@
+{
+  "TestAccountOnboardingLoads": {
+    "className": "com.stripe.android.connect.example.AccountOnboardingEndToEndTest",
+    "testCaseName": "accountOnboardingLoads"
+  },
+  "Testmode-Data-TestOauthInstitution": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodeDataTestOauthInstitution"
+  },
+  "Testmode-Data-TestOauthInstitution-Connected": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodeDataTestOauthInstitutionConnected"
+  },
+  "Testmode-PaymentIntent-TestInstitution": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodePaymentIntentTestInstitution"
+  },
+  "Testmode-PaymentIntent-TestInstitution-InstantDebits": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodePaymentIntentTestInstitutionInstantDebits"
+  },
+  "Testmode-PaymentIntent-TestInstitution-UnplannedDowntime": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodePaymentIntentTestInstitutionUnplannedDowntime"
+  },
+  "Testmode-PaymentIntent-TestInstitution-Networking": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodePaymentIntentTestInstitutionNetworking"
+  },
+  "Testmode-Token-ManualEntry": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodeTokenManualEntry"
+  },
+  "Testmode-Token-NME": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "testmodeTokenNme"
+  },
+  "Web-Testmode-Data-TestOauthInstitution": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "webTestmodeDataTestOauthInstitution"
+  },
+  "Livemode-Data-Finbank": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "livemodeDataFinbank"
+  },
+  "Livemode-Data-MXBank": {
+    "className": "com.stripe.android.financialconnections.example.FinancialConnectionsEndToEndTest",
+    "testCaseName": "livemodeDataMxBank"
+  }
+}

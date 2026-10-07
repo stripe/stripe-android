@@ -7,6 +7,8 @@
 - `./gradlew testDebugUnitTest` - Debug unit tests only
 - `./gradlew :MODULE:testDebugUnitTest` - Single module (e.g. `:payments-core`, `:paymentsheet`)
 - `./gradlew connectedAndroidTest` - Instrumentation tests (requires device)
+- `./gradlew :MODULE:ewPixel2api33AtdDebugAndroidTest` - Instrumentation tests on emulator.wtf (requires `EW_API_TOKEN`)
+- Use `ewPixel2api33DebugAndroidTest` for a full image with keyboard/browser support; see [instrumentation test instructions](build-configuration/instrumentation-tests.md).
 - `./gradlew detekt` - Static analysis
 - `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 

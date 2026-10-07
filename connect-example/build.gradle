@@ -64,6 +64,7 @@ dependencies {
     androidTestImplementation testLibs.hilt.androidTesting
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
+    androidTestImplementation project(':payments-core-testing')
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -72,6 +73,7 @@ android {
     defaultConfig {
         testApplicationId "com.stripe.android.connect.example.test"
         testInstrumentationRunner "com.stripe.android.connect.example.ConnectExampleTestRunner"
+        testInstrumentationRunnerArguments testEnvironment: System.getenv('test_environment') ?: 'production'
     }
 
     buildFeatures {
@@ -92,4 +94,10 @@ android {
             }
         }
     }
+}
+
+emulatorwtf {
+    recordVideo.set(true)
+    outputs.add(wtf.emulator.OutputType.CAPTURED_VIDEO)
+    sideEffects.set(true)
 }
