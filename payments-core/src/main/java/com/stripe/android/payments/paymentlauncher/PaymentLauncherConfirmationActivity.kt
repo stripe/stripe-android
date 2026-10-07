@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.utils.fadeOut
@@ -63,10 +62,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
                 apiConfigurationProvider = {
-                    ApiConfiguration.State(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                    )
+                    args.apiConfiguration
                 },
             )
                 .report(

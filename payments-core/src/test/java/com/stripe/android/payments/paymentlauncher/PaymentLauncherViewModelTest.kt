@@ -652,8 +652,7 @@ class PaymentLauncherViewModelTest {
         runScenario {
             val factory = PaymentLauncherViewModel.Factory {
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -1250,6 +1249,10 @@ class PaymentLauncherViewModelTest {
         const val RETURN_URL = "return://to.me"
         const val TEST_STRIPE_ACCOUNT_ID = "acct_123"
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+        )
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         val API_REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

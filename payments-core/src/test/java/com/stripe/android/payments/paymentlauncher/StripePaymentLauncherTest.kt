@@ -40,7 +40,9 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.confirmStripeIntentParams == params
+                    arg.confirmStripeIntentParams == params &&
+                    arg.apiConfiguration.publishableKey == PUBLISHABLE_KEY &&
+                    arg.apiConfiguration.stripeAccountId == STRIPE_ACCOUNT_ID
             }
         )
     }
@@ -54,7 +56,9 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.confirmStripeIntentParams == params
+                    arg.confirmStripeIntentParams == params &&
+                    arg.apiConfiguration.publishableKey == PUBLISHABLE_KEY &&
+                    arg.apiConfiguration.stripeAccountId == STRIPE_ACCOUNT_ID
             }
         )
     }
@@ -66,7 +70,9 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.PaymentIntentNextActionArgs &&
-                    arg.paymentIntentClientSecret == CLIENT_SECRET
+                    arg.paymentIntentClientSecret == CLIENT_SECRET &&
+                    arg.apiConfiguration.publishableKey == PUBLISHABLE_KEY &&
+                    arg.apiConfiguration.stripeAccountId == STRIPE_ACCOUNT_ID
             }
         )
     }
@@ -78,7 +84,9 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.SetupIntentNextActionArgs &&
-                    arg.setupIntentClientSecret == CLIENT_SECRET
+                    arg.setupIntentClientSecret == CLIENT_SECRET &&
+                    arg.apiConfiguration.publishableKey == PUBLISHABLE_KEY &&
+                    arg.apiConfiguration.stripeAccountId == STRIPE_ACCOUNT_ID
             }
         )
     }
@@ -94,7 +102,8 @@ class StripePaymentLauncherTest {
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs &&
                     arg.paymentIntentClientSecret == CLIENT_SECRET &&
-                    arg.publishableKey == PUBLISHABLE_KEY
+                    arg.apiConfiguration.publishableKey == HASHED_PUBLISHABLE_KEY &&
+                    arg.apiConfiguration.stripeAccountId == STRIPE_ACCOUNT_ID
             }
         )
     }
@@ -103,6 +112,7 @@ class StripePaymentLauncherTest {
         const val PUBLISHABLE_KEY = "publishableKey"
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
         const val CLIENT_SECRET = "clientSecret"
-        const val HASHED_VALUE = "$PUBLISHABLE_KEY:$CLIENT_SECRET"
+        const val HASHED_PUBLISHABLE_KEY = "hashedPublishableKey"
+        const val HASHED_VALUE = "$HASHED_PUBLISHABLE_KEY:$CLIENT_SECRET"
     }
 }
