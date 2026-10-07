@@ -131,9 +131,27 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
+    fun `button layout rejects maximum columns greater than ten`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(11)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
     fun `button layout rejects non-positive maximum rows`() {
         val exception = runCatching {
             ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(-1)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `button layout rejects maximum rows greater than ten`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(11)
         }.exceptionOrNull()
 
         assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)

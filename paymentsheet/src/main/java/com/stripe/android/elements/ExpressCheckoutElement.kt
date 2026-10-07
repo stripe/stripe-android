@@ -284,11 +284,12 @@ class ExpressCheckoutElement @Inject internal constructor(
                 /**
                  * Sets the maximum number of columns the Express Checkout Element can use.
                  *
+                 * Must be between 1 and 10, inclusive, or null.
                  * Defaults to null, meaning unlimited.
                  */
                 fun maxColumns(maxColumns: Int?): ButtonLayout = apply {
-                    require(maxColumns == null || maxColumns > 0) {
-                        "maxColumns must be greater than zero or null."
+                    require(maxColumns == null || maxColumns in 1..MAX_LAYOUT_DIMENSION) {
+                        "maxColumns must be between 1 and 10 or null."
                     }
                     this.maxColumns = maxColumns
                 }
@@ -296,11 +297,12 @@ class ExpressCheckoutElement @Inject internal constructor(
                 /**
                  * Sets the maximum number of rows the Express Checkout Element can use.
                  *
+                 * Must be between 1 and 10, inclusive, or null.
                  * Defaults to null, meaning unlimited.
                  */
                 fun maxRows(maxRows: Int?): ButtonLayout = apply {
-                    require(maxRows == null || maxRows > 0) {
-                        "maxRows must be greater than zero or null."
+                    require(maxRows == null || maxRows in 1..MAX_LAYOUT_DIMENSION) {
+                        "maxRows must be between 1 and 10 or null."
                     }
                     this.maxRows = maxRows
                 }
@@ -315,6 +317,10 @@ class ExpressCheckoutElement @Inject internal constructor(
                     maxColumns = maxColumns,
                     maxRows = maxRows,
                 )
+
+                private companion object {
+                    const val MAX_LAYOUT_DIMENSION = 10
+                }
             }
 
             /** Configures how payment methods are arranged within the Express Checkout Element. */
