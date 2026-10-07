@@ -10,7 +10,7 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
 import java.io.File
 
 @Suppress("TooManyFunctions")
-internal class AdditionalKycStateHolder(
+internal class KycStateHolder(
     requirements: AdditionalKycRequirements,
 ) {
     private val userActionRequirements = requirements.userActionRequired.sortedBy {
@@ -34,8 +34,8 @@ internal class AdditionalKycStateHolder(
     private var requirementIndex = 0
     private val requirement: AdditionalKycRequirement?
         get() = userActionRequirements.getOrNull(requirementIndex)
-    private var questionnaire = AdditionalKycQuestionnaireModel(requirement?.questionnaire)
-    private var documents = AdditionalKycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
+    private var questionnaire = KycQuestionnaireModel(requirement?.questionnaire)
+    private var documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
     private var validationError: AdditionalKycValidationError? = null
     private var submissionState = AdditionalKycSubmissionState.Collecting
     private var page = initialPage(requirement, pendingRequirements)
@@ -252,8 +252,8 @@ internal class AdditionalKycStateHolder(
         }
 
         requirementIndex += 1
-        questionnaire = AdditionalKycQuestionnaireModel(requirement?.questionnaire)
-        documents = AdditionalKycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
+        questionnaire = KycQuestionnaireModel(requirement?.questionnaire)
+        documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
         validationError = null
         documents.clearValidation()
         documents.onFileSelectionCancelled()

@@ -6,7 +6,7 @@ import java.io.File
 import java.util.Locale
 
 @Suppress("TooManyFunctions")
-internal class AdditionalKycDocumentCollectionModel(
+internal class KycDocumentCollectionModel(
     private val document: AdditionalKycDocumentRequirement?,
     private val requirementType: AdditionalKycRequirementType,
 ) {

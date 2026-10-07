@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class AdditionalKycQuestionnaireModelTest {
+internal class KycQuestionnaireModelTest {
     @Test
     fun `required answers are validated and trimmed for submission`() {
         val model = model()
@@ -40,13 +40,13 @@ internal class AdditionalKycQuestionnaireModelTest {
 
     @Test
     fun `missing questionnaire omits submission`() {
-        val model = AdditionalKycQuestionnaireModel(null)
+        val model = KycQuestionnaireModel(null)
         assertThat(model.hasQuestions).isFalse()
         assertThat(model.hasMissingAnswers).isFalse()
         assertThat(model.createSubmission()).isNull()
     }
 
-    private fun model() = AdditionalKycQuestionnaireModel(
+    private fun model() = KycQuestionnaireModel(
         AdditionalKycQuestionnaire(
             listOf(
                 AdditionalKycQuestion("required", "Source of funds", "free_text", true),

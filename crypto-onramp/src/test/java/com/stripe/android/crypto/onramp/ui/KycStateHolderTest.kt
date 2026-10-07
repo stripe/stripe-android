@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.io.File
 
-internal class AdditionalKycStateHolderTest {
+internal class KycStateHolderTest {
     @Test
     fun `proof of address fixture preserves server categories through submission`() {
         val stateHolder = stateHolderFromFixture("proof_of_address_required.json")
@@ -69,17 +69,17 @@ internal class AdditionalKycStateHolderTest {
         assertThat(answer?.value).isEqualTo("Long-term investment")
     }
 
-    private fun stateHolderFromFixture(fileName: String): AdditionalKycStateHolder {
+    private fun stateHolderFromFixture(fileName: String): KycStateHolder {
         val fixture = requireNotNull(
             javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
         ).bufferedReader().use { it.readText() }
         val response = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(fixture)
-        return AdditionalKycStateHolder(response.requirements.toAdditionalKycRequirements())
+        return KycStateHolder(response.requirements.toAdditionalKycRequirements())
     }
 
     @Test
     fun `proof of address advances from context to document editor`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
@@ -97,7 +97,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `source of funds advances through questionnaire overview and editor`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(
@@ -131,7 +131,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `initial state uses first requirement awaiting user action`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = listOf(questionnaireRequirement()),
@@ -151,7 +151,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `submit validates required questionnaire answers`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(questionnaireRequirement()),
                 pendingPartnerAction = emptyList(),
@@ -178,7 +178,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `document submission groups files by source and populates funding source answer`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(
@@ -232,7 +232,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `unsupported file type is rejected`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
@@ -255,7 +255,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `uploading state retains selected file name`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
@@ -272,7 +272,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `proof of address file at size limit is accepted`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
@@ -289,7 +289,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `oversized proof of address file is rejected`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
                 pendingPartnerAction = emptyList(),
@@ -308,7 +308,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `oversized source of funds file is rejected`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(description = "source_of_funds")
@@ -329,7 +329,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `unrecognized document requirement uses server file size limit`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     documentRequirement(minDocumentTypes = 1).copy(description = "future_requirement")
@@ -348,7 +348,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `partner requirement produces waiting for review state`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = listOf(
@@ -369,7 +369,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `Stripe requirement produces processing state`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = emptyList(),
@@ -388,7 +388,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `partner and Stripe requirements are both represented`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = listOf(
@@ -410,7 +410,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `no recognized requirement produces unavailable state`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = emptyList(),
                 pendingPartnerAction = emptyList(),
@@ -426,7 +426,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `submission failure retains answers and allows retry`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(questionnaireRequirement()),
                 pendingPartnerAction = emptyList(),
@@ -452,7 +452,7 @@ internal class AdditionalKycStateHolderTest {
 
     @Test
     fun `successful submission advances through all user requirements`() {
-        val stateHolder = AdditionalKycStateHolder(
+        val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     questionnaireRequirement(),
@@ -576,10 +576,10 @@ internal class AdditionalKycStateHolderTest {
         maxDocumentTypes: Int = 2,
         maxFileSizeBytes: Long = 5_000_000L,
         maxFilesPerDocumentType: Int = 10,
-        block: AdditionalKycStateHolder.() -> Unit,
+        block: KycStateHolder.() -> Unit,
     ) {
         val requirement = documentRequirement(minDocumentTypes)
-        AdditionalKycStateHolder(
+        KycStateHolder(
             requirements(
                 userActionRequired = listOf(
                     requirement.copy(

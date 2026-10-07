@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Test
 import java.io.File
 
-internal class AdditionalKycDocumentCollectionModelTest {
+internal class KycDocumentCollectionModelTest {
     @Test
     fun `removing a file restores its source capacity`() {
         val model = model()
@@ -36,13 +36,13 @@ internal class AdditionalKycDocumentCollectionModelTest {
         assertThat(model.validationError).isNull()
     }
 
-    private fun model(): AdditionalKycDocumentCollectionModel {
+    private fun model(): KycDocumentCollectionModel {
         val fixture = requireNotNull(
             javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/source_of_funds_required.json")
         ).bufferedReader().use { it.readText() }
         val requirement = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(fixture)
             .requirements.toAdditionalKycRequirements().userActionRequired.single()
-        return AdditionalKycDocumentCollectionModel(
+        return KycDocumentCollectionModel(
             requireNotNull(requirement.document).copy(maxFilesPerDocumentType = 1),
             AdditionalKycRequirementType.SourceOfFunds,
         )

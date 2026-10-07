@@ -4,7 +4,7 @@ import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
 import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
 
-internal class AdditionalKycQuestionnaireModel(
+internal class KycQuestionnaireModel(
     private val questionnaire: AdditionalKycQuestionnaire?,
 ) {
     private val questions = questionnaire?.questions.orEmpty()
