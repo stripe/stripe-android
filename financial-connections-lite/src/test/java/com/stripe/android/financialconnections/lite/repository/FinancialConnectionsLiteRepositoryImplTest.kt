@@ -45,8 +45,8 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             options = optionsCaptor.capture(),
             params = paramsCaptor.capture()
         )
-        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo("pk_test_123")
-        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo("acct_test")
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
                 "consent" to "fccons_123",
@@ -71,8 +71,8 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             options = optionsCaptor.capture(),
             params = paramsCaptor.capture()
         )
-        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo("pk_test_123")
-        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo("acct_test")
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
 
