@@ -7,8 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,6 +51,7 @@ internal fun ExpressCheckoutElementContent(
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
                 theme = button.buttonTheme.toGooglePayButtonTheme(),
                 onPressed = onPressed,
+                modifier = Modifier.fillMaxSize(),
             )
         },
     )
@@ -85,14 +90,20 @@ internal fun ExpressCheckoutElementContent(
         ) {
             visibleButtons.chunked(columnCount).forEach { rowButtons ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.spacedBy(
                         space = ButtonSpacing,
                         alignment = Alignment.CenterHorizontally,
                     ),
                 ) {
                     rowButtons.forEach { button ->
-                        Box(modifier = Modifier.width(buttonWidth)) {
+                        Box(
+                            modifier = Modifier
+                                .width(buttonWidth)
+                                .fillMaxHeight()
+                        ) {
                             ExpressButtonContent(
                                 button = button,
                                 enabled = state.enabled,
@@ -167,6 +178,7 @@ private fun ExpressButtonContent(
                 enabled = enabled,
                 theme = button.buttonTheme.toLinkButtonTheme(),
                 linkBrand = button.linkBrand,
+                modifier = Modifier.fillMaxSize(),
                 onClick = {
                     interactor.handleViewAction(
                         ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(

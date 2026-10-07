@@ -5,6 +5,7 @@ package com.stripe.android.elements
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -143,6 +144,7 @@ internal class ExpressCheckoutElementScreenshotTest {
     private fun FakeGooglePayButton(enabled: Boolean = true) {
         Box(
             modifier = Modifier
+                .fillMaxSize()
                 .fillMaxWidth()
                 .height(48.dp)
                 .alpha(if (enabled) 1f else 0.5f)
