@@ -22,6 +22,7 @@ internal fun PaymentSelection.toConfirmationOption(
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
     googlePayBillingEmailOverride: String? = null,
     googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
+    showSecondaryLinkButtonForLink: Boolean = true,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -37,7 +38,10 @@ internal fun PaymentSelection.toConfirmationOption(
             billingEmailOverride = googlePayBillingEmailOverride,
             shippingAddressParameters = googlePayShippingAddressParameters,
         )
-        is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
+        is PaymentSelection.Link -> toConfirmationOption(
+            linkConfiguration = linkConfiguration,
+            showSecondaryLinkButtonForLink = showSecondaryLinkButtonForLink,
+        )
     }
 }
 
@@ -157,6 +161,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
 
 private fun PaymentSelection.Link.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
+    showSecondaryLinkButtonForLink: Boolean,
 ): LinkConfirmationOption? {
     return linkConfiguration?.let {
         LinkConfirmationOption(
@@ -166,7 +171,7 @@ private fun PaymentSelection.Link.toConfirmationOption(
                 // If a payment is included in the confirmation option, launch confirmation right away
                 selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
                 // If a payment is not included, launch the link flow regularly
-                else -> LinkLaunchMode.Full(showSecondaryButton = true)
+                else -> LinkLaunchMode.Full(showSecondaryButton = showSecondaryLinkButtonForLink)
             },
         )
     }

@@ -7,11 +7,9 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
-import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -87,7 +85,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         } else {
             null
         }
-        val baseConfirmationOption = expressButton.toSelection().toConfirmationOption(
+        val confirmationOption = expressButton.toSelection().toConfirmationOption(
             configuration = configuration,
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
@@ -96,14 +94,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
             googlePayShippingAddressParameters = shippingAddressParameters,
+            showSecondaryLinkButtonForLink = false,
         ) ?: return null
-        val confirmationOption = if (baseConfirmationOption is LinkConfirmationOption) {
-            baseConfirmationOption.copy(
-                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = false),
-            )
-        } else {
-            baseConfirmationOption
-        }
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
