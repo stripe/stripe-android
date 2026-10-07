@@ -18,19 +18,10 @@ internal object CheckoutExpressDefinitions {
             displayName = "Display",
             defaultValue = ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic,
         )
-        val collectMissingBilling = boolean(
-            key = "express.link.collect_missing_billing",
-            displayName = "Collect missing billing details",
-            defaultValue = true,
-        )
-        val disallowedFunding = stringCsv(
-            key = "express.link.disallow_funding",
-            displayName = "Disallowed funding sources (comma separated)",
-        )
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "express.link",
             displayName = "Link",
-            children = arrayOf(display, collectMissingBilling, disallowedFunding),
+            children = arrayOf(display),
         )
     }
 

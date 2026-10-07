@@ -3,8 +3,6 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -56,8 +54,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class LinkConfiguration {
             private var display: Display = Display.Automatic
-            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
-            private var disallowFundingSourceCreation: Set<String> = emptySet()
 
             /**
              * Display configuration for Link.
@@ -87,39 +83,13 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.display = display
             }
 
-            /**
-             * Sets whether Link collects missing billing details for existing payment methods.
-             */
-            @CollectMissingLinkBillingDetailsPreview
-            fun collectMissingBillingDetailsForExistingPaymentMethods(
-                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-            ): LinkConfiguration = apply {
-                this.collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods
-            }
-
-            /**
-             * Sets the funding source types that Link must not create.
-             */
-            @LinkDisallowFundingSourceCreationPreview
-            fun disallowFundingSourceCreation(
-                disallowFundingSourceCreation: Set<String>,
-            ): LinkConfiguration = apply {
-                this.disallowFundingSourceCreation = disallowFundingSourceCreation
-            }
-
             @Parcelize
             internal data class State(
                 val display: Display,
-                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-                val disallowFundingSourceCreation: Set<String>,
             ) : Parcelable
 
             internal fun build(): State = State(
                 display = display,
-                collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods,
-                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
             )
         }
 

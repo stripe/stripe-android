@@ -1,17 +1,11 @@
 package com.stripe.android.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
-@OptIn(
-    CheckoutSessionPreview::class,
-    CollectMissingLinkBillingDetailsPreview::class,
-    LinkDisallowFundingSourceCreationPreview::class,
-)
+@OptIn(CheckoutSessionPreview::class)
 internal class ExpressCheckoutElementTest {
     @Test
     fun `configuration builds default values`() {
@@ -20,8 +14,6 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.display).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic
         )
-        assertThat(state.linkConfiguration.collectMissingBillingDetailsForExistingPaymentMethods).isTrue()
-        assertThat(state.linkConfiguration.disallowFundingSourceCreation).isEmpty()
         assertThat(state.googlePayConfiguration.display).isEqualTo(
             CheckoutGooglePayConfiguration.Display.Automatic
         )
@@ -44,8 +36,6 @@ internal class ExpressCheckoutElementTest {
             .linkConfiguration(
                 ExpressCheckoutElement.Configuration.LinkConfiguration()
                     .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
-                    .collectMissingBillingDetailsForExistingPaymentMethods(false)
-                    .disallowFundingSourceCreation(setOf("card", "bank_account"))
             )
             .googlePayConfiguration(
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration()
@@ -59,9 +49,6 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.display).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
         )
-        assertThat(state.linkConfiguration.collectMissingBillingDetailsForExistingPaymentMethods).isFalse()
-        assertThat(state.linkConfiguration.disallowFundingSourceCreation)
-            .containsExactly("card", "bank_account")
         assertThat(state.googlePayConfiguration.display).isEqualTo(
             CheckoutGooglePayConfiguration.Display.Never
         )
