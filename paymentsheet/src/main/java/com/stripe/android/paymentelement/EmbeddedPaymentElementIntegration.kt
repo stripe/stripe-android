@@ -12,7 +12,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.embedded.content.DaggerEmbeddedPaymentElementViewModelComponent
@@ -23,11 +22,10 @@ import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import kotlinx.coroutines.cancel
 
 /**
- * Owns one React Native Embedded integration independently of its Activity presentation.
+ * Owns one Embedded integration independently of its Activity presentation.
  * Retain this object across configuration changes and call [destroy] on permanent removal.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@ReactNativeSdkInternal
 class EmbeddedPaymentElementIntegration internal constructor(
     private val component: EmbeddedPaymentElementViewModelComponent,
     private val savedState: EmbeddedPaymentElementSavedState,

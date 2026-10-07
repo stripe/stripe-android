@@ -17,7 +17,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -49,7 +48,6 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ReactNativeSdkInternal::class)
 @Suppress("RestrictedApi")
 internal class EmbeddedPaymentElementIntegrationTest {
     private val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())

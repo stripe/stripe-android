@@ -40,11 +40,9 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementIntegration
-import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -55,7 +53,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckou
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.serialization.json.Json
 
-@OptIn(ReactNativeSdkInternal::class)
 internal class EmbeddedExampleActivity : AppCompatActivity() {
     private var mountedInstances by mutableStateOf(0)
     private val integrationViewModel: EmbeddedExampleIntegrationViewModel by viewModels()
@@ -70,7 +67,6 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
                 UseApiConfigurationSettingsDefinition.isEnabled(snapshot)
             }
             var checkoutVisible by rememberSaveable { mutableStateOf(false) }
-            var useRestrictedIntegration by rememberSaveable { mutableStateOf(false) }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -78,15 +74,8 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
             ) {
                 Text(getString(R.string.embedded_example_title), modifier = Modifier.padding(16.dp))
                 Button(
-                    enabled = !checkoutVisible,
-                    onClick = { useRestrictedIntegration = !useRestrictedIntegration },
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                ) {
-                    Text(if (useRestrictedIntegration) "Restricted RN integration" else "Native Compose control")
-                }
-                Button(
                     onClick = {
-                        if (checkoutVisible && useRestrictedIntegration) {
+                        if (checkoutVisible) {
                             integrationViewModel.destroyIntegration()
                         }
                         if (!checkoutVisible) mountedInstances += 1
@@ -101,11 +90,7 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
                     Box(modifier = Modifier.weight(1f)) {
                         CheckoutScreen(
                             useApiConfiguration = useApiConfiguration,
-                            integration = if (useRestrictedIntegration) {
-                                integrationViewModel.getIntegration(this@EmbeddedExampleActivity)
-                            } else {
-                                null
-                            },
+                            integration = integrationViewModel.getIntegration(this@EmbeddedExampleActivity),
                             activity = this@EmbeddedExampleActivity,
                         )
                     }
@@ -130,10 +115,10 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
 }
 
 @Composable
-@OptIn(ApiConfigurationPreview::class, ReactNativeSdkInternal::class)
+@OptIn(ApiConfigurationPreview::class)
 private fun CheckoutScreen(
     useApiConfiguration: Boolean,
-    integration: EmbeddedPaymentElementIntegration?,
+    integration: EmbeddedPaymentElementIntegration,
     activity: ComponentActivity,
 ) {
     val context = LocalContext.current.applicationContext
@@ -147,16 +132,12 @@ private fun CheckoutScreen(
         )
     }
 
-    val embeddedPaymentElement = if (integration == null) {
-        rememberEmbeddedPaymentElement(embeddedBuilder)
-    } else {
-        remember(integration, activity, embeddedBuilder) {
-            integration.createElement(activity, embeddedBuilder)
-        }
+    val embeddedPaymentElement = remember(integration, activity, embeddedBuilder) {
+        integration.createElement(activity, embeddedBuilder)
     }
 
     LaunchedEffect(embeddedPaymentElement) {
-        if (integration != null && embeddedPaymentElement.state != null) return@LaunchedEffect
+        if (embeddedPaymentElement.state != null) return@LaunchedEffect
         val checkoutResult = if (useApiConfiguration) {
             checkout(context, initializePaymentConfiguration = false).also {
                 prefetchedCheckout = it
@@ -205,7 +186,6 @@ private fun CheckoutScreen(
     }
 }
 
-@OptIn(ReactNativeSdkInternal::class)
 internal class EmbeddedExampleIntegrationViewModel(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
