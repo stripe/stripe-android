@@ -1,5 +1,6 @@
 package com.stripe.android.payments.bankaccount.ui
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -16,9 +17,8 @@ internal sealed class CollectBankAccountViewEffect {
      * Instruct the view to open the financial connections SDK flow.
      */
     data class OpenConnectionsFlow(
-        val publishableKey: String,
+        val apiConfiguration: ApiConfiguration.State,
         val financialConnectionsSessionSecret: String,
-        val stripeAccountId: String?,
         val elementsSessionContext: ElementsSessionContext?,
         val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ) : CollectBankAccountViewEffect()
