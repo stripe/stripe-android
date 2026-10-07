@@ -3,15 +3,11 @@ package com.stripe.android.crypto.onramp.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswer
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
 import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
 import java.io.File
-import java.util.Locale
 
 @Suppress("TooManyFunctions")
 internal class AdditionalKycStateHolder(
@@ -38,34 +34,30 @@ internal class AdditionalKycStateHolder(
     private var requirementIndex = 0
     private val requirement: AdditionalKycRequirement?
         get() = userActionRequirements.getOrNull(requirementIndex)
-    private var answers = createAnswers(requirement)
-    private var documentSlots = createDocumentSlots(requirement)
+    private var questionnaire = AdditionalKycQuestionnaireModel(requirement?.questionnaire)
+    private var documents = AdditionalKycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
     private var validationError: AdditionalKycValidationError? = null
-    private var validationFileName: String? = null
-    private var selectingFileSlot: Int? = null
-    private var selectingFileName: String? = null
     private var submissionState = AdditionalKycSubmissionState.Collecting
     private var page = initialPage(requirement, pendingRequirements)
-    private var editingDocumentSlot: Int? = initialEditingSlot(requirement, page)
 
     var state by mutableStateOf(buildState())
         private set
 
     val acceptedFormats: List<String>
-        get() = requirement?.document?.acceptedFormats.orEmpty()
+        get() = documents.acceptedFormats
 
     val maximumFileSizeBytes: Long?
-        get() = requirement?.document?.maxFileSizeBytes
+        get() = documents.maximumFileSizeBytes
 
     fun onContinue(): Boolean {
-        if (!canEdit() || !isCollectionAvailable() || selectingFileSlot != null) {
+        if (!canEdit() || !isCollectionAvailable() || documents.selectingFileSlot != null) {
             return false
         }
 
         when (page) {
             AdditionalKycCollectionPage.Context -> page = firstCollectionPage(requirement)
             AdditionalKycCollectionPage.Questionnaire -> {
-                if (hasMissingVisibleAnswers()) {
+                if (questionnaire.hasMissingAnswers) {
                     validationError = AdditionalKycValidationError.MissingRequiredAnswers
                     refreshState()
                     return false
@@ -83,9 +75,8 @@ internal class AdditionalKycStateHolder(
                     return false
                 }
                 if (!canContinue()) return false
-                discardEmptyDocumentSlots()
+                documents.finishEditing()
                 page = AdditionalKycCollectionPage.DocumentOverview
-                editingDocumentSlot = null
             }
             AdditionalKycCollectionPage.DocumentOverview,
             AdditionalKycCollectionPage.Pending,
@@ -95,7 +86,7 @@ internal class AdditionalKycStateHolder(
         }
 
         validationError = null
-        validationFileName = null
+        documents.clearValidation()
         refreshState()
         return true
     }
@@ -110,8 +101,7 @@ internal class AdditionalKycStateHolder(
             AdditionalKycCollectionPage.DocumentOverview -> previousPageBeforeDocuments()
             AdditionalKycCollectionPage.DocumentEditor -> {
                 if (requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds) {
-                    discardEmptyDocumentSlots()
-                    editingDocumentSlot = null
+                    documents.finishEditing()
                     AdditionalKycCollectionPage.DocumentOverview
                 } else {
                     previousPageBeforeDocuments()
@@ -120,152 +110,77 @@ internal class AdditionalKycStateHolder(
             else -> return false
         }
         validationError = null
-        validationFileName = null
-        selectingFileSlot = null
-        selectingFileName = null
+        documents.clearValidation()
+        documents.onFileSelectionCancelled()
         refreshState()
         return true
     }
 
     fun onAddDocuments() {
-        if (!canEdit() || requirement?.document == null) {
-            return
-        }
-        val selectedTypes = documentSlots.filter { it.file != null }.mapNotNull { it.subtypeId }.toSet()
-        val document = requireNotNull(requirement?.document)
-        if (selectedTypes.size >= document.maxDocumentTypes) return
-        val subtype = document.acceptedSubtypes.firstOrNull { it.id !in selectedTypes } ?: return
-        val slot = DocumentSlot(
-            index = documentSlots.firstOrNull { it.file == null }?.index ?: nextDocumentSlotIndex(),
-            subtypeId = subtype.id,
-            file = null,
-        )
-        discardEmptyDocumentSlots()
-        documentSlots = documentSlots + slot
-        editingDocumentSlot = slot.index
+        if (!canEdit() || !documents.onAddDocuments()) return
         page = AdditionalKycCollectionPage.DocumentEditor
         validationError = null
-        validationFileName = null
         refreshState()
     }
 
     fun onEditDocuments(slotIndex: Int) {
-        if (!canEdit() || requirement?.document == null) {
-            return
-        }
-        val selectedSlot = documentSlots.firstOrNull { slot -> slot.index == slotIndex } ?: return
-        val editingSlot = documentSlots.firstOrNull { slot ->
-            slot.file == null && slot.subtypeId == selectedSlot.subtypeId
-        } ?: DocumentSlot(
-            index = nextDocumentSlotIndex(),
-            subtypeId = selectedSlot.subtypeId,
-            file = null,
-        ).also { newSlot -> documentSlots = documentSlots + newSlot }
-        editingDocumentSlot = editingSlot.index
+        if (!canEdit() || !documents.onEditDocuments(slotIndex)) return
         page = AdditionalKycCollectionPage.DocumentEditor
         validationError = null
-        validationFileName = null
         refreshState()
     }
 
     fun onQuestionAnswerChanged(questionId: String, answer: String) {
-        if (!canEdit() || questionId !in answers) {
-            return
-        }
-
-        answers[questionId] = limitAdditionalKycAnswer(answer)
+        if (!canEdit() || !questionnaire.updateAnswer(questionId, answer)) return
         submissionState = AdditionalKycSubmissionState.Collecting
         validationError = null
         refreshState()
     }
 
     fun onDocumentSubtypeSelected(slotIndex: Int, subtypeId: String) {
-        if (!canEdit() || selectingFileSlot != null) {
-            return
-        }
-        val document = requirement?.document ?: return
-        if (
-            document.acceptedSubtypes.none { subtype -> subtype.id == subtypeId } ||
-            !canSelectSubtype(slotIndex, subtypeId)
-        ) {
-            return
-        }
-
-        updateDocumentSlot(slotIndex) { slot -> slot.copy(subtypeId = subtypeId) }
-        editingDocumentSlot = slotIndex
+        if (!canEdit() || !documents.onDocumentSubtypeSelected(slotIndex, subtypeId)) return
         submissionState = AdditionalKycSubmissionState.Collecting
         validationError = null
-        validationFileName = null
         refreshState()
     }
 
     fun canSelectFile(slotIndex: Int): Boolean {
-        val document = requirement?.document ?: return false
-        val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return false
-        return canEdit() && slot.subtypeId != null && documentSlots.count {
-            it.index != slotIndex && it.subtypeId == slot.subtypeId && it.file != null
-        } < document.maxFilesPerDocumentType
+        return canEdit() && documents.canSelectFile(slotIndex)
     }
 
     fun onFileSelectionStarted(slotIndex: Int) {
-        if (!canSelectFile(slotIndex)) {
-            return
-        }
-
+        if (!canEdit() || !documents.onFileSelectionStarted(slotIndex)) return
         submissionState = AdditionalKycSubmissionState.Collecting
-        selectingFileSlot = slotIndex
-        selectingFileName = null
         validationError = null
-        validationFileName = null
         refreshState()
     }
 
     fun onFileUploadStarted(slotIndex: Int, displayName: String) {
-        if (selectingFileSlot != slotIndex) {
-            return
-        }
-        selectingFileName = displayName
+        documents.onFileUploadStarted(slotIndex, displayName)
         refreshState()
     }
 
     fun onFileSelectionCancelled() {
-        selectingFileSlot = null
-        selectingFileName = null
+        documents.onFileSelectionCancelled()
         refreshState()
     }
 
     fun isAcceptedFile(displayName: String, mimeTypeExtension: String?): Boolean {
-        val accepted = acceptedFormats
-            .map(::normalizeExtension)
-            .filter(String::isNotEmpty)
-            .toSet()
-        if (accepted.isEmpty()) {
-            return true
-        }
-
-        val candidateExtensions = setOfNotNull(
-            displayName.substringAfterLast('.', missingDelimiterValue = ""),
-            mimeTypeExtension,
-        ).map(::normalizeExtension)
-
-        val isAccepted = candidateExtensions.any { extension -> extension in accepted }
-        if (!isAccepted) {
-            selectingFileSlot = null
-            selectingFileName = null
-            validationError = AdditionalKycValidationError.UnsupportedFileType
-            validationFileName = displayName
+        val accepted = documents.isAcceptedFile(displayName, mimeTypeExtension)
+        if (!accepted) {
+            validationError = documents.validationError
             refreshState()
         }
-        return isAccepted
+        return accepted
     }
 
     fun isAcceptedFileSize(fileSizeBytes: Long): Boolean {
-        val maximumBytes = maximumFileSizeBytes ?: return true
-        val isAccepted = fileSizeBytes <= maximumBytes
-        if (!isAccepted) {
-            onFileTooLarge()
+        val accepted = documents.isAcceptedFileSize(fileSizeBytes)
+        if (!accepted) {
+            validationError = documents.validationError
+            refreshState()
         }
-        return isAccepted
+        return accepted
     }
 
     fun onFileSelected(slotIndex: Int, file: File, displayName: String, fileId: String): File? {
@@ -273,54 +188,30 @@ internal class AdditionalKycStateHolder(
             onFileSelectionCancelled()
             return file
         }
-        var replacedFile: File? = null
-        updateDocumentSlot(slotIndex) { slot ->
-            replacedFile = slot.file?.file
-            slot.copy(file = SelectedKycFile(file = file, displayName = displayName, fileId = fileId))
-        }
+        val replacedFile = documents.onFileSelected(slotIndex, file, displayName, fileId)
         submissionState = AdditionalKycSubmissionState.Collecting
-        selectingFileSlot = null
-        selectingFileName = null
         validationError = null
-        validationFileName = null
-        addNextUploadSlotIfNeeded(completedSlotIndex = slotIndex)
         refreshState()
         return replacedFile
     }
 
     fun onFileSelectionFailed() {
-        selectingFileSlot = null
-        selectingFileName = null
-        validationError = AdditionalKycValidationError.FileUnavailable
-        validationFileName = null
+        documents.onFileSelectionFailed()
+        validationError = documents.validationError
         refreshState()
     }
 
     fun onFileTooLarge(displayName: String? = null) {
-        selectingFileSlot = null
-        validationError = AdditionalKycValidationError.FileTooLarge
-        validationFileName = displayName ?: selectingFileName
-        selectingFileName = null
+        documents.onFileTooLarge(displayName)
+        validationError = documents.validationError
         refreshState()
     }
 
     fun onFileRemoved(slotIndex: Int): File? {
-        if (!canEdit()) {
-            return null
-        }
-        val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return null
-        val removedFile = slot.file?.file
-        documentSlots = if (slot.file == null || documentSlots.count { it.file != null } > 1) {
-            documentSlots.filterNot { it.index == slotIndex }
-        } else {
-            documentSlots.map { candidate ->
-                if (candidate.index == slotIndex) candidate.copy(file = null) else candidate
-            }
-        }
-        ensureEditingSlot()
+        if (!canEdit() || !documents.containsSlot(slotIndex)) return null
+        val removedFile = documents.onFileRemoved(slotIndex, page == AdditionalKycCollectionPage.DocumentEditor)
         submissionState = AdditionalKycSubmissionState.Collecting
         validationError = null
-        validationFileName = null
         refreshState()
         return removedFile
     }
@@ -329,9 +220,8 @@ internal class AdditionalKycStateHolder(
         val submission = createSubmission() ?: return null
         submissionState = AdditionalKycSubmissionState.Submitting
         validationError = null
-        validationFileName = null
-        selectingFileSlot = null
-        selectingFileName = null
+        documents.clearValidation()
+        documents.onFileSelectionCancelled()
         refreshState()
         return submission
     }
@@ -362,67 +252,34 @@ internal class AdditionalKycStateHolder(
         }
 
         requirementIndex += 1
-        answers = createAnswers(requirement)
-        documentSlots = createDocumentSlots(requirement)
+        questionnaire = AdditionalKycQuestionnaireModel(requirement?.questionnaire)
+        documents = AdditionalKycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
         validationError = null
-        validationFileName = null
-        selectingFileSlot = null
-        selectingFileName = null
+        documents.clearValidation()
+        documents.onFileSelectionCancelled()
         submissionState = AdditionalKycSubmissionState.Collecting
         page = initialPage(requirement, emptyList())
-        editingDocumentSlot = initialEditingSlot(requirement, page)
         refreshState()
         return true
     }
 
-    fun currentFiles(): List<File> {
-        return documentSlots.mapNotNull { slot -> slot.file?.file }
-    }
+    fun currentFiles(): List<File> = documents.currentFiles()
 
     fun createSubmission(): AdditionalKycSubmission? {
         val requirement = requirement ?: return null
-        if (!canEdit() || !isCollectionAvailable() || selectingFileSlot != null) {
-            return null
-        }
+        if (!canEdit() || !isCollectionAvailable() || documents.selectingFileSlot != null) return null
         val error = currentValidationError()
         if (error != null) {
             validationError = error
             refreshState()
             return null
         }
-
-        val completedSlots = documentSlots.filter { slot -> slot.file != null }
-
         return AdditionalKycSubmission(
             requirements = mapOf(
                 requirement.description to AdditionalKycRequirementSubmission(
                     requestedBy = requirement.requestedBy,
-                    documents = if (requirement.document != null) {
-                        completedSlots.groupBy { slot -> slot.subtypeId }.map { (subtypeId, slots) ->
-                            AdditionalKycDocumentSubmission(
-                                documentSubtype = requireNotNull(subtypeId),
-                                files = emptyList(),
-                                uploadedFileIds = slots.map { slot -> requireNotNull(slot.file).fileId },
-                            )
-                        }
-                    } else {
-                        emptyList()
-                    },
-                    questionnaire = requirement.questionnaire?.let { questionnaire ->
-                        AdditionalKycQuestionnaireSubmission(
-                            answers = questionnaire.questions.mapNotNull { question ->
-                                val answer = answers[question.id]
-                                answer
-                                    ?.takeIf { value -> value.isNotBlank() || question.required }
-                                    ?.let { value ->
-                                        AdditionalKycQuestionnaireAnswer(
-                                            questionId = question.id,
-                                            value = value.trim(),
-                                        )
-                                    }
-                            },
-                        )
-                    },
+                    documents = documents.createSubmission(),
+                    questionnaire = questionnaire.createSubmission(),
                 )
             ),
         )
@@ -432,63 +289,19 @@ internal class AdditionalKycStateHolder(
         state = buildState()
     }
 
-    @Suppress("LongMethod")
     private fun buildState(): AdditionalKycScreenState {
-        val requirement = requirement
-        val document = requirement?.document
-        val requirementType = requirement.toRequirementType()
-        val completedDocumentCount = documentSlots.count { slot -> slot.file != null }
-
         return AdditionalKycScreenState(
             page = page,
-            requirementType = requirementType,
-            errorMessages = requirement?.errors?.map { error -> error.developerMessage }.orEmpty(),
-            questions = requirement?.questionnaire?.questions.orEmpty().map { question ->
-                AdditionalKycQuestionState(
-                    id = question.id,
-                    prompt = question.prompt,
-                    answer = answers[question.id].orEmpty(),
-                    required = question.required,
-                )
-            },
-            document = document?.let {
-                AdditionalKycDocumentState(
-                    acceptedFormats = it.acceptedFormats,
-                    instructions = it.instructions,
-                    fileRequirements = it.fileRequirements,
-                    maxFileSizeMegabytes = maximumFileSizeBytes
-                        ?.div(BYTES_PER_MEGABYTE)
-                        ?.toInt(),
-                    minDocumentTypes = it.minDocumentTypes.coerceAtLeast(MINIMUM_DOCUMENT_COUNT),
-                    maxDocumentTypes = it.maxDocumentTypes,
-                    maxFilesPerDocumentType = it.maxFilesPerDocumentType,
-                    editingSlotIndex = editingDocumentSlot,
-                    slots = documentSlots.map { slot ->
-                        AdditionalKycDocumentSlotState(
-                            index = slot.index,
-                            subtypes = it.acceptedSubtypes.map { subtype ->
-                                AdditionalKycDocumentSubtypeState(
-                                    id = subtype.id,
-                                    label = subtype.label,
-                                    description = subtype.description,
-                                    isEnabled = canSelectSubtype(slot.index, subtype.id),
-                                )
-                            },
-                            selectedSubtypeId = slot.subtypeId,
-                            selectedSubtypeLabel = subtypeLabel(slot.subtypeId),
-                            fileName = slot.file?.displayName,
-                        )
-                    },
-                )
-            },
+            requirementType = requirement.toRequirementType(),
+            errorMessages = requirement?.errors?.map { it.developerMessage }.orEmpty(),
+            questions = questionnaire.state,
+            document = documents.buildState(),
             validationError = validationError,
-            validationFileName = validationFileName,
-            selectingFileSlot = selectingFileSlot,
-            selectingFileName = selectingFileName,
-            canSubmit = canEdit() &&
-                isCollectionAvailable() &&
-                selectingFileSlot == null &&
-                currentValidationError() == null,
+            validationFileName = documents.validationFileName,
+            selectingFileSlot = documents.selectingFileSlot,
+            selectingFileName = documents.selectingFileName,
+            canSubmit = canEdit() && isCollectionAvailable() &&
+                documents.selectingFileSlot == null && currentValidationError() == null,
             canContinue = canContinue(),
             isCollectionAvailable = isCollectionAvailable(),
             submissionState = submissionState,
@@ -496,21 +309,16 @@ internal class AdditionalKycStateHolder(
             totalRequirements = userActionRequirements.size,
             hasMoreRequirements = requirementIndex < userActionRequirements.lastIndex,
             pendingRequirements = pendingRequirements,
-            completedDocumentCount = completedDocumentCount,
+            completedDocumentCount = documents.completedDocumentCount,
         )
     }
 
     private fun canContinue(): Boolean {
         return when (page) {
             AdditionalKycCollectionPage.Context -> isCollectionAvailable()
-            AdditionalKycCollectionPage.Questionnaire -> !hasMissingVisibleAnswers()
+            AdditionalKycCollectionPage.Questionnaire -> !questionnaire.hasMissingAnswers
             AdditionalKycCollectionPage.DocumentEditor ->
-                requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds &&
-                    selectingFileSlot == null &&
-                    documentSlots.any { slot ->
-                        slot.file != null && slot.subtypeId ==
-                            documentSlots.firstOrNull { it.index == editingDocumentSlot }?.subtypeId
-                    }
+                requirement.toRequirementType() == AdditionalKycRequirementType.SourceOfFunds && documents.canContinue
             else -> false
         }
     }
@@ -521,129 +329,20 @@ internal class AdditionalKycStateHolder(
     }
 
     private fun currentValidationError(): AdditionalKycValidationError? {
-        val requirement = requirement ?: return null
-
-        val hasMissingAnswers = requirement.questionnaire?.questions.orEmpty().any { question ->
-            question.required && answers[question.id].isNullOrBlank()
-        }
-        if (hasMissingAnswers) {
-            return AdditionalKycValidationError.MissingRequiredAnswers
-        }
-
-        if (requirement.document != null) {
-            val document = requirement.document
-            val completedSlots = documentSlots.filter { slot -> slot.file != null }
-            val completedTypes = completedSlots.mapNotNull { it.subtypeId }.toSet()
-            val exceedsFileLimit = completedSlots.groupingBy { it.subtypeId }.eachCount().values.any {
-                it > document.maxFilesPerDocumentType
-            }
-            val missingProofOfAddress = requirement.description == PROOF_OF_ADDRESS && completedSlots.isEmpty()
-            if (completedTypes.size < document.minDocumentTypes ||
-                completedTypes.size > document.maxDocumentTypes ||
-                exceedsFileLimit ||
-                missingProofOfAddress
-            ) {
-                return AdditionalKycValidationError.MissingDocuments
-            }
-            if (document.acceptedSubtypes.isNotEmpty() && completedSlots.any { it.subtypeId == null }) {
-                return AdditionalKycValidationError.MissingDocumentType
-            }
-        }
-
-        return null
-    }
-
-    private fun hasMissingVisibleAnswers(): Boolean {
-        return visibleQuestions().any { question ->
-            question.required && answers[question.id].isNullOrBlank()
+        return if (questionnaire.hasMissingAnswers) {
+            AdditionalKycValidationError.MissingRequiredAnswers
+        } else {
+            documents.currentValidationError()
         }
     }
-
-    private fun visibleQuestions() = requirement?.questionnaire?.questions.orEmpty()
 
     private fun isCollectionAvailable(): Boolean = requirement?.isSupportedForCollection() == true
 
-    private fun canSelectSubtype(slotIndex: Int, subtypeId: String): Boolean {
-        val document = requirement?.document ?: return false
-        val selectedTypes = documentSlots.filter { it.index != slotIndex && it.file != null }
-            .mapNotNull { it.subtypeId }.toSet()
-        val fileCount = documentSlots.count {
-            it.index != slotIndex && it.subtypeId == subtypeId && it.file != null
-        }
-        return fileCount < document.maxFilesPerDocumentType &&
-            (subtypeId in selectedTypes || selectedTypes.size < document.maxDocumentTypes)
-    }
-
-    private fun addNextUploadSlotIfNeeded(completedSlotIndex: Int) {
-        val requirementType = requirement.toRequirementType()
-        val completedDocumentCount = documentSlots.filter { it.file != null }
-            .mapNotNull { it.subtypeId }.distinct().size
-        val minimumDocumentCount = requirement?.document
-            ?.minDocumentTypes
-            ?.coerceAtLeast(MINIMUM_DOCUMENT_COUNT)
-            ?: MINIMUM_DOCUMENT_COUNT
-        if (
-            requirementType == AdditionalKycRequirementType.ProofOfAddress &&
-            completedDocumentCount >= minimumDocumentCount
-        ) {
-            editingDocumentSlot = completedSlotIndex
-            return
-        }
-        val completedSlot = documentSlots.firstOrNull { slot -> slot.index == completedSlotIndex } ?: return
-        val nextSlot = DocumentSlot(
-            index = nextDocumentSlotIndex(),
-            subtypeId = completedSlot.subtypeId,
-            file = null,
-        )
-        documentSlots = documentSlots + nextSlot
-        editingDocumentSlot = nextSlot.index
-    }
-
-    private fun ensureEditingSlot() {
-        val emptySlot = documentSlots.firstOrNull { slot -> slot.file == null }
-        if (page != AdditionalKycCollectionPage.DocumentEditor) {
-            editingDocumentSlot = null
-        } else if (emptySlot != null) {
-            editingDocumentSlot = emptySlot.index
-        } else {
-            val slot = DocumentSlot(
-                index = nextDocumentSlotIndex(),
-                subtypeId = documentSlots.lastOrNull()?.subtypeId,
-                file = null,
-            )
-            documentSlots = documentSlots + slot
-            editingDocumentSlot = slot.index
-        }
-    }
-
-    private fun discardEmptyDocumentSlots() {
-        documentSlots = documentSlots.filter { slot -> slot.file != null }
-    }
-
     private fun previousPageBeforeDocuments(): AdditionalKycCollectionPage {
-        return if (visibleQuestions().isEmpty()) {
+        return if (!questionnaire.hasQuestions) {
             AdditionalKycCollectionPage.Context
         } else {
             AdditionalKycCollectionPage.Questionnaire
-        }
-    }
-
-    private fun subtypeLabel(subtypeId: String?): String? {
-        return requirement?.document?.acceptedSubtypes
-            ?.firstOrNull { subtype -> subtype.id == subtypeId }
-            ?.label
-    }
-
-    private fun nextDocumentSlotIndex(): Int {
-        return (documentSlots.maxOfOrNull { slot -> slot.index } ?: -1) + 1
-    }
-
-    private fun updateDocumentSlot(
-        slotIndex: Int,
-        transform: (DocumentSlot) -> DocumentSlot,
-    ) {
-        documentSlots = documentSlots.map { slot ->
-            if (slot.index == slotIndex) transform(slot) else slot
         }
     }
 
@@ -657,47 +356,10 @@ internal class AdditionalKycStateHolder(
         }
     }
 
-    private data class DocumentSlot(
-        val index: Int,
-        val subtypeId: String?,
-        val file: SelectedKycFile?,
-    )
-
-    private data class SelectedKycFile(
-        val file: File,
-        val displayName: String,
-        val fileId: String,
-    )
-
     private companion object {
         private const val PROOF_OF_ADDRESS = "proof_of_address"
         private const val SOURCE_OF_FUNDS = "source_of_funds"
         private const val SOURCE_OF_FUNDS_QUESTIONS = "source_of_funds_questions"
-        private const val MINIMUM_DOCUMENT_COUNT = 1
-        private const val BYTES_PER_MEGABYTE = 1_000_000L
-
-        private fun createAnswers(requirement: AdditionalKycRequirement?): MutableMap<String, String> {
-            return requirement
-                ?.questionnaire
-                ?.questions
-                .orEmpty()
-                .associate { question -> question.id to "" }
-                .toMutableMap()
-        }
-
-        private fun createDocumentSlots(requirement: AdditionalKycRequirement?): List<DocumentSlot> {
-            if (requirement?.document == null) {
-                return emptyList()
-            }
-            return listOf(
-                DocumentSlot(
-                    index = 0,
-                    subtypeId = requirement.document.acceptedSubtypes.firstOrNull()?.id,
-                    file = null,
-                )
-            )
-        }
-
         private fun initialPage(
             requirement: AdditionalKycRequirement?,
             pendingRequirements: List<AdditionalKycPendingRequirementState>,
@@ -724,28 +386,6 @@ internal class AdditionalKycStateHolder(
                     AdditionalKycCollectionPage.DocumentOverview
                 requirement?.document != null -> AdditionalKycCollectionPage.DocumentEditor
                 else -> AdditionalKycCollectionPage.Questionnaire
-            }
-        }
-
-        private fun initialEditingSlot(
-            requirement: AdditionalKycRequirement?,
-            page: AdditionalKycCollectionPage,
-        ): Int? {
-            return if (
-                page == AdditionalKycCollectionPage.DocumentEditor ||
-                requirement?.description == PROOF_OF_ADDRESS
-            ) {
-                0
-            } else {
-                null
-            }
-        }
-
-        private fun normalizeExtension(extension: String): String {
-            return when (extension.trim().removePrefix(".").lowercase(Locale.ROOT)) {
-                "jpg" -> "jpeg"
-                "tif" -> "tiff"
-                else -> extension.trim().removePrefix(".").lowercase(Locale.ROOT)
             }
         }
     }
