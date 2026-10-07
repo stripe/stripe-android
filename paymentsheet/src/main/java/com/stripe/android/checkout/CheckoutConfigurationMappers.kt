@@ -62,6 +62,7 @@ internal fun CheckoutController.Configuration.State.toBillingDetails(
     address = defaults.billingDetails?.address?.asPaymentSheet(),
     email = collectedEmail ?: checkoutSessionResponse.customerEmail,
     name = defaults.billingDetails?.name,
+    phone = defaults.phone,
 )
 
 @OptIn(CheckoutSessionPreview::class)

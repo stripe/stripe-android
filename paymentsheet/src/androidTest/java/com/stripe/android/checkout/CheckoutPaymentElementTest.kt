@@ -24,9 +24,8 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.VerticalModePage
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.junit.After
@@ -57,12 +56,12 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testBackingOutOfFormPreservesPreviouslySelectedPaymentMethod() {
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
-        ) { context ->
+        ) {
             // Open the card form, then back out without entering any details.
             contentPage.clickOnLpm("card")
             formPage.waitUntilVisible()
@@ -81,20 +80,20 @@ internal class CheckoutPaymentElementTest {
 
             // Backing out of the form must not clear the previously selected payment method.
             contentPage.assertHasSelectedLpm("cashapp")
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
     @Test
     fun testSuccessfulCardPayment() {
         var checkoutResult: CheckoutController.Result? = null
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
-        ) { context ->
+        ) {
             networkRule.createPaymentMethod()
             networkRule.checkoutConfirm { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -103,7 +102,7 @@ internal class CheckoutPaymentElementTest {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
-            context.confirm()
+            confirm()
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
@@ -111,15 +110,13 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testPaymentMethodsAreDisabledWhileCheckoutUpdateIsInProgress() {
-        lateinit var controller: CheckoutController
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
-        ) { context ->
-            runBlocking {
+        ) {
+            coroutineScope {
                 contentPage.assertLpmIsEnabled("card", isEnabled = true)
 
                 val holdResponse = CountDownLatch(1)
@@ -150,7 +147,7 @@ internal class CheckoutPaymentElementTest {
                     !controller.isUpdating.value
                 }
                 contentPage.assertLpmIsEnabled("card", isEnabled = true)
-                context.markTestSucceeded()
+                markTestSucceeded()
             }
         }
     }
@@ -198,19 +195,16 @@ internal class CheckoutPaymentElementTest {
             response.testBodyFromFile("consumer-session-logout-success.json")
         }
 
-        lateinit var controller: CheckoutController
-
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
-        ) { context ->
+        ) {
             contentPage.clickOnLpm("link")
             contentPage.assertHasSelectedLpm("link")
-            context.presentPaymentOptions()
+            presentPaymentOptions()
 
             linkWalletPage.logOut()
 
@@ -220,13 +214,11 @@ internal class CheckoutPaymentElementTest {
             verticalModePage.waitUntilMissing()
 
             networkRule.checkoutInit(responseFactory = checkoutInitResponse)
-            runBlocking {
-                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
-            }
-            context.markTestSucceeded()
+            controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            markTestSucceeded()
         }
     }
-    
+
     @Test
     fun testLinkAccountStatusIsLoaded_forLinkDisplayAutomatic() {
         runLinkLoadingTest(
@@ -273,19 +265,15 @@ internal class CheckoutPaymentElementTest {
             }
         }
 
-
-        lateinit var controller: CheckoutController
-
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
-        ) { context ->
+        ) {
             // Just testing loading events, mark test succeeded once that has completed.
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 

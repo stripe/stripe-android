@@ -40,7 +40,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
@@ -79,7 +79,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
@@ -110,7 +110,7 @@ internal class ExpressCheckoutElementTest {
         // This is called for PE, but we skip this account lookup for ECE since its Link config sets display to never.
         networkRule.enqueueLinkAccountLookup()
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             assertions = { controller ->
                 assertThat(
@@ -125,9 +125,9 @@ internal class ExpressCheckoutElementTest {
                         .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
                 )
             }
-        ) { testContext ->
+        ) {
             // Just testing load, no need to confirm.
-            testContext.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -138,7 +138,7 @@ internal class ExpressCheckoutElementTest {
         }
 
         val expectedErrorMessage = "Google Pay failed"
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
@@ -166,7 +166,7 @@ internal class ExpressCheckoutElementTest {
         }
 
         val expectedErrorMessage = "Link failed"
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
@@ -193,7 +193,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             assertions = { controller ->
@@ -203,10 +203,10 @@ internal class ExpressCheckoutElementTest {
                     ExpressCheckoutElement.PaymentMethod.GooglePay()
                 )
             },
-        ) { testContext ->
+        ) {
             page.assertGooglePayButtonExists()
             page.assertLinkButtonDoesNotExist()
-            testContext.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -216,7 +216,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             resultCallback = { result ->
@@ -262,7 +262,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory =
                 ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
@@ -326,7 +326,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->
@@ -351,7 +351,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePaySendsRequiredBillingAddressForAutomaticTax() {
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
@@ -387,7 +387,7 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testGooglePayFailsWhenAutomaticTaxUpdateChangesTotal() {
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
@@ -425,7 +425,7 @@ internal class ExpressCheckoutElementTest {
             networkRule.enqueueLinkAccountLookup()
         }
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->

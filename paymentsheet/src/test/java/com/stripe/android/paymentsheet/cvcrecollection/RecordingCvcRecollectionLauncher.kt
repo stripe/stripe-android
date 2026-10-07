@@ -12,15 +12,13 @@ internal class RecordingCvcRecollectionLauncher private constructor() : CvcRecol
     override fun launch(
         data: CvcRecollectionData,
         appearance: PaymentSheet.Appearance,
-        isLiveMode: Boolean,
     ) {
-        launchCalls.add(Call(data, appearance, isLiveMode))
+        launchCalls.add(Call(data, appearance))
     }
 
     data class Call(
         val data: CvcRecollectionData,
         val appearance: PaymentSheet.Appearance,
-        val isLiveMode: Boolean,
     )
 
     class Scenario(

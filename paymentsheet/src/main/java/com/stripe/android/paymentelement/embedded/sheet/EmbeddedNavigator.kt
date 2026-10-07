@@ -224,7 +224,6 @@ internal class EmbeddedNavigator private constructor(
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = formInteractor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -292,7 +291,6 @@ internal class EmbeddedNavigator private constructor(
 
         class SavedPaymentMethodConfirm(
             private val interactor: SavedPaymentMethodConfirmInteractor,
-            private val isLiveMode: Boolean,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
@@ -301,7 +299,7 @@ internal class EmbeddedNavigator private constructor(
             private val launchMode: EmbeddedLaunchMode,
         ) : Screen(), Closeable {
             override fun topBarState() = stateFlowOf(
-                PaymentSheetTopBarStateFactory.create(isLiveMode, PaymentSheetTopBarState.Editable.Never)
+                PaymentSheetTopBarStateFactory.create(PaymentSheetTopBarState.Editable.Never)
             )
 
             override fun title() = stateFlowOf<ResolvableString?>(null)
@@ -343,14 +341,12 @@ internal class EmbeddedNavigator private constructor(
 
         class VerticalPaymentOptions(
             private val interactor: PaymentMethodVerticalLayoutInteractor,
-            private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -393,7 +389,6 @@ internal class EmbeddedNavigator private constructor(
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -439,7 +434,6 @@ internal class EmbeddedNavigator private constructor(
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
                 return interactor.state.mapAsStateFlow { state ->
                     PaymentSheetTopBarStateFactory.create(
-                        isLiveMode = interactor.isLiveMode,
                         editable = PaymentSheetTopBarState.Editable.Maybe(
                             isEditing = state.isEditing,
                             canEdit = state.canEdit,

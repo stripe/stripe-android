@@ -5,6 +5,7 @@ import android.graphics.drawable.ShapeDrawable
 import androidx.compose.ui.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
@@ -31,7 +32,7 @@ import kotlin.test.Test
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionFactoryTest {
+class DefaultPaymentOptionFactoryTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -39,7 +40,11 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with GooglePay should return expected object`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null, appearance = null)
+        val paymentOption = factory.create(
+            selection = PaymentSelection.GooglePay,
+            linkBrand = null,
+            appearance = ConfigurationDefaults.appearance,
+        )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
         assertThat(paymentOption.paymentMethodType).isEqualTo("google_pay")
@@ -56,7 +61,7 @@ class PaymentOptionFactoryTest {
                 )
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
@@ -76,7 +81,7 @@ class PaymentOptionFactoryTest {
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
@@ -103,7 +108,7 @@ class PaymentOptionFactoryTest {
                 )
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("\u2066···· 4242\u2069")
@@ -122,7 +127,11 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Saved(paymentMethod),
+            linkBrand = null,
+            appearance = ConfigurationDefaults.appearance,
+        )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
@@ -137,7 +146,11 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Saved(paymentMethod),
+            linkBrand = null,
+            appearance = ConfigurationDefaults.appearance,
+        )
 
         assertThat(paymentOption.billingDetails).isNull()
     }
@@ -158,7 +171,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -167,7 +180,11 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Google Pay should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null, appearance = null)
+        val paymentOption = factory.create(
+            selection = PaymentSelection.GooglePay,
+            linkBrand = null,
+            appearance = ConfigurationDefaults.appearance,
+        )
 
         assertThat(paymentOption.billingDetails).isNull()
     }
@@ -178,7 +195,7 @@ class PaymentOptionFactoryTest {
         val paymentOption = factory.create(
             PaymentSelection.Link(brand = LinkBrand.Link),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
 
         assertThat(paymentOption.billingDetails).isNull()
@@ -196,7 +213,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null,
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -215,7 +232,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null,
             ),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -237,7 +254,11 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, appearance = null)
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Saved(paymentMethod),
+            linkBrand = null,
+            appearance = ConfigurationDefaults.appearance,
+        )
 
         assertThat(paymentOption.billingDetails).isEqualTo(
             PaymentSheet.BillingDetails(
@@ -306,7 +327,7 @@ class PaymentOptionFactoryTest {
         val option = factory.create(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
         val icon = option.icon()
 
@@ -322,7 +343,7 @@ class PaymentOptionFactoryTest {
         val option = factory.create(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             null,
-            appearance = null,
+            appearance = ConfigurationDefaults.appearance,
         )
         val icon = option.icon()
 
@@ -337,7 +358,7 @@ class PaymentOptionFactoryTest {
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val imageLoader = FakeStripeImageLoader()
-        val factory = PaymentOptionFactory(
+        val factory = DefaultPaymentOptionFactory(
             iconLoader = PaymentSelection.IconLoader(
                 resources = context.resources,
                 imageLoader = imageLoader,
@@ -372,7 +393,7 @@ class PaymentOptionFactoryTest {
         cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
     ): PaymentOptionFactory {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        return PaymentOptionFactory(
+        return DefaultPaymentOptionFactory(
             iconLoader = PaymentSelection.IconLoader(
                 resources = context.resources,
                 imageLoader = DefaultStripeImageLoader(context),

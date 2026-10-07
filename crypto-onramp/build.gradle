@@ -44,6 +44,12 @@ dependencies {
 }
 
 android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
     defaultConfig {
         minSdkVersion 24
     }

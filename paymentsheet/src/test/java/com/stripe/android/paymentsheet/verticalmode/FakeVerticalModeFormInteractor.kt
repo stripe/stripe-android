@@ -13,7 +13,6 @@ import org.mockito.Mockito.mock
 
 internal class FakeVerticalModeFormInteractor private constructor(
     initialState: VerticalModeFormInteractor.State,
-    override val isLiveMode: Boolean = true,
 ) : VerticalModeFormInteractor {
     override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(initialState)
 

@@ -90,6 +90,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
+import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -435,6 +436,14 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
+    fun onAdditionalKycFlowStarted() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentStarted)
+    }
+
+    fun onAdditionalKycFlowCompleted() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentCompleted)
+    }
+
     suspend fun retrieveAdditionalKycRequirements(): Result<AdditionalKycRequirements> {
         val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
         val linkAccount = storedLinkAccount?.takeIf { it.consumerSessionClientSecret != null }
@@ -518,13 +527,31 @@ internal class OnrampInteractor @Inject constructor(
         )
     }
 
+    suspend fun uploadAdditionalKycDocument(file: File): Result<String> {
+        val account = _state.value.linkControllerState?.internalLinkAccount
+            ?.takeIf { !it.linkSessionKey.isNullOrBlank() }
+            ?: linkController.state(application).value.internalLinkAccount
+        val key = account?.linkSessionKey?.takeIf { it.isNotBlank() }
+            ?: return fulfillKycRequirementsFailure(MissingLinkSessionKeyException())
+        if (account.sessionState != LinkController.SessionState.LoggedIn) {
+            return fulfillKycRequirementsFailure(LinkAccountNotVerifiedException())
+        }
+        return cryptoApiRepository.uploadAdditionalKycDocument(file, key).fold(
+            onSuccess = { uploaded ->
+                uploaded.id?.takeIf { it.isNotBlank() }?.let { Result.success(it) }
+                    ?: fulfillKycRequirementsFailure(MissingAdditionalKycFileIdException())
+            },
+            onFailure = { fulfillKycRequirementsFailure(it) },
+        )
+    }
+
     private suspend fun uploadAdditionalKycDocuments(
         documents: List<AdditionalKycDocumentSubmission>,
         linkSessionKey: String,
     ): Result<List<AdditionalKycDocumentSubmissionRequest>> {
         val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
         for (document in documents) {
-            val fileIds = mutableListOf<String>()
+            val fileIds = document.uploadedFileIds.toMutableList()
             for (file in document.files) {
                 val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file, linkSessionKey)
                     .getOrElse { error -> return Result.failure(error) }

@@ -77,13 +77,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `screen is created with correct isLiveMode`() = testScenario {
-        val screen = factory.createInitialScreen().first()
-        val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isTrue()
-    }
-
-    @Test
     fun `screen isPerformingNetworkOperation returns false`() = testScenario {
         val screen = factory.createInitialScreen().first()
         assertThat(screen.isPerformingNetworkOperation().value).isFalse()
@@ -274,7 +267,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor.create()
         val initialScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = fakeInteractor,
-            isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},

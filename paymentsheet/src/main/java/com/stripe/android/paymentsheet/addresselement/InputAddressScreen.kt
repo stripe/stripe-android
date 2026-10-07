@@ -40,6 +40,7 @@ internal fun InputAddressScreen(
     appearance: PaymentSheet.Appearance,
     primaryButtonEnabled: Boolean,
     primaryButtonLoading: Boolean,
+    closeButtonEnabled: Boolean,
     primaryButtonText: String,
     title: String,
     onPrimaryButtonClick: () -> Unit,
@@ -57,9 +58,11 @@ internal fun InputAddressScreen(
                 .fillMaxHeight()
                 .imePadding(),
             backgroundColor = MaterialTheme.colors.surface,
+            contentColor = MaterialTheme.colors.onSurface,
             topBar = {
                 AddressOptionsAppBar(
                     isRootScreen = true,
+                    isEnabled = closeButtonEnabled,
                     onButtonClick = {
                         focusManager.clearFocus()
                         onCloseClick()
@@ -142,6 +145,7 @@ internal fun InputAddressScreen(
         appearance = viewModel.args.config?.appearance ?: PaymentSheet.Appearance(),
         primaryButtonEnabled = completeValues != null && formEnabled,
         primaryButtonLoading = !formEnabled,
+        closeButtonEnabled = formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
         onPrimaryButtonClick = {
@@ -156,9 +160,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = {
-            viewModel.resultStateHolder.setResult(AddressElementActivityContract.Result.Canceled)
-        },
+        onCloseClick = viewModel.resultStateHolder::onUserCancel,
         topContent = {
             val currentState = billingSameAsShippingState
 
