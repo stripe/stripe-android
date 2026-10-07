@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.luminance
+import androidx.core.content.res.use
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -48,6 +49,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import com.google.android.material.R as MaterialR
 
 /**
  * Host activity to perform Identity verification.
@@ -108,6 +110,7 @@ internal class IdentityActivity :
 
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
+        ensureCompatibleTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         injectWithFallback(
@@ -221,6 +224,18 @@ internal class IdentityActivity :
                     }
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun ensureCompatibleTheme() {
+        // Preserve supported host themes so Identity can continue to inherit their styling.
+        // Other hosts need a Material theme for both AppCompat and the Compose theme adapter.
+        val isMaterialTheme = obtainStyledAttributes(intArrayOf(MaterialR.attr.isMaterialTheme)).use {
+            it.hasValue(0)
+        }
+        if (!isMaterialTheme) {
+            setTheme(MaterialR.style.Theme_MaterialComponents_DayNight_NoActionBar)
         }
     }
 
