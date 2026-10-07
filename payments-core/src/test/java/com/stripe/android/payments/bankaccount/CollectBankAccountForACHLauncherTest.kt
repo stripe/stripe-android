@@ -26,9 +26,9 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION
         )
 
@@ -53,9 +53,9 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION
         )
 
@@ -83,9 +83,9 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent
         )
@@ -112,9 +112,9 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
         )
@@ -137,8 +137,8 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher()
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
         )
@@ -161,8 +161,8 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher(hostedSurface = "payment_element")
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
         )
@@ -189,8 +189,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent
@@ -218,8 +218,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -245,8 +245,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithDeferredPayment(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
@@ -275,8 +275,8 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher()
 
         launcher.presentWithDeferredSetup(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
@@ -309,8 +309,6 @@ class CollectBankAccountForACHLauncherTest {
 
     companion object {
         private const val CLIENT_SECRET = "client_secret"
-        private const val PUBLISHABLE_KEY = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        private const val STRIPE_ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null

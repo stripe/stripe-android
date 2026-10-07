@@ -26,8 +26,8 @@ class CollectBankAccountForInstantDebitsLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -55,8 +55,8 @@ class CollectBankAccountForInstantDebitsLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -85,8 +85,6 @@ class CollectBankAccountForInstantDebitsLauncherTest {
 
     companion object {
         private const val CLIENT_SECRET = "client_secret"
-        private const val PUBLISHABLE_KEY = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        private const val STRIPE_ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         private const val HOSTED_SURFACE = "payment_element"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
