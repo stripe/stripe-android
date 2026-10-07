@@ -512,11 +512,11 @@ class CheckoutController @Inject internal constructor(
          *
          * When empty, Express Checkout Element will render empty content.
          */
-        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+        val availableExpressCheckoutPaymentMethods: List<String> =
             availableExpressButtonTypes.map { type ->
                 when (type) {
-                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
-                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
+                    is ExpressButtonType.GooglePay -> "google_pay"
+                    ExpressButtonType.Link -> "link"
                 }
             }
 

@@ -509,11 +509,9 @@ internal class CheckoutControllerTest {
             ),
         )
 
-        assertThat(session.availableExpressCheckoutPaymentMethods).hasSize(2)
-        assertThat(session.availableExpressCheckoutPaymentMethods[0])
-            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.GooglePay::class.java)
-        assertThat(session.availableExpressCheckoutPaymentMethods[1])
-            .isInstanceOf(ExpressCheckoutElement.PaymentMethod.Link::class.java)
+        assertThat(session.availableExpressCheckoutPaymentMethods)
+            .containsExactly("google_pay", "link")
+            .inOrder()
     }
 
     @Test
