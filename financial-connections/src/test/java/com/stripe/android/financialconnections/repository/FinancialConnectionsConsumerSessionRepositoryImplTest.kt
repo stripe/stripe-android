@@ -408,6 +408,6 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             billingPhone = null,
         )
 
-        verify(fraudDetectionDataRepository, never()).getLatest()
+        verify(fraudDetectionDataRepository, never()).getLatest(any())
     }
 }

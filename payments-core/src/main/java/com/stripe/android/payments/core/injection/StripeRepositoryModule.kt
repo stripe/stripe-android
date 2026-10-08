@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
@@ -16,6 +17,7 @@ import com.stripe.android.networking.StripeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.Multibinds
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -26,6 +28,9 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 abstract class StripeRepositoryModule {
+    @Multibinds
+    internal abstract fun fraudDetectionDataRepositories(): Set<FraudDetectionDataRepository>
+
     @Binds
     internal abstract fun bindsAnalyticsRequestExecutor(
         default: DefaultAnalyticsRequestExecutor

@@ -1,7 +1,10 @@
 package com.stripe.android.link.injection
 
+import android.content.Context
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -14,6 +17,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -27,7 +31,20 @@ internal interface LinkCommonModule {
     @Singleton
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
+    @Binds
+    @IntoSet
+    fun bindSharedFraudDetectionDataRepository(
+        repository: FraudDetectionDataRepository,
+    ): FraudDetectionDataRepository
+
     companion object {
+        @Provides
+        @Singleton
+        fun provideFraudDetectionDataRepository(
+            context: Context,
+            @IOContext workContext: CoroutineContext,
+        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext)
+
         @Provides
         @Singleton
         fun provideConsumersApiService(

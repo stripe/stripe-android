@@ -1,7 +1,5 @@
 package com.stripe.android.link.repositories
 
-import android.app.Application
-import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -39,7 +37,6 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -47,8 +44,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
-    application: Application,
-    apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val requestSurface: RequestSurface,
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
@@ -56,17 +52,6 @@ internal class LinkApiRepository @Inject constructor(
     private val locale: Locale?,
     private val errorReporter: ErrorReporter,
 ) : LinkRepository {
-
-    private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(
-            context = application,
-            apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
-        )
-
-    init {
-        fraudDetectionDataRepository.refresh()
-    }
 
     override suspend fun lookupConsumer(
         email: String?,

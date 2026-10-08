@@ -4,16 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 internal class TapToAddViewModel @Inject constructor(
     val component: TapToAddViewModelComponent,
+    paymentMethodMetadata: PaymentMethodMetadata,
+    fraudDetectionDataRepository: FraudDetectionDataRepository,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
+    init {
+        fraudDetectionDataRepository.refresh(paymentMethodMetadata.apiConfiguration.publishableKey)
+    }
+
     override fun onCleared() {
         super.onCleared()
         customViewModelScope.cancel()

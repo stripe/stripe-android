@@ -20,12 +20,12 @@ internal class FakeFraudDetectionDataRepository(
         )
     )
 
-    override fun refresh() {
+    override fun refresh(publishableKey: String) {
     }
 
     override fun getCached() = fraudDetectionData
 
-    override suspend fun getLatest() = fraudDetectionData
+    override suspend fun getLatest(publishableKey: String) = fraudDetectionData
 
     override fun save(fraudDetectionData: FraudDetectionData) {
     }

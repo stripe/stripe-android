@@ -36,10 +36,11 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         publishableKeyOverride: String? = null
     )
 
-    override fun reportFraudDetectionError(error: StripeException) {
+    override fun reportFraudDetectionError(error: StripeException, publishableKey: String) {
         report(
             errorEvent = ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
             stripeException = error,
+            publishableKeyOverride = publishableKey,
         )
     }
 

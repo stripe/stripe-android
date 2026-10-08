@@ -113,6 +113,50 @@ internal class StripeApiRepositoryTest {
         argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
+    @Test
+    fun `construction does not access credentials or collect fraud data`() {
+        StripeApiRepository(
+            context = context,
+            publishableKeyProvider = { error("Credentials are not configured yet") },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            workContext = testDispatcher,
+            stripeNetworkClient = stripeNetworkClient,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+        )
+
+        verifyNoInteractions(fraudDetectionDataRepository)
+        verifyNoInteractions(stripeNetworkClient)
+    }
+
+    @Test
+    fun `fraud refresh uses the request publishable key`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenThrow(APIConnectionException("Request failed"))
+        val repository = create()
+
+        repository.retrievePaymentIntent(
+            clientSecret = "pi_123_secret_123",
+            options = ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY),
+            expandFields = emptyList(),
+        )
+
+        verify(fraudDetectionDataRepository).refresh(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)
+    }
+
+    @Test
+    fun `fraud refresh does not report ephemeral authentication credentials`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenThrow(APIConnectionException("Request failed"))
+        val repository = create()
+
+        repository.retrievePaymentIntent(
+            clientSecret = "pi_123_secret_123",
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+            expandFields = emptyList(),
+        )
+
+        verify(fraudDetectionDataRepository).refresh(DEFAULT_OPTIONS.apiKey)
+    }
+
     @BeforeTest
     fun before() {
         whenever(fraudDetectionDataRepository.getCached()).thenReturn(
@@ -3327,8 +3371,8 @@ internal class StripeApiRepositoryTest {
         event: PaymentAnalyticsEvent,
         productUsage: String? = null
     ) {
-        verify(fraudDetectionDataRepository, times(2))
-            .refresh()
+        verify(fraudDetectionDataRepository)
+            .refresh(any())
 
         verifyAnalyticsRequest(event, productUsage)
     }

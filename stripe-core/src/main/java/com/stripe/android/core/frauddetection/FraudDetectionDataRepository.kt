@@ -7,13 +7,15 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface FraudDetectionDataRepository {
-    fun refresh()
+    fun refresh(publishableKey: String)
 
     /**
      * Get the cached [FraudDetectionData]. This is not a blocking request.
@@ -26,7 +28,7 @@ interface FraudDetectionDataRepository {
      * 1. From [FraudDetectionDataStore] if that value is not expired.
      * 2. Otherwise, from the network.
      */
-    suspend fun getLatest(): FraudDetectionData?
+    suspend fun getLatest(publishableKey: String): FraudDetectionData?
 
     fun save(fraudDetectionData: FraudDetectionData)
 }
@@ -37,7 +39,7 @@ private val timestampSupplier: () -> Long = {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface FraudDetectionErrorReporter {
-    fun reportFraudDetectionError(error: StripeException)
+    fun reportFraudDetectionError(error: StripeException, publishableKey: String)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -54,45 +56,50 @@ class DefaultFraudDetectionDataRepository(
     private val workContext: CoroutineContext,
     private val fraudDetectionEnabledProvider: FraudDetectionEnabledProvider,
 ) : FraudDetectionDataRepository {
+    private val mutex = Mutex()
+
+    @Volatile
     private var cachedFraudDetectionData: FraudDetectionData? = null
 
     private val fraudDetectionEnabled: Boolean
         get() = fraudDetectionEnabledProvider.provideFraudDetectionEnabled()
 
-    override fun refresh() {
+    override fun refresh(publishableKey: String) {
         if (fraudDetectionEnabled) {
             CoroutineScope(workContext).launch {
-                getLatest()
+                getLatest(publishableKey)
             }
         }
     }
 
-    override suspend fun getLatest() = withContext(workContext) {
-        val latestFraudDetectionData = localStore.get().let { localFraudDetectionData ->
-            if (localFraudDetectionData == null ||
-                localFraudDetectionData.isExpired(timestampSupplier())
-            ) {
-                // fraud detection data request failures should be non-fatal
-                runCatching {
-                    stripeNetworkClient.executeRequest(
-                        fraudDetectionDataRequestFactory.create(
-                            localFraudDetectionData
-                        )
-                    ).fraudDetectionData()
-                }.onFailure {
-                    val error = StripeException.create(it)
-                    errorReporter.reportFraudDetectionError(error)
-                }.getOrNull()
-            } else {
-                localFraudDetectionData
+    override suspend fun getLatest(publishableKey: String) = withContext(workContext) {
+        mutex.withLock {
+            val latestFraudDetectionData = localStore.get().let { localFraudDetectionData ->
+                if (localFraudDetectionData == null ||
+                    localFraudDetectionData.isExpired(timestampSupplier())
+                ) {
+                    // fraud detection data request failures should be non-fatal
+                    runCatching {
+                        stripeNetworkClient.executeRequest(
+                            fraudDetectionDataRequestFactory.create(
+                                localFraudDetectionData
+                            )
+                        ).fraudDetectionData()
+                    }.onFailure {
+                        val error = StripeException.create(it)
+                        errorReporter.reportFraudDetectionError(error, publishableKey)
+                    }.getOrNull()
+                } else {
+                    localFraudDetectionData
+                }
             }
-        }
 
-        if (cachedFraudDetectionData != latestFraudDetectionData) {
-            latestFraudDetectionData?.let(::save)
-        }
+            if (cachedFraudDetectionData != latestFraudDetectionData) {
+                latestFraudDetectionData?.let(::save)
+            }
 
-        latestFraudDetectionData
+            latestFraudDetectionData
+        }
     }
 
     override fun getCached(): FraudDetectionData? {

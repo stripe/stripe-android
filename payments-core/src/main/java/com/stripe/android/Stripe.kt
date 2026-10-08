@@ -109,7 +109,7 @@ class Stripe internal constructor(
             appInfo = appInfo,
             logger = Logger.getInstance(enableLogging),
             betas = betas
-        ),
+        ).also { it.fireFraudDetectionDataRequest(publishableKey) },
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,
         enableLogging

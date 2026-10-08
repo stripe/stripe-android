@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.StripeNetworkClientModule
@@ -44,6 +46,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -94,8 +97,21 @@ internal interface CustomerSheetViewModelModule {
         impl: NoOpIsNfcScanningAvailable
     ): IsNfcScanningAvailable
 
+    @Binds
+    @IntoSet
+    fun bindSharedFraudDetectionDataRepository(
+        repository: FraudDetectionDataRepository,
+    ): FraudDetectionDataRepository
+
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @CustomerSheetViewModelScope
+        fun provideFraudDetectionDataRepository(
+            context: Context,
+            @IOContext workContext: CoroutineContext,
+        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext)
+
         @Provides
         @PaymentElementCallbackIdentifier
         fun providesPaymentElementCallbackIdentifier(): String {

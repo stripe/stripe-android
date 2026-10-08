@@ -6,6 +6,7 @@ import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
@@ -48,6 +49,7 @@ internal class DefaultCustomerSheetLoader(
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
     private val apiConfigurationResolver: ApiConfigurationResolver,
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
 ) : CustomerSheetLoader {
 
     @Inject
@@ -58,6 +60,7 @@ internal class DefaultCustomerSheetLoader(
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
         apiConfigurationResolver: ApiConfigurationResolver,
+        fraudDetectionDataRepository: FraudDetectionDataRepository,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -67,6 +70,7 @@ internal class DefaultCustomerSheetLoader(
         errorReporter = errorReporter,
         workContext = workContext,
         apiConfigurationResolver = apiConfigurationResolver,
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
     )
 
     override suspend fun load(
@@ -143,6 +147,7 @@ internal class DefaultCustomerSheetLoader(
         val cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
 
         val apiConfiguration = apiConfigurationResolver.resolve(apiConfiguration = null)
+        fraudDetectionDataRepository.refresh(apiConfiguration.publishableKey)
         val isGooglePaySupportedOnDevice = googlePayRepositoryFactory(
             environment = if (elementsSession.stripeIntent.isLiveMode) {
                 GooglePayEnvironment.Production

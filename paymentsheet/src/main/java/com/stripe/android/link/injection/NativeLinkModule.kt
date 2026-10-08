@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -19,6 +21,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -150,8 +153,24 @@ internal interface NativeLinkModule {
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
+    @Binds
+    @IntoSet
+    fun bindSharedFraudDetectionDataRepository(
+        repository: FraudDetectionDataRepository,
+    ): FraudDetectionDataRepository
+
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @NativeLinkScope
+        fun provideFraudDetectionDataRepository(
+            context: Context,
+            @IOContext workContext: CoroutineContext,
+            configuration: LinkConfiguration,
+        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext).also {
+            it.refresh(configuration.apiConfiguration.publishableKey)
+        }
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(

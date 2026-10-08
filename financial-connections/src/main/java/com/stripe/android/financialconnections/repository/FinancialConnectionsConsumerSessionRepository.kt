@@ -142,7 +142,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     }
 
     init {
-        fraudDetectionDataRepository.refresh()
+        fraudDetectionDataRepository.refresh(provideApiRequestOptions(useConsumerPublishableKey = false).apiKey)
     }
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
