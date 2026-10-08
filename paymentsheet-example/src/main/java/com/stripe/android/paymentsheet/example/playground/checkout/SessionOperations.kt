@@ -18,12 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.CheckoutController.Session
-
-internal const val SHIPPING_ADDRESS_TEST_TAG = "shipping_address"
 
 @Composable
 internal fun SessionOperations(
@@ -86,9 +82,7 @@ private fun ShippingAddressSection(shippingAddress: Session.ShippingAddress?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}
-            .testTag(SHIPPING_ADDRESS_TEST_TAG),
+            .padding(vertical = 8.dp),
     ) {
         Text("Shipping address", style = MaterialTheme.typography.h6)
         Text(addressLines ?: "No shipping address")
