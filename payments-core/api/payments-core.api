@@ -738,6 +738,17 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Billin
 	public static fun values ()[Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;
 }
 
+public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Builder {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher;
+	public final fun build (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher;
+	public final fun build (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher;
+	public final fun readyCallback (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ReadyCallback;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Builder;
+}
+
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Companion {
 }
 
@@ -858,6 +869,17 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;
 	public static fun values ()[Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Builder {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
+	public final fun build (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
+	public final fun build (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
+	public final fun readyCallback (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Builder;
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Companion {

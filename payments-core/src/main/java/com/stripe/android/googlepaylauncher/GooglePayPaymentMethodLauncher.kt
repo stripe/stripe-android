@@ -44,7 +44,7 @@ import java.util.Locale
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
  *
- * Use [rememberGooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
+ * Use [Builder] to create an instance. For Jetpack Compose integrations, use [Builder.build].
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -94,6 +94,12 @@ class GooglePayPaymentMethodLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
+    @Deprecated(
+        message = "Use GooglePayPaymentMethodLauncher.Builder instead.",
+        replaceWith = ReplaceWith(
+            "GooglePayPaymentMethodLauncher.Builder(resultCallback, readyCallback).build(activity, config)"
+        )
+    )
     constructor(
         activity: ComponentActivity,
         config: Config,
@@ -148,6 +154,12 @@ class GooglePayPaymentMethodLauncher internal constructor(
      *
      * @param resultCallback called with the result of the [GooglePayPaymentMethodLauncher] operation
      */
+    @Deprecated(
+        message = "Use GooglePayPaymentMethodLauncher.Builder instead.",
+        replaceWith = ReplaceWith(
+            "GooglePayPaymentMethodLauncher.Builder(resultCallback, readyCallback).build(fragment, config)"
+        )
+    )
     constructor(
         fragment: Fragment,
         config: Config,
@@ -209,6 +221,94 @@ class GooglePayPaymentMethodLauncher internal constructor(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter
     )
+
+    /**
+     * Builder to add optional callbacks to [GooglePayPaymentMethodLauncher].
+     *
+     * @param resultCallback Called with the result of the [GooglePayPaymentMethodLauncher] operation.
+     * @param readyCallback Called after determining whether Google Pay is available and ready on
+     * the device. Defaults to a no-op callback; the readiness check still runs.
+     */
+    class Builder @JvmOverloads constructor(
+        private val resultCallback: ResultCallback,
+        private var readyCallback: ReadyCallback = ReadyCallback {},
+    ) {
+
+        /**
+         * Called after determining whether Google Pay is available and ready on the device.
+         * Only present Google Pay after this callback reports `true`.
+         *
+         * Omitting this callback does not skip the readiness check.
+         */
+        fun readyCallback(callback: ReadyCallback) = apply {
+            readyCallback = callback
+        }
+
+        /**
+         * Creates a [GooglePayPaymentMethodLauncher] from an Activity.
+         * Call no later than `Activity.onCreate()`.
+         *
+         * @param activity The Activity that is launching Google Pay.
+         * @param config The configuration used for the integration.
+         */
+        @Suppress("DEPRECATION")
+        fun build(activity: ComponentActivity, config: Config): GooglePayPaymentMethodLauncher {
+            return GooglePayPaymentMethodLauncher(
+                activity = activity,
+                config = config,
+                readyCallback = readyCallback,
+                resultCallback = resultCallback,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun build(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            config: Config,
+        ): GooglePayPaymentMethodLauncher {
+            return GooglePayPaymentMethodLauncher(
+                activity = activity,
+                signal = signal,
+                config = config,
+                readyCallback = readyCallback,
+                resultCallback = resultCallback,
+            )
+        }
+
+        /**
+         * Creates a [GooglePayPaymentMethodLauncher] from a Fragment.
+         * Call from `Fragment.onViewCreated()` when the view lifecycle owner is available.
+         *
+         * @param fragment The Fragment that is launching Google Pay.
+         * @param config The configuration used for the integration.
+         */
+        @Suppress("DEPRECATION")
+        fun build(fragment: Fragment, config: Config): GooglePayPaymentMethodLauncher {
+            return GooglePayPaymentMethodLauncher(
+                fragment = fragment,
+                config = config,
+                readyCallback = readyCallback,
+                resultCallback = resultCallback,
+            )
+        }
+
+        /**
+         * Creates a [GooglePayPaymentMethodLauncher] that is remembered across compositions.
+         * Call unconditionally as part of the initialization path.
+         *
+         * @param config The configuration used for the integration.
+         */
+        @Composable
+        fun build(config: Config): GooglePayPaymentMethodLauncher {
+            return internalRememberGooglePayPaymentMethodLauncher(
+                config = config,
+                readyCallback = readyCallback,
+                resultCallback = resultCallback,
+            )
+        }
+    }
 
     init {
         if (!skipReadyCheck) {
@@ -457,8 +557,28 @@ class GooglePayPaymentMethodLauncher internal constructor(
  * [GooglePayPaymentMethodLauncher.present] may only be called if Google Pay is ready.
  * @param resultCallback Called with the result of the [GooglePayPaymentMethodLauncher] operation
  */
+@Deprecated(
+    message = "Use GooglePayPaymentMethodLauncher.Builder instead.",
+    replaceWith = ReplaceWith(
+        "GooglePayPaymentMethodLauncher.Builder(resultCallback, readyCallback).build(config)",
+        "com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher",
+    )
+)
 @Composable
 fun rememberGooglePayPaymentMethodLauncher(
+    config: GooglePayPaymentMethodLauncher.Config,
+    readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+    resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
+): GooglePayPaymentMethodLauncher {
+    return internalRememberGooglePayPaymentMethodLauncher(
+        config = config,
+        readyCallback = readyCallback,
+        resultCallback = resultCallback,
+    )
+}
+
+@Composable
+internal fun internalRememberGooglePayPaymentMethodLauncher(
     config: GooglePayPaymentMethodLauncher.Config,
     readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
     resultCallback: GooglePayPaymentMethodLauncher.ResultCallback
