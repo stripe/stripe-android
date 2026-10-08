@@ -85,6 +85,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
+            analyticsPayloadField(
+                Uri.encode("mpe_config[api_configuration]"),
+                (apiConfigurationTestType.apiConfiguration != null).toString(),
+            ),
             analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
             analyticsPayloadField(Uri.encode("mpe_config[form_sheet_action]"), "confirm"),
             analyticsPayloadField(Uri.encode("mpe_config[row_selection_behavior]"), "default"),
