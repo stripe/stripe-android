@@ -156,6 +156,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
         savePaymentMethod = savePaymentMethod.takeIf { intent is PaymentIntent },
         shipping = shipping,
+        collectedInformation = integrationMetadata.collectedEmail
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.fixedEmail == null }
+            ?.let { ConfirmCheckoutSessionParams.CollectedInformation(email = it) },
     )
 
     private suspend fun confirmCheckoutSession(

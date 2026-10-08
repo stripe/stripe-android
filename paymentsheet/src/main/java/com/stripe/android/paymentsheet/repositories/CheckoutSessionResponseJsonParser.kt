@@ -234,6 +234,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private fun parseCustomer(json: JSONObject): CheckoutSessionResponse.Customer {
         return CheckoutSessionResponse.Customer(
             id = json.requiredString("id"),
+            email = StripeJsonUtils.optString(json, "email"),
             paymentMethods = json.requiredArray("payment_methods").objects().map { paymentMethod ->
                 PaymentMethodJsonParser().parse(paymentMethod) ?: error("Invalid payment method")
             },

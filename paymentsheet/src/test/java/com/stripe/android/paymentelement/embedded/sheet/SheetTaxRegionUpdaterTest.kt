@@ -187,6 +187,7 @@ internal class SheetTaxRegionUpdaterTest {
         checkoutSessionResponse: CheckoutSessionResponse,
     ) = PaymentMethodMetadataFactory.create(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
+            collectedEmail = null,
             id = checkoutSessionResponse.id,
             instancesKey = "test_instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
