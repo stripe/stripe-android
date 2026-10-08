@@ -2,9 +2,12 @@ package com.stripe.android.paymentsheet.model
 
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.ShapeDrawable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.ReceiveTurbine
@@ -32,6 +35,51 @@ internal class PaymentOptionResourceTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `rememberPainter uses new drawable when resource changes`() = runTest {
+        val loadCalls = Turbine<String>()
+        val appearance = PaymentSheet.Appearance()
+        val firstResource = DefaultPaymentOptionResource(
+            appearance = appearance,
+            loader = {
+                loadCalls.add("first")
+                ShapeDrawable().apply {
+                    setIntrinsicWidth(10)
+                    setIntrinsicHeight(20)
+                }
+            },
+        )
+        val secondResource = DefaultPaymentOptionResource(
+            appearance = appearance,
+            loader = {
+                loadCalls.add("second")
+                ShapeDrawable().apply {
+                    setIntrinsicWidth(30)
+                    setIntrinsicHeight(40)
+                }
+            },
+        )
+        val resource = mutableStateOf<PaymentOptionResource>(firstResource)
+        var currentPainter: Painter? = null
+
+        composeRule.setContent {
+            currentPainter = resource.value.rememberPainter()
+        }
+        composeRule.waitForIdle()
+
+        assertThat(requireNotNull(currentPainter).intrinsicSize).isEqualTo(Size(10f, 20f))
+        assertThat(loadCalls.awaitItem()).isEqualTo("first")
+
+        composeRule.runOnIdle {
+            resource.value = secondResource
+        }
+        composeRule.waitForIdle()
+
+        assertThat(requireNotNull(currentPainter).intrinsicSize).isEqualTo(Size(30f, 40f))
+        assertThat(loadCalls.awaitItem()).isEqualTo("second")
+        loadCalls.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `automatic appearance reloads when system theme changes`() = runScenario(
