@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.CheckoutController.Session
 
@@ -66,17 +67,17 @@ internal fun SessionOperations(
 
 @Composable
 private fun ShippingAddressSection(shippingAddress: Session.ShippingAddress?) {
-    val addressLines = shippingAddress?.let { shipping ->
+    val addressFields = shippingAddress?.let { shipping ->
         val address = shipping.address
         listOf(
-            shipping.name,
-            address.line1,
-            address.line2,
-            listOf(address.city, address.state, address.postalCode)
-                .filterNot { it.isNullOrBlank() }
-                .joinToString(" "),
-            address.country,
-        ).filterNot { it.isNullOrBlank() }.joinToString("\n")
+            "Name" to shipping.name,
+            "Line 1" to address.line1,
+            "Line 2" to address.line2,
+            "City" to address.city,
+            "State" to address.state,
+            "Postal code" to address.postalCode,
+            "Country" to address.country,
+        )
     }
 
     Column(
@@ -85,6 +86,29 @@ private fun ShippingAddressSection(shippingAddress: Session.ShippingAddress?) {
             .padding(vertical = 8.dp),
     ) {
         Text("Shipping address", style = MaterialTheme.typography.h6)
-        Text(addressLines ?: "No shipping address")
+        if (addressFields == null) {
+            Text("No shipping address")
+        } else {
+            addressFields.forEach { (label, value) ->
+                if (!value.isNullOrBlank()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = label,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.body2,
+                        )
+                        Text(
+                            text = value,
+                            modifier = Modifier.weight(2f),
+                            style = MaterialTheme.typography.body2,
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
