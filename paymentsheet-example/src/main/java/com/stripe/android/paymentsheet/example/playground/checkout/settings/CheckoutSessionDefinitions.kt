@@ -152,7 +152,7 @@ internal object CheckoutSessionDefinitions {
     )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
-        displayName = "Checkout Session",
+        displayName = "Server side",
         children = arrayOf(
             backendUrl,
             customStripeApi,

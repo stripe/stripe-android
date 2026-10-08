@@ -93,11 +93,11 @@ class CheckoutPlaygroundSettingsUiTest {
 
         page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(paymentCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Payment Element › Appearance › Primary button › Shape"
+            "Client side › Payment Element › Appearance › Primary button › Shape"
         )
         page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(currencyCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Currency Selector Element › Appearance"
+            "Client side › Currency Selector Element › Appearance"
         )
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
 
