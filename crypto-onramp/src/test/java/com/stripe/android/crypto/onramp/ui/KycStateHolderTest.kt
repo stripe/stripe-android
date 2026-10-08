@@ -47,6 +47,54 @@ internal class KycStateHolderTest {
     }
 
     @Test
+    fun `clearing oversized proof of address file preserves type for retry`() {
+        val stateHolder = stateHolderFromFixture("proof_of_address_required.json")
+        stateHolder.onContinue()
+
+        verifyOversizedFileRetry(stateHolder, "utility_provider")
+    }
+
+    @Test
+    fun `clearing oversized source of funds file preserves source for retry`() {
+        val stateHolder = stateHolderFromFixture("source_of_funds_required.json")
+        stateHolder.onContinue()
+        stateHolder.state.questions.forEach {
+            stateHolder.onQuestionAnswerChanged(it.id, "Test answer")
+        }
+        stateHolder.onContinue()
+        stateHolder.onAddDocuments()
+
+        verifyOversizedFileRetry(stateHolder, "bank_statement")
+    }
+
+    private fun verifyOversizedFileRetry(stateHolder: KycStateHolder, subtypeId: String) {
+        val slotIndex = requireNotNull(stateHolder.state.document?.editingSlotIndex)
+        stateHolder.onDocumentSubtypeSelected(slotIndex, subtypeId)
+        stateHolder.onFileSelectionStarted(slotIndex)
+        stateHolder.onFileUploadStarted(slotIndex, "oversized.pdf")
+        stateHolder.onFileTooLarge()
+        assertThat(stateHolder.state.validationError).isEqualTo(KycValidationError.FileTooLarge)
+        assertThat(stateHolder.state.validationFileName).isEqualTo("oversized.pdf")
+
+        assertThat(stateHolder.onFileRemoved(slotIndex)).isNull()
+
+        assertThat(stateHolder.state.validationError).isNull()
+        assertThat(stateHolder.state.validationFileName).isNull()
+        assertThat(stateHolder.state.document?.editingSlotIndex).isEqualTo(slotIndex)
+        val slot = requireNotNull(stateHolder.state.document).slots.first { it.index == slotIndex }
+        assertThat(slot.selectedSubtypeId).isEqualTo(subtypeId)
+        assertThat(slot.fileName).isNull()
+        assertThat(stateHolder.canSelectFile(slotIndex)).isTrue()
+
+        stateHolder.onFileSelectionStarted(slotIndex)
+        assertThat(stateHolder.state.selectingFileSlot).isEqualTo(slotIndex)
+        stateHolder.onFileSelected(slotIndex, File("retry.pdf"), "retry.pdf", "file_retry")
+        val document = requireNotNull(stateHolder.createSubmission()).requirements.values.single().documents.single()
+        assertThat(document.documentSubtype).isEqualTo(subtypeId)
+        assertThat(document.uploadedFileIds).containsExactly("file_retry")
+    }
+
+    @Test
     fun `source of funds fixture supports Word documents and its questionnaire`() {
         val stateHolder = stateHolderFromFixture("source_of_funds_required.json")
         stateHolder.onContinue()

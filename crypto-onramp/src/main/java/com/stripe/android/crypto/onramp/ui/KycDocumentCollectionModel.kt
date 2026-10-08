@@ -201,7 +201,7 @@ internal class KycDocumentCollectionModel(
     fun onFileRemoved(slotIndex: Int, isEditing: Boolean): File? {
         val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return null
         val removedFile = slot.file?.file
-        documentSlots = if (slot.file == null || documentSlots.count { it.file != null } > 1) {
+        documentSlots = if (slot.file != null && documentSlots.count { it.file != null } > 1) {
             documentSlots.filterNot { it.index == slotIndex }
         } else {
             documentSlots.map { candidate ->
