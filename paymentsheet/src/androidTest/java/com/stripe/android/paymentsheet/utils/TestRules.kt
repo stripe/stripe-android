@@ -13,12 +13,25 @@ class TestRules private constructor(
     private val chain: RuleChain,
     val compose: ComposeTestRule,
     val networkRule: NetworkRule,
+    private val profile: Boolean,
 ) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
-                val statement = chain.apply(base, description)
-                statement.evaluate()
+                val timings = if (profile) TestTimingProfile(System::nanoTime) else null
+                val execution = timings?.executionStatement(base) ?: base
+                val rules = chain.apply(execution, description)
+                val statement = DetectLeaksAfterTestSuccess().apply(
+                    timings?.rulesStatement(rules) ?: rules,
+                    description,
+                )
+                if (timings == null) {
+                    statement.evaluate()
+                } else {
+                    timings.evaluate(statement) { durations, outcome ->
+                        writeTestTimingReport(description, durations, outcome)
+                    }
+                }
             }
         }
     }
@@ -29,10 +42,10 @@ class TestRules private constructor(
             networkRule: NetworkRule = NetworkRule(),
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             retryRule: TestRule? = null,
+            profile: Boolean = false,
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
-                .around(DetectLeaksAfterTestSuccess())
                 .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
                 .around(PrefsTestStoreRule())
@@ -42,7 +55,7 @@ class TestRules private constructor(
                 .around(networkRule)
                 .around(terminalTestRule)
                 .block()
-            return TestRules(chain, composeTestRule, networkRule)
+            return TestRules(chain, composeTestRule, networkRule, profile)
         }
     }
 }
