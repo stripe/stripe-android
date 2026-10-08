@@ -7,10 +7,13 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
@@ -24,11 +27,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.Shadows.shadowOf
 import java.io.File
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 internal class StripeNextActionTest {
     private val testDispatcher = StandardTestDispatcher()
 
@@ -79,6 +82,36 @@ internal class StripeNextActionTest {
         stripe.handleNextActionForSetupIntent(activity, clientSecret)
 
         val error = assertError(PaymentController.StripeIntentType.SetupIntent)
+
+        assertThat(error.stackTraceToString()).doesNotContain(clientSecret)
+    }
+
+    @Test
+    fun `next action rejects a secret for the opposite intent type`(
+        @TestParameter intentType: PaymentController.StripeIntentType,
+        @TestParameter host: Host,
+    ) = runScenario {
+        val clientSecret = when (intentType) {
+            PaymentController.StripeIntentType.PaymentIntent -> {
+                SetupIntent.ClientSecret("seti_a1b2c3_secret_x7y8z9").value
+            }
+            PaymentController.StripeIntentType.SetupIntent -> {
+                PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value
+            }
+        }
+
+        when (intentType) {
+            PaymentController.StripeIntentType.PaymentIntent -> when (host) {
+                Host.Activity -> stripe.handleNextActionForPayment(activity, clientSecret)
+                Host.Fragment -> stripe.handleNextActionForPayment(fragment, clientSecret)
+            }
+            PaymentController.StripeIntentType.SetupIntent -> when (host) {
+                Host.Activity -> stripe.handleNextActionForSetupIntent(activity, clientSecret)
+                Host.Fragment -> stripe.handleNextActionForSetupIntent(fragment, clientSecret)
+            }
+        }
+
+        val error = assertError(intentType)
 
         assertThat(error.stackTraceToString()).doesNotContain(clientSecret)
     }
@@ -219,5 +252,10 @@ internal class StripeNextActionTest {
             requests.add(request)
             error("An invalid client secret should not trigger a file request.")
         }
+    }
+
+    enum class Host {
+        Activity,
+        Fragment,
     }
 }
