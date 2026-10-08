@@ -1,0 +1,64 @@
+name: Reconcile this PR's CI annotation
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - run: node --test .github/tests/pr-base-ci.test.cjs
+
+  reconcile:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pr-base-ci-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number });
+            if (pr.state !== 'open') return;
+
+            const blockPattern = /(?:\r?\n){0,2}<!-- pr-base-ci:start -->[\s\S]*?<!-- pr-base-ci:end -->/;
+            const skipPattern = /\[(?:skip ci|ci skip)\]/i;
+            const runOverride = '<!-- pr-base-ci:run -->';
+            const managedBlock = '<!-- pr-base-ci:start -->\n[skip ci]\n' +
+              'Bitrise is deferred until this PR targets master.\n<!-- pr-base-ci:end -->';
+            const body = pr.body ?? '';
+            const currentBlock = body.match(blockPattern)?.[0] ?? '';
+            let desired = body.replace(blockPattern, '');
+            const previousBody = context.payload.changes?.body?.from ?? '';
+            const previousBlock = previousBody.match(blockPattern)?.[0] ?? '';
+            const editedBody = context.payload.pull_request.body ?? '';
+            const editedBlock = editedBody.match(blockPattern)?.[0] ?? '';
+            const manuallyRemoved = skipPattern.test(previousBlock) &&
+              !skipPattern.test(editedBlock) && !skipPattern.test(currentBlock);
+            // Persist removal so future pushes respect the author's choice.
+            if (manuallyRemoved && !desired.includes(runOverride)) {
+              desired += `${desired ? '\n\n' : ''}${runOverride}`;
+            }
+            if (pr.base.ref !== 'master' && !desired.includes(runOverride) &&
+              !skipPattern.test(desired)) {
+              desired += `${desired ? '\n\n' : ''}${managedBlock}`;
+            }
+            if (desired !== body) {
+              await github.rest.pulls.update({ owner, repo, pull_number, body: desired });
+              core.info(`Updated CI annotation for PR #${pull_number}`);
+            }
