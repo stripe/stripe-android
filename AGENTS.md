@@ -6,7 +6,7 @@
 - `./gradlew test` - Run all unit tests
 - `./gradlew testDebugUnitTest` - Debug unit tests only
 - `./gradlew :MODULE:testDebugUnitTest` - Single module (e.g. `:payments-core`, `:paymentsheet`)
-- `./gradlew connectedAndroidTest` - Instrumentation tests (requires device)
+- `./gradlew :MODULE:pixel2api33DebugAndroidTest` - Instrumentation tests on the Gradle Managed Device (e.g. `:paymentsheet-example`)
 - `./gradlew detekt` - Static analysis
 - `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 
@@ -31,6 +31,8 @@ Multi-module Android library for payment processing and financial services.
 - Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
 - Detekt for static analysis, Paparazzi for screenshot testing
 - No defaults for internal code: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction; non-public code (`internal` or `@RestrictTo`) omits defaults on both model fields and function parameters to force explicit decisions at each call site
+
+**Instrumentation test device** — Use `pixel2api33DebugAndroidTest` by default for instrumentation tests in this working directory. Use `pixel2api33imeDebugAndroidTest` when a test specifically requires the IME-enabled managed device. Do not use `connectedAndroidTest`, other connected-device test tasks, or the user's running emulator unless the user explicitly requests it. If the managed-device task is unavailable or fails, report the issue rather than falling back to the user's emulator.
 
 **Testing** — MUST invoke the relevant skill (in `.agents/skills/`) before writing any test code:
 - `write-unit-tests` — unit test structure, fake implementations, runScenario pattern, Turbine testing, Truth assertions
