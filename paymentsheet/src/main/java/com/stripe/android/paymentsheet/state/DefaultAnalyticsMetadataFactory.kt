@@ -159,6 +159,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     }
 
     private fun CommonConfiguration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
+        put("api_configuration", SimpleBoolean(apiConfiguration != null))
         put("customer", SimpleBoolean(customer != null))
         put("customer_access_provider", SimpleString(customer?.accessType?.analyticsValue))
         put("googlepay", SimpleBoolean(googlePay != null))
