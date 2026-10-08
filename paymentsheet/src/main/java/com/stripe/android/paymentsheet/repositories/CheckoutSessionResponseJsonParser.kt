@@ -20,7 +20,7 @@ import org.json.JSONObject
 internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
-        require(json.requiredString("ui_mode") == "custom")
+        require(json.requiredString("ui_mode") == "mobile_elements")
         require(json.requiredString("mode") == "modeless")
         val id = json.requiredString("session_id")
         val currency = json.requiredString("currency")
