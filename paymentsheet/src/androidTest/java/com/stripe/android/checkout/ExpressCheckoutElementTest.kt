@@ -35,10 +35,8 @@ internal class ExpressCheckoutElementTest {
 
     @Test
     fun testSuccessfulGooglePayPayment() {
-        // This is called twice during load - once for ECE, once for PE
-        repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
-        }
+        // Link is disabled for ECE in this test, but this is still called for PE.
+        networkRule.enqueueLinkAccountLookup()
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
@@ -48,8 +46,14 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains("google_pay")
+                ).containsExactly("google_pay")
             },
+            configurationUpdates = {
+                it.linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
+                )
+            }
         ) {
             val paymentMethod = PaymentMethodFactory.card()
 
@@ -85,7 +89,13 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains("link")
+                ).containsExactly("link")
+            },
+            configurationUpdates = {
+                it.googlePayConfiguration(
+                    ExpressCheckoutElement.Configuration.GooglePayConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
+                )
             },
         ) {
             enqueueSuccessfulNativeLinkPayment()
@@ -102,23 +112,22 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun testGooglePayOnlyLoad() {
-        // This is called for PE, but we skip this account lookup for ECE since its Link config sets display to never.
-        networkRule.enqueueLinkAccountLookup()
+    fun testGooglePayAndLinkLoad() {
+        // This is called for both ECE and PE
+        repeat(2) {
+            networkRule.enqueueLinkAccountLookup()
+        }
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).contains("google_pay")
+                assertThat(
+                    controller.session.value?.availableExpressCheckoutPaymentMethods
+                ).contains("link")
             },
-            configurationUpdates = {
-                it.linkConfiguration(
-                    ExpressCheckoutElement.Configuration.LinkConfiguration()
-                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
-                )
-            }
         ) {
             // Just testing load, no need to confirm.
             markTestSucceeded()
