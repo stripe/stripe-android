@@ -119,6 +119,7 @@
   <string name="stripe_link_onramp_kyc_previous_document_issue">There was an issue with your previous document. Please upload a new document that meets the requirements.</string>
   <!-- Camera document capture action -->
   <string name="stripe_onramp_kyc_take_photo">Take photo</string>
+  <string name="stripe_onramp_kyc_choose_photo">Choose photo</string>
   <!-- Existing document selection action -->
   <string name="stripe_onramp_kyc_choose_file">Choose file</string>
   <!-- Title of document source chooser -->

@@ -15,6 +15,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -126,6 +127,7 @@ internal class KycActivity : ComponentActivity() {
     }
 
     @Composable
+    @Suppress("LongMethod") // Keep both picker launchers with their shared pending selection state.
     private fun rememberFilePicker(
         stateHolder: KycStateHolder,
         handlerKey: String,
@@ -133,9 +135,7 @@ internal class KycActivity : ComponentActivity() {
         val scope = rememberCoroutineScope()
         val takePhoto = rememberCameraPicker(stateHolder, handlerKey)
         var pendingFileSlot by rememberSaveable { mutableStateOf<Int?>(null) }
-        val filePicker = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri ->
+        val onPicked: (Uri?) -> Unit = { uri ->
             val slotIndex = pendingFileSlot
             pendingFileSlot = null
 
@@ -153,6 +153,8 @@ internal class KycActivity : ComponentActivity() {
                 }
             }
         }
+        val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument(), onPicked)
+        val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia(), onPicked)
 
         return chooseFile@{ slotIndex ->
             if (!stateHolder.canSelectFile(slotIndex)) {
@@ -166,18 +168,28 @@ internal class KycActivity : ComponentActivity() {
             }
             val cameraAvailable = kycCameraFormat(stateHolder.acceptedFormats) != null &&
                 Intent(MediaStore.ACTION_IMAGE_CAPTURE).resolveActivity(packageManager) != null
-            if (cameraAvailable) {
+            val photoMediaType = kycPhotoPickerMediaType(stateHolder.acceptedFormats)
+            val sources = buildList {
+                if (cameraAvailable) {
+                    add(R.string.stripe_onramp_kyc_take_photo to { takePhoto(slotIndex) })
+                }
+                if (photoMediaType != null) {
+                    add(R.string.stripe_onramp_kyc_choose_photo to {
+                        pendingFileSlot = slotIndex
+                        photoPicker.launch(PickVisualMediaRequest(photoMediaType))
+                    })
+                }
+                add(R.string.stripe_onramp_kyc_choose_file to chooseExisting)
+            }
+            if (sources.size > 1) {
                 var selected = false
                 sourceDialog = AlertDialog.Builder(this)
                     .setTitle(R.string.stripe_onramp_kyc_document_source)
                     .setItems(
-                        arrayOf(
-                            getString(R.string.stripe_onramp_kyc_take_photo),
-                            getString(R.string.stripe_onramp_kyc_choose_file),
-                        )
+                        sources.map { (label, _) -> getString(label) }.toTypedArray()
                     ) { _, index ->
                         selected = true
-                        if (index == 0) takePhoto(slotIndex) else chooseExisting()
+                        sources[index].second()
                     }
                     .setOnDismissListener {
                         if (!selected) stateHolder.onFileSelectionCancelled()
