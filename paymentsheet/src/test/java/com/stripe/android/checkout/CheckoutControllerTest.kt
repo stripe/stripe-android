@@ -388,7 +388,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure syncs shipping tax despite saved and default billing addresses and reloads payment metadata`() =
         runConfigureScenario(
-            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            configuration = configurationWithDefaultShippingAddress(),
             initModifier = combine(
                 automaticTaxFor("shipping"),
                 savedCustomerWithBillingAddress(),
@@ -454,7 +454,6 @@ internal class CheckoutControllerTest {
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(
                 address = null,
-                includeBillingAddress = true,
             ),
             initModifier = automaticTaxFor("shipping"),
         ) {
@@ -484,7 +483,6 @@ internal class CheckoutControllerTest {
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(
                 address = Address().country("DE"),
-                includeBillingAddress = true,
             ).shippingAddressElement(ShippingAddressElement.Configuration()),
             initModifier = combine(
                 automaticTaxFor("shipping"),
@@ -500,7 +498,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure retains default shipping without a tax update for an unknown tax address source`() =
         runConfigureScenario(
-            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            configuration = configurationWithDefaultShippingAddress(),
             initModifier = automaticTaxFor("unknown"),
         ) {
             result.getOrThrow()
@@ -512,7 +510,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure uses default billing address for billing tax even with default shipping`() =
         runConfigureScenario(
-            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            configuration = configurationWithDefaultShippingAddress(),
             initModifier = automaticTaxFor("billing"),
             networkSetup = {
                 networkRule.defaultBillingAddressTaxUpdate(
@@ -1791,13 +1789,12 @@ internal class CheckoutControllerTest {
 
     private fun configurationWithDefaultShippingAddress(
         address: Address? = fullAddress,
-        includeBillingAddress: Boolean = false,
     ): CheckoutController.Configuration {
         val shippingDetails = CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping")
         address?.let(shippingDetails::address)
-        val defaults = CheckoutController.Configuration.Defaults().shippingDetails(shippingDetails)
-        if (includeBillingAddress) {
-            defaults.billingDetails(
+        val defaults = CheckoutController.Configuration.Defaults()
+            .shippingDetails(shippingDetails)
+            .billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
                     Address()
                         .city("San Francisco")
@@ -1808,7 +1805,6 @@ internal class CheckoutControllerTest {
                         .state("CA")
                 )
             )
-        }
         return CheckoutController.Configuration().defaults(defaults)
     }
 
