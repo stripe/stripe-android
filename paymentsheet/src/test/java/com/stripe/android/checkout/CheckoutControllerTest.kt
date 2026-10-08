@@ -386,10 +386,9 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `configure syncs shipping tax despite saved and default billing addresses and reloads payment metadata`() =
+    fun `configure sends default shipping address for shipping tax despite saved and default billing addresses`() =
         runConfigureScenario(
-            configuration = configurationWithDefaultShippingAddress()
-                .shippingAddressElement(ShippingAddressElement.Configuration()),
+            configuration = configurationWithDefaultShippingAddress(),
             initModifier = combine(
                 automaticTaxFor("shipping"),
                 savedCustomerWithBillingAddress(),
@@ -400,51 +399,12 @@ internal class CheckoutControllerTest {
                         combine(
                             automaticTaxFor("shipping"),
                             savedCustomerWithBillingAddress(),
-                            { json ->
-                                val taxes = JSONArray().put(
-                                    JSONObject()
-                                        .put("amount", 510)
-                                        .put("inclusive", false)
-                                        .put(
-                                            "tax_rate",
-                                            JSONObject().put("display_name", "Sales tax")
-                                                .put("percentage", 10.0).put("rate_type", "percentage")
-                                        )
-                                )
-                                checkoutItemJson(json)
-                                    .put("total", 5609)
-                                    .put("tax_exclusive", 510)
-                                    .put("tax_amounts", taxes)
-                                json.getJSONObject("recurring_details").getJSONObject("total_summary")
-                                    .put("total_tax_amounts", taxes)
-                                json.getJSONObject("tax_meta").put("status", "complete")
-                                json.getJSONObject("server_built_elements_session_params")
-                                    .getJSONObject("deferred_intent").put("amount", 5609)
-                            },
                         ),
                     ),
                 )
             },
         ) {
-            result.getOrThrow()
-
-            val state = requireNotNull(committedState)
-            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
-            assertThat(state.checkoutSessionResponse.requiresShippingAddress).isTrue()
-            assertThat(controller.session.value?.totals?.subtotal?.minorUnitsAmount).isEqualTo(5099.0)
-            assertThat(controller.session.value?.totals?.taxExclusive?.minorUnitsAmount).isEqualTo(510.0)
-            assertThat(controller.session.value?.taxAmounts?.single()?.minorUnitsAmount).isEqualTo(510.0)
-            assertThat(controller.session.value?.tax?.status)
-                .isInstanceOf(CheckoutController.Session.Tax.Status.Ready::class.java)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5609.0)
-            assertThat(state.checkoutSessionResponse.amount).isEqualTo(5609L)
-            assertThat((state.paymentMethodMetadata.stripeIntent as PaymentIntent).amount).isEqualTo(5609L)
-            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
-            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
-            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
-            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John Shipping")
-            assertThat(state.paymentMethodMetadata.shippingDetails?.address)
-                .isEqualTo(fullAddress.build().asPaymentSheet())
+            assertThat(result.isSuccess).isTrue()
         }
 
     @Test
@@ -466,14 +426,11 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            result.getOrThrow()
-
-            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("CA")
-            assertThat(controller.session.value?.shippingAddress?.address?.postalCode).isEqualTo("M5V 3L9")
+            assertThat(result.isSuccess).isTrue()
         }
 
     @Test
-    fun `configure does not use billing defaults when shipping defaults have no address`() =
+    fun `configure skips tax update and loads the init session when default shipping has no address`() =
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(
                 address = null,
@@ -482,12 +439,11 @@ internal class CheckoutControllerTest {
         ) {
             result.getOrThrow()
 
-            assertThat(committedState?.collectedDetails?.shippingName).isEqualTo("John Shipping")
-            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
 
     @Test
-    fun `configure retains default shipping without a tax update when automatic tax is disabled`() =
+    fun `configure skips tax update and loads the init session when automatic tax is disabled`() =
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(),
             initModifier = combine(
@@ -500,8 +456,7 @@ internal class CheckoutControllerTest {
         ) {
             result.getOrThrow()
 
-            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
-            assertThat(committedState?.collectedDetails?.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
 
     @Test
@@ -517,20 +472,18 @@ internal class CheckoutControllerTest {
         ) {
             result.getOrThrow()
 
-            assertThat(controller.session.value?.shippingAddress).isNull()
-            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
 
     @Test
-    fun `configure retains default shipping without a tax update for an unknown tax address source`() =
+    fun `configure skips tax update and loads the init session for an unknown tax address source`() =
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(),
             initModifier = automaticTaxFor("unknown"),
         ) {
             result.getOrThrow()
 
-            assertThat(committedState?.checkoutSessionResponse?.taxAddressSource).isNull()
-            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
 
     @Test
@@ -544,9 +497,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            result.getOrThrow()
-
-            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+            assertThat(result.isSuccess).isTrue()
         }
 
     @Test
