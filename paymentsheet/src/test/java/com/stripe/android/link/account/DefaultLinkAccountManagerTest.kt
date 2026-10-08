@@ -1419,7 +1419,7 @@ class DefaultLinkAccountManagerTest {
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
             errorReporter = FakeErrorReporter(),
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             linkAuth = linkAuth
         )
     }

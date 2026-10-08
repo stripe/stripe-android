@@ -100,9 +100,9 @@ internal object CheckoutSessionDefinitions {
         displayName = "Automatic payment methods",
         defaultValue = true,
     )
-    val paymentMethodTypes = value(
+    val allowedPaymentMethodTypes = value(
         key = "session.payment_method_types",
-        displayName = "Payment method types (comma separated)",
+        displayName = "Allowed payment method types (comma separated)",
         defaultValue = listOf("card"),
         encode = { values -> values.joinToString(", ") },
         decode = { serialized ->
@@ -143,6 +143,11 @@ internal object CheckoutSessionDefinitions {
         key = "session.billing_address_collection",
         displayName = "Collect billing address",
     )
+    val invoiceCreation = boolean(
+        key = "session.invoice_creation",
+        displayName = "Invoice creation",
+        defaultValue = false,
+    )
     val linkType = choice(
         key = "controller.link_type",
         displayName = "Link Type",
@@ -152,7 +157,7 @@ internal object CheckoutSessionDefinitions {
     )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
-        displayName = "Checkout Session",
+        displayName = "Server side",
         children = arrayOf(
             backendUrl,
             customStripeApi,
@@ -166,11 +171,12 @@ internal object CheckoutSessionDefinitions {
             customSecretKey,
             customPublishableKey,
             automaticPaymentMethods,
-            paymentMethodTypes,
+            allowedPaymentMethodTypes,
             automaticTax,
             adaptivePricingCountry,
             shippingAddressCollection,
             billingAddressCollection,
+            invoiceCreation,
             linkType,
         ),
     )

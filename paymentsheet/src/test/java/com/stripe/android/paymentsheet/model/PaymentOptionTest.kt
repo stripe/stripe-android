@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -51,10 +52,13 @@ internal class PaymentOptionTest {
             billingDetails = null,
             _shippingDetails = null,
             _labels = PaymentOption.Labels(label = "Visa"),
-            imageLoader = { isSystemDark ->
-                imageLoaderCalls.add(isSystemDark)
-                if (isSystemDark == true) darkDrawable else lightDrawable
-            },
+            paymentOptionResource = DefaultPaymentOptionResource(
+                appearance = PaymentSheet.Appearance(),
+                loader = { packet ->
+                    imageLoaderCalls.add(packet.isSystemDarkTheme)
+                    if (packet.isSystemDarkTheme == true) darkDrawable else lightDrawable
+                },
+            ),
         )
         var configuration by mutableStateOf(configuration(Configuration.UI_MODE_NIGHT_NO))
         var currentPainter: Painter? = null

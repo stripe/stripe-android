@@ -392,9 +392,50 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept passes expectedAmount from payment intent`() = runScenario {
+    fun `intercept with new payment method passes expectedAmount from checkout session`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 5099L),
+    ) {
         networkRule.checkoutConfirm(
             bodyPart("expected_amount", "5099"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(intent = PaymentIntentFactory.create(amount = 1000L))
+    }
+
+    @Test
+    fun `intercept with saved payment method passes expectedAmount from checkout session`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 5099L),
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "5099"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(intent = PaymentIntentFactory.create(amount = 1000L))
+    }
+
+    @Test
+    fun `intercept passes expectedAmount when payment intent amount is null`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 5099L),
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "5099"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(intent = PaymentIntentFactory.create().copy(amount = null))
+    }
+
+    @Test
+    fun `intercept with new payment method passes zero expectedAmount from checkout session`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 0L),
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "0"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -403,14 +444,57 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept omits expectedAmount for setup intent`() = runScenario {
+    fun `intercept with saved payment method passes zero expectedAmount from checkout session`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 0L),
+    ) {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("expected_amount")),
+            bodyPart("expected_amount", "0"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(intent = PaymentIntentFactory.create(amount = 5099L))
+    }
+
+    @Test
+    fun `intercept passes expectedAmount from checkout session for setup intent`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 5099L),
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "5099"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
 
         interceptNewPm(intent = SetupIntentFactory.create())
+    }
+
+    @Test
+    fun `intercept passes zero expectedAmount and omits saving for setup intent`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 0L),
+        customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "0"),
+            not(hasBodyPart("save_payment_method")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json")
+        }
+
+        interceptNewPm(intent = SetupIntentFactory.create(), shouldSave = true)
+    }
+
+    @Test
+    fun `intercept with saved payment method passes zero expectedAmount for setup intent`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(amount = 0L),
+    ) {
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "0"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json")
+        }
+
+        interceptSavedPm(intent = SetupIntentFactory.create())
     }
 
     @Test

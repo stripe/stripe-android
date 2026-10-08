@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
@@ -212,8 +213,7 @@ class LinkController @Inject internal constructor(
     @LinkControllerPreview
     class Configuration {
         private var merchantDisplayName: String
-        private var publishableKey: String?
-        private var stripeAccountId: String?
+        private val apiConfiguration: ApiConfiguration.State
         private var email: String?
         private var phoneNumber: String? = null
         private var supportedPaymentMethodTypes: List<PaymentMethodType>? = null
@@ -236,15 +236,19 @@ class LinkController @Inject internal constructor(
         ) {
             this.merchantDisplayName = merchantDisplayName
             this.email = email
-            this.publishableKey = publishableKey
-            this.stripeAccountId = stripeAccountId
+            this.apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+            )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(merchantDisplayName: String, publishableKey: String, stripeAccountId: String? = null) {
             this.merchantDisplayName = merchantDisplayName
-            this.publishableKey = publishableKey
-            this.stripeAccountId = stripeAccountId
+            this.apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+            )
             this.email = null
         }
 
@@ -291,8 +295,7 @@ class LinkController @Inject internal constructor(
         @Poko
         internal class State(
             internal val merchantDisplayName: String,
-            internal val publishableKey: String,
-            internal val stripeAccountId: String?,
+            internal val apiConfiguration: ApiConfiguration.State,
             internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
             internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
             internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -307,8 +310,7 @@ class LinkController @Inject internal constructor(
 
         internal fun build(): State = State(
             merchantDisplayName = merchantDisplayName,
-            publishableKey = publishableKey ?: "",
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = apiConfiguration,
             email = email,
             phoneNumber = phoneNumber,
             supportedPaymentMethodTypes = supportedPaymentMethodTypes,

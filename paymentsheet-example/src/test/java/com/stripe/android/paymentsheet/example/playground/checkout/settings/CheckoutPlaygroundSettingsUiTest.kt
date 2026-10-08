@@ -93,11 +93,11 @@ class CheckoutPlaygroundSettingsUiTest {
 
         page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(paymentCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Payment Element › Appearance › Primary button › Shape"
+            "Client side › Payment Element › Appearance › Primary button › Shape"
         )
         page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(currencyCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Currency Selector Element › Appearance"
+            "Client side › Currency Selector Element › Appearance"
         )
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
 
@@ -151,8 +151,8 @@ class CheckoutPlaygroundSettingsUiTest {
 
     @Test
     fun `search displays non-applicable text settings as disabled`() = runScenario {
-        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodTypes
-        setSearchQuery("payment method types")
+        val definition = CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes
+        setSearchQuery("allowed payment method types")
 
         page.value(definition).performScrollTo().assertIsDisplayed().assertIsNotEnabled()
 
@@ -277,15 +277,15 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
-    fun `payment method types are only displayed for manual payment methods`() = runScenario(
+    fun `allowed payment method types are only displayed for manual payment methods`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {
-        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes).assertDoesNotExist()
+        page.value(CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes).assertDoesNotExist()
 
         settings.update(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
         composeRule.waitForIdle()
 
-        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes)
+        page.value(CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes)
             .performScrollTo()
             .assertIsDisplayed()
     }

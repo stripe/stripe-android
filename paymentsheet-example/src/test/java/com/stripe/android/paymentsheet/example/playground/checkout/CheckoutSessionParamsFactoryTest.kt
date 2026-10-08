@@ -15,11 +15,33 @@ import org.junit.Test
 
 class CheckoutSessionParamsFactoryTest {
     @Test
+    fun `invoice creation is omitted by default`() = runScenario {
+        val params = createParams()
+
+        assertThat(params).doesNotContainKey("invoice_creation")
+    }
+
+    @Test
+    fun `invoice creation includes invoice data when enabled`() = runScenario {
+        settings.update(session.invoiceCreation, true)
+
+        val params = createParams()
+
+        val invoiceCreation = params.getValue("invoice_creation").jsonObject
+        assertThat(invoiceCreation["enabled"]).isEqualTo(JsonPrimitive(true))
+        val invoiceData = invoiceCreation.getValue("invoice_data").jsonObject
+        assertThat(invoiceData.string("description")).isEqualTo("Checkout live post-purchase invoice")
+        assertThat(invoiceData.getValue("metadata").jsonObject.string("suite"))
+            .isEqualTo("checkout_live_billing_invoice")
+    }
+
+    @Test
     fun `default parameters contain fixed Elements cart`() = runScenario {
         val params = createParams()
 
         assertThat(params.string("ui_mode")).isEqualTo("elements")
         assertThat(params.string("currency")).isEqualTo("usd")
+        assertThat(params).doesNotContainKey("allowed_payment_method_types")
         val items = params["items"]!!.jsonArray
         assertThat(items).hasSize(1)
         val lineItems = items.single().jsonObject["one_time_price"]!!.jsonObject["items"]!!.jsonArray
@@ -36,13 +58,14 @@ class CheckoutSessionParamsFactoryTest {
     @Test
     fun `manual payment methods are sorted and automatic payment methods are omitted`() = runScenario {
         settings.update(session.automaticPaymentMethods, false)
-        settings.update(session.paymentMethodTypes, listOf("klarna", "card"))
+        settings.update(session.allowedPaymentMethodTypes, listOf("klarna", "card"))
 
         val params = createParams()
 
-        assertThat(params["payment_method_types"]).isEqualTo(
+        assertThat(params["allowed_payment_method_types"]).isEqualTo(
             JsonArray(listOf(JsonPrimitive("card"), JsonPrimitive("klarna")))
         )
+        assertThat(params).doesNotContainKey("payment_method_types")
     }
 
     @Test

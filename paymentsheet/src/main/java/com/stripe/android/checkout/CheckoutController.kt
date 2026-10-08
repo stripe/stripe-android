@@ -13,9 +13,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -34,7 +35,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -938,11 +938,7 @@ class CheckoutController @Inject internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PaymentOptionDisplayData internal constructor(
-            /**
-             * Loads the payment method image. Prefer [iconPainter] to render it in Compose.
-             */
-            @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            val imageLoader: suspend () -> Drawable,
+            private val paymentOptionResource: PaymentOptionResource,
             /**
              * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
              */
@@ -967,6 +963,16 @@ class CheckoutController @Inject internal constructor(
              */
             val mandateText: AnnotatedString?,
         ) {
+            /**
+             * Loads the payment method image for the provided raw system theme. Appearance-based theme
+             * overrides are resolved internally.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ReactNativeSdkInternal
+            suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+                return paymentOptionResource.load(isSystemDarkTheme)
+            }
+
             /**
              * The billing details collected for a payment method.
              */
@@ -1025,16 +1031,12 @@ class CheckoutController @Inject internal constructor(
                 )
             }
 
-            private val iconDrawable: Drawable by lazy {
-                DelegateDrawable(imageLoader)
-            }
-
             /**
              * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
              */
             val iconPainter: Painter
                 @Composable
-                get() = rememberDrawablePainter(iconDrawable)
+                get() = paymentOptionResource.rememberPainter()
         }
     }
 

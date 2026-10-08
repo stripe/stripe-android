@@ -22,7 +22,10 @@ buildscript {
         classpath buildLibs.googleServices
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
-        classpath buildLibs.paparazzi
+        classpath(buildLibs.paparazzi) {
+            // Keep sdk-common aligned with the Android Gradle plugin on the build classpath.
+            exclude group: 'com.android.tools', module: 'sdk-common'
+        }
     }
 }
 
