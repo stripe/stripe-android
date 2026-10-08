@@ -178,4 +178,5 @@ dependencies {
     androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.testParameterInjector
 }

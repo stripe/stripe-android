@@ -70,6 +70,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
+import com.stripe.android.test.core.ui.PaymentSelection
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
@@ -126,6 +127,32 @@ internal class PlaygroundTestDriver(
         override fun onActivityResumed(activity: Activity) {
             currentActivity = activity
         }
+    }
+
+    fun startCustomFlow(testParameters: TestParameters) {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
+            }
+        )
+        launchCustom(clickMultiStep = false)
+    }
+
+    fun selectCustomPaymentOption(
+        paymentMethodCode: String,
+        populateFields: (Selectors) -> Unit,
+    ) {
+        pressMultiStepSelect()
+        selectors.formElement.waitFor()
+        PaymentSelection(composeTestRule, paymentMethodCode).click()
+        populateFields(selectors)
+        Espresso.closeSoftKeyboard()
+        selectors.continueButton.waitProcessingComplete()
+        pressContinue()
     }
 
     fun confirmCustom(
