@@ -174,7 +174,7 @@ internal fun CurrencySelectorToggle(
                 text = options.exchangeRateText,
                 style = captionStyle,
                 color = captionColor,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
@@ -185,7 +185,7 @@ internal fun CurrencySelectorToggle(
                 text = errorMessage,
                 style = captionStyle,
                 color = errorColor,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
