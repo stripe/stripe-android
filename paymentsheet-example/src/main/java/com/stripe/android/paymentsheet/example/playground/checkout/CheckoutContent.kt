@@ -40,11 +40,11 @@ internal fun CheckoutContent(
     Spacer(Modifier.height(20.dp))
     SessionOperations(
         initialEmail = session.email.orEmpty(),
-        shippingAddress = session.shippingAddress,
         isUpdating = isUpdating,
         message = operationMessage,
         onApplyPromotionCode = onApplyPromotionCode,
         onRemovePromotionCode = onRemovePromotionCode,
         onUpdateEmail = onUpdateEmail,
     )
+    ShippingAddressSection(session.shippingAddress)
 }
