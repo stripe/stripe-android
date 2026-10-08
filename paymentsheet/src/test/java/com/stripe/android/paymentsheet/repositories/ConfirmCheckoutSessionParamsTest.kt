@@ -19,10 +19,10 @@ class ConfirmCheckoutSessionParamsTest {
     }
 
     @Test
-    fun `toParamMap omits expectedAmount when null`() {
-        val params = createParams(expectedAmount = null).toParamMap()
+    fun `toParamMap includes expectedAmount when zero`() {
+        val params = createParams(expectedAmount = 0L).toParamMap()
 
-        assertThat(params).doesNotContainKey("expected_amount")
+        assertThat(params["expected_amount"]).isEqualTo(0L)
     }
 
     @Test
@@ -80,7 +80,7 @@ class ConfirmCheckoutSessionParamsTest {
     }
 
     private fun createParams(
-        expectedAmount: Long? = null,
+        expectedAmount: Long = 5099L,
         savePaymentMethod: Boolean? = null,
         shipping: ConfirmCheckoutSessionParams.Shipping? = null,
     ): ConfirmCheckoutSessionParams {

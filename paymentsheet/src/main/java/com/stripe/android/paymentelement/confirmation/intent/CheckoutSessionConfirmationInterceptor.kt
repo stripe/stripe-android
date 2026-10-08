@@ -149,22 +149,14 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
-    ): ConfirmCheckoutSessionParams = when (intent) {
-        is PaymentIntent -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            expectedAmount = intent.amount,
-            savePaymentMethod = savePaymentMethod,
-            shipping = shipping,
-        )
-        else -> ConfirmCheckoutSessionParams(
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
-            shipping = shipping,
-        )
-    }
+    ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
+        paymentMethodId = paymentMethod.id,
+        clientAttributionMetadata = clientAttributionMetadata,
+        returnUrl = returnUrl,
+        expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
+        savePaymentMethod = savePaymentMethod.takeIf { intent is PaymentIntent },
+        shipping = shipping,
+    )
 
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
