@@ -37,7 +37,7 @@ internal class DefaultPaymentOptionResource(
     private fun rememberPaymentOptionDrawable(): Drawable {
         val isSystemDarkTheme = isSystemInDarkTheme()
         val useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(isSystemDarkTheme)
-        return remember(useDarkThemeIcon) {
+        return remember(this, useDarkThemeIcon) {
             DelegateDrawable {
                 load(isSystemDarkTheme)
             }
