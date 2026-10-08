@@ -33,24 +33,6 @@ internal class FraudDetectionDataRepositoryLifecycleTest {
     }
 
     @Test
-    fun `concurrent refreshes share fresh data and populate the cache`() = runScenario {
-        repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        runCurrent()
-        val response = networkClient.requests.awaitItem()
-
-        repository.refresh(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        runCurrent()
-        networkClient.requests.expectNoEvents()
-
-        response.complete(successResponse())
-        runCurrent()
-
-        networkClient.requests.expectNoEvents()
-        reportedErrors.expectNoEvents()
-        assertThat(repository.getCached()?.guid).isEqualTo("guid")
-    }
-
-    @Test
     fun `in flight failure retains its initiating key after another refresh`() = runScenario {
         repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         runCurrent()
@@ -58,14 +40,14 @@ internal class FraudDetectionDataRepositoryLifecycleTest {
 
         repository.refresh(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         runCurrent()
-        networkClient.requests.expectNoEvents()
+        val secondResponse = networkClient.requests.awaitItem()
 
         val error = APIConnectionException("Failed to collect fraud data")
         firstResponse.completeExceptionally(error)
         runCurrent()
         assertThat(reportedErrors.awaitItem()).isEqualTo(error to ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-        networkClient.requests.awaitItem().complete(successResponse())
+        secondResponse.complete(successResponse())
         runCurrent()
         reportedErrors.expectNoEvents()
         assertThat(repository.getCached()?.guid).isEqualTo("guid")

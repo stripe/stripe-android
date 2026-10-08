@@ -7,8 +7,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
@@ -56,8 +54,6 @@ class DefaultFraudDetectionDataRepository(
     private val workContext: CoroutineContext,
     private val fraudDetectionEnabledProvider: FraudDetectionEnabledProvider,
 ) : FraudDetectionDataRepository {
-    private val mutex = Mutex()
-
     private val fraudDetectionEnabled: Boolean
         get() = fraudDetectionEnabledProvider.provideFraudDetectionEnabled()
 
@@ -70,25 +66,23 @@ class DefaultFraudDetectionDataRepository(
     }
 
     override suspend fun getLatest(publishableKey: String) = withContext(workContext) {
-        mutex.withLock {
-            localStore.get().let { localFraudDetectionData ->
-                if (localFraudDetectionData == null ||
-                    localFraudDetectionData.isExpired(timestampSupplier())
-                ) {
-                    // fraud detection data request failures should be non-fatal
-                    runCatching {
-                        stripeNetworkClient.executeRequest(
-                            fraudDetectionDataRequestFactory.create(
-                                localFraudDetectionData
-                            )
-                        ).fraudDetectionData()
-                    }.onFailure {
-                        val error = StripeException.create(it)
-                        errorReporter.reportFraudDetectionError(error, publishableKey)
-                    }.getOrNull()?.also(::save)
-                } else {
-                    localFraudDetectionData
-                }
+        localStore.get().let { localFraudDetectionData ->
+            if (localFraudDetectionData == null ||
+                localFraudDetectionData.isExpired(timestampSupplier())
+            ) {
+                // fraud detection data request failures should be non-fatal
+                runCatching {
+                    stripeNetworkClient.executeRequest(
+                        fraudDetectionDataRequestFactory.create(
+                            localFraudDetectionData
+                        )
+                    ).fraudDetectionData()
+                }.onFailure {
+                    val error = StripeException.create(it)
+                    errorReporter.reportFraudDetectionError(error, publishableKey)
+                }.getOrNull()?.also(::save)
+            } else {
+                localFraudDetectionData
             }
         }
     }
