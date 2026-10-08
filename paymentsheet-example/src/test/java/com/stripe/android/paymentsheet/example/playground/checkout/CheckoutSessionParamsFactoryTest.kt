@@ -41,6 +41,7 @@ class CheckoutSessionParamsFactoryTest {
 
         assertThat(params.string("ui_mode")).isEqualTo("elements")
         assertThat(params.string("currency")).isEqualTo("usd")
+        assertThat(params).doesNotContainKey("allowed_payment_method_types")
         val items = params["items"]!!.jsonArray
         assertThat(items).hasSize(1)
         val lineItems = items.single().jsonObject["one_time_price"]!!.jsonObject["items"]!!.jsonArray
@@ -57,13 +58,14 @@ class CheckoutSessionParamsFactoryTest {
     @Test
     fun `manual payment methods are sorted and automatic payment methods are omitted`() = runScenario {
         settings.update(session.automaticPaymentMethods, false)
-        settings.update(session.paymentMethodTypes, listOf("klarna", "card"))
+        settings.update(session.allowedPaymentMethodTypes, listOf("klarna", "card"))
 
         val params = createParams()
 
-        assertThat(params["payment_method_types"]).isEqualTo(
+        assertThat(params["allowed_payment_method_types"]).isEqualTo(
             JsonArray(listOf(JsonPrimitive("card"), JsonPrimitive("klarna")))
         )
+        assertThat(params).doesNotContainKey("payment_method_types")
     }
 
     @Test
