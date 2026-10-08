@@ -18,10 +18,13 @@ app:
 pipelines:
   runif-status-experiment:
     workflows:
+      runif-status-gate: { }
       runif-skipped-a:
+        depends_on: [runif-status-gate]
         run_if:
           expression: '{{false}}'
       runif-skipped-b:
+        depends_on: [runif-status-gate]
         run_if:
           expression: '{{false}}'
   main-trigger-pipeline:
@@ -69,6 +72,12 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
+  runif-status-gate:
+    steps:
+      - script@1:
+          title: Successful lightweight gate
+          inputs:
+            - content: echo 'The gate ran; downstream probes must remain skipped.'
   runif-skipped-a:
     steps:
       - script@1:
