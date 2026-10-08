@@ -39,6 +39,7 @@ jobs:
             const blockPattern = /(?:\r?\n){0,2}<!-- pr-base-ci:start -->[\s\S]*?<!-- pr-base-ci:end -->/;
             const skipPattern = /\[(?:skip ci|ci skip)\]/i;
             const runOverride = '<!-- pr-base-ci:run -->';
+            const runOverridePattern = /(?:^|\r?\n)<!-- pr-base-ci:run -->(?=\r?\n|$)/;
             const managedBlock = '<!-- pr-base-ci:start -->\n[skip ci]\n' +
               'Bitrise is deferred until this PR targets master.\n<!-- pr-base-ci:end -->';
             const body = pr.body ?? '';
@@ -51,10 +52,10 @@ jobs:
             const manuallyRemoved = skipPattern.test(previousBlock) &&
               !skipPattern.test(editedBlock) && !skipPattern.test(currentBlock);
             // Persist removal so future pushes respect the author's choice.
-            if (manuallyRemoved && !desired.includes(runOverride)) {
+            if (manuallyRemoved && !runOverridePattern.test(desired)) {
               desired += `${desired ? '\n\n' : ''}${runOverride}`;
             }
-            if (pr.base.ref !== 'master' && !desired.includes(runOverride) &&
+            if (pr.base.ref !== 'master' && !runOverridePattern.test(desired) &&
               !skipPattern.test(desired)) {
               desired += `${desired ? '\n\n' : ''}${managedBlock}`;
             }

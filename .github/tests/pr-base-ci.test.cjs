@@ -81,3 +81,8 @@ test('repeated reconciliation leaves an existing marker unchanged', async () => 
 test('a PR closed before the workflow runs is not edited', async () => {
   assert.deepEqual(await reconcile(pr('feature-parent', 'Description', 'closed')), []);
 });
+
+test('documenting the override inline does not enable it', async () => {
+  const body = 'To override, add `<!-- pr-base-ci:run -->` on its own line.';
+  assert.deepEqual(await reconcile(pr('feature-parent', body)), [`${body}\n\n${block}`]);
+});
