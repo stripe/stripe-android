@@ -21,12 +21,8 @@ pipelines:
       runif-status-gate: { }
       runif-skipped-a:
         depends_on: [runif-status-gate]
-        run_if:
-          expression: '{{false}}'
       runif-skipped-b:
         depends_on: [runif-status-gate]
-        run_if:
-          expression: '{{false}}'
   main-trigger-pipeline:
     workflows:
       check-and-test: { }
@@ -75,19 +71,25 @@ workflows:
   runif-status-gate:
     steps:
       - script@1:
-          title: Successful lightweight gate
+          title: Verify draft PR environment
           inputs:
-            - content: echo 'The gate ran; downstream probes must remain skipped.'
+            - content: |
+                #!/usr/bin/env bash
+                set -euo pipefail
+                test "${GITHUB_PR_IS_DRAFT:-}" = true
+                echo 'Verified GITHUB_PR_IS_DRAFT=true; probe steps must be skipped.'
   runif-skipped-a:
     steps:
       - script@1:
           title: Fail if the skipped probe executes
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - content: exit 1
   runif-skipped-b:
     steps:
       - script@1:
           title: Fail if the skipped probe executes
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - content: exit 1
   check-and-test:
