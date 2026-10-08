@@ -49,7 +49,7 @@ internal class TestTimingProfileTest {
     fun nullableResultsDoNotRepeatTheMeasuredBlock() = runScenario {
         val calls = Turbine<Unit>()
         evaluate(profile.executionStatement(statement {
-            val result = TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
+            val result: Any? = TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
                 calls.add(Unit)
                 advance(11)
                 null
