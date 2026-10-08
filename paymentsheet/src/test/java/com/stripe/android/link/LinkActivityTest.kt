@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
@@ -22,6 +23,9 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
+import com.stripe.android.link.ui.wallet.WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -35,6 +39,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -81,6 +86,7 @@ internal class LinkActivityTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             use2faDialog = true,
             linkAccountManager = linkAccountManager
         )
@@ -100,6 +106,7 @@ internal class LinkActivityTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         setupActivityController(
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             use2faDialog = false,
             linkAccountManager = linkAccountManager
         )
@@ -112,6 +119,43 @@ internal class LinkActivityTest {
             .assertIsDisplayed()
     }
 
+    @Test
+    fun `secondary button is displayed when full mode shows it`() {
+        verifySecondaryButtonVisibility(showSecondaryButton = true)
+    }
+
+    @Test
+    fun `secondary button is not displayed when full mode hides it`() {
+        verifySecondaryButtonVisibility(showSecondaryButton = false)
+    }
+
+    private fun verifySecondaryButtonVisibility(showSecondaryButton: Boolean) = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
+
+        setupActivityController(
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = showSecondaryButton),
+            use2faDialog = false,
+            linkAccountManager = linkAccountManager,
+        )
+
+        dispatcher.scheduler.advanceUntilIdle()
+        composeTestRule.waitForIdle()
+        dispatcher.scheduler.advanceUntilIdle()
+        composeTestRule.waitForIdle()
+
+        val secondaryButton = composeTestRule.onNodeWithTag(
+            testTag = WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON,
+            useUnmergedTree = true,
+        )
+        if (showSecondaryButton) {
+            secondaryButton.performScrollTo().assertIsDisplayed()
+        } else {
+            secondaryButton.assertDoesNotExist()
+        }
+    }
+
     private fun verificationDialog() = composeTestRule
         .onNodeWithTag(VERIFICATION_DIALOG_CONTENT_TAG)
 
@@ -119,6 +163,7 @@ internal class LinkActivityTest {
         .onNodeWithTag(FULL_SCREEN_CONTENT_TAG)
 
     private fun setupActivityController(
+        linkLaunchMode: LinkLaunchMode,
         use2faDialog: Boolean = true,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): LinkActivity {
@@ -127,12 +172,14 @@ internal class LinkActivityTest {
             context = context,
             args = TestFactory.NATIVE_LINK_ARGS.copy(
                 linkExpressMode = linkExpressMode,
+                launchMode = linkLaunchMode,
             )
         )
 
         val activityController = Robolectric.buildActivity(LinkActivity::class.java, intent)
 
         activityController.get().viewModelFactory = linkViewModelFactory(
+            linkLaunchMode = linkLaunchMode,
             linkExpressMode = linkExpressMode,
             linkAccountManager = linkAccountManager
         )
@@ -143,12 +190,20 @@ internal class LinkActivityTest {
     }
 
     private fun linkViewModelFactory(
+        linkLaunchMode: LinkLaunchMode,
         linkExpressMode: LinkExpressMode = LinkExpressMode.ENABLED,
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager()
     ): ViewModelProvider.Factory = viewModelFactory {
         initializer {
             LinkActivityViewModel(
-                activityRetainedComponent = FakeNativeLinkComponent(),
+                activityRetainedComponent = FakeNativeLinkComponent(
+                    linkAccountManager = linkAccountManager,
+                    linkLaunchMode = linkLaunchMode,
+                    addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory(linkLaunchMode),
+                    viewModel = mock {
+                        on { confirmationHandler } doReturn FakeConfirmationHandler()
+                    },
+                ),
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 linkAccountManager = linkAccountManager,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -159,11 +214,25 @@ internal class LinkActivityTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkExpressMode = linkExpressMode,
                 navigationManager = TestNavigationManager(),
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = linkLaunchMode,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),
                 addPaymentMethodOptionsFactory = mock()
             )
+        }
+    }
+
+    private fun addPaymentMethodOptionsFactory(
+        linkLaunchMode: LinkLaunchMode,
+    ): AddPaymentMethodOptions.Factory {
+        return object : AddPaymentMethodOptions.Factory {
+            override fun create(linkAccount: LinkAccount): AddPaymentMethodOptions {
+                return AddPaymentMethodOptions(
+                    linkAccount = linkAccount,
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    linkLaunchMode = linkLaunchMode,
+                )
+            }
         }
     }
 }

@@ -45,7 +45,7 @@ class WebLinkActivityContractTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-            launchMode = LinkLaunchMode.Full,
+            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             statusBarColor = null,
         )
 

@@ -94,6 +94,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
             googlePayShippingAddressParameters = shippingAddressParameters,
+            showSecondaryButtonForLink = false,
         ) ?: return null
 
         return ConfirmationHandler.Args(
