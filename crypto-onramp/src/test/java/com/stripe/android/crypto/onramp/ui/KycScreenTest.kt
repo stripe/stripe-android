@@ -57,16 +57,41 @@ internal class KycScreenTest {
     }
 
     @Test
-    fun `uploading document shows accessible progress and cannot be removed`() = runScenario(
+    fun `choosing a document does not show upload progress`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo().assertIsNotEnabled()
+        composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Uploading…").assertDoesNotExist()
+        composeRule.onNodeWithText("Upload document").assertIsDisplayed()
+    }
+
+    @Test
+    fun `preparing a document does not show upload progress`() = runScenario(
         state = screenState(
             page = KycCollectionPage.DocumentEditor,
         ).copy(selectingFileSlot = 0, selectingFileName = "electricity-bill.pdf"),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo().assertIsNotEnabled()
+        composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Uploading…").assertDoesNotExist()
+        composeRule.onNodeWithText("Upload document").assertIsDisplayed()
+    }
+
+    @Test
+    fun `uploading document shows accessible progress and cannot be removed`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0, selectingFileName = "electricity-bill.pdf", uploadingFileSlot = 0),
     ) {
         composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo()
         composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG)
             .assertIsDisplayed()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo))
         composeRule.onNodeWithText("electricity-bill.pdf").assertIsDisplayed()
+        composeRule.onNodeWithText("Uploading…").assertIsDisplayed()
         composeRule.onNodeWithTag(kycRemoveFileTag(0)).assertDoesNotExist()
         composeRule.onNodeWithTag(kycChooseFileTag(0)).assertIsNotEnabled()
     }
@@ -487,6 +512,7 @@ internal class KycScreenTest {
                 validationFileName = validationFileName,
                 selectingFileSlot = null,
                 selectingFileName = null,
+                uploadingFileSlot = null,
                 canSubmit = canSubmit,
                 canContinue = canContinue,
                 isCollectionAvailable = true,

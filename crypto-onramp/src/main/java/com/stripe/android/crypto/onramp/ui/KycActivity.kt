@@ -286,7 +286,7 @@ internal class KycActivity : ComponentActivity() {
             val format = kycCameraFormat(stateHolder.acceptedFormats)
                 ?: throw IOException("Camera format is no longer accepted")
             if (stateHolder.state.selectingFileSlot != slot) return
-            stateHolder.onFileUploadStarted(slot, "photo.$format")
+            stateHolder.onFilePreparationStarted(slot, "photo.$format")
             val file = withContext(Dispatchers.IO) {
                 prepareKycCameraImage(
                     source, format, stateHolder.maximumFileSizeBytes ?: Long.MAX_VALUE,
@@ -318,7 +318,7 @@ internal class KycActivity : ComponentActivity() {
             stateHolder.onFileSelectionFailed()
             return
         }
-        stateHolder.onFileUploadStarted(slotIndex, displayName)
+        stateHolder.onFilePreparationStarted(slotIndex, displayName)
         var localCopy: File? = null
         try {
             val selectedFile = withContext(Dispatchers.IO) {
@@ -362,6 +362,7 @@ internal class KycActivity : ComponentActivity() {
         handlerKey: String,
     ) {
         val uploader = KycSubmissionHandlerRegistry.uploader(handlerKey)
+        stateHolder.onFileUploadStarted(slotIndex, selection.displayName)
         val result = uploader?.upload(selection.file)
             ?: Result.failure(IllegalStateException("Missing KYC document uploader"))
         currentCoroutineContext().ensureActive()

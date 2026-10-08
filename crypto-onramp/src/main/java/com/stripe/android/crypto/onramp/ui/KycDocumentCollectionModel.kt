@@ -25,6 +25,8 @@ internal class KycDocumentCollectionModel(
         private set
     var selectingFileName: String? = null
         private set
+    var uploadingFileSlot: Int? = null
+        private set
 
     val acceptedFormats: List<String> get() = document?.acceptedFormats.orEmpty()
     val maximumFileSizeBytes: Long? get() = document?.maxFileSizeBytes
@@ -123,21 +125,29 @@ internal class KycDocumentCollectionModel(
 
         selectingFileSlot = slotIndex
         selectingFileName = null
+        uploadingFileSlot = null
         validationError = null
         validationFileName = null
         return true
     }
 
-    fun onFileUploadStarted(slotIndex: Int, displayName: String) {
+    fun onFilePreparationStarted(slotIndex: Int, displayName: String) {
         if (selectingFileSlot != slotIndex) {
             return
         }
         selectingFileName = displayName
     }
 
+    fun onFileUploadStarted(slotIndex: Int, displayName: String) {
+        if (selectingFileSlot != slotIndex) return
+        onFilePreparationStarted(slotIndex, displayName)
+        uploadingFileSlot = slotIndex
+    }
+
     fun onFileSelectionCancelled() {
         selectingFileSlot = null
         selectingFileName = null
+        uploadingFileSlot = null
     }
 
     fun isAcceptedFile(displayName: String, mimeTypeExtension: String?): Boolean {
@@ -156,8 +166,7 @@ internal class KycDocumentCollectionModel(
 
         val isAccepted = candidateExtensions.any { extension -> extension in accepted }
         if (!isAccepted) {
-            selectingFileSlot = null
-            selectingFileName = null
+            onFileSelectionCancelled()
             validationError = KycValidationError.UnsupportedFileType
             validationFileName = displayName
         }
@@ -183,8 +192,7 @@ internal class KycDocumentCollectionModel(
             replacedFile = slot.file?.file
             slot.copy(file = SelectedKycFile(file = file, displayName = displayName, fileId = fileId))
         }
-        selectingFileSlot = null
-        selectingFileName = null
+        onFileSelectionCancelled()
         validationError = null
         validationFileName = null
         addNextUploadSlotIfNeeded(completedSlotIndex = slotIndex)
@@ -192,17 +200,15 @@ internal class KycDocumentCollectionModel(
     }
 
     fun onFileSelectionFailed() {
-        selectingFileSlot = null
-        selectingFileName = null
+        onFileSelectionCancelled()
         validationError = KycValidationError.FileUnavailable
         validationFileName = null
     }
 
     fun onFileTooLarge(displayName: String?) {
-        selectingFileSlot = null
         validationError = KycValidationError.FileTooLarge
         validationFileName = displayName ?: selectingFileName
-        selectingFileName = null
+        onFileSelectionCancelled()
     }
 
     fun onFileRemoved(slotIndex: Int, isEditing: Boolean): File? {

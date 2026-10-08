@@ -21,6 +21,39 @@ internal class KycDocumentCollectionModelTest {
     }
 
     @Test
+    fun `progress starts only after preparation and clears on completion`() = runScenario {
+        onAddDocuments()
+        val slot = requireNotNull(editingDocumentSlot)
+        assertThat(onFileSelectionStarted(slot)).isTrue()
+        assertThat(uploadingFileSlot).isNull()
+
+        onFilePreparationStarted(slot, "salary.pdf")
+        assertThat(selectingFileName).isEqualTo("salary.pdf")
+        assertThat(uploadingFileSlot).isNull()
+
+        onFileUploadStarted(slot, "salary.pdf")
+        assertThat(uploadingFileSlot).isEqualTo(slot)
+
+        onFileSelected(slot, File("salary.pdf"), "salary.pdf", "file_salary")
+        assertThat(uploadingFileSlot).isNull()
+        assertThat(selectingFileSlot).isNull()
+    }
+
+    @Test
+    fun `cancelling clears upload progress`() = runScenario {
+        onAddDocuments()
+        val slot = requireNotNull(editingDocumentSlot)
+        onFileSelectionStarted(slot)
+        onFileUploadStarted(slot, "salary.pdf")
+
+        onFileSelectionCancelled()
+
+        assertThat(uploadingFileSlot).isNull()
+        assertThat(selectingFileSlot).isNull()
+        assertThat(selectingFileName).isNull()
+    }
+
+    @Test
     fun `upload failure clears progress and permits retry`() {
         val model = model()
         model.onAddDocuments()
@@ -28,9 +61,11 @@ internal class KycDocumentCollectionModelTest {
         model.onFileSelectionStarted(slot)
         model.onFileUploadStarted(slot, "salary.pdf")
         assertThat(model.selectingFileName).isEqualTo("salary.pdf")
+        assertThat(model.uploadingFileSlot).isEqualTo(slot)
         model.onFileSelectionFailed()
         assertThat(model.selectingFileSlot).isNull()
         assertThat(model.selectingFileName).isNull()
+        assertThat(model.uploadingFileSlot).isNull()
         assertThat(model.validationError).isEqualTo(KycValidationError.FileUnavailable)
         assertThat(model.onFileSelectionStarted(slot)).isTrue()
         assertThat(model.validationError).isNull()

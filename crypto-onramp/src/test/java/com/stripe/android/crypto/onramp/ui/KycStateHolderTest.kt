@@ -71,7 +71,7 @@ internal class KycStateHolderTest {
         val slotIndex = requireNotNull(stateHolder.state.document?.editingSlotIndex)
         stateHolder.onDocumentSubtypeSelected(slotIndex, subtypeId)
         stateHolder.onFileSelectionStarted(slotIndex)
-        stateHolder.onFileUploadStarted(slotIndex, "oversized.pdf")
+        stateHolder.onFilePreparationStarted(slotIndex, "oversized.pdf")
         stateHolder.onFileTooLarge()
         assertThat(stateHolder.state.validationError).isEqualTo(KycValidationError.FileTooLarge)
         assertThat(stateHolder.state.validationFileName).isEqualTo("oversized.pdf")
@@ -302,7 +302,7 @@ internal class KycStateHolderTest {
     }
 
     @Test
-    fun `uploading state retains selected file name`() {
+    fun `selection and preparation do not mark the file as uploading`() {
         val stateHolder = KycStateHolder(
             requirements(
                 userActionRequired = listOf(documentRequirement(minDocumentTypes = 1)),
@@ -311,11 +311,17 @@ internal class KycStateHolderTest {
             )
         )
         stateHolder.onFileSelectionStarted(slotIndex = 0)
+        assertThat(stateHolder.state.uploadingFileSlot).isNull()
+
+        stateHolder.onFilePreparationStarted(slotIndex = 0, displayName = "electricity-bill.pdf")
+        assertThat(stateHolder.state.selectingFileName).isEqualTo("electricity-bill.pdf")
+        assertThat(stateHolder.state.uploadingFileSlot).isNull()
 
         stateHolder.onFileUploadStarted(slotIndex = 0, displayName = "electricity-bill.pdf")
 
         assertThat(stateHolder.state.selectingFileSlot).isEqualTo(0)
         assertThat(stateHolder.state.selectingFileName).isEqualTo("electricity-bill.pdf")
+        assertThat(stateHolder.state.uploadingFileSlot).isEqualTo(0)
     }
 
     @Test

@@ -631,7 +631,7 @@ private fun DocumentEditorContent(
                 UploadDocumentControl(
                     slot = editingSlot,
                     fileRequirements = document.fileRequirements,
-                    isUploading = state.selectingFileSlot == editingSlot.index,
+                    isUploading = state.uploadingFileSlot == editingSlot.index,
                     uploadingFileName = state.selectingFileName,
                     enabled = selectedSubtypeId != null && state.selectingFileSlot == null,
                     onChooseFile = onChooseFile,
@@ -1315,6 +1315,7 @@ internal data class KycScreenState(
     val validationFileName: String?,
     val selectingFileSlot: Int?,
     val selectingFileName: String?,
+    val uploadingFileSlot: Int?,
     val canSubmit: Boolean,
     val canContinue: Boolean,
     val isCollectionAvailable: Boolean,

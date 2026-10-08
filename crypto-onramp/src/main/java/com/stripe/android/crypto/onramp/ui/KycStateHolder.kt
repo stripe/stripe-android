@@ -155,6 +155,11 @@ internal class KycStateHolder(
         refreshState()
     }
 
+    fun onFilePreparationStarted(slotIndex: Int, displayName: String) {
+        documents.onFilePreparationStarted(slotIndex, displayName)
+        refreshState()
+    }
+
     fun onFileUploadStarted(slotIndex: Int, displayName: String) {
         documents.onFileUploadStarted(slotIndex, displayName)
         refreshState()
@@ -300,6 +305,7 @@ internal class KycStateHolder(
             validationFileName = documents.validationFileName,
             selectingFileSlot = documents.selectingFileSlot,
             selectingFileName = documents.selectingFileName,
+            uploadingFileSlot = documents.uploadingFileSlot,
             canSubmit = canEdit() && isCollectionAvailable() &&
                 documents.selectingFileSlot == null && currentValidationError() == null,
             canContinue = canContinue(),
