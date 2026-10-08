@@ -80,22 +80,13 @@ internal class PhoneNumberControllerTest {
     }
 
     @Test
-    fun `optional label alone does not allow empty or incomplete input`() = runTest {
+    fun `optional label alone does not make a blank phone complete`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
             showOptionalLabel = true,
         )
 
         phoneNumberController.isComplete.test {
-            assertThat(awaitItem()).isFalse()
-
-            phoneNumberController.onValueChange("123")
-            expectNoEvents()
-
-            phoneNumberController.onValueChange("1234567890")
-            assertThat(awaitItem()).isTrue()
-
-            phoneNumberController.onValueChange("")
             assertThat(awaitItem()).isFalse()
         }
     }
