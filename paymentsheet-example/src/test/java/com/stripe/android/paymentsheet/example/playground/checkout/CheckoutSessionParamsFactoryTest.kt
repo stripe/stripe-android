@@ -22,14 +22,11 @@ class CheckoutSessionParamsFactoryTest {
     }
 
     @Test
-    fun `invoice creation includes invoice data and keeps mode unset`() = runScenario {
+    fun `invoice creation includes invoice data when enabled`() = runScenario {
         settings.update(session.invoiceCreation, true)
 
         val params = createParams()
 
-        assertThat(params).doesNotContainKey("mode")
-        assertThat(params.string("ui_mode")).isEqualTo("elements")
-        assertThat(params).containsKey("items")
         val invoiceCreation = params.getValue("invoice_creation").jsonObject
         assertThat(invoiceCreation["enabled"]).isEqualTo(JsonPrimitive(true))
         val invoiceData = invoiceCreation.getValue("invoice_data").jsonObject

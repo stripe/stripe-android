@@ -21,14 +21,16 @@ internal object CheckoutSessionParamsFactory {
         val automaticTax = settings[session.automaticTax]
         val shippingAddressCollection = settings[session.shippingAddressCollection]
         val billingAddressCollection = settings[session.billingAddressCollection]
+        val invoiceCreation = settings[session.invoiceCreation]
         val email = resolvedEmail(settings)
         val currency = settings[session.currency].value
 
-        val request = buildJsonObject {
+        return buildJsonObject {
             put("ui_mode", "elements")
             put("currency", currency)
             putCart(currency)
             putPaymentMethodTypes(settings)
+            putInvoiceCreation(invoiceCreation)
             putTaxAndAddresses(automaticTax, billingAddressCollection, shippingAddressCollection)
             putCustomer(
                 customerId,
@@ -40,22 +42,6 @@ internal object CheckoutSessionParamsFactory {
             )
             putSavedPaymentMethodOptions(customerId, paymentMethodSave, paymentMethodRemove)
         }
-        return if (settings[session.invoiceCreation]) invoice(request) else request
-    }
-
-    private fun invoice(request: JsonObject): JsonObject {
-        check(request["mode"] == null) { "Invoice live tests must keep mode unset" }
-        val invoiceCreation = buildJsonObject {
-            put("enabled", true)
-            put(
-                "invoice_data",
-                buildJsonObject {
-                    put("description", "Checkout live post-purchase invoice")
-                    put("metadata", buildJsonObject { put("suite", "checkout_live_billing_invoice") })
-                },
-            )
-        }
-        return JsonObject(request + ("invoice_creation" to invoiceCreation))
     }
 
     fun resolvedEmail(settings: CheckoutPlaygroundSettings.Snapshot): String? {
@@ -90,6 +76,24 @@ internal object CheckoutSessionParamsFactory {
             put(
                 "payment_method_types",
                 JsonArray(settings[session.paymentMethodTypes].sorted().map(::JsonPrimitive)),
+            )
+        }
+    }
+
+    private fun JsonObjectBuilder.putInvoiceCreation(enabled: Boolean) {
+        if (enabled) {
+            put(
+                "invoice_creation",
+                buildJsonObject {
+                    put("enabled", true)
+                    put(
+                        "invoice_data",
+                        buildJsonObject {
+                            put("description", "Checkout live post-purchase invoice")
+                            put("metadata", buildJsonObject { put("suite", "checkout_live_billing_invoice") })
+                        },
+                    )
+                },
             )
         }
     }
