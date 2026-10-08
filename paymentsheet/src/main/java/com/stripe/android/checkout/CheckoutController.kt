@@ -133,13 +133,7 @@ class CheckoutController @Inject internal constructor(
                             ?: configurationState.defaults.billingDetails?.address
                     null -> null
                 }
-                if (
-                    taxAddress != null && addressSource != null &&
-                    checkoutSessionTaxRegionUpdater.requiresUpdate(
-                        checkoutSessionResponse = response,
-                        addressSource = addressSource,
-                    )
-                ) {
+                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = addressSource,
