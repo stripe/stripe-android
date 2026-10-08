@@ -299,7 +299,7 @@ class Stripe internal constructor(
         activity.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(activity),
-                PaymentIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -331,7 +331,7 @@ class Stripe internal constructor(
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(fragment),
-                PaymentIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -560,7 +560,7 @@ class Stripe internal constructor(
         activity.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(activity),
-                SetupIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -590,7 +590,7 @@ class Stripe internal constructor(
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(fragment),
-                SetupIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
