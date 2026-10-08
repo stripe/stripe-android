@@ -3,8 +3,6 @@ format_version: '25'
 default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
-  - pull_request_source_branch: 'cttsai/bitrise-runif-status'
-    pipeline: runif-status-experiment
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
@@ -16,13 +14,6 @@ app:
     - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
 
 pipelines:
-  runif-status-experiment:
-    workflows:
-      runif-status-gate: { }
-      runif-skipped-a:
-        depends_on: [runif-status-gate]
-      runif-skipped-b:
-        depends_on: [runif-status-gate]
   main-trigger-pipeline:
     workflows:
       check-and-test: { }
@@ -68,30 +59,6 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
-  runif-status-gate:
-    steps:
-      - script@1:
-          title: Verify draft PR environment
-          inputs:
-            - content: |
-                #!/usr/bin/env bash
-                set -euo pipefail
-                test "${GITHUB_PR_IS_DRAFT:-}" = true
-                echo 'Verified GITHUB_PR_IS_DRAFT=true; probe steps must be skipped.'
-  runif-skipped-a:
-    steps:
-      - script@1:
-          title: Fail if the skipped probe executes
-          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
-          inputs:
-            - content: exit 1
-  runif-skipped-b:
-    steps:
-      - script@1:
-          title: Fail if the skipped probe executes
-          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
-          inputs:
-            - content: exit 1
   check-and-test:
     envs:
       - opts:
@@ -108,6 +75,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Run static analysis, unit, and screenshot tests
           timeout: 1200
           inputs:
@@ -234,15 +202,18 @@ workflows:
       # Build once and run all testmode flows on the same emulator. This avoids
       # paying for three jobs that each repeat checkout, build, and emulator boot.
       - android-build@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
       - wait-for-android-emulator@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - boot_timeout: 600
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Start logcat capture
           inputs:
             - content: |-
@@ -250,6 +221,7 @@ workflows:
                 adb logcat > /tmp/logcat.txt 2>&1 &
                 echo $! > /tmp/logcat.pid
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute all testmode Maestro tests
           timeout: 1200
           inputs:
@@ -257,6 +229,7 @@ workflows:
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Stop logcat capture
           is_always_run: true
           is_skippable: true
@@ -266,12 +239,13 @@ workflows:
                 kill "$(cat /tmp/logcat.pid)" 2>/dev/null || true
       - deploy-to-bitrise-io@2:
           title: Upload logcat on failure
-          run_if: '{{ getenv "BITRISE_BUILD_STATUS" | eq "1" }}'
+          run_if: '{{and (enveq "GITHUB_PR_IS_DRAFT" "") (getenv "BITRISE_BUILD_STATUS" | eq "1")}}'
           inputs:
             - deploy_path: /tmp/logcat.txt
             - notify_user_groups: none
             - is_enable_public_page: "false"
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Test results
           is_always_run: true
           inputs:
@@ -386,11 +360,13 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute general instrumentation tests
           timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute PaymentSheet IME instrumentation tests
           is_always_run: true
           timeout: 1200
@@ -408,6 +384,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
@@ -443,14 +420,17 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
             - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - boot_timeout: 600
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
@@ -471,14 +451,17 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
             - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
       - wait-for-android-emulator@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - boot_timeout: 600
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
@@ -490,6 +473,7 @@ workflows:
       # Firebase Test Lab runs remotely, so it can share this job without
       # competing with CardScan's local emulator.
       - android-build-for-ui-testing@0:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Build PaymentSheet Google Pay E2E test APKs
           is_always_run: true
           timeout: 1200
@@ -498,6 +482,7 @@ workflows:
             - variant: baseDebug
             - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
       - virtual-device-testing-for-android@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Run TestGooglePay on virtual devices
           is_always_run: true
           timeout: 3600
@@ -508,6 +493,7 @@ workflows:
             - download_test_results: "true"
             - test_timeout: "2700"
       - deploy-to-bitrise-io@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Deploy Google Pay E2E test results
           is_always_run: true
           inputs:
@@ -524,6 +510,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Execute PaymentSheet E2E tests
           timeout: 2400
           inputs:
@@ -609,9 +596,11 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - content: asdf install ruby 3.2.4
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Check dependencies and published POMs
           timeout: 1200
           inputs:
@@ -635,6 +624,7 @@ workflows:
   start_connections_emulator:
     steps:
       - avd-manager@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - profile: "Nexus 5"
             - abi: "x86_64"
@@ -653,6 +643,7 @@ workflows:
   start_cardscan_emulator:
     steps:
       - avd-manager@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - profile: "pixel_6"
             - abi: "x86_64"
@@ -670,6 +661,7 @@ workflows:
   start_emulator:
     steps:
       - avd-manager@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - profile: "pixel_6"
             - abi: "x86_64"
@@ -706,40 +698,51 @@ workflows:
   prepare_all:
     steps:
       - activate-ssh-key@4:
-          run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
-      - git-clone@8: { }
+          run_if: '{{and (enveq "GITHUB_PR_IS_DRAFT" "") (getenv "SSH_RSA_PRIVATE_KEY" | ne "")}}'
+      - git-clone@8:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Install Java via Direct Download
           inputs:
             - content: ./scripts/retry.sh 3 ./scripts/install_java.sh
-      - restore-gradle-configuration-cache@1: { }
-      - restore-gradle-cache@2: { }
+      - restore-gradle-configuration-cache@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
+      - restore-gradle-cache@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
       - activate-build-cache-for-gradle:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - push: 'true'
             - validation_level: warning
   conclude_all:
     steps:
       - script-runner@0:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           is_always_run: true
           title: Copy test results to tmp
           inputs:
             - file_path: ./scripts/copy_test_results_to_tmp.sh
       - deploy-to-bitrise-io@2:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - notify_user_groups: none
             - is_compress: "true"
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
-      - save-gradle-configuration-cache@1: { }
+      - save-gradle-configuration-cache@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
       - save-gradle-cache@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           inputs:
             - save_transforms: true
 step_bundles:
@@ -756,6 +759,7 @@ step_bundles:
       - test_title: Instrumentation tests
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           title: Split instrumentation test results
           is_skippable: true
           is_always_run: true
@@ -772,6 +776,7 @@ step_bundles:
       - test_type: unit
     steps:
       - script@1:
+          run_if: '{{enveq "GITHUB_PR_IS_DRAFT" ""}}'
           is_always_run: true
           is_skippable: true
           title: Test results
