@@ -3,6 +3,8 @@ format_version: '25'
 default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
+  - pull_request_source_branch: 'cttsai/bitrise-runif-status'
+    pipeline: runif-status-experiment
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
@@ -14,6 +16,12 @@ app:
     - PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT: 6
 
 pipelines:
+  runif-status-experiment:
+    workflows:
+      runif-skipped-a:
+        run_if: '{{false}}'
+      runif-skipped-b:
+        run_if: '{{false}}'
   main-trigger-pipeline:
     workflows:
       check-and-test: { }
@@ -59,6 +67,18 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
+  runif-skipped-a:
+    steps:
+      - script@1:
+          title: Fail if the skipped probe executes
+          inputs:
+            - content: exit 1
+  runif-skipped-b:
+    steps:
+      - script@1:
+          title: Fail if the skipped probe executes
+          inputs:
+            - content: exit 1
   check-and-test:
     envs:
       - opts:
