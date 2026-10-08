@@ -19,6 +19,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -735,15 +736,29 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `applyPromotionCode sends promotion code and reloads on success`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
+        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+            .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(),
+            responseFactory = successResponseFactory(
+                combine(
+                    withTotal(4099),
+                    { json ->
+                        json.getJSONObject("server_built_elements_session_params")
+                            .getJSONObject("deferred_intent").put("amount", 4099)
+                    },
+                ),
+            ),
         )
 
         val result = controller.applyPromotionCode("10OFF")
 
         result.getOrThrow()
-        assertThat(committedState().paymentMethodMetadata).isNotNull()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
+        assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
+        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+            .isEqualTo(4099L)
     }
 
     @Test
@@ -827,10 +842,16 @@ internal class CheckoutControllerTest {
     fun `updateEmail clears email when session has no customer email`() = runMutationScenario(
         initModifier = { it.remove("customer_email") },
     ) {
+        controller.updateEmail("local@example.com").getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+            .isEqualTo("local@example.com")
+
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
     }
 
     @Test
@@ -1169,6 +1190,7 @@ internal class CheckoutControllerTest {
             )
         }
 
+    @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         networkRule.checkoutInit(
             responseFactory = successResponseFactory(withTotal(8000)),
