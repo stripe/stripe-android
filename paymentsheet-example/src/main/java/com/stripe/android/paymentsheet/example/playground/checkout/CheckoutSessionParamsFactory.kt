@@ -26,7 +26,7 @@ internal object CheckoutSessionParamsFactory {
         val currency = settings[session.currency].value
 
         return buildJsonObject {
-            put("ui_mode", "elements")
+            put("ui_mode", "mobile_elements")
             put("currency", currency)
             putCart(currency)
             putAllowedPaymentMethodTypes(settings)

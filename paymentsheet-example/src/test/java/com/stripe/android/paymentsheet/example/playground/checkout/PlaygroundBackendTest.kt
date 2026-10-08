@@ -72,7 +72,7 @@ class PlaygroundBackendTest {
     fun `checkout session sends preview version and decodes secret`() = runTest {
         val executor = FakePlaygroundRequestExecutor(buildJsonObject { put("client_secret", "cs_test_123") })
         val backend = backend(merchant = "us_tax", executor = executor)
-        val params = buildJsonObject { put("ui_mode", "elements") }
+        val params = buildJsonObject { put("ui_mode", "mobile_elements") }
 
         assertThat(backend.createCheckoutSession(params)).isEqualTo("cs_test_123")
         val request = executor.requests.awaitItem()

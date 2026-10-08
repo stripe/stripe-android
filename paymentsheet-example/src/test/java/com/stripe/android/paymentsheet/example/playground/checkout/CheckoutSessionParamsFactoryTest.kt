@@ -39,7 +39,7 @@ class CheckoutSessionParamsFactoryTest {
     fun `default parameters contain fixed Elements cart`() = runScenario {
         val params = createParams()
 
-        assertThat(params.string("ui_mode")).isEqualTo("elements")
+        assertThat(params.string("ui_mode")).isEqualTo("mobile_elements")
         assertThat(params.string("currency")).isEqualTo("usd")
         assertThat(params).doesNotContainKey("allowed_payment_method_types")
         val items = params["items"]!!.jsonArray

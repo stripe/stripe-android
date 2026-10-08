@@ -10,6 +10,16 @@ import org.junit.Test
 
 class CheckoutSessionResponseJsonParserTest {
     @Test
+    fun `rejects custom ui mode`() {
+        val json = base()
+        assertThat(parse(json)).isNotNull()
+
+        json.put("ui_mode", "custom")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
     fun `parses nested unified one-time price group`() {
         val result = parse(base())
 
