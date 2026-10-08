@@ -23,12 +23,11 @@ internal class LaplacianBlurDetectorTest {
     private val mockAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
 
     @Test
-    fun `calculateBlurOutput returns default score and reports error when blur calculation fails`() {
-        // RenderScript is not available under Robolectric, exercising the error fallback path.
+    fun `calculateBlurOutput returns default score and reports error for unsupported bitmap config`() {
         val detector = LaplacianBlurDetector(context, mockAnalyticsRequestFactory)
 
         val score = detector.calculateBlurOutput(
-            Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
+            Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.RGBA_F16)
         )
 
         assertThat(score).isEqualTo(1.0f)
