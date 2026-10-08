@@ -386,6 +386,185 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `configure syncs shipping tax despite saved and default billing addresses and reloads payment metadata`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
+            ),
+            networkSetup = {
+                networkRule.defaultShippingAddressTaxUpdate(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("shipping"),
+                            savedCustomerWithBillingAddress(),
+                            withTotal(6099),
+                            { json ->
+                                json.getJSONObject("server_built_elements_session_params")
+                                    .getJSONObject("deferred_intent").put("amount", 6099)
+                            },
+                        ),
+                    ),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            val state = requireNotNull(committedState)
+            assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6099.0)
+            assertThat(state.checkoutSessionResponse.amount).isEqualTo(6099L)
+            assertThat((state.paymentMethodMetadata.stripeIntent as PaymentIntent).amount).isEqualTo(6099L)
+            assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
+            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John Shipping")
+            assertThat(state.paymentMethodMetadata.shippingDetails?.address)
+                .isEqualTo(fullAddress.build().asPaymentSheet())
+        }
+
+    @Test
+    fun `configure sends partial default shipping address without requiring a complete address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = Address().country("CA").postalCode("M5V 3L9"),
+            ),
+            initModifier = automaticTaxFor("shipping"),
+            networkSetup = {
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "CA"),
+                    bodyPart("tax_region[postal_code]", "M5V 3L9"),
+                    not(hasBodyPart("tax_region[city]")),
+                    not(hasBodyPart("tax_region[state]")),
+                    not(hasBodyPart("tax_region[line1]")),
+                    not(hasBodyPart("tax_region[line2]")),
+                    responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("CA")
+            assertThat(controller.session.value?.shippingAddress?.address?.postalCode).isEqualTo("M5V 3L9")
+        }
+
+    @Test
+    fun `configure does not use billing defaults when shipping defaults have no address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = null,
+                includeBillingAddress = true,
+            ),
+            initModifier = automaticTaxFor("shipping"),
+        ) {
+            result.getOrThrow()
+
+            assertThat(committedState?.collectedDetails?.shippingName).isEqualTo("John Shipping")
+            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `configure retains default shipping without a tax update when automatic tax is disabled`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                { json -> json.getJSONObject("tax_context").put("automatic_tax_enabled", false) },
+            ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+            assertThat(committedState?.collectedDetails?.shippingAddress).isEqualTo(fullAddress.build())
+        }
+
+    @Test
+    fun `configure does not sync shipping tax when SAE filters a disallowed default address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = Address().country("DE"),
+                includeBillingAddress = true,
+            ).shippingAddressElement(ShippingAddressElement.Configuration()),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                allowedShippingCountries(listOf("US", "CA")),
+            ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress).isNull()
+            assertThat(committedState?.collectedDetails?.shippingAddress).isNull()
+        }
+
+    @Test
+    fun `configure retains default shipping without a tax update for an unknown tax address source`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            initModifier = automaticTaxFor("unknown"),
+        ) {
+            result.getOrThrow()
+
+            assertThat(committedState?.checkoutSessionResponse?.taxAddressSource).isNull()
+            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+        }
+
+    @Test
+    fun `configure uses default billing address for billing tax even with default shipping`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(includeBillingAddress = true),
+            initModifier = automaticTaxFor("billing"),
+            networkSetup = {
+                networkRule.defaultBillingAddressTaxUpdate(
+                    responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                )
+            },
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
+        }
+
+    @Test
+    fun `configure does not emit session or state when the default shipping tax update fails`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = automaticTaxFor("shipping"),
+            networkSetup = {
+                networkRule.defaultShippingAddressTaxUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
+            },
+        ) {
+            assertThat(result.isFailure).isTrue()
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
+        }
+
+    @Test
+    fun `reconfigure preserves the published session and state when default shipping tax update fails`() =
+        runConfigureScenario {
+            result.getOrThrow()
+            val beforeSession = requireNotNull(controller.session.value)
+            val beforeState = requireNotNull(committedState)
+            networkRule.enqueueSuccessfulInit(automaticTaxFor("shipping"))
+            networkRule.defaultShippingAddressTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            val reconfigureResult = controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                configurationWithDefaultShippingAddress(),
+            )
+
+            assertThat(reconfigureResult.isFailure).isTrue()
+            assertThat(controller.session.value).isEqualTo(beforeSession)
+            assertThat(committedState).isEqualTo(beforeState)
+        }
+
+    @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
@@ -1526,6 +1705,19 @@ internal class CheckoutControllerTest {
         )
     }
 
+    private fun NetworkRule.defaultShippingAddressTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "Denver"),
+            bodyPart("tax_region[state]", "CO"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            bodyPart("tax_region[line1]", "123 Main St"),
+            bodyPart("tax_region[line2]", "Apt 4"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
     // The base fixture omits customer_email. Inject one for standard success paths; a test can
     // remove it in the JSON modifier when exercising an absent session email.
     // Link is disabled so the loader doesn't fire a consumer session lookup that's unrelated to
@@ -1595,6 +1787,29 @@ internal class CheckoutControllerTest {
                 )
             )
         )
+    }
+
+    private fun configurationWithDefaultShippingAddress(
+        address: Address? = fullAddress,
+        includeBillingAddress: Boolean = false,
+    ): CheckoutController.Configuration {
+        val shippingDetails = CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping")
+        address?.let(shippingDetails::address)
+        val defaults = CheckoutController.Configuration.Defaults().shippingDetails(shippingDetails)
+        if (includeBillingAddress) {
+            defaults.billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
+        }
+        return CheckoutController.Configuration().defaults(defaults)
     }
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
@@ -1870,14 +2085,6 @@ internal class CheckoutControllerTest {
     ) : CoroutineScope by testScope {
         val testScheduler: TestCoroutineScheduler get() = testScope.testScheduler
 
-        val fullAddress: Address = Address()
-            .city("Denver")
-            .country("US")
-            .line1("123 Main St")
-            .line2("Apt 4")
-            .postalCode("80202")
-            .state("CO")
-
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
@@ -1894,5 +2101,13 @@ internal class CheckoutControllerTest {
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val DEFAULT_INTEGRATION_NAME = "stripe_checkout"
+
+        val fullAddress: Address = Address()
+            .city("Denver")
+            .country("US")
+            .line1("123 Main St")
+            .line2("Apt 4")
+            .postalCode("80202")
+            .state("CO")
     }
 }
