@@ -1913,7 +1913,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    internal fun fireFraudDetectionDataRequest(publishableKey: String) {
+    private fun fireFraudDetectionDataRequest(publishableKey: String) {
         fraudDetectionDataRepository.refresh(publishableKey)
     }
 

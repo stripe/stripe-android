@@ -14,7 +14,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
@@ -283,7 +282,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val apiConfigurationResolver: ApiConfigurationResolver,
-    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -326,8 +324,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             callbackIdentifier = paymentElementCallbackIdentifier,
             isTapToAddSupported = tapToAddConnectionStarter.isSupported(apiConfiguration),
         )
-
-        fraudDetectionDataRepository.refresh(apiConfiguration.publishableKey)
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
         tapToAddConnectionStarter.start(

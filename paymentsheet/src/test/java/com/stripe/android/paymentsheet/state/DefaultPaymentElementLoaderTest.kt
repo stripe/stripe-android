@@ -18,7 +18,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
@@ -101,7 +100,6 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
-import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -111,7 +109,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.mockito.kotlin.mock
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -121,50 +118,6 @@ internal class DefaultPaymentElementLoaderTest {
     @AfterTest
     fun tearDown() {
         PaymentElementCallbackReferences.clear()
-    }
-
-    @Test
-    fun `fraud collection starts at load with each resolved configuration key`() = runScenario {
-        val fraudRepository = FakeFraudDetectionDataRepository()
-        val loader = createPaymentElementLoader(fraudDetectionDataRepository = fraudRepository)
-        fraudRepository.refreshCalls.expectNoEvents()
-
-        for (key in listOf(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)) {
-            val result = loader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant",
-                    apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = key),
-                ),
-                metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
-            )
-
-            assertThat(result.isSuccess).isTrue()
-            assertThat(fraudRepository.refreshCalls.awaitItem()).isEqualTo(key)
-            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-        }
-        consumeLoadingEvents()
-        fraudRepository.refreshCalls.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `invalid configuration does not start fraud collection`() = runScenario {
-        val fraudRepository = FakeFraudDetectionDataRepository()
-        val result = createPaymentElementLoader(fraudDetectionDataRepository = fraudRepository).load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(merchantDisplayName = ""),
-            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
-        )
-
-        assertThat(result.isFailure).isTrue()
-        fraudRepository.refreshCalls.expectNoEvents()
-        fraudRepository.refreshCalls.ensureAllEventsConsumed()
-        assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -410,12 +363,10 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
-        val fraudRepository = FakeFraudDetectionDataRepository()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
             userFacingLogger = userFacingLogger,
-            fraudDetectionDataRepository = fraudRepository,
         )
         val checkoutSessionResponse = createCheckoutSessionResponse(
             canDetachPaymentMethod = true,
@@ -444,9 +395,6 @@ internal class DefaultPaymentElementLoaderTest {
                 "Google Pay is disabled because automatic tax is configured to use the billing address and" +
                     " no default billing address was provided."
             )
-
-        assertThat(fraudRepository.refreshCalls.awaitItem()).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
-        fraudRepository.refreshCalls.ensureAllEventsConsumed()
 
         consumeLoadingEvents()
 
@@ -5028,7 +4976,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun Scenario.createPaymentElementLoader(
-        fraudDetectionDataRepository: FraudDetectionDataRepository = mock(),
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
@@ -5112,7 +5059,6 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            fraudDetectionDataRepository = fraudDetectionDataRepository,
             apiConfigurationResolver = FakeApiConfigurationResolver(
                 resolvedApiConfiguration = if (isLiveMode) {
                     DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)

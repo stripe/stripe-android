@@ -31,6 +31,7 @@ import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -44,7 +45,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -73,11 +73,12 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `construction does not collect fraud data`() {
-        val fraudRepository = mock<FraudDetectionDataRepository>()
+        val fraudRepository = FakeFraudDetectionDataRepository()
 
         linkRepository(fraudDetectionDataRepository = fraudRepository)
 
-        verifyNoInteractions(fraudRepository)
+        fraudRepository.refreshCalls.expectNoEvents()
+        fraudRepository.refreshCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -925,7 +926,8 @@ class LinkApiRepositoryTest {
     @Test
     fun `sharePaymentDetails sends correct parameters`() = runTest {
         val consumersApiService = FakeConsumersApiService()
-        val linkRepository = linkRepository(consumersApiService)
+        val fraudRepository = FakeFraudDetectionDataRepository()
+        val linkRepository = linkRepository(consumersApiService, fraudRepository)
 
         val consumerSessionSecret = "consumer_session_secret"
         val paymentDetailsId = "csmrpd*AYq4D_sXdAAAAOQ0"
@@ -942,6 +944,8 @@ class LinkApiRepositoryTest {
             apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
+        assertThat(fraudRepository.refreshCalls.awaitItem()).isEqualTo(DEFAULT_API_CONFIGURATION.publishableKey)
+        fraudRepository.refreshCalls.ensureAllEventsConsumed()
         assertThat(consumersApiService.sharePaymentDetailsCalls).hasSize(1)
         val sharePaymentDetailsCall = consumersApiService.sharePaymentDetailsCalls.first()
         assertThat(sharePaymentDetailsCall.extraParams).containsEntry(
@@ -977,6 +981,7 @@ class LinkApiRepositoryTest {
 
         assertThat(consumersApiService.sharePaymentDetailsCalls).hasSize(1)
         val sharePaymentDetailsCall = consumersApiService.sharePaymentDetailsCalls.first()
+        verify(fraudRepository).refresh(DEFAULT_API_CONFIGURATION.publishableKey)
         assertThat(sharePaymentDetailsCall.extraParams).containsAtLeastEntriesIn(fraudData.params)
         assertThat(sharePaymentDetailsCall.requestOptions.stripeAccount)
             .isEqualTo(DEFAULT_API_CONFIGURATION.stripeAccountId)

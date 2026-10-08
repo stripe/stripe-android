@@ -21,7 +21,6 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -159,10 +158,7 @@ internal interface NativeLinkModule {
         fun provideFraudDetectionDataRepository(
             context: Context,
             @IOContext workContext: CoroutineContext,
-            configuration: LinkConfiguration,
-        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext).also {
-            it.refresh(configuration.apiConfiguration.publishableKey)
-        }
+        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext)
 
         @Provides
         @NativeLinkScope

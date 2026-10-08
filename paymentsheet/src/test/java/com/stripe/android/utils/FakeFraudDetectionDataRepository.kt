@@ -14,10 +14,10 @@ internal class FakeFraudDetectionDataRepository : FraudDetectionDataRepository {
     override suspend fun getCached(): FraudDetectionData? = null
 
     override suspend fun getLatest(publishableKey: String): FraudDetectionData? {
-        error("Awaited collection is not expected during configuration")
+        error("Awaited collection is not expected when sharing payment details")
     }
 
     override fun save(fraudDetectionData: FraudDetectionData) {
-        error("Saving fraud data is not expected during configuration")
+        error("Saving fraud data is not expected when sharing payment details")
     }
 }

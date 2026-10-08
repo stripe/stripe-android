@@ -106,10 +106,6 @@ constructor(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId
                 )
-
-            DefaultFraudDetectionDataRepository(
-                context = context,
-            ).refresh(publishableKey)
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

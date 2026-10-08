@@ -862,7 +862,6 @@ internal class DefaultCustomerSheetLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
-            fraudDetectionDataRepository = mock(),
             apiConfigurationResolver = FakeApiConfigurationResolver(),
         )
     }

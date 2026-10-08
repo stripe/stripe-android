@@ -348,6 +348,7 @@ internal class LinkApiRepository @Inject constructor(
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
     ): Result<SharePaymentDetails> = withContext(workContext) {
+        fraudDetectionDataRepository.refresh(apiConfiguration.publishableKey)
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
         val optionsParams = cvc?.let {

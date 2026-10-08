@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
-import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
 import com.stripe.android.core.Logger
-import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.StripeNetworkClientModule
@@ -98,12 +96,6 @@ internal interface CustomerSheetViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        fun provideFraudDetectionDataRepository(
-            context: Context,
-            @IOContext workContext: CoroutineContext,
-        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext)
-
         @Provides
         @PaymentElementCallbackIdentifier
         fun providesPaymentElementCallbackIdentifier(): String {
