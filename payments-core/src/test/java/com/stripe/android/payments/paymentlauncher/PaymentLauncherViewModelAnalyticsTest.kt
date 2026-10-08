@@ -460,6 +460,112 @@ class PaymentLauncherViewModelAnalyticsTest {
             )
         }
 
+    @Test
+    fun `invalid PaymentIntent client secret is omitted from confirmation analytics`() =
+        runScenario {
+            val clientSecret = "person@example.com"
+            val error = IllegalArgumentException("Invalid PaymentIntent client secret.")
+            repository.confirmPaymentIntentResult = Result.failure(error)
+
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+                analyticsPayloadField("status", "failed"),
+            )
+
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmPaymentIntentCalls.awaitItem()
+        }
+
+    @Test
+    fun `invalid SetupIntent client secret is omitted from confirmation analytics`() =
+        runScenario(isPaymentIntent = false) {
+            val clientSecret = "person@example.com_secret_invalid"
+            val error = IllegalArgumentException("Invalid SetupIntent client secret.")
+            repository.confirmSetupIntentResult = Result.failure(error)
+
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+                analyticsPayloadField("status", "failed"),
+            )
+
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmSetupIntentCalls.awaitItem()
+        }
+
+    @Test
+    fun `valid scoped PaymentIntent client secret includes its intent ID in confirmation analytics`() =
+        runScenario {
+            val clientSecret = "pi_example_scoped_secret_example"
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(clientSecret = clientSecret)
+            repository.confirmPaymentIntentResult = Result.success(intent)
+
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                analyticsPayloadField("intent_id", "pi_example"),
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("intent_id", "pi_example"),
+            )
+
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmPaymentIntentCalls.awaitItem()
+        }
+
+    @Test
+    fun `valid SetupIntent client secret includes its intent ID in confirmation analytics`() =
+        runScenario(isPaymentIntent = false) {
+            val clientSecret = "seti_example_secret_example"
+            val intent = SetupIntentFixtures.SI_SUCCEEDED.copy(clientSecret = clientSecret)
+            repository.confirmSetupIntentResult = Result.success(intent)
+
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                analyticsPayloadField("intent_id", "seti_example"),
+            )
+            expectEvent(PaymentAnalyticsEvent.ConfirmReturnUrlNull)
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherConfirmFinished,
+                analyticsPayloadField("intent_id", "seti_example"),
+            )
+
+            viewModel.confirmStripeIntent(confirmSetupIntentParams.copy(clientSecret = clientSecret), authHost)
+            repository.confirmSetupIntentCalls.awaitItem()
+        }
+
+    @Test
+    fun `invalid client secret is omitted from next action analytics`() =
+        runScenario {
+            val clientSecret = "person@example.com"
+            val error = IllegalArgumentException("Invalid client secret.")
+            repository.retrieveStripeIntentResult = Result.failure(error)
+
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+            expectEvent(
+                PaymentAnalyticsEvent.PaymentLauncherNextActionFinished,
+                RequestMatcher { !it.queryParams.containsKey("intent_id") },
+            )
+
+            viewModel.handleNextActionForStripeIntent(clientSecret, authHost)
+            repository.retrieveStripeIntentCalls.awaitItem()
+        }
+
     private fun expectEvent(event: PaymentAnalyticsEvent, vararg matchers: RequestMatcher) {
         networkRule.enqueue(
             host("q.stripe.com"),

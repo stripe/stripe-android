@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### Payments
 * [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+* [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
 
 ### PaymentSheet
 * [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
