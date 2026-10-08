@@ -1,4 +1,7 @@
 import java.time.Duration
+import wtf.emulator.DeviceModel
+import wtf.emulator.OutputType
+import wtf.emulator.gmd.EwManagedDevice
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
@@ -34,6 +37,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.2.21' apply false
     id 'com.google.dagger.hilt.android' version '2.58' apply false
     id 'org.gradle.test-retry' version "1.6.4" apply false
+    id 'wtf.emulator.gradle' version '1.5.4' apply false
 }
 
 apply plugin: "dev.detekt"
@@ -45,6 +49,11 @@ allprojects { project ->
         mavenCentral()
         google()
         gradlePluginPortal()
+
+        maven {
+            url = 'https://maven.emulator.wtf/releases/'
+            content { includeGroup('wtf.emulator') }
+        }
     }
 }
 
@@ -130,7 +139,45 @@ apiValidation {
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
 }
 
+def configureEmulatorWtf = { Project androidProject ->
+    androidProject.pluginManager.apply('wtf.emulator.gradle')
+
+    // EW_API_TOKEN is read by the plugin from the environment, including Bitrise Secrets.
+    androidProject.emulatorwtf {
+        shardTargetRuntime.set(13)
+        timeout.set(Duration.ofMinutes(30))
+        numFlakyTestAttempts.set(2)
+        outputs.set([OutputType.MERGED_RESULTS_XML, OutputType.LOGCAT])
+        printOutput.set(true)
+        baseOutputDir.set(androidProject.layout.buildDirectory.dir('outputs/androidTest-results/emulatorWtf'))
+
+        // Also use API 33 for the plugin's test*WithEmulatorWtf convenience tasks.
+        device {
+            model.set(DeviceModel.PIXEL_2)
+            version.set(33)
+        }
+    }
+
+    androidProject.android.testOptions.managedDevices.allDevices {
+        register('ewPixel2api33Atd', EwManagedDevice) {
+            device.set(DeviceModel.PIXEL_2_ATD)
+            apiLevel.set(33)
+        }
+        // The full image supports the software keyboard, browser, and camera suites.
+        register('ewPixel2api33', EwManagedDevice) {
+            device.set(DeviceModel.PIXEL_2)
+            apiLevel.set(33)
+        }
+    }
+}
+
 subprojects {
+    plugins.withId('com.android.library') {
+        configureEmulatorWtf(project)
+    }
+    plugins.withId('com.android.application') {
+        configureEmulatorWtf(project)
+    }
     plugins.withId("app.cash.paparazzi") {
         tasks.withType(Test).configureEach { test ->
             // https://github.com/cashapp/paparazzi/issues/2111

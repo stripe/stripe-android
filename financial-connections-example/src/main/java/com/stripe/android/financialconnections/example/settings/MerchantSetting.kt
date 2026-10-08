@@ -34,7 +34,7 @@ data class MerchantSetting(
         return runCatching {
             Json.decodeFromString<Merchant>(value)
         }.recoverCatching {
-            // This is used for Maestro tests, where we pass the merchant value in a URL
+            // End-to-end instrumentation tests pass the merchant value in a URL.
             merchants.first { it.value == value }
         }.getOrElse {
             merchants.first()

@@ -1,6 +1,15 @@
+import groovy.json.JsonSlurper
+
 apply from: new File(gradle.startParameter.currentDir, "build-configuration/quarantined-tests-json.gradle")
 
 def load = gradle.ext.quarantinedTestsLoad
+def migratedFlows = new JsonSlurper().parse(
+    new File(gradle.startParameter.currentDir, 'build-configuration/migrated-maestro-tests.json')
+)
+def runsOnEmulatorWtf = gradle.startParameter.taskNames.any { taskPath ->
+    def taskName = taskPath.tokenize(':').last()
+    taskName.startsWith('ewPixel2api33') || taskName.endsWith('WithEmulatorWtf')
+}
 
 allprojects { project ->
     def configureAndroidTestOrchestratorResolution = {
@@ -63,13 +72,34 @@ allprojects { project ->
         return
     }
 
-    def excludedInstrumentationTestClasses = load.cases
-        .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
-        .join(",")
+    def excludedTestCases = load.cases
+        .collect { testCase -> migratedFlows[testCase.testCaseName] ?: testCase }
 
-    if (excludedInstrumentationTestClasses.isEmpty()) {
+    if (excludedTestCases.isEmpty()) {
         return
     }
+
+    if (runsOnEmulatorWtf) {
+        project.plugins.withId('wtf.emulator.gradle') {
+            // Append after module targets are configured, preserving exclusions such as Google Pay.
+            project.androidComponents.finalizeDsl {
+                def emulatorWtf = project.extensions.getByName('emulatorwtf')
+                if (!emulatorWtf.testTargets.isPresent()) {
+                    emulatorWtf.targets { }
+                }
+                def targets = emulatorWtf.testTargets.get()
+                excludedTestCases.each { testCase ->
+                    targets.excludeTestMethod(testCase.className, testCase.testCaseName)
+                }
+            }
+        }
+        // ew-cli cannot encode comma-separated class/notClass values as environment variables.
+        return
+    }
+
+    def excludedInstrumentationTestClasses = excludedTestCases
+        .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
+        .join(",")
 
     def configureAndroidTestExclusions = {
         project.android.defaultConfig.testInstrumentationRunnerArguments.put(

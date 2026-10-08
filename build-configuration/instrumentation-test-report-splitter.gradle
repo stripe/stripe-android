@@ -7,7 +7,8 @@ class InstrumentationTestReportSplitter {
     static void split(File moduleDir, File outDir) {
         def resultRoots = [
             'build/outputs/androidTest-results/connected',
-            'build/outputs/androidTest-results/managedDevice'
+            'build/outputs/androidTest-results/managedDevice',
+            'build/outputs/androidTest-results/emulatorWtf'
         ].collect {
             new File(moduleDir, it)
         }.findAll { it.directory }

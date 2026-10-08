@@ -20,6 +20,7 @@ dependencies {
     implementation testLibs.junit
     api testLibs.androidx.composeUi
     implementation testLibs.androidx.core
+    implementation testLibs.androidx.uiAutomator
     implementation testLibs.kotlin.coroutines
     implementation testLibs.mockito.kotlin
     implementation testLibs.turbine

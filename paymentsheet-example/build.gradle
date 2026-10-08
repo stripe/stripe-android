@@ -179,3 +179,10 @@ dependencies {
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
 }
+
+emulatorwtf {
+    targets {
+        // Google Pay needs Firebase Test Lab's automatic Google account login.
+        excludeTestClass 'com.stripe.android.lpm.TestGooglePay'
+    }
+}
