@@ -466,7 +466,7 @@ private fun SourceDocumentsCard(
             .background(LinkTheme.colors.surfaceSecondary)
             .padding(horizontal = 16.dp),
     ) {
-        groups.values.forEach { slots ->
+        groups.values.forEachIndexed { index, slots ->
             val first = slots.first()
             Row(
                 modifier = Modifier
@@ -516,43 +516,52 @@ private fun SourceDocumentsCard(
                 }
                 ChevronRight()
             }
-            Spacer(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.08f))
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(enabled = canAddDocuments, onClick = onAddDocuments)
-                .padding(vertical = 12.dp)
-                .testTag(KYC_ADD_DOCUMENTS_TAG),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stripe_link_add),
-                    contentDescription = null,
-                    tint = LinkTheme.colors.iconPrimary,
-                    modifier = Modifier.size(20.dp),
+            if (index < groups.size - 1 || canAddDocuments) {
+                Spacer(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(LinkTheme.colors.textPrimary.copy(alpha = 0.08f))
                 )
             }
-            Spacer(Modifier.width(16.dp))
-            Text(
-                text = stringResource(R.string.stripe_link_onramp_kyc_add_documents),
-                modifier = Modifier.weight(1f),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
-            )
-            ChevronRight()
         }
+        if (canAddDocuments) {
+            AddDocumentsRow(onAddDocuments)
+        }
+    }
+}
+
+@Composable
+private fun AddDocumentsRow(onAddDocuments: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onAddDocuments)
+            .padding(vertical = 12.dp)
+            .testTag(KYC_ADD_DOCUMENTS_TAG),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_link_add),
+                contentDescription = null,
+                tint = LinkTheme.colors.iconPrimary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = stringResource(R.string.stripe_link_onramp_kyc_add_documents),
+            modifier = Modifier.weight(1f),
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textPrimary,
+        )
+        ChevronRight()
     }
 }
 

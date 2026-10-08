@@ -278,6 +278,33 @@ internal class KycScreenTest {
     }
 
     @Test
+    fun `source overview hides add documents at the type limit and keeps groups editable`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(
+                slots = listOf(
+                    documentSlot(index = 0, fileName = "salary.pdf"),
+                    documentSlot(index = 1, fileName = "bank.pdf").copy(
+                        selectedSubtypeId = "bank_statement",
+                        selectedSubtypeLabel = "Bank statement",
+                    ),
+                ),
+                editingSlotIndex = null,
+            ).copy(maxDocumentTypes = 2),
+            canSubmit = true,
+            completedDocumentCount = 2,
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_ADD_DOCUMENTS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("salary.pdf").assertIsDisplayed()
+        composeRule.onNodeWithText("bank.pdf").assertIsDisplayed()
+        composeRule.onNodeWithTag(kycDocumentGroupTag(0)).performClick()
+        assertThat(editedDocumentSlot).isEqualTo(0)
+        composeRule.onNodeWithTag(kycDocumentGroupTag(1)).performClick()
+        assertThat(editedDocumentSlot).isEqualTo(1)
+    }
+
+    @Test
     fun `source overview groups documents and forwards add and edit`() = runScenario(
         state = screenState(
             page = KycCollectionPage.DocumentOverview,
@@ -287,7 +314,7 @@ internal class KycScreenTest {
                     documentSlot(index = 1, fileName = "payslip-mar.pdf"),
                 ),
                 editingSlotIndex = null,
-            ),
+            ).copy(maxDocumentTypes = 2),
             canSubmit = true,
             completedDocumentCount = 2,
         ),
