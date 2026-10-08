@@ -47,7 +47,10 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
                 }
         }
 
-        val googlePayLauncher = GooglePayLauncher(
+        val googlePayLauncher = GooglePayLauncher.Builder(
+            resultCallback = ::onGooglePayResult,
+            readyCallback = ::onGooglePayReady,
+        ).build(
             activity = this,
             config = GooglePayLauncher.Config(
                 environment = GooglePayEnvironment.Test,
@@ -59,9 +62,7 @@ class GooglePayLauncherIntegrationActivity : StripeIntentActivity() {
                     isPhoneNumberRequired = false
                 ),
                 existingPaymentMethodRequired = false
-            ),
-            readyCallback = ::onGooglePayReady,
-            resultCallback = ::onGooglePayResult
+            )
         )
 
         viewBinding.googlePayButton.setOnClickListener {

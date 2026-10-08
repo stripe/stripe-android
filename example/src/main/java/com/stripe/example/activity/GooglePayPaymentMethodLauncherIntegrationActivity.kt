@@ -29,7 +29,10 @@ class GooglePayPaymentMethodLauncherIntegrationActivity : AppCompatActivity() {
         viewBinding.progressBar.isVisible = true
         viewBinding.googlePayButton.isEnabled = false
 
-        val googlePayLauncher = GooglePayPaymentMethodLauncher(
+        val googlePayLauncher = GooglePayPaymentMethodLauncher.Builder(
+            resultCallback = ::onGooglePayResult,
+            readyCallback = ::onGooglePayReady,
+        ).build(
             activity = this,
             config = GooglePayPaymentMethodLauncher.Config(
                 environment = GooglePayEnvironment.Test,
@@ -40,9 +43,7 @@ class GooglePayPaymentMethodLauncherIntegrationActivity : AppCompatActivity() {
                     format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
                     isPhoneNumberRequired = true
                 )
-            ),
-            readyCallback = ::onGooglePayReady,
-            resultCallback = ::onGooglePayResult
+            )
         )
 
         googlePayButton.setOnClickListener {

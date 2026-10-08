@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
@@ -8,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.googlepaylauncher.utils.LauncherIntegrationType
 import com.stripe.android.googlepaylauncher.utils.runGooglePayLauncherTest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.utils.createTestActivityRule
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -19,11 +21,49 @@ import kotlin.test.assertFailsWith
 internal class GooglePayLauncherTest {
 
     @get:Rule
+    val testActivityRule = createTestActivityRule<FragmentActivity>()
+
+    @get:Rule
     val intentsTestRule = IntentsTestRule(ComponentActivity::class.java)
 
     @Test
+    fun `builder without ready callback still presents when Google Pay is ready`() {
+        runGooglePayLauncherTest(
+            integrationTypes = builderIntegrationTypes,
+            includeReadyCallback = false,
+        ) { _, launcher ->
+            launcher.presentForPaymentIntent("pi_123_secret_456")
+        }
+    }
+
+    @Test
+    fun `builder without ready callback rejects presentation when Google Pay is not ready`() {
+        runGooglePayLauncherTest(
+            integrationTypes = builderIntegrationTypes,
+            includeReadyCallback = false,
+            isReady = false,
+            expectResult = false,
+        ) { _, launcher ->
+            assertFailsWith<IllegalStateException> {
+                launcher.presentForPaymentIntent("pi_123_secret_456")
+            }
+        }
+    }
+
+    @Test
+    fun `builder forwards canceled results`() {
+        runGooglePayLauncherTest(
+            includeReadyCallback = true,
+            integrationTypes = builderIntegrationTypes,
+            result = GooglePayLauncher.Result.Canceled,
+        ) { _, launcher ->
+            launcher.presentForPaymentIntent("pi_123_secret_456")
+        }
+    }
+
+    @Test
     fun `presentForPaymentIntent() should successfully return a result when Google Pay is available`() {
-        runGooglePayLauncherTest { _, launcher ->
+        runGooglePayLauncherTest(includeReadyCallback = true) { _, launcher ->
             launcher.presentForPaymentIntent("pi_123_secret_456")
         }
     }
@@ -31,6 +71,7 @@ internal class GooglePayLauncherTest {
     @Test
     fun `init should fire expected event`() {
         runGooglePayLauncherTest(
+            includeReadyCallback = true,
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
@@ -61,6 +102,7 @@ internal class GooglePayLauncherTest {
     @Test
     fun `init should fire expected event on init`() {
         runGooglePayLauncherTest(
+            includeReadyCallback = true,
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
@@ -106,6 +148,7 @@ internal class GooglePayLauncherTest {
     @Test
     fun `presentForPaymentIntent() should throw IllegalStateException when Google Pay is not available`() {
         runGooglePayLauncherTest(
+            includeReadyCallback = true,
             isReady = false,
             expectResult = false,
         ) { _, launcher ->
@@ -131,6 +174,12 @@ internal class GooglePayLauncherTest {
     }
 
     private companion object {
+        val builderIntegrationTypes = listOf(
+            LauncherIntegrationType.BuilderActivity,
+            LauncherIntegrationType.BuilderFragment,
+            LauncherIntegrationType.BuilderCompose,
+        )
+
         val CONFIG = GooglePayLauncher.Config(
             GooglePayEnvironment.Test,
             merchantCountryCode = "US",

@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.rememberGooglePayPaymentMethodLauncher
 import kotlinx.coroutines.launch
 
 class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
@@ -49,16 +48,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         val scope = rememberCoroutineScope()
         var enabled by remember { mutableStateOf(false) }
 
-        val googlePayLauncher = rememberGooglePayPaymentMethodLauncher(
-            config = googlePayConfig,
-            readyCallback = { ready ->
-                if (ready) {
-                    enabled = true
-                }
-                scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
-                }
-            },
+        val googlePayLauncher = GooglePayPaymentMethodLauncher.Builder(
             resultCallback = { result ->
                 when (result) {
                     is GooglePayPaymentMethodLauncher.Result.Completed -> {
@@ -76,8 +66,16 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
                         enabled = false
                     }
                 }
-            }
-        )
+            },
+            readyCallback = { ready ->
+                if (ready) {
+                    enabled = true
+                }
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("Google Pay ready? $ready")
+                }
+            },
+        ).build(googlePayConfig)
 
         GooglePayPaymentMethodLauncherScreen(
             scaffoldState = scaffoldState,

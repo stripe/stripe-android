@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher
 
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.test.espresso.intent.rule.IntentsTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -12,6 +13,7 @@ import com.stripe.android.googlepaylauncher.utils.runGooglePayPaymentMethodLaunc
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -21,16 +23,55 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class GooglePayPaymentMethodLauncherTest {
+internal class GooglePayPaymentMethodLauncherTest {
+
+    @get:Rule
+    val testActivityRule = createTestActivityRule<FragmentActivity>()
 
     @get:Rule
     val intentsTestRule = IntentsTestRule(ComponentActivity::class.java)
+
+    @Test
+    fun `builder without ready callback still presents when Google Pay is ready`() {
+        runGooglePayPaymentMethodLauncherTest(
+            integrationTypes = builderIntegrationTypes,
+            includeReadyCallback = false,
+        ) { _, launcher ->
+            launcher.present(currencyCode = "usd")
+        }
+    }
+
+    @Test
+    fun `builder without ready callback rejects presentation when Google Pay is not ready`() {
+        runGooglePayPaymentMethodLauncherTest(
+            integrationTypes = builderIntegrationTypes,
+            includeReadyCallback = false,
+            isReady = false,
+            expectResult = false,
+        ) { _, launcher ->
+            assertFailsWith<IllegalStateException> {
+                launcher.present(currencyCode = "usd")
+            }
+        }
+    }
+
+    @Test
+    fun `builder forwards canceled results`() {
+        runGooglePayPaymentMethodLauncherTest(
+            includeReadyCallback = true,
+            integrationTypes = builderIntegrationTypes,
+            result = GooglePayPaymentMethodLauncher.Result.Canceled,
+        ) { _, launcher ->
+            launcher.present(currencyCode = "usd")
+        }
+    }
 
     @Test
     fun `present() should successfully return a result when Google Pay is available`() {
         val result = GooglePayPaymentMethodLauncher.Result.Completed(CARD_PAYMENT_METHOD)
 
         runGooglePayPaymentMethodLauncherTest(
+            includeReadyCallback = true,
             result = result,
         ) { _, launcher ->
             launcher.present(currencyCode = "usd")
@@ -40,6 +81,7 @@ class GooglePayPaymentMethodLauncherTest {
     @Test
     fun `init should fire expected event`() {
         runGooglePayPaymentMethodLauncherTest(
+            includeReadyCallback = true,
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
@@ -72,6 +114,7 @@ class GooglePayPaymentMethodLauncherTest {
     @Test
     fun `init should fire expected event only on first init`() {
         runGooglePayPaymentMethodLauncherTest(
+            includeReadyCallback = true,
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
@@ -120,6 +163,7 @@ class GooglePayPaymentMethodLauncherTest {
     @Test
     fun `present() should throw IllegalStateException when Google Pay is not available`() {
         runGooglePayPaymentMethodLauncherTest(
+            includeReadyCallback = true,
             isReady = false,
             expectResult = false,
         ) { _, launcher ->
@@ -189,6 +233,12 @@ class GooglePayPaymentMethodLauncherTest {
     )
 
     private companion object {
+        val builderIntegrationTypes = listOf(
+            LauncherIntegrationType.BuilderActivity,
+            LauncherIntegrationType.BuilderFragment,
+            LauncherIntegrationType.BuilderCompose,
+        )
+
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             GooglePayEnvironment.Test,
             merchantCountryCode = "US",
