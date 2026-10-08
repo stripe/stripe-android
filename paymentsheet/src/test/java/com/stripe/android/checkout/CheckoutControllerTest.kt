@@ -388,7 +388,8 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure syncs shipping tax despite saved and default billing addresses and reloads payment metadata`() =
         runConfigureScenario(
-            configuration = configurationWithDefaultShippingAddress(),
+            configuration = configurationWithDefaultShippingAddress()
+                .shippingAddressElement(ShippingAddressElement.Configuration()),
             initModifier = combine(
                 automaticTaxFor("shipping"),
                 savedCustomerWithBillingAddress(),
@@ -399,10 +400,26 @@ internal class CheckoutControllerTest {
                         combine(
                             automaticTaxFor("shipping"),
                             savedCustomerWithBillingAddress(),
-                            withTotal(6099),
                             { json ->
+                                val taxes = JSONArray().put(
+                                    JSONObject()
+                                        .put("amount", 510)
+                                        .put("inclusive", false)
+                                        .put(
+                                            "tax_rate",
+                                            JSONObject().put("display_name", "Sales tax")
+                                                .put("percentage", 10.0).put("rate_type", "percentage")
+                                        )
+                                )
+                                checkoutItemJson(json)
+                                    .put("total", 5609)
+                                    .put("tax_exclusive", 510)
+                                    .put("tax_amounts", taxes)
+                                json.getJSONObject("recurring_details").getJSONObject("total_summary")
+                                    .put("total_tax_amounts", taxes)
+                                json.getJSONObject("tax_meta").put("status", "complete")
                                 json.getJSONObject("server_built_elements_session_params")
-                                    .getJSONObject("deferred_intent").put("amount", 6099)
+                                    .getJSONObject("deferred_intent").put("amount", 5609)
                             },
                         ),
                     ),
@@ -413,9 +430,15 @@ internal class CheckoutControllerTest {
 
             val state = requireNotNull(committedState)
             assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6099.0)
-            assertThat(state.checkoutSessionResponse.amount).isEqualTo(6099L)
-            assertThat((state.paymentMethodMetadata.stripeIntent as PaymentIntent).amount).isEqualTo(6099L)
+            assertThat(state.checkoutSessionResponse.requiresShippingAddress).isTrue()
+            assertThat(controller.session.value?.totals?.subtotal?.minorUnitsAmount).isEqualTo(5099.0)
+            assertThat(controller.session.value?.totals?.taxExclusive?.minorUnitsAmount).isEqualTo(510.0)
+            assertThat(controller.session.value?.taxAmounts?.single()?.minorUnitsAmount).isEqualTo(510.0)
+            assertThat(controller.session.value?.tax?.status)
+                .isInstanceOf(CheckoutController.Session.Tax.Status.Ready::class.java)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5609.0)
+            assertThat(state.checkoutSessionResponse.amount).isEqualTo(5609L)
+            assertThat((state.paymentMethodMetadata.stripeIntent as PaymentIntent).amount).isEqualTo(5609L)
             assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
             assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo("123 Main St")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
@@ -469,7 +492,10 @@ internal class CheckoutControllerTest {
             configuration = configurationWithDefaultShippingAddress(),
             initModifier = combine(
                 automaticTaxFor("shipping"),
-                { json -> json.getJSONObject("tax_context").put("automatic_tax_enabled", false) },
+                { json ->
+                    json.getJSONObject("tax_context").put("automatic_tax_enabled", false)
+                    json.getJSONObject("tax_meta").put("computation_type", "Off").put("status", JSONObject.NULL)
+                },
             ),
         ) {
             result.getOrThrow()
@@ -1753,12 +1779,22 @@ internal class CheckoutControllerTest {
     // Enables automatic tax with the given address source ("shipping" or "billing"), so an address
     // update sends tax_region to the server.
     private fun automaticTaxFor(source: String): (JSONObject) -> Unit = { json ->
+        val addressSource = when (source) {
+            "shipping", "billing" -> "session.$source"
+            else -> source
+        }
         json.put(
             "tax_context",
             JSONObject()
                 .put("automatic_tax_enabled", true)
-                .put("automatic_tax_address_source", source),
+                .put("automatic_tax_address_source", addressSource),
         )
+        json.getJSONObject("tax_meta")
+            .put("computation_type", "automatic")
+            .put("status", "requires_location_inputs")
+        if (source == "shipping" && !json.has("shipping_address_collection")) {
+            allowedShippingCountries(listOf("US", "CA"))(json)
+        }
     }
 
     private fun successfulSavedPaymentMethodResponse(response: MockResponse) {
