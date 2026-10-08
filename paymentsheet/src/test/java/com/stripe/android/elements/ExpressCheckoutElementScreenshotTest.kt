@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -79,6 +79,29 @@ internal class ExpressCheckoutElementScreenshotTest {
     }
 
     @Test
+    fun rendersGooglePayAndLinkButtonsInOneRow_atSameHeight() {
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        ExpressCheckoutElementInteractorStateFactory.create(
+                            buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                                .maxRows(1)
+                                .build(),
+                        )
+                    ),
+                ),
+                googlePayButton = { _, _, _ ->
+                    FakeGooglePayButton(
+                        text = "Google Pay with taller height because of text overflow abcdefghijklmnopqrstuvwxyz" +
+                            " abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz"
+                    )
+                },
+            )
+        }
+    }
+
+    @Test
     fun rendersThreeButtonsInTwoByTwoGrid() {
         val defaultState = ExpressCheckoutElementInteractorStateFactory.create()
         val thirdButton = defaultState.expressButtons
@@ -141,12 +164,15 @@ internal class ExpressCheckoutElementScreenshotTest {
     }
 
     @Composable
-    private fun FakeGooglePayButton(enabled: Boolean = true) {
+    private fun FakeGooglePayButton(
+        enabled: Boolean = true,
+        text: String = "Google Pay"
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .fillMaxWidth()
-                .height(48.dp)
+                .heightIn(min = 48.dp)
                 .alpha(if (enabled) 1f else 0.5f)
                 .background(
                     color = Color.Black,
@@ -155,7 +181,7 @@ internal class ExpressCheckoutElementScreenshotTest {
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "Google Pay",
+                text = text,
                 color = Color.White,
                 fontWeight = FontWeight.Medium,
             )
