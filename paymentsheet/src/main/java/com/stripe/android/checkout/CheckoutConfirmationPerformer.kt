@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -58,10 +57,6 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                configuration = configuration,
-                paymentMethodMetadata = state.paymentMethodMetadata,
-            ),
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
                 !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
