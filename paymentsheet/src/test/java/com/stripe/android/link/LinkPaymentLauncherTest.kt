@@ -92,7 +92,7 @@ internal class LinkPaymentLauncherTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 statusBarColor = 0x00FF00,
             )
 
@@ -105,7 +105,7 @@ internal class LinkPaymentLauncherTest {
                         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                        launchMode = LinkLaunchMode.Full,
+                        launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                         statusBarColor = 0x00FF00,
                     )
                 )
@@ -129,7 +129,7 @@ internal class LinkPaymentLauncherTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.DISABLED,
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 statusBarColor = null,
             )
 
@@ -165,7 +165,7 @@ internal class LinkPaymentLauncherTest {
                 ),
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 statusBarColor = null,
             )
 
@@ -277,7 +277,7 @@ internal class LinkPaymentLauncherTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 statusBarColor = null,
             )
 
@@ -310,7 +310,7 @@ internal class LinkPaymentLauncherTest {
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                     linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    launchMode = LinkLaunchMode.Full,
+                    launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                     statusBarColor = null,
                 )
 

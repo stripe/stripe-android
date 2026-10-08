@@ -107,7 +107,7 @@ class AddPaymentMethodOptionsTest {
 
     @Test
     fun `values handles non-PaymentMethodSelection launch mode`() {
-        val options = createOptions(linkLaunchMode = LinkLaunchMode.Full)
+        val options = createOptions(linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true))
 
         assertThat(options.values).hasSize(2)
         assertThat(options.values).containsExactly(

@@ -1,5 +1,6 @@
 package com.stripe.android.payments.bankaccount.domain
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -13,15 +14,14 @@ internal class RetrieveStripeIntent @Inject constructor(
      * Retrieve [StripeIntent].
      */
     suspend operator fun invoke(
-        publishableKey: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
         clientSecret: String,
     ): Result<StripeIntent> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId,
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
             ),
         )
     }

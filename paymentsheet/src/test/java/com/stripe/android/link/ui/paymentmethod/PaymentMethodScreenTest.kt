@@ -204,12 +204,12 @@ internal class PaymentMethodScreenTest {
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
-                linkLaunchMode = LinkLaunchMode.Full
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
             ),
             logger = FakeLogger(),
             formHelper = formHelper,
             dismissalCoordinator = dismissalCoordinator,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             dismissWithResult = {}
         ).also { viewModelStoreRule.track(it) }
     }

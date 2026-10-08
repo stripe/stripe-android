@@ -193,7 +193,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
-                            launchMode = LinkLaunchMode.Full,
+                            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                             statusBarColor = null,
                         )
                     )

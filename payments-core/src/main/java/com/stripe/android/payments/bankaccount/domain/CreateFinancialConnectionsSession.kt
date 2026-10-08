@@ -1,5 +1,6 @@
 package com.stripe.android.payments.bankaccount.domain
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -20,9 +21,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
      * Creates a [FinancialConnectionsSession] for the given [PaymentIntent] secret.
      */
     suspend fun forPaymentIntent(
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         clientSecret: String,
-        stripeAccountId: String?,
         hostedSurface: String?,
         configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
@@ -38,8 +38,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     hostedSurface = hostedSurface
                 ),
                 requestOptions = ApiRequest.Options(
-                    publishableKey,
-                    stripeAccountId
+                    apiKey = apiConfiguration.publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId
                 )
             ).getOrThrow()
         }
@@ -49,9 +49,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
      * Creates a [FinancialConnectionsSession] for the given [SetupIntent] secret.
      */
     suspend fun forSetupIntent(
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         clientSecret: String,
-        stripeAccountId: String?,
         hostedSurface: String?,
         configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
@@ -67,8 +66,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     hostedSurface = hostedSurface
                 ),
                 requestOptions = ApiRequest.Options(
-                    publishableKey,
-                    stripeAccountId
+                    apiKey = apiConfiguration.publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId
                 )
             ).getOrThrow()
         }
@@ -84,8 +83,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
      * @param currency the currency of the payment
      */
     suspend fun forDeferredIntent(
-        publishableKey: String,
-        stripeAccountId: String?,
+        apiConfiguration: ApiConfiguration.State,
         elementsSessionId: String,
         customerId: String?,
         onBehalfOf: String?,
@@ -111,8 +109,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 product = product,
             ),
             requestOptions = ApiRequest.Options(
-                publishableKey,
-                stripeAccountId
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId
             )
         )
     }

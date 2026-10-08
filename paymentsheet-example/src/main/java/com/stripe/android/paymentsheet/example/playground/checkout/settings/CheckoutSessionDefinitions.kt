@@ -143,6 +143,11 @@ internal object CheckoutSessionDefinitions {
         key = "session.billing_address_collection",
         displayName = "Collect billing address",
     )
+    val invoiceCreation = boolean(
+        key = "session.invoice_creation",
+        displayName = "Invoice creation",
+        defaultValue = false,
+    )
     val linkType = choice(
         key = "controller.link_type",
         displayName = "Link Type",
@@ -152,7 +157,7 @@ internal object CheckoutSessionDefinitions {
     )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
-        displayName = "Checkout Session",
+        displayName = "Server side",
         children = arrayOf(
             backendUrl,
             customStripeApi,
@@ -171,6 +176,7 @@ internal object CheckoutSessionDefinitions {
             adaptivePricingCountry,
             shippingAddressCollection,
             billingAddressCollection,
+            invoiceCreation,
             linkType,
         ),
     )

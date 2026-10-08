@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
@@ -34,21 +35,19 @@ class CreateFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given repository succeeds, linkedSession created for payment intent`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
             givenCreateSessionWithPaymentIntentReturns { Result.success(linkedAccountSession) }
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
                     hostedSurface = "payment_element",
-                    stripeAccountId = null
                 )
 
             // Then
@@ -61,7 +60,10 @@ class CreateFinancialConnectionsSessionTest {
                     customerEmailAddress = null,
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
         }
@@ -71,7 +73,6 @@ class CreateFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "pi_1234_secret_5678"
 
             val expectedException = APIException()
@@ -80,14 +81,13 @@ class CreateFinancialConnectionsSessionTest {
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
                     hostedSurface = "payment_element",
-                    stripeAccountId = null
                 )
 
             // Then
@@ -100,7 +100,10 @@ class CreateFinancialConnectionsSessionTest {
                     customerEmailAddress = null,
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -110,20 +113,18 @@ class CreateFinancialConnectionsSessionTest {
     fun `forPaymentIntent - given wrong secret, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "wrong_secret"
             givenCreateSessionWithPaymentIntentReturns { Result.success(linkedAccountSession) }
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null,
                     hostedSurface = "payment_element"
                 )
 
@@ -136,21 +137,19 @@ class CreateFinancialConnectionsSessionTest {
     fun `forSetupIntent - given repository succeeds, linkedSession created for setup intent`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
-            val stripeAccountId = "accountId"
+
             givenCreateSessionWithSetupIntentReturns { Result.success(linkedAccountSession) }
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = stripeAccountId,
                     hostedSurface = "payment_element"
                 )
 
@@ -165,8 +164,8 @@ class CreateFinancialConnectionsSessionTest {
                     linkMode = null,
                 ),
                 requestOptions = ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
                 )
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
@@ -177,7 +176,6 @@ class CreateFinancialConnectionsSessionTest {
     fun `forSetupIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "seti_1234_secret_5678"
             val expectedException = APIException()
             givenCreateSessionWithSetupIntentReturns { Result.failure(expectedException) }
@@ -185,13 +183,12 @@ class CreateFinancialConnectionsSessionTest {
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null,
                     hostedSurface = "payment_element"
                 )
 
@@ -205,7 +202,10 @@ class CreateFinancialConnectionsSessionTest {
                     hostedSurface = "payment_element",
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -215,20 +215,18 @@ class CreateFinancialConnectionsSessionTest {
     fun `forSetupIntent - given wrong secret, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val clientSecret = "wrong_secret"
             givenCreateSessionWithSetupIntentReturns { Result.success(linkedAccountSession) }
 
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     clientSecret = clientSecret,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = customerName,
                         email = null
                     ),
-                    stripeAccountId = null,
                     hostedSurface = "payment_element"
                 )
 
@@ -241,8 +239,6 @@ class CreateFinancialConnectionsSessionTest {
     fun `forDeferredIntent - given repository succeeds, linkedSession created for deferred intent`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
-            val stripeAccountId = "accountId"
             val elementsSessionId = "unique_id"
             val customerId = "customer_id"
             val onBehalfOf = "on_behalf_of_id"
@@ -253,8 +249,7 @@ class CreateFinancialConnectionsSessionTest {
             // When
             val deferredIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
                     hostedSurface = "payment_element",
@@ -285,8 +280,8 @@ class CreateFinancialConnectionsSessionTest {
                 ),
                 requestOptions = eq(
                     ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
+                        apiKey = DEFAULT_API_CONFIG.publishableKey,
+                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
                     )
                 )
             )
@@ -298,7 +293,6 @@ class CreateFinancialConnectionsSessionTest {
     fun `forDeferredIntent - given repository throws exception, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val elementsSessionId = "unique_id"
             val customerId = "customer_id"
             val onBehalfOf = "on_behalf_of_id"
@@ -311,8 +305,7 @@ class CreateFinancialConnectionsSessionTest {
             // When
             val paymentIntent: Result<FinancialConnectionsSession> =
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = null,
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     elementsSessionId = elementsSessionId,
                     customerId = customerId,
                     onBehalfOf = onBehalfOf,
@@ -342,7 +335,10 @@ class CreateFinancialConnectionsSessionTest {
                     )
                 ),
                 requestOptions = eq(
-                    ApiRequest.Options(publishableKey)
+                    ApiRequest.Options(
+                        apiKey = DEFAULT_API_CONFIG.publishableKey,
+                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    )
                 )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)

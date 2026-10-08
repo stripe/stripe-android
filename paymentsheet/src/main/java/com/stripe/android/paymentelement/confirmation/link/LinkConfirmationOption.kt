@@ -9,6 +9,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class LinkConfirmationOption(
     val configuration: LinkConfiguration,
-    val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+    val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
     val linkExpressMode: LinkExpressMode,
 ) : ConfirmationHandler.Option

@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -39,8 +40,10 @@ internal class CollectBankAccountForACHLauncher(
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                ),
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
@@ -73,8 +76,10 @@ internal class CollectBankAccountForACHLauncher(
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                ),
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
@@ -97,8 +102,10 @@ internal class CollectBankAccountForACHLauncher(
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,
@@ -121,8 +128,10 @@ internal class CollectBankAccountForACHLauncher(
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
                 customerId = customerId,

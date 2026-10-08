@@ -1,10 +1,10 @@
 package com.stripe.android.customersheet
 
 import android.graphics.Color
-import android.graphics.drawable.ShapeDrawable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.test.runTest
@@ -126,7 +126,7 @@ internal class InternalCustomerSheetResultTest {
                 billingDetails = null,
                 _shippingDetails = null,
                 _labels = PaymentOption.Labels(label = "Converted payment option"),
-                imageLoader = { ShapeDrawable() },
+                paymentOptionResource = ErrorPaymentOptionResource,
             ),
         )
     }

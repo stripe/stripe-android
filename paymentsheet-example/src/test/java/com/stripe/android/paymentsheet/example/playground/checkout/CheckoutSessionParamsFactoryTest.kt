@@ -15,6 +15,27 @@ import org.junit.Test
 
 class CheckoutSessionParamsFactoryTest {
     @Test
+    fun `invoice creation is omitted by default`() = runScenario {
+        val params = createParams()
+
+        assertThat(params).doesNotContainKey("invoice_creation")
+    }
+
+    @Test
+    fun `invoice creation includes invoice data when enabled`() = runScenario {
+        settings.update(session.invoiceCreation, true)
+
+        val params = createParams()
+
+        val invoiceCreation = params.getValue("invoice_creation").jsonObject
+        assertThat(invoiceCreation["enabled"]).isEqualTo(JsonPrimitive(true))
+        val invoiceData = invoiceCreation.getValue("invoice_data").jsonObject
+        assertThat(invoiceData.string("description")).isEqualTo("Checkout live post-purchase invoice")
+        assertThat(invoiceData.getValue("metadata").jsonObject.string("suite"))
+            .isEqualTo("checkout_live_billing_invoice")
+    }
+
+    @Test
     fun `default parameters contain fixed Elements cart`() = runScenario {
         val params = createParams()
 
