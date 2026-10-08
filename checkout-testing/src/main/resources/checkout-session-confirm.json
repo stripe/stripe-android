@@ -39,8 +39,10 @@
     }
   ],
   "recurring_details": {
-    "total_discount_amounts": [],
-    "total_tax_amounts": []
+    "total_summary": {
+      "total_discount_amounts": [],
+      "total_tax_amounts": []
+    }
   },
   "tax_meta": {
     "computation_type": "Off",

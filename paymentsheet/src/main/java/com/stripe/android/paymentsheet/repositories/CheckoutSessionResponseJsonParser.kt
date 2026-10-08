@@ -145,10 +145,14 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         )
     }
 
-    private fun parseRecurringDetails(json: JSONObject) = CheckoutSessionResponse.RecurringDetails(
-        totalDiscountAmounts = json.requiredArray("total_discount_amounts").objects().map(::parseDiscountAmount),
-        totalTaxAmounts = json.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
-    )
+    private fun parseRecurringDetails(json: JSONObject): CheckoutSessionResponse.RecurringDetails {
+        val totalSummary = json.requiredObject("total_summary")
+        return CheckoutSessionResponse.RecurringDetails(
+            totalDiscountAmounts = totalSummary.requiredArray("total_discount_amounts")
+                .objects().map(::parseDiscountAmount),
+            totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
+        )
+    }
 
     private fun parseDiscountAmount(json: JSONObject): CheckoutSessionResponse.DiscountAmount {
         val coupon = json.requiredObject("coupon")
