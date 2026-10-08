@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
@@ -58,13 +60,19 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
         }
 
         return PaymentOptionDisplayData(
-            imageLoader = {
+            paymentOptionResource = DefaultPaymentOptionResource(
+                appearance = paymentMethodMetadata.appearance,
+            ) { packet ->
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(
+                    isSystemDarkTheme = packet.isSystemDarkTheme,
+                    context = context,
+                )
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = null,
+                    useDarkThemeIcon = useDarkThemeIcon,
                 )
             },
             label = selection.label(
