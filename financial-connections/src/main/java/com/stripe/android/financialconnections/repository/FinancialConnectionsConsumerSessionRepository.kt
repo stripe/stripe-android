@@ -142,7 +142,8 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
     }
 
     init {
-        fraudDetectionDataRepository.refresh()
+        val options = provideApiRequestOptions(useConsumerPublishableKey = false)
+        fraudDetectionDataRepository.refresh(options.apiKey, options.stripeAccount)
     }
 
     override suspend fun getCachedConsumerSession(): CachedConsumerSession? = mutex.withLock {
@@ -277,7 +278,11 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         expectedPaymentMethodType: String,
         billingPhone: String?,
     ): SharePaymentDetails {
-        val fraudDetectionData = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false)
+        fraudDetectionDataRepository.refresh(requestOptions.apiKey, requestOptions.stripeAccount)
+        val fraudDetectionData = fraudDetectionDataRepository.getCached(
+            requestOptions.apiKey, requestOptions.stripeAccount
+        )?.params.orEmpty()
         val expandParams = mapOf("expand" to listOf("payment_method"))
 
         return consumersApiService.sharePaymentDetails(
@@ -286,7 +291,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             expectedPaymentMethodType = expectedPaymentMethodType,
             billingPhone = elementsSessionContext?.billingDetails?.phone?.takeIf { it.isNotBlank() },
             requestSurface = requestSurface,
-            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            requestOptions = requestOptions,
             extraParams = fraudDetectionData + expandParams,
         ).getOrThrow()
     }

@@ -2,7 +2,9 @@ package com.stripe.android.core.frauddetection
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -13,6 +15,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -33,19 +36,21 @@ class FraudDetectionDataRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
-    fun `save() ➡ refresh() ➡ get() should return original object`() {
+    fun `save() ➡ refresh() ➡ get() should return original object`() = runTest {
         val expectedFraudDetectionData = createFraudDetectionData(elapsedTime = -5L)
         val repository = DefaultFraudDetectionDataRepository(
             localStore = DefaultFraudDetectionDataStore(context, testDispatcher),
             fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
             stripeNetworkClient = DefaultStripeNetworkClient(workContext = testDispatcher),
-            errorReporter = { /* No-op */ },
+            errorReporter = { _, _ -> },
             workContext = testDispatcher,
             fraudDetectionEnabledProvider = { true },
         )
-        repository.save(expectedFraudDetectionData)
-        repository.refresh()
-        assertThat(repository.getCached())
+        repository.save(
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT, expectedFraudDetectionData
+        )
+        repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT)
+        assertThat(repository.getCached(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT))
             .isEqualTo(expectedFraudDetectionData)
     }
 
@@ -79,13 +84,17 @@ class FraudDetectionDataRepositoryTest {
                 fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
                 stripeNetworkClient = mockStripeNetworkClient,
                 workContext = testDispatcher,
-                errorReporter = { /* No-op */ },
+                errorReporter = { _, _ -> },
                 fraudDetectionEnabledProvider = { true },
             )
             val expiredFraudDetectionData = createFraudDetectionData(elapsedTime = -60L)
-            repository.save(expiredFraudDetectionData)
-            repository.refresh()
-            val actualFraudDetectionData = repository.getCached()
+            repository.save(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT, expiredFraudDetectionData
+            )
+            repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT)
+            val actualFraudDetectionData = repository.getCached(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT
+            )
 
             assertThat(expiredFraudDetectionData.guid).isNotEqualTo(expectedGUID)
             assertThat(expiredFraudDetectionData.muid).isNotEqualTo(expectedMUID)
@@ -108,13 +117,13 @@ class FraudDetectionDataRepositoryTest {
                 fraudDetectionDataRequestFactory = fraudDetectionDataRequestFactory,
                 stripeNetworkClient = mockStripeNetworkClient,
                 workContext = testDispatcher,
-                errorReporter = { /* No-op */ },
+                errorReporter = { _, _ -> },
                 fraudDetectionEnabledProvider = { false },
             )
-            repository.refresh()
+            repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT)
 
-            verify(store, never()).get()
-            verify(store, never()).save(any())
+            verify(store, never()).get(any(), anyOrNull())
+            verify(store, never()).save(any(), anyOrNull(), any())
             verify(fraudDetectionDataRequestFactory, never()).create(any())
             verify(mockStripeNetworkClient, never()).executeRequest(any())
         }
@@ -122,7 +131,7 @@ class FraudDetectionDataRepositoryTest {
     @Test
     fun `on getLatest() fails, should report error`() =
         runTest {
-            var reportedError: StripeException? = null
+            val reportedErrors = Turbine<Pair<StripeException, String>>()
             val mockStripeNetworkClient = mock<StripeNetworkClient>()
 
             val expectedError = APIConnectionException("API connection failed!")
@@ -136,12 +145,15 @@ class FraudDetectionDataRepositoryTest {
                 fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
                 stripeNetworkClient = mockStripeNetworkClient,
                 workContext = testDispatcher,
-                errorReporter = { reportedError = it },
+                errorReporter = { error, key -> reportedErrors.add(error to key) },
                 fraudDetectionEnabledProvider = { true },
             )
 
-            assertThat(repository.getLatest()).isNull()
-            assertThat(reportedError).isEqualTo(expectedError)
+            assertThat(
+                repository.getLatest(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT)
+            ).isNull()
+            assertThat(reportedErrors.awaitItem()).isEqualTo(expectedError to ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            reportedErrors.ensureAllEventsConsumed()
         }
 
     private companion object {
