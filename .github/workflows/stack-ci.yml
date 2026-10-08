@@ -1,0 +1,98 @@
+name: Reconcile stacked PR CI
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/stack-ci.yml
+      - .github/tests/reconcile-stack-ci.test.cjs
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize, stacked, closed]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - run: node --test .github/tests/reconcile-stack-ci.test.cjs
+
+  reconcile:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: stack-ci-reconciliation
+      cancel-in-progress: false
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const headers = { 'X-GitHub-Api-Version': '2026-03-10' };
+            const start = '<!-- stack-ci:start -->';
+            const end = '<!-- stack-ci:end -->';
+            const runOverride = '<!-- stack-ci:run -->';
+            const blockPattern = /(?:\r?\n){0,2}<!-- stack-ci:start -->[\s\S]*?<!-- stack-ci:end -->/;
+            const managedBlock = `${start}\n[skip ci]\nBitrise is deferred until this PR is the first layer of its stack.\n${end}`;
+            const skipPattern = /\[(?:skip ci|ci skip)\]/i;
+
+            function validateStack(pr) {
+              if (pr.stack && (
+                !Number.isInteger(pr.stack.position) ||
+                !Number.isInteger(pr.stack.size) ||
+                pr.stack.position < 1 ||
+                pr.stack.position > pr.stack.size
+              )) {
+                throw new Error(`Invalid stack metadata for PR #${pr.number}`);
+              }
+            }
+
+            function desiredBody(pr) {
+              const body = pr.body ?? '';
+              const currentBlock = body.match(blockPattern)?.[0] ?? '';
+              let bareBody = body.replace(blockPattern, '');
+              const previousBody = context.payload.changes?.body?.from ?? '';
+              const previousBlock = previousBody.match(blockPattern)?.[0] ?? '';
+              const editedBody = context.payload.pull_request?.body ?? '';
+              const editedBlock = editedBody.match(blockPattern)?.[0] ?? '';
+              const manuallyRemoved = context.payload.pull_request?.number === pr.number &&
+                skipPattern.test(previousBlock) && !skipPattern.test(editedBlock) &&
+                !skipPattern.test(currentBlock);
+              // Persist removal so later stack events respect the author's choice.
+              if (manuallyRemoved && !bareBody.includes(runOverride)) {
+                bareBody += `${bareBody ? '\n\n' : ''}${runOverride}`;
+              }
+              if (!pr.stack || pr.stack.position === 1 ||
+                bareBody.includes(runOverride) || skipPattern.test(bareBody)) {
+                return bareBody;
+              }
+              return `${bareBody}${bareBody ? '\n\n' : ''}${managedBlock}`;
+            }
+
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: 'open', per_page: 100, headers,
+            });
+            // Check the complete snapshot before changing any descriptions.
+            prs.forEach(validateStack);
+            for (const listed of prs) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner, repo, pull_number: listed.number, headers,
+              });
+              if (pr.state !== 'open') continue;
+              validateStack(pr);
+              const body = desiredBody(pr);
+              if (body !== (pr.body ?? '')) {
+                await github.rest.pulls.update({
+                  owner, repo, pull_number: pr.number, body,
+                });
+                core.info(`Updated CI annotation for PR #${pr.number}`);
+              }
+            }
