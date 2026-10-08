@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
@@ -25,8 +26,8 @@ class CollectBankAccountForInstantDebitsLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -34,8 +35,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -55,8 +55,8 @@ class CollectBankAccountForInstantDebitsLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -64,8 +64,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -86,8 +85,6 @@ class CollectBankAccountForInstantDebitsLauncherTest {
 
     companion object {
         private const val CLIENT_SECRET = "client_secret"
-        private const val PUBLISHABLE_KEY = "publishableKey"
-        private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         private const val HOSTED_SURFACE = "payment_element"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",

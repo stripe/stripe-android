@@ -1251,6 +1251,147 @@ class DefaultLinkAccountManagerTest {
         assertThat(account?.linkBrand).isNull()
     }
 
+    @Test
+    fun `missing Link session key is retained for the same session`() = runSuspendTest {
+        val manager = accountManager()
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkSessionKey = "lsk_original"),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = TestFactory.CONSUMER_SESSION.emailAddress,
+                    linkSessionKey = null,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+    }
+
+    @Test
+    fun `empty Link session key is retained for the same session`() = runSuspendTest {
+        val manager = accountManager()
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkSessionKey = "lsk_original"),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = TestFactory.CONSUMER_SESSION.emailAddress,
+                    linkSessionKey = "",
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+    }
+
+    @Test
+    fun `new Link session key replaces the previous key`() = runSuspendTest {
+        val manager = accountManager()
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkSessionKey = "lsk_original"),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = TestFactory.CONSUMER_SESSION.emailAddress,
+                    linkSessionKey = "lsk_new",
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_new")
+    }
+
+    @Test
+    fun `Link session key is never carried to another user`() = runSuspendTest {
+        val manager = accountManager()
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkSessionKey = "lsk_original"),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        manager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "other@example.com",
+                    linkSessionKey = null,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo(null)
+    }
+
+    @Test
+    fun `Link session key is not carried to a new session for the same user`() = runSuspendTest {
+        val manager = accountManager()
+        val originalSession = TestFactory.CONSUMER_SESSION.copy(
+            clientSecret = "cs_original",
+            linkSessionKey = "lsk_original",
+        )
+        manager.setTestAccount(originalSession)
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+
+        manager.setTestAccount(originalSession.copy(clientSecret = "cs_new", linkSessionKey = null))
+
+        val account = requireNotNull(manager.linkAccountInfo.value.account)
+        assertThat(account.clientSecret).isEqualTo("cs_new")
+        assertThat(account.linkSessionKey).isNull()
+    }
+
+    @Test
+    fun `Link session key is not retained when both client secrets are blank`() = runSuspendTest {
+        val manager = accountManager()
+        val originalSession = TestFactory.CONSUMER_SESSION.copy(
+            clientSecret = "",
+            linkSessionKey = "lsk_original",
+        )
+        manager.setTestAccount(originalSession)
+        assertThat(manager.linkAccountInfo.value.account?.linkSessionKey).isEqualTo("lsk_original")
+
+        manager.setTestAccount(originalSession.copy(linkSessionKey = null))
+
+        val account = requireNotNull(manager.linkAccountInfo.value.account)
+        assertThat(account.linkSessionKey).isNull()
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }

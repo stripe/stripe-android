@@ -124,7 +124,7 @@ enum class Merchant(override val value: String) : ValueEnum {
     ES("ES"),
     IT("IT"),
     TH("TH"),
-    NG("ng"),
+    NG("NG"),
     StripeShop("stripe_shop_test"),
     US_TAX("us_tax"),
     Custom("custom")

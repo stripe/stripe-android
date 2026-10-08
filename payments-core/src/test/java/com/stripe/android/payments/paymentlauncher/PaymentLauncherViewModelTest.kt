@@ -16,6 +16,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.analytics.FakeDurationProvider
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -576,8 +577,7 @@ class PaymentLauncherViewModelTest {
     fun `Factory gets initialized`() = runTest {
         val factory = PaymentLauncherViewModel.Factory {
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                apiConfiguration = API_CONFIGURATION,
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
                 includePaymentSheetNextHandlers = false,
@@ -793,5 +793,9 @@ class PaymentLauncherViewModelTest {
         const val RETURN_URL = "return://to.me"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+        )
     }
 }

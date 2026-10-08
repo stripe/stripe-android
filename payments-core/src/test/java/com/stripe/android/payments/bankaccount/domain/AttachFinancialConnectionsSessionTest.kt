@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
@@ -20,9 +21,7 @@ class AttachFinancialConnectionsSessionTest {
     private val stripeRepository = mock<StripeRepository>()
     private val attachFinancialConnectionsSession = AttachFinancialConnectionsSession(stripeRepository)
 
-    private val publishableKey = "publishable_key"
     private val linkedAccountSessionId = "session_id"
-    private val stripeAccountId = "stripe_account_id"
 
     @Test
     fun `forPaymentIntent - given repository succeeds, linkedSession attached and paymentIntent returned`() {
@@ -36,10 +35,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey = publishableKey,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 linkedAccountSessionId = linkedAccountSessionId,
                 clientSecret = clientSecret,
-                stripeAccountId = stripeAccountId
             )
 
             // Then
@@ -47,7 +45,10 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                ),
                 expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
@@ -64,10 +65,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey = publishableKey,
+                apiConfiguration = DEFAULT_API_CONFIG,
                 linkedAccountSessionId = linkedAccountSessionId,
                 clientSecret = clientSecret,
-                stripeAccountId = stripeAccountId
             )
 
             // Then
@@ -75,7 +75,10 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                ),
                 expandFields = listOf("payment_method")
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -92,10 +95,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<PaymentIntent> = attachFinancialConnectionsSession.forPaymentIntent(
-                publishableKey,
+                DEFAULT_API_CONFIG,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
             )
 
             // Then
@@ -115,10 +117,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val result: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
-                publishableKey,
+                DEFAULT_API_CONFIG,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
             )
 
             // Then
@@ -126,7 +127,10 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                ),
                 expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
@@ -143,10 +147,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
-                publishableKey,
+                DEFAULT_API_CONFIG,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
             )
 
             // Then
@@ -154,7 +157,10 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(publishableKey, stripeAccountId),
+                requestOptions = ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                ),
                 expandFields = listOf("payment_method")
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -165,7 +171,6 @@ class AttachFinancialConnectionsSessionTest {
     fun `forSetupIntent - given wrong secret, results in internal error failure`() {
         runTest {
             // Given
-            val publishableKey = "publishable_key"
             val linkedAccountSessionId = "session_id"
             val clientSecret = "wrong_secret"
             val resultSetupIntent = mock<SetupIntent>()
@@ -173,10 +178,9 @@ class AttachFinancialConnectionsSessionTest {
 
             // When
             val setupIntent: Result<SetupIntent> = attachFinancialConnectionsSession.forSetupIntent(
-                publishableKey,
+                DEFAULT_API_CONFIG,
                 linkedAccountSessionId,
                 clientSecret,
-                stripeAccountId
             )
 
             // Then

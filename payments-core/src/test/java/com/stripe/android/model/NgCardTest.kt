@@ -1,10 +1,14 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import org.json.JSONObject
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class NgCardTest {
     @Test
     fun `creates payment method without extra required fields`() {
@@ -32,5 +36,33 @@ internal class NgCardTest {
         val result = PaymentMethodJsonParser().parse(JSONObject("""{"id":"pm_123","type":"ng_card"}"""))
 
         assertThat(result.type).isEqualTo(PaymentMethod.Type.NgCard)
+    }
+
+    @Test
+    fun `parses known Naira card brands and last four digits`(
+        @TestParameter(value = ["amex", "mastercard", "verve", "visa", "VISA"]) brand: String,
+    ) {
+        val result = PaymentMethodJsonParser().parse(
+            JSONObject("""{"id":"pm_123","type":"ng_card","ng_card":{"brand":"$brand","last4":"1234"}}"""),
+        )
+        assertThat(result.ngCard?.brand?.code).isEqualTo(brand.lowercase())
+        assertThat(result.ngCard?.last4).isEqualTo("1234")
+    }
+
+    @Test
+    fun `handles missing and unknown card details`(
+        @TestParameter(value = ["{}", "{\"brand\":\"future_brand\",\"last4\":null}"]) details: String,
+    ) {
+        val result = PaymentMethodJsonParser().parse(
+            JSONObject("""{"id":"pm_123","type":"ng_card","ng_card":$details}"""),
+        )
+        assertThat(result.ngCard?.brand).isEqualTo(PaymentMethod.NgCard.Brand.Unknown)
+        assertThat(result.ngCard?.last4).isNull()
+    }
+
+    @Test
+    fun `missing details remain null`() {
+        val result = PaymentMethodJsonParser().parse(JSONObject("""{"id":"pm_123","type":"ng_card"}"""))
+        assertThat(result.ngCard).isNull()
     }
 }

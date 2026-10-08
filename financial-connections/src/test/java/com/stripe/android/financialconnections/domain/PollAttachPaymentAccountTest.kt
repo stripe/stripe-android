@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
@@ -31,7 +32,7 @@ internal class PollAttachPaymentAccountTest {
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret",
-        publishableKey = "publishable_key",
+        apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
 

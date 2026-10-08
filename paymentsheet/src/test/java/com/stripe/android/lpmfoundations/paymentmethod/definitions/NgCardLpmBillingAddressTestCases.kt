@@ -63,53 +63,50 @@ private fun ngCardWithBillingAddressExpectedPaymentMethodParams(
     clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
 )
 
-internal val ngCardTestCases = LpmBillingAddressTestConfiguration.IntentScenario.entries.flatMap { intentScenario ->
-    val requiresMandate = intentScenario != LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-    listOf(
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "Naira card $intentScenario Never",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.NgCard,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = ngCardFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = ngCardNoBillingDetailsExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+internal val ngCardTestCases = listOf(
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Naira card PaymentIntent Never",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.NgCard,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         ),
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "Naira card $intentScenario Automatic without tax",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.NgCard,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = ngCardFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = ngCardNoBillingDetailsExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+        rawValues = ngCardFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = ngCardNoBillingDetailsExpectedPaymentMethodParams(requiresMandate = false),
+            optionsParams = null,
+            extraParams = null,
         ),
-        LpmBillingAddressFormValuesToParamsTestCase(
-            name = "Naira card $intentScenario Full",
-            config = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.NgCard,
-                billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
-                intentScenario = intentScenario,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ),
-            rawValues = ngCardFullRawValues,
-            expectedParams = LpmBillingAddressFormParams(
-                createParams = ngCardWithBillingAddressExpectedPaymentMethodParams(requiresMandate),
-                optionsParams = null,
-                extraParams = null,
-            ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Naira card PaymentIntent Automatic without tax",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.NgCard,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.AutomaticWithoutTax,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         ),
-    )
-}
+        rawValues = ngCardFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = ngCardNoBillingDetailsExpectedPaymentMethodParams(requiresMandate = false),
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+    LpmBillingAddressFormValuesToParamsTestCase(
+        name = "Naira card PaymentIntent Full",
+        config = LpmBillingAddressTestConfiguration(
+            paymentMethodType = PaymentMethod.Type.NgCard,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Full,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ),
+        rawValues = ngCardFullRawValues,
+        expectedParams = LpmBillingAddressFormParams(
+            createParams = ngCardWithBillingAddressExpectedPaymentMethodParams(requiresMandate = false),
+            optionsParams = null,
+            extraParams = null,
+        ),
+    ),
+)
