@@ -11,7 +11,7 @@ internal class FakeFraudDetectionDataRepository : FraudDetectionDataRepository {
         refreshCalls.add(publishableKey)
     }
 
-    override fun getCached(): FraudDetectionData? = null
+    override suspend fun getCached(): FraudDetectionData? = null
 
     override suspend fun getLatest(publishableKey: String): FraudDetectionData? {
         error("Awaited collection is not expected during configuration")

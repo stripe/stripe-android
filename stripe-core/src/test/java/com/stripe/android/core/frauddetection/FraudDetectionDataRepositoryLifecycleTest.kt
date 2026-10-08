@@ -71,20 +71,68 @@ internal class FraudDetectionDataRepositoryLifecycleTest {
         assertThat(repository.getCached()?.guid).isEqualTo("guid")
     }
 
-    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+    @Test
+    fun `cached reads see collection completed by another repository`() = runScenario {
+        assertThat(secondRepository.getCached()).isNull()
+
+        repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        runCurrent()
+        networkClient.requests.awaitItem().complete(successResponse())
+        runCurrent()
+
+        assertThat(secondRepository.getCached()?.guid).isEqualTo("guid")
+        networkClient.requests.expectNoEvents()
+    }
+
+    @Test
+    fun `cached reads see later updates from another repository`() = runScenario {
+        repository.save(FraudDetectionData("first", "muid", "sid"))
+        assertThat(secondRepository.getCached()?.guid).isEqualTo("first")
+
+        repository.save(FraudDetectionData("second", "muid", "sid"))
+
+        assertThat(secondRepository.getCached()?.guid).isEqualTo("second")
+        networkClient.requests.expectNoEvents()
+    }
+
+    @Test
+    fun `cached reads do not wait for an in flight collection`() = runScenario {
+        repository.refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        runCurrent()
+        val response = networkClient.requests.awaitItem()
+
+        assertThat(repository.getCached()).isNull()
+        networkClient.requests.expectNoEvents()
+
+        response.complete(successResponse())
+        runCurrent()
+    }
+
+    @Test
+    fun `disabled collection hides persisted data`() = runScenario(fraudDetectionEnabled = false) {
+        repository.save(FraudDetectionData("guid", "muid", "sid"))
+
+        assertThat(secondRepository.getCached()).isNull()
+        networkClient.requests.expectNoEvents()
+    }
+
+    private fun runScenario(
+        fraudDetectionEnabled: Boolean = true,
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val networkClient = FakeFraudNetworkClient()
         val reportedErrors = Turbine<Pair<StripeException, String>>()
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val repository = DefaultFraudDetectionDataRepository(
+        fun createRepository() = DefaultFraudDetectionDataRepository(
             localStore = DefaultFraudDetectionDataStore(context, dispatcher),
             fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
             stripeNetworkClient = networkClient,
             errorReporter = { error, key -> reportedErrors.add(error to key) },
             workContext = dispatcher,
-            fraudDetectionEnabledProvider = { true },
+            fraudDetectionEnabledProvider = { fraudDetectionEnabled },
         )
-        Scenario(this, repository, networkClient, reportedErrors).block()
+        Scenario(this, createRepository(), createRepository(), networkClient, reportedErrors).block()
         networkClient.requests.ensureAllEventsConsumed()
         reportedErrors.ensureAllEventsConsumed()
     }
@@ -92,6 +140,7 @@ internal class FraudDetectionDataRepositoryLifecycleTest {
     private class Scenario(
         val scope: TestScope,
         val repository: DefaultFraudDetectionDataRepository,
+        val secondRepository: DefaultFraudDetectionDataRepository,
         val networkClient: FakeFraudNetworkClient,
         val reportedErrors: Turbine<Pair<StripeException, String>>,
     ) {

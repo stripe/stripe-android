@@ -93,7 +93,8 @@ public class StripeTest {
     @NonNull
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
             DefaultFraudDetectionDataRepository(
-                    context
+                    context,
+                    (CoroutineContext) testDispatcher
             );
     @NonNull
     private final Stripe defaultStripe = createStripe();

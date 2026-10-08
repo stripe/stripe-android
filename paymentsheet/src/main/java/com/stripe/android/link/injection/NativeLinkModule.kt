@@ -153,16 +153,9 @@ internal interface NativeLinkModule {
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
-    @Binds
-    @IntoSet
-    fun bindSharedFraudDetectionDataRepository(
-        repository: FraudDetectionDataRepository,
-    ): FraudDetectionDataRepository
-
     @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
-        @NativeLinkScope
         fun provideFraudDetectionDataRepository(
             context: Context,
             @IOContext workContext: CoroutineContext,

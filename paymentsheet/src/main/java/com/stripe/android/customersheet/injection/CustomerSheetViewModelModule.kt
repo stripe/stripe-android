@@ -46,7 +46,6 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -97,16 +96,9 @@ internal interface CustomerSheetViewModelModule {
         impl: NoOpIsNfcScanningAvailable
     ): IsNfcScanningAvailable
 
-    @Binds
-    @IntoSet
-    fun bindSharedFraudDetectionDataRepository(
-        repository: FraudDetectionDataRepository,
-    ): FraudDetectionDataRepository
-
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
-        @CustomerSheetViewModelScope
         fun provideFraudDetectionDataRepository(
             context: Context,
             @IOContext workContext: CoroutineContext,

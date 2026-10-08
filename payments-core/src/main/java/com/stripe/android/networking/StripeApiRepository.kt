@@ -22,7 +22,6 @@ import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
@@ -165,7 +164,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         logger: Logger,
-        fraudDetectionDataRepositories: Set<@JvmSuppressWildcards FraudDetectionDataRepository>,
     ) : this(
         context = appContext,
         publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
@@ -173,11 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = if (fraudDetectionDataRepositories.isEmpty()) {
-            DefaultFraudDetectionDataRepository(appContext, workContext)
-        } else {
-            fraudDetectionDataRepositories.single()
-        },
+        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(appContext, workContext),
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = appContext,
             productUsageTokens = productUsageTokens,
@@ -194,9 +188,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
-
-    private val fraudDetectionData: FraudDetectionData?
-        get() = fraudDetectionDataRepository.getCached()
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -253,7 +244,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 confirmPaymentIntentParams.paymentMethodCreateParams,
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
-            fraudDetectionData
+            fraudDetectionDataRepository.getCached()
         )
 
         val paymentIntentId = runCatching {
@@ -461,7 +452,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                             .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                         confirmSetupIntentParams.paymentMethodCreateParams
                     ).plus(createExpandParam(expandFields)),
-                    fraudDetectionData
+                    fraudDetectionDataRepository.getCached()
                 )
             ),
             SetupIntentJsonParser()
@@ -555,7 +546,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 sourceParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(sourceParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             SourceJsonParser()
         ) {
@@ -609,7 +600,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 paymentMethodCreateParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             PaymentMethodJsonParser()
         ) {
@@ -702,7 +693,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 tokenParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(tokenParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             TokenJsonParser()
         ) {

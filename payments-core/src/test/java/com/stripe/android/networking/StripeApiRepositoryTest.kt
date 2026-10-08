@@ -158,7 +158,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @BeforeTest
-    fun before() {
+    fun before() = runTest {
         whenever(fraudDetectionDataRepository.getCached()).thenReturn(
             FraudDetectionData(
                 guid = UUID.randomUUID().toString(),

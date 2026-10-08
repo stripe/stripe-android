@@ -35,7 +35,7 @@ class FraudDetectionDataRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
-    fun `save() ➡ refresh() ➡ get() should return original object`() {
+    fun `save() ➡ refresh() ➡ get() should return original object`() = runTest {
         val expectedFraudDetectionData = createFraudDetectionData(elapsedTime = -5L)
         val repository = DefaultFraudDetectionDataRepository(
             localStore = DefaultFraudDetectionDataStore(context, testDispatcher),

@@ -18,9 +18,9 @@ interface FraudDetectionDataRepository {
     fun refresh(publishableKey: String)
 
     /**
-     * Get the cached [FraudDetectionData]. This is not a blocking request.
+     * Read locally stored [FraudDetectionData] without making a network request.
      */
-    fun getCached(): FraudDetectionData?
+    suspend fun getCached(): FraudDetectionData?
 
     /**
      * Get the latest [FraudDetectionData]. This is a blocking request.
@@ -58,9 +58,6 @@ class DefaultFraudDetectionDataRepository(
 ) : FraudDetectionDataRepository {
     private val mutex = Mutex()
 
-    @Volatile
-    private var cachedFraudDetectionData: FraudDetectionData? = null
-
     private val fraudDetectionEnabled: Boolean
         get() = fraudDetectionEnabledProvider.provideFraudDetectionEnabled()
 
@@ -74,7 +71,7 @@ class DefaultFraudDetectionDataRepository(
 
     override suspend fun getLatest(publishableKey: String) = withContext(workContext) {
         mutex.withLock {
-            val latestFraudDetectionData = localStore.get().let { localFraudDetectionData ->
+            localStore.get().let { localFraudDetectionData ->
                 if (localFraudDetectionData == null ||
                     localFraudDetectionData.isExpired(timestampSupplier())
                 ) {
@@ -88,28 +85,19 @@ class DefaultFraudDetectionDataRepository(
                     }.onFailure {
                         val error = StripeException.create(it)
                         errorReporter.reportFraudDetectionError(error, publishableKey)
-                    }.getOrNull()
+                    }.getOrNull()?.also(::save)
                 } else {
                     localFraudDetectionData
                 }
             }
-
-            if (cachedFraudDetectionData != latestFraudDetectionData) {
-                latestFraudDetectionData?.let(::save)
-            }
-
-            latestFraudDetectionData
         }
     }
 
-    override fun getCached(): FraudDetectionData? {
-        return cachedFraudDetectionData.takeIf {
-            fraudDetectionEnabled
-        }
+    override suspend fun getCached(): FraudDetectionData? {
+        return if (fraudDetectionEnabled) localStore.get() else null
     }
 
     override fun save(fraudDetectionData: FraudDetectionData) {
-        cachedFraudDetectionData = fraudDetectionData
         localStore.save(fraudDetectionData)
     }
 }

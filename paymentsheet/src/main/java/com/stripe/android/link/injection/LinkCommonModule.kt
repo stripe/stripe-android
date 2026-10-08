@@ -17,7 +17,6 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.multibindings.IntoSet
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -31,15 +30,8 @@ internal interface LinkCommonModule {
     @Singleton
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
-    @Binds
-    @IntoSet
-    fun bindSharedFraudDetectionDataRepository(
-        repository: FraudDetectionDataRepository,
-    ): FraudDetectionDataRepository
-
     companion object {
         @Provides
-        @Singleton
         fun provideFraudDetectionDataRepository(
             context: Context,
             @IOContext workContext: CoroutineContext,
