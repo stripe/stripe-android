@@ -100,9 +100,9 @@ internal object CheckoutSessionDefinitions {
         displayName = "Automatic payment methods",
         defaultValue = true,
     )
-    val paymentMethodTypes = value(
+    val allowedPaymentMethodTypes = value(
         key = "session.payment_method_types",
-        displayName = "Payment method types (comma separated)",
+        displayName = "Allowed payment method types (comma separated)",
         defaultValue = listOf("card"),
         encode = { values -> values.joinToString(", ") },
         decode = { serialized ->
@@ -171,7 +171,7 @@ internal object CheckoutSessionDefinitions {
             customSecretKey,
             customPublishableKey,
             automaticPaymentMethods,
-            paymentMethodTypes,
+            allowedPaymentMethodTypes,
             automaticTax,
             adaptivePricingCountry,
             shippingAddressCollection,

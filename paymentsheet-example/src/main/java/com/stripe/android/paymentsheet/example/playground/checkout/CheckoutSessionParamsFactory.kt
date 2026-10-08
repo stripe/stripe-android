@@ -29,7 +29,7 @@ internal object CheckoutSessionParamsFactory {
             put("ui_mode", "elements")
             put("currency", currency)
             putCart(currency)
-            putPaymentMethodTypes(settings)
+            putAllowedPaymentMethodTypes(settings)
             putInvoiceCreation(invoiceCreation)
             putTaxAndAddresses(automaticTax, billingAddressCollection, shippingAddressCollection)
             putCustomer(
@@ -70,12 +70,12 @@ internal object CheckoutSessionParamsFactory {
         )
     }
 
-    private fun JsonObjectBuilder.putPaymentMethodTypes(settings: CheckoutPlaygroundSettings.Snapshot) {
+    private fun JsonObjectBuilder.putAllowedPaymentMethodTypes(settings: CheckoutPlaygroundSettings.Snapshot) {
         val session = CheckoutPlaygroundDefinitions.session
         if (!settings[session.automaticPaymentMethods]) {
             put(
-                "payment_method_types",
-                JsonArray(settings[session.paymentMethodTypes].sorted().map(::JsonPrimitive)),
+                "allowed_payment_method_types",
+                JsonArray(settings[session.allowedPaymentMethodTypes].sorted().map(::JsonPrimitive)),
             )
         }
     }
