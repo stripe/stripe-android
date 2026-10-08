@@ -6,6 +6,7 @@ trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
+    pull_request_target_branch: 'master'
     pipeline: main-trigger-pipeline
 app:
   envs:
