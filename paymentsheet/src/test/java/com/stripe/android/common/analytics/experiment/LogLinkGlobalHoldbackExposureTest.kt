@@ -2,12 +2,15 @@ package com.stripe.android.common.analytics.experiment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.PUBLISHABLE_KEY
 import com.stripe.android.link.repositories.FakeLinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConsumerSessionLookup
@@ -23,6 +26,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -37,9 +42,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@RunWith(TestParameterInjector::class)
 class LogLinkGlobalHoldbackExposureTest {
 
     private lateinit var eventReporter: FakeEventReporter
@@ -78,6 +85,76 @@ class LogLinkGlobalHoldbackExposureTest {
             mode = EventReporter.Mode.Complete,
         )
     }
+
+    @Test
+    fun `disabled Link lookup uses Checkout email independently from billing email`(
+        @TestParameter source: CheckoutEmailSource,
+        @TestParameter returning: Boolean,
+    ) = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(LINK_GLOBAL_HOLD_BACK to "holdback"),
+            ),
+        )
+        val state = createElementsState(
+            paymentMethodMetadata = checkoutMetadata(source),
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "billing@example.com"),
+        )
+        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
+            ConsumerSessionLookup(
+                exists = returning,
+                consumerSession = CONSUMER_SESSION,
+                errorMessage = null,
+                publishableKey = PUBLISHABLE_KEY,
+            ),
+        )
+        logLinkHoldbackExperiment(
+            experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
+            elementsSession = elementsSession,
+            state = state,
+        )
+        val expectedEmail = when (source) {
+            CheckoutEmailSource.Collected -> "checkout@example.com"
+            CheckoutEmailSource.Session -> "session@example.com"
+            CheckoutEmailSource.Customer -> "customer@example.com"
+            CheckoutEmailSource.Absent -> null
+        }
+        if (expectedEmail != null) {
+            assertThat(linkRepository.awaitLookupWithoutBackendLogging().email).isEqualTo(expectedEmail)
+        }
+        val experiment = eventReporter.experimentExposureCalls.awaitItem().experiment as LoggableExperiment.LinkHoldback
+        assertThat(experiment.isReturningLinkUser).isEqualTo(returning && expectedEmail != null)
+        assertThat(experiment.emailRecognitionSource).isEqualTo(
+            EmailRecognitionSource.EMAIL.takeIf { expectedEmail != null }
+        )
+        linkRepository.ensureAllEventsConsumed()
+        eventReporter.experimentExposureCalls.ensureAllEventsConsumed()
+    }
+
+    private fun checkoutMetadata(source: CheckoutEmailSource): PaymentMethodMetadata =
+        PaymentMethodMetadataFactory.create(
+            linkState = null,
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_test",
+                instancesKey = "test",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    customerEmail = "session@example.com".takeIf { source == CheckoutEmailSource.Session },
+                ).copy(
+                    customer = CheckoutSessionResponse.Customer(
+                        id = "cus_test",
+                        email = "customer@example.com".takeIf {
+                            source == CheckoutEmailSource.Customer || source == CheckoutEmailSource.Session
+                        },
+                        paymentMethods = emptyList(),
+                        canDetachPaymentMethod = false,
+                    ),
+                ),
+                collectedEmail = "checkout@example.com".takeUnless { source == CheckoutEmailSource.Absent },
+            ),
+        )
+
+    enum class CheckoutEmailSource { Collected, Session, Customer, Absent }
 
     @Test
     fun `invoke should log exposure TREATMENT when feature flag is enabled and holdback is on`() = runTest {
@@ -359,6 +436,12 @@ class LogLinkGlobalHoldbackExposureTest {
         )
         val state = createElementsState(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    id = "cs_test",
+                    instancesKey = "test",
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    collectedEmail = null,
+                ),
                 linkState = LinkState(
                     configuration = TestFactory.LINK_CONFIGURATION.copy(
                         customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(email = "test@example.com")
