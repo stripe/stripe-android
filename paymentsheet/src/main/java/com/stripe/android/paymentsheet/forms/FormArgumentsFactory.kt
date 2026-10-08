@@ -15,6 +15,7 @@ internal object FormArgumentsFactory {
             merchantName = metadata.merchantName,
             amount = metadata.amount(),
             billingDetails = metadata.defaultBillingDetails,
+            prefillEmail = null,
             shippingDetails = metadata.shippingDetails,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
