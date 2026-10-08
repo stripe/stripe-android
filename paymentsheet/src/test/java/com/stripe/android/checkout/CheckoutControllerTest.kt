@@ -741,21 +741,27 @@ internal class CheckoutControllerTest {
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(
-                combine(
-                    withTotal(4099),
-                    { json ->
-                        json.getJSONObject("server_built_elements_session_params")
-                            .getJSONObject("deferred_intent").put("amount", 4099)
-                    },
-                ),
-            ),
+            responseFactory = successResponseFactory { json ->
+                checkoutItemJson(json).put("total", 4099)
+                json.getJSONObject("server_built_elements_session_params")
+                    .getJSONObject("deferred_intent").put("amount", 4099)
+                val discounts = JSONArray().put(
+                    JSONObject()
+                        .put("amount", 1000)
+                        .put("coupon", JSONObject().put("code", "10OFF").put("name", "$10 off"))
+                        .put("promotion_code", JSONObject().put("code", "10OFF"))
+                )
+                val recurringDetails = json.getJSONObject("recurring_details")
+                recurringDetails.getJSONObject("total_summary").put("total_discount_amounts", discounts)
+            },
         )
 
         val result = controller.applyPromotionCode("10OFF")
 
         result.getOrThrow()
+        assertThat(controller.session.value?.totals?.subtotal?.minorUnitsAmount).isEqualTo(5099.0)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
+        assertThat(controller.session.value?.discountAmounts?.single()?.minorUnitsAmount).isEqualTo(1000.0)
         assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
         assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
             .isEqualTo(4099L)
