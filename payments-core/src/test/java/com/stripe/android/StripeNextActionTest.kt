@@ -39,49 +39,26 @@ internal class StripeNextActionTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `payment next action with empty secret returns an error for Activity`() = runScenario {
-        stripe.handleNextActionForPayment(activity, "")
+    fun `next action with empty secret returns an error`(
+        @TestParameter intentType: PaymentController.StripeIntentType,
+        @TestParameter host: Host,
+    ) = runScenario {
+        handleNextAction(intentType, host, "")
 
-        assertError(PaymentController.StripeIntentType.PaymentIntent)
+        assertError(intentType)
     }
 
     @Test
-    fun `payment next action with empty secret returns an error for Fragment`() = runScenario {
-        stripe.handleNextActionForPayment(fragment, "")
+    fun `next action error omits the supplied invalid secret`(
+        @TestParameter intentType: PaymentController.StripeIntentType,
+    ) = runScenario {
+        val clientSecret = when (intentType) {
+            PaymentController.StripeIntentType.PaymentIntent -> "person@example.com"
+            PaymentController.StripeIntentType.SetupIntent -> "person@example.com_secret_invalid"
+        }
+        handleNextAction(intentType, Host.Activity, clientSecret)
 
-        assertError(PaymentController.StripeIntentType.PaymentIntent)
-    }
-
-    @Test
-    fun `setup next action with empty secret returns an error for Activity`() = runScenario {
-        stripe.handleNextActionForSetupIntent(activity, "")
-
-        assertError(PaymentController.StripeIntentType.SetupIntent)
-    }
-
-    @Test
-    fun `setup next action with empty secret returns an error for Fragment`() = runScenario {
-        stripe.handleNextActionForSetupIntent(fragment, "")
-
-        assertError(PaymentController.StripeIntentType.SetupIntent)
-    }
-
-    @Test
-    fun `payment next action error omits the supplied invalid secret`() = runScenario {
-        val clientSecret = "person@example.com"
-        stripe.handleNextActionForPayment(activity, clientSecret)
-
-        val error = assertError(PaymentController.StripeIntentType.PaymentIntent)
-
-        assertThat(error.stackTraceToString()).doesNotContain(clientSecret)
-    }
-
-    @Test
-    fun `setup next action error omits the supplied invalid secret`() = runScenario {
-        val clientSecret = "person@example.com_secret_invalid"
-        stripe.handleNextActionForSetupIntent(activity, clientSecret)
-
-        val error = assertError(PaymentController.StripeIntentType.SetupIntent)
+        val error = assertError(intentType)
 
         assertThat(error.stackTraceToString()).doesNotContain(clientSecret)
     }
@@ -100,16 +77,7 @@ internal class StripeNextActionTest {
             }
         }
 
-        when (intentType) {
-            PaymentController.StripeIntentType.PaymentIntent -> when (host) {
-                Host.Activity -> stripe.handleNextActionForPayment(activity, clientSecret)
-                Host.Fragment -> stripe.handleNextActionForPayment(fragment, clientSecret)
-            }
-            PaymentController.StripeIntentType.SetupIntent -> when (host) {
-                Host.Activity -> stripe.handleNextActionForSetupIntent(activity, clientSecret)
-                Host.Fragment -> stripe.handleNextActionForSetupIntent(fragment, clientSecret)
-            }
-        }
+        handleNextAction(intentType, host, clientSecret)
 
         val error = assertError(intentType)
 
@@ -176,6 +144,23 @@ internal class StripeNextActionTest {
         val callback: FakeApiResultCallback,
         val testDispatcher: TestDispatcher,
     ) {
+        fun handleNextAction(
+            intentType: PaymentController.StripeIntentType,
+            host: Host,
+            clientSecret: String,
+        ) {
+            when (intentType) {
+                PaymentController.StripeIntentType.PaymentIntent -> when (host) {
+                    Host.Activity -> stripe.handleNextActionForPayment(activity, clientSecret)
+                    Host.Fragment -> stripe.handleNextActionForPayment(fragment, clientSecret)
+                }
+                PaymentController.StripeIntentType.SetupIntent -> when (host) {
+                    Host.Activity -> stripe.handleNextActionForSetupIntent(activity, clientSecret)
+                    Host.Fragment -> stripe.handleNextActionForSetupIntent(fragment, clientSecret)
+                }
+            }
+        }
+
         suspend fun assertError(type: PaymentController.StripeIntentType): Exception {
             testDispatcher.scheduler.advanceUntilIdle()
 
