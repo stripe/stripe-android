@@ -66,6 +66,7 @@ class USBankAccountFormViewModelTest {
         instantDebits = false,
         incentive = null,
         formArgs = FormArguments(
+            prefillEmail = null,
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
@@ -105,6 +106,42 @@ class USBankAccountFormViewModelTest {
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @Test
+    fun `visible bank account email prefills independently from billing defaults`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = PaymentSheet.BillingDetails(email = "billing@example.com"),
+                    prefillEmail = "checkout@example.com",
+                ),
+            ),
+        )
+        viewModel.email.test {
+            assertThat(awaitItem()).isEqualTo("checkout@example.com")
+            viewModel.emailController.onValueChange("billing@example.com")
+            assertThat(awaitItem()).isEqualTo("billing@example.com")
+        }
+    }
+
+    @Test
+    fun `hidden bank account email does not receive Checkout prefill`() = runTest {
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = PaymentSheet.BillingDetails(email = "billing@example.com"),
+                    prefillEmail = "checkout@example.com",
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        attachDefaultsToPaymentMethod = true,
+                    ),
+                ),
+            ),
+        )
+        viewModel.email.test {
+            assertThat(awaitItem()).isEqualTo("billing@example.com")
+        }
+    }
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
@@ -467,6 +504,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
+                    prefillEmail = "prefill@example.com",
                     billingDetails = PaymentSheet.BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
