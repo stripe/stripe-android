@@ -87,6 +87,7 @@ internal class KycDocumentCollectionModel(
             return false
         }
         val document = document ?: return false
+        val selectedSlot = documentSlots.firstOrNull { it.index == slotIndex } ?: return false
         if (
             document.acceptedSubtypes.none { subtype -> subtype.id == subtypeId } ||
             !canSelectSubtype(slotIndex, subtypeId)
@@ -94,7 +95,13 @@ internal class KycDocumentCollectionModel(
             return false
         }
 
-        updateDocumentSlot(slotIndex) { slot -> slot.copy(subtypeId = subtypeId) }
+        if (requirementType == KycRequirementType.SourceOfFunds) {
+            documentSlots = documentSlots.map { slot ->
+                if (slot.subtypeId == selectedSlot.subtypeId) slot.copy(subtypeId = subtypeId) else slot
+            }
+        } else {
+            updateDocumentSlot(slotIndex) { slot -> slot.copy(subtypeId = subtypeId) }
+        }
         editingDocumentSlot = slotIndex
         validationError = null
         validationFileName = null
@@ -222,6 +229,12 @@ internal class KycDocumentCollectionModel(
 
     private fun canSelectSubtype(slotIndex: Int, subtypeId: String): Boolean {
         val document = document ?: return false
+        if (requirementType == KycRequirementType.SourceOfFunds) {
+            val selectedSlot = documentSlots.firstOrNull { it.index == slotIndex } ?: return false
+            val otherTypes = documentSlots.filter { it.file != null && it.subtypeId != selectedSlot.subtypeId }
+                .mapNotNull { it.subtypeId }.toSet()
+            return subtypeId !in otherTypes && otherTypes.size < document.maxDocumentTypes
+        }
         val selectedTypes = documentSlots.filter { it.index != slotIndex && it.file != null }
             .mapNotNull { it.subtypeId }.toSet()
         val fileCount = documentSlots.count {
@@ -337,7 +350,10 @@ internal class KycDocumentCollectionModel(
             slots = documentSlots.map { slot ->
                 KycDocumentSlotState(
                     index = slot.index,
-                    subtypes = it.acceptedSubtypes.map { subtype ->
+                    subtypes = it.acceptedSubtypes.filter { subtype ->
+                        requirementType != KycRequirementType.SourceOfFunds ||
+                            canSelectSubtype(slot.index, subtype.id)
+                    }.map { subtype ->
                         KycDocumentSubtypeState(
                             id = subtype.id,
                             label = subtype.label,

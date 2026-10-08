@@ -545,26 +545,28 @@ internal class KycStateHolderTest {
         assertThat(createSubmission()).isNull()
         assertThat(state.validationError).isEqualTo(KycValidationError.MissingDocuments)
 
-        onDocumentSubtypeSelected(1, "payslip")
+        onAddDocuments()
+        val slot = requireNotNull(state.document?.editingSlotIndex)
+        onFileSelected(slot, File("/tmp/salary.pdf"), "salary.pdf", fileId = "file_salary")
 
         assertThat(createSubmission()?.requirements?.values?.single()?.documents?.map { it.documentSubtype })
             .containsExactly("bank_statement", "payslip")
     }
 
     @Test
-    fun `maximum distinct types disables new types but permits more files of existing type`() = runDocumentScenario(
+    fun `maximum distinct types permits replacing the existing source type`() = runDocumentScenario(
         maxDocumentTypes = 1,
     ) {
         onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf", fileId = "file_uploaded")
 
         val slot = requireNotNull(state.document).slots.first { it.index == 1 }
-        assertThat(slot.subtypes.first { it.id == "payslip" }.isEnabled).isFalse()
+        assertThat(slot.subtypes.first { it.id == "payslip" }.isEnabled).isTrue()
         assertThat(slot.subtypes.first { it.id == "bank_statement" }.isEnabled).isTrue()
         onDocumentSubtypeSelected(1, "payslip")
         onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
 
         val documents = requireNotNull(createSubmission()).requirements.values.single().documents
-        assertThat(documents.single().documentSubtype).isEqualTo("bank_statement")
+        assertThat(documents.single().documentSubtype).isEqualTo("payslip")
         assertThat(documents.single().uploadedFileIds).hasSize(2)
     }
 
@@ -613,7 +615,7 @@ internal class KycStateHolderTest {
         maxFilesPerDocumentType = 1,
     ) {
         onFileSelected(0, File("bank.pdf"), "bank.pdf", "file_bank")
-        onDocumentSubtypeSelected(1, "payslip")
+        onAddDocuments()
         assertThat(canSelectFile(1)).isTrue()
         onFileSelected(1, File("salary.pdf"), "salary.pdf", "file_salary")
         assertThat(createSubmission()?.requirements?.values?.single()?.documents).hasSize(2)
