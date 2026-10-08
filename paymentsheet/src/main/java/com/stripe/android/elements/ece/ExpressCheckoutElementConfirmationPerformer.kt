@@ -9,7 +9,6 @@ import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -89,10 +88,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             configuration = configuration,
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                configuration = configuration,
-                paymentMethodMetadata = paymentMethodMetadata,
-            ),
             googlePayShippingAddressParameters = shippingAddressParameters,
             showSecondaryButtonForLink = false,
         ) ?: return null
