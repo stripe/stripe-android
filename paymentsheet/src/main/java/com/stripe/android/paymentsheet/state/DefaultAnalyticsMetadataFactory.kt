@@ -159,7 +159,6 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     }
 
     private fun CommonConfiguration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
-        put("api_configuration", SimpleBoolean(apiConfiguration != null))
         put("customer", SimpleBoolean(customer != null))
         put("customer_access_provider", SimpleString(customer?.accessType?.analyticsValue))
         put("googlepay", SimpleBoolean(googlePay != null))
@@ -184,6 +183,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 
         put("appearance", Nested(appearance.analyticsMap()))
         put("card_funding_acceptance", SimpleBoolean(allowedCardFundingTypes.toAnalyticsValue()))
+        put("api_configuration", SimpleBoolean(apiConfiguration != null))
     }
 
     private fun PaymentSheet.BillingDetailsCollectionConfiguration.analyticsMap() =
