@@ -17,8 +17,9 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val stateHolder: EmbeddedPaymentElementStateHolder,
 ) {
-    fun initialize(applicationIsTaskOwner: Boolean, retainCallbacks: Boolean) {
+    fun initialize(applicationIsTaskOwner: Boolean) {
         if (!applicationIsTaskOwner && !savedStateHandle.previouslySentDeepLinkEvent) {
             eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
             savedStateHandle.previouslySentDeepLinkEvent = true
@@ -29,10 +30,9 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    if (!retainCallbacks) {
-                        PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
-                    }
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     sheetStateHolder.sheetLauncher = null
+                    stateHolder.clear(owner)
                 }
             }
         )

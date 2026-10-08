@@ -107,10 +107,12 @@ internal class EmbeddedPaymentElementComposeTest {
 
         assertThat(firstLaunch.input.paymentElementCallbackIdentifier)
             .isNotEqualTo(secondLaunch.input.paymentElementCallbackIdentifier)
-        assertThat(PaymentElementCallbackReferences[firstLaunch.input.paymentElementCallbackIdentifier]
-            ?.createIntentCallback).isSameInstanceAs(firstCallbacks.createIntentCallback)
-        assertThat(PaymentElementCallbackReferences[secondLaunch.input.paymentElementCallbackIdentifier]
-            ?.createIntentCallback).isSameInstanceAs(secondCallbacks.createIntentCallback)
+        assertThat(
+            PaymentElementCallbackReferences[firstLaunch.input.paymentElementCallbackIdentifier]?.createIntentCallback
+        ).isSameInstanceAs(firstCallbacks.createIntentCallback)
+        assertThat(
+            PaymentElementCallbackReferences[secondLaunch.input.paymentElementCallbackIdentifier]?.createIntentCallback
+        ).isSameInstanceAs(secondCallbacks.createIntentCallback)
         complete(firstLaunch)
         complete(secondLaunch)
         assertCompleted(firstCallbacks)
@@ -193,8 +195,9 @@ internal class EmbeddedPaymentElementComposeTest {
         assertThat(embeddedViewModelKeys()).containsExactly(originalKey)
         val launch = confirm(firstElement)
         assertThat(viewModelKey(launch.input.paymentElementCallbackIdentifier)).isEqualTo(originalKey)
-        assertThat(PaymentElementCallbackReferences[launch.input.paymentElementCallbackIdentifier]
-            ?.createIntentCallback).isSameInstanceAs(firstCallbacks.createIntentCallback)
+        assertThat(
+            PaymentElementCallbackReferences[launch.input.paymentElementCallbackIdentifier]?.createIntentCallback
+        ).isSameInstanceAs(firstCallbacks.createIntentCallback)
         complete(launch)
         assertCompleted(firstCallbacks)
     }
@@ -212,6 +215,7 @@ internal class EmbeddedPaymentElementComposeTest {
 
         composeRule.runOnIdle {
             controller = replacementController
+            activity = replacementController.get()
             mounted = true
         }
         composeRule.waitForIdle()
@@ -228,6 +232,7 @@ internal class EmbeddedPaymentElementComposeTest {
     fun `retained named runtime delivers pending confirmation to the recreated Activity callback`() = runScenario {
         val original = firstElement
         val originalStore = controller.get().viewModelStore
+        val originalViewModel = originalStore[viewModelKey(DEFAULT_NAME)]
         composeRule.runOnIdle { original.state = loadedState() }
         val launch = confirm(original)
         val originalRegistry = registry
@@ -237,10 +242,13 @@ internal class EmbeddedPaymentElementComposeTest {
             mounted = false
         }
         composeRule.waitForIdle()
-        composeRule.runOnIdle { controller.recreate() }
+        composeRule.runOnIdle {
+            controller.recreate()
+            activity = controller.get()
+        }
         assertThat(controller.get().viewModelStore).isSameInstanceAs(originalStore)
-        assertThat(PaymentElementCallbackReferences[DEFAULT_NAME]?.createIntentCallback)
-            .isSameInstanceAs(firstCallbacks.createIntentCallback)
+        assertThat(originalStore[viewModelKey(DEFAULT_NAME)]).isSameInstanceAs(originalViewModel)
+        assertThat(PaymentElementCallbackReferences[DEFAULT_NAME]).isSameInstanceAs(unrelatedCallbacks)
         assertThat(original.state?.confirmationState?.selection).isEqualTo(customSelection(CUSTOM_METHOD_ID))
 
         val replacementRegistry = FakeEmbeddedActivityResultRegistry().apply {
@@ -258,6 +266,8 @@ internal class EmbeddedPaymentElementComposeTest {
 
         assertThat(firstElement).isNotSameInstanceAs(original)
         assertThat(embeddedViewModelKeys()).containsExactly(viewModelKey(DEFAULT_NAME))
+        assertThat(PaymentElementCallbackReferences[DEFAULT_NAME]?.createIntentCallback)
+            .isSameInstanceAs(replacementCallbacks.createIntentCallback)
         assertCompleted(replacementCallbacks)
         assertThat(firstElement.state).isNull()
         assertThat(firstElement.paymentOption.value).isNull()
@@ -282,7 +292,7 @@ internal class EmbeddedPaymentElementComposeTest {
         val unrelatedCallbacks = seedUnrelatedCallbacks()
         val scenario = Scenario(firstName, secondName, createActivity(savedState = null), unrelatedCallbacks)
         stateRestorer.setContent {
-            val activity = scenario.controller.get()
+            val activity = scenario.activity
             CompositionLocalProvider(
                 LocalContext provides activity,
                 LocalLifecycleOwner provides activity,
@@ -372,7 +382,8 @@ internal class EmbeddedPaymentElementComposeTest {
         val firstCallbacks = CallbackRecorder()
         val secondCallbacks = CallbackRecorder()
         val replacementCallbacks = CallbackRecorder()
-        var controller by mutableStateOf(controller)
+        var controller = controller
+        var activity by mutableStateOf(controller.get())
         var mounted by mutableStateOf(true)
         var firstVisible by mutableStateOf(true)
         var firstBuilder by mutableStateOf(firstCallbacks.builder(firstName))

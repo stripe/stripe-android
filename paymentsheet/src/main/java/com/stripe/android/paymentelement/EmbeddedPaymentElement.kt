@@ -814,7 +814,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             paymentElementCallbackIdentifier: String,
             resultCallback: ResultCallback,
-            retainCallbacks: Boolean,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
@@ -838,7 +837,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 )
                 subcomponent.initializer.initialize(
                     applicationIsTaskOwner = activity.applicationIsTaskOwner(),
-                    retainCallbacks = retainCallbacks,
                 )
                 subcomponent.embeddedPaymentElement
             }

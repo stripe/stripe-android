@@ -59,41 +59,44 @@ fun rememberEmbeddedPaymentElement(
             lifecycleOwner = lifecycleOwner,
             viewModelStoreOwner = viewModelStoreOwner,
             resultCallback = { onResult(it) },
-            retainCallbacks = builder.integrationName != null,
         )
     }
 
     val callbacks = remember(builder, embeddedPaymentElement) {
-        @OptIn(
-            ExperimentalAnalyticEventCallbackApi::class,
-            SharedPaymentTokenSessionPreview::class,
-            TapToAddPreview::class
-        )
-        PaymentElementCallbacks.Builder()
-            .apply {
-                when (val deferredHandler = builder.deferredHandler) {
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
-                        createIntentCallback(deferredHandler.createIntentCallback)
-                    }
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
-                        createIntentCallback(
-                            deferredHandler.createIntentWithConfirmationTokenCallback
-                        )
-                    }
-                    is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
-                        preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
-                    }
-                }
-            }
-            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
-            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-            .analyticEventCallback(builder.analyticEventCallback)
-            .createCardPresentSetupIntentCallback(builder.createCardPresentSetupIntentCallback)
-            .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
-            .build()
+        builder.createCallbacks(embeddedPaymentElement)
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     return embeddedPaymentElement
+}
+
+@OptIn(
+    ExperimentalAnalyticEventCallbackApi::class,
+    SharedPaymentTokenSessionPreview::class,
+    TapToAddPreview::class,
+)
+private fun EmbeddedPaymentElement.Builder.createCallbacks(
+    embeddedPaymentElement: EmbeddedPaymentElement,
+): PaymentElementCallbacks {
+    return PaymentElementCallbacks.Builder()
+        .apply {
+            when (val handler = deferredHandler) {
+                is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
+                    createIntentCallback(handler.createIntentCallback)
+                }
+                is EmbeddedPaymentElement.Builder.DeferredHandler.ConfirmationToken -> {
+                    createIntentCallback(handler.createIntentWithConfirmationTokenCallback)
+                }
+                is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
+                    preparePaymentMethodHandler(handler.preparePaymentMethodHandler)
+                }
+            }
+        }
+        .confirmCustomPaymentMethodCallback(confirmCustomPaymentMethodCallback)
+        .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+        .analyticEventCallback(analyticEventCallback)
+        .createCardPresentSetupIntentCallback(createCardPresentSetupIntentCallback)
+        .rowSelectionImmediateActionCallback(rowSelectionBehavior, embeddedPaymentElement)
+        .build()
 }
