@@ -64,6 +64,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                 configuration = configuration.asCommonConfiguration(),
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
+            showSecondaryButtonForLink = false,
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
