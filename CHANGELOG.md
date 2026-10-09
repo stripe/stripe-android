@@ -9,6 +9,7 @@ NEXT_VERSION_BUMP: MINOR
 * [Fixed] Return errors for invalid client secrets in legacy Stripe next-action APIs instead of throwing uncaught exceptions.
 
 ### PaymentSheet
+* [Fixed] Address forms now recognize country and state codes and names case-insensitively when prefilling default values.
 * [ADDED][14585](https://github.com/stripe/stripe-android/pull/14585) Added Naira card API bindings and PaymentSheet support for one-time payments.
 * [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
 * [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
