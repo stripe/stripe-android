@@ -30,7 +30,6 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -338,10 +337,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
             googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
-                configuration = arguments.configuration,
-                paymentMethodMetadata = arguments.paymentMethodMetadata,
-            ),
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
                 configuration = arguments.configuration,
                 paymentMethodMetadata = arguments.paymentMethodMetadata,
             ),
