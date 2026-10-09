@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -114,6 +115,10 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         confirmationHelper.confirm()
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+        val option = args.confirmationOption as LinkConfirmationOption
+        assertThat(option.linkLaunchMode).isEqualTo(
+            LinkLaunchMode.Full(showSecondaryButton = false)
+        )
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
     }
 

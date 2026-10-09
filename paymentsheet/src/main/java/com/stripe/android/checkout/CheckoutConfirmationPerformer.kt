@@ -62,6 +62,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 configuration = configuration,
                 paymentMethodMetadata = state.paymentMethodMetadata,
             ),
+            showSecondaryButtonForLink = false,
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
                 !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
