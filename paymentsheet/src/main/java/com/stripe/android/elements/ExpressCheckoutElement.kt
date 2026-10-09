@@ -74,12 +74,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                  * Link will never be displayed.
                  */
                 Never,
-
-                /**
-                 * Link remains enabled. Its button or row is shown when an existing Link user is
-                 * detected and hidden otherwise.
-                 */
-                WalletButtonHidden,
             }
 
             /** Sets the display configuration for Link. */

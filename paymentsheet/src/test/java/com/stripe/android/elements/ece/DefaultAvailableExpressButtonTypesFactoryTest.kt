@@ -76,35 +76,6 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create filters out Link for logged-out user when its wallet button is hidden`() {
-        val availableExpressButtonTypes = create(
-            availableWallets = listOf(WalletType.Link),
-            configuration = ExpressCheckoutElement.Configuration()
-                .linkConfiguration(
-                    ExpressCheckoutElement.Configuration.LinkConfiguration()
-                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
-                ),
-        )
-
-        assertThat(availableExpressButtonTypes).isEmpty()
-    }
-
-    @Test
-    fun `create returns Link for existing user when its wallet button is hidden`() {
-        val availableExpressButtonTypes = create(
-            availableWallets = listOf(WalletType.Link),
-            configuration = ExpressCheckoutElement.Configuration()
-                .linkConfiguration(
-                    ExpressCheckoutElement.Configuration.LinkConfiguration()
-                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
-                ),
-            linkLoginState = LinkState.LoginState.NeedsVerification,
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(ExpressButtonType.Link)
-    }
-
-    @Test
     fun `create returns all available express button types`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),

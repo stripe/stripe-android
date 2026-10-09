@@ -156,7 +156,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .expressCheckoutElement(
                 ExpressCheckoutElement.Configuration().linkConfiguration(
                     ExpressCheckoutElement.Configuration.LinkConfiguration().display(
-                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden
+                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
                     )
                 )
             )
@@ -169,7 +169,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result?.link?.display)
-            .isEqualTo(PaymentSheet.LinkConfiguration.Display.WalletButtonHidden)
+            .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 
     @Test
