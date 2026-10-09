@@ -27,6 +27,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -163,27 +164,6 @@ private fun SuccessUI(
                 lines = consentPage.lines,
                 bottomSheets = bottomSheets
             )
-
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                BottomSheetHTML(
-                    html = consentPage.privacyPolicy,
-                    bottomSheets = bottomSheets,
-                    modifier = Modifier
-                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-                        .semantics {
-                            testTag = PRIVACY_POLICY_TAG
-                        },
-                    color = colorResource(id = R.color.stripe_html_line),
-                    style = MaterialTheme.typography.body1,
-                    urlSpanStyle = SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        color = colorResource(id = R.color.stripe_html_line)
-                    )
-                )
-            }
         }
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
@@ -231,6 +211,40 @@ private fun SuccessUI(
                 onConsentDeclined()
             }
         }
+
+        ConsentPrivacyPolicy(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+            privacyPolicy = consentPage.privacyPolicy,
+            bottomSheets = bottomSheets
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ConsentPrivacyPolicy(
+    modifier: Modifier,
+    privacyPolicy: String,
+    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        BottomSheetHTML(
+            html = privacyPolicy,
+            bottomSheets = bottomSheets,
+            modifier = Modifier
+                .semantics { testTag = PRIVACY_POLICY_TAG },
+            color = colorResource(id = R.color.stripe_html_line),
+            style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+            urlSpanStyle = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                color = colorResource(id = R.color.stripe_html_line)
+            )
+        )
     }
 }
 

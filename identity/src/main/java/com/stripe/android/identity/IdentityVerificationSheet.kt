@@ -33,9 +33,9 @@ interface IdentityVerificationSheet {
         @get:ColorInt val brandColor: Int? = null
     ) {
         /**
-         * Configuration for the biometric consent screen's header.
+         * Configuration for the biometric consent screen.
          *
-         * When `null`, the biometric consent screen uses the default header.
+         * When `null`, the biometric consent screen uses its default layout.
          */
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -50,7 +50,7 @@ interface IdentityVerificationSheet {
         var secondaryButtonStyle: SecondaryButtonStyle? = null
 
         /**
-         * Configuration for the biometric consent screen's header.
+         * Configuration for the biometric consent screen.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
