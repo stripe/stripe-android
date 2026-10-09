@@ -39,6 +39,7 @@ enum class Currency(val displayName: String, override val value: String) : Value
     IDR("IDR", "idr"),
     PHP("PHP", "php"),
     VND("VND", "vnd"),
+    NGN("NGN", "ngn"),
     PLN("PLN", "pln"),
     SGD("SGD", "sgd"),
     MYR("MYR", "myr"),
