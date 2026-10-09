@@ -2,13 +2,13 @@ package com.stripe.android.paymentsheet.utils
 
 import android.app.Activity
 import android.app.Application
+import androidx.test.platform.app.InstrumentationRegistry
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runners.model.Statement
@@ -16,13 +16,15 @@ import org.junit.runners.model.Statement
 internal class ActivityCollectionProfileTest {
     @Test
     fun recordsActivityCategoriesAndUnregistersAfterLeakCheck() = runScenario {
-        val activities = listOf(
-            MainActivity(),
-            PaymentSheetActivity(),
-            PaymentOptionsActivity(),
-            OtherActivity(),
-            PaymentSheetActivity(),
-        )
+        val activities = onMainThread {
+            listOf(
+                MainActivity(),
+                PaymentSheetActivity(),
+                PaymentOptionsActivity(),
+                OtherActivity(),
+                PaymentSheetActivity(),
+            )
+        }
         var callbacks: Application.ActivityLifecycleCallbacks? = null
         val rules = profile.rulesStatement(statement {
             callbacks = application.registerCalls.takeItem()
@@ -84,7 +86,7 @@ internal class ActivityCollectionProfileTest {
         val rules = profile.rulesStatement(statement {
             callbacks = application.registerCalls.takeItem()
             advance(20L)
-            val activity = PaymentSheetActivity()
+            val activity = onMainThread { PaymentSheetActivity() }
             requireNotNull(callbacks).onActivityDestroyed(activity)
             val reference = references.takeItem()
             beforeCollection = profile.snapshot()
@@ -114,7 +116,7 @@ internal class ActivityCollectionProfileTest {
         val rules = profile.rulesStatement(statement {
             callbacks = application.registerCalls.takeItem()
             advance(20L)
-            val activity = OtherActivity()
+            val activity = onMainThread { OtherActivity() }
             requireNotNull(callbacks).onActivityDestroyed(activity)
             val reference = references.takeItem()
             reference.clear()
@@ -187,7 +189,7 @@ internal class ActivityCollectionProfileTest {
         val rules = profile.rulesStatement(statement {
             callbacks = application.registerCalls.takeItem()
             advance(10L)
-            val activity = PaymentSheetActivity()
+            val activity = onMainThread { PaymentSheetActivity() }
             requireNotNull(callbacks).onActivityDestroyed(activity)
             val reference = references.takeItem()
             reference.clear()
@@ -217,10 +219,18 @@ internal class ActivityCollectionProfileTest {
         assertThat(application.unregisterCalls.takeItem()).isSameInstanceAs(callbacks)
     }
 
-    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+    private fun runScenario(block: Scenario.() -> Unit) {
         val scenario = Scenario()
         scenario.block()
         scenario.ensureAllEventsConsumed()
+    }
+
+    private fun <T : Any> onMainThread(block: () -> T): T {
+        lateinit var result: T
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            result = block()
+        }
+        return result
     }
 
     private class Scenario {
