@@ -19,7 +19,8 @@ internal class FakeLogLinkHoldbackExperiment : LogLinkHoldbackExperiment {
         experimentAssignments.forEach { experiment ->
             _calls.add(
                 ExperimentCall(
-                    experiment = experiment
+                    experiment = experiment,
+                    state = state,
                 )
             )
         }
@@ -27,5 +28,6 @@ internal class FakeLogLinkHoldbackExperiment : LogLinkHoldbackExperiment {
 }
 
 internal data class ExperimentCall(
-    val experiment: ElementsSession.ExperimentAssignment
+    val experiment: ElementsSession.ExperimentAssignment,
+    val state: PaymentElementLoader.State,
 )

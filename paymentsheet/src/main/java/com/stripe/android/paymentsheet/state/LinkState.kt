@@ -8,7 +8,9 @@ import com.stripe.android.model.LinkDisabledReason
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
-internal sealed interface LinkStateResult : Parcelable
+internal sealed interface LinkStateResult : Parcelable {
+    val customerInfo: LinkConfiguration.CustomerInfo
+}
 
 @Parcelize
 internal data class LinkState(
@@ -16,6 +18,9 @@ internal data class LinkState(
     val loginState: LoginState,
     val signupModeResult: LinkSignupModeResult
 ) : LinkStateResult {
+
+    override val customerInfo: LinkConfiguration.CustomerInfo
+        get() = configuration.customerInfo
 
     // Constructor added for backwards compatibility with existing tests.
     @VisibleForTesting
@@ -48,4 +53,7 @@ internal data class LinkState(
 }
 
 @Parcelize
-internal data class LinkDisabledState(val linkDisabledReasons: List<LinkDisabledReason>) : LinkStateResult
+internal data class LinkDisabledState(
+    val linkDisabledReasons: List<LinkDisabledReason>,
+    override val customerInfo: LinkConfiguration.CustomerInfo,
+) : LinkStateResult

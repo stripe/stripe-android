@@ -1,21 +1,27 @@
 package com.stripe.android.paymentsheet.state
 
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Customer
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CustomerFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 import kotlin.test.Test
 
+@RunWith(TestParameterInjector::class)
 internal class DefaultRetrieveCustomerEmailTest {
 
     @Test
@@ -32,14 +38,14 @@ internal class DefaultRetrieveCustomerEmailTest {
         customerMetadata = LEGACY_EK_METADATA,
     ) {
         assertThat(result).isNull()
-        val call = customerRepository.retrieveCalls.awaitItem()
+        val call = customerRepository.retrieveCustomerRequests.awaitItem()
         assertThat(call.customerId).isEqualTo("cus_123")
         assertThat(call.ephemeralKeySecret).isEqualTo(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY)
         assertThat(call.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
-    fun `checkout session returns default billing email without calling repository`() = runScenario(
+    fun `Checkout customer metadata without Checkout initialization uses billing email`() = runScenario(
         configuration = CONFIG_WITH_DEFAULT_EMAIL,
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
@@ -87,13 +93,70 @@ internal class DefaultRetrieveCustomerEmailTest {
         assertThat(result).isEqualTo(null)
     }
 
+    @Test
+    fun `Checkout resolves email independently of customer metadata and billing defaults`(
+        @TestParameter source: CheckoutEmailSource,
+        @TestParameter hasCustomerMetadata: Boolean,
+    ) = runScenario(
+        configuration = CONFIG_WITH_DEFAULT_EMAIL,
+        customerMetadata = CHECKOUT_SESSION_METADATA.takeIf { hasCustomerMetadata },
+        customerEmail = "elements@example.com",
+        initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "test",
+            collectedEmail = "collected@example.com".takeUnless { source == CheckoutEmailSource.Absent },
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                customerEmail = "session@example.com".takeIf { source == CheckoutEmailSource.Session },
+                customer = CheckoutSessionResponse.Customer(
+                    id = "cus_test",
+                    email = "attached@example.com".takeIf {
+                        source == CheckoutEmailSource.Session || source == CheckoutEmailSource.Attached
+                    },
+                    paymentMethods = emptyList(),
+                    canDetachPaymentMethod = false,
+                ),
+            ),
+        ),
+    ) {
+        assertThat(result).isEqualTo(source.email)
+        customerRepository.retrieveCustomerRequests.expectNoEvents()
+    }
+
+    enum class CheckoutEmailSource(val email: String?) {
+        Session("session@example.com"), Attached("attached@example.com"),
+        Collected("collected@example.com"), Absent(null)
+    }
+
+    @Test
+    fun `billing email skips legacy retrieval`() = runScenario(
+        configuration = CONFIG_WITH_DEFAULT_EMAIL,
+        customerMetadata = LEGACY_EK_METADATA,
+    ) {
+        assertThat(result).isEqualTo("default@example.com")
+        customerRepository.retrieveCustomerRequests.expectNoEvents()
+    }
+
+    @Test
+    fun `legacy retrieved customer supplies email`() = runScenario(
+        customerMetadata = LEGACY_EK_METADATA,
+        customer = CustomerFactory.create(email = "legacy@example.com"),
+    ) {
+        assertThat(result).isEqualTo("legacy@example.com")
+        val call = customerRepository.retrieveCustomerRequests.awaitItem()
+        assertThat(call.customerId).isEqualTo(LEGACY_EK_METADATA.id)
+        assertThat(call.ephemeralKeySecret).isEqualTo(LEGACY_EK_METADATA.ephemeralKeySecret)
+        assertThat(call.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+    }
+
     private fun runScenario(
         configuration: CommonConfiguration = CONFIG_WITHOUT_EMAIL,
         customerMetadata: CustomerMetadata? = null,
         customerEmail: String? = null,
+        customer: Customer? = null,
+        initializationMode: PaymentElementLoader.InitializationMode =
+            PaymentElementLoader.InitializationMode.PaymentIntent("pi_test_secret_test"),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val customerRepository = CallTrackingCustomerRepository()
+        val customerRepository = FakeCustomerRepository(customer = customer)
         val retrieveEmail = DefaultRetrieveCustomerEmail(
             customerRepository,
             FakeDurationProvider(),
@@ -101,6 +164,7 @@ internal class DefaultRetrieveCustomerEmailTest {
 
         val result = retrieveEmail(
             configuration = configuration,
+            initializationMode = initializationMode,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
             apiConfiguration = DEFAULT_API_CONFIG,
@@ -116,35 +180,8 @@ internal class DefaultRetrieveCustomerEmailTest {
 
     private class Scenario(
         val result: String?,
-        val customerRepository: CallTrackingCustomerRepository,
+        val customerRepository: FakeCustomerRepository,
     )
-
-    /**
-     * A [FakeCustomerRepository] subclass that tracks [retrieveCustomer] calls via Turbine.
-     * Returns null for all calls (Customer has an internal constructor in payments-core).
-     */
-    private class CallTrackingCustomerRepository : FakeCustomerRepository() {
-        data class RetrieveCall(
-            val customerId: String,
-            val ephemeralKeySecret: String,
-            val apiConfiguration: ApiConfiguration.State,
-        )
-
-        val retrieveCalls = Turbine<RetrieveCall>()
-
-        override suspend fun retrieveCustomer(
-            customerId: String,
-            ephemeralKeySecret: String,
-            apiConfiguration: ApiConfiguration.State,
-        ) = null.also {
-            retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret, apiConfiguration))
-        }
-
-        override fun ensureAllEventsConsumed() {
-            super.ensureAllEventsConsumed()
-            retrieveCalls.ensureAllEventsConsumed()
-        }
-    }
 
     private companion object {
         val CONFIG_WITH_DEFAULT_EMAIL = PaymentSheet.Configuration(

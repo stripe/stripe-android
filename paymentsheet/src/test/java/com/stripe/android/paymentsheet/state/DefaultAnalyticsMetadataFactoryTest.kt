@@ -7,6 +7,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -377,6 +378,7 @@ class DefaultAnalyticsMetadataFactoryTest {
     @Test
     fun `create returns expected values when link is disabled`() = runScenario {
         val linkDisabledState = LinkDisabledState(
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo,
             linkDisabledReasons = listOf(
                 LinkDisabledReason.NotSupportedInElementsSession,
                 LinkDisabledReason.LinkConfiguration
@@ -395,6 +397,7 @@ class DefaultAnalyticsMetadataFactoryTest {
     @Test
     fun `create returns expected values when link is disabled due to card brand filtering`() = runScenario {
         val linkDisabledState = LinkDisabledState(
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo,
             linkDisabledReasons = listOf(LinkDisabledReason.CardBrandFiltering)
         )
         val resultMap = createAnalyticsMetadata(
@@ -408,6 +411,7 @@ class DefaultAnalyticsMetadataFactoryTest {
     @Test
     fun `create returns expected values when link is disabled due to billing details collection`() = runScenario {
         val linkDisabledState = LinkDisabledState(
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo,
             linkDisabledReasons = listOf(LinkDisabledReason.BillingDetailsCollection)
         )
         val resultMap = createAnalyticsMetadata(

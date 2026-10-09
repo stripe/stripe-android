@@ -10,7 +10,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -21,7 +20,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,7 +45,6 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
     @Named(MOBILE_SESSION_ID) private val mobileSessionId: String,
     @IOContext private val workContext: CoroutineContext,
-    private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
     private val logger: Logger
@@ -81,7 +78,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
 
-        val customerEmail = state.getEmail(elementsSession.customer?.email)
+        val customerEmail = state.paymentMethodMetadata.linkStateResult?.customerInfo?.email
 
         val defaultValues = state.getDefaultValues()
 
@@ -183,21 +180,5 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             elementsConfiguration is Enabled && elementsConfiguration.isPaymentMethodSaveEnabled == true
         val linkDisabledOrEnableLinkSPMFlagEnabled = !linkEnabled || flags[ELEMENTS_ENABLE_LINK_SPM] == true
         return paymentMethodSaveEnabled && linkDisabledOrEnableLinkSPMFlagEnabled
-    }
-
-    private suspend fun PaymentElementLoader.State.getEmail(
-        elementsSessionCustomerEmail: String?
-    ): String? {
-        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email?.let { return it }
-        val integrationMetadata = paymentMethodMetadata.integrationMetadata
-        if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
-            return integrationMetadata.effectiveEmail
-        }
-        return retrieveCustomerEmail(
-            configuration = config,
-            customerMetadata = paymentMethodMetadata.customerMetadata,
-            customerEmail = elementsSessionCustomerEmail,
-            apiConfiguration = paymentMethodMetadata.apiConfiguration,
-        )
     }
 }

@@ -12,6 +12,8 @@ import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.elementsSession
@@ -553,6 +555,14 @@ internal class VerticalModePaymentSheetActivityTest {
         test: () -> Unit,
     ) {
         networkSetup()
+        if (customer != null) {
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/customers/${customer.id}"),
+            ) { response ->
+                response.setBody("""{"id": "${customer.id}", "object": "customer", "email": null}""")
+            }
+        }
 
         ActivityScenario.launch<PaymentSheetActivity>(
             PaymentSheetContract().createIntent(

@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
@@ -45,6 +48,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
@@ -105,14 +109,18 @@ import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+@RunWith(TestParameterInjector::class)
 internal class DefaultPaymentElementLoaderTest {
 
     @AfterTest
@@ -159,7 +167,12 @@ internal class DefaultPaymentElementLoaderTest {
                     allowsDelayedPaymentMethods = false,
                     isGooglePayReady = true,
                     linkMode = null,
-                    linkState = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession)),
+                    linkState = LinkDisabledState(
+                        listOf(LinkDisabledReason.NotSupportedInElementsSession),
+                        LinkConfiguration.CustomerInfo(
+                            name = null, email = null, phone = null, billingCountryCode = null,
+                        ),
+                    ),
                     availableWallets = emptyList(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
@@ -926,6 +939,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
+            customerRepository.retrieveCustomerRequests.awaitItem()
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
             assertThat(request.types).containsExactly(
                 PaymentMethod.Type.Card,
@@ -960,6 +974,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
+            customerRepository.retrieveCustomerRequests.awaitItem()
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
             assertThat(request.types).doesNotContain(PaymentMethod.Type.AuBecsDebit)
 
@@ -1718,6 +1733,98 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.email)
             .isEqualTo("email@stripe.com")
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `loading waits for disabled Link customer retrieval`() = runScenario {
+        val releaseCustomer = CompletableDeferred<Customer?>()
+        val requests = Turbine<Unit>()
+        val repository = object : FakeCustomerRepository(paymentMethods = PAYMENT_METHODS) {
+            override suspend fun retrieveCustomer(
+                customerId: String,
+                ephemeralKeySecret: String,
+                apiConfiguration: ApiConfiguration.State,
+            ): Customer? {
+                requests.add(Unit)
+                return releaseCustomer.await()
+            }
+        }
+        val analytics = FakeLogLinkHoldbackExperiment()
+        val loader = createPaymentElementLoader(
+            customerRepo = repository,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            logLinkHoldbackExperiment = analytics,
+        )
+        coroutineScope {
+            val loading = async {
+                loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+                    paymentSheetConfiguration = mockConfiguration(
+                        customer = PaymentSheet.CustomerConfiguration(id = "id", ephemeralKeySecret = "ek_123"),
+                    ),
+                    metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+                ).getOrThrow()
+            }
+            requests.awaitItem()
+            assertThat(loading.isCompleted).isFalse()
+            analytics.calls.expectNoEvents()
+            releaseCustomer.complete(CustomerFactory.create(email = "legacy@example.com"))
+            val state = loading.await()
+            assertThat(state.paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+                .isEqualTo("legacy@example.com")
+            repeat(3) {
+                assertThat(analytics.calls.awaitItem().state.paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+                    .isEqualTo("legacy@example.com")
+            }
+        }
+        requests.ensureAllEventsConsumed()
+        analytics.calls.ensureAllEventsConsumed()
+        repository.getPaymentMethodsRequests.awaitItem()
+        repository.ensureAllEventsConsumed()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `disabled Link resolves legacy customer before loading completes even with holdback kill switch`(
+        @TestParameter hasEmail: Boolean,
+    ) = runScenario(
+        customerRepo = FakeCustomerRepository(
+            customer = CustomerFactory.create(email = "legacy@example.com").takeIf { hasEmail },
+        ),
+    ) {
+        val analytics = FakeLogLinkHoldbackExperiment()
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            logLinkHoldbackExperiment = analytics,
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                error = null,
+                linkSettings = null,
+                flags = mapOf(ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP to true),
+            ),
+        )
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration(id = "id", ephemeralKeySecret = "ek_123"),
+            ),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+        val expectedEmail = "legacy@example.com".takeIf { hasEmail }
+        val linkState = result.paymentMethodMetadata.linkStateResult
+        assertThat(linkState).isInstanceOf<LinkDisabledState>()
+        assertThat(linkState?.customerInfo?.email).isEqualTo(expectedEmail)
+        customerRepository.retrieveCustomerRequests.awaitItem()
+        customerRepository.retrieveCustomerRequests.expectNoEvents()
+        repeat(3) {
+            assertThat(analytics.calls.awaitItem().state.paymentMethodMetadata.linkStateResult?.customerInfo)
+                .isEqualTo(linkState?.customerInfo)
+        }
+        analytics.calls.ensureAllEventsConsumed()
+        customerRepository.getPaymentMethodsRequests.awaitItem()
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }

@@ -7,17 +7,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import javax.inject.Inject
 
-/**
- * Retrieves the customer email from any of the available sources.
- *
- * For [CustomerMetadata.CustomerSession] and [CustomerMetadata.LegacyEphemeralKey], checks the
- * default billing email first, then fetches from the [CustomerRepository].
- * For [CustomerMetadata.CheckoutSession] and null, returns the default billing email only.
- */
+/** Resolves the Link email from the initialization context and customer access. */
 internal interface RetrieveCustomerEmail {
 
     suspend operator fun invoke(
         configuration: CommonConfiguration,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         customerEmail: String?,
         apiConfiguration: ApiConfiguration.State,
@@ -31,6 +26,7 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
+        initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         customerEmail: String?,
         apiConfiguration: ApiConfiguration.State,
@@ -38,6 +34,10 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadRetrieveCustomer,
         ) {
+            if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                return@measureDuration initializationMode.checkoutSessionResponse.fixedEmail
+                    ?: initializationMode.collectedEmail
+            }
             val defaultEmail = configuration.defaultBillingDetails?.email
             when (customerMetadata) {
                 is CustomerMetadata.CustomerSession -> {

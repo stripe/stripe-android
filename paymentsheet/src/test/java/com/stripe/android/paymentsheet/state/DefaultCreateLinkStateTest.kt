@@ -1,12 +1,16 @@
 package com.stripe.android.paymentsheet.state
 
+import android.os.Parcel
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -33,9 +37,9 @@ import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 internal class DefaultCreateLinkStateTest {
 
     @Test
@@ -52,8 +56,11 @@ internal class DefaultCreateLinkStateTest {
             apiConfiguration = DEFAULT_API_CONFIG,
         )
 
-        assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
-        assertThat(retrieveCustomerEmail.invokedWith?.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        val invocation = retrieveCustomerEmail.calls.awaitItem()
+        assertThat(invocation.customerEmail).isEqualTo(customerWithEmail.email)
+        assertThat(invocation.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        assertThat(invocation.initializationMode).isEqualTo(PAYMENT_INTENT_INIT_MODE)
+        retrieveCustomerEmail.calls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -95,7 +102,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            collectedEmail = null,
+            collectedEmail = "tax@example.com",
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,
@@ -115,6 +122,7 @@ internal class DefaultCreateLinkStateTest {
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
         val disabledState = result as LinkDisabledState
+        assertThat(disabledState.customerInfo.email).isEqualTo("tax@example.com")
         assertThat(disabledState.linkDisabledReasons)
             .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
     }
@@ -150,13 +158,13 @@ internal class DefaultCreateLinkStateTest {
         )
 
     @Test
-    fun `link is enabled when web Link configuration has default email`() =
+    fun `web Link Checkout requires resolved email despite billing defaults`() =
         testLinkEmailRequirement(
             useNativeLink = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = "merchant@example.com",
-            expectedDisabledReason = null,
+            expectedDisabledReason = LinkDisabledReason.CheckoutSessionsRequiresEmail,
         )
 
     @Test
@@ -196,6 +204,112 @@ internal class DefaultCreateLinkStateTest {
 
         assertThat(result).isInstanceOf<LinkState>()
         assertThat((result as LinkState).signupMode).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
+    }
+
+    @Test
+    @Suppress("LongMethod")
+    fun `resolved customer context is retained and only enabled Link initializes an account`(
+        @TestParameter enabled: Boolean,
+    ) = runTest {
+        val resolver = FakeRetrieveCustomerEmail()
+        val accountCalls = Turbine<LinkConfiguration>()
+        val createLinkState = DefaultCreateLinkState(
+            accountStatusProvider = {
+                accountCalls.add(it)
+                AccountStatus.SignedOut
+            },
+            retrieveCustomerEmail = resolver,
+            linkStore = FakeLinkStore(),
+            linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
+            cardFundingFilterFactory = FakeCardFundingFilterFactory(),
+        )
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+            .defaultBillingDetails(
+                PaymentSheet.BillingDetails(
+                    name = "Customer",
+                    phone = "123",
+                    email = "billing@example.com",
+                    address = PaymentSheet.Address(country = "CA"),
+                )
+            )
+            .link(
+                PaymentSheet.LinkConfiguration(
+                    display = if (enabled) {
+                        PaymentSheet.LinkConfiguration.Display.Automatic
+                    } else {
+                        PaymentSheet.LinkConfiguration.Display.Never
+                    }
+                )
+            )
+            .build().asCommonConfiguration()
+        val result = createLinkState(
+            elementsSession = createElementsSession(customer = customerWithEmail),
+            configuration = configuration,
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+        assertThat(result.customerInfo).isEqualTo(
+            LinkConfiguration.CustomerInfo(
+                name = "Customer",
+                email = customerWithEmail.email,
+                phone = "123",
+                billingCountryCode = "CA",
+            )
+        )
+        resolver.calls.awaitItem()
+        resolver.calls.ensureAllEventsConsumed()
+        if (enabled) {
+            assertThat(accountCalls.awaitItem().customerInfo).isEqualTo(result.customerInfo)
+        } else {
+            assertThat((result as LinkDisabledState).linkDisabledReasons).contains(LinkDisabledReason.LinkConfiguration)
+        }
+        accountCalls.ensureAllEventsConsumed()
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(result, 0)
+            parcel.setDataPosition(0)
+            val restored = parcel.readParcelable<LinkStateResult>(LinkStateResult::class.java.classLoader)
+            assertThat(restored?.customerInfo).isEqualTo(result.customerInfo)
+        } finally {
+            parcel.recycle()
+        }
+    }
+
+    @Test
+    fun `web Link accepts resolved Checkout email sources`(
+        @TestParameter source: DefaultRetrieveCustomerEmailTest.CheckoutEmailSource,
+    ) = runTest {
+        val elementsSession = createElementsSession()
+        val result = createLinkStateFactory(useNativeLink = false)(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "test",
+                collectedEmail = "collected@example.com".takeUnless {
+                    source == DefaultRetrieveCustomerEmailTest.CheckoutEmailSource.Absent
+                },
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    customerEmail = "session@example.com".takeIf {
+                        source == DefaultRetrieveCustomerEmailTest.CheckoutEmailSource.Session
+                    },
+                    customer = CheckoutSessionResponse.Customer(
+                        id = "cus_test",
+                        email = "attached@example.com".takeIf {
+                            source == DefaultRetrieveCustomerEmailTest.CheckoutEmailSource.Attached
+                        },
+                        paymentMethods = emptyList(),
+                        canDetachPaymentMethod = false,
+                    ),
+                ),
+            ),
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+        assertThat(result.customerInfo.email).isEqualTo(source.email)
+        assertThat(result is LinkState).isEqualTo(source.email != null)
     }
 
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
@@ -383,25 +497,30 @@ internal class DefaultCreateLinkStateTest {
     }
 
     private class FakeRetrieveCustomerEmail : RetrieveCustomerEmail {
-        var invokedWith: Invocation? = null
+        val calls = Turbine<Invocation>()
 
         override suspend fun invoke(
             configuration: CommonConfiguration,
+            initializationMode: PaymentElementLoader.InitializationMode,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
             apiConfiguration: ApiConfiguration.State,
         ): String? {
-            invokedWith = Invocation(
-                configuration = configuration,
-                customerMetadata = customerMetadata,
-                customerEmail = customerEmail,
-                apiConfiguration = apiConfiguration,
+            calls.add(
+                Invocation(
+                    configuration = configuration,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    customerEmail = customerEmail,
+                    apiConfiguration = apiConfiguration,
+                )
             )
             return customerEmail
         }
 
         data class Invocation(
             val configuration: CommonConfiguration,
+            val initializationMode: PaymentElementLoader.InitializationMode,
             val customerMetadata: CustomerMetadata?,
             val customerEmail: String?,
             val apiConfiguration: ApiConfiguration.State,

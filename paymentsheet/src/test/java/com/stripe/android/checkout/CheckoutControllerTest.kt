@@ -837,6 +837,8 @@ internal class CheckoutControllerTest {
             (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
                 .collectedEmail
         ).isEqualTo("local@example.com")
+        assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+            .isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
@@ -845,6 +847,7 @@ internal class CheckoutControllerTest {
             (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
                 .collectedEmail
         ).isNull()
+        assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email).isNull()
     }
 
     @Test
@@ -852,6 +855,38 @@ internal class CheckoutControllerTest {
         controller.updateEmail("local@example.com").getOrThrow()
 
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+    }
+
+    @Test
+    fun `Payment Element and ECE recompute the same Link context when collected email changes`() =
+        runMutationScenario(
+            configuration = CheckoutController.Configuration()
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration()),
+            initModifier = { it.remove("customer_email") },
+        ) {
+            controller.updateEmail("local@example.com").getOrThrow()
+            assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+                .isEqualTo("local@example.com")
+            assertThat(
+                committedState().expressCheckoutElementPaymentMethodMetadata?.linkStateResult?.customerInfo?.email
+            ).isEqualTo("local@example.com")
+            controller.updateEmail(null).getOrThrow()
+            assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email).isNull()
+            assertThat(
+                committedState().expressCheckoutElementPaymentMethodMetadata?.linkStateResult?.customerInfo?.email
+            ).isNull()
+        }
+
+    @Test
+    fun `fixed Checkout email retains precedence in Link context after local updates`() = runMutationScenario(
+        initModifier = { it.put("customer_email", "fixed@example.com") },
+    ) {
+        controller.updateEmail("local@example.com").getOrThrow()
+        assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+            .isEqualTo("fixed@example.com")
+        controller.updateEmail(null).getOrThrow()
+        assertThat(committedState().paymentMethodMetadata.linkStateResult?.customerInfo?.email)
+            .isEqualTo("fixed@example.com")
     }
 
     @Test
@@ -1812,6 +1847,7 @@ internal class CheckoutControllerTest {
     // every isUpdating emission and this asserts none are left over. Tests that don't care about
     // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
+        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
         initModifier: (JSONObject) -> Unit = {},
         configureNetworkSetup: () -> Unit = {},
         paymentSelection: PaymentSelection? = null,
@@ -1826,7 +1862,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
         paymentSelection?.let(setup.stateHolder::setSelection)
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
         if (!previousNewSelections.isEmpty) {

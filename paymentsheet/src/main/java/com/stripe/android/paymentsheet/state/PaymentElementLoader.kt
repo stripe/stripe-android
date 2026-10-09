@@ -133,7 +133,7 @@ internal interface PaymentElementLoader {
         }
 
         fun requiresEmailAddress(): Boolean {
-            return this is CheckoutSession && checkoutSessionResponse.customerEmail == null
+            return this is CheckoutSession
         }
 
         enum class WalletsDisabledReason {

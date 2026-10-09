@@ -84,22 +84,30 @@ internal class DefaultCreateLinkState @Inject constructor(
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
     ): LinkStateResult {
+        val customerInfo = createCustomerInfo(
+            configuration = configuration,
+            elementsSession = elementsSession,
+            initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
+            apiConfiguration = apiConfiguration,
+        )
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
             configuration = configuration,
             initializationMode = initializationMode,
+            customerInfo = customerInfo,
         )
 
         val isLinkDisabled = linkDisabledReasons.isNotEmpty()
         if (isLinkDisabled) {
-            return LinkDisabledState(linkDisabledReasons)
+            return LinkDisabledState(linkDisabledReasons, customerInfo)
         }
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
             configuration = configuration,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
-            customerMetadata = customerMetadata,
+            customerInfo = customerInfo,
             clientAttributionMetadata = clientAttributionMetadata,
             apiConfiguration = apiConfiguration,
         )
@@ -118,6 +126,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     }
 
     private fun getLinkDisabledReasons(
+        customerInfo: LinkConfiguration.CustomerInfo,
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -146,7 +155,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         }
 
         val requiresCheckoutSessionEmail =
-            initializationMode.requiresEmailAddress() && configuration.defaultBillingDetails?.email == null
+            initializationMode.requiresEmailAddress() && customerInfo.email == null
         if (requiresCheckoutSessionEmail && useWebLink) {
             add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
         }
@@ -226,49 +235,45 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
     }
 
-    // Create LinkConfiguration without validating whether Link should be enabled at all.
-    // Validation is done in getLinkDisabledReasons.
-    private suspend fun createLinkConfigurationWithoutValidation(
+    private suspend fun createCustomerInfo(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
-        clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
-    ): LinkConfiguration {
-        val cardBrandFilter = getCardBrandFilter(
-            elementsSession = elementsSession,
+    ): LinkConfiguration.CustomerInfo = LinkConfiguration.CustomerInfo(
+        name = configuration.defaultBillingDetails?.name,
+        email = retrieveCustomerEmail(
             configuration = configuration,
-        )
-        val shippingDetails = configuration.shippingDetails
-        val customerPhone = getCustomerPhone(shippingDetails, configuration)
-
-        val resolvedEmail = retrieveCustomerEmail(
-            configuration,
-            customerMetadata,
+            initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
             customerEmail = elementsSession.customer?.email,
             apiConfiguration = apiConfiguration,
-        )
-        val customerInfo = LinkConfiguration.CustomerInfo(
-            name = configuration.defaultBillingDetails?.name,
-            email = resolvedEmail,
-            phone = customerPhone,
-            billingCountryCode = configuration.defaultBillingDetails?.address?.country,
-        )
-        val cardBrandChoice = getCardBrandChoice(elementsSession)
+        ),
+        phone = getCustomerPhone(configuration.shippingDetails, configuration),
+        billingCountryCode = configuration.defaultBillingDetails?.address?.country,
+    )
 
-        return buildLinkConfiguration(
-            configuration = configuration,
-            elementsSession = elementsSession,
-            initializationMode = initializationMode,
-            customerInfo = customerInfo,
-            cardBrandFilter = cardBrandFilter,
-            cardBrandChoice = cardBrandChoice,
-            shippingDetails = shippingDetails,
-            clientAttributionMetadata = clientAttributionMetadata,
-            apiConfiguration = apiConfiguration,
-        )
-    }
+    // Create LinkConfiguration without validating whether Link should be enabled at all.
+    // Validation is done in getLinkDisabledReasons.
+    private fun createLinkConfigurationWithoutValidation(
+        configuration: CommonConfiguration,
+        elementsSession: ElementsSession,
+        initializationMode: PaymentElementLoader.InitializationMode,
+        customerInfo: LinkConfiguration.CustomerInfo,
+        clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: ApiConfiguration.State,
+    ): LinkConfiguration = buildLinkConfiguration(
+        configuration = configuration,
+        elementsSession = elementsSession,
+        initializationMode = initializationMode,
+        customerInfo = customerInfo,
+        cardBrandFilter = getCardBrandFilter(elementsSession, configuration),
+        cardBrandChoice = getCardBrandChoice(elementsSession),
+        shippingDetails = configuration.shippingDetails,
+        clientAttributionMetadata = clientAttributionMetadata,
+        apiConfiguration = apiConfiguration,
+    )
 
     private fun buildLinkConfiguration(
         configuration: CommonConfiguration,
