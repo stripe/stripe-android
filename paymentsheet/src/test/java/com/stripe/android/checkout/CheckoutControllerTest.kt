@@ -19,6 +19,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
@@ -990,6 +991,10 @@ internal class CheckoutControllerTest {
         assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
             .isEqualTo("checkout@example.com")
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -1001,11 +1006,19 @@ internal class CheckoutControllerTest {
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
 
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isNull()
     }
 
     @Test

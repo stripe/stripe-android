@@ -10,6 +10,19 @@ import kotlin.test.Test
 class ConfirmCheckoutSessionParamsTest {
 
     @Test
+    fun `serializes collected information email`() {
+        val params = createParams(
+            collectedInformation = ConfirmCheckoutSessionParams.CollectedInformation(email = "  email@example.com  "),
+        ).toParamMap()
+        assertThat(params["collected_information"]).isEqualTo(mapOf("email" to "  email@example.com  "))
+    }
+
+    @Test
+    fun `omits collected information when absent`() {
+        assertThat(createParams().toParamMap()).doesNotContainKey("collected_information")
+    }
+
+    @Test
     fun `toParamMap includes shared fields`() {
         val params = createParams().toParamMap()
 
@@ -83,8 +96,10 @@ class ConfirmCheckoutSessionParamsTest {
         expectedAmount: Long = 5099L,
         savePaymentMethod: Boolean? = null,
         shipping: ConfirmCheckoutSessionParams.Shipping? = null,
+        collectedInformation: ConfirmCheckoutSessionParams.CollectedInformation? = null,
     ): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
+            collectedInformation = collectedInformation,
             paymentMethodId = "pm_test_123",
             clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
             returnUrl = "stripesdk://return_url",
