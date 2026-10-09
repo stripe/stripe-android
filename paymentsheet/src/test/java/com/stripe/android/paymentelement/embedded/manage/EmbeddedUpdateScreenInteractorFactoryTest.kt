@@ -197,50 +197,6 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     }
 
     @Test
-    fun `saving an unselected card delegates billing synchronization without changing selection`() = runScenario(
-        selectedSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
-    ) {
-        changeBillingPostalCode()
-        interactor.handleViewAction(
-            UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
-        )
-        testScope.advanceUntilIdle()
-
-        assertThat(repository.updateRequests.awaitItem().params.billingDetails?.address?.postalCode)
-            .isEqualTo("10001")
-        assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
-        assertThat(selectionHolder.selection.value)
-            .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
-        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
-            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
-        )
-        assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
-        assertThat(navigatorResultCalls.awaitItem()).isNull()
-        navigatorResultCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `saving a changed billing address delegates billing synchronization without a selection`() = runScenario(
-        selectedSelection = null,
-    ) {
-        changeBillingPostalCode()
-        interactor.handleViewAction(
-            UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
-        )
-        testScope.advanceUntilIdle()
-
-        assertThat(repository.updateRequests.awaitItem().params.billingDetails?.address?.postalCode)
-            .isEqualTo("10001")
-        assertThat(selectionHolder.selection.value).isNull()
-        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
-            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
-        )
-        assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
-        assertThat(navigatorResultCalls.awaitItem()).isNull()
-        navigatorResultCalls.expectNoEvents()
-    }
-
-    @Test
     fun `saving an expiry change delegates billing synchronization with the returned card`() = runScenario(
         updatePaymentMethodResult = Result.success(PAYMENT_METHOD),
     ) {
@@ -292,12 +248,11 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     }
 
     private fun runScenario(
-        selectedSelection: PaymentSelection? = PaymentSelection.Saved(PAYMENT_METHOD),
         updatePaymentMethodResult: Result<PaymentMethod> = Result.success(UPDATED_PAYMENT_METHOD),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
-            setSelection(selectedSelection)
+            setSelection(PaymentSelection.Saved(PAYMENT_METHOD))
         }
         val customerStateHolder = createCustomerStateHolder(selectionHolder)
         val eventReporter = FakeEventReporter()

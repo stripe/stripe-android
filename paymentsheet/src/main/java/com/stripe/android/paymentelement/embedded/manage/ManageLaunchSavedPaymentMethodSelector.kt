@@ -35,17 +35,20 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
         private set
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+        val paymentMethodId = selection.paymentMethod.id
         val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection, checkoutSessionResponse)
-        if (update != null) {
-            _selectionState.value = SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id)
+        val response = update?.let {
+            _selectionState.value = SavedPaymentMethodSelectionState.Pending(paymentMethodId)
+            it().getOrElse { error ->
+                _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
+                return Result.failure(error)
+            }
         }
-        return (update?.invoke() ?: Result.success(null)).map { response ->
-            response?.let(::updateCheckoutSessionResponse)
-            selectionHolder.setSelection(selection)
-            _selectionState.value = SavedPaymentMethodSelectionState.Idle
-        }.onFailure { error ->
-            _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
-        }
+
+        response?.let(::updateCheckoutSessionResponse)
+        selectionHolder.setSelection(selection)
+        _selectionState.value = SavedPaymentMethodSelectionState.Idle
+        return Result.success(Unit)
     }
 
     override suspend fun syncBillingAfterEdit(
