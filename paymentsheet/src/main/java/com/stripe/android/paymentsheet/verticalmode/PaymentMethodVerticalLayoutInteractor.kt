@@ -48,8 +48,6 @@ import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal interface PaymentMethodVerticalLayoutInteractor {
-    val isLiveMode: Boolean
-
     val state: StateFlow<State>
 
     val showsWalletsHeader: StateFlow<Boolean>
@@ -284,8 +282,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             mostRecentlySelectedSavedPaymentMethod
         )
     }
-
-    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,

@@ -1,6 +1,5 @@
 apply from: configs.androidApplication
 
-apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'io.sentry.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
@@ -42,21 +41,6 @@ def runLatencyTestsInCi() {
 
 def getLatencyExperimentIterations() {
     return findProperty('LATENCY_EXPERIMENT_ITERATIONS') ?: "1"
-}
-
-emerge {
-    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
-
-    size {
-        tag.set(System.getenv("EMERGE_TAG"))
-    }
-
-    vcs {
-        gitHub {
-            repoOwner.set("stripe")
-            repoName.set("stripe-android")
-        }
-    }
 }
 
 sentry {

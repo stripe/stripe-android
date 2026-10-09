@@ -1,9 +1,17 @@
 package com.stripe.android
 
+import com.stripe.android.core.ApiConfiguration
+
 internal object ApiKeyFixtures {
     const val FAKE_PUBLISHABLE_KEY = "pk_test_123"
     const val FAKE_STRIPE_ACCOUNT = "acct_123"
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+
+    val DEFAULT_API_CONFIG = ApiConfiguration.State(
+        publishableKey = DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = FAKE_STRIPE_ACCOUNT,
+    )
+
     const val CONNECTED_ACCOUNT_PUBLISHABLE_KEY = "pk_test_fdjfCYpGSwAX24KUEiuaAAWX"
     const val FAKE_EPHEMERAL_KEY = "ek_test_123"
     const val FAKE_SECRET_KEY = "sk_test_123"

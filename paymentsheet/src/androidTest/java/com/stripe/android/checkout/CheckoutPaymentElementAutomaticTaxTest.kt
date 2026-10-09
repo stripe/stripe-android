@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.Turbine
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -19,6 +18,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -42,11 +42,13 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementtestpages.BillingDetailsPage
+import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
-import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Rule
@@ -65,6 +67,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
     }
 
+    private val editPage = EditPage(testRules.compose)
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val billingDetailsPage = BillingDetailsPage(testRules.compose)
@@ -74,6 +77,71 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     @After
     fun teardown() {
         GooglePayRepository.resetFactory()
+    }
+
+    @Test
+    fun testCancellingPaymentOptionsRebindsUpdatedSavedPaymentMethod() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("billing_address_collection", "required")
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(BILLING_ADDRESS_ZIP))),
+                    )
+                    json.getJSONObject("elements_session").remove("link_settings")
+                }
+            },
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) {
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(BILLING_ADDRESS_ZIP)
+
+            presentPaymentOptions()
+            verticalModePage.waitUntilVisible()
+            verticalModePage.clickEdit()
+            editPage.waitUntilVisible()
+            billingDetailsPage.zipCode.performTextReplacement(UPDATED_BILLING_ZIP)
+
+            networkRule.checkoutUpdate(
+                bodyPart("payment_method_to_update[payment_method_id]", SAVED_CARD.id),
+                bodyPart(
+                    "payment_method_to_update[billing_details][address][postal_code]",
+                    UPDATED_BILLING_ZIP,
+                ),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(UPDATED_BILLING_ZIP))),
+                    )
+                }
+            }
+            editPage.update()
+            verticalModePage.waitUntilVisible()
+            Espresso.pressBack()
+
+            testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                controller.session.value?.paymentOption?.billingDetails?.address?.postalCode == UPDATED_BILLING_ZIP
+            }
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(UPDATED_BILLING_ZIP)
+            markTestSucceeded()
+        }
     }
 
     @Test
@@ -100,7 +168,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             billingAddressCollection = "auto",
             hasSavedPaymentMethod = true,
         )
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             checkoutInitResponse = automaticTaxResponse(
@@ -116,7 +184,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                     configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
                 ).getOrThrow()
             },
-        ) { context ->
+        ) {
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
 
             enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
@@ -126,7 +194,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            context.confirm()
+            confirm()
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
@@ -598,56 +666,52 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         holdTaxUpdateResponse: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
-        lateinit var controller: CheckoutController
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             rowSelectionBehavior = rowSelectionBehavior,
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 configureNetworkSetup()
-                configuredController.configure(
+                controller.configure(
                     clientSecret = DEFAULT_CLIENT_SECRET,
                     configuration = configuration,
                 ).getOrThrow()
             },
-        ) { runnerContext ->
-            runBlocking {
-                val scenario = Scenario(
-                    runnerContext = runnerContext,
-                    controller = controller,
-                    holdTaxUpdateResponse = holdTaxUpdateResponse,
-                )
-                scenario.block()
-                scenario.immediateActionCalls.ensureAllEventsConsumed()
-                scenario.taxUpdateRequests.ensureAllEventsConsumed()
-            }
+        ) {
+            val scenario = Scenario(
+                checkoutScenario = this,
+                holdTaxUpdateResponse = holdTaxUpdateResponse,
+            )
+            scenario.block()
+            scenario.immediateActionCalls.ensureAllEventsConsumed()
+            scenario.taxUpdateRequests.ensureAllEventsConsumed()
         }
     }
 
     private class Scenario(
-        private val runnerContext: CheckoutPaymentElementTestRunnerContext,
-        val controller: CheckoutController,
+        private val checkoutScenario: CheckoutPaymentElementScenario,
         holdTaxUpdateResponse: Boolean,
     ) {
+        val controller: CheckoutController
+            get() = checkoutScenario.controller
         val immediateActionCalls = Turbine<Unit>()
         val taxUpdateRequests = Turbine<Unit>()
         val releaseTaxUpdateResponse = CountDownLatch(if (holdTaxUpdateResponse) 1 else 0)
 
         fun presentPaymentOptions() {
-            runnerContext.presentPaymentOptions()
+            checkoutScenario.presentPaymentOptions()
         }
 
         fun confirm() {
-            runnerContext.confirm()
+            checkoutScenario.confirm()
         }
 
         fun recreateHost() {
-            runnerContext.recreateHost()
+            checkoutScenario.recreateHost()
         }
 
         fun markTestSucceeded() {
-            runnerContext.markTestSucceeded()
+            checkoutScenario.markTestSucceeded()
         }
     }
 
@@ -878,6 +942,21 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         useUnmergedTree = true,
     )
 
+    private fun savedCardJson(postalCode: String): JSONObject {
+        return SAVED_CARD.createJson().put(
+            "billing_details",
+            JSONObject().put(
+                "address",
+                JSONObject()
+                    .put("line1", BILLING_ADDRESS_LINE_ONE)
+                    .put("city", BILLING_ADDRESS_CITY)
+                    .put("state", BILLING_ADDRESS_STATE)
+                    .put("country", "US")
+                    .put("postal_code", postalCode),
+            ),
+        )
+    }
+
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INITIAL_TOTAL = 5_099L
@@ -893,6 +972,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         const val SAVED_BILLING_ADDRESS_STATE = "CO"
         const val SAVED_BILLING_ADDRESS_ZIP = "80202"
         const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
+        const val UPDATED_BILLING_ZIP = "94107"
+        val SAVED_CARD = CardPaymentMethodDetails(id = "pm_12345", last4 = "4242")
         const val TAX_STATUS_COMPLETE = "complete"
     }
 }

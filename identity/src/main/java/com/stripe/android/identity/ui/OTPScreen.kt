@@ -180,7 +180,8 @@ internal fun OTPScreen(
 
             LoadingTextButton(
                 modifier = Modifier.testTag(OTP_RESEND_BUTTON_TAG),
-                text = otpStaticPage.resendButtonText.uppercase(),
+                text = otpStaticPage.resendButtonText,
+                uppercase = true,
                 state = when (viewState) {
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Loading
@@ -195,7 +196,8 @@ internal fun OTPScreen(
             LoadingTextButton(
                 modifier = Modifier
                     .testTag(OTP_CANNOT_VERIFY_BUTTON_TAG),
-                text = otpStaticPage.cannotVerifyButtonText.uppercase(),
+                text = otpStaticPage.cannotVerifyButtonText,
+                uppercase = true,
                 state = when (viewState) {
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Disabled

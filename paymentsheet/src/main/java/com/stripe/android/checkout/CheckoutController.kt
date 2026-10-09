@@ -13,9 +13,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -34,7 +35,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -124,14 +124,20 @@ class CheckoutController @Inject internal constructor(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val billingAddress = initialLoad.state.paymentSelection
-                    ?.billingDetails?.address?.toCheckoutAddress()
-                    ?: configurationState.defaults.billingDetails?.address
-                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                val addressSource = response.taxAddressSource
+                val taxAddress = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        initialLoad.state.collectedDetails.shippingAddress
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                            ?: configurationState.defaults.billingDetails?.address
+                    null -> null
+                }
+                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = billingAddress,
+                        addressSource = addressSource,
+                        address = taxAddress,
                     ).getOrThrow()
                     // The updated totals change payment method metadata, so rebuild it before publishing.
                     checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
@@ -510,13 +516,15 @@ class CheckoutController @Inject internal constructor(
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
+         * Possible values are `"google_pay"` and `"link"`.
+         *
          * When empty, Express Checkout Element will render empty content.
          */
-        val availableExpressCheckoutPaymentMethods: List<ExpressCheckoutElement.PaymentMethod> =
+        val availableExpressCheckoutPaymentMethods: List<String> =
             availableExpressButtonTypes.map { type ->
                 when (type) {
-                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
-                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
+                    is ExpressButtonType.GooglePay -> "google_pay"
+                    ExpressButtonType.Link -> "link"
                 }
             }
 
@@ -936,15 +944,15 @@ class CheckoutController @Inject internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class PaymentOptionDisplayData internal constructor(
+            private val paymentOptionResource: PaymentOptionResource,
             /**
-             * Loads the payment method image. Prefer [iconPainter] to render it in Compose.
-             */
-            @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            val imageLoader: suspend () -> Drawable,
-            /**
-             * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
+             * The primary text representing the payment option; e.g. "Google Pay" or "Visa" for a card.
              */
             val label: String,
+            /**
+             * Optional secondary details for the payment option; e.g. "···· 4242" for a card.
+             */
+            val sublabel: String?,
             /**
              * The billing details associated with the customer's selected payment method, if any were collected.
              */
@@ -965,6 +973,16 @@ class CheckoutController @Inject internal constructor(
              */
             val mandateText: AnnotatedString?,
         ) {
+            /**
+             * Loads the payment method image for the provided raw system theme. Appearance-based theme
+             * overrides are resolved internally.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ReactNativeSdkInternal
+            suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+                return paymentOptionResource.load(isSystemDarkTheme)
+            }
+
             /**
              * The billing details collected for a payment method.
              */
@@ -1023,16 +1041,12 @@ class CheckoutController @Inject internal constructor(
                 )
             }
 
-            private val iconDrawable: Drawable by lazy {
-                DelegateDrawable(imageLoader)
-            }
-
             /**
              * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
              */
             val iconPainter: Painter
                 @Composable
-                get() = rememberDrawablePainter(iconDrawable)
+                get() = paymentOptionResource.rememberPainter()
         }
     }
 
@@ -1135,6 +1149,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the payment element.
+         *
+         * This is required if using [PaymentElement].
          */
         fun paymentElement(
             configuration: PaymentElement.Configuration
@@ -1144,6 +1160,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the currency selector element.
+         *
+         * This is required if using [CurrencySelectorElement].
          */
         fun currencySelectorElement(
             configuration: CurrencySelectorElement.Configuration
@@ -1153,6 +1171,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the shipping address element.
+         *
+         * This is required if using [ShippingAddressElement].
          */
         fun shippingAddressElement(
             configuration: ShippingAddressElement.Configuration
@@ -1162,6 +1182,8 @@ class CheckoutController @Inject internal constructor(
 
         /**
          * Sets the configuration for the express checkout element.
+         *
+         * This is required if using [ExpressCheckoutElement].
          */
         fun expressCheckoutElement(
             configuration: ExpressCheckoutElement.Configuration
@@ -1202,7 +1224,7 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Prefill values for the customer's billing/shipping details and email.
+         * Prefill values for the customer's billing/shipping details, email, and phone number.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1210,6 +1232,7 @@ class CheckoutController @Inject internal constructor(
             private var billingDetails: ContactDetails? = null
             private var shippingDetails: ContactDetails? = null
             private var email: String? = null
+            private var phone: String? = null
 
             /**
              * The customer's known billing contact details.
@@ -1232,17 +1255,26 @@ class CheckoutController @Inject internal constructor(
                 this.email = email
             }
 
+            /**
+             * The customer's known phone number. Pass `null` to clear the default phone number.
+             */
+            fun phone(phone: String?): Defaults = apply {
+                this.phone = phone
+            }
+
             @Parcelize
             internal data class State(
                 val billingDetails: ContactDetails.State?,
                 val shippingDetails: ContactDetails.State?,
                 val email: String?,
+                val phone: String?,
             ) : Parcelable
 
             internal fun build(): State = State(
                 billingDetails = billingDetails?.build(),
                 shippingDetails = shippingDetails?.build(),
                 email = email,
+                phone = phone,
             )
 
             /**

@@ -46,7 +46,7 @@ internal class FakeNativeLinkComponent(
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
     override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),

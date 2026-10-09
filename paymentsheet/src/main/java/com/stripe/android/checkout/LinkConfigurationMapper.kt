@@ -21,11 +21,6 @@ internal fun ExpressCheckoutElement.Configuration.LinkConfiguration.State.asPaym
     PaymentSheet.LinkConfiguration =
     PaymentSheet.LinkConfiguration(
         display = display.asPaymentSheet(),
-        collectMissingBillingDetailsForExistingPaymentMethods =
-            collectMissingBillingDetailsForExistingPaymentMethods,
-        allowUserEmailEdits = true,
-        allowLogOut = true,
-        disallowFundingSourceCreation = disallowFundingSourceCreation,
     )
 
 @OptIn(CheckoutSessionPreview::class)
@@ -46,6 +41,4 @@ private fun ExpressCheckoutElement.Configuration.LinkConfiguration.Display.asPay
         PaymentSheet.LinkConfiguration.Display.Automatic
     ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never ->
         PaymentSheet.LinkConfiguration.Display.Never
-    ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden ->
-        PaymentSheet.LinkConfiguration.Display.WalletButtonHidden
 }

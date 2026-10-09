@@ -27,8 +27,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal interface VerticalModeFormInteractor {
-    val isLiveMode: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -63,7 +61,6 @@ internal class DefaultVerticalModeFormInteractor(
     private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
     private val headerInformation: FormHeaderInformation?,
-    override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
     validationRequested: SharedFlow<Unit>,
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
@@ -151,7 +148,6 @@ internal class DefaultVerticalModeFormInteractor(
                         it.type?.code == selectedPaymentMethodCode
                     },
                 ),
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 processing = viewModel.processing,
                 paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,

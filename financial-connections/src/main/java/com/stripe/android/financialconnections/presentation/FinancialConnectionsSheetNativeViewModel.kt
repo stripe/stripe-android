@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneNotFound
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -443,14 +444,17 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        if (pane.destination.logPaneLaunched) {
+        val event = when {
+            pane == Pane.UNKNOWN -> PaneNotFound(paneName = Pane.Serializer.consumeUnknownValue())
+            pane.destination.logPaneLaunched -> PaneLaunched(
+                referrer = referrer,
+                pane = pane
+            )
+            else -> null
+        }
+        event?.let {
             viewModelScope.launch {
-                eventTracker.track(
-                    PaneLaunched(
-                        referrer = referrer,
-                        pane = pane
-                    )
-                )
+                eventTracker.track(it)
             }
         }
     }
@@ -661,7 +665,6 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     return TopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
-        isTestMode = testMode,
         theme = theme,
         linkBrand = linkBrand,
     )

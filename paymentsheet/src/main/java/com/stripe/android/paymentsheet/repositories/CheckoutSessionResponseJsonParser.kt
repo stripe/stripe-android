@@ -20,7 +20,7 @@ import org.json.JSONObject
 internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
-        require(json.requiredString("ui_mode") == "custom")
+        require(json.requiredString("ui_mode") == "mobile_elements")
         require(json.requiredString("mode") == "modeless")
         val id = json.requiredString("session_id")
         val currency = json.requiredString("currency")
@@ -145,10 +145,14 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         )
     }
 
-    private fun parseRecurringDetails(json: JSONObject) = CheckoutSessionResponse.RecurringDetails(
-        totalDiscountAmounts = json.requiredArray("total_discount_amounts").objects().map(::parseDiscountAmount),
-        totalTaxAmounts = json.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
-    )
+    private fun parseRecurringDetails(json: JSONObject): CheckoutSessionResponse.RecurringDetails {
+        val totalSummary = json.requiredObject("total_summary")
+        return CheckoutSessionResponse.RecurringDetails(
+            totalDiscountAmounts = totalSummary.requiredArray("total_discount_amounts")
+                .objects().map(::parseDiscountAmount),
+            totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
+        )
+    }
 
     private fun parseDiscountAmount(json: JSONObject): CheckoutSessionResponse.DiscountAmount {
         val coupon = json.requiredObject("coupon")
@@ -178,7 +182,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             amount = json.requiredLong("amount").also { require(it >= 0) },
             inclusive = json.requiredBoolean("inclusive"),
             taxRate = CheckoutSessionResponse.TaxRate(
-                displayName = taxRate.requiredString("display_name"),
+                displayName = taxRate.getString("display_name"),
                 percentage = taxRate.requiredFiniteDouble("percentage"),
                 rateType = rateType,
             ),
@@ -230,6 +234,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private fun parseCustomer(json: JSONObject): CheckoutSessionResponse.Customer {
         return CheckoutSessionResponse.Customer(
             id = json.requiredString("id"),
+            email = StripeJsonUtils.optString(json, "email"),
             paymentMethods = json.requiredArray("payment_methods").objects().map { paymentMethod ->
                 PaymentMethodJsonParser().parse(paymentMethod) ?: error("Invalid payment method")
             },

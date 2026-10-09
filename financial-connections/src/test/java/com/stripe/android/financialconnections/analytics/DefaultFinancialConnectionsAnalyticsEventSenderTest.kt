@@ -40,7 +40,8 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         val params = request.params.jsonObject
         assertThat(params.getValue("las_id").jsonPrimitive.content).isEqualTo(manifest.id)
         assertThat(params.getValue("key").jsonPrimitive.content).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(params.getValue("stripe_account").jsonPrimitive.content).isEqualTo("acct_test")
+        assertThat(params.getValue("stripe_account").jsonPrimitive.content)
+            .isEqualTo(ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT)
         assertThat(params.getValue("navigator_language").jsonPrimitive.content).isEqualTo("en-US")
         assertThat(params.getValue("product").jsonPrimitive.content).isEqualTo(manifest.product.value)
         assertThat(params.getValue("livemode").jsonPrimitive.content).isEqualTo(manifest.livemode.toString())
@@ -70,8 +71,7 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
     private fun createSender(requests: Turbine<AnalyticsRequestV2>) = DefaultFinancialConnectionsAnalyticsEventSender(
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-            stripeAccountId = "acct_test",
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null
         ),
         locale = Locale.US,

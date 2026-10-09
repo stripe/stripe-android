@@ -267,7 +267,8 @@ internal fun UploadScreen(
             }
             LoadingButton(
                 modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.stripe_kontinue).uppercase(),
+                text = stringResource(id = R.string.stripe_kontinue),
+                uppercase = true,
                 state = continueButtonState
             ) {
                 continueButtonState = LoadingButtonState.Loading

@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -208,6 +209,69 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 linkBrand = LinkBrand.Link,
                 onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testCompactNewUser() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactExistingUser() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactPaymentMethodDisplayed() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.DefaultPayment(
+                    paymentUI = DisplayablePaymentDetails(
+                        defaultPaymentType = "CARD",
+                        defaultCardBrand = "visa",
+                        last4 = "4242"
+                    ).toDefaultPaymentUI(true)!!,
+                ),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactBankAccountDisplayed() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.DefaultPayment(
+                    paymentUI = DisplayablePaymentDetails(
+                        defaultPaymentType = "BANK_ACCOUNT",
+                        last4 = "6789"
+                    ).toDefaultPaymentUI(true)!!,
+                ),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                onClick = { },
             )
         }
     }

@@ -141,6 +141,7 @@ internal class CheckoutPaymentColorsDefinitions(
 internal class CheckoutPrimaryButtonColorsDefinitions(
     key: String,
     displayName: String,
+    includeSuccessColors: Boolean,
 ) {
     val background = optionalColor(key = "$key.background", displayName = "Background")
     val onBackground = optionalColor(key = "$key.on_background", displayName = "On background")
@@ -153,13 +154,15 @@ internal class CheckoutPrimaryButtonColorsDefinitions(
     val configuration = configuration(
         key = key,
         displayName = displayName,
-        children = arrayOf(
-            background,
-            onBackground,
-            border,
-            successBackground,
-            onSuccessBackground,
-        ),
+        children = buildList {
+            add(background)
+            add(onBackground)
+            add(border)
+            if (includeSuccessColors) {
+                add(successBackground)
+                add(onSuccessBackground)
+            }
+        }.toTypedArray(),
     )
 }
 

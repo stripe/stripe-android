@@ -234,6 +234,12 @@ internal sealed class Destination(
         composable = { ErrorScreen() }
     )
 
+    data object UnknownPane : Destination(
+        route = Pane.UNKNOWN.value,
+        logPaneLaunched = false,
+        composable = { ErrorScreen() }
+    )
+
     data object GenericError : Destination(
         route = Pane.GENERIC_ERROR.value,
         logPaneLaunched = true,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
@@ -13,6 +14,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -74,13 +76,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     ) {
         val screens = factory.createInitialScreen()
         assertThat(screens).hasSize(1)
-    }
-
-    @Test
-    fun `screen is created with correct isLiveMode`() = testScenario {
-        val screen = factory.createInitialScreen().first()
-        val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isTrue()
     }
 
     @Test
@@ -211,6 +206,44 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `continue invokes override once without completing for an existing selection`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
+
+        factory.onContinueClick()
+
+        assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
+        onClickOverrideCalls.expectNoEvents()
+        continueCoordinator.onContinueCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `continue invokes override once without a payment selection`() = testScenario {
+        assertThat(selectionHolder.selection.value).isNull()
+        onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
+
+        factory.onContinueClick()
+
+        assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
+        onClickOverrideCalls.expectNoEvents()
+        continueCoordinator.onContinueCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `clearing override restores normal continuation`() = testScenario {
+        onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
+        factory.onContinueClick()
+        assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
+        continueCoordinator.onContinueCalls.expectNoEvents()
+
+        onClickOverrideDelegate.clear()
+        factory.onContinueClick()
+
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+        onClickOverrideCalls.expectNoEvents()
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         isGooglePayReady: Boolean = true,
@@ -237,6 +270,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val testScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
+        val onClickOverrideCalls = Turbine<Unit>()
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -274,7 +309,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor.create()
         val initialScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = fakeInteractor,
-            isLiveMode = true,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
@@ -332,6 +366,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            onClickOverrideDelegate = onClickOverrideDelegate,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
         )
 
@@ -342,9 +377,12 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             navigator = navigator,
             sheetActivityStateHolder = sheetActivityStateHolder,
             continueCoordinator = continueCoordinator,
+            onClickOverrideDelegate = onClickOverrideDelegate,
+            onClickOverrideCalls = onClickOverrideCalls,
         ).block()
         eventReporter.validate()
         continueCoordinator.validate()
+        onClickOverrideCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -354,6 +392,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val navigator: EmbeddedNavigator,
         val sheetActivityStateHolder: FakeSheetActivityStateHolder,
         val continueCoordinator: FakeSheetActivityContinueCoordinator,
+        val onClickOverrideDelegate: OnClickDelegateOverrideImpl,
+        val onClickOverrideCalls: Turbine<Unit>,
     )
 }
 

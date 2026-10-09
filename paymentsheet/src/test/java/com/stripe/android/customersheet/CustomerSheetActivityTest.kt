@@ -14,6 +14,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -72,7 +73,10 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
             assertThat(
                 InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                InternalCustomerSheetResult.Canceled(null)
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = null,
+                    appearance = PaymentSheet.Appearance(),
+                )
             )
         }
     }
@@ -113,7 +117,8 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
                 InternalCustomerSheetResult.Canceled(
                     paymentSelection = PaymentSelection.Saved(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                    )
+                    ),
+                    appearance = PaymentSheet.Appearance(),
                 )
             )
         }

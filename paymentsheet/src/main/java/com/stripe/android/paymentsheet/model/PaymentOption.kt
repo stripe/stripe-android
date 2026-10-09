@@ -3,14 +3,12 @@ package com.stripe.android.paymentsheet.model
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
 /**
@@ -45,7 +43,7 @@ class PaymentOption internal constructor(
     val billingDetails: PaymentSheet.BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
-    private val imageLoader: suspend () -> Drawable,
+    private val paymentOptionResource: PaymentOptionResource,
 ) {
 
     @Poko
@@ -89,7 +87,7 @@ class PaymentOption internal constructor(
         _shippingDetails = null,
         billingDetails = null,
         _labels = Labels(label = label),
-        imageLoader = errorImageLoader,
+        paymentOptionResource = ErrorPaymentOptionResource,
     )
 
     /**
@@ -98,8 +96,7 @@ class PaymentOption internal constructor(
     val iconPainter: Painter
         @Composable
         get() {
-            val drawable = remember(this) { icon() }
-            return rememberDrawablePainter(drawable)
+            return paymentOptionResource.rememberPainter()
         }
 
     /**
@@ -107,11 +104,7 @@ class PaymentOption internal constructor(
      */
     fun icon(): Drawable {
         return DelegateDrawable(
-            imageLoader = imageLoader,
+            imageLoader = { paymentOptionResource.load(isSystemDarkTheme = null) },
         )
     }
-}
-
-private val errorImageLoader: suspend () -> Drawable = {
-    throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
 }

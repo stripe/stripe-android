@@ -115,7 +115,6 @@ internal typealias PaymentMethodSetAsDefaultOperation = suspend (
 ) -> Result<Unit>
 
 internal class DefaultUpdatePaymentMethodInteractor(
-    isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
@@ -158,7 +157,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks()
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
-        isLiveMode = isLiveMode,
         editable = PaymentSheetTopBarState.Editable.Never,
     )
     override val setAsDefaultCheckboxEnabled: Boolean = !isDefaultPaymentMethod

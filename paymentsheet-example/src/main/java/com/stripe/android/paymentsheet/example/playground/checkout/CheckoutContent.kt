@@ -46,4 +46,5 @@ internal fun CheckoutContent(
         onRemovePromotionCode = onRemovePromotionCode,
         onUpdateEmail = onUpdateEmail,
     )
+    ShippingAddressSection(session.shippingAddress)
 }

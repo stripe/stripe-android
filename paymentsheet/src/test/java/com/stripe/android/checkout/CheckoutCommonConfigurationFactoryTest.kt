@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.PaymentElement.Configuration.Appearance
 import com.stripe.android.elements.PaymentElement.Configuration.TermsDisplay
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -156,7 +157,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .expressCheckoutElement(
                 ExpressCheckoutElement.Configuration().linkConfiguration(
                     ExpressCheckoutElement.Configuration.LinkConfiguration().display(
-                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden
+                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
                     )
                 )
             )
@@ -169,7 +170,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result?.link?.display)
-            .isEqualTo(PaymentSheet.LinkConfiguration.Display.WalletButtonHidden)
+            .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 
     @Test
@@ -306,7 +307,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     fun `maps configured billing defaults to payment element and express checkout element`() {
         val configuration = CheckoutController.Configuration()
             .defaults(
-                CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Jane Billing")
                         .address(
@@ -341,6 +342,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(expressCheckoutElementDefaults).isEqualTo(paymentElementDefaults)
         assertThat(paymentElementDefaults?.email).isEqualTo("checkout@example.com")
         assertThat(paymentElementDefaults?.name).isEqualTo("Jane Billing")
+        assertThat(paymentElementDefaults?.phone).isEqualTo("+15555551234")
         assertThat(paymentElementDefaults?.address?.city).isEqualTo("Denver")
         assertThat(paymentElementDefaults?.address?.country).isEqualTo("US")
         assertThat(paymentElementDefaults?.address?.line1).isEqualTo("123 Main St")
@@ -500,12 +502,42 @@ internal class CheckoutCommonConfigurationFactoryTest {
                     .colorsLight(
                         PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
                     )
+                    .typography(Appearance.Typography().sizeScaleFactor(1.5f))
+                    .shapes(Appearance.Shapes().cornerRadiusDp(12f))
+                    .embeddedAppearance(
+                        Appearance.Embedded()
+                            .rowStyle(Appearance.Embedded.RowStyle.FloatingButton().spacingDp(7f))
+                    )
             ),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
         assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
+        assertThat(result.appearance.typography.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(12f)
+        assertThat(result.appearance.embeddedAppearance.style).isEqualTo(
+            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder().spacingDp(7f).build()
+        )
+    }
+
+    @Test
+    fun `clearing default phone leaves billing phone null`() {
+        val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
+        assertThat(defaults.build().phone).isEqualTo("+15555551234")
+        val configuration = CheckoutController.Configuration()
+            .defaults(defaults.phone(null))
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+        val response = CheckoutSessionResponseFactory.create()
+        val details = collectedDetails()
+
+        assertThat(factory().createForPaymentElement(configuration, response, details).defaultBillingDetails?.phone)
+            .isNull()
+        val expressConfiguration = requireNotNull(
+            factory().createForExpressCheckoutElement(configuration, response, details)
+        )
+        assertThat(expressConfiguration.defaultBillingDetails?.phone).isNull()
     }
 
     private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)

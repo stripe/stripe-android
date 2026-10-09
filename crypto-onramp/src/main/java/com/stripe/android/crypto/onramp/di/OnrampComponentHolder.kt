@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 
 /**
@@ -26,6 +27,13 @@ internal object OnrampComponentHolder {
                 application,
                 savedStateHandle,
             ).also { component = it }
+        }
+    }
+
+    @VisibleForTesting
+    fun reset() {
+        synchronized(this) {
+            component = null
         }
     }
 

@@ -540,7 +540,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             updateSelection = { selection: PaymentSelection?, isUserInput: Boolean ->
                 updateSelectionTurbine.add(Pair(selection, isUserInput))
             },
-            isLiveMode = true,
             linkBrand = LinkBrand.Link,
         )
         cleanupRule.track(interactor)

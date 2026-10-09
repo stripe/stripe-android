@@ -96,7 +96,6 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
                     isVerticalLayout = false,
                 )
             },
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
         )
     }
 
@@ -110,7 +109,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             isCompleteFlow = false,
-            draftPaymentSelection = null,
+            draftPaymentSelection = embeddedSelectionHolder.getPreviousNewSelection(paymentMethodCode),
             bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
