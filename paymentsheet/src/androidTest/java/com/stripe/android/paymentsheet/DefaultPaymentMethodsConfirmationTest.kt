@@ -30,7 +30,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val testRules: TestRules = TestRules.create(profile = true)
+    private val testRules: TestRules = TestRules.create(profile = true, profileLeakChecks = true)
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()

@@ -14,22 +14,26 @@ class TestRules private constructor(
     val compose: ComposeTestRule,
     val networkRule: NetworkRule,
     private val profile: Boolean,
+    private val profileLeakChecks: Boolean,
 ) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
                 val timings = if (profile) TestTimingProfile(System::nanoTime) else null
+                val leakChecks = if (profileLeakChecks) LeakCheckProfile(System::nanoTime) else null
                 val execution = timings?.executionStatement(base) ?: base
                 val rules = chain.apply(execution, description)
-                val statement = DetectLeaksAfterTestSuccess().apply(
-                    timings?.rulesStatement(rules) ?: rules,
+                val measuredRules = timings?.rulesStatement(rules) ?: rules
+                val leakStatement = DetectLeaksAfterTestSuccess().apply(
+                    leakChecks?.rulesStatement(measuredRules) ?: measuredRules,
                     description,
                 )
+                val statement = leakChecks?.leakStatement(leakStatement) ?: leakStatement
                 if (timings == null) {
                     statement.evaluate()
                 } else {
                     timings.evaluate(statement) { durations, outcome ->
-                        writeTestTimingReport(description, durations, outcome)
+                        writeTestTimingReport(description, durations, outcome, leakChecks?.snapshot())
                     }
                 }
             }
@@ -43,6 +47,7 @@ class TestRules private constructor(
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             retryRule: TestRule? = null,
             profile: Boolean = false,
+            profileLeakChecks: Boolean = false,
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
@@ -55,7 +60,7 @@ class TestRules private constructor(
                 .around(networkRule)
                 .around(terminalTestRule)
                 .block()
-            return TestRules(chain, composeTestRule, networkRule, profile)
+            return TestRules(chain, composeTestRule, networkRule, profile, profileLeakChecks)
         }
     }
 }

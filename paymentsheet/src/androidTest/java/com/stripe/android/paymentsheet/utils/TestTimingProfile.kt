@@ -115,6 +115,7 @@ internal fun writeTestTimingReport(
     description: Description,
     durations: Map<TestTimingPhase, Long>,
     outcome: String,
+    leakCheck: LeakCheckDiagnostics?,
 ) {
     val arguments = InstrumentationRegistry.getArguments()
     val report = JSONObject().apply {
@@ -125,6 +126,14 @@ internal fun writeTestTimingReport(
         put("outcome", outcome)
         put("total_ns", durations.values.sum())
         put("phases_ns", JSONObject(durations.mapKeys { it.key.name }))
+        if (leakCheck != null) {
+            put("leak_check", JSONObject().apply {
+                put("observer_started", leakCheck.observerStarted)
+                put("no_heap_analysis_reason", leakCheck.noHeapAnalysisReason?.name ?: JSONObject.NULL)
+                put("decision_after_ns", leakCheck.decisionAfterNanos ?: JSONObject.NULL)
+                put("assertion_duration_ms", leakCheck.assertionDurationMillis ?: JSONObject.NULL)
+            })
+        }
     }.toString()
     Log.i(TEST_TIMING_TAG, report)
     val outputDirectory = arguments.getString("additionalTestOutputDir") ?: return
