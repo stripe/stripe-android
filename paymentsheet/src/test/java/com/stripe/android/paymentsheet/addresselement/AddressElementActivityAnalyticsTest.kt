@@ -78,6 +78,7 @@ internal class AddressElementActivityAnalyticsTest {
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         addressPage.clickClose()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
@@ -91,6 +92,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `root back reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
@@ -107,6 +109,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `close and keep editing do not report until discard uses current data`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         addressPage.clickClose()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
@@ -129,6 +132,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `scrim accessibility action reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         addressPage.dismissViaScrimAccessibilityAction()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
@@ -267,6 +271,7 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     private companion object {
+        const val EDITED_NAME = "Jenny Rosen Updated"
         val SHIPPING_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(

@@ -114,20 +114,7 @@ internal class AddressElementActivityTestRunner(
             awaitAnalytics(startedRequest)
         }
 
-        fun assertCheckoutDismissalRequestsConfirmation(
-            requestDismissal: () -> Unit,
-        ) {
-            addressPage.assertReadyToSave()
-            requestDismissal()
-
-            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-            addressPage.discardChanges()
-
-            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        }
-
-        fun assertStandaloneDismissesImmediately(
+        fun assertDirtyDismissal(
             editedName: String,
             requestDismissal: () -> Unit,
         ) {
@@ -135,8 +122,24 @@ internal class AddressElementActivityTestRunner(
             addressPage.editName(editedName)
             requestDismissal()
 
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
+
+            addressPage.keepEditing()
             addressPage.assertDiscardConfirmationNotDisplayed()
-            assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+            addressPage.assertName(editedName)
+            addressPage.assertReadyToSave()
+
+            requestDismissal()
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            addressPage.discardChanges()
+
+            when (args) {
+                is AddressElementActivityContract.Args.Standalone ->
+                    assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+                is AddressElementActivityContract.Args.CheckoutShipping ->
+                    assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+            }
         }
 
         fun assertDismissalBlocked() {
