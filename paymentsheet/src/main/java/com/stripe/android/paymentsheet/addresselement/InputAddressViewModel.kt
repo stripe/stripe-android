@@ -244,6 +244,11 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
+        val selectedAddress = autocompleteSelectedAddressDetails()
+        eventReporter.onSaveStarted(
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = selectedAddress,
+        )
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
                 onSuccess = { result ->
@@ -253,6 +258,11 @@ internal class InputAddressViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
+                    eventReporter.onSaveFailed(
+                        addressDetails = addressDetails,
+                        autocompleteAddressDetails = selectedAddress,
+                        error = error,
+                    )
                     _saveError.value = error.stripeErrorMessage()
                     resultStateHolder.onSaveFailed()
                 },
@@ -283,6 +293,20 @@ internal class InputAddressViewModel @Inject constructor(
             editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
         resultStateHolder.onSaveCompleted(result)
+    }
+
+    private fun autocompleteSelectedAddressDetails(): AddressDetails? {
+        val address = inlineAutocompleteController?.autocompleteFilledAddress ?: return null
+        return AddressDetails(
+            address = PaymentSheet.Address(
+                city = address.city,
+                country = address.country,
+                line1 = address.line1,
+                line2 = address.line2,
+                postalCode = address.postalCode,
+                state = address.state,
+            )
+        )
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {
