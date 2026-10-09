@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.verification
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
@@ -27,7 +26,6 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -44,12 +42,6 @@ internal class VerificationViewModelAuthFlowTest {
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
-
-    @get:Rule
-    val featureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkEmailOtpAndMfa,
-        isEnabled = true,
-    )
 
     @Test
     fun `init sends an SMS code and exposes the auth flow state`() = runScenario {
@@ -186,6 +178,7 @@ internal class VerificationViewModelAuthFlowTest {
             webLinkAuthChannel = WebLinkAuthChannel(),
             isDialog = false,
             linkBrand = LinkBrand.Link,
+            enableMfaAuthFlow = true,
             onVerificationSucceeded = { verificationSucceededCalls.add(it) },
             setScreenBackHandler = { backHandlers.add(it) },
             onChangeEmailRequested = { changeEmailCalls.add(Unit) },

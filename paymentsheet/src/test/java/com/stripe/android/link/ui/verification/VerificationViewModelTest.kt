@@ -507,6 +507,7 @@ internal class VerificationViewModelTest {
             webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
             linkBrand = LinkBrand.Link,
+            enableMfaAuthFlow = false,
             onVerificationSucceeded = onVerificationSucceeded,
             setScreenBackHandler = {},
             onChangeEmailRequested = onChangeEmailRequested,

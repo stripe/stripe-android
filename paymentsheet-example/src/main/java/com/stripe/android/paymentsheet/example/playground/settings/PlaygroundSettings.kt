@@ -587,7 +587,6 @@ internal class PlaygroundSettings private constructor(
             LinkControllerAllowUserEmailEditsSettingsDefinition,
             LinkControllerCustomAppearanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
-            FeatureFlagSettingsDefinition(FeatureFlags.linkEmailOtpAndMfa),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.forceEnableLinkPaymentSelectionHint,
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)

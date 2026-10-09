@@ -1,6 +1,5 @@
 package com.stripe.android.link.account
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.VerificationType
 
 /**
@@ -9,8 +8,8 @@ import com.stripe.android.model.VerificationType
  * we never declare a type we can't complete.
  */
 internal object LinkAuthCapabilities {
-    fun supportedVerificationTypes(): List<VerificationType> {
-        return if (FeatureFlags.linkEmailOtpAndMfa.isEnabled) {
+    fun supportedVerificationTypes(enableMfaAuthFlow: Boolean): List<VerificationType> {
+        return if (enableMfaAuthFlow) {
             listOf(VerificationType.SMS, VerificationType.EMAIL)
         } else {
             listOf(VerificationType.SMS)

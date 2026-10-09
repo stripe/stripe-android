@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
@@ -52,6 +51,7 @@ internal class VerificationViewModel @Inject constructor(
     private val webLinkAuthChannel: WebLinkAuthChannel,
     private val isDialog: Boolean,
     private val linkBrand: LinkBrand,
+    private val enableMfaAuthFlow: Boolean,
     private val onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit,
     private val setScreenBackHandler: (handler: (() -> Unit)?) -> Unit,
     private val onChangeEmailRequested: () -> Unit,
@@ -91,12 +91,12 @@ internal class VerificationViewModel @Inject constructor(
      * Drives email OTP, phone-match and multi-factor verification. Null when only SMS OTP is supported.
      */
     private val authFlow: LinkAuthFlow? = if (
-        FeatureFlags.linkEmailOtpAndMfa.isEnabled && !viewState.value.isProcessingWebAuth
+        enableMfaAuthFlow && !viewState.value.isProcessingWebAuth
     ) {
         LinkAuthFlow(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
-            capabilities = LinkAuthCapabilities.supportedVerificationTypes(),
+            capabilities = LinkAuthCapabilities.supportedVerificationTypes(enableMfaAuthFlow),
             consentGranted = { didSeeConsentSection.takeIf { it } },
             scope = viewModelScope,
             now = System::currentTimeMillis,
@@ -465,6 +465,7 @@ internal class VerificationViewModel @Inject constructor(
                         linkLaunchMode = parentComponent.linkLaunchMode,
                         webLinkAuthChannel = parentComponent.webLinkAuthChannel,
                         linkBrand = parentComponent.configuration.effectiveLinkBrand(linkAccount),
+                        enableMfaAuthFlow = parentComponent.configuration.enableMfaAuthFlow,
                         onVerificationSucceeded = parentComponent.viewModel::onVerificationSucceeded,
                         setScreenBackHandler = parentComponent.viewModel::setScreenBackHandler,
                         onChangeEmailRequested = onChangeEmailClicked,

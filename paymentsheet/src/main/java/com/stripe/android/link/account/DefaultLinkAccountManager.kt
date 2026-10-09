@@ -723,6 +723,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
             listOf("__fake__")
         } else {
-            LinkAuthCapabilities.supportedVerificationTypes().map { it.value }
+            LinkAuthCapabilities.supportedVerificationTypes(config.enableMfaAuthFlow).map { it.value }
         }
 }
