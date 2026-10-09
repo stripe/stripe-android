@@ -1,9 +1,6 @@
 package com.stripe.android.link.ui
 
 import android.os.Build
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.hasContentDescription
@@ -36,6 +33,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
@@ -54,6 +52,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
             )
         }
 
@@ -72,6 +71,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
@@ -88,6 +88,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
             )
         }
 
@@ -99,14 +100,13 @@ class LinkButtonTest {
     @Test
     fun signedOutButton_displaysCompactContent_belowCompactWidth() {
         composeRule.setContent {
-            Box(modifier = Modifier.requiredWidth(399.dp)) {
-                LinkButton(
-                    state = LinkButtonState.Default,
-                    enabled = true,
-                    onClick = {},
-                    linkBrand = LinkBrand.Link,
-                )
-            }
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 399.dp,
+            )
         }
 
         composeRule.onNodeWithTag(LinkButtonCompactContentTestTag, useUnmergedTree = true).assertExists()
@@ -114,16 +114,15 @@ class LinkButtonTest {
     }
 
     @Test
-    fun signedOutButton_displaysFullContent_aboveCompactWidth() {
+    fun signedOutButton_displaysFullContent_atCompactWidth() {
         composeRule.setContent {
-            Box(modifier = Modifier.requiredWidth(401.dp)) {
-                LinkButton(
-                    state = LinkButtonState.Default,
-                    enabled = true,
-                    onClick = {},
-                    linkBrand = LinkBrand.Link,
-                )
-            }
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 400.dp,
+            )
         }
 
         composeRule.onNodeWithTag(LinkButtonFullContentTestTag, useUnmergedTree = true).assertExists()

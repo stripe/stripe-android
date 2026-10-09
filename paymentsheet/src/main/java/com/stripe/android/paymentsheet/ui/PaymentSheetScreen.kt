@@ -474,6 +474,7 @@ private fun WalletHeader(
                         state = wallet.state,
                         enabled = state.buttonsEnabled,
                         linkBrand = wallet.linkBrand,
+                        containerWidth = null,
                         onClick = onLinkPressed,
                     )
                 }

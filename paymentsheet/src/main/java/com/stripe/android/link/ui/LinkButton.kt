@@ -7,7 +7,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -54,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -164,6 +164,7 @@ private fun LinkButtonPreview(
             enabled = previewData.enabled,
             theme = previewData.theme,
             linkBrand = LinkBrand.Link,
+            containerWidth = null,
             onClick = {}
         )
     }
@@ -181,6 +182,7 @@ private fun LinkButtonLocalizedPreview(
             enabled = previewData.enabled,
             theme = previewData.theme,
             linkBrand = LinkBrand.Link,
+            containerWidth = null,
             onClick = {}
         )
     }
@@ -193,6 +195,7 @@ internal fun LinkButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     linkBrand: LinkBrand,
+    containerWidth: Dp?,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
 ) {
     val alpha = if (enabled) {
@@ -200,51 +203,48 @@ internal fun LinkButton(
     } else {
         ContentAlpha.disabled
     }
+    val compact = containerWidth?.let { it < LinkButtonCompactWidth } == true
     CompositionLocalProvider(
         LocalContentAlpha provides alpha
     ) {
         DefaultLinkTheme {
-            BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-                val compact = maxWidth < LinkButtonCompactWidth
-
-                Button(
-                    onClick = onClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
-                        .themeBorder(theme)
-                        .testTag(LinkButtonTestTag),
-                    enabled = enabled,
-                    shape = LinkButtonShape,
-                    elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                    colors = theme.buttonColors(),
-                    contentPadding = PaddingValues(
-                        start = LinkButtonHorizontalPadding,
-                        top = LinkButtonVerticalPadding,
-                        end = LinkButtonHorizontalPadding,
-                        bottom = LinkButtonVerticalPadding
+            Button(
+                onClick = onClick,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
+                    .themeBorder(theme)
+                    .testTag(LinkButtonTestTag),
+                enabled = enabled,
+                shape = LinkButtonShape,
+                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
+                colors = theme.buttonColors(),
+                contentPadding = PaddingValues(
+                    start = LinkButtonHorizontalPadding,
+                    top = LinkButtonVerticalPadding,
+                    end = LinkButtonHorizontalPadding,
+                    bottom = LinkButtonVerticalPadding
+                )
+            ) {
+                when (state) {
+                    is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
+                        paymentUI = state.paymentUI,
+                        theme = theme,
+                        linkBrand = linkBrand,
+                        compact = compact,
                     )
-                ) {
-                    when (state) {
-                        is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
-                            paymentUI = state.paymentUI,
-                            theme = theme,
-                            linkBrand = linkBrand,
-                            compact = compact,
-                        )
 
-                        is LinkButtonState.Email -> SignedInButtonContent(
-                            email = state.email,
-                            theme = theme,
-                            linkBrand = linkBrand,
-                            compact = compact,
-                        )
-                        LinkButtonState.Default -> SignedOutButtonContent(
-                            theme = theme,
-                            linkBrand = linkBrand,
-                            compact = compact,
-                        )
-                    }
+                    is LinkButtonState.Email -> SignedInButtonContent(
+                        email = state.email,
+                        theme = theme,
+                        linkBrand = linkBrand,
+                        compact = compact,
+                    )
+                    LinkButtonState.Default -> SignedOutButtonContent(
+                        theme = theme,
+                        linkBrand = linkBrand,
+                        compact = compact,
+                    )
                 }
             }
         }
