@@ -28,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 import com.stripe.android.uicore.R as UiCoreR
 
@@ -175,6 +176,68 @@ class AddressElementTest {
         val bahamasValues = formFieldValueFlow.value.toMap()
         assertThat(bahamasValues).doesNotContainKey(FormFieldId.PostalCode)
         assertThat(bahamasValues[FormFieldId.State]?.value).isEmpty()
+    }
+
+    @Test
+    fun `raw lowercase state code is serialized with canonical country and state codes`() = runTest {
+        val addressElement = AddressElement(
+            FormFieldId.Generic("address"),
+            rawValuesMap = mapOf(
+                FormFieldId.Country to "US",
+                FormFieldId.State to "wa",
+            ),
+            countryCodes = setOf("US"),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val formValues = addressElement.getFormFieldValueFlow().value.toMap()
+
+        assertThat(formValues[FormFieldId.Country]?.value).isEqualTo("US")
+        assertThat(formValues[FormFieldId.State]?.value).isEqualTo("WA")
+    }
+
+    @Test
+    fun `raw state name is serialized with canonical country and state codes`() = runTest {
+        val addressElement = AddressElement(
+            FormFieldId.Generic("address"),
+            rawValuesMap = mapOf(
+                FormFieldId.Country to "US",
+                FormFieldId.State to "Washington",
+            ),
+            countryCodes = setOf("US"),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val formValues = addressElement.getFormFieldValueFlow().value.toMap()
+
+        assertThat(formValues[FormFieldId.Country]?.value).isEqualTo("US")
+        assertThat(formValues[FormFieldId.State]?.value).isEqualTo("WA")
+    }
+
+    @Test
+    fun `raw country name is serialized as canonical country code`() = runTest {
+        val defaultLocale = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.US)
+            val countryCodes = setOf("AT", "IT")
+            val config = CountryConfig(countryCodes, Locale.US)
+            assertThat(config.rawItems.indexOf("IT")).isGreaterThan(0)
+
+            val addressElement = AddressElement(
+                FormFieldId.Generic("address"),
+                rawValuesMap = mapOf(FormFieldId.Country to "Italy"),
+                countryCodes = countryCodes,
+                sameAsShippingElement = null,
+                shippingValuesMap = null,
+            )
+            val formValues = addressElement.getFormFieldValueFlow().value.toMap()
+
+            assertThat(formValues[FormFieldId.Country]?.value).isEqualTo("IT")
+        } finally {
+            Locale.setDefault(defaultLocale)
+        }
     }
 
     @Test
