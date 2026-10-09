@@ -145,6 +145,14 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
+        val requiresCheckoutSessionEmail =
+            initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession &&
+                initializationMode.checkoutSessionResponse.customerEmail == null &&
+                configuration.defaultBillingDetails?.email == null
+        if (requiresCheckoutSessionEmail && useWebLink && elementsSession.linkPassthroughModeEnabled) {
+            add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
+        }
+
         when (initializationMode.walletsDisabledReason()) {
             WalletsDisabledReason.AutomaticTaxBillingAddress -> {
                 add(LinkDisabledReason.AutomaticTaxBillingAddress)

@@ -17,7 +17,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -120,48 +122,80 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
-    fun `link is enabled when web Link checkout session and configuration are missing email`() =
-        testLinkEnabledWithEmailConfiguration(
+    fun `web Link is enabled without checkout email when passthrough mode is disabled`() =
+        testLinkEmailRequirement(
             useNativeLink = false,
+            passthroughModeEnabled = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `web Link is disabled without checkout email when passthrough mode is enabled`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = LinkDisabledReason.CheckoutSessionsRequiresEmail,
+        )
+
+    @Test
+    fun `native Link is enabled without checkout email when passthrough mode is enabled`() =
+        testLinkEmailRequirement(
+            useNativeLink = true,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
         )
 
     @Test
     fun `link is enabled when native Link checkout session and configuration are missing email`() =
-        testLinkEnabledWithEmailConfiguration(
+        testLinkEmailRequirement(
             useNativeLink = true,
+            passthroughModeEnabled = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
+            expectedDisabledReason = null,
         )
 
     @Test
-    fun `link is enabled when web Link checkout session has customer email`() =
-        testLinkEnabledWithEmailConfiguration(
+    fun `web Link passthrough is enabled when checkout session has customer email`() =
+        testLinkEmailRequirement(
             useNativeLink = false,
+            passthroughModeEnabled = true,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = "customer@example.com",
             defaultEmail = null,
+            expectedDisabledReason = null,
         )
 
     @Test
-    fun `link is enabled when web Link configuration has default email`() =
-        testLinkEnabledWithEmailConfiguration(
+    fun `web Link passthrough is enabled when configuration has default email`() =
+        testLinkEmailRequirement(
             useNativeLink = false,
+            passthroughModeEnabled = true,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = "merchant@example.com",
+            expectedDisabledReason = null,
         )
 
     @Test
-    fun `link is enabled when web Link is not initialized with checkout session`() =
-        testLinkEnabledWithEmailConfiguration(
+    fun `web Link passthrough is enabled when not initialized with checkout session`() =
+        testLinkEmailRequirement(
             useNativeLink = false,
+            passthroughModeEnabled = true,
             useCheckoutSession = false,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
+            expectedDisabledReason = null,
         )
 
     @Test
@@ -270,14 +304,33 @@ internal class DefaultCreateLinkStateTest {
         )
     }
 
-    private fun testLinkEnabledWithEmailConfiguration(
+    private fun testLinkEmailRequirement(
         useNativeLink: Boolean,
+        passthroughModeEnabled: Boolean,
         useCheckoutSession: Boolean,
         checkoutSessionCustomerEmail: String?,
         defaultEmail: String?,
+        expectedDisabledReason: LinkDisabledReason?,
     ) = runTest {
         val createLinkState = createLinkStateFactory(useNativeLink = useNativeLink)
-        val elementsSession = createElementsSession()
+        val elementsSession = createElementsSession().copy(
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = listOf("card"),
+                linkPassthroughModeEnabled = passthroughModeEnabled,
+                linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
+                linkFlags = emptyMap(),
+                disableLinkSignup = false,
+                linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false,
+                linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
+                linkBrand = LinkBrand.Link,
+            ),
+        )
         val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder().apply {
             defaultEmail?.let {
                 defaultBillingDetails(PaymentSheet.BillingDetails(email = it))
@@ -301,7 +354,13 @@ internal class DefaultCreateLinkStateTest {
             apiConfiguration = DEFAULT_API_CONFIG,
         )
 
-        assertThat(result).isInstanceOf<LinkState>()
+        if (expectedDisabledReason == null) {
+            assertThat(result).isInstanceOf<LinkState>()
+        } else {
+            assertThat(result).isInstanceOf<LinkDisabledState>()
+            assertThat((result as LinkDisabledState).linkDisabledReasons)
+                .containsExactly(expectedDisabledReason)
+        }
     }
 
     private fun checkoutSessionInitializationMode(
