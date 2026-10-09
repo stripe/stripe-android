@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
+import android.os.Build
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
@@ -27,6 +29,16 @@ internal object CheckoutSessionParamsFactory {
 
         return buildJsonObject {
             put("ui_mode", "mobile_elements")
+            put(
+                "metadata",
+                buildJsonObject {
+                    put("sdk", "stripe-android")
+                    put("sdk_version", StripeSdkVersion.VERSION_NAME)
+                    put("integration", "checkout-playground")
+                    put("android_version", Build.VERSION.RELEASE)
+                    put("android_api_level", Build.VERSION.SDK_INT.toString())
+                },
+            )
             put("currency", currency)
             putCart(currency)
             putAllowedPaymentMethodTypes(settings)
