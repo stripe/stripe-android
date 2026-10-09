@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -310,6 +311,10 @@ private class ImmediateSavedPaymentMethodSelector(
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         selectionHolder.setSelection(selection)
+        return Result.success(Unit)
+    }
+
+    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
         return Result.success(Unit)
     }
 

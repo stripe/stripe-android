@@ -85,27 +85,11 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         method: PaymentMethod,
         cardUpdateParams: CardUpdateParams,
     ): Result<PaymentMethod> {
-        return savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
+        val updatedMethod = savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
             paymentMethod = method,
             cardUpdateParams = cardUpdateParams,
-            onSuccess = { paymentMethod ->
-                val currentSelection = selectionHolder.selection.value
-                if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                    selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
-                }
-            },
-        ).fold(
-            onSuccess = { updatedMethod ->
-                val selection = selectionHolder.selection.value as? PaymentSelection.Saved
-                if (selection != null && selection.paymentMethod.id == updatedMethod.id &&
-                    method.billingDetails?.address != updatedMethod.billingDetails?.address
-                ) {
-                    savedPaymentMethodSelector.select(selection).map { updatedMethod }
-                } else {
-                    Result.success(updatedMethod)
-                }
-            },
-            onFailure = { Result.failure(it) },
-        )
+        ).getOrElse { return Result.failure(it) }
+
+        return savedPaymentMethodSelector.syncBillingAfterEdit(method, updatedMethod).map { updatedMethod }
     }
 }

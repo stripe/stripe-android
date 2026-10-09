@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdate
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -33,30 +35,36 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     override var checkoutSessionResponse: CheckoutSessionResponse? = null
         private set
 
-    private var synchronizedSelection: PaymentSelection.Saved? = null
-
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
-        val paymentMethodId = selection.paymentMethod.id
-        val update = if (selection == synchronizedSelection) {
-            null
-        } else {
-            taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        if (update != null) {
+            _selectionState.value = SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id)
         }
-        val response = update?.let {
-            _selectionState.value = SavedPaymentMethodSelectionState.Pending(paymentMethodId)
-            it().getOrElse { error ->
-                _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
-                return Result.failure(error)
-            }
+        return synchronizeBilling(update).onSuccess {
+            selectionHolder.setSelection(selection)
+            _selectionState.value = SavedPaymentMethodSelectionState.Idle
+        }.onFailure { error ->
+            _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
         }
+    }
 
-        if (response != null) {
-            checkoutSessionResponse = response
-            synchronizedSelection = selection
+    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
+        val selected = selectionHolder.selection.value as? PaymentSelection.Saved
+            ?: return Result.success(Unit)
+        if (selected.paymentMethod.id != updated.id ||
+            original.billingDetails?.address == updated.billingDetails?.address
+        ) {
+            return Result.success(Unit)
         }
-        selectionHolder.setSelection(selection)
-        _selectionState.value = SavedPaymentMethodSelectionState.Idle
-        return Result.success(Unit)
+        return synchronizeBilling(
+            taxRegionUpdater.prepareUpdate(paymentMethodMetadata, PaymentSelection.Saved(updated))
+        )
+    }
+
+    private suspend fun synchronizeBilling(update: SheetTaxRegionUpdate?): Result<Unit> {
+        return update?.invoke()?.map { response ->
+            checkoutSessionResponse = response
+        } ?: Result.success(Unit)
     }
 
     override fun clearError() {

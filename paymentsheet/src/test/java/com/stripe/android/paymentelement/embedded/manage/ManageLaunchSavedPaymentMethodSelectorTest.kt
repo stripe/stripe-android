@@ -10,6 +10,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -144,23 +145,151 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `successful selection is reused without another tax request and keeps response`() {
-        val response = CheckoutSessionResponseFactory.create(id = "first_response")
-
+    fun `selecting a row after an edit requests tax again and retains the latest response`() {
+        val firstResponse = CheckoutSessionResponseFactory.create(id = "edit_response")
+        val secondResponse = CheckoutSessionResponseFactory.create(id = "selection_response")
+        var nextResponse = firstResponse
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-            updateTaxRegion = { Result.success(response) },
+            updateTaxRegion = { Result.success(nextResponse) },
         ) {
-            assertThat(selector.select(selection).isSuccess).isTrue()
-            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "94111")
-            assertThat(selector.checkoutSessionResponse).isEqualTo(response)
+            val updated = selection.paymentMethod.withPostalCode("10001")
+            selectionHolder.setSelection(PaymentSelection.Saved(updated))
+            assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).isSuccess).isTrue()
+            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+            assertThat(selector.checkoutSessionResponse).isEqualTo(firstResponse)
 
-            assertThat(selector.select(selection).isSuccess).isTrue()
+            nextResponse = secondResponse
+            assertThat(selector.select(PaymentSelection.Saved(updated)).isSuccess).isTrue()
 
-            taxRegionUpdateCalls.expectNoEvents()
-            assertThat(selector.checkoutSessionResponse).isEqualTo(response)
-            assertThat(selectionHolder.selection.value).isEqualTo(selection)
+            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+            assertThat(selector.checkoutSessionResponse).isEqualTo(secondResponse)
         }
+    }
+
+    @Test
+    fun `edit synchronization stores the response without changing selection or row state`() {
+        val update = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { update.await() },
+        ) {
+            val original = selection.paymentMethod
+            val updated = original.withPostalCode("10001")
+            selectionHolder.setSelection(selection)
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+
+                val result = testScope.async(start = CoroutineStart.UNDISPATCHED) {
+                    selector.syncBillingAfterEdit(original, updated)
+                }
+                assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                assertThat(selector.checkoutSessionResponse).isNull()
+                expectNoEvents()
+
+                val response = CheckoutSessionResponseFactory.create(id = "edit_response")
+                update.complete(Result.success(response))
+
+                assertThat(result.await().isSuccess).isTrue()
+                assertThat(selector.checkoutSessionResponse).isEqualTo(response)
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                expectNoEvents()
+            }
+        }
+    }
+
+    @Test
+    fun `failed edit synchronization retains the last response without changing row state and can retry`() {
+        val response = CheckoutSessionResponseFactory.create(id = "edit_response")
+        val error = IllegalStateException("Tax update failed")
+        var nextResult: Result<CheckoutSessionResponse> = Result.success(response)
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            updateTaxRegion = { nextResult },
+        ) {
+            val updated = selection.paymentMethod.withPostalCode("10001")
+            selectionHolder.setSelection(selection)
+            assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).isSuccess).isTrue()
+            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+
+            selector.selectionState.test {
+                assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+                nextResult = Result.failure(error)
+
+                assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).exceptionOrNull())
+                    .isSameInstanceAs(error)
+                assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+                assertThat(selector.checkoutSessionResponse).isEqualTo(response)
+                assertThat(selectionHolder.selection.value).isEqualTo(selection)
+                expectNoEvents()
+
+                val retryResponse = CheckoutSessionResponseFactory.create(id = "retry_response")
+                nextResult = Result.success(retryResponse)
+                assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).isSuccess).isTrue()
+                assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "10001")
+                assertThat(selector.checkoutSessionResponse).isEqualTo(retryResponse)
+                expectNoEvents()
+            }
+        }
+    }
+
+    @Test
+    fun `editing an unselected saved card does not update tax`() = runScenario(
+        paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+        updateTaxRegion = { error("Tax update should not run") },
+    ) {
+        val original = selection.paymentMethod
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).isSuccess).isTrue()
+
+        taxRegionUpdateCalls.expectNoEvents()
+        assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
+        assertThat(selector.checkoutSessionResponse).isNull()
+    }
+
+    @Test
+    fun `editing a saved card with no selection does not update tax`() = runScenario(
+        paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+        updateTaxRegion = { error("Tax update should not run") },
+    ) {
+        selectionHolder.setSelection(null)
+        val original = selection.paymentMethod
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).isSuccess).isTrue()
+
+        taxRegionUpdateCalls.expectNoEvents()
+        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(selector.checkoutSessionResponse).isNull()
+    }
+
+    @Test
+    fun `editing selected card expiry with an unchanged billing address does not update tax`() = runScenario(
+        paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+        updateTaxRegion = { error("Tax update should not run") },
+    ) {
+        selectionHolder.setSelection(selection)
+        val original = selection.paymentMethod
+        val updated = original.copy(card = original.card?.copy(expiryMonth = 12, expiryYear = 2030))
+        assertThat(updated.card).isNotEqualTo(original.card)
+
+        assertThat(selector.syncBillingAfterEdit(original, updated).isSuccess).isTrue()
+
+        taxRegionUpdateCalls.expectNoEvents()
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(selector.checkoutSessionResponse).isNull()
+    }
+
+    @Test
+    fun `editing selected card address without Checkout tax does not update tax`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        updateTaxRegion = { error("Tax update should not run") },
+    ) {
+        selectionHolder.setSelection(selection)
+        val original = selection.paymentMethod
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).isSuccess).isTrue()
+
+        taxRegionUpdateCalls.expectNoEvents()
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(selector.checkoutSessionResponse).isNull()
     }
 
     @Test
@@ -176,13 +305,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             assertThat(selector.select(selection).isSuccess).isTrue()
             assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), postalCode = "94111")
 
-            val changedSelection = PaymentSelection.Saved(
-                selection.paymentMethod.copy(
-                    billingDetails = selection.paymentMethod.billingDetails?.toBuilder()
-                        ?.setAddress(selection.paymentMethod.billingDetails?.address?.copy(postalCode = "10001"))
-                        ?.build(),
-                ),
-            )
+            val changedSelection = PaymentSelection.Saved(selection.paymentMethod.withPostalCode("10001"))
             nextResponse = secondResponse
             assertThat(selector.select(changedSelection).isSuccess).isTrue()
 
@@ -193,7 +316,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `failed selection is not cached and retries tax update`() {
+    fun `failed selection retries tax update`() {
         val error = IllegalStateException("Tax update failed")
         val response = CheckoutSessionResponseFactory.create(id = "retry_response")
         var nextResult: Result<CheckoutSessionResponse> = Result.failure(error)
@@ -217,6 +340,14 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
             assertThat(selector.checkoutSessionResponse).isEqualTo(response)
         }
+    }
+
+    private fun PaymentMethod.withPostalCode(postalCode: String): PaymentMethod {
+        return copy(
+            billingDetails = billingDetails?.toBuilder()
+                ?.setAddress(billingDetails?.address?.copy(postalCode = postalCode))
+                ?.build(),
+        )
     }
 
     private fun assertTaxUpdateAddress(

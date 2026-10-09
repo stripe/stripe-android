@@ -65,9 +65,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             savedStateHandle = SavedStateHandle(),
             selection = selectionHolder.selection,
         )
-        val savedPaymentMethodSelector = FakeManageScreenSavedPaymentMethodSelector(
-            setSelection = selectionHolder::setSelection,
-        )
+        val savedPaymentMethodSelector = FakeManageScreenSavedPaymentMethodSelector()
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val factory = DefaultEmbeddedUpdateScreenInteractorFactory(
             savedPaymentMethodMutatorProvider = Provider { error("Not expected") },
@@ -99,7 +97,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     @Test
     fun `saving selected card with changed billing address waits for tax update`() = runScenario {
         val taxUpdate = CompletableDeferred<Result<Unit>>()
-        savedPaymentMethodSelector.onSelect = {
+        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ ->
             assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
             taxUpdate.await()
         }
@@ -127,8 +125,9 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             .isEqualTo(UpdatePaymentMethodInteractor.Status.Updating)
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
 
-        val selection = savedPaymentMethodSelector.selectCalls.awaitItem().selection
-        assertThat(selection).isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
+        )
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
         navigatorResultCalls.expectNoEvents()
 
@@ -146,7 +145,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     @Test
     fun `tax failure retains the updated card and retry repeats payment and tax updates`() = runScenario {
         val taxError = IllegalStateException("Tax update failed")
-        savedPaymentMethodSelector.onSelect = { Result.failure(taxError) }
+        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.failure(taxError) }
         changeBillingPostalCode()
 
         interactor.handleViewAction(
@@ -158,8 +157,9 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(firstUpdate.params.billingDetails?.address?.postalCode).isEqualTo("10001")
         assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
-        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem().selection)
-            .isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
+        )
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
         assertThat(interactor.state.value.status)
             .isEqualTo(UpdatePaymentMethodInteractor.Status.Idle)
@@ -168,7 +168,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(interactor.state.value.isSaveButtonEnabled).isTrue()
         navigatorResultCalls.expectNoEvents()
 
-        savedPaymentMethodSelector.onSelect = { Result.success(Unit) }
+        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.success(Unit) }
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
         )
@@ -177,8 +177,9 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         val retryUpdate = repository.updateRequests.awaitItem()
         assertThat(retryUpdate.paymentMethodId).isEqualTo(firstUpdate.paymentMethodId)
         assertThat(retryUpdate.params).isEqualTo(firstUpdate.params)
-        assertThat(savedPaymentMethodSelector.selectCalls.awaitItem().selection)
-            .isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
+        )
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
         assertThat(interactor.state.value.status)
             .isEqualTo(UpdatePaymentMethodInteractor.Status.Idle)
@@ -189,7 +190,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     }
 
     @Test
-    fun `saving an unselected card with changed billing address does not update tax`() = runScenario(
+    fun `saving an unselected card delegates billing synchronization without changing selection`() = runScenario(
         selectedSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
     ) {
         changeBillingPostalCode()
@@ -203,14 +204,16 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
         assertThat(selectionHolder.selection.value)
             .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
-        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
+        )
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
         assertThat(navigatorResultCalls.awaitItem()).isNull()
         navigatorResultCalls.expectNoEvents()
     }
 
     @Test
-    fun `saving a changed billing address with no selection does not update tax`() = runScenario(
+    fun `saving a changed billing address delegates billing synchronization without a selection`() = runScenario(
         selectedSelection = null,
     ) {
         changeBillingPostalCode()
@@ -222,14 +225,16 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(repository.updateRequests.awaitItem().params.billingDetails?.address?.postalCode)
             .isEqualTo("10001")
         assertThat(selectionHolder.selection.value).isNull()
-        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, UPDATED_PAYMENT_METHOD)
+        )
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
         assertThat(navigatorResultCalls.awaitItem()).isNull()
         navigatorResultCalls.expectNoEvents()
     }
 
     @Test
-    fun `saving an expiry change with unchanged billing address does not update tax`() = runScenario(
+    fun `saving an expiry change delegates billing synchronization with the returned card`() = runScenario(
         updatePaymentMethodResult = Result.success(PAYMENT_METHOD),
     ) {
         interactor.editCardDetailsInteractor.handleViewAction(
@@ -250,7 +255,9 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(updateParams.billingDetails).isNull()
         assertThat(customerStateHolder.paymentMethods.value.single().billingDetails?.address)
             .isEqualTo(PAYMENT_METHOD.billingDetails?.address)
-        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        assertThat(savedPaymentMethodSelector.syncBillingAfterEditCalls.awaitItem()).isEqualTo(
+            FakeManageScreenSavedPaymentMethodSelector.SyncBillingCall(PAYMENT_METHOD, PAYMENT_METHOD)
+        )
         assertThat(eventReporter.updatePaymentMethodSucceededCalls.awaitItem().selectedBrand).isNull()
         assertThat(navigatorResultCalls.awaitItem()).isNull()
         navigatorResultCalls.expectNoEvents()
@@ -270,7 +277,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(updateRequest.params.billingDetails?.address?.postalCode).isEqualTo("10001")
         assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(PAYMENT_METHOD)
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(PAYMENT_METHOD))
-        savedPaymentMethodSelector.selectCalls.expectNoEvents()
+        savedPaymentMethodSelector.syncBillingAfterEditCalls.expectNoEvents()
         assertThat(eventReporter.updatePaymentMethodFailedCalls.awaitItem().selectedBrand).isNull()
         assertThat(interactor.state.value.error)
             .isEqualTo(updateCardBrandErrorMessage)
@@ -310,9 +317,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             customerStateHolder = customerStateHolder,
             repository = repository,
         )
-        val savedPaymentMethodSelector = FakeManageScreenSavedPaymentMethodSelector(
-            setSelection = selectionHolder::setSelection,
-        )
+        val savedPaymentMethodSelector = FakeManageScreenSavedPaymentMethodSelector()
         val interactor = DefaultEmbeddedUpdateScreenInteractorFactory(
             savedPaymentMethodMutatorProvider = Provider { savedPaymentMethodMutator },
             paymentMethodMetadata = PAYMENT_METHOD_METADATA,
@@ -425,15 +430,19 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     }
 }
 
-internal class FakeManageScreenSavedPaymentMethodSelector(
-    private val setSelection: (PaymentSelection?) -> Unit,
-) : ManageScreenSavedPaymentMethodSelector {
+internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPaymentMethodSelector {
     private val _selectCalls = Turbine<SelectCall>()
     val selectCalls: ReceiveTurbine<SelectCall> = _selectCalls
+
+    private val _syncBillingAfterEditCalls = Turbine<SyncBillingCall>()
+    val syncBillingAfterEditCalls: ReceiveTurbine<SyncBillingCall> = _syncBillingAfterEditCalls
 
     private val _clearErrorCalls = Turbine<Unit>()
 
     var onSelect: suspend (PaymentSelection.Saved) -> Result<Unit> = { Result.success(Unit) }
+    var onSyncBillingAfterEdit: suspend (PaymentMethod, PaymentMethod) -> Result<Unit> = { _, _ ->
+        Result.success(Unit)
+    }
 
     override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
         stateFlowOf(SavedPaymentMethodSelectionState.Idle)
@@ -441,9 +450,12 @@ internal class FakeManageScreenSavedPaymentMethodSelector(
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         _selectCalls.add(SelectCall(selection))
-        return onSelect(selection).onSuccess {
-            setSelection(selection)
-        }
+        return onSelect(selection)
+    }
+
+    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
+        _syncBillingAfterEditCalls.add(SyncBillingCall(original, updated))
+        return onSyncBillingAfterEdit(original, updated)
     }
 
     override fun clearError() {
@@ -452,8 +464,10 @@ internal class FakeManageScreenSavedPaymentMethodSelector(
 
     fun ensureAllEventsConsumed() {
         _selectCalls.ensureAllEventsConsumed()
+        _syncBillingAfterEditCalls.ensureAllEventsConsumed()
         _clearErrorCalls.ensureAllEventsConsumed()
     }
 
     data class SelectCall(val selection: PaymentSelection.Saved)
+    data class SyncBillingCall(val original: PaymentMethod, val updated: PaymentMethod)
 }

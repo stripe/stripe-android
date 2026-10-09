@@ -78,6 +78,15 @@ internal class EmbeddedActivityModuleTest {
 
             assertThat(selector.select(selection).isSuccess).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
+
+            val original = selection.paymentMethod
+            val updated = original.copy(
+                billingDetails = original.billingDetails?.toBuilder()
+                    ?.setAddress(original.billingDetails?.address?.copy(postalCode = "10001"))
+                    ?.build(),
+            )
+            assertThat(selector.syncBillingAfterEdit(original, updated).isSuccess).isTrue()
+            assertThat(selectionHolder.selection.value).isEqualTo(selection)
             assertThat(selector.checkoutSessionResponse).isNull()
         }
     }
