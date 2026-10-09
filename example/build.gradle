@@ -42,8 +42,6 @@ dependencies {
     implementation libs.retrofit
     implementation libs.retrofitGsonConverter
 
-    debugImplementation libs.leakCanary
-
     androidTestImplementation testLibs.androidx.core
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.junit
