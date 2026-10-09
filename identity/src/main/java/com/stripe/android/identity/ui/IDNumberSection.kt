@@ -52,7 +52,8 @@ internal fun IDNumberSection(
         DropdownFieldController(
             CountryConfig(
                 onlyShowCountryCodes = idNumberCountries.map { it.code.value }.toSet(),
-                disableDropdownWithSingleElement = true
+                disableDropdownWithSingleElement = true,
+                autofillType = null,
             )
         )
     }
