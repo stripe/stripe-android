@@ -77,7 +77,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm starts confirmation with a Google Pay option`() {
-        val state = createState()
+        val state = createState().copy(
+            collectedDetails = com.stripe.android.checkout.CheckoutCollectedDetails(email = "checkout@example.com"),
+        )
 
         runScenario(
             state = state,
@@ -88,6 +90,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.checkoutConfirmationData?.collectedEmail).isEqualTo("checkout@example.com")
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()

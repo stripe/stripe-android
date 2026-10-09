@@ -27,6 +27,7 @@ internal class CreateCustomerStateTest {
     fun `Checkout session creates correct state with filtered payment methods`() = runScenario {
         val cards = PaymentMethodFactory.cards(2)
         val customer = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_123",
             paymentMethods = cards + listOf(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
             canDetachPaymentMethod = false,
@@ -57,6 +58,7 @@ internal class CreateCustomerStateTest {
     @Test
     fun `Checkout session with empty payment methods`() = runScenario {
         val customer = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_empty",
             paymentMethods = emptyList(),
             canDetachPaymentMethod = false,
@@ -142,6 +144,7 @@ internal class CreateCustomerStateTest {
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             customer = CheckoutSessionResponse.Customer(
+                email = null,
                 id = "cus_checkout_automatic_tax",
                 paymentMethods = paymentMethods,
                 canDetachPaymentMethod = false,

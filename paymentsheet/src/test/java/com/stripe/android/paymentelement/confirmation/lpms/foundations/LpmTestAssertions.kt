@@ -43,6 +43,7 @@ internal suspend fun assertIntentConfirmed(
 
         activity.confirmationHandler.start(
             ConfirmationHandler.Args(
+                checkoutConfirmationData = null,
                 confirmationOption = option,
                 statusBarColor = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(

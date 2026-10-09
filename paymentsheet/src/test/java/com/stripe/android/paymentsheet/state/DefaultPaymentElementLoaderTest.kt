@@ -5221,6 +5221,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantId = "acct_123",
             ),
             customer = CheckoutSessionResponse.Customer(
+                email = null,
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,

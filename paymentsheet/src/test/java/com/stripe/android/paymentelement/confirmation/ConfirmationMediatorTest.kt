@@ -638,6 +638,7 @@ class ConfirmationMediatorTest {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = FakeConfirmationOption(),
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

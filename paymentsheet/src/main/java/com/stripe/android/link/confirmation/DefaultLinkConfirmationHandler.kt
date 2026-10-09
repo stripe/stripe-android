@@ -183,6 +183,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         }
 
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
@@ -209,6 +210,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         newPMTransformedForConfirmation: Boolean
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 shippingInformation = null,
                 paymentMethod = paymentMethod,

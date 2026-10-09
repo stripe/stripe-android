@@ -348,6 +348,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         ) ?: return null
 
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = confirmationOption,
             paymentMethodMetadata = arguments.paymentMethodMetadata,
             statusBarColor = arguments.statusBarColor,

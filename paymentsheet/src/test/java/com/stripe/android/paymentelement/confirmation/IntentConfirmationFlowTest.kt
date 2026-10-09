@@ -278,6 +278,7 @@ internal class IntentConfirmationFlowTest {
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                     isLiveMode: Boolean,
+                    checkoutConfirmationData: CheckoutConfirmationData?,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(
                         integrationMetadata = integrationMetadata,
@@ -302,6 +303,7 @@ internal class IntentConfirmationFlowTest {
         intent: StripeIntent,
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent,
@@ -346,6 +348,7 @@ internal class IntentConfirmationFlowTest {
         )
 
         val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = FakeConfirmationOption(),
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

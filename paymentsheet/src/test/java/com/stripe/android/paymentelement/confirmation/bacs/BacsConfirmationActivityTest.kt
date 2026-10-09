@@ -195,6 +195,7 @@ internal class BacsConfirmationActivityTest {
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = CONFIRMATION_OPTION,
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

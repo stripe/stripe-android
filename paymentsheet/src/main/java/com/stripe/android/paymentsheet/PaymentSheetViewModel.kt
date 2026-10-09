@@ -596,6 +596,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             confirmationOption?.let { option ->
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
+                        checkoutConfirmationData = null,
                         confirmationOption = option,
                         paymentMethodMetadata = paymentMethodMetadata,
                         statusBarColor = args.statusBarColor,

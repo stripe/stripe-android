@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
@@ -34,6 +35,7 @@ internal interface IntentConfirmationInterceptor {
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
             isLiveMode: Boolean,
+            checkoutConfirmationData: CheckoutConfirmationData?,
         ): IntentConfirmationInterceptor
     }
 
@@ -56,6 +58,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
         isLiveMode: Boolean,
+        checkoutConfirmationData: CheckoutConfirmationData?,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
             is IntegrationMetadata.CustomerSheet -> {
@@ -98,6 +101,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.CheckoutSession -> {
                 checkoutSessionConfirmationInterceptorFactory.create(
                     integrationMetadata = integrationMetadata,
+                    checkoutConfirmationData = checkoutConfirmationData,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )

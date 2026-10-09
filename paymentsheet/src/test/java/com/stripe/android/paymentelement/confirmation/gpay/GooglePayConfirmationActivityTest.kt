@@ -285,6 +285,7 @@ internal class GooglePayConfirmationActivityTest {
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

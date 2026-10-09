@@ -202,6 +202,7 @@ internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.R
 internal val PAYMENT_INTENT = PaymentIntentFactory.create(clientSecret = "pi_123_secret_123")
 
 internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+    checkoutConfirmationData = null,
     confirmationOption = FakeConfirmationOption(),
     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PAYMENT_INTENT,

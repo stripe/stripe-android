@@ -147,6 +147,7 @@ internal class SepaMandateConfirmationDefinitionTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationArgs = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = confirmationOption,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             statusBarColor = null,

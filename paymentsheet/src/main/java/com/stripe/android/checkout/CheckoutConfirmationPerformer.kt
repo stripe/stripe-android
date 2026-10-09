@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
@@ -68,6 +69,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         ) ?: return null
 
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = CheckoutConfirmationData(collectedEmail = state.collectedDetails.email),
             confirmationOption = confirmationOption,
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,

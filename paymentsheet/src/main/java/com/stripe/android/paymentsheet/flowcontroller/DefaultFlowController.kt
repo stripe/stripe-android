@@ -526,6 +526,7 @@ internal class DefaultFlowController @Inject internal constructor(
             confirmationOption?.let { option ->
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
+                        checkoutConfirmationData = null,
                         confirmationOption = option,
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         statusBarColor = viewModel.statusBarColor,

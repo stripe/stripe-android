@@ -17,6 +17,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -45,6 +46,7 @@ import dagger.assisted.AssistedInject
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
+    @Assisted private val checkoutConfirmationData: CheckoutConfirmationData?,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
@@ -156,6 +158,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
         savePaymentMethod = savePaymentMethod.takeIf { intent is PaymentIntent },
         shipping = shipping,
+        collectedInformation = checkoutConfirmationData?.collectedEmail
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.fixedEmail == null }
+            ?.let { ConfirmCheckoutSessionParams.CollectedInformation(email = it) },
     )
 
     private suspend fun confirmCheckoutSession(
@@ -226,6 +231,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     interface Factory {
         fun create(
             integrationMetadata: IntegrationMetadata.CheckoutSession,
+            checkoutConfirmationData: CheckoutConfirmationData?,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor

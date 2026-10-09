@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -132,6 +133,7 @@ internal class CustomerSheetIntentConfirmationInterceptorFactory @Inject constru
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
         isLiveMode: Boolean,
+        checkoutConfirmationData: CheckoutConfirmationData?,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
             is IntegrationMetadata.CustomerSheet -> {

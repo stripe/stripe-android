@@ -66,6 +66,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             ),
         ) ?: return null
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,

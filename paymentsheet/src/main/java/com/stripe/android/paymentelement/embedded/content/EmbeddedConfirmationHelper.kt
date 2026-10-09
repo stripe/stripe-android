@@ -64,6 +64,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         ) ?: return null
 
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = confirmationOption,
             paymentMethodMetadata = confirmationState.paymentMethodMetadata,
             statusBarColor = confirmationState.statusBarColor,

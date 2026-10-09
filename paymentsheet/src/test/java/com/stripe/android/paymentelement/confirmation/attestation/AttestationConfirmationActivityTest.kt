@@ -173,6 +173,7 @@ internal class AttestationConfirmationActivityTest {
         )
 
         private val CONFIRMATION_ARGUMENTS_NEW = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = NEW_CONFIRMATION_OPTION,
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

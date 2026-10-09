@@ -176,6 +176,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         coroutineScope.launch {
             confirmationHandler.start(
                 arguments = ConfirmationHandler.Args(
+                    checkoutConfirmationData = null,
                     confirmationOption = confirmationOption,
                     paymentMethodMetadata = paymentMethodMetadata,
                     statusBarColor = statusBarColor,

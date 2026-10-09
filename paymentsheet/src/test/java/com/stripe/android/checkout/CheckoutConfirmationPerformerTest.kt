@@ -57,7 +57,9 @@ internal class CheckoutConfirmationPerformerTest {
     @Test
     fun `confirm starts confirmation with a Google Pay option`() = runScenario(
         statusBarColor = STATUS_BAR_COLOR,
-        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(
+            collectedDetails = CheckoutCollectedDetails(email = "checkout@example.com"),
+        ),
     ) {
         performer.confirm()
 
@@ -66,6 +68,10 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.paymentMethodMetadata)
             .isEqualTo(stateHolder.state?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            collectedDetails = CheckoutCollectedDetails(email = "later@example.com"),
+        )
+        assertThat(args.checkoutConfirmationData?.collectedEmail).isEqualTo("checkout@example.com")
     }
 
     @Test

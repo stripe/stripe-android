@@ -144,6 +144,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         checkoutSessionConfirmationInterceptorFactory = object : CheckoutSessionConfirmationInterceptor.Factory {
             override fun create(
                 integrationMetadata: IntegrationMetadata.CheckoutSession,
+                checkoutConfirmationData: CheckoutConfirmationData?,
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
@@ -162,6 +163,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     },
                 )
                 return CheckoutSessionConfirmationInterceptor(
+                    checkoutConfirmationData = checkoutConfirmationData,
                     integrationMetadata = integrationMetadata,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
@@ -178,6 +180,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
         isLiveMode = requestOptions.apiKeyIsLiveMode,
+        checkoutConfirmationData = null,
     )
 }
 

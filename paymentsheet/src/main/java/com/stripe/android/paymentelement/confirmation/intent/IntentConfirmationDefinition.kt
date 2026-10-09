@@ -45,6 +45,7 @@ internal class IntentConfirmationDefinition(
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
                 integrationMetadata = paymentMethodMetadata.integrationMetadata,
+                checkoutConfirmationData = confirmationArgs.checkoutConfirmationData,
                 customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
                 isLiveMode = paymentMethodMetadata.apiConfiguration.isLiveMode(),

@@ -242,6 +242,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
     companion object {
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            checkoutConfirmationData = null,
             confirmationOption = FakeConfirmationOption(),
             statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

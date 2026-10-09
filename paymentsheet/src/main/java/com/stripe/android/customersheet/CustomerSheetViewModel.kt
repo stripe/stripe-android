@@ -1005,6 +1005,7 @@ internal class CustomerSheetViewModel(
         viewModelScope.launch(workContext) {
             confirmationHandler.start(
                 arguments = ConfirmationHandler.Args(
+                    checkoutConfirmationData = null,
                     confirmationOption = PaymentMethodConfirmationOption.New(
                         createParams = paymentMethodCreateParams,
                         optionsParams = null,

@@ -8,6 +8,7 @@ import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -98,6 +99,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         ) ?: return null
 
         return ConfirmationHandler.Args(
+            checkoutConfirmationData = CheckoutConfirmationData(collectedEmail = state.collectedDetails.email),
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,

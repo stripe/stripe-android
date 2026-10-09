@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -103,8 +104,27 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'action' with new payment method, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest {
-            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
-                enqueueCompleteStep()
+            val checkoutData = CheckoutConfirmationData(collectedEmail = "checkout@example.com")
+            val createCalls = Turbine<CheckoutConfirmationData?>()
+            val intentConfirmationInterceptorFactory = object : FakeIntentConfirmationInterceptorFactory(
+                enqueueStep = { enqueueCompleteStep() },
+            ) {
+                override suspend fun create(
+                    integrationMetadata: IntegrationMetadata,
+                    customerMetadata: CustomerMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
+                    checkoutConfirmationData: CheckoutConfirmationData?,
+                ): IntentConfirmationInterceptor {
+                    createCalls.add(checkoutConfirmationData)
+                    return super.create(
+                        integrationMetadata,
+                        customerMetadata,
+                        clientAttributionMetadata,
+                        isLiveMode,
+                        checkoutConfirmationData,
+                    )
+                }
             }
             val definition = createIntentConfirmationDefinition(
                 intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
@@ -120,7 +140,7 @@ class IntentConfirmationDefinitionTest {
                     shouldSave = true,
                     extraParams = null,
                 ),
-                confirmationArgs = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(checkoutConfirmationData = checkoutData),
             )
 
             val result = intentConfirmationInterceptorFactory.interceptor
@@ -130,6 +150,8 @@ class IntentConfirmationDefinitionTest {
             assertThat(result.paymentMethodOptionsParams).isNull()
             assertThat(result.shippingValues).isEqualTo(shippingDetails.toConfirmPaymentIntentShipping())
             assertThat(result.customerRequestedSave).isTrue()
+            assertThat(createCalls.awaitItem()).isEqualTo(checkoutData)
+            createCalls.ensureAllEventsConsumed()
         }
 
     @Test
@@ -168,6 +190,7 @@ class IntentConfirmationDefinitionTest {
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                     isLiveMode: Boolean,
+                    checkoutConfirmationData: CheckoutConfirmationData?,
                 ): IntentConfirmationInterceptor {
                     throw CallbackNotFoundException(
                         message = "CreateIntentCallback must be implemented",
@@ -593,6 +616,7 @@ class IntentConfirmationDefinitionTest {
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                     isLiveMode: Boolean,
+                    checkoutConfirmationData: CheckoutConfirmationData?,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor()
                 }

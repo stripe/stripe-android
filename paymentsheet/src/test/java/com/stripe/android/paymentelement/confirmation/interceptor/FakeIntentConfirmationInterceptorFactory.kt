@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.paymentelement.confirmation.CheckoutConfirmationData
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 
@@ -15,6 +16,7 @@ internal open class FakeIntentConfirmationInterceptorFactory(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
         isLiveMode: Boolean,
+        checkoutConfirmationData: CheckoutConfirmationData?,
     ): IntentConfirmationInterceptor {
         interceptor = FakeIntentConfirmationInterceptor().apply(enqueueStep)
         return interceptor

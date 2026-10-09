@@ -70,6 +70,8 @@ internal interface ConfirmationHandler {
          * The confirmation option used to in order to potentially confirm the intent
          */
         val confirmationOption: Option,
+        /** Checkout input for this confirmation attempt. */
+        val checkoutConfirmationData: CheckoutConfirmationData?,
         /**
          * The immutable data created during configuration.
          */
