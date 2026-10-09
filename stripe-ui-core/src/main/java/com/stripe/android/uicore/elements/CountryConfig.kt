@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
@@ -27,7 +28,8 @@ class CountryConfig(
     private val collapsedLabelMapper: (Country) -> String = { country -> country.name },
     expandedLabelMapper: (Country) -> String = { country ->
         "${countryCodeToEmoji(country.code.value)} ${country.name}"
-    }
+    },
+    override val autofillType: ContentType?,
 ) : DropdownConfig {
     override val debugLabel = "country"
 

@@ -54,7 +54,8 @@ class PhoneNumberController private constructor(
                 CountryConfig.countryCodeToEmoji(country.code.value),
                 PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " }
             ).joinToString("")
-        }
+        },
+        autofillType = null,
     )
     val countryDropdownController = DropdownFieldController(
         countryConfig,
