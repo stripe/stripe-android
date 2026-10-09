@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -220,6 +221,33 @@ internal class FormHelperTest {
         ).onFormFieldValuesChanged(formFieldValues, "card")
         assertThat(hasCalledSelectionUpdater).isTrue()
     }
+
+    @Test
+    fun `onFormFieldValuesChanged clears the selection when the intent does not accept the payment method`() =
+        runScenario {
+            val selections = Turbine<PaymentSelection?>()
+            val formHelper = createFormHelper(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("link"),
+                    ),
+                ),
+                eventReporter = eventReporter,
+                newPaymentSelectionProvider = { null },
+                selectionUpdater = { selections.add(it) },
+            )
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    FormFieldId.CardBrand to FormFieldEntry("visa", true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+
+            formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+            assertThat(selections.awaitItem()).isNull()
+            selections.ensureAllEventsConsumed()
+        }
 
     @Test
     fun `first onFormFieldValuesChanged call is not dropped on a real async dispatcher`() {

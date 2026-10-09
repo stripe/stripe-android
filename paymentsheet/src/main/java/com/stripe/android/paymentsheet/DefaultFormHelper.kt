@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.FormHelper.FormType
@@ -33,11 +32,14 @@ internal class DefaultFormHelper(
         lastFormValues,
         linkInlineHandler.linkInlineState,
     ) { formValues, inlineSignupViewState ->
-        formValues.first?.transformToPaymentSelection(
-            paymentMethod = supportedPaymentMethodForCode(formValues.second),
-            paymentMethodMetadata = paymentMethodMetadata,
-            inlineSignupViewState = inlineSignupViewState,
-        )
+        // The intent may not accept the form's payment method, so there's no selection rather than a crash.
+        paymentMethodMetadata.supportedPaymentMethodForCode(code = formValues.second)?.let { paymentMethod ->
+            formValues.first?.transformToPaymentSelection(
+                paymentMethod = paymentMethod,
+                paymentMethodMetadata = paymentMethodMetadata,
+                inlineSignupViewState = inlineSignupViewState,
+            )
+        }
     }
 
     private var previouslyCompletedForm: PaymentMethodCode?
@@ -59,10 +61,6 @@ internal class DefaultFormHelper(
         coroutineScope.launch {
             lastFormValues.emit(formValues to selectedPaymentMethodCode)
         }
-    }
-
-    private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
-        return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
     }
 
     private fun reportFieldCompleted(code: PaymentMethodCode?) {
