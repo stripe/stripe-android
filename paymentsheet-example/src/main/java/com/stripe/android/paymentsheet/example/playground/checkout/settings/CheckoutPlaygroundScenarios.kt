@@ -64,6 +64,7 @@ internal object CheckoutPlaygroundScenarios {
             CheckoutTaxScenarios.group,
             CheckoutSavedPaymentMethodScenarios.group,
             CheckoutElementScenarios.group,
+            CheckoutLinkScenarios.group,
         )
     }
 

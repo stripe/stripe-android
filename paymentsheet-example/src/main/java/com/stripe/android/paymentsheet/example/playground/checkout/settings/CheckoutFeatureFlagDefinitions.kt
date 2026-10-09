@@ -4,6 +4,12 @@ import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 
 internal object CheckoutFeatureFlagDefinitions {
+    val nativeLinkEnabled = featureFlag("nativeLinkEnabled", FeatureFlags.nativeLinkEnabled)
+    val nativeLinkAttestationEnabled = featureFlag(
+        "nativeLinkAttestationEnabled",
+        FeatureFlags.nativeLinkAttestationEnabled,
+    )
+
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "feature_flags",
         displayName = "Client side feature flags",
@@ -16,7 +22,11 @@ internal object CheckoutFeatureFlagDefinitions {
             .sortedBy { it.name }
             .map { field ->
                 field.isAccessible = true
-                featureFlag(field.name, field.get(FeatureFlags) as FeatureFlag)
+                when (field.name) {
+                    "nativeLinkEnabled" -> nativeLinkEnabled
+                    "nativeLinkAttestationEnabled" -> nativeLinkAttestationEnabled
+                    else -> featureFlag(field.name, field.get(FeatureFlags) as FeatureFlag)
+                }
             }
     }
 
