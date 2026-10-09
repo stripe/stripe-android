@@ -150,6 +150,11 @@ class AddressElementPage(
         composeTestRule.onNodeWithText(error).assertDoesNotExist()
     }
 
+    fun selectCountry(country: String) {
+        composeTestRule.onNodeWithText("Country or region").performScrollTo().performClick()
+        composeTestRule.onNodeWithText(country, substring = true).performScrollTo().performClick()
+    }
+
     fun editName(name: String) {
         replaceText("Full name", name)
     }

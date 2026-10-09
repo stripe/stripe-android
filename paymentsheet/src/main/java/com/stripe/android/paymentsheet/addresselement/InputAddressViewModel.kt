@@ -138,6 +138,17 @@ internal class InputAddressViewModel @Inject constructor(
         )
     }
 
+    fun onUserCancel() {
+        val addressDetails = getCurrentAddress()
+        val autocompleteAddressDetails = autocompleteSelectedAddressDetails()
+        if (resultStateHolder.onUserCancel()) {
+            eventReporter.onCanceled(
+                addressDetails = addressDetails,
+                autocompleteAddressDetails = autocompleteAddressDetails,
+            )
+        }
+    }
+
     init {
 
         viewModelScope.launch {
