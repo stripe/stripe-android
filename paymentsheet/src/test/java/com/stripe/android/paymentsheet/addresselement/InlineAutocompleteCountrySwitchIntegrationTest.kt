@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
@@ -47,13 +46,7 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
                 autocompleteConfig = config,
                 coroutineScope = backgroundScope,
             )
-            val countryController = DropdownFieldController(
-                config = CountryConfig(
-                    setOf("US", "JP"),
-                    autofillType = ContentType.AddressCountry,
-                ),
-                initialValue = "US",
-            )
+            val countryController = DropdownFieldController(CountryConfig(setOf("US", "JP")), "US")
             val controller = AutocompleteAddressController(
                 identifier = FormFieldId.Generic("address"),
                 initialValues = mapOf(FormFieldId.Country to "US"),

@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 import kotlinx.coroutines.flow.StateFlow
 
@@ -11,7 +10,7 @@ class AutocompleteAddressElement(
     initialValues: Map<FormFieldId, String?>,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes, autofillType = ContentType.AddressCountry),
+        CountryConfig(countryCodes),
         initialValues[FormFieldId.Country]
     ),
     phoneNumberConfig: AddressFieldConfiguration = AddressFieldConfiguration.HIDDEN,

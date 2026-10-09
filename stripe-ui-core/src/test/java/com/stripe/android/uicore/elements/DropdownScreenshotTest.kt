@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -48,10 +47,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(
-                        mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
-                        autofillType = ContentType.AddressCountry,
-                    )
+                    CountryConfig(mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false))
                 ),
                 enabled = true
             )
@@ -65,8 +61,7 @@ class DropdownScreenshotTest {
                 controller = DropdownFieldController(
                     CountryConfig(
                         onlyShowCountryCodes = setOf("US"),
-                        disableDropdownWithSingleElement = true,
-                        autofillType = ContentType.AddressCountry,
+                        disableDropdownWithSingleElement = true
                     )
                 ),
                 enabled = true
@@ -80,8 +75,7 @@ class DropdownScreenshotTest {
             DropDown(
                 controller = DropdownFieldController(
                     CountryConfig(
-                        onlyShowCountryCodes = setOf("US"),
-                        autofillType = ContentType.AddressCountry,
+                        onlyShowCountryCodes = setOf("US")
                     )
                 ),
                 enabled = true

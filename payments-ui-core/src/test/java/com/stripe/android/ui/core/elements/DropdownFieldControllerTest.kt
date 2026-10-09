@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
@@ -14,7 +13,7 @@ import org.junit.Test
 import java.util.Locale
 
 class DropdownFieldControllerTest {
-    private val countryConfig = CountryConfig(locale = Locale.US, autofillType = ContentType.AddressCountry)
+    private val countryConfig = CountryConfig(locale = Locale.US)
     private val controller = DropdownFieldController(countryConfig)
 
     @Test
@@ -39,8 +38,7 @@ class DropdownFieldControllerTest {
     fun `Verify 'tinyMode' is true & complete when mode is 'Condensed'`() = runBlocking {
         val countryConfig = CountryConfig(
             locale = Locale.US,
-            mode = DropdownConfig.Mode.Condensed,
-            autofillType = ContentType.AddressCountry,
+            mode = DropdownConfig.Mode.Condensed
         )
         val controller = DropdownFieldController(countryConfig)
 
@@ -53,8 +51,7 @@ class DropdownFieldControllerTest {
     fun `Verify 'tinyMode' is false & complete when mode is 'Full'`() = runBlocking {
         val countryConfig = CountryConfig(
             locale = Locale.US,
-            mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = true),
-            autofillType = ContentType.AddressCountry,
+            mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = true)
         )
         val controller = DropdownFieldController(countryConfig)
 
@@ -68,7 +65,6 @@ class DropdownFieldControllerTest {
         val countryConfig = CountryConfig(
             locale = Locale.US,
             mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
-            autofillType = ContentType.AddressCountry,
         )
         val controller = DropdownFieldController(countryConfig)
 
@@ -82,7 +78,6 @@ class DropdownFieldControllerTest {
         val countryConfig = CountryConfig(
             locale = Locale.US,
             mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
-            autofillType = ContentType.AddressCountry,
         )
         val controller = DropdownFieldController(countryConfig)
 
@@ -96,7 +91,6 @@ class DropdownFieldControllerTest {
         val countryConfig = CountryConfig(
             locale = Locale.US,
             mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
-            autofillType = ContentType.AddressCountry,
         )
         val controller = DropdownFieldController(countryConfig)
 
@@ -114,7 +108,6 @@ class DropdownFieldControllerTest {
         val countryConfig = CountryConfig(
             locale = Locale.US,
             mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
-            autofillType = ContentType.AddressCountry,
         )
         val controller = DropdownFieldController(countryConfig)
 

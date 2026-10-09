@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -87,7 +86,7 @@ class AddressFormControllerTest {
         val element = awaitItem()
 
         assertThat(element.countryElement.controller.displayItems)
-            .isEqualTo(CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry).displayItems)
+            .isEqualTo(CountryConfig(setOf("US", "CA")).displayItems)
     }
 
     @Test

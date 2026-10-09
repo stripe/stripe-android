@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.autofill.ContentType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryConfig
@@ -57,7 +56,7 @@ class AddressElementDefaultsTest {
         try {
             Locale.setDefault(Locale.US)
             val countryCodes = setOf("AT", "IT")
-            val config = CountryConfig(countryCodes, Locale.US, autofillType = ContentType.AddressCountry)
+            val config = CountryConfig(countryCodes, Locale.US)
             assertThat(config.rawItems.indexOf("IT")).isGreaterThan(0)
 
             val addressElement = AddressElement(
