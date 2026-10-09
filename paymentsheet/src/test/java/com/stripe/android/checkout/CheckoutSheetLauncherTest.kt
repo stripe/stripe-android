@@ -484,6 +484,23 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `manageSheetLauncher refreshes checkout session after save without invoking immediate action`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val response = CheckoutSessionResponseFactory.create(id = "saved_card_tax_response")
+        val result = manageCompleteResult(checkoutSessionResponse = response).copy(
+            shouldInvokeSelectionCallback = false,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(immediateActionWasInvoked()).isFalse()
+    }
+
+    @Test
     fun `manageSheetLauncher invokes immediate action before checkout session refresh completes`() = testScenario {
         val releaseRefresh = CompletableDeferred<Unit>()
         val response = CheckoutSessionResponseFactory.create()

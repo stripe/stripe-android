@@ -25,6 +25,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
@@ -61,6 +62,18 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                             selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
                         }
                     },
+                ).fold(
+                    onSuccess = { updatedMethod ->
+                        val selection = selectionHolder.selection.value as? PaymentSelection.Saved
+                        if (selection != null && selection.paymentMethod.id == updatedMethod.id &&
+                            method.billingDetails?.address != updatedMethod.billingDetails?.address
+                        ) {
+                            savedPaymentMethodSelector.select(selection).map { updatedMethod }
+                        } else {
+                            Result.success(updatedMethod)
+                        }
+                    },
+                    onFailure = { Result.failure(it) },
                 )
             },
             setDefaultPaymentMethodExecutor = { method ->

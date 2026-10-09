@@ -15,8 +15,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * In Manage mode the selection is the sheet result, so this syncs the Checkout Session billing
- * tax region, when required, before committing. Other launch modes sync on Continue in
+ * Manage mode has no Continue step, so selections and saved-card edits sync the Checkout Session
+ * billing tax region before returning the sheet result. Other launch modes sync on Continue in
  * [SheetActivityContinueCoordinator].
  */
 @Singleton
@@ -33,9 +33,15 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     override var checkoutSessionResponse: CheckoutSessionResponse? = null
         private set
 
+    private var synchronizedSelection: PaymentSelection.Saved? = null
+
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         val paymentMethodId = selection.paymentMethod.id
-        val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        val update = if (selection == synchronizedSelection) {
+            null
+        } else {
+            taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        }
         val response = update?.let {
             _selectionState.value = SavedPaymentMethodSelectionState.Pending(paymentMethodId)
             it().getOrElse { error ->
@@ -44,7 +50,10 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
             }
         }
 
-        checkoutSessionResponse = response
+        if (response != null) {
+            checkoutSessionResponse = response
+            synchronizedSelection = selection
+        }
         selectionHolder.setSelection(selection)
         _selectionState.value = SavedPaymentMethodSelectionState.Idle
         return Result.success(Unit)
