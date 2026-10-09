@@ -90,6 +90,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             cardUpdateParams = cardUpdateParams,
         ).getOrElse { return Result.failure(it) }
 
-        return savedPaymentMethodSelector.syncBillingAfterEdit(method, updatedMethod).map { updatedMethod }
+        return savedPaymentMethodSelector.syncBillingAfterEdit(method, updatedMethod).map { response ->
+            response?.let(savedPaymentMethodSelector::updateCheckoutSessionResponse)
+            updatedMethod
+        }
     }
 }

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
@@ -96,7 +97,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
 
     @Test
     fun `saving selected card with changed billing address waits for tax update`() = runScenario {
-        val taxUpdate = CompletableDeferred<Result<Unit>>()
+        val taxUpdate = CompletableDeferred<Result<CheckoutSessionResponse?>>()
         savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ ->
             assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
             taxUpdate.await()
@@ -131,13 +132,16 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
         navigatorResultCalls.expectNoEvents()
 
-        taxUpdate.complete(Result.success(Unit))
+        savedPaymentMethodSelector.updateCheckoutSessionResponseCalls.expectNoEvents()
+        val response = CheckoutSessionResponseFactory.create(id = "edit_response")
+        taxUpdate.complete(Result.success(response))
         testScope.advanceUntilIdle()
 
         assertThat(interactor.state.value.status)
             .isEqualTo(UpdatePaymentMethodInteractor.Status.Idle)
         assertThat(interactor.state.value.error).isNull()
         assertThat(interactor.state.value.isSaveButtonEnabled).isFalse()
+        assertThat(savedPaymentMethodSelector.updateCheckoutSessionResponseCalls.awaitItem()).isEqualTo(response)
         assertThat(navigatorResultCalls.awaitItem()).isNull()
         navigatorResultCalls.expectNoEvents()
     }
@@ -168,7 +172,9 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(interactor.state.value.isSaveButtonEnabled).isTrue()
         navigatorResultCalls.expectNoEvents()
 
-        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.success(Unit) }
+        savedPaymentMethodSelector.updateCheckoutSessionResponseCalls.expectNoEvents()
+        val response = CheckoutSessionResponseFactory.create(id = "retry_response")
+        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.success(response) }
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
         )
@@ -185,6 +191,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             .isEqualTo(UpdatePaymentMethodInteractor.Status.Idle)
         assertThat(interactor.state.value.error).isNull()
         assertThat(interactor.state.value.isSaveButtonEnabled).isFalse()
+        assertThat(savedPaymentMethodSelector.updateCheckoutSessionResponseCalls.awaitItem()).isEqualTo(response)
         assertThat(navigatorResultCalls.awaitItem()).isNull()
         navigatorResultCalls.expectNoEvents()
     }
@@ -437,11 +444,15 @@ internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPay
     private val _syncBillingAfterEditCalls = Turbine<SyncBillingCall>()
     val syncBillingAfterEditCalls: ReceiveTurbine<SyncBillingCall> = _syncBillingAfterEditCalls
 
+    private val _updateCheckoutSessionResponseCalls = Turbine<CheckoutSessionResponse>()
+    val updateCheckoutSessionResponseCalls: ReceiveTurbine<CheckoutSessionResponse> =
+        _updateCheckoutSessionResponseCalls
+
     private val _clearErrorCalls = Turbine<Unit>()
 
     var onSelect: suspend (PaymentSelection.Saved) -> Result<Unit> = { Result.success(Unit) }
-    var onSyncBillingAfterEdit: suspend (PaymentMethod, PaymentMethod) -> Result<Unit> = { _, _ ->
-        Result.success(Unit)
+    var onSyncBillingAfterEdit: suspend (PaymentMethod, PaymentMethod) -> Result<CheckoutSessionResponse?> = { _, _ ->
+        Result.success(null)
     }
 
     override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
@@ -453,9 +464,16 @@ internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPay
         return onSelect(selection)
     }
 
-    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
+    override suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<CheckoutSessionResponse?> {
         _syncBillingAfterEditCalls.add(SyncBillingCall(original, updated))
         return onSyncBillingAfterEdit(original, updated)
+    }
+
+    override fun updateCheckoutSessionResponse(response: CheckoutSessionResponse) {
+        _updateCheckoutSessionResponseCalls.add(response)
     }
 
     override fun clearError() {
@@ -465,6 +483,7 @@ internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPay
     fun ensureAllEventsConsumed() {
         _selectCalls.ensureAllEventsConsumed()
         _syncBillingAfterEditCalls.ensureAllEventsConsumed()
+        _updateCheckoutSessionResponseCalls.ensureAllEventsConsumed()
         _clearErrorCalls.ensureAllEventsConsumed()
     }
 

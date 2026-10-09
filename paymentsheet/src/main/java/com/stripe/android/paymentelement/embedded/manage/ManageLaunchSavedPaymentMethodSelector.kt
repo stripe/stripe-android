@@ -5,7 +5,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
-import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdate
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -36,11 +35,12 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
         private set
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
-        val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection, checkoutSessionResponse)
         if (update != null) {
             _selectionState.value = SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id)
         }
-        return synchronizeBilling(update).onSuccess {
+        return (update?.invoke() ?: Result.success(null)).map { response ->
+            response?.let(::updateCheckoutSessionResponse)
             selectionHolder.setSelection(selection)
             _selectionState.value = SavedPaymentMethodSelectionState.Idle
         }.onFailure { error ->
@@ -48,23 +48,26 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
         }
     }
 
-    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
+    override suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<CheckoutSessionResponse?> {
         val selected = selectionHolder.selection.value as? PaymentSelection.Saved
-            ?: return Result.success(Unit)
+            ?: return Result.success(null)
         if (selected.paymentMethod.id != updated.id ||
             original.billingDetails?.address == updated.billingDetails?.address
         ) {
-            return Result.success(Unit)
+            return Result.success(null)
         }
-        return synchronizeBilling(
-            taxRegionUpdater.prepareUpdate(paymentMethodMetadata, PaymentSelection.Saved(updated))
-        )
+        return taxRegionUpdater.prepareUpdate(
+            paymentMethodMetadata,
+            PaymentSelection.Saved(updated),
+            checkoutSessionResponse,
+        )?.invoke() ?: Result.success(null)
     }
 
-    private suspend fun synchronizeBilling(update: SheetTaxRegionUpdate?): Result<Unit> {
-        return update?.invoke()?.map { response ->
-            checkoutSessionResponse = response
-        } ?: Result.success(Unit)
+    override fun updateCheckoutSessionResponse(response: CheckoutSessionResponse) {
+        checkoutSessionResponse = response
     }
 
     override fun clearError() {

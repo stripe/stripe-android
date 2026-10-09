@@ -32,12 +32,13 @@ internal class SheetTaxRegionUpdater internal constructor(
     fun prepareUpdate(
         paymentMethodMetadata: PaymentMethodMetadata,
         selection: PaymentSelection?,
+        currentResponse: CheckoutSessionResponse?,
     ): SheetTaxRegionUpdate? {
-        val checkoutSessionResponse =
-            (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
-                ?.checkoutSessionResponse
-                ?.takeIf { it.collectsTaxFromBillingAddress }
-                ?: return null
+        val checkoutSessionResponse = (currentResponse
+            ?: (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
+                ?.checkoutSessionResponse)
+            ?.takeIf { it.collectsTaxFromBillingAddress }
+            ?: return null
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
             ?: return null
 

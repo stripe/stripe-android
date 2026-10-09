@@ -314,9 +314,14 @@ private class ImmediateSavedPaymentMethodSelector(
         return Result.success(Unit)
     }
 
-    override suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit> {
-        return Result.success(Unit)
+    override suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<CheckoutSessionResponse?> {
+        return Result.success(null)
     }
+
+    override fun updateCheckoutSessionResponse(response: CheckoutSessionResponse) = Unit
 
     override fun clearError() = Unit
 }

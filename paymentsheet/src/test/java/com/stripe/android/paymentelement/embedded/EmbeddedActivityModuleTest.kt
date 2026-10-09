@@ -85,7 +85,7 @@ internal class EmbeddedActivityModuleTest {
                     ?.setAddress(original.billingDetails?.address?.copy(postalCode = "10001"))
                     ?.build(),
             )
-            assertThat(selector.syncBillingAfterEdit(original, updated).isSuccess).isTrue()
+            assertThat(selector.syncBillingAfterEdit(original, updated).getOrThrow()).isNull()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
             assertThat(selector.checkoutSessionResponse).isNull()
         }

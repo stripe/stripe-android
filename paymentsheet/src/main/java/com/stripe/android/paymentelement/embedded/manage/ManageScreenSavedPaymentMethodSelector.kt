@@ -12,7 +12,12 @@ internal interface ManageScreenSavedPaymentMethodSelector {
 
     suspend fun select(selection: PaymentSelection.Saved): Result<Unit>
 
-    suspend fun syncBillingAfterEdit(original: PaymentMethod, updated: PaymentMethod): Result<Unit>
+    suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<CheckoutSessionResponse?>
+
+    fun updateCheckoutSessionResponse(response: CheckoutSessionResponse)
 
     fun clearError()
 }

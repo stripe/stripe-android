@@ -46,7 +46,11 @@ internal class SheetTaxRegionUpdaterTest {
             )
         )
     ) {
-        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(
+            paymentMethodMetadata,
+            selectionWithAddress(ADDRESS),
+            currentResponse = null,
+        )
 
         assertThat(update).isNull()
     }
@@ -55,7 +59,11 @@ internal class SheetTaxRegionUpdaterTest {
     fun `prepareUpdate returns null for non-checkout session integration`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
-        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(
+            paymentMethodMetadata,
+            selectionWithAddress(ADDRESS),
+            currentResponse = null,
+        )
 
         assertThat(update).isNull()
     }
@@ -69,10 +77,58 @@ internal class SheetTaxRegionUpdaterTest {
             )
         )
     ) {
-        val update = updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+        val update = updater.prepareUpdate(
+            paymentMethodMetadata,
+            selectionWithAddress(ADDRESS),
+            currentResponse = null,
+        )
 
         assertThat(update).isNull()
     }
+
+    @Test
+    fun `prepareUpdate uses billing-enabled current response when launch response disables automatic tax`() =
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata(
+                checkoutSessionResponse(
+                    automaticTaxEnabled = false,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
+            )
+        ) {
+            val update = updater.prepareUpdate(
+                paymentMethodMetadata,
+                selectionWithAddress(ADDRESS),
+                currentResponse = checkoutSessionResponse(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+
+            assertThat(update).isNotNull()
+        }
+
+    @Test
+    fun `prepareUpdate uses disabled current response when launch response enables automatic tax`() =
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata(
+                checkoutSessionResponse(
+                    automaticTaxEnabled = true,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
+            )
+        ) {
+            val update = updater.prepareUpdate(
+                paymentMethodMetadata,
+                selectionWithAddress(ADDRESS),
+                currentResponse = checkoutSessionResponse(
+                    automaticTaxEnabled = false,
+                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                ),
+            )
+
+            assertThat(update).isNull()
+        }
 
     @Test
     fun `prepared update sends the selection billing address and returns the updated response`() = runScenario {
@@ -88,7 +144,11 @@ internal class SheetTaxRegionUpdaterTest {
         }
 
         val result = requireNotNull(
-            updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+            updater.prepareUpdate(
+                paymentMethodMetadata,
+                selectionWithAddress(ADDRESS),
+                currentResponse = null,
+            )
         ).invoke()
 
         assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
@@ -96,7 +156,11 @@ internal class SheetTaxRegionUpdaterTest {
 
     @Test
     fun `prepareUpdate returns null when selection is null`() = runScenario {
-        val update = updater.prepareUpdate(paymentMethodMetadata, selection = null)
+        val update = updater.prepareUpdate(
+            paymentMethodMetadata,
+            selection = null,
+            currentResponse = null,
+        )
 
         assertThat(update).isNull()
     }
@@ -109,7 +173,7 @@ internal class SheetTaxRegionUpdaterTest {
             ),
         )
 
-        val update = updater.prepareUpdate(paymentMethodMetadata, selection)
+        val update = updater.prepareUpdate(paymentMethodMetadata, selection, currentResponse = null)
 
         assertThat(update).isNull()
     }
@@ -119,6 +183,7 @@ internal class SheetTaxRegionUpdaterTest {
         val update = updater.prepareUpdate(
             paymentMethodMetadata,
             selectionWithAddress(ADDRESS.copy(country = null)),
+            currentResponse = null,
         )
 
         assertThat(update).isNull()
@@ -132,7 +197,11 @@ internal class SheetTaxRegionUpdaterTest {
         }
 
         val result = requireNotNull(
-            updater.prepareUpdate(paymentMethodMetadata, selectionWithAddress(ADDRESS))
+            updater.prepareUpdate(
+                paymentMethodMetadata,
+                selectionWithAddress(ADDRESS),
+                currentResponse = null,
+            )
         ).invoke()
 
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
