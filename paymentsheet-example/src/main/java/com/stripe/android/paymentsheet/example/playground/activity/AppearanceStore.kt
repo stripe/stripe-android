@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
@@ -156,7 +156,7 @@ internal object AppearanceStore {
             val verticalPaymentMethodIconMargin: Float? = null,
             val titleFont: Typography.Font? = null,
             val subtitleFont: Typography.Font? = null,
-            val disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
+            val disclosureIconRes: Int = R.drawable.ic_chevron_right
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,

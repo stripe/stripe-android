@@ -8,11 +8,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
+import com.stripe.example.R
 
 class StripeImageActivity : AppCompatActivity() {
     private val LocalStripeImageLoader = staticCompositionLocalOf<StripeImageLoader> {
@@ -35,8 +35,8 @@ class StripeImageActivity : AppCompatActivity() {
                     Html(
                         imageLoader = mapOf(
                             "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo_day,
-                                R.string.stripe_paymentsheet_payment_method_affirm
+                                R.drawable.ic_affirm_logo_day,
+                                R.string.payment_method_affirm
                             )
                         ),
                         html = """
@@ -51,8 +51,8 @@ class StripeImageActivity : AppCompatActivity() {
                     Html(
                         imageLoader = mapOf(
                             "affirm" to EmbeddableImage.Drawable(
-                                R.drawable.stripe_ic_affirm_logo_day,
-                                R.string.stripe_paymentsheet_payment_method_affirm
+                                R.drawable.ic_affirm_logo_day,
+                                R.string.payment_method_affirm
                             )
                         ),
                         html = """
