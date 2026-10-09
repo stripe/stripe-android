@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
-import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 import com.stripe.android.paymentsheet.example.playground.checkout.normalizedPlaygroundBaseUrl
-import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.Currency as PlaygroundCurrency
 
@@ -148,16 +146,9 @@ internal object CheckoutSessionDefinitions {
         displayName = "Invoice creation",
         defaultValue = false,
     )
-    val linkType = choice(
-        key = "controller.link_type",
-        displayName = "Link Type",
-        options = LinkType.entries.map { it.value to it },
-        serialize = LinkType::value,
-        applyFeatureFlags = LinkType::applyFeatureFlags,
-    )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
-        displayName = "Server side",
+        displayName = "Server side config",
         children = arrayOf(
             backendUrl,
             customStripeApi,
@@ -177,7 +168,6 @@ internal object CheckoutSessionDefinitions {
             shippingAddressCollection,
             billingAddressCollection,
             invoiceCreation,
-            linkType,
         ),
     )
 }
