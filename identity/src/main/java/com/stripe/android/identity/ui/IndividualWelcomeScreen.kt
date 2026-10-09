@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -94,11 +95,13 @@ private fun SuccessUI(
         ) {
             ConsentWelcomeHeader(
                 merchantLogoUri = merchantLogoUri,
-                title = welcomePage.title
+                title = welcomePage.title,
+                subtitle = null
             )
             ConsentLines(
                 lines = welcomePage.lines,
-                bottomSheets = bottomSheets
+                bottomSheets = bottomSheets,
+                textColor = colorResource(id = R.color.stripe_html_line)
             )
         }
 
