@@ -41,7 +41,7 @@ internal class StripeBrowserLauncherViewModel(
         args: PaymentBrowserAuthContract.Args
     ): Intent {
         val url = Uri.parse(args.url)
-        logBrowserCapabilities()
+        logBrowserCapabilities(args.apiConfiguration.publishableKey)
 
         val intent = when (browserCapabilities) {
             BrowserCapabilities.CustomTabs -> {
@@ -111,19 +111,17 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    private fun logBrowserCapabilities() {
+    private fun logBrowserCapabilities(publishableKey: String) {
         val event = when (browserCapabilities) {
             BrowserCapabilities.CustomTabs -> PaymentAnalyticsEvent.AuthWithCustomTabs
             BrowserCapabilities.Unknown -> PaymentAnalyticsEvent.AuthWithDefaultBrowser
         }
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(event)
+            paymentAnalyticsRequestFactory.createRequest(event, publishableKey = publishableKey)
         )
     }
 
-    class Factory(
-        private val args: PaymentBrowserAuthContract.Args,
-    ) : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -136,7 +134,7 @@ internal class StripeBrowserLauncherViewModel(
                 analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = application,
-                    publishableKeyProvider = { args.apiConfiguration.publishableKey },
+                    defaultProductUsageTokens = emptySet(),
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
                 customTabsPackage = CustomTabsClient.getPackageName(application, null),

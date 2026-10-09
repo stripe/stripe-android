@@ -27,7 +27,7 @@ class PaymentAuthWebViewActivityViewModelTest {
     private val analyticsRequestExecutor = AnalyticsRequestExecutor { analyticsRequests.add(it) }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = ApplicationProvider.getApplicationContext(),
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        defaultProductUsageTokens = emptySet(),
     )
 
     @Test

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -7,6 +8,7 @@ import com.stripe.android.core.utils.DurationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -15,7 +17,8 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : AddressLauncherEventReporter {
 
     override fun onShow(country: String) {
@@ -116,11 +119,13 @@ internal class DefaultAddressLauncherEventReporter @Inject internal constructor(
     }
 
     private fun fireEvent(event: AddressLauncherEvent) {
+        val publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event,
-                    event.additionalParams
+                    event.additionalParams,
+                    publishableKey = publishableKey,
                 )
             )
         }

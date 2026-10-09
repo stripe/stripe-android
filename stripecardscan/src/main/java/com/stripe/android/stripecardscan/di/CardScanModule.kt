@@ -11,7 +11,6 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.BuildConfig
-import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanEventsReporter
 import com.stripe.android.stripecardscan.cardscan.DefaultCardScanEventsReporter
 import dagger.Binds
@@ -38,14 +37,10 @@ internal interface CardScanModule {
         @Singleton
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            configuration: CardScanConfiguration,
         ): AnalyticsRequestFactory = AnalyticsRequestFactory(
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = {
-                requireNotNull(configuration.apiConfiguration?.publishableKey)
-            },
             networkTypeProvider = NetworkTypeDetector(application)::invoke,
         )
 

@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.GenericNfcScanningError
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
@@ -168,7 +169,6 @@ internal class DefaultNfcScanningEventReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null },
             ),
@@ -176,6 +176,7 @@ internal class DefaultNfcScanningEventReporterTest {
             deviceManufacturer = "Google",
             deviceModel = "Pixel 10",
             sdkVersion = 36,
+            apiConfigurationProvider = { ApiConfiguration.State("", null) },
         )
 
         block(

@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -31,7 +32,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : Stripe3ds2ChallengeResultProcessor {
 
     override suspend fun process(
@@ -42,7 +44,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = apiConfiguration.publishableKey,
                     )
                 )
             }
@@ -50,7 +53,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = apiConfiguration.publishableKey,
                     )
                 )
             }
@@ -58,25 +62,33 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeCanceled,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = apiConfiguration.publishableKey,
                     )
                 )
             }
             is ChallengeResult.ProtocolError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeErrored,
+                        publishableKey = apiConfiguration.publishableKey,
+                    )
                 )
             }
             is ChallengeResult.RuntimeError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeErrored,
+                        publishableKey = apiConfiguration.publishableKey,
+                    )
                 )
             }
             is ChallengeResult.Timeout -> {
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.create3ds2Challenge(
                         PaymentAnalyticsEvent.Auth3ds2ChallengeTimedOut,
-                        challengeResult.uiTypeCode
+                        challengeResult.uiTypeCode,
+                        publishableKey = apiConfiguration.publishableKey,
                     )
                 )
             }
@@ -85,7 +97,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.create3ds2Challenge(
                 PaymentAnalyticsEvent.Auth3ds2ChallengePresented,
-                challengeResult.initialUiType?.code.orEmpty()
+                challengeResult.initialUiType?.code.orEmpty(),
+                publishableKey = apiConfiguration.publishableKey,
             )
         )
 

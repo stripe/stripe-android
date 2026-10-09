@@ -884,7 +884,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         publishableKey: String,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
-            eventReporter.onElementsSessionLoadFailed(sessionsError)
+            eventReporter.onElementsSessionLoadFailed(sessionsError, publishableKey)
         }
 
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath

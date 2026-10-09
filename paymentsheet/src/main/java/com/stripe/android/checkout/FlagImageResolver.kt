@@ -1,11 +1,13 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Resolves the adaptive-pricing flag images for a [CheckoutSessionResponse].
@@ -20,6 +22,7 @@ internal class FlagImageResolver @Inject constructor(
     private val flagImageRepository: FlagImageRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) {
     suspend fun resolve(
         response: CheckoutSessionResponse,
@@ -50,6 +53,7 @@ internal class FlagImageResolver @Inject constructor(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = event.params,
+                    publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
                 )
             )
         }

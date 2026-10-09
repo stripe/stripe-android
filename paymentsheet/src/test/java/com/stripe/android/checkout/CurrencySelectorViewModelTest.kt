@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -150,9 +151,10 @@ internal class CurrencySelectorViewModelTest {
             analyticsRequestExecutor = fakeAnalyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = application,
-                publishableKey = "pk_test_123",
+                defaultProductUsageTokens = emptySet(),
             ),
             savedStateHandle = savedStateHandle,
+            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", null) },
         ).also { viewModelStoreRule.track(it) }
 
         Scenario(

@@ -71,8 +71,8 @@ class PaymentLauncherViewModelAnalyticsTest {
         packageManager = null,
         packageInfo = null,
         packageName = "com.stripe.test",
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         networkTypeProvider = { null },
+        defaultProductUsageTokens = emptySet(),
     )
 
     @Test

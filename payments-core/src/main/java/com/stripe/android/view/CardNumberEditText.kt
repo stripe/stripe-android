@@ -51,7 +51,8 @@ class CardNumberEditText internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
-    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val publishableKeySupplier: () -> String,
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -88,9 +89,10 @@ class CardNumberEditText internal constructor(
         DefaultAnalyticsRequestExecutor(),
         PaymentAnalyticsRequestFactory(
             context,
-            publishableKeyProvider = publishableKeySupplier
+            defaultProductUsageTokens = emptySet(),
         ),
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        publishableKeySupplier = publishableKeySupplier,
     )
 
     @VisibleForTesting
@@ -317,7 +319,12 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.CardMetadataLoadedTooSlow,
+                publishableKey = runCatching {
+                publishableKeySupplier()
+            }.getOrNull(),
+            )
         )
     }
 

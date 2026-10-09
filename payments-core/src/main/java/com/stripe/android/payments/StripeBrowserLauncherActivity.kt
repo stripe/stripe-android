@@ -33,7 +33,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     }
 
     private val viewModel: StripeBrowserLauncherViewModel by viewModels {
-        StripeBrowserLauncherViewModel.Factory(requireNotNull(args))
+        StripeBrowserLauncherViewModel.Factory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
