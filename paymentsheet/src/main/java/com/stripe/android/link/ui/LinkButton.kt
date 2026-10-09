@@ -264,33 +264,18 @@ private fun PaymentDetailsButtonContent(
     ) {
         if (compact) {
             CompactLinkIconAndDivider(theme)
-            CompactPaymentDetailsContent(
-                paymentUI = paymentUI,
-                color = color,
-            )
         } else {
             FullLinkIconAndDivider(theme, linkBrand)
-            FullPaymentDetailsContent(
-                paymentUI = paymentUI,
-                color = color,
-            )
         }
+        PaymentDetailsContent(
+            paymentUI = paymentUI,
+            color = color,
+        )
     }
 }
 
 @Composable
-private fun RowScope.CompactPaymentDetailsContent(
-    paymentUI: DefaultPaymentUI,
-    color: Color,
-) {
-    when (paymentUI.paymentType) {
-        is DefaultPaymentUI.PaymentType.Card -> PaymentDetailsDisplay(paymentUI)
-        is DefaultPaymentUI.PaymentType.BankAccount -> LastFourText(paymentUI.last4, color)
-    }
-}
-
-@Composable
-private fun RowScope.FullPaymentDetailsContent(
+private fun RowScope.PaymentDetailsContent(
     paymentUI: DefaultPaymentUI,
     color: Color,
 ) {
