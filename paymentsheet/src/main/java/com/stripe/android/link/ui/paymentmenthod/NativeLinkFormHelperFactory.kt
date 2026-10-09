@@ -2,6 +2,10 @@ package com.stripe.android.link.ui.paymentmenthod
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.DefaultFormDefinitionFactory
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
@@ -17,7 +21,7 @@ internal class NativeLinkFormHelperFactory(
 ) {
     fun create(): FormHelper {
         val linkInlineHandler = LinkInlineHandler.create()
-        val paymentMethodMetadata = parentComponent.paymentMethodMetadata
+        val paymentMethodMetadata = parentComponent.paymentMethodMetadata.withCardPaymentMethod()
 
         return DefaultFormHelper(
             coroutineScope = parentComponent.viewModel.viewModelScope,
@@ -61,4 +65,20 @@ internal class NativeLinkFormHelperFactory(
             eventReporter = NoOpAddressLauncherEventReporter,
         )
     }
+}
+
+/**
+ * Link saves the entered card to the consumer's Link account and pays with Link, so the card form must work even when
+ * the intent itself doesn't accept cards (e.g. `payment_method_types: ["link"]`).
+ */
+internal fun PaymentMethodMetadata.withCardPaymentMethod(): PaymentMethodMetadata {
+    val cardCode = PaymentMethod.Type.Card.code
+    if (cardCode in stripeIntent.paymentMethodTypes) return this
+
+    val paymentMethodTypes = stripeIntent.paymentMethodTypes + cardCode
+    val intent = when (val intent = stripeIntent) {
+        is PaymentIntent -> intent.copy(paymentMethodTypes = paymentMethodTypes)
+        is SetupIntent -> intent.copy(paymentMethodTypes = paymentMethodTypes)
+    }
+    return copy(stripeIntent = intent)
 }
