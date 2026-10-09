@@ -11,11 +11,11 @@ internal class ExpressCheckoutElementLinkConfigurationMapperTest {
     @Test
     fun `asPaymentSheet maps Link configuration`() {
         val configuration = ExpressCheckoutElement.Configuration.LinkConfiguration()
-            .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
+            .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
             .build()
 
         val mapped = configuration.asPaymentSheet()
 
-        assertThat(mapped.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.WalletButtonHidden)
+        assertThat(mapped.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 }
