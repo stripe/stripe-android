@@ -44,6 +44,21 @@ class CheckoutPlaygroundSettingsUiTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `feature flags are accessible from the top level`() = runScenario {
+        page.group(CheckoutFeatureFlagDefinitions.configuration).assertIsDisplayed().performClick()
+
+        val nativeLink = CheckoutFeatureFlagDefinitions.configuration.values().single {
+            it.key == "feature_flags.nativeLinkEnabled"
+        }
+        page.value(nativeLink).performScrollTo().assertIsDisplayed()
+        val webAuth = CheckoutFeatureFlagDefinitions.configuration.values().single {
+            it.key == "feature_flags.forceLinkWebAuth"
+        }
+        page.value(webAuth).performScrollTo().assertIsDisplayed()
+        page.group(CheckoutPlaygroundDefinitions.Controller.configuration).assertDoesNotExist()
+    }
+
+    @Test
     fun `opening nested configuration shows only its direct children`() = runScenario {
         page.group(CheckoutPlaygroundDefinitions.Controller.configuration).assertIsDisplayed().performClick()
 
@@ -93,11 +108,11 @@ class CheckoutPlaygroundSettingsUiTest {
 
         page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(paymentCornerRadius).assertTextContains(
-            "Client side › Payment Element › Appearance › Primary button › Shape"
+            "Client side config › Payment Element › Appearance › Primary button › Shape"
         )
         page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(currencyCornerRadius).assertTextContains(
-            "Client side › Currency Selector Element › Appearance"
+            "Client side config › Currency Selector Element › Appearance"
         )
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
 

@@ -271,7 +271,7 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
-    fun `preset atomically replaces settings and persists once`() {
+    fun `preset atomically overrides settings and persists once`() {
         val persisted = mutableListOf<Map<String, String>>()
         val settings = CheckoutPlaygroundSettings.createInMemory(persist = persisted::add)
         settings.update(CheckoutPlaygroundDefinitions.session.currency, Currency.GBP)
@@ -289,7 +289,7 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
-    fun `preset restores values not overridden to defaults`() = runScenario {
+    fun `preset preserves current values not overridden`() = runScenario {
         val save = CheckoutPlaygroundDefinitions.session.paymentMethodSave
         settings.update(save, false)
 
@@ -299,7 +299,7 @@ class CheckoutPlaygroundSettingsTest {
             }
         )
 
-        assertThat(settings[save]).isTrue()
+        assertThat(settings[save]).isFalse()
     }
 
     @Test

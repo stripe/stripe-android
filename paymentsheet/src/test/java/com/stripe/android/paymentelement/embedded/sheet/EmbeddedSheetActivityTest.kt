@@ -458,6 +458,7 @@ internal class EmbeddedSheetActivityTest {
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                collectedEmail = null,
             ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(

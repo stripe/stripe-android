@@ -61,6 +61,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("google_pay")
         assertThat(option?.label).isEqualTo("Google Pay")
+        assertThat(option?.sublabel).isNull()
         assertThat(option?.mandateText).isNull()
     }
 
@@ -73,7 +74,8 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("card")
-        assertThat(option?.label).contains("4242")
+        assertThat(option?.label).isEqualTo("Visa")
+        assertThat(option?.sublabel).isEqualTo("\u2066···· 4242\u2069")
     }
 
     @Test
@@ -92,7 +94,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
-    fun `create does not attach mandate text for a saved card`() = runScenario {
+    fun `create maps a saved card without mandate text`() = runScenario {
         val option = factory.create(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             paymentMethodMetadata = metadata,
@@ -100,6 +102,8 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
 
         assertThat(option).isNotNull()
         assertThat(option?.paymentMethodType).isEqualTo("card")
+        assertThat(option?.label).isEqualTo("Visa")
+        assertThat(option?.sublabel).isEqualTo("\u2066···· 4242\u2069")
         assertThat(option?.mandateText).isNull()
     }
 
@@ -190,7 +194,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
-    fun `create uses link account brand for saved Link passthrough card label`() = runScenario(
+    fun `create uses card labels for saved Link passthrough card`() = runScenario(
         linkAccount = LinkAccount(
             TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
         )
@@ -204,7 +208,57 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
             ),
         )
 
+        assertThat(option?.label).isEqualTo("Visa")
+        assertThat(option?.sublabel).isEqualTo("\u2066···· 4242\u2069")
+    }
+
+    @Test
+    fun `create maps a new bank account`() = runScenario {
+        val option = factory.create(
+            selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(option?.label).isEqualTo("Stripe Bank")
+        assertThat(option?.sublabel).isEqualTo("···· 6789")
+    }
+
+    @Test
+    fun `create maps a saved bank account`() = runScenario {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT),
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(option?.label).isEqualTo("STRIPE TEST BANK")
+        assertThat(option?.sublabel).isEqualTo("\u2066···· 6789\u2069")
+    }
+
+    @Test
+    fun `create maps saved Link details using metadata brand`() = runScenario(
+        metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+    ) {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.LINK_PAYMENT_METHOD),
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(option?.label).isEqualTo("Link")
+        assertThat(option?.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
+    }
+
+    @Test
+    fun `create maps saved Link details using account brand override`() = runScenario(
+        metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+        linkAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink)),
+    ) {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.LINK_PAYMENT_METHOD),
+            paymentMethodMetadata = metadata,
+        )
+
         assertThat(option?.label).isEqualTo("Onelink")
+        assertThat(option?.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
     }
 
     private fun runScenario(

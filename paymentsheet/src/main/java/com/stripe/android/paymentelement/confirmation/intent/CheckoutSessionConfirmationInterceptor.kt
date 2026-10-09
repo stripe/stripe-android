@@ -151,11 +151,15 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
         paymentMethodId = paymentMethod.id,
+        expectedPaymentMethodType = paymentMethod.type?.code,
         clientAttributionMetadata = clientAttributionMetadata,
         returnUrl = returnUrl,
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
         savePaymentMethod = savePaymentMethod.takeIf { intent is PaymentIntent },
         shipping = shipping,
+        collectedInformation = integrationMetadata.collectedEmail
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.fixedEmail == null }
+            ?.let { ConfirmCheckoutSessionParams.CollectedInformation(email = it) },
     )
 
     private suspend fun confirmCheckoutSession(
@@ -233,7 +237,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.takeIf { it.address?.toParamMap()?.isNotEmpty() == true }?.let {
+    return this?.takeIf {
+        it.address?.toParamMap()?.isNotEmpty() == true && !it.name.isNullOrEmpty()
+    }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.name,
             address = it.address,
@@ -242,7 +248,9 @@ private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSes
 }
 
 private fun ConfirmPaymentIntentParams.Shipping?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {
-    return this?.takeIf { it.getAddress().toParamMap().isNotEmpty() }?.let {
+    return this?.takeIf {
+        it.getAddress().toParamMap().isNotEmpty() && !it.getName().isNullOrEmpty()
+    }?.let {
         ConfirmCheckoutSessionParams.Shipping(
             name = it.getName(),
             address = it.getAddress(),

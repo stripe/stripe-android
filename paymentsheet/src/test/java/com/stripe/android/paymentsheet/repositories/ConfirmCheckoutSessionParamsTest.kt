@@ -4,18 +4,47 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import kotlin.test.Test
 
 class ConfirmCheckoutSessionParamsTest {
 
     @Test
+    fun `serializes collected information email`() {
+        val params = createParams(
+            collectedInformation = ConfirmCheckoutSessionParams.CollectedInformation(email = "  email@example.com  "),
+        ).toParamMap()
+        assertThat(params["collected_information"]).isEqualTo(mapOf("email" to "  email@example.com  "))
+    }
+
+    @Test
+    fun `omits collected information when absent`() {
+        assertThat(createParams().toParamMap()).doesNotContainKey("collected_information")
+    }
+
+    @Test
     fun `toParamMap includes shared fields`() {
         val params = createParams().toParamMap()
 
         assertThat(params["payment_method"]).isEqualTo("pm_test_123")
+        assertThat(params["expected_payment_method_type"]).isEqualTo("card")
         assertThat(params["return_url"]).isEqualTo("stripesdk://return_url")
         assertThat(params).containsKey("client_attribution_metadata")
+    }
+
+    @Test
+    fun `serializes Link payment method type`() {
+        val params = createParams().copy(expectedPaymentMethodType = PaymentMethod.Type.Link.code).toParamMap()
+
+        assertThat(params["expected_payment_method_type"]).isEqualTo("link")
+    }
+
+    @Test
+    fun `omits expected payment method type when unavailable`() {
+        val params = createParams().copy(expectedPaymentMethodType = null).toParamMap()
+
+        assertThat(params).doesNotContainKey("expected_payment_method_type")
     }
 
     @Test
@@ -83,9 +112,12 @@ class ConfirmCheckoutSessionParamsTest {
         expectedAmount: Long = 5099L,
         savePaymentMethod: Boolean? = null,
         shipping: ConfirmCheckoutSessionParams.Shipping? = null,
+        collectedInformation: ConfirmCheckoutSessionParams.CollectedInformation? = null,
     ): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
+            collectedInformation = collectedInformation,
             paymentMethodId = "pm_test_123",
+            expectedPaymentMethodType = PaymentMethod.Type.Card.code,
             clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
             returnUrl = "stripesdk://return_url",
             expectedAmount = expectedAmount,

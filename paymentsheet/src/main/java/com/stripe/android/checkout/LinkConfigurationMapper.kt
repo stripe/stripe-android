@@ -41,6 +41,4 @@ private fun ExpressCheckoutElement.Configuration.LinkConfiguration.Display.asPay
         PaymentSheet.LinkConfiguration.Display.Automatic
     ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never ->
         PaymentSheet.LinkConfiguration.Display.Never
-    ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden ->
-        PaymentSheet.LinkConfiguration.Display.WalletButtonHidden
 }

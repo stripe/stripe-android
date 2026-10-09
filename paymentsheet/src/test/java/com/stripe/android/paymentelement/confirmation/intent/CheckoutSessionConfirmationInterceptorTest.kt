@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -53,10 +54,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 
+@Suppress("LargeClass")
 @OptIn(CheckoutSessionPreview::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class CheckoutSessionConfirmationInterceptorTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -66,6 +68,190 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `confirmation sends actual payment method type`(
+        @TestParameter saved: Boolean,
+        @TestParameter(value = ["Card", "Link", "SepaDebit"]) type: PaymentMethod.Type,
+        @TestParameter setup: Boolean,
+    ) {
+        val paymentMethod = when (type) {
+            PaymentMethod.Type.Card -> PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            PaymentMethod.Type.Link -> PaymentMethodFixtures.LINK_PAYMENT_METHOD
+            PaymentMethod.Type.SepaDebit -> PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+            else -> error("Unexpected test type: $type")
+        }
+        val createParams = when (type) {
+            PaymentMethod.Type.Card -> PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            PaymentMethod.Type.Link -> PaymentMethodCreateParams.createLink(
+                paymentDetailsId = "payment_details_123",
+                consumerSessionClientSecret = "consumer_session_secret",
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = "test_session_id",
+                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+                    checkoutSessionId = null,
+                ),
+            )
+            PaymentMethod.Type.SepaDebit -> PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
+            else -> error("Unexpected test type: $type")
+        }
+
+        runScenario(createPaymentMethodResult = Result.success(paymentMethod)) {
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_payment_method_type", type.code),
+            ) { response ->
+                response.testBodyFromFile(
+                    if (setup) "checkout-session-confirm-setup.json" else "checkout-session-confirm.json"
+                )
+            }
+
+            val intent = if (setup) SetupIntentFactory.create() else PaymentIntentFactory.create()
+            val result = if (saved) {
+                interceptor.intercept(
+                    intent = intent,
+                    confirmationOption = SAVED_PM_OPTION.copy(paymentMethod = paymentMethod),
+                    shippingValues = null,
+                )
+            } else {
+                interceptor.intercept(
+                    intent = intent,
+                    confirmationOption = NEW_PM_OPTION.copy(createParams = createParams),
+                    shippingValues = null,
+                )
+            }
+
+            assertThat(result)
+                .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+        }
+    }
+
+    @Test
+    fun `web Link confirmation without email sends Link type`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("payment_method", PaymentMethodFixtures.LINK_PAYMENT_METHOD.id),
+            bodyPart("expected_payment_method_type", "link"),
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = SAVED_PM_OPTION.copy(
+                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+                originatedFromWallet = true,
+            ),
+            shippingValues = null,
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `Link passthrough confirmation without email sends card type`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("payment_method", PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
+            bodyPart("expected_payment_method_type", "card"),
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = SAVED_PM_OPTION.copy(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true),
+                originatedFromWallet = true,
+            ),
+            shippingValues = null,
+        )
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `confirmation completes without expected type when unavailable`(
+        @TestParameter saved: Boolean,
+        @TestParameter unrecognized: Boolean,
+    ) {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            type = null,
+            code = if (unrecognized) "unrecognized_payment_method" else null,
+        )
+
+        runScenario(createPaymentMethodResult = Result.success(paymentMethod)) {
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                not(hasBodyPart("expected_payment_method_type")),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            val result = if (saved) {
+                interceptor.intercept(
+                    intent = PaymentIntentFactory.create(),
+                    confirmationOption = SAVED_PM_OPTION.copy(paymentMethod = paymentMethod),
+                    shippingValues = null,
+                )
+            } else {
+                interceptNewPm()
+            }
+
+            assertThat(result)
+                .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+        }
+    }
+
+    @Test
+    fun `confirmation sends collected email`(
+        @TestParameter saved: Boolean,
+        @TestParameter setup: Boolean,
+    ) = runScenario(collectedEmail = "local+checkout@example.com") {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile(
+                if (setup) "checkout-session-confirm-setup.json" else "checkout-session-confirm.json"
+            )
+        }
+        val intent = if (setup) SetupIntentFactory.create() else PaymentIntentFactory.create()
+        if (saved) interceptSavedPm(intent = intent) else interceptNewPm(intent = intent)
+    }
+
+    @Test
+    fun `confirmation omits collected email`(
+        @TestParameter saved: Boolean,
+        @TestParameter reason: EmailOmissionReason,
+    ) = runScenario(
+        collectedEmail = "local@example.com".takeUnless { reason == EmailOmissionReason.Absent },
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            customerEmail = "fixed@example.com".takeIf { reason == EmailOmissionReason.Session },
+        ).let { response ->
+            if (reason == EmailOmissionReason.Customer) {
+                response.copy(
+                    customer = CheckoutSessionResponse.Customer(
+                        id = "cus_test",
+                        email = "fixed@example.com",
+                        paymentMethods = emptyList(),
+                        canDetachPaymentMethod = false,
+                    ),
+                )
+            } else {
+                response
+            }
+        },
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        if (saved) interceptSavedPm() else interceptNewPm()
+    }
+
+    enum class EmailOmissionReason { Absent, Session, Customer }
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
@@ -127,7 +313,9 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept fails when checkout session confirm fails`() = runScenario {
-        networkRule.checkoutConfirm { response ->
+        networkRule.checkoutConfirm(
+            bodyPart("expected_payment_method_type", "card"),
+        ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
         }
@@ -326,7 +514,9 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept with saved payment method fails when checkout session confirm fails`() = runScenario {
-        networkRule.checkoutConfirm { response ->
+        networkRule.checkoutConfirm(
+            bodyPart("expected_payment_method_type", "card"),
+        ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
         }
@@ -523,6 +713,28 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept with saved payment method omits shipping information without a name`() = runScenario {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("shipping["),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingInformation = SHIPPING_INFORMATION_WITHOUT_NAME)
+    }
+
+    @Test
+    fun `intercept with saved payment method omits shipping information with an empty name`() = runScenario {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("shipping["),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingInformation = EMPTY_NAME_SHIPPING_INFORMATION)
+    }
+
+    @Test
     fun `intercept with new payment method passes controller shipping`() = runScenario {
         networkRule.checkoutConfirm(
             bodyPart("shipping[name]", "Controller Shipping"),
@@ -538,6 +750,17 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
 
         interceptNewPm(shippingValues = CONTROLLER_SHIPPING)
+    }
+
+    @Test
+    fun `intercept with new payment method omits controller shipping with an empty name`() = runScenario {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("shipping["),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm(shippingValues = EMPTY_NAME_CONTROLLER_SHIPPING)
     }
 
     @Test
@@ -570,6 +793,17 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept with saved payment method omits controller shipping with an empty name`() = runScenario {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("shipping["),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(shippingValues = EMPTY_NAME_CONTROLLER_SHIPPING)
+    }
+
+    @Test
     fun `intercept with saved payment method omits empty controller shipping`() = runScenario {
         networkRule.checkoutConfirm(
             doesNotContainBodyPartsWithPrefix("shipping["),
@@ -597,6 +831,48 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         interceptSavedPm(
             shippingInformation = ADDRESSLESS_SHIPPING_INFORMATION,
+            shippingValues = CONTROLLER_SHIPPING,
+        )
+    }
+
+    @Test
+    fun `intercept with saved payment method falls back when shipping information name is null`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Controller Shipping"),
+            bodyPart("shipping[address][line1]", "123 Controller Street"),
+            bodyPart("shipping[address][line2]", "Unit 4"),
+            bodyPart("shipping[address][city]", "Controller City"),
+            bodyPart("shipping[address][state]", "NY"),
+            bodyPart("shipping[address][postal_code]", "10001"),
+            bodyPart("shipping[address][country]", "CA"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(
+            shippingInformation = SHIPPING_INFORMATION_WITHOUT_NAME,
+            shippingValues = CONTROLLER_SHIPPING,
+        )
+    }
+
+    @Test
+    fun `intercept with saved payment method falls back when shipping information name is empty`() = runScenario {
+        networkRule.checkoutConfirm(
+            bodyPart("shipping[name]", "Controller Shipping"),
+            bodyPart("shipping[address][line1]", "123 Controller Street"),
+            bodyPart("shipping[address][line2]", "Unit 4"),
+            bodyPart("shipping[address][city]", "Controller City"),
+            bodyPart("shipping[address][state]", "NY"),
+            bodyPart("shipping[address][postal_code]", "10001"),
+            bodyPart("shipping[address][country]", "CA"),
+            not(hasBodyPart("shipping[phone]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptSavedPm(
+            shippingInformation = EMPTY_NAME_SHIPPING_INFORMATION,
             shippingValues = CONTROLLER_SHIPPING,
         )
     }
@@ -649,6 +925,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
+        collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
@@ -673,6 +950,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = collectedEmail,
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -788,6 +1066,21 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val EMPTY_CONTROLLER_SHIPPING = ConfirmPaymentIntentParams.Shipping(
             address = Address(),
+            name = "Controller Shipping",
+        )
+
+        val EMPTY_NAME_CONTROLLER_SHIPPING = ConfirmPaymentIntentParams.Shipping(
+            address = CONTROLLER_SHIPPING.getAddress(),
+            name = "",
+        )
+
+        val SHIPPING_INFORMATION_WITHOUT_NAME = ShippingInformation(
+            address = SHIPPING_INFORMATION.address,
+            name = null,
+        )
+
+        val EMPTY_NAME_SHIPPING_INFORMATION = ShippingInformation(
+            address = SHIPPING_INFORMATION.address,
             name = "",
         )
 

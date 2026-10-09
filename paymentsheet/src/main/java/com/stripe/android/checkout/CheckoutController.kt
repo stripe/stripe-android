@@ -124,14 +124,20 @@ class CheckoutController @Inject internal constructor(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val billingAddress = initialLoad.state.paymentSelection
-                    ?.billingDetails?.address?.toCheckoutAddress()
-                    ?: configurationState.defaults.billingDetails?.address
-                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                val addressSource = response.taxAddressSource
+                val taxAddress = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        initialLoad.state.collectedDetails.shippingAddress
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                            ?: configurationState.defaults.billingDetails?.address
+                    null -> null
+                }
+                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = billingAddress,
+                        addressSource = addressSource,
+                        address = taxAddress,
                     ).getOrThrow()
                     // The updated totals change payment method metadata, so rebuild it before publishing.
                     checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
@@ -940,9 +946,13 @@ class CheckoutController @Inject internal constructor(
         class PaymentOptionDisplayData internal constructor(
             private val paymentOptionResource: PaymentOptionResource,
             /**
-             * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
+             * The primary text representing the payment option; e.g. "Google Pay" or "Visa" for a card.
              */
             val label: String,
+            /**
+             * Optional secondary details for the payment option; e.g. "···· 4242" for a card.
+             */
+            val sublabel: String?,
             /**
              * The billing details associated with the customer's selected payment method, if any were collected.
              */

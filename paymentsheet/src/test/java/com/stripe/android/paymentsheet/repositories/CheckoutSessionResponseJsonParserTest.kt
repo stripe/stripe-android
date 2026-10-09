@@ -20,6 +20,29 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses customer email as fixed email`() {
+        val json = base().put(
+            "customer",
+            JSONObject().put("id", "cus_test").put("email", "customer@example.com")
+                .put("payment_methods", JSONArray()),
+        )
+        val result = requireNotNull(parse(json))
+        assertThat(result.customer?.email).isEqualTo("customer@example.com")
+        assertThat(result.fixedEmail).isEqualTo("customer@example.com")
+    }
+
+    @Test
+    fun `session email takes precedence over customer email`() {
+        val json = base().put("customer_email", "session@example.com").put(
+            "customer",
+            JSONObject().put("id", "cus_test").put("email", "customer@example.com")
+                .put("payment_methods", JSONArray()),
+        )
+        val result = requireNotNull(parse(json))
+        assertThat(result.fixedEmail).isEqualTo("session@example.com")
+    }
+
+    @Test
     fun `parses nested unified one-time price group`() {
         val result = parse(base())
 

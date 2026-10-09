@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -55,14 +56,28 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm starts confirmation with a Google Pay option`() = runScenario(
+    fun `confirm preserves Google Pay billing email when Checkout has billing defaults`() = runScenario(
         statusBarColor = STATUS_BAR_COLOR,
-        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).let { state ->
+            val response = state.checkoutSessionResponse.copy(customerEmail = "checkout@example.com")
+            state.copy(
+                checkoutSessionResponse = response,
+                paymentMethodMetadata = state.paymentMethodMetadata.copy(
+                    integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        id = response.id,
+                        instancesKey = "test",
+                        checkoutSessionResponse = response,
+                        collectedEmail = null,
+                    ),
+                ),
+            )
+        },
     ) {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
             .isEqualTo(stateHolder.state?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
