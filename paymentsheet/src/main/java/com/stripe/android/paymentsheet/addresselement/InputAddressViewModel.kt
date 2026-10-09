@@ -274,9 +274,23 @@ internal class InputAddressViewModel @Inject constructor(
         addressDetails: AddressDetails,
         result: AddressElementActivityContract.Result,
     ) {
+        val autocompleteFilledAddress = inlineAutocompleteController?.autocompleteFilledAddress
+        val autocompleteAddressDetails = autocompleteFilledAddress?.let { address ->
+            AddressDetails(
+                address = PaymentSheet.Address(
+                    city = address.city,
+                    country = address.country,
+                    line1 = address.line1,
+                    line2 = address.line2,
+                    postalCode = address.postalCode,
+                    state = address.state,
+                )
+            )
+        }
         eventReporter.onSaveCompleted(
-            addressDetails = addressDetails,
-            autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
+            country = addressDetails.address?.country,
+            autocompleteResultSelected = autocompleteFilledAddress != null,
+            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
         resultStateHolder.onSaveCompleted(result)
     }
