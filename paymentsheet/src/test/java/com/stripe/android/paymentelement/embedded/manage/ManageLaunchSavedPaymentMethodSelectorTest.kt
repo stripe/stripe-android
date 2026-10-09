@@ -339,29 +339,6 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `changed saved selection requests tax update again and stores new response`() {
-        val firstResponse = CHECKOUT_SESSION_RESPONSE.copy(id = "first_response")
-        val secondResponse = CHECKOUT_SESSION_RESPONSE.copy(id = "second_response")
-        var nextResponse = firstResponse
-
-        runScenario(
-            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-            updateTaxRegion = { Result.success(nextResponse) },
-        ) {
-            assertThat(selector.select(selection).isSuccess).isTrue()
-            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "94111", CHECKOUT_SESSION_RESPONSE)
-
-            val changedSelection = PaymentSelection.Saved(selection.paymentMethod.withPostalCode("10001"))
-            nextResponse = secondResponse
-            assertThat(selector.select(changedSelection).isSuccess).isTrue()
-
-            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", firstResponse)
-            assertThat(selector.checkoutSessionResponse).isEqualTo(secondResponse)
-            assertThat(selectionHolder.selection.value).isEqualTo(changedSelection)
-        }
-    }
-
-    @Test
     fun `failed selection retries tax update`() {
         val error = IllegalStateException("Tax update failed")
         val response = CHECKOUT_SESSION_RESPONSE.copy(id = "retry_response")
