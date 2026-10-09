@@ -34,9 +34,11 @@ internal class SheetTaxRegionUpdater internal constructor(
         selection: PaymentSelection?,
         currentResponse: CheckoutSessionResponse?,
     ): SheetTaxRegionUpdate? {
-        val checkoutSessionResponse = (currentResponse
-            ?: (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
-                ?.checkoutSessionResponse)
+        val checkoutSessionResponse = (
+            currentResponse
+                ?: (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
+                    ?.checkoutSessionResponse
+            )
             ?.takeIf { it.collectsTaxFromBillingAddress }
             ?: return null
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
