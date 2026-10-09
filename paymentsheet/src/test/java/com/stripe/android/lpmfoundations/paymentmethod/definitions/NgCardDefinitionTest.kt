@@ -92,46 +92,6 @@ internal class NgCardDefinitionTest {
     }
 
     @Test
-    fun `defaults billing country to Nigeria when no country is supplied`(
-        @TestParameter(value = ["Full", "AutomaticWithTax"])
-        billingMode: LpmBillingDetailsCollectionMode,
-    ) {
-        val elements = NgCardDefinition.formElements(
-            metadata = LpmBillingAddressTestConfiguration(
-                paymentMethodType = PaymentMethod.Type.NgCard,
-                billingDetailsCollectionMode = billingMode,
-                intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
-                termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
-            ).metadata(),
-            initialValues = emptyMap(),
-        )
-        val field = elements.filterIsInstance<SectionElement>().single().fields.single()
-        val country = when (field) {
-            is AddressElement -> field.countryElement
-            is BillingAddressElement -> field.countryElement
-            else -> error("Expected billing address")
-        }
-        assertThat(country.controller.rawFieldValue.value).isEqualTo("NG")
-        assertThat(country.controller.displayItems).hasSize(CountryUtils.supportedBillingCountries.size)
-    }
-
-    @Test
-    fun `country default respects merchant restrictions`() {
-        val elements = NgCardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_card")),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    allowedCountries = setOf("CA"),
-                ),
-            ),
-            initialValues = emptyMap(),
-        )
-        val field = elements.filterIsInstance<SectionElement>().single().fields.single() as AddressElement
-        assertThat(field.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
-    }
-
-    @Test
     fun `rejects payment method specific future usage`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

@@ -1443,7 +1443,7 @@ constructor(
             )
         }
 
-        /** Creates parameters for a one-time Naira card payment. */
+        /** Creates parameters for a Naira card payment method. */
         @JvmStatic
         @JvmOverloads
         fun createNgCard(

@@ -2103,9 +2103,6 @@ public final class com/stripe/android/model/PaymentMethod$NgCard : com/stripe/an
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field brand Lcom/stripe/android/model/PaymentMethod$NgCard$Brand;
 	public final field last4 Ljava/lang/String;
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/model/PaymentMethod$NgCard$Brand;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/model/PaymentMethod$NgCard$Brand;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I

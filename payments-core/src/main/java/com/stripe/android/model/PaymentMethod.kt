@@ -950,9 +950,9 @@ constructor(
     /** Card details returned by the Naira card redirect flow. */
     @Parcelize
     @Poko
-    class NgCard(
-        @JvmField val brand: Brand = Brand.Unknown,
-        @JvmField val last4: String? = null,
+    class NgCard @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @JvmField val brand: Brand,
+        @JvmField val last4: String?,
     ) : StripeModel {
         /** The local card brand, or [Brand.Unknown] for an unrecognized or missing value. */
         enum class Brand(val code: String?) {
