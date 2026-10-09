@@ -41,6 +41,14 @@ interface IdentityVerificationSheet {
         @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         var biometricConsent: BiometricConsentConfiguration? = null
 
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var primaryButtonStyle: PrimaryButtonStyle? = null
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var secondaryButtonStyle: SecondaryButtonStyle? = null
+
         /**
          * Configuration for the biometric consent screen's header.
          */
@@ -56,6 +64,41 @@ interface IdentityVerificationSheet {
              * Whether to hide the decline button below the primary action.
              */
             val hideDeclineButton: Boolean
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class PrimaryButtonStyle(
+            val backgroundColor: ButtonColor?,
+            val textColor: ButtonColor?,
+            val shape: ButtonShape?,
+            val elevationDp: Float?,
+            val uppercase: Boolean?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class SecondaryButtonStyle(
+            val backgroundColor: ButtonColor?,
+            val textColor: ButtonColor?,
+            val shape: ButtonShape?,
+            val elevationDp: Float?,
+            val uppercase: Boolean?,
+            val showBorder: Boolean?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class ButtonColor(
+            @get:ColorInt val light: Int?,
+            @get:ColorInt val dark: Int?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class ButtonShape(
+            val cornerRadiusDp: Float,
+            val heightDp: Float?
         ) : Parcelable
     }
 
