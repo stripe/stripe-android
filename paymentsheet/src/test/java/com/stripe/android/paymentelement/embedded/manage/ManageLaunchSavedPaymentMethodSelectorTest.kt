@@ -178,9 +178,9 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
 
             val changedSelection = PaymentSelection.Saved(
                 selection.paymentMethod.copy(
-                    billingDetails = selection.paymentMethod.billingDetails?.copy(
-                        address = selection.paymentMethod.billingDetails?.address?.copy(postalCode = "10001"),
-                    ),
+                    billingDetails = selection.paymentMethod.billingDetails?.toBuilder()
+                        ?.setAddress(selection.paymentMethod.billingDetails?.address?.copy(postalCode = "10001"))
+                        ?.build(),
                 ),
             )
             nextResponse = secondResponse

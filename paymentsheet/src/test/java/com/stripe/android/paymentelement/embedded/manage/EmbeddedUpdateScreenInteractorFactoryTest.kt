@@ -282,28 +282,10 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         updatePaymentMethodResult: Result<PaymentMethod> = Result.success(UPDATED_PAYMENT_METHOD),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            hasCustomerConfiguration = true,
-            canUpdateCardExpiryAndBillingDetails = true,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            ),
-        )
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(selectedSelection)
         }
-        val customerStateHolder = DefaultCustomerStateHolder(
-            customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
-            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
-            savedStateHandle = SavedStateHandle(),
-            selection = selectionHolder.selection,
-        ).apply {
-            setCustomerState(
-                PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
-                    paymentMethods = listOf(PAYMENT_METHOD),
-                )
-            )
-        }
+        val customerStateHolder = createCustomerStateHolder(selectionHolder)
         val eventReporter = FakeEventReporter()
         val navigator = EmbeddedNavigator(
             coroutineScope = this,
@@ -322,37 +304,25 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             paymentMethods = listOf(PAYMENT_METHOD),
             onUpdatePaymentMethod = { updatePaymentMethodResult },
         )
-        val savedPaymentMethodMutator = SavedPaymentMethodMutator(
-            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
+        val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             eventReporter = eventReporter,
-            coroutineScope = backgroundScope,
-            workContext = coroutineContext,
-            uiContext = coroutineContext,
-            savedPaymentMethodRepository = repository,
-            selection = selectionHolder.selection,
-            setSelection = selectionHolder::setSelection,
+            selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
-            prePaymentMethodRemoveActions = {},
-            postPaymentMethodRemoveActions = {},
-            onUpdatePaymentMethod = { _, _, _, _, _ -> error("Not expected") },
-            isLinkEnabled = stateFlowOf(false),
-            isNotPaymentFlow = false,
-            linkAccount = stateFlowOf(null),
+            repository = repository,
         )
         val savedPaymentMethodSelector = FakeManageScreenSavedPaymentMethodSelector(
             setSelection = selectionHolder::setSelection,
         )
-        val factory = DefaultEmbeddedUpdateScreenInteractorFactory(
+        val interactor = DefaultEmbeddedUpdateScreenInteractorFactory(
             savedPaymentMethodMutatorProvider = Provider { savedPaymentMethodMutator },
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = PAYMENT_METHOD_METADATA,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             savedPaymentMethodSelector = savedPaymentMethodSelector,
             eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
-        )
-        val interactor = factory.createUpdateScreenInteractor(
+        ).createUpdateScreenInteractor(
             PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
         ) as DefaultUpdatePaymentMethodInteractor
 
@@ -372,6 +342,48 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         navigatorResultCalls.ensureAllEventsConsumed()
         repository.validate()
         eventReporter.validate()
+    }
+
+    private fun createCustomerStateHolder(
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+    ): DefaultCustomerStateHolder {
+        return DefaultCustomerStateHolder(
+            customerMetadata = stateFlowOf(PAYMENT_METHOD_METADATA.customerMetadata),
+            paymentMethodMetadataFlow = stateFlowOf(PAYMENT_METHOD_METADATA),
+            savedStateHandle = SavedStateHandle(),
+            selection = selectionHolder.selection,
+        ).apply {
+            setCustomerState(
+                PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = listOf(PAYMENT_METHOD),
+                )
+            )
+        }
+    }
+
+    private fun TestScope.createSavedPaymentMethodMutator(
+        eventReporter: FakeEventReporter,
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+        customerStateHolder: DefaultCustomerStateHolder,
+        repository: FakeSavedPaymentMethodRepository,
+    ): SavedPaymentMethodMutator {
+        return SavedPaymentMethodMutator(
+            paymentMethodMetadataFlow = stateFlowOf(PAYMENT_METHOD_METADATA),
+            eventReporter = eventReporter,
+            coroutineScope = backgroundScope,
+            workContext = coroutineContext,
+            uiContext = coroutineContext,
+            savedPaymentMethodRepository = repository,
+            selection = selectionHolder.selection,
+            setSelection = selectionHolder::setSelection,
+            customerStateHolder = customerStateHolder,
+            prePaymentMethodRemoveActions = {},
+            postPaymentMethodRemoveActions = {},
+            onUpdatePaymentMethod = { _, _, _, _, _ -> error("Not expected") },
+            isLinkEnabled = stateFlowOf(false),
+            isNotPaymentFlow = false,
+            linkAccount = stateFlowOf(null),
+        )
     }
 
     private fun Scenario.changeBillingPostalCode() {
@@ -397,11 +409,18 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
     )
 
     private companion object {
+        val PAYMENT_METHOD_METADATA = PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+            canUpdateCardExpiryAndBillingDetails = true,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+        )
         val PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val UPDATED_PAYMENT_METHOD = PAYMENT_METHOD.copy(
-            billingDetails = PAYMENT_METHOD.billingDetails?.copy(
-                address = PAYMENT_METHOD.billingDetails?.address?.copy(postalCode = "10001"),
-            ),
+            billingDetails = PAYMENT_METHOD.billingDetails?.toBuilder()
+                ?.setAddress(PAYMENT_METHOD.billingDetails?.address?.copy(postalCode = "10001"))
+                ?.build(),
         )
     }
 }

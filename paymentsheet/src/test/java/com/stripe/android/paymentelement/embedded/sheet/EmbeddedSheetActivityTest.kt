@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -43,12 +44,15 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_ERROR_MESSAGE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupPaymentMethodUpdateResponse
@@ -79,20 +83,20 @@ internal class EmbeddedSheetActivityTest {
 
     private val selectedCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     private val updatedSelectedCard = selectedCard.copy(
-        billingDetails = requireNotNull(selectedCard.billingDetails).copy(
-            address = UPDATED_ADDRESS,
-        ),
+        billingDetails = requireNotNull(selectedCard.billingDetails).toBuilder()
+            .setAddress(UPDATED_ADDRESS)
+            .build(),
     )
     private val secondCard = selectedCard.copy(
         id = SECOND_CARD_ID,
-        billingDetails = requireNotNull(selectedCard.billingDetails).copy(
-            address = requireNotNull(selectedCard.billingDetails?.address).copy(line1 = "9 Market St"),
-        ),
+        billingDetails = requireNotNull(selectedCard.billingDetails).toBuilder()
+            .setAddress(requireNotNull(selectedCard.billingDetails?.address).copy(line1 = "9 Market St"))
+            .build(),
     )
     private val updatedSecondCard = secondCard.copy(
-        billingDetails = requireNotNull(secondCard.billingDetails).copy(
-            address = UPDATED_ADDRESS,
-        ),
+        billingDetails = requireNotNull(secondCard.billingDetails).toBuilder()
+            .setAddress(UPDATED_ADDRESS)
+            .build(),
     )
 
     private val cbcCardId = "pm_54321"
@@ -302,9 +306,10 @@ internal class EmbeddedSheetActivityTest {
             enqueueTaxRegionUpdateResponse(updatedSelectedCard, taxResponseGate)
 
             try {
-                editPage.update(waitUntilComplete = false)
+                saveBillingAddress(waitUntilComplete = false)
 
                 composeTestRule.waitUntilWithIdle(conditionDescription = "payment method update request") {
+                    composeTestRule.waitForIdle()
                     paymentMethodResponseGate.requestReceived.count == 0L
                 }
                 assertThat(taxResponseGate.requestReceived.count).isEqualTo(1)
@@ -312,6 +317,7 @@ internal class EmbeddedSheetActivityTest {
                 paymentMethodResponseGate.releaseResponse.countDown()
 
                 composeTestRule.waitUntilWithIdle(conditionDescription = "tax region update request") {
+                    composeTestRule.waitForIdle()
                     taxResponseGate.requestReceived.count == 0L
                 }
                 editPage.assertIsVisible()
@@ -342,7 +348,7 @@ internal class EmbeddedSheetActivityTest {
             editBillingAddress()
             enqueuePaymentMethodUpdateResponse(updatedSelectedCard)
             enqueueTaxRegionUpdateResponse(updatedSelectedCard)
-            editPage.update()
+            saveBillingAddress()
             managePage.waitUntilVisible()
 
             composeTestRule.onNodeWithContentDescription(
@@ -376,16 +382,21 @@ internal class EmbeddedSheetActivityTest {
                 response.setResponseCode(400)
                 response.setBody("""{"error":{"message":"Invalid tax region"}}""")
             }
-            editPage.update()
+            saveBillingAddress()
 
-            val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+            val expectedError = updateCardBrandErrorMessage.resolve(applicationContext)
+            composeTestRule.waitUntilWithIdle {
+                composeTestRule.onAllNodesWithTag(UPDATE_PM_ERROR_MESSAGE_TEST_TAG)
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                    .isNotEmpty()
+            }
             composeTestRule.onNodeWithText(expectedError).performScrollTo().assertIsDisplayed()
             editPage.assertIsVisible()
             composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsEnabled()
 
             enqueuePaymentMethodUpdateResponse(updatedSelectedCard)
             enqueueTaxRegionUpdateResponse(updatedSelectedCard)
-            editPage.update()
+            saveBillingAddress()
             managePage.waitUntilVisible()
             Espresso.pressBack()
 
@@ -406,7 +417,7 @@ internal class EmbeddedSheetActivityTest {
             editPage.waitUntilVisible()
             editBillingAddress()
             enqueuePaymentMethodUpdateResponse(updatedSecondCard)
-            editPage.update()
+            saveBillingAddress()
             managePage.waitUntilVisible()
             Espresso.pressBack()
 
@@ -424,6 +435,14 @@ internal class EmbeddedSheetActivityTest {
 
     private fun editBillingAddress() {
         billingDetailsPage.line1.performScrollTo().performTextReplacement(UPDATED_LINE1)
+    }
+
+    private fun saveBillingAddress(waitUntilComplete: Boolean = true) {
+        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+        editPage.update(waitUntilComplete = waitUntilComplete)
     }
 
     private fun checkoutPaymentMethodMetadata(): PaymentMethodMetadata {

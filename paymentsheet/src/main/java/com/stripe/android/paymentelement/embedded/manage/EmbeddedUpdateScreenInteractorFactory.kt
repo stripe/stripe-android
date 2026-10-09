@@ -1,8 +1,10 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
@@ -52,30 +54,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updatePaymentMethodExecutor = { method, cardUpdateParams ->
-                savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
-                    paymentMethod = method,
-                    cardUpdateParams = cardUpdateParams,
-                    onSuccess = { paymentMethod ->
-                        val currentSelection = selectionHolder.selection.value
-                        if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                            selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
-                        }
-                    },
-                ).fold(
-                    onSuccess = { updatedMethod ->
-                        val selection = selectionHolder.selection.value as? PaymentSelection.Saved
-                        if (selection != null && selection.paymentMethod.id == updatedMethod.id &&
-                            method.billingDetails?.address != updatedMethod.billingDetails?.address
-                        ) {
-                            savedPaymentMethodSelector.select(selection).map { updatedMethod }
-                        } else {
-                            Result.success(updatedMethod)
-                        }
-                    },
-                    onFailure = { Result.failure(it) },
-                )
-            },
+            updatePaymentMethodExecutor = ::updatePaymentMethod,
             setDefaultPaymentMethodExecutor = { method ->
                 savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
@@ -99,6 +78,34 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        )
+    }
+
+    private suspend fun updatePaymentMethod(
+        method: PaymentMethod,
+        cardUpdateParams: CardUpdateParams,
+    ): Result<PaymentMethod> {
+        return savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
+            paymentMethod = method,
+            cardUpdateParams = cardUpdateParams,
+            onSuccess = { paymentMethod ->
+                val currentSelection = selectionHolder.selection.value
+                if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
+                    selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
+                }
+            },
+        ).fold(
+            onSuccess = { updatedMethod ->
+                val selection = selectionHolder.selection.value as? PaymentSelection.Saved
+                if (selection != null && selection.paymentMethod.id == updatedMethod.id &&
+                    method.billingDetails?.address != updatedMethod.billingDetails?.address
+                ) {
+                    savedPaymentMethodSelector.select(selection).map { updatedMethod }
+                } else {
+                    Result.success(updatedMethod)
+                }
+            },
+            onFailure = { Result.failure(it) },
         )
     }
 }
