@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.utils
 
 import android.app.Activity
+import android.provider.Settings
 import android.util.Log
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.AssumptionViolatedException
 import org.junit.runner.Description
@@ -116,6 +118,7 @@ internal fun writeTestTimingReport(
     durations: Map<TestTimingPhase, Long>,
     outcome: String,
     leakCheck: LeakCheckDiagnostics?,
+    activityCollection: ActivityCollectionDiagnostics?,
 ) {
     val arguments = InstrumentationRegistry.getArguments()
     val report = JSONObject().apply {
@@ -134,10 +137,48 @@ internal fun writeTestTimingReport(
                 put("assertion_duration_ms", leakCheck.assertionDurationMillis ?: JSONObject.NULL)
             })
         }
+        if (activityCollection != null) {
+            put("activity_collection", activityCollection.toJson())
+            put("animation_scales", readAnimationScales())
+        }
     }.toString()
     Log.i(TEST_TIMING_TAG, report)
     val outputDirectory = arguments.getString("additionalTestOutputDir") ?: return
     val directory = File(outputDirectory, "paymentsheet-test-timings")
     check(directory.isDirectory || directory.mkdirs()) { "Cannot create test timing output directory" }
     File(directory, "${UUID.randomUUID()}.json").writeText(report)
+}
+
+private fun ActivityCollectionDiagnostics.toJson() = JSONObject().apply {
+    put("observer_started", observerStarted)
+    put("observer_completed", observerCompleted)
+    put("worker_exited_unexpectedly", workerExitedUnexpectedly)
+    put("leak_check_started_after_ns", leakCheckStartedAfterNanos ?: JSONObject.NULL)
+    put("leak_check_finished_after_ns", leakCheckFinishedAfterNanos ?: JSONObject.NULL)
+    put("finished_after_ns", finishedAfterNanos ?: JSONObject.NULL)
+    put("activities", JSONArray(activities.map { it.toJson() }))
+}
+
+private fun ActivityCollectionObservation.toJson() = JSONObject().apply {
+    put("type", type.name)
+    put("destroyed_after_ns", destroyedAfterNanos)
+    put("collection_observed_after_ns", collectionObservedAfterNanos ?: JSONObject.NULL)
+}
+
+private fun readAnimationScales(): JSONObject {
+    val resolver = InstrumentationRegistry.getInstrumentation().targetContext.contentResolver
+    return JSONObject().apply {
+        put(
+            "window",
+            Settings.Global.getString(resolver, Settings.Global.WINDOW_ANIMATION_SCALE) ?: JSONObject.NULL,
+        )
+        put(
+            "transition",
+            Settings.Global.getString(resolver, Settings.Global.TRANSITION_ANIMATION_SCALE) ?: JSONObject.NULL,
+        )
+        put(
+            "animator",
+            Settings.Global.getString(resolver, Settings.Global.ANIMATOR_DURATION_SCALE) ?: JSONObject.NULL,
+        )
+    }
 }
