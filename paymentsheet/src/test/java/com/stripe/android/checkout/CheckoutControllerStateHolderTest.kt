@@ -41,9 +41,10 @@ internal class CheckoutControllerStateHolderTest {
     fun `session projects the paymentOption the factory builds from the committed state`() {
         val expectedOption = PaymentOptionDisplayData(
             paymentOptionResource = ErrorPaymentOptionResource,
-            label = "Google Pay",
+            label = "Visa",
+            sublabel = "···· 4242",
             billingDetails = null,
-            paymentMethodType = "google_pay",
+            paymentMethodType = "card",
             mandateText = null,
         )
         var capturedSelection: PaymentSelection? = null
@@ -53,11 +54,28 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         testScenario(paymentOptionFactory = factory) {
-            stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+            stateHolder.state = committedState(
+                paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            )
 
             assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
-            assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(stateHolder.session.value?.paymentOption?.label).isEqualTo("Visa")
+            assertThat(stateHolder.session.value?.paymentOption?.sublabel).isEqualTo("···· 4242")
+            assertThat(capturedSelection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         }
+    }
+
+    @Test
+    fun `session has no payment option when there is no selection`() = testScenario(
+        paymentOptionFactory = { selection, _ ->
+            assertThat(selection).isNull()
+            null
+        },
+    ) {
+        stateHolder.state = committedState(paymentSelection = null)
+
+        assertThat(stateHolder.session.value).isNotNull()
+        assertThat(stateHolder.session.value?.paymentOption).isNull()
     }
 
     @Test

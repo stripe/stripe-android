@@ -10,12 +10,12 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.model.DefaultPaymentOptionResource
+import com.stripe.android.paymentsheet.model.PaymentOptionLabelsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
 import com.stripe.android.paymentsheet.model.drawableResourceIdNight
-import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -59,6 +59,14 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
             is PaymentSelection.Link -> null
         }
 
+        val labels = PaymentOptionLabelsFactory.create(
+            context = context,
+            selection = selection,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(
+                linkAccountHolder.linkAccountInfo.value.account
+            ),
+        )
+
         return PaymentOptionDisplayData(
             paymentOptionResource = DefaultPaymentOptionResource(
                 appearance = paymentMethodMetadata.appearance,
@@ -75,11 +83,8 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
                     useDarkThemeIcon = useDarkThemeIcon,
                 )
             },
-            label = selection.label(
-                paymentMethodMetadata.effectiveLinkBrand(
-                    linkAccountHolder.linkAccountInfo.value.account
-                )
-            ).resolve(context),
+            label = labels.label,
+            sublabel = labels.sublabel,
             billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),

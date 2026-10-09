@@ -946,9 +946,13 @@ class CheckoutController @Inject internal constructor(
         class PaymentOptionDisplayData internal constructor(
             private val paymentOptionResource: PaymentOptionResource,
             /**
-             * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
+             * The primary text representing the payment option; e.g. "Google Pay" or "Visa" for a card.
              */
             val label: String,
+            /**
+             * Optional secondary details for the payment option; e.g. "···· 4242" for a card.
+             */
+            val sublabel: String?,
             /**
              * The billing details associated with the customer's selected payment method, if any were collected.
              */
