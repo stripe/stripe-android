@@ -263,7 +263,7 @@ internal fun ConsentPreview() {
                 declineButtonText = "Decline",
                 scrollToContinueButtonText = "scroll to button",
                 title = "Tora's cat food works with Stripe to verify your identity",
-                subtitle = "Complete a one-time identity check to enable withdrawals.",
+                subtitle = null,
                 privacyPolicy = "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • " +
                     "<a href='https://tora.me'>Tora's cat food Privacy Policy</a>",
                 lines = listOf(
