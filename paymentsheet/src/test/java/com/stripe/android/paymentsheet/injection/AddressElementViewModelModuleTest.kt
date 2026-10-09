@@ -230,9 +230,17 @@ class AddressElementViewModelModuleTest {
 
         eventReporter.onShown(country = "CA")
         eventReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = AddressDetails(
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "511 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                )
+            ),
         )
 
         assertThat(addressLauncherEventReporter.showCalls.awaitItem()).isEqualTo("CA")
