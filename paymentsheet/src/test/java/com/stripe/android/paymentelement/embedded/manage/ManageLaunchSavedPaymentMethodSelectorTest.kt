@@ -145,7 +145,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     }
 
     @Test
-    fun `selecting a row after an edit requests tax again and retains the latest response`() {
+    fun `selecting another row after an edit uses and replaces the latest response`() {
         val firstResponse = CHECKOUT_SESSION_RESPONSE.copy(id = "edit_response")
         val secondResponse = CHECKOUT_SESSION_RESPONSE.copy(id = "selection_response")
         var nextResponse = firstResponse
@@ -161,10 +161,12 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             selector.updateCheckoutSessionResponse(requireNotNull(editResponse))
 
             nextResponse = secondResponse
-            assertThat(selector.select(PaymentSelection.Saved(updated)).isSuccess).isTrue()
+            val nextSelection = PaymentSelection.Saved(selection.paymentMethod.copy(id = "pm_other"))
+            assertThat(selector.select(nextSelection).isSuccess).isTrue()
 
-            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", firstResponse)
+            assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "94111", firstResponse)
             assertThat(selector.checkoutSessionResponse).isEqualTo(secondResponse)
+            assertThat(selectionHolder.selection.value).isEqualTo(nextSelection)
         }
     }
 
