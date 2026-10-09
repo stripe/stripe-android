@@ -120,53 +120,48 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
-    fun `link is disabled when web Link checkout session and configuration are missing email`() =
-        testLinkEmailRequirement(
+    fun `link is enabled when web Link checkout session and configuration are missing email`() =
+        testLinkEnabledWithEmailConfiguration(
             useNativeLink = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
-            expectedDisabledReason = LinkDisabledReason.CheckoutSessionsRequiresEmail,
         )
 
     @Test
     fun `link is enabled when native Link checkout session and configuration are missing email`() =
-        testLinkEmailRequirement(
+        testLinkEnabledWithEmailConfiguration(
             useNativeLink = true,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
-            expectedDisabledReason = null,
         )
 
     @Test
     fun `link is enabled when web Link checkout session has customer email`() =
-        testLinkEmailRequirement(
+        testLinkEnabledWithEmailConfiguration(
             useNativeLink = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = "customer@example.com",
             defaultEmail = null,
-            expectedDisabledReason = null,
         )
 
     @Test
     fun `link is enabled when web Link configuration has default email`() =
-        testLinkEmailRequirement(
+        testLinkEnabledWithEmailConfiguration(
             useNativeLink = false,
             useCheckoutSession = true,
             checkoutSessionCustomerEmail = null,
             defaultEmail = "merchant@example.com",
-            expectedDisabledReason = null,
         )
 
     @Test
     fun `link is enabled when web Link is not initialized with checkout session`() =
-        testLinkEmailRequirement(
+        testLinkEnabledWithEmailConfiguration(
             useNativeLink = false,
             useCheckoutSession = false,
             checkoutSessionCustomerEmail = null,
             defaultEmail = null,
-            expectedDisabledReason = null,
         )
 
     @Test
@@ -275,12 +270,11 @@ internal class DefaultCreateLinkStateTest {
         )
     }
 
-    private fun testLinkEmailRequirement(
+    private fun testLinkEnabledWithEmailConfiguration(
         useNativeLink: Boolean,
         useCheckoutSession: Boolean,
         checkoutSessionCustomerEmail: String?,
         defaultEmail: String?,
-        expectedDisabledReason: LinkDisabledReason?,
     ) = runTest {
         val createLinkState = createLinkStateFactory(useNativeLink = useNativeLink)
         val elementsSession = createElementsSession()
@@ -307,13 +301,7 @@ internal class DefaultCreateLinkStateTest {
             apiConfiguration = DEFAULT_API_CONFIG,
         )
 
-        if (expectedDisabledReason == null) {
-            assertThat(result).isInstanceOf<LinkState>()
-        } else {
-            assertThat(result).isInstanceOf<LinkDisabledState>()
-            assertThat((result as LinkDisabledState).linkDisabledReasons)
-                .containsExactly(expectedDisabledReason)
-        }
+        assertThat(result).isInstanceOf<LinkState>()
     }
 
     private fun checkoutSessionInitializationMode(

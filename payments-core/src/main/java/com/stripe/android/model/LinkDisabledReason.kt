@@ -30,10 +30,5 @@ enum class LinkDisabledReason(val value: String) {
     /**
      * Automatic tax is enabled with billing address as the tax source.
      */
-    AutomaticTaxBillingAddress("automatic_tax_billing_address"),
-
-    /**
-     * Checkout Session initialization requires an email address and none was provided.
-     */
-    CheckoutSessionsRequiresEmail("checkout_sessions_requires_email")
+    AutomaticTaxBillingAddress("automatic_tax_billing_address")
 }
