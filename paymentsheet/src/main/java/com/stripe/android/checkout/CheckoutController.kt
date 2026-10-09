@@ -124,14 +124,20 @@ class CheckoutController @Inject internal constructor(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val billingAddress = initialLoad.state.paymentSelection
-                    ?.billingDetails?.address?.toCheckoutAddress()
-                    ?: configurationState.defaults.billingDetails?.address
-                if (billingAddress != null && response.collectsTaxFromBillingAddress) {
+                val addressSource = response.taxAddressSource
+                val taxAddress = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        initialLoad.state.collectedDetails.shippingAddress
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                            ?: configurationState.defaults.billingDetails?.address
+                    null -> null
+                }
+                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        address = billingAddress,
+                        addressSource = addressSource,
+                        address = taxAddress,
                     ).getOrThrow()
                     // The updated totals change payment method metadata, so rebuild it before publishing.
                     checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
