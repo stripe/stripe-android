@@ -54,7 +54,7 @@ internal class AddressElementActivityAnalyticsTest {
         .around(networkRule)
 
     @Test
-    fun `failed save reports failure and close reports cancellation`() = runScenario {
+    fun `failed save reports sanitized failure and re-enables saving`() = runScenario {
         val taxUpdate = enqueueTaxUpdate(fails = true)
 
         try {
@@ -71,65 +71,9 @@ internal class AddressElementActivityAnalyticsTest {
             addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
             awaitAnalytics(failedRequest)
             addressPage.assertReadyToSave()
-
-            val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-            addressPage.clickClose()
-
-            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-            awaitAnalytics(canceledRequest)
         } finally {
             taxUpdate.releaseResponse.countDown()
         }
-    }
-
-    @Test
-    fun `root back reports cancellation`() = runScenario {
-        addressPage.assertReadyToSave()
-
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        activityScenario.onActivity { activity ->
-            activity.onBackPressedDispatcher.onBackPressed()
-        }
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        awaitAnalytics(canceledRequest)
-    }
-
-    @Test
-    fun `close reports cancellation`() = runScenario {
-        addressPage.assertReadyToSave()
-
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.clickClose()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        awaitAnalytics(canceledRequest)
-    }
-
-    @Test
-    fun `scrim accessibility action reports cancellation`() = runScenario {
-        addressPage.assertReadyToSave()
-
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.dismissViaScrimAccessibilityAction()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        awaitAnalytics(canceledRequest)
-    }
-
-    @Test
-    fun `back reports the current country once even when pressed twice`() = runScenario {
-        addressPage.assertReadyToSave()
-        addressPage.selectCountry("Canada")
-
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
-        activityScenario.onActivity { activity ->
-            activity.onBackPressedDispatcher.onBackPressed()
-            activity.onBackPressedDispatcher.onBackPressed()
-        }
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-        awaitAnalytics(canceledRequest)
     }
 
     @Test
@@ -152,36 +96,6 @@ internal class AddressElementActivityAnalyticsTest {
             awaitAnalytics(shownRequest)
 
             addressPage.assertVisible()
-            assertDismissalBlocked()
-
-            val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
-            taxUpdate.releaseResponse.countDown()
-
-            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
-            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
-            awaitAnalytics(completedRequest)
-        } finally {
-            taxUpdate.releaseResponse.countDown()
-        }
-    }
-
-    @Test
-    fun `saving blocks cancellation analytics from close back and scrim dismissal`() = runScenario {
-        val taxUpdate = enqueueTaxUpdate()
-
-        try {
-            startTaxUpdateWithAnalytics(taxUpdate)
-            assertDismissalBlocked()
-
-            addressPage.clickClose()
-            assertDismissalBlocked()
-
-            activityScenario.onActivity { activity ->
-                activity.onBackPressedDispatcher.onBackPressed()
-            }
-            assertDismissalBlocked()
-
-            addressPage.dismissViaScrimAccessibilityAction()
             assertDismissalBlocked()
 
             val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")

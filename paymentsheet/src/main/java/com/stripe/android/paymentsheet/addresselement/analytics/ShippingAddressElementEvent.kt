@@ -14,14 +14,6 @@ internal sealed class ShippingAddressElementEvent : AnalyticsEvent {
             get() = mapOf(FIELD_ADDRESS_DATA_BLOB to addressData.toAnalyticsParams())
     }
 
-    class Canceled(
-        private val addressData: ShippingAddressElementAnalyticsData,
-    ) : ShippingAddressElementEvent() {
-        override val eventName: String = "elements.shipping_address.canceled"
-        override val additionalParams: Map<String, Any>
-            get() = mapOf(FIELD_ADDRESS_DATA_BLOB to addressData.toAnalyticsParams())
-    }
-
     class SaveStarted(
         private val addressData: ShippingAddressElementAnalyticsData,
     ) : ShippingAddressElementEvent() {

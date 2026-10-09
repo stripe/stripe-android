@@ -67,10 +67,6 @@ internal class AddressElementEventReporterTest {
 
     @Test
     fun `standalone ignores Checkout lifecycle events`() = runScenario {
-        standaloneReporter.onCanceled(
-            addressDetails = createAddressDetails(),
-            autocompleteAddressDetails = null,
-        )
         standaloneReporter.onSaveStarted(
             addressDetails = createAddressDetails(),
             autocompleteAddressDetails = null,
@@ -125,24 +121,6 @@ internal class AddressElementEventReporterTest {
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.save_completed")
-        assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
-        assertThat(params["address_data_blob"]).isEqualTo(
-            mapOf(
-                "address_country_code" to "US",
-                "auto_complete_result_selected" to false,
-            )
-        )
-    }
-
-    @Test
-    fun `Checkout onCanceled reports canceled`() = runScenario {
-        checkoutShippingReporter.onCanceled(
-            addressDetails = createAddressDetails(),
-            autocompleteAddressDetails = null,
-        )
-
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.canceled")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
