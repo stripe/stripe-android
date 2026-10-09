@@ -426,6 +426,9 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
         isResendSmsCode: Boolean,
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession> {
@@ -435,11 +438,13 @@ internal class LinkApiRepository @Inject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     locale = locale ?: Locale.US,
                     requestSurface = requestSurface.value,
-                    type = VerificationType.SMS,
+                    type = type,
                     customEmailType = null,
                     connectionsMerchantName = null,
+                    accountPhoneNumber = accountPhoneNumber.takeIf { type == VerificationType.EMAIL },
+                    emailAddress = emailAddress,
                     requestOptions = buildRequestOptions(apiConfiguration),
-                    isResendSmsCode = isResendSmsCode
+                    isResendSmsCode = isResendSmsCode && type == VerificationType.SMS
                 )
             )
         }
@@ -448,6 +453,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
+        type: VerificationType,
         consentGranted: Boolean?,
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession> {
@@ -457,7 +463,7 @@ internal class LinkApiRepository @Inject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     verificationCode = verificationCode,
                     requestSurface = requestSurface.value,
-                    type = VerificationType.SMS,
+                    type = type,
                     consentGranted = consentGranted,
                     requestOptions = buildRequestOptions(apiConfiguration),
                 )

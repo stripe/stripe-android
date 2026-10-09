@@ -22,6 +22,7 @@ import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -48,7 +49,11 @@ internal class VerificationViewModelTest {
     fun `init starts verification with link account manager`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
-            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+            override suspend fun startVerification(
+                type: VerificationType,
+                accountPhoneNumber: String?,
+                isResend: Boolean,
+            ): Result<LinkAccount> {
                 callCount += 1
                 return Result.success(TestFactory.LINK_ACCOUNT)
             }
@@ -104,11 +109,15 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification fails then code is cleared`() = runTest(dispatcher) {
         val linkEventsReporter = object : FakeLinkEventsReporter() {
-            override fun on2FAFailure() = Unit
+            override fun on2FAFailure(verificationType: String) = Unit
         }
         val linkAccountManager = object : FakeLinkAccountManager() {
             var codeUsed: String? = null
-            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+            override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                 codeUsed = code
                 return Result.failure(RuntimeException("Error"))
             }
@@ -151,9 +160,13 @@ internal class VerificationViewModelTest {
     @Test
     fun `Resending code is reflected in state`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+            override suspend fun startVerification(
+                type: VerificationType,
+                accountPhoneNumber: String?,
+                isResend: Boolean,
+            ): Result<LinkAccount> {
                 delay(100)
-                return super.startVerification(isResendSmsCode)
+                return super.startVerification(type, accountPhoneNumber, isResend)
             }
         }
 
@@ -181,7 +194,11 @@ internal class VerificationViewModelTest {
     @Test
     fun `Failing to resend code is reflected in state`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
-            override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+            override suspend fun startVerification(
+                type: VerificationType,
+                accountPhoneNumber: String?,
+                isResend: Boolean,
+            ): Result<LinkAccount> {
                 delay(100)
                 return Result.failure(RuntimeException("error"))
             }
@@ -229,7 +246,11 @@ internal class VerificationViewModelTest {
     fun `onConsentShown allows consent to be granted in verification`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var consentGrantedValue: Boolean? = null
-            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+            override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(TestFactory.LINK_ACCOUNT)
             }
@@ -265,7 +286,11 @@ internal class VerificationViewModelTest {
         run {
             var result: LinkActivityResult? = null
             val linkAccountManager = object : FakeLinkAccountManager() {
-                override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+                override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                     return Result.success(linkAccountWithInlineConsent())
                 }
             }
@@ -298,7 +323,11 @@ internal class VerificationViewModelTest {
     fun `Authorization mode with inline consent and onConsentShown works end to end`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var consentGrantedValue: Boolean? = null
-            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+            override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(linkAccountWithInlineConsent(mock()))
             }
@@ -326,7 +355,11 @@ internal class VerificationViewModelTest {
     fun `When confirmVerification succeeds then consentGranted parameter is passed correctly`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var consentGrantedValue: Boolean? = null
-            override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
+            override suspend fun confirmVerification(
+                code: String,
+                type: VerificationType,
+                consentGranted: Boolean?,
+            ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(TestFactory.LINK_ACCOUNT)
             }
@@ -474,7 +507,9 @@ internal class VerificationViewModelTest {
             webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
             linkBrand = LinkBrand.Link,
+            enableMfaAuthFlow = false,
             onVerificationSucceeded = onVerificationSucceeded,
+            setScreenBackHandler = {},
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult

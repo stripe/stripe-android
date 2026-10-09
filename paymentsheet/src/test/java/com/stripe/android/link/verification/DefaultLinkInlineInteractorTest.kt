@@ -22,6 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
@@ -266,6 +267,7 @@ class DefaultLinkInlineInteractorTest {
 
         // Setup initial state with isProcessing=true
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = true, // Already processing
             errorMessage = null,
             email = "test@example.com",
@@ -311,6 +313,7 @@ class DefaultLinkInlineInteractorTest {
         val testError = RuntimeException("Invalid OTP code")
 
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = true,
             errorMessage = null,
             email = "test@example.com",
@@ -360,6 +363,7 @@ class DefaultLinkInlineInteractorTest {
 
         // Setup initial state with some OTP values and error
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             errorMessage = "Previous error".resolvableString,
             email = "test@example.com",
@@ -393,8 +397,9 @@ class DefaultLinkInlineInteractorTest {
         interactor.resendCode()
 
         // Verify startVerification was called with isResendSmsCode = true
-        val isResendSmsCode = linkAccountManager.awaitStartVerificationCall()
-        assertThat(isResendSmsCode).isTrue()
+        val startVerificationCall = linkAccountManager.awaitStartVerificationCall()
+        assertThat(startVerificationCall.isResend).isTrue()
+        assertThat(startVerificationCall.type).isEqualTo(VerificationType.SMS)
 
         interactor.state.test {
             val state = awaitItem()
@@ -419,6 +424,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             errorMessage = null,
             email = "test@example.com",
@@ -467,6 +473,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             errorMessage = "Previous error message".resolvableString,
             email = "test@example.com",
@@ -547,6 +554,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            authFlow = null,
             isProcessing = false,
             errorMessage = null,
             email = "test@example.com",
