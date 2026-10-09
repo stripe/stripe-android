@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +27,7 @@ private val ALL_ADDRESS_FIELDS: Set<FormFieldId> = FieldType.entries
 @RunWith(RobolectricTestRunner::class)
 internal class CardBillingAddressElementTest {
     val dropdownFieldController = DropdownFieldController(
-        CountryConfig(emptySet(), autofillType = ContentType.AddressCountry)
+        CountryConfig(emptySet())
     )
     val cardBillingElement = createCardBillingAddressElement()
 

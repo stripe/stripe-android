@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
@@ -38,7 +37,7 @@ class AddressElementTest {
     private val countryElement = CountryElement(
         FormFieldId.Country,
         DropdownFieldController(
-            CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry)
+            CountryConfig(setOf("US", "CA"))
         )
     )
 
@@ -437,7 +436,7 @@ class AddressElementTest {
     @Test
     fun `AddressElement has no TrailingIcon on Line1 when places is unavailable`() = runTest {
         val countryDropdownFieldController = DropdownFieldController(
-            CountryConfig(setOf("US", "CA", "JP"), autofillType = ContentType.AddressCountry)
+            CountryConfig(setOf("US", "CA", "JP"))
         )
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
@@ -465,7 +464,7 @@ class AddressElementTest {
     @Test
     fun `AddressElement has a TrailingIcon on Line1 when places is available`() = runTest {
         val countryDropdownFieldController = DropdownFieldController(
-            CountryConfig(setOf("US", "CA", "JP"), autofillType = ContentType.AddressCountry)
+            CountryConfig(setOf("US", "CA", "JP"))
         )
         val onNavigationCounter = AtomicInteger(0)
         val addressElement = AddressElement(

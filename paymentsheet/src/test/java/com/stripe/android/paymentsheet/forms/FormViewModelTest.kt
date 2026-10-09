@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
-import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
@@ -873,7 +872,7 @@ internal class FormViewModelTest {
             CountryElement(
                 identifier = FormFieldId.Country,
                 controller = DropdownFieldController(
-                    config = CountryConfig(allowedCountryCodes, autofillType = ContentType.AddressCountry),
+                    config = CountryConfig(allowedCountryCodes),
                     initialValue = null,
                 ),
             )

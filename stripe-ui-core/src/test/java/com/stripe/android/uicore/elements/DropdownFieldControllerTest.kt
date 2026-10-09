@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.elements
 
-import androidx.compose.ui.autofill.ContentType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.util.Locale
@@ -34,7 +33,6 @@ class DropdownFieldControllerTest {
         val config = CountryConfig(
             onlyShowCountryCodes = setOf("AT", "IT"),
             locale = Locale.US,
-            autofillType = ContentType.AddressCountry,
         )
         assertThat(config.rawItems.indexOf("IT")).isGreaterThan(0)
 
@@ -48,7 +46,6 @@ class DropdownFieldControllerTest {
         val config = CountryConfig(
             onlyShowCountryCodes = setOf("AT", "IT"),
             locale = Locale.US,
-            autofillType = ContentType.AddressCountry,
         )
         assertThat(config.rawItems.indexOf("IT")).isGreaterThan(0)
 

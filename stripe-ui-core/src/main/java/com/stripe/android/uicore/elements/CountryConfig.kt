@@ -29,7 +29,7 @@ class CountryConfig(
     expandedLabelMapper: (Country) -> String = { country ->
         "${countryCodeToEmoji(country.code.value)} ${country.name}"
     },
-    override val autofillType: ContentType?,
+    override val autofillType: ContentType? = ContentType.AddressCountry,
 ) : DropdownConfig {
     override val debugLabel = "country"
 

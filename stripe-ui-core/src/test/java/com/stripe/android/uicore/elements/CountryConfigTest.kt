@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.elements
 
-import androidx.compose.ui.autofill.ContentType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
@@ -12,13 +11,13 @@ class CountryConfigTest {
 
     @Test
     fun `Verify the displayed country list`() {
-        assertThat(CountryConfig(locale = Locale.US, autofillType = ContentType.AddressCountry).displayItems[0])
+        assertThat(CountryConfig(locale = Locale.US).displayItems[0])
             .isEqualTo("🇺🇸 United States")
     }
 
     @Test
     fun `Verify the label`() {
-        assertThat(CountryConfig(locale = Locale.US, autofillType = ContentType.AddressCountry).label)
+        assertThat(CountryConfig(locale = Locale.US).label)
             .isEqualTo(resolvableString(CoreR.string.stripe_address_label_country_or_region))
     }
 
@@ -27,8 +26,7 @@ class CountryConfigTest {
         assertThat(
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
-                locale = Locale.US,
-                autofillType = ContentType.AddressCountry,
+                locale = Locale.US
             ).displayItems[0]
         ).isEqualTo("🇦🇹 Austria")
     }
@@ -61,7 +59,6 @@ class CountryConfigTest {
             val config = CountryConfig(
                 onlyShowCountryCodes = setOf("AT", "IT"),
                 locale = Locale.FRANCE,
-                autofillType = ContentType.AddressCountry,
             )
             val italyIndex = config.rawItems.indexOf("IT")
 
@@ -80,7 +77,6 @@ class CountryConfigTest {
             onlyShowCountryCodes = setOf("AT", "IT"),
             locale = Locale.US,
             expandedLabelMapper = { country -> "Code: ${country.code.value}" },
-            autofillType = ContentType.AddressCountry,
         )
         val italyIndex = config.rawItems.indexOf("IT")
 
@@ -93,7 +89,6 @@ class CountryConfigTest {
         val config = CountryConfig(
             onlyShowCountryCodes = setOf("AT", "US"),
             locale = Locale.US,
-            autofillType = ContentType.AddressCountry,
         )
 
         assertThat(config.rawItems).doesNotContain("IT")
@@ -115,7 +110,6 @@ class CountryConfigTest {
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
                 mode = DropdownConfig.Mode.Full(),
-                autofillType = ContentType.AddressCountry,
             ).getSelectedItemLabel(0)
         ).isEqualTo("Austria")
     }
@@ -130,8 +124,7 @@ class CountryConfigTest {
                 collapsedLabelMapper = { country ->
                     CountryConfig.countryCodeToEmoji(country.code.value)
                 },
-                expandedLabelMapper = { country -> country.name },
-                autofillType = ContentType.AddressCountry,
+                expandedLabelMapper = { country -> country.name }
             ).getSelectedItemLabel(0)
         ).isEqualTo("🇦🇹")
     }
@@ -140,13 +133,11 @@ class CountryConfigTest {
     fun `test country list `() {
         val defaultCountries = CountryConfig(
             onlyShowCountryCodes = emptySet(),
-            locale = Locale.US,
-            autofillType = ContentType.AddressCountry,
+            locale = Locale.US
         ).displayItems
         val supportedCountries = CountryConfig(
             onlyShowCountryCodes = CountryUtils.supportedBillingCountries,
-            locale = Locale.US,
-            autofillType = ContentType.AddressCountry,
+            locale = Locale.US
         ).displayItems
 
         val excludedCountries = setOf(
@@ -184,6 +175,5 @@ class CountryConfigTest {
     private fun italyAndAustriaConfig() = CountryConfig(
         onlyShowCountryCodes = setOf("AT", "IT"),
         locale = Locale.US,
-        autofillType = ContentType.AddressCountry,
     )
 }

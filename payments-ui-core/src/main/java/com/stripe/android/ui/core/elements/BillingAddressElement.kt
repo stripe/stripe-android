@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
@@ -77,7 +76,7 @@ class BillingAddressElement(
     rawValuesMap: Map<FormFieldId, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes, autofillType = ContentType.AddressCountry),
+        CountryConfig(countryCodes),
         rawValuesMap[FormFieldId.Country]
     ),
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
