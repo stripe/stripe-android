@@ -55,13 +55,7 @@ interface IdentityVerificationSheet {
             /**
              * Whether to hide the decline button below the primary action.
              */
-            val hideDeclineButton: Boolean,
-
-            /**
-             * Whether to display the privacy policy below the consent buttons (true)
-             * or below the body text (false - the default).
-             */
-            val movePrivacyPolicyToFooter: Boolean
+            val hideDeclineButton: Boolean
         ) : Parcelable
     }
 

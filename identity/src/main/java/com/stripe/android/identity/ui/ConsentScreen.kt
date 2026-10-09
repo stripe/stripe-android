@@ -92,8 +92,6 @@ internal fun ConsentScreen(
             visitedIndividualWelcomePage,
             hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
             hideDeclineButton = identityViewModel.verificationArgs.biometricConsent?.hideDeclineButton == true,
-            movePrivacyPolicyToFooter = identityViewModel.verificationArgs.biometricConsent
-                ?.movePrivacyPolicyToFooter == true,
             showStripeLogo = !verificationPage.isStripe,
             onConsentAgreed = {
                 coroutineScope.launch {
@@ -131,7 +129,6 @@ private fun SuccessUI(
     visitedIndividualWelcomePage: Boolean,
     hideBrandingHeader: Boolean,
     hideDeclineButton: Boolean,
-    movePrivacyPolicyToFooter: Boolean,
     showStripeLogo: Boolean = true,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
@@ -167,16 +164,6 @@ private fun SuccessUI(
                 lines = consentPage.lines,
                 bottomSheets = bottomSheets
             )
-
-            if (!movePrivacyPolicyToFooter) {
-                ConsentPrivacyPolicy(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
-                    privacyPolicy = consentPage.privacyPolicy,
-                    bottomSheets = bottomSheets
-                )
-            }
         }
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
@@ -223,15 +210,13 @@ private fun SuccessUI(
             }
         }
 
-        if (movePrivacyPolicyToFooter) {
-            ConsentPrivacyPolicy(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
-                privacyPolicy = consentPage.privacyPolicy,
-                bottomSheets = bottomSheets
-            )
-        }
+        ConsentPrivacyPolicy(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+            privacyPolicy = consentPage.privacyPolicy,
+            bottomSheets = bottomSheets
+        )
     }
 }
 
@@ -300,7 +285,6 @@ internal fun ConsentPreview() {
             visitedIndividualWelcomePage = false,
             hideBrandingHeader = false,
             hideDeclineButton = false,
-            movePrivacyPolicyToFooter = false,
             bottomSheets = mapOf(),
             onConsentAgreed = {},
             onConsentDeclined = {}

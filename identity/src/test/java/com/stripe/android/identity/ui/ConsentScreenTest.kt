@@ -114,7 +114,7 @@ class ConsentScreenTest {
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
             onNodeWithTag(PRIVACY_POLICY_TAG)
-                .assert(hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
             onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -149,8 +149,7 @@ class ConsentScreenTest {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = true,
-                hideDeclineButton = false,
-                movePrivacyPolicyToFooter = false
+                hideDeclineButton = false
             )
         )
 
@@ -164,8 +163,7 @@ class ConsentScreenTest {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = false,
-                hideDeclineButton = false,
-                movePrivacyPolicyToFooter = false
+                hideDeclineButton = false
             )
         )
 
@@ -189,30 +187,31 @@ class ConsentScreenTest {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = false,
-                hideDeclineButton = true,
-                movePrivacyPolicyToFooter = false
+                hideDeclineButton = true
             )
         )
 
         runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(ACCEPT_BUTTON_TAG).assertIsDisplayed()
             onNodeWithTag(DECLINE_BUTTON_TAG).assertDoesNotExist()
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertIsDisplayed()
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    onNodeWithTag(ACCEPT_BUTTON_TAG).fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
         }
     }
 
     @Test
-    fun `when movePrivacyPolicyToFooter is true policy is below consent buttons`() {
-        whenever(mockVerificationArgs.biometricConsent).thenReturn(
-            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
-                hideBrandingHeader = false,
-                hideDeclineButton = false,
-                movePrivacyPolicyToFooter = true
-            )
-        )
+    fun `when biometric consent configuration is null policy is below consent buttons`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
 
         runScenario(Resource.success(verificationPage)) {
             val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
                 .assertTextEquals(CONSENT_PRIVACY_POLICY)
+                .assertIsDisplayed()
                 .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
             val declineButton = onNodeWithTag(DECLINE_BUTTON_TAG)
 
@@ -228,8 +227,7 @@ class ConsentScreenTest {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = false,
-                hideDeclineButton = false,
-                movePrivacyPolicyToFooter = false
+                hideDeclineButton = false
             )
         )
 
@@ -271,8 +269,7 @@ class ConsentScreenTest {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = false,
-                hideDeclineButton = false,
-                movePrivacyPolicyToFooter = false
+                hideDeclineButton = false
             )
         )
 
