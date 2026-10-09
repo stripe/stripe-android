@@ -28,6 +28,7 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
@@ -135,6 +136,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         LpmNetworkTestModule::class,
     ]
 )

@@ -230,6 +230,7 @@ internal class CreateCustomerMetadataTest {
 
     private companion object {
         val CHECKOUT_CUSTOMER = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_1",
             paymentMethods = emptyList(),
             canDetachPaymentMethod = true,

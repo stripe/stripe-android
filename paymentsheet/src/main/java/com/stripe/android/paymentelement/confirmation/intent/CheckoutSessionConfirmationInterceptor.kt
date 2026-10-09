@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -31,6 +32,16 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
+internal interface CheckoutSessionConfirmationInterceptor : IntentConfirmationInterceptor {
+    interface Factory {
+        fun create(
+            integrationMetadata: IntegrationMetadata.CheckoutSession,
+            customerMetadata: CustomerMetadata?,
+            clientAttributionMetadata: ClientAttributionMetadata,
+        ): CheckoutSessionConfirmationInterceptor
+    }
+}
+
 /**
  * Confirmation interceptor for checkout sessions.
  *
@@ -43,16 +54,17 @@ import dagger.assisted.AssistedInject
  * and existing payment method IDs.
  */
 @OptIn(CheckoutSessionPreview::class)
-internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
+internal class DefaultCheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
+    private val stateHolder: CheckoutControllerStateHolder,
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val requestOptions: ApiRequest.Options,
-) : IntentConfirmationInterceptor {
+) : CheckoutSessionConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
     private val genericErrorMessage: String = context.getString(R.string.stripe_something_went_wrong)
@@ -156,6 +168,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
         savePaymentMethod = savePaymentMethod.takeIf { intent is PaymentIntent },
         shipping = shipping,
+        collectedInformation = stateHolder.state?.collectedDetails?.email
+            ?.takeIf { integrationMetadata.checkoutSessionResponse.fixedEmail == null }
+            ?.let { ConfirmCheckoutSessionParams.CollectedInformation(email = it) },
     )
 
     private suspend fun confirmCheckoutSession(
@@ -223,12 +238,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     }
 
     @AssistedFactory
-    interface Factory {
-        fun create(
+    interface Factory : CheckoutSessionConfirmationInterceptor.Factory {
+        override fun create(
             integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
-        ): CheckoutSessionConfirmationInterceptor
+        ): DefaultCheckoutSessionConfirmationInterceptor
     }
 }
 

@@ -17,6 +17,7 @@ internal data class ConfirmCheckoutSessionParams(
     private val expectedAmount: Long,
     private val savePaymentMethod: Boolean?,
     private val shipping: Shipping?,
+    private val collectedInformation: CollectedInformation?,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -27,10 +28,17 @@ internal data class ConfirmCheckoutSessionParams(
             if (savePaymentMethod != null) {
                 put("save_payment_method", savePaymentMethod)
             }
+            if (collectedInformation != null) {
+                put("collected_information", collectedInformation.toParamMap())
+            }
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())
             }
         }
+    }
+
+    internal data class CollectedInformation(val email: String) {
+        fun toParamMap(): Map<String, Any> = mapOf("email" to email)
     }
 
     internal data class Shipping(

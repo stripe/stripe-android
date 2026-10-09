@@ -25,6 +25,7 @@ import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
@@ -48,6 +49,7 @@ internal annotation class NativeLinkScope
         ElementsSessionClientParamsModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
         ApiRequestOptionsModule::class,
     ]

@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkConfigurationLoader
 import com.stripe.android.link.LinkControllerInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -34,6 +35,7 @@ import javax.inject.Singleton
     includes = [
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         NoOpTapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         GooglePayLauncherModule::class,

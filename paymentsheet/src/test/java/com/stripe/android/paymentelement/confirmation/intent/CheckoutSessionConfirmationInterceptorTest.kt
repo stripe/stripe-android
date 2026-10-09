@@ -1,8 +1,13 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.checkout.CheckoutCollectedDetails
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -53,11 +58,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 
 @Suppress("LargeClass")
 @OptIn(CheckoutSessionPreview::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class CheckoutSessionConfirmationInterceptorTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -67,6 +72,70 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `confirmation sends collected email`(
+        @TestParameter saved: Boolean,
+        @TestParameter setup: Boolean,
+    ) = runScenario(collectedEmail = "local+checkout@example.com") {
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "local+checkout@example.com"),
+        ) { response ->
+            response.testBodyFromFile(
+                if (setup) "checkout-session-confirm-setup.json" else "checkout-session-confirm.json"
+            )
+        }
+        val intent = if (setup) SetupIntentFactory.create() else PaymentIntentFactory.create()
+        if (saved) interceptSavedPm(intent = intent) else interceptNewPm(intent = intent)
+    }
+
+    @Test
+    fun `confirmation omits collected email`(
+        @TestParameter saved: Boolean,
+        @TestParameter reason: EmailOmissionReason,
+    ) = runScenario(
+        collectedEmail = "local@example.com".takeUnless { reason == EmailOmissionReason.Absent },
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            customerEmail = "fixed@example.com".takeIf { reason == EmailOmissionReason.Session },
+        ).let { response ->
+            if (reason == EmailOmissionReason.Customer) {
+                response.copy(
+                    customer = CheckoutSessionResponse.Customer(
+                        id = "cus_test",
+                        email = "fixed@example.com",
+                        paymentMethods = emptyList(),
+                        canDetachPaymentMethod = false,
+                    ),
+                )
+            } else {
+                response
+            }
+        },
+    ) {
+        networkRule.checkoutConfirm(
+            doesNotContainBodyPartsWithPrefix("collected_information"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        if (saved) interceptSavedPm() else interceptNewPm()
+    }
+
+    @Test
+    fun `confirmation reads email updated after interceptor creation`(
+        @TestParameter saved: Boolean,
+    ) = runScenario(collectedEmail = "initial@example.com") {
+        stateHolder.state = requireNotNull(stateHolder.state).copy(
+            collectedDetails = CheckoutCollectedDetails(email = "updated@example.com"),
+        )
+        networkRule.checkoutConfirm(
+            bodyPart("collected_information[email]", "updated@example.com"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+        if (saved) interceptSavedPm() else interceptNewPm()
+    }
+
+    enum class EmailOmissionReason { Absent, Session, Customer }
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
@@ -736,6 +805,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
+        collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
@@ -758,7 +828,12 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
         )
 
-        val interceptor = CheckoutSessionConfirmationInterceptor(
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            collectedDetails = CheckoutCollectedDetails(email = collectedEmail),
+        )
+        val interceptor = DefaultCheckoutSessionConfirmationInterceptor(
+            stateHolder = stateHolder,
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
@@ -781,6 +856,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
+                stateHolder = stateHolder,
             )
 
             scenario.block()
@@ -789,6 +865,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
+        val stateHolder: CheckoutControllerStateHolder,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,

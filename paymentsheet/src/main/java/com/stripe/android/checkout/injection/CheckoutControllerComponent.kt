@@ -45,6 +45,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DefaultCheckoutSessionConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
@@ -152,6 +154,11 @@ internal interface CheckoutControllerComponent {
 @Suppress("TooManyFunctions")
 @Module(subcomponents = [CheckoutPresenterSubcomponent::class])
 internal interface CheckoutControllerModule {
+    @Binds
+    fun bindsCheckoutSessionConfirmationInterceptorFactory(
+        implementation: DefaultCheckoutSessionConfirmationInterceptor.Factory,
+    ): CheckoutSessionConfirmationInterceptor.Factory
+
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
 

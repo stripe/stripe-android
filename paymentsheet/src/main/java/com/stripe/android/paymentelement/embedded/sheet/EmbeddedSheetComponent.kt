@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -36,6 +37,7 @@ import javax.inject.Singleton
         EmbeddedCommonModule::class,
         ElementsSessionClientParamsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,

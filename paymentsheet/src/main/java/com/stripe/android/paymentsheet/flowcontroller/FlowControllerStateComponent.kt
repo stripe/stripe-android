@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.paymentelement.confirmation.sepa.SepaMandateConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
@@ -41,6 +42,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         ApiRequestOptionsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         SepaMandateConfirmationModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,

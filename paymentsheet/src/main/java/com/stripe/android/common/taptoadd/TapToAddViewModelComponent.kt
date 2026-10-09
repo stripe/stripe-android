@@ -55,6 +55,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.UnsupportedCheckoutSessionConfirmationModule
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
@@ -96,6 +97,7 @@ private const val IS_SYSTEM_DARK = "isSystemDark"
         ConfirmationHandlerModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
+        UnsupportedCheckoutSessionConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
         ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
