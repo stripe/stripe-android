@@ -163,7 +163,7 @@ internal class LinkActivityViewModelTest {
                 lastUpdateReason = null
             ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-            launchMode = LinkLaunchMode.Full,
+            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             statusBarColor = null,
         )
         val savedStateHandle = SavedStateHandle()
@@ -218,7 +218,7 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate does not confirm when paymentReadyForConfirmation returns null`() = runTest {
-        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full)
+        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true))
         vm.onCreate(mock())
         advanceUntilIdle()
         // Should not emit Completed result, should proceed to attestation check and update screen state
@@ -1171,7 +1171,7 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration, PaymentMethodMetadata) -> Unit = { _, _ -> },
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),

@@ -41,6 +41,15 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         CardJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.NgCard ->
+                builder.setNgCard(
+                    json.optJSONObject(type.code)?.let {
+                        PaymentMethod.NgCard(
+                            brand = PaymentMethod.NgCard.Brand.fromCode(StripeJsonUtils.optString(it, "brand")),
+                            last4 = StripeJsonUtils.optString(it, "last4"),
+                        )
+                    }
+                )
             PaymentMethod.Type.CardPresent ->
                 builder.setCardPresent(PaymentMethod.CardPresent.EMPTY)
             PaymentMethod.Type.Ideal ->

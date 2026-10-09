@@ -137,6 +137,8 @@ constructor(
      * [allow_redisplay](https://docs.stripe.com/api/payment_methods/object#payment_method_object-allow_redisplay)
      */
     @JvmField val allowRedisplay: AllowRedisplay? = null,
+    /** Details returned for a Naira card payment method. */
+    @JvmField val ngCard: NgCard? = null,
 ) : StripeModel {
 
     val isLinkPaymentMethod: Boolean
@@ -605,6 +607,22 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        NgCard(
+            "ng_card",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        GCash(
+            "gcash",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         KakaoPay(
             "kakao_pay",
             isReusable = false,
@@ -705,6 +723,7 @@ constructor(
         private var bacsDebit: BacsDebit? = null
         private var netbanking: Netbanking? = null
         private var usBankAccount: USBankAccount? = null
+        private var ngCard: NgCard? = null
         fun setId(id: String?): Builder = apply {
             this.id = id
         }
@@ -773,6 +792,10 @@ constructor(
             this.usBankAccount = usBankAccount
         }
 
+        fun setNgCard(ngCard: NgCard?): Builder = apply {
+            this.ngCard = ngCard
+        }
+
         fun setCode(code: String?): Builder = apply {
             this.code = code
         }
@@ -795,7 +818,8 @@ constructor(
                 auBecsDebit = auBecsDebit,
                 bacsDebit = bacsDebit,
                 netbanking = netbanking,
-                usBankAccount = usBankAccount
+                usBankAccount = usBankAccount,
+                ngCard = ngCard,
             )
         }
     }
@@ -929,6 +953,29 @@ constructor(
 
         // Indicates that the payment method can always be shown to a customer in a checkout flow.
         ALWAYS("always"),
+    }
+
+    /** Card details returned by the Naira card redirect flow. */
+    @Parcelize
+    @Poko
+    class NgCard @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @JvmField val brand: Brand,
+        @JvmField val last4: String?,
+    ) : StripeModel {
+        /** The local card brand, or [Brand.Unknown] for an unrecognized or missing value. */
+        enum class Brand(val code: String?) {
+            Amex("amex"),
+            Mastercard("mastercard"),
+            Verve("verve"),
+            Visa("visa"),
+            Unknown(null);
+
+            internal companion object {
+                fun fromCode(code: String?): Brand = entries.firstOrNull {
+                    it.code?.equals(code, ignoreCase = true) == true
+                } ?: Unknown
+            }
+        }
     }
 
     sealed class TypeData : StripeModel {
@@ -1459,6 +1506,7 @@ constructor(
         linkPaymentDetails: LinkPaymentDetails? = this.linkPaymentDetails,
         isLinkPassthroughMode: Boolean = this.isLinkPassthroughMode,
         allowRedisplay: AllowRedisplay? = this.allowRedisplay,
+        ngCard: NgCard? = this.ngCard,
     ): PaymentMethod {
         return PaymentMethod(
             id = id,
@@ -1480,6 +1528,7 @@ constructor(
             linkPaymentDetails = linkPaymentDetails,
             isLinkPassthroughMode = isLinkPassthroughMode,
             allowRedisplay = allowRedisplay,
+            ngCard = ngCard,
         )
     }
 

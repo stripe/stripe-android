@@ -22,7 +22,7 @@ internal class CurrentLinkBrandTest {
         firstInit = true,
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null,
         ),
         reducedBranding = false,

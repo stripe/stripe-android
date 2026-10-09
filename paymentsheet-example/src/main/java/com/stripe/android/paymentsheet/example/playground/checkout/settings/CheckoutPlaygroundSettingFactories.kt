@@ -64,8 +64,7 @@ internal fun <T> choice(
         encode = serialize,
         decode = { serialized ->
             options.firstOrNull { (_, option) -> serialize(option) == serialized }
-                ?.second
-                ?.let(Result.Companion::success)
+                ?.let { (_, option) -> Result.success(option) }
                 ?: invalid(message = "Unknown value: $serialized")
         },
     )

@@ -111,7 +111,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             isCompleteFlow = false,
-            draftPaymentSelection = null,
+            draftPaymentSelection = embeddedSelectionHolder.getPreviousNewSelection(paymentMethodCode),
             bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

@@ -344,8 +344,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newLaiInfo = linkAuthIntentInfo
             ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
+        val isSameSession = consumerSession.clientSecret.isNotBlank() &&
+            currentAccount?.clientSecret == consumerSession.clientSecret
+        val newSession = if (isSameUser && isSameSession && consumerSession.linkSessionKey.isNullOrBlank()) {
+            consumerSession.copy(linkSessionKey = currentAccount?.linkSessionKey)
+        } else {
+            consumerSession
+        }
         val newAccount = LinkAccount(
-            consumerSession = consumerSession,
+            consumerSession = newSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
             linkAuthIntentInfo = newLaiInfo,
@@ -532,7 +539,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             null,
             is LinkLaunchMode.Authentication,
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full,
+            is LinkLaunchMode.Full,
             is LinkLaunchMode.PaymentMethodSelection -> {
                 linkAccount
                     // If we already have an account, return it.

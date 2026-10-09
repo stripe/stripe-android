@@ -9,15 +9,17 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.NullUiDefinitionFactoryHelper
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionResource
+import com.stripe.android.paymentsheet.model.PaymentOptionLabelsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
 import com.stripe.android.paymentsheet.model.drawableResourceIdNight
-import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.shouldUseDarkThemeIcon
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
@@ -57,21 +59,32 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
             is PaymentSelection.Link -> null
         }
 
+        val labels = PaymentOptionLabelsFactory.create(
+            context = context,
+            selection = selection,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(
+                linkAccountHolder.linkAccountInfo.value.account
+            ),
+        )
+
         return PaymentOptionDisplayData(
-            imageLoader = {
+            paymentOptionResource = DefaultPaymentOptionResource(
+                appearance = paymentMethodMetadata.appearance,
+            ) { packet ->
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(
+                    isSystemDarkTheme = packet.isSystemDarkTheme,
+                    context = context,
+                )
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
-                    useDarkThemeIcon = null,
+                    useDarkThemeIcon = useDarkThemeIcon,
                 )
             },
-            label = selection.label(
-                paymentMethodMetadata.effectiveLinkBrand(
-                    linkAccountHolder.linkAccountInfo.value.account
-                )
-            ).resolve(context),
+            label = labels.label,
+            sublabel = labels.sublabel,
             billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
             mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),

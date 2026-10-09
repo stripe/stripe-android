@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -25,16 +26,15 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -53,16 +53,15 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false,
@@ -84,17 +83,16 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -114,17 +112,16 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithPaymentIntent(
-            publishableKey = PUBLISHABLE_KEY,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             clientSecret = CLIENT_SECRET,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false,
@@ -140,16 +137,15 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher()
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -165,16 +161,15 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher(hostedSurface = "payment_element")
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
         )
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false,
@@ -194,8 +189,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent
@@ -203,8 +198,7 @@ class CollectBankAccountForACHLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
@@ -224,8 +218,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithSetupIntent(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             clientSecret = CLIENT_SECRET,
             configuration = CONFIGURATION,
             preCollectedConsent = preCollectedConsent,
@@ -233,8 +227,7 @@ class CollectBankAccountForACHLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = false,
@@ -252,8 +245,8 @@ class CollectBankAccountForACHLauncherTest {
         )
 
         launcher.presentWithDeferredPayment(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
@@ -264,8 +257,7 @@ class CollectBankAccountForACHLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 configuration = CONFIGURATION,
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
@@ -283,8 +275,8 @@ class CollectBankAccountForACHLauncherTest {
         val launcher = makeLauncher()
 
         launcher.presentWithDeferredSetup(
-            publishableKey = PUBLISHABLE_KEY,
-            stripeAccountId = STRIPE_ACCOUNT_ID,
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             configuration = CONFIGURATION,
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
@@ -293,8 +285,7 @@ class CollectBankAccountForACHLauncherTest {
 
         verify(mockHostActivityLauncher).launch(
             CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 configuration = CONFIGURATION,
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
@@ -318,8 +309,6 @@ class CollectBankAccountForACHLauncherTest {
 
     companion object {
         private const val CLIENT_SECRET = "client_secret"
-        private const val PUBLISHABLE_KEY = "publishableKey"
-        private const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         private val CONFIGURATION = CollectBankAccountConfiguration.USBankAccount(
             name = "Carlos",
             email = null

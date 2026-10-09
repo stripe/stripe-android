@@ -248,15 +248,16 @@ constructor(
     }
 
     internal data class ClientSecret(internal val value: String) {
+        init {
+            require(isMatch(value)) {
+                "Invalid SetupIntent client secret. " +
+                    "Pass the client_secret from the SetupIntent returned by your server."
+            }
+        }
+
         internal val setupIntentId: String =
             value.split("_secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-
-        init {
-            require(isMatch(value)) {
-                "Invalid Setup Intent client secret: $value"
-            }
-        }
 
         internal companion object {
             private val PATTERN = Pattern.compile("^seti_[^_]+_secret_[^_]+$")

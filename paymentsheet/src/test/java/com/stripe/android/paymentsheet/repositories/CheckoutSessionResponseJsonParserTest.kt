@@ -10,6 +10,39 @@ import org.junit.Test
 
 class CheckoutSessionResponseJsonParserTest {
     @Test
+    fun `rejects custom ui mode`() {
+        val json = base()
+        assertThat(parse(json)).isNotNull()
+
+        json.put("ui_mode", "custom")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `parses customer email as fixed email`() {
+        val json = base().put(
+            "customer",
+            JSONObject().put("id", "cus_test").put("email", "customer@example.com")
+                .put("payment_methods", JSONArray()),
+        )
+        val result = requireNotNull(parse(json))
+        assertThat(result.customer?.email).isEqualTo("customer@example.com")
+        assertThat(result.fixedEmail).isEqualTo("customer@example.com")
+    }
+
+    @Test
+    fun `session email takes precedence over customer email`() {
+        val json = base().put("customer_email", "session@example.com").put(
+            "customer",
+            JSONObject().put("id", "cus_test").put("email", "customer@example.com")
+                .put("payment_methods", JSONArray()),
+        )
+        val result = requireNotNull(parse(json))
+        assertThat(result.fixedEmail).isEqualTo("session@example.com")
+    }
+
+    @Test
     fun `parses nested unified one-time price group`() {
         val result = parse(base())
 
@@ -81,9 +114,10 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parses aggregate discounts and taxes separately`() {
+    fun `parses aggregate discounts and taxes from recurring total summary`() {
         val json = base()
         json.getJSONObject("recurring_details")
+            .getJSONObject("total_summary")
             .put("total_tax_amounts", JSONArray().put(taxAmount()))
             .put(
                 "total_discount_amounts",
@@ -98,6 +132,28 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result.recurringDetails?.totalTaxAmounts).hasSize(1)
         assertThat(result.recurringDetails?.totalDiscountAmounts?.single()?.promotionCode?.code).isEqualTo("SAVE10")
+    }
+
+    @Test
+    fun `ignores deprecated recurring amount fields`() {
+        val json = base()
+        json.getJSONObject("recurring_details")
+            .put("total_tax_amounts", JSONArray().put(taxAmount()))
+            .put("total_discount_amounts", JSONArray().put(JSONObject().put("amount", 500)))
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.recurringDetails?.totalTaxAmounts).isEmpty()
+        assertThat(result.recurringDetails?.totalDiscountAmounts).isEmpty()
+    }
+
+    @Test
+    fun `rejects recurring details without total summary`() {
+        val json = base()
+        assertThat(parse(json)).isNotNull()
+        json.getJSONObject("recurring_details").remove("total_summary")
+
+        assertThat(parse(json)).isNull()
     }
 
     @Test
@@ -237,6 +293,26 @@ class CheckoutSessionResponseJsonParserTest {
         item(json).put("adjustable_quantity", JSONObject().put("enabled", true))
 
         assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `parses tax rate with empty display name`() {
+        val json = base()
+        item(json).put(
+            "tax_amounts",
+            JSONArray().put(
+                taxAmount().apply {
+                    getJSONObject("tax_rate").put("display_name", "")
+                }
+            )
+        )
+
+        val result = requireNotNull(parse(json))
+        val taxRate = result.checkoutItems.single().oneTimePrice.items.single().taxAmounts.single().taxRate
+
+        assertThat(taxRate.displayName).isEmpty()
+        assertThat(taxRate.percentage).isEqualTo(8.0)
+        assertThat(taxRate.rateType).isEqualTo(CheckoutSessionResponse.TaxRateType.PERCENTAGE)
     }
 
     @Test

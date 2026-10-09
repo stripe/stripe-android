@@ -10,11 +10,13 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
@@ -35,7 +37,7 @@ internal class NgBankTransferDefinitionTest {
         assertThat(NgBankTransferDefinition.isSupported(metadata)).isEqualTo(
             intentScenario == LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
         )
-        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isEqualTo(false)
+        assertThat(NgBankTransferDefinition.requiresMandate(metadata)).isFalse()
     }
 
     @Test
@@ -90,6 +92,31 @@ internal class NgBankTransferDefinitionTest {
     }
 
     @Test
+    fun `rejects payment method specific future usage`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("ng_bank_transfer"),
+                paymentMethodOptionsJsonString = """{"ng_bank_transfer":{"setup_future_usage":"off_session"}}""",
+            ),
+        )
+        assertThat(NgBankTransferDefinition.isSupported(metadata)).isFalse()
+    }
+
+    @Test
+    fun `disclosure remains visible without collecting payment method fields`(
+        @TestParameter termsDisplay: PaymentSheet.TermsDisplay,
+    ) {
+        val elements = NgBankTransferDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
+                termsDisplay = mapOf(PaymentMethod.Type.NgBankTransfer to termsDisplay),
+            ),
+        )
+        assertThat(elements).hasSize(1)
+        assertThat(elements.single()).isInstanceOf(MandateTextElement::class.java)
+    }
+
+    @Test
     fun `does not redisplay saved payment methods`() {
         assertThat(NgBankTransferDefinition.supportedAsSavedPaymentMethod).isFalse()
     }
@@ -99,7 +126,10 @@ internal class NgBankTransferDefinitionTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val notice = context.getString(R.string.stripe_ng_payment_mor_notice, NIGERIAN_PAYMENT_METHOD_TERMS_URL)
 
-        assertThat(notice).contains("Global Stack Services Limited as merchant of record")
+        assertThat(HtmlCompat.fromHtml(notice, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()).isEqualTo(
+            "By confirming your payment, you agree that your transaction will be handled by " +
+                "Global Stack Services Limited as merchant of record and in accordance with their terms of use."
+        )
         val renderedNotice = HtmlCompat.fromHtml(notice, HtmlCompat.FROM_HTML_MODE_LEGACY)
         val links = renderedNotice.getSpans(0, renderedNotice.length, URLSpan::class.java)
         assertThat(links.map { it.url }).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)

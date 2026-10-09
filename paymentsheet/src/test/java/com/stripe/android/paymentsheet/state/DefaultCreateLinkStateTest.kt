@@ -95,6 +95,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,
@@ -179,6 +180,7 @@ internal class DefaultCreateLinkStateTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
         )
@@ -319,6 +321,7 @@ internal class DefaultCreateLinkStateTest {
         customerEmail: String?,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,

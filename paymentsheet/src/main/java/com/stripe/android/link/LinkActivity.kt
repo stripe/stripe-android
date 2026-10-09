@@ -141,7 +141,7 @@ internal class LinkActivity : ComponentActivity() {
                     account = null,
                     lastUpdateReason = null
                 ),
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 // Web flow renders in a Custom Tab that manages its own chrome; no status bar
                 // color to forward.
                 statusBarColor = null,

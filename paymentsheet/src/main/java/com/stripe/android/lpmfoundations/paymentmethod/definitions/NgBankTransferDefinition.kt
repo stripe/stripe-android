@@ -39,13 +39,11 @@ private object NgBankTransferUiDefinitionFactory : UiDefinitionFactory.Simple() 
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (metadata.mandateAllowed(PaymentMethod.Type.NgBankTransfer)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_ng_payment_mor_notice,
-                    args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
-                )
+        builder.footer(
+            MandateTextElement(
+                stringResId = R.string.stripe_ng_payment_mor_notice,
+                args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
             )
-        }
+        )
     }
 }

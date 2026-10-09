@@ -40,7 +40,6 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -517,10 +516,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
                 cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-                googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                    configuration = state.config,
-                    paymentMethodMetadata = state.paymentMethodMetadata,
-                ),
             )
 
             confirmationOption?.let { option ->

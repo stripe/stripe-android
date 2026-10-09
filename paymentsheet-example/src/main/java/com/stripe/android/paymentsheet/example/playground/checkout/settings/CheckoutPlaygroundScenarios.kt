@@ -25,7 +25,10 @@ internal class CheckoutPlaygroundPresetBuilder {
         set(CheckoutPlaygroundDefinitions.session.merchant, merchant)
         set(CheckoutPlaygroundDefinitions.session.currency, currency)
         set(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
-        set(CheckoutPlaygroundDefinitions.session.paymentMethodTypes, paymentMethods.map(PaymentMethod.Type::code))
+        set(
+            CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes,
+            paymentMethods.map(PaymentMethod.Type::code),
+        )
     }
 
     internal fun build(): CheckoutPlaygroundPreset = CheckoutPlaygroundPreset(values.toMap())
@@ -61,6 +64,7 @@ internal object CheckoutPlaygroundScenarios {
             CheckoutTaxScenarios.group,
             CheckoutSavedPaymentMethodScenarios.group,
             CheckoutElementScenarios.group,
+            CheckoutLinkScenarios.group,
         )
     }
 

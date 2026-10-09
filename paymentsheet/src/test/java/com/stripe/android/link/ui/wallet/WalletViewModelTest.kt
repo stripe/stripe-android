@@ -4,6 +4,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -204,7 +205,10 @@ class WalletViewModelTest {
             awaitItem().run {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
-                    publishableKey = linkAccount.consumerPublishableKey!!,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = linkAccount.consumerPublishableKey!!,
+                        stripeAccountId = null,
+                    ),
                     preCollectedConsent = null,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
@@ -928,7 +932,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             configuration = configuration,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             dismissWithResult = ::dismissWithResult,
         )
 
@@ -993,7 +997,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `secondaryButtonLabel is present based on shouldShowSecondaryCta`() = runTest(dispatcher) {
+    fun `secondaryButtonLabel is present based on canContinueWithoutLink`() = runTest(dispatcher) {
         val launchMode = LinkLaunchMode.PaymentMethodSelection(
             selectedPayment = null,
             canContinueWithoutLink = true
@@ -1005,6 +1009,15 @@ class WalletViewModelTest {
             assertThat(createViewModel(linkLaunchMode = mode).uiState.value.secondaryButtonLabel)
                 .isEqualTo(expected)
         }
+    }
+
+    @Test
+    fun `secondaryButtonLabel is absent when full mode hides the secondary button`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = false)
+        )
+
+        assertThat(viewModel.uiState.value.secondaryButtonLabel).isNull()
     }
 
     @Test
@@ -1175,7 +1188,7 @@ class WalletViewModelTest {
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,

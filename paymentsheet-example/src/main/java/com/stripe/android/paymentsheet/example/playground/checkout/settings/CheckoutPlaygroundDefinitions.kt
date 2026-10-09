@@ -10,6 +10,7 @@ internal object CheckoutPlaygroundDefinitions {
             children = arrayOf(
                 session.configuration,
                 Controller.configuration,
+                CheckoutFeatureFlagDefinitions.configuration,
             ),
         )
     }
@@ -30,7 +31,7 @@ internal object CheckoutPlaygroundDefinitions {
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration by lazy {
             configuration(
                 key = "controller",
-                displayName = "CheckoutController.Configuration",
+                displayName = "Client side config",
                 children = arrayOf(
                     merchantDisplayName,
                     defaults.configuration,

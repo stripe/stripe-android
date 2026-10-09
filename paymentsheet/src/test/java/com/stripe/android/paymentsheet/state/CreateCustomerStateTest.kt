@@ -27,6 +27,7 @@ internal class CreateCustomerStateTest {
     fun `Checkout session creates correct state with filtered payment methods`() = runScenario {
         val cards = PaymentMethodFactory.cards(2)
         val customer = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_123",
             paymentMethods = cards + listOf(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
             canDetachPaymentMethod = false,
@@ -35,6 +36,7 @@ internal class CreateCustomerStateTest {
             customer = customer,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
         )
@@ -57,12 +59,14 @@ internal class CreateCustomerStateTest {
     @Test
     fun `Checkout session with empty payment methods`() = runScenario {
         val customer = CheckoutSessionResponse.Customer(
+            email = null,
             id = "cus_checkout_empty",
             paymentMethods = emptyList(),
             canDetachPaymentMethod = false,
         )
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(customer = customer)
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
         )
@@ -112,6 +116,7 @@ internal class CreateCustomerStateTest {
 
         val result = createCustomerState(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
@@ -142,6 +147,7 @@ internal class CreateCustomerStateTest {
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             customer = CheckoutSessionResponse.Customer(
+                email = null,
                 id = "cus_checkout_automatic_tax",
                 paymentMethods = paymentMethods,
                 canDetachPaymentMethod = false,
@@ -155,6 +161,7 @@ internal class CreateCustomerStateTest {
         checkoutSessionResponse: CheckoutSessionResponse,
     ) = PaymentMethodMetadataFactory.create(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
+            collectedEmail = null,
             id = checkoutSessionResponse.id,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,

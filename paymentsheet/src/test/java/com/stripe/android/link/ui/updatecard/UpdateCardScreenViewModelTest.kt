@@ -480,10 +480,10 @@ class UpdateCardScreenViewModelTest {
                 linkConfirmationHandler = FakeLinkConfirmationHandler(),
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
-                linkLaunchMode = LinkLaunchMode.Full
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
             ),
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             dismissWithResult = {}
         ).also { viewModelStoreRule.track(it) }
     }
