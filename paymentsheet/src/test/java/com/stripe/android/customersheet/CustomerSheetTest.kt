@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import android.content.pm.ActivityInfo
 import android.graphics.Color
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -14,12 +15,14 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -28,6 +31,7 @@ import org.robolectric.Shadows.shadowOf
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetTest {
@@ -38,13 +42,64 @@ class CustomerSheetTest {
     fun setup() {
         val appContext = ApplicationProvider.getApplicationContext<Application>()
 
-        val activityInfo = ActivityInfo().apply {
-            name = TestActivity::class.java.name
-            packageName = appContext.packageName
-            theme = R.style.StripePaymentSheetDefaultTheme
+        listOf(TestActivity::class.java, CustomerSheetHostActivity::class.java).forEach { activityClass ->
+            val activityInfo = ActivityInfo().apply {
+                name = activityClass.name
+                packageName = appContext.packageName
+                theme = R.style.StripePaymentSheetDefaultTheme
+            }
+
+            shadowOf(appContext.packageManager).addOrUpdateActivity(activityInfo)
+        }
+    }
+
+    @Test
+    fun `Creating two CustomerSheet instances in the same activity throws`() = runTestActivityTest {
+        CustomerSheet.create(
+            activity = activity,
+            customerAdapter = FakeCustomerAdapter(),
+            callback = {},
+        )
+
+        val error = assertFailsWith<IllegalStateException> {
+            CustomerSheet.create(
+                activity = activity,
+                customerSessionProvider = FakeCustomerSessionProvider(),
+                callback = {},
+            )
         }
 
-        shadowOf(appContext.packageManager).addOrUpdateActivity(activityInfo)
+        assertThat(error.message).isEqualTo("Cannot have more than one active CustomerSheet instance!")
+        completeTest()
+    }
+
+    @Test
+    fun `Recreating the host activity initializes a single CustomerSheet without crashing`() {
+        ActivityScenario.launch(CustomerSheetHostActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.customerSheet.configure(CUSTOM_CONFIGURATION)
+            }
+
+            scenario.recreate()
+
+            scenario.onActivity { activity ->
+                activity.customerSheet.present()
+            }
+
+            intended(
+                allOf(
+                    hasComponent(CustomerSheetActivity::class.java.name),
+                    hasExtra(
+                        "args",
+                        CustomerSheetContract.Args(
+                            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+                            configuration = CUSTOM_CONFIGURATION,
+                            statusBarColor = 0,
+                        ),
+                    ),
+                ),
+            )
+        }
     }
 
     @Test
@@ -232,13 +287,15 @@ class CustomerSheetTest {
 
         activityScenario.recreate()
 
-        val recreatedCustomerSheet = CustomerSheet.create(
-            activity = activity,
-            customerAdapter = FakeCustomerAdapter(),
-            callback = {},
-        )
+        activityScenario.onActivity { recreatedActivity ->
+            val recreatedCustomerSheet = CustomerSheet.create(
+                activity = recreatedActivity,
+                customerAdapter = FakeCustomerAdapter(),
+                callback = {},
+            )
 
-        recreatedCustomerSheet.present()
+            recreatedCustomerSheet.present()
+        }
 
         intended(hasComponent(CustomerSheetActivity::class.java.name), times(2))
 
@@ -398,6 +455,21 @@ class CustomerSheetTest {
     )
 
     private class TestActivity : AppCompatActivity()
+
+    private class CustomerSheetHostActivity : AppCompatActivity() {
+        lateinit var customerSheet: CustomerSheet
+            private set
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            customerSheet = CustomerSheet.create(
+                activity = this,
+                customerAdapter = FakeCustomerAdapter(),
+                callback = {},
+            )
+        }
+    }
 
     private class FactoryScenario(
         val customerSheet: CustomerSheet,
