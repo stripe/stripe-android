@@ -151,6 +151,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
         paymentMethodId = paymentMethod.id,
+        expectedPaymentMethodType = paymentMethod.type?.code,
         clientAttributionMetadata = clientAttributionMetadata,
         returnUrl = returnUrl,
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,
