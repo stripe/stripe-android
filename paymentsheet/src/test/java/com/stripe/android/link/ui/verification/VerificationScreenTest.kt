@@ -332,6 +332,7 @@ internal class VerificationScreenTest {
             webLinkAuthChannel = WebLinkAuthChannel(),
             isDialog = isDialog,
             linkBrand = linkBrand,
+            enableMfaAuthFlow = false,
             onVerificationSucceeded = { _ -> },
             setScreenBackHandler = {},
             onChangeEmailRequested = {},

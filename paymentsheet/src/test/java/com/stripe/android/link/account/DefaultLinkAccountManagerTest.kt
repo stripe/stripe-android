@@ -80,6 +80,41 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
+    fun `lookup declares only SMS when the MFA auth flow is disabled`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(linkAuth = fakeLinkAuth)
+
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        assertThat(fakeLinkAuth.lookupCalls.single().supportedVerificationTypes).containsExactly("SMS")
+    }
+
+    @Test
+    fun `lookup declares SMS and email when the MFA auth flow is enabled`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(
+            linkAuth = fakeLinkAuth,
+            flags = mapOf("link_mobile_enable_mfa_auth_flow" to true),
+        )
+
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        assertThat(fakeLinkAuth.lookupCalls.single().supportedVerificationTypes)
+            .containsExactly("SMS", "EMAIL")
+            .inOrder()
+    }
+
+    @Test
     fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
         val fakeLinkAuth = fakeLinkAuth()
         val error = Exception()
@@ -1442,6 +1477,7 @@ class DefaultLinkAccountManagerTest {
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
         allowUserEmailEdits: Boolean = true,
         linkAuth: LinkAuth = fakeLinkAuth(),
+        flags: Map<String, Boolean> = emptyMap(),
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -1453,6 +1489,7 @@ class DefaultLinkAccountManagerTest {
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo,
                 allowUserEmailEdits = allowUserEmailEdits,
+                flags = flags,
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
