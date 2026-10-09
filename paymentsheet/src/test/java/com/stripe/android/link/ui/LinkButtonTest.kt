@@ -105,7 +105,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
-                containerWidth = 399.dp,
+                containerWidth = 199.dp,
             )
         }
 
@@ -121,7 +121,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
-                containerWidth = 400.dp,
+                containerWidth = 200.dp,
             )
         }
 

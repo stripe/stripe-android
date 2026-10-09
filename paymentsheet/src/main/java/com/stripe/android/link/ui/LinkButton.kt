@@ -131,7 +131,7 @@ private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
 
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
-private val LinkButtonCompactWidth = 400.dp
+private val LinkButtonCompactWidth = 200.dp
 private val LinkButtonShape: RoundedCornerShape
     get() = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
