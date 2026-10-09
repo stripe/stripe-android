@@ -6,6 +6,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressInputMode
+import com.stripe.android.uicore.elements.AddressTextFieldElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
@@ -22,6 +24,18 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class AddressFormControllerTest {
+    private val usOnlyLauncherConfig = AddressLauncher.Configuration(
+        allowedCountries = setOf("US"),
+    )
+
+    private val inlineAutocompleteConfig = AutocompleteAddressInteractor.Config(
+        autocompleteCountries = setOf("US"),
+        googlePlacesApiKey = null,
+        isPlacesAvailable = true,
+        isInlineAutocompleteEnabled = true,
+        shouldUseStripeHostedAutocomplete = true,
+    )
+
     @Test
     fun `Ensure expected set of elements`() = fieldsTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
@@ -240,6 +254,129 @@ class AddressFormControllerTest {
         }
     }
 
+    @Test
+    fun `empty form starts clean`() = test {
+        val controller = createAddressFormController(launcherConfig = usOnlyLauncherConfig)
+        registerCalls.awaitItem()
+
+        assertThat(controller.initialValues.containsKey(FormFieldId.Country)).isFalse()
+        assertThat(controller.getCurrentFormValues()[FormFieldId.Country]?.value).isEqualTo("US")
+        assertThat(controller.hasChanges()).isFalse()
+    }
+
+    @Test
+    fun `prefilled form starts clean`() = test {
+        val controller = createAddressFormController(
+            initialValues = mapOf(
+                FormFieldId.Name to "Jane Doe",
+                FormFieldId.Line1 to "123 Apple Street",
+                FormFieldId.City to "San Francisco",
+                FormFieldId.State to "CA",
+                FormFieldId.Country to "US",
+                FormFieldId.PostalCode to "94107 ",
+            ),
+            launcherConfig = usOnlyLauncherConfig,
+        )
+        registerCalls.awaitItem()
+
+        assertThat(controller.getCurrentFormValues()[FormFieldId.PostalCode]?.value)
+            .isEqualTo("94107")
+        assertThat(controller.hasChanges()).isFalse()
+    }
+
+    @Test
+    fun `partially prefilled form starts clean`() = test {
+        val initialValues = mapOf(FormFieldId.Name to "Jane")
+        val controller = createAddressFormController(
+            initialValues = initialValues,
+            launcherConfig = usOnlyLauncherConfig,
+        )
+        registerCalls.awaitItem()
+
+        assertThat(initialValues.containsKey(FormFieldId.Country)).isFalse()
+        assertThat(controller.getCurrentFormValues()[FormFieldId.Country]?.value).isEqualTo("US")
+        assertThat(controller.completeFormValues.value).isNull()
+        assertThat(controller.hasChanges()).isFalse()
+    }
+
+    @Test
+    fun `inline query edit makes form dirty and clearing it restores clean state`() =
+        test(autocompleteConfig = inlineAutocompleteConfig) {
+            val controller = createAddressFormController()
+            registerCalls.awaitItem()
+            val addressElement = controller.currentAddressElement()
+            val inlineField = addressElement.addressTextField(FormFieldId.OneLineAddress)
+
+            assertThat(addressElement.addressInputMode)
+                .isInstanceOf(AddressInputMode.AutocompleteInline::class.java)
+            assertThat(controller.hasChanges()).isFalse()
+
+            inlineField.controller.onInlineQueryChanged("1")
+
+            assertThat(addressElement.inlineQuery.value).isEqualTo("1")
+            assertThat(controller.hasChanges()).isTrue()
+            assertThat(controller.completeFormValues.value).isNull()
+            assertThat(controller.uncompletedFormValues.value[FormFieldId.OneLineAddress]?.value)
+                .isEmpty()
+
+            inlineField.controller.onInlineQueryChanged("")
+
+            assertThat(controller.hasChanges()).isFalse()
+        }
+
+    @Test
+    fun `expanding an unchanged inline form keeps it clean`() = test(
+        autocompleteConfig = inlineAutocompleteConfig,
+    ) {
+        val controller = createAddressFormController(
+            initialValues = mapOf(FormFieldId.Country to "US"),
+        )
+        val registerCall = registerCalls.awaitItem()
+        val originalAddressElement = controller.currentAddressElement()
+
+        assertThat(originalAddressElement.addressInputMode)
+            .isInstanceOf(AddressInputMode.AutocompleteInline::class.java)
+
+        registerCall.onEvent(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(FormFieldId.Country to "US"),
+            )
+        )
+
+        val expandedAddressElement = controller.currentAddressElement()
+        assertThat(expandedAddressElement).isNotSameInstanceAs(originalAddressElement)
+        assertThat(expandedAddressElement.addressInputMode)
+            .isInstanceOf(AddressInputMode.NoAutocomplete::class.java)
+        assertThat(controller.hasChanges()).isFalse()
+    }
+
+    @Test
+    fun `incomplete address edit makes form dirty and reverting clears it`() =
+        test(autocompleteConfig = inlineAutocompleteConfig) {
+            val controller = createAddressFormController(
+                initialValues = mapOf(FormFieldId.Country to "US"),
+            )
+            val registerCall = registerCalls.awaitItem()
+
+            registerCall.onEvent(
+                AutocompleteAddressInteractor.Event.OnExpandForm(
+                    values = mapOf(FormFieldId.Country to "US"),
+                )
+            )
+
+            val line1Field = controller.currentAddressElement()
+                .addressTextField(FormFieldId.Line1)
+
+            line1Field.controller.onInlineQueryChanged("123 Main")
+
+            assertThat(controller.completeFormValues.value).isNull()
+            assertThat(controller.hasChanges()).isTrue()
+
+            line1Field.controller.onInlineQueryChanged("")
+
+            assertThat(controller.hasChanges()).isFalse()
+        }
+
     private fun phoneNumberTest(
         phoneNumberConfiguration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration,
         phoneNumberElementIsVisible: Boolean,
@@ -339,4 +476,14 @@ class AddressFormControllerTest {
         config = launcherConfig,
         initialValues = initialValues,
     )
+
+    private fun AddressFormController.currentAddressElement(): AddressElement {
+        val autocompleteAddressElement =
+            (elements.single() as SectionElement).fields.single() as AutocompleteAddressElement
+        return autocompleteAddressElement.sectionFieldErrorController().addressElementFlow.value
+    }
+
+    private fun AddressElement.addressTextField(identifier: FormFieldId): AddressTextFieldElement =
+        addressController.value.fieldsFlowable.value
+            .single { it.identifier == identifier } as AddressTextFieldElement
 }
