@@ -86,6 +86,8 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
             return when (this) {
                 ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic -> "automatic"
                 ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never -> "never"
+                ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden ->
+                    "wallet_button_hidden"
             }
         }
     }

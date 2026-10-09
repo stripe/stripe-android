@@ -60,6 +60,26 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         )
     }
 
+    @Test
+    fun `onEceDisplayed reports Link wallet button as hidden`() = runScenario(
+        expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration()
+            .linkConfiguration(
+                ExpressCheckoutElement.Configuration.LinkConfiguration()
+                    .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
+            ),
+    ) {
+        reporter.onEceDisplayed()
+
+        val loggedParams = executor.getExecutedRequests().single().params
+        assertThat(loggedParams).containsEntry(
+            "ece_config",
+            mapOf(
+                "link_visibility" to "wallet_button_hidden",
+                "google_pay_visibility" to "automatic",
+            ),
+        )
+    }
+
     private class Scenario(
         val reporter: ExpressCheckoutElementEventReporter,
         val executor: FakeAnalyticsRequestExecutor,
