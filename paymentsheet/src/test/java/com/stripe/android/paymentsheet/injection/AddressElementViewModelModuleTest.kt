@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.TestAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -60,34 +61,50 @@ class AddressElementViewModelModuleTest {
     @Test
     fun `providePrimaryButtonAction completes standalone through the view model`() =
         runTest(UnconfinedTestDispatcher()) {
-            val args = AddressElementActivityContract.Args.Standalone(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = AddressLauncher.Configuration(),
-            )
-            val resultStateHolder = AddressElementResultStateHolder()
-            val viewModel = createViewModel(
-                args = args,
-                resultStateHolder = resultStateHolder,
-                taxRegionUpdater = createTaxRegionUpdater(),
-            )
+            TestAddressElementNavigator.test {
+                val args = AddressElementActivityContract.Args.Standalone(
+                    apiConfiguration = DEFAULT_API_CONFIG,
+                    config = AddressLauncher.Configuration(),
+                )
+                val resultStateHolder = AddressElementResultStateHolder()
+                val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+                val viewModel = createViewModel(
+                    args = args,
+                    navigator = navigator,
+                    resultStateHolder = resultStateHolder,
+                    addressLauncherEventReporter = addressLauncherEventReporter,
+                    taxRegionUpdater = createTaxRegionUpdater(),
+                )
 
-            viewModel.clickPrimaryButton(
-                completedFormValues = mapOf(
-                    FormFieldId.Country to FormFieldEntry("US", true),
-                ),
-                checkboxChecked = true,
-            )
+                assertThat(getResultFlowCalls.awaitItem().key)
+                    .isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
 
-            assertThat(resultStateHolder.state.value).isEqualTo(
-                State.Finished(
-                    AddressElementActivityContract.Result.StandaloneSucceeded(
-                        AddressDetails(
-                            address = PaymentSheet.Address(country = "US"),
-                            isCheckboxSelected = true,
+                viewModel.clickPrimaryButton(
+                    completedFormValues = mapOf(
+                        FormFieldId.Country to FormFieldEntry("US", true),
+                    ),
+                    checkboxChecked = true,
+                )
+
+                assertThat(resultStateHolder.state.value).isEqualTo(
+                    State.Finished(
+                        AddressElementActivityContract.Result.StandaloneSucceeded(
+                            AddressDetails(
+                                address = PaymentSheet.Address(country = "US"),
+                                isCheckboxSelected = true,
+                            )
                         )
                     )
                 )
-            )
+                assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+                    FakeAddressLauncherEventReporter.CompletedCall(
+                        country = "US",
+                        autocompleteResultSelected = false,
+                        editDistance = null,
+                    )
+                )
+                addressLauncherEventReporter.validate()
+            }
         }
 
     @Test
@@ -310,38 +327,55 @@ class AddressElementViewModelModuleTest {
             CheckoutSessionResponse.TaxAddressSource.SHIPPING,
         block: suspend CheckoutShippingScenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = automaticTaxEnabled,
-            taxAddressSource = taxAddressSource,
-        )
-        val resultStateHolder = AddressElementResultStateHolder()
-        val args = AddressElementActivityContract.Args.CheckoutShipping(
-            apiConfiguration = DEFAULT_API_CONFIG,
-            config = AddressLauncher.Configuration(),
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
-        val viewModel = createViewModel(
-            args = args,
-            resultStateHolder = resultStateHolder,
-            taxRegionUpdater = createTaxRegionUpdater(),
-        )
+        TestAddressElementNavigator.test {
+            val checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = automaticTaxEnabled,
+                taxAddressSource = taxAddressSource,
+            )
+            val resultStateHolder = AddressElementResultStateHolder()
+            val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+            val args = AddressElementActivityContract.Args.CheckoutShipping(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration(),
+                checkoutSessionResponse = checkoutSessionResponse,
+            )
+            val viewModel = createViewModel(
+                args = args,
+                navigator = navigator,
+                resultStateHolder = resultStateHolder,
+                addressLauncherEventReporter = addressLauncherEventReporter,
+                taxRegionUpdater = createTaxRegionUpdater(),
+            )
 
-        CheckoutShippingScenario(
-            checkoutSessionResponse = checkoutSessionResponse,
-            resultStateHolder = resultStateHolder,
-            viewModel = viewModel,
-        ).block()
+            assertThat(getResultFlowCalls.awaitItem().key)
+                .isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
+
+            CheckoutShippingScenario(
+                checkoutSessionResponse = checkoutSessionResponse,
+                resultStateHolder = resultStateHolder,
+                viewModel = viewModel,
+            ).block()
+
+            addressLauncherEventReporter.validate()
+        }
     }
 
     private fun createViewModel(
         args: AddressElementActivityContract.Args,
+        navigator: AddressElementNavigator,
         resultStateHolder: AddressElementResultStateHolder,
+        addressLauncherEventReporter: FakeAddressLauncherEventReporter,
         taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     ): InputAddressViewModel = InputAddressViewModel(
         args = args,
-        navigator = mock<AddressElementNavigator>(),
+        navigator = navigator,
         resultStateHolder = resultStateHolder,
-        eventReporter = mock(),
+        eventReporter = module.provideAddressElementEventReporter(
+            args = args,
+            addressLauncherEventReporter = addressLauncherEventReporter,
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            analyticsRequestFactory = createAnalyticsRequestFactory(),
+        ),
         placesClient = null,
         primaryButtonAction = module.providePrimaryButtonAction(
             args = args,
