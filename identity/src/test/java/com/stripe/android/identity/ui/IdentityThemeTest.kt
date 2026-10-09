@@ -306,7 +306,9 @@ internal class IdentityThemeTest {
                 hostingAppColors = MaterialTheme.colors,
                 hostingAppTypography = hostingAppTypography,
                 hostingAppShapes = MaterialTheme.shapes,
-                inspectionMode = true
+                inspectionMode = true,
+                primaryButtonStyle = null,
+                secondaryButtonStyle = null
             ) {
                 Column {
                     ConsentWelcomeHeader(
