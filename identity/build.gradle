@@ -59,6 +59,12 @@ dependencies {
 }
 
 android {
+    lint {
+        // Disabled to avoid AndroidX lint's crash resolving postValue within
+        // anonymous LiveData objects.
+        disable "NullSafeMutableLiveData"
+    }
+
     defaultConfig {
         minSdkVersion 24
     }
