@@ -18,7 +18,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import kotlinx.parcelize.Parcelize
 import java.lang.ref.WeakReference
 import java.util.UUID
@@ -122,7 +122,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
 
         @Composable
         override fun Theme(content: @Composable () -> Unit) {
-            StripeTheme {
+            PaymentElementTheme(appearance = appearance) {
                 content()
             }
         }
