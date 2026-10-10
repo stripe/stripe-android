@@ -38,6 +38,9 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14756](https://github.com/stripe/stripe-android/pull/14756) Added Pix support for PaymentIntents and SetupIntents in PaymentSheet.
 * [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
 
+### Identity
+* [FIXED][14774](https://github.com/stripe/stripe-android/pull/14774) Fixed a crash when `IdentityActivity` is restored after process death while showing an error.
+
 ## 23.21.0 - 2026-09-28
 
 ### Payments
