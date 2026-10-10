@@ -16,6 +16,9 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
 
+### AddressElement
+* [Fixed] Address Element now rejects incomplete optional phone numbers.
+
 ### Financial Connections
 * [REMOVED] Removed the test mode indicator from the header.
 

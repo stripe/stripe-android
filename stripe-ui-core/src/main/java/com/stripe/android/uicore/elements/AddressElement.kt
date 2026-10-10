@@ -89,7 +89,7 @@ class AddressElement(
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[FormFieldId.Phone] ?: "",
             showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
-            acceptAnyInput = addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
+            acceptEmptyInput = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
         )
     )
 
