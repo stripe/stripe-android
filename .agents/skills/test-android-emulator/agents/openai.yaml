@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Android Emulator"
+  short_description: "Drive Android emulator flows with adb"
+  default_prompt: "Use $test-android-emulator to manually drive and verify an Android emulator flow with reproducible evidence."
