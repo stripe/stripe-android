@@ -61,7 +61,9 @@ fun PaymentMethodSelector(
                 Icon(
                     painter = paymentMethodPainter,
                     contentDescription = null, // decorative element
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .testTag(PAYMENT_METHOD_ICON_TEST_TAG),
                     tint = Color.Unspecified,
                 )
 
@@ -108,4 +110,5 @@ fun BuyButton(
 }
 
 const val PAYMENT_METHOD_SELECTOR_TEST_TAG = "PAYMENT_METHOD_SELECTOR"
+const val PAYMENT_METHOD_ICON_TEST_TAG = "PAYMENT_METHOD_ICON"
 const val CHECKOUT_TEST_TAG = "CHECKOUT"
