@@ -35,6 +35,10 @@ internal class CheckoutPaymentElementScenario(
         presenter.paymentElement().present()
     }
 
+    fun presentShippingAddressElement() {
+        presenter.shippingAddressElement().present()
+    }
+
     fun confirm() {
         presenter.confirm()
     }
