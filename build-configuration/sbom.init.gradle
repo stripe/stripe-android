@@ -1,0 +1,41 @@
+import org.cyclonedx.gradle.CyclonedxDirectTask
+import org.cyclonedx.gradle.CyclonedxPlugin
+import org.gradle.api.artifacts.result.UnresolvedDependencyResult
+
+initscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.cyclonedx.bom:org.cyclonedx.bom.gradle.plugin:3.4.1'
+    }
+}
+
+rootProject { root ->
+    root.apply plugin: CyclonedxPlugin
+
+    gradle.projectsEvaluated {
+        def publishedModules = root.subprojects.findAll { it.hasProperty('artifactId') }
+        publishedModules.each { module ->
+            // Maven publication versions are set independently of Gradle project versions.
+            module.version = root.VERSION_NAME
+            module.tasks.named('cyclonedxDirectBom', CyclonedxDirectTask) {
+                includeConfigs = ['releaseRuntimeClasspath']
+                componentName = module.artifactId
+                jsonOutput = root.layout.buildDirectory.file("reports/sbom/${module.artifactId}.cdx.json")
+                xmlOutput.unsetConvention()
+                // The plugin's lenient resolution can otherwise produce a partial inventory.
+                doFirst {
+                    def unresolved = module.configurations.releaseRuntimeClasspath.incoming.resolutionResult
+                        .allDependencies.find { it instanceof UnresolvedDependencyResult }
+                    if (unresolved != null) {
+                        throw new GradleException("Unresolved release dependency in ${module.path}", unresolved.failure)
+                    }
+                }
+            }
+        }
+        root.tasks.register('moduleSboms') {
+            dependsOn publishedModules.collect { it.tasks.named('cyclonedxDirectBom') }
+        }
+    }
+}
