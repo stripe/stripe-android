@@ -1348,11 +1348,9 @@ internal class PlaygroundTestDriver(
                     }
 
                     is AuthorizeAction.Authorize3ds2 -> {
-                        closeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-
                         val completeButton = UiAutomatorText("COMPLETE", device = device)
 
-                        completeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        completeButton.wait(THREE_DS2_ACTION_TIMEOUT.inWholeMilliseconds)
                         completeButton.click()
                     }
 
@@ -1409,17 +1407,13 @@ internal class PlaygroundTestDriver(
                     }
 
                     is AuthorizeAction.Test3DS2.OTP -> {
-                        val explanationText =
-                            UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
-                        explanationText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-
                         val enterOTPField = UiAutomatorText(
                             "Enter your code below:",
                             labelMatchesExactly = true,
                             className = "android.widget.EditText",
                             device = device
                         )
-                        enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        enterOTPField.wait(THREE_DS2_ACTION_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("424242")
 
@@ -1929,6 +1923,7 @@ internal class PlaygroundTestDriver(
         // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
         val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
         val CHECKOUT_PREPARATION_TIMEOUT: Duration = 45.seconds
+        val THREE_DS2_ACTION_TIMEOUT: Duration = DEFAULT_UI_TIMEOUT * 2
         val BROWSER_ACCOUNT_LOAD_WAIT: Duration = 5.seconds
         val FINANCIAL_CONNECTIONS_COMPLETION_TIMEOUT: Duration = 60.seconds
         val FINANCIAL_CONNECTIONS_UI_TIMEOUT: Duration = 45.seconds
