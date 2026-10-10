@@ -33,6 +33,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import java.util.Locale
 
@@ -64,6 +65,13 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         fraudDetectionDataRepository = fraudDetectionDataRepository,
         elementsSessionContext = elementsSessionContext,
     )
+
+    @Test
+    fun `construction does not collect fraud data`() {
+        buildRepository()
+
+        verifyNoInteractions(fraudDetectionDataRepository)
+    }
 
     @Test
     fun testSignUp() = runTest {
@@ -408,6 +416,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             billingPhone = null,
         )
 
-        verify(fraudDetectionDataRepository, never()).getLatest()
+        verify(fraudDetectionDataRepository).refresh(apiOptions.apiKey)
+        verify(fraudDetectionDataRepository, never()).getLatest(any())
     }
 }

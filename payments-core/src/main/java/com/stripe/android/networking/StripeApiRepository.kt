@@ -22,7 +22,6 @@ import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
@@ -133,16 +132,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(
-            context = context,
-            apiConfigurationProvider = {
-                ApiConfiguration.State(
-                    publishableKey = publishableKeyProvider(),
-                    stripeAccountId = null,
-                )
-            },
-            workContext = workContext,
-        ),
+        DefaultFraudDetectionDataRepository(context, workContext),
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory =
         DefaultCardAccountRangeRepositoryFactory(
             context = context,
@@ -173,7 +163,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
-        logger: Logger
+        logger: Logger,
     ) : this(
         context = appContext,
         publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
@@ -181,11 +171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
-            context = appContext,
-            apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
-        ),
+        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(appContext, workContext),
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = appContext,
             productUsageTokens = productUsageTokens,
@@ -202,13 +188,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
-
-    private val fraudDetectionData: FraudDetectionData?
-        get() = fraudDetectionDataRepository.getCached()
-
-    init {
-        fireFraudDetectionDataRequest()
-    }
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -265,7 +244,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 confirmPaymentIntentParams.paymentMethodCreateParams,
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
-            fraudDetectionData
+            fraudDetectionDataRepository.getCached()
         )
 
         val paymentIntentId = runCatching {
@@ -274,7 +253,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.failure(it)
         }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -321,7 +300,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             createClientSecretParam(clientSecret, expandFields)
         }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -354,7 +333,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.failure(it)
         }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -387,7 +366,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.failure(it)
         }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -411,7 +390,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): Result<PaymentIntent> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -459,7 +438,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             return Result.failure(it)
         }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -473,7 +452,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                             .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                         confirmSetupIntentParams.paymentMethodCreateParams
                     ).plus(createExpandParam(expandFields)),
-                    fraudDetectionData
+                    fraudDetectionDataRepository.getCached()
                 )
             ),
             SetupIntentJsonParser()
@@ -511,7 +490,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 createClientSecretParam(clientSecret, expandFields)
             }
 
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -559,7 +538,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Result<Source> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -567,7 +546,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 sourceParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(sourceParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             SourceJsonParser()
         ) {
@@ -613,7 +592,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -621,7 +600,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 paymentMethodCreateParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             PaymentMethodJsonParser()
         ) {
@@ -639,7 +618,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options,
     ): Result<PaymentMethod> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -706,7 +685,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Result<Token> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(options))
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -714,7 +693,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 tokenParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(tokenParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionDataRepository.getCached()?.params.orEmpty())
             ),
             TokenJsonParser()
         ) {
@@ -816,7 +795,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethod> {
-        fireFraudDetectionDataRequest()
+        fireFraudDetectionDataRequest(fraudDetectionPublishableKey(requestOptions))
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1192,7 +1171,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
             }
 
-            requireNotNull(fraudDetectionDataRepository.getLatest()) {
+            requireNotNull(fraudDetectionDataRepository.getLatest(fraudDetectionPublishableKey(requestOptions))) {
                 "Could not obtain fraud data required to create a Radar Session."
             }
         }
@@ -1230,7 +1209,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
             }
 
-            requireNotNull(fraudDetectionDataRepository.getLatest()) {
+            requireNotNull(fraudDetectionDataRepository.getLatest(fraudDetectionPublishableKey(requestOptions))) {
                 "Could not obtain fraud data required to create a Radar Session."
             }
         }
@@ -1934,9 +1913,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private fun fireFraudDetectionDataRequest() {
-        fraudDetectionDataRepository.refresh()
+    private fun fireFraudDetectionDataRequest(publishableKey: String) {
+        fraudDetectionDataRepository.refresh(publishableKey)
     }
+
+    private fun fraudDetectionPublishableKey(options: ApiRequest.Options): String =
+        options.apiKey.takeIf { it.startsWith("pk_") } ?: publishableKeyProvider()
 
     private fun fireAnalyticsRequest(
         event: PaymentAnalyticsEvent
