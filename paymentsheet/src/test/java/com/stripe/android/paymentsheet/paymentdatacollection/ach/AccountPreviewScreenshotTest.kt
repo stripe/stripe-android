@@ -170,6 +170,7 @@ internal class AccountPreviewScreenshotTest {
     }
 
     private val defaultFormArguments = FormArguments(
+        prefillEmail = null,
         paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
         merchantName = "Test Merchant",
         amount = null,
