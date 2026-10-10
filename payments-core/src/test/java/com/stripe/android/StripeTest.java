@@ -882,7 +882,11 @@ public class StripeTest {
         );
         return new Stripe(
                 stripeRepository,
-                StripePaymentController.create(context, publishableKey, stripeRepository),
+                StripePaymentController.create(
+                        context,
+                        new ApiConfiguration.State(publishableKey, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
+                        stripeRepository
+                ),
                 publishableKey,
                 null
         );
@@ -900,7 +904,7 @@ public class StripeTest {
                 stripeRepository,
                 StripePaymentController.create(
                         context,
-                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                        ApiKeyFixtures.INSTANCE.getDEFAULT_API_CONFIG(),
                         stripeRepository
                 ),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
