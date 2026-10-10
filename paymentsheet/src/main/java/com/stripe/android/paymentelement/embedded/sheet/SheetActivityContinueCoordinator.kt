@@ -31,7 +31,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
 
     override fun onContinue() {
         val selection = selectionHolder.selection.value
-        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection, currentResponse = null)
         if (taxRegionUpdate == null) {
             stateHolder.setResult(createResult(selection, checkoutSessionResponse = null))
             return
