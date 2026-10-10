@@ -3,6 +3,7 @@
 package com.stripe.android.elements.ece
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -11,6 +12,7 @@ import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface ExpressCheckoutElementEventReporter {
     fun onEceDisplayed()
@@ -21,6 +23,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : ExpressCheckoutElementEventReporter {
     override fun onEceDisplayed() {
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
@@ -63,6 +66,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
                     override val eventName: String = eventName
                 },
                 additionalParams = defaultParams() + additionalParams,
+                publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
             )
         )
     }

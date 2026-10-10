@@ -158,6 +158,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,
                 additionalParams = event.params,
+                publishableKey = runCatching { apiRequestOptionsProvider.get().apiKey }.getOrNull(),
             )
         )
     }

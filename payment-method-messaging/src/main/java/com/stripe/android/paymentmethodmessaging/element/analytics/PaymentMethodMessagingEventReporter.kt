@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentmethodmessaging.element.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -12,6 +13,7 @@ import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface PaymentMethodMessagingEventReporter {
@@ -27,17 +29,20 @@ internal class DefaultPaymentMethodMessagingEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : PaymentMethodMessagingEventReporter {
 
     private var lastAppearance: PaymentMethodMessagingElement.Appearance.State? = null
 
     private fun fireEvent(event: PaymentMethodMessagingEvent) {
+        val publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event,
                     event.additionalParams,
+                    publishableKey = publishableKey,
                 )
             )
         }

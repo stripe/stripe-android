@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -41,7 +42,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
     }
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = application,
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
+        defaultProductUsageTokens = emptySet(),
     )
 
     private val stripeRepository = FakeStripeRepository()
@@ -51,7 +52,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequestFactory,
         LinearRetryDelaySupplier(),
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null),
     )
 
     @get:Rule

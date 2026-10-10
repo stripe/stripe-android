@@ -70,7 +70,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
     suspend fun start3ds2Flow(): NextStep {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Fingerprint)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds2Fingerprint,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
 
         return runCatching {
@@ -79,7 +82,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             )
         }.getOrElse {
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2RequestParamsFailed)
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.Auth3ds2RequestParamsFailed,
+                    publishableKey = args.apiConfiguration.publishableKey,
+                )
             )
 
             NextStep.Complete(
@@ -214,7 +220,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
         fallbackRedirectUrl: String
     ): NextStep {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Fallback)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds2Fallback,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
 
         return NextStep.StartFallback(
@@ -239,7 +248,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
     private fun startFrictionlessFlow(): NextStep {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Frictionless)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.Auth3ds2Frictionless,
+                publishableKey = args.apiConfiguration.publishableKey,
+            )
         )
 
         return NextStep.Complete(

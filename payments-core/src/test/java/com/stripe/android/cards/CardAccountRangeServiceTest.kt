@@ -510,7 +510,7 @@ class CardAccountRangeServiceTest {
             ApiRequest.Options(publishableKey),
             DefaultCardAccountRangeStore(applicationContext),
             DefaultAnalyticsRequestExecutor(),
-            PaymentAnalyticsRequestFactory(applicationContext, publishableKey)
+            PaymentAnalyticsRequestFactory(applicationContext, defaultProductUsageTokens = emptySet())
         )
     }
 

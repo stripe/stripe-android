@@ -95,7 +95,7 @@ internal class CardNumberEditTextTest {
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentAnalyticsRequestFactory(context, defaultProductUsageTokens = emptySet())
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -103,7 +103,8 @@ internal class CardNumberEditTextTest {
         workContext = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository,
         analyticsRequestExecutor = analyticsRequestExecutor,
-        paymentAnalyticsRequestFactory = analyticsRequestFactory
+        paymentAnalyticsRequestFactory = analyticsRequestFactory,
+        publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
@@ -267,7 +268,8 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         var callbacks = 0
@@ -299,7 +301,8 @@ internal class CardNumberEditTextTest {
                 ) = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         var callbacks = 0
@@ -331,7 +334,8 @@ internal class CardNumberEditTextTest {
                 ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         cardNumberEditText.setText("6216828050000000000")
@@ -349,7 +353,8 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
@@ -704,7 +709,8 @@ internal class CardNumberEditTextTest {
                         workContext = testDispatcher,
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                         analyticsRequestExecutor = analyticsRequestExecutor,
-                        paymentAnalyticsRequestFactory = analyticsRequestFactory
+                        paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                        publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
                     )
 
                     activity.layout.addView(cardNumberEditText)
@@ -745,7 +751,8 @@ internal class CardNumberEditTextTest {
                 override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         cardNumberEditText.setText(VISA_BIN)
@@ -849,7 +856,8 @@ internal class CardNumberEditTextTest {
                 override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
 
         // 620000 - valid BIN, call repo
@@ -914,7 +922,8 @@ internal class CardNumberEditTextTest {
             analyticsRequestExecutor = {
                 analyticsRequests.add(it)
             },
-            paymentAnalyticsRequestFactory = analyticsRequestFactory
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         )
         cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
         idleLooper()
@@ -1100,6 +1109,7 @@ internal class CardNumberEditTextTest {
                     analyticsRequestExecutor = analyticsRequestExecutor,
                     paymentAnalyticsRequestFactory = analyticsRequestFactory,
                     viewModelStoreOwner = storeOwner,
+                    publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
                 )
 
                 if (isCbcEligible) {

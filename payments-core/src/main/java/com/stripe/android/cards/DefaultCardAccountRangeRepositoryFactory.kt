@@ -33,6 +33,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
+    private val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(appContext, productUsageTokens)
     private val cardAccountRangeRepository = lazy {
         val store = InMemoryCardAccountRangeStore()
         DefaultCardAccountRangeRepository(
@@ -80,7 +81,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                 ),
                 store,
                 DefaultAnalyticsRequestExecutor(),
-                PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                paymentAnalyticsRequestFactory
             ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
@@ -115,7 +116,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                     ),
                     store,
                     DefaultAnalyticsRequestExecutor(),
-                    PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
+                    paymentAnalyticsRequestFactory
                 )
             },
             onFailure = {
@@ -129,11 +130,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         event: PaymentAnalyticsEvent
     ) {
         analyticsRequestExecutor.executeAsync(
-            PaymentAnalyticsRequestFactory(
-                appContext,
-                publishableKey,
-                productUsageTokens,
-            ).createRequest(event)
+            paymentAnalyticsRequestFactory.createRequest(event, publishableKey = publishableKey)
         )
     }
 

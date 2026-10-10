@@ -54,7 +54,7 @@ internal class FakeLoadingEventReporter : LoadingEventReporter {
         )
     }
 
-    override fun onElementsSessionLoadFailed(error: Throwable) {
+    override fun onElementsSessionLoadFailed(error: Throwable, publishableKey: String) {
         _elementsSessionLoadFailedTurbine.add(
             ElementsSessionLoadFailedCall(
                 error = error,

@@ -208,9 +208,8 @@ internal class DefaultCardScanEventsReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
-                pluginTypeProvider = { null }
+                pluginTypeProvider = { null },
             ),
             durationProvider = durationProvider,
             cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)

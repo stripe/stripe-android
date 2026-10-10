@@ -42,7 +42,7 @@ internal class RemoteCardAccountRangeSourceTest {
             { },
             PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                defaultProductUsageTokens = emptySet(),
             )
         )
 
@@ -74,7 +74,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 { },
                 PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    defaultProductUsageTokens = emptySet(),
                 )
             )
 
@@ -96,7 +96,7 @@ internal class RemoteCardAccountRangeSourceTest {
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                defaultProductUsageTokens = emptySet(),
             )
         )
 
@@ -113,7 +113,7 @@ internal class RemoteCardAccountRangeSourceTest {
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                defaultProductUsageTokens = emptySet(),
             )
         )
 
@@ -130,7 +130,7 @@ internal class RemoteCardAccountRangeSourceTest {
             analyticsRequestExecutor = {},
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                defaultProductUsageTokens = emptySet(),
             )
         )
 
@@ -150,7 +150,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 { },
                 PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    defaultProductUsageTokens = emptySet(),
                 )
             )
 
@@ -196,7 +196,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 },
                 PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                    defaultProductUsageTokens = emptySet(),
                 )
             )
 

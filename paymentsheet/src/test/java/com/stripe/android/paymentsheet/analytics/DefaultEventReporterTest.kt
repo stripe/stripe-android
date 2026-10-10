@@ -291,10 +291,11 @@ class DefaultEventReporterTest {
     @Test
     fun `onElementsSessionLoadFailed fires event`() = runScenario {
         val error = RuntimeException("Elements session error")
-        eventReporter.onElementsSessionLoadFailed(error = error)
+        eventReporter.onElementsSessionLoadFailed(error = error, publishableKey = "pk_test_loading_operation")
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_elements_session_load_failed")
+        assertThat(request.params).containsEntry("publishable_key", "pk_test_loading_operation")
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
     }
 
@@ -1524,7 +1525,6 @@ class DefaultEventReporterTest {
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKey = DEFAULT_API_CONFIG.publishableKey,
             defaultProductUsageTokens = setOf(""),
         )
 

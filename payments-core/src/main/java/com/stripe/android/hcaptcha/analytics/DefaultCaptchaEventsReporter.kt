@@ -1,11 +1,13 @@
 package com.stripe.android.hcaptcha.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.hcaptcha.HCaptchaException
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -13,7 +15,8 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : CaptchaEventsReporter {
 
     override fun init(siteKey: String) {
@@ -70,7 +73,8 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,
-                additionalParams = event.params + additionalParams
+                additionalParams = event.params + additionalParams,
+                publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
             )
         )
     }

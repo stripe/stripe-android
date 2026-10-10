@@ -196,15 +196,11 @@ internal interface FinancialConnectionsSheetSharedModule {
 
         @Provides
         @ActivityRetainedScope
-        internal fun provideAnalyticsRequestFactory(
-            application: Application,
-            apiConfigurationProvider: Provider<ApiConfiguration.State>
-        ): AnalyticsRequestFactory {
+        internal fun provideAnalyticsRequestFactory(application: Application): AnalyticsRequestFactory {
             return AnalyticsRequestFactory(
                 packageManager = application.packageManager,
                 packageName = application.packageName.orEmpty(),
                 packageInfo = application.packageInfo,
-                publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
                 networkTypeProvider = NetworkTypeDetector(application)::invoke,
             )
         }

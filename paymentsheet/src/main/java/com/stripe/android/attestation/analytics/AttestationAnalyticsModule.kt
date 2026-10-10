@@ -1,5 +1,6 @@
 package com.stripe.android.attestation.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -7,6 +8,7 @@ import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 
 @Module(
     includes = [
@@ -21,11 +23,13 @@ internal object AttestationAnalyticsModule {
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         analyticsRequestFactory: AnalyticsRequestFactory,
         durationProvider: DurationProvider,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ): AttestationAnalyticsEventsReporter {
         return DefaultAttestationAnalyticsEventsReporter(
             analyticsRequestExecutor,
             analyticsRequestFactory,
             durationProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
         )
     }
 }

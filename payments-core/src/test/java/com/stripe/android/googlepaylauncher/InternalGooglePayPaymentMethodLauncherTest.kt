@@ -152,9 +152,10 @@ class InternalGooglePayPaymentMethodLauncherTest {
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                defaultProductUsageTokens = emptySet(),
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = { ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null) },
         )
     }
 

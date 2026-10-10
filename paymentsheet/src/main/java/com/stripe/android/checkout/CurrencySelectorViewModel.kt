@@ -7,6 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
@@ -25,6 +27,7 @@ internal class CurrencySelectorViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     savedStateHandle: SavedStateHandle,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : ViewModel() {
 
     private val _errorMessage = MutableStateFlow<ResolvableString?>(null)
@@ -59,6 +62,7 @@ internal class CurrencySelectorViewModel(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = event.params,
+                    publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
                 )
             )
         }
@@ -72,6 +76,7 @@ internal class CurrencySelectorViewModel(
         private val checkoutController: CheckoutController,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+        private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -89,6 +94,7 @@ internal class CurrencySelectorViewModel(
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
                 savedStateHandle = extras.createSavedStateHandle(),
+                apiConfigurationProvider = apiConfigurationProvider,
             ) as T
         }
     }

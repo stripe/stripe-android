@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.ContextUtils.packageInfo
@@ -65,13 +66,13 @@ class CustomerSheetEventReporterTest {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageInfo,
-        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         networkTypeProvider = { "5G" },
     )
     private val eventReporter = DefaultCustomerSheetEventReporter(
         analyticsRequestExecutor = analyticsRequestExecutor,
         analyticsRequestFactory = analyticsRequestFactory,
         workContext = testDispatcher,
+        apiConfigurationProvider = { ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null) },
     )
 
     @Test
