@@ -116,7 +116,8 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
+    onCloseClick: () -> Unit,
 ) {
     val viewModel: InputAddressViewModel = viewModel(
         factory = InputAddressViewModel.Factory(
@@ -160,7 +161,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = viewModel.resultStateHolder::onUserCancel,
+        onCloseClick = onCloseClick,
         topContent = {
             val currentState = billingSameAsShippingState
 
