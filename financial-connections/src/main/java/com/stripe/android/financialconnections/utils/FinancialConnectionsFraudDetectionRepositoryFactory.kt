@@ -16,7 +16,7 @@ internal fun DefaultFraudDetectionDataRepository(
         localStore = DefaultFraudDetectionDataStore(application, workContext),
         fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(application),
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
-        errorReporter = { /* No-op */ },
+        errorReporter = { _, _ -> },
         workContext = workContext,
         fraudDetectionEnabledProvider = { true },
     )

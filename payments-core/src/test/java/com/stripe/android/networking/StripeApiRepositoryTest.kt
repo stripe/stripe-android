@@ -68,6 +68,7 @@ import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
@@ -113,9 +114,57 @@ internal class StripeApiRepositoryTest {
         argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
+    @Test
+    fun `construction does not access credentials or collect fraud data`() {
+        StripeApiRepository(
+            context = context,
+            publishableKeyProvider = { error("Credentials are not configured yet") },
+            requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            workContext = testDispatcher,
+            stripeNetworkClient = stripeNetworkClient,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+        )
+
+        verifyNoInteractions(fraudDetectionDataRepository)
+        verifyNoInteractions(stripeNetworkClient)
+    }
+
+    @Test
+    fun `fraud refresh uses the request publishable key`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenThrow(APIConnectionException("Request failed"))
+        val repository = create()
+
+        repository.retrievePaymentIntent(
+            clientSecret = "pi_123_secret_123",
+            options = ApiRequest.Options(
+                ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+            ),
+            expandFields = emptyList(),
+        )
+
+        verify(fraudDetectionDataRepository).refresh(
+            ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+        )
+    }
+
+    @Test
+    fun `fraud refresh does not report ephemeral authentication credentials`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenThrow(APIConnectionException("Request failed"))
+        val repository = create()
+
+        repository.retrievePaymentIntent(
+            clientSecret = "pi_123_secret_123",
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
+            expandFields = emptyList(),
+        )
+
+        verify(fraudDetectionDataRepository).refresh(DEFAULT_OPTIONS.apiKey, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
+    }
+
     @BeforeTest
-    fun before() {
-        whenever(fraudDetectionDataRepository.getCached()).thenReturn(
+    fun before() = runTest {
+        whenever(fraudDetectionDataRepository.getCached(any(), anyOrNull())).thenReturn(
             FraudDetectionData(
                 guid = UUID.randomUUID().toString(),
                 muid = UUID.randomUUID().toString(),
@@ -3327,8 +3376,8 @@ internal class StripeApiRepositoryTest {
         event: PaymentAnalyticsEvent,
         productUsage: String? = null
     ) {
-        verify(fraudDetectionDataRepository, times(2))
-            .refresh()
+        verify(fraudDetectionDataRepository)
+            .refresh(any(), anyOrNull())
 
         verifyAnalyticsRequest(event, productUsage)
     }

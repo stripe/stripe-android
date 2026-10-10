@@ -15,8 +15,10 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Singleton
 
 @CustomerSheetViewModelScope
+@Singleton
 @Component(
     modules = [
         ElementsSessionClientParamsModule::class,

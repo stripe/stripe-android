@@ -1179,6 +1179,7 @@ internal class LinkActivityViewModelTest {
         addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
+            fraudDetectionDataRepository = mock(),
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
             activityRetainedComponent = activityRetainedComponent,
