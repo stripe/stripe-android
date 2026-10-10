@@ -48,12 +48,13 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
+    private val inputAddressViewModel: InputAddressViewModel by viewModels {
+        InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+    }
+
     private val starterArgs by lazy {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
-
-    private val isShippingAddressElement: Boolean
-        get() = starterArgs is AddressElementActivityContract.Args.CheckoutShipping
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +75,7 @@ internal class AddressElementActivity : ComponentActivity() {
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = { target ->
                     target != ModalBottomSheetValue.Hidden || viewModel.canDismiss(
-                        shouldConfirmDismissal = isShippingAddressElement,
+                        shouldConfirmDismissal = inputAddressViewModel.hasChanges(),
                     )
                 },
             )
@@ -89,7 +90,7 @@ internal class AddressElementActivity : ComponentActivity() {
             }
 
             BackHandler {
-                viewModel.onBack(shouldConfirmDismissal = isShippingAddressElement)
+                viewModel.onBack(shouldConfirmDismissal = inputAddressViewModel.hasChanges())
             }
 
             AddressElementUi(bottomSheetState, navController)
@@ -107,7 +108,7 @@ internal class AddressElementActivity : ComponentActivity() {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    viewModel.dismiss(shouldConfirmDismissal = isShippingAddressElement)
+                    viewModel.dismiss(shouldConfirmDismissal = inputAddressViewModel.hasChanges())
                 },
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -117,10 +118,9 @@ internal class AddressElementActivity : ComponentActivity() {
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
                             InputAddressScreen(
-                                inputAddressViewModelSubcomponentFactoryProvider =
-                                    viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                viewModel = inputAddressViewModel,
                                 onCloseClick = {
-                                    viewModel.dismiss(shouldConfirmDismissal = isShippingAddressElement)
+                                    viewModel.dismiss(shouldConfirmDismissal = inputAddressViewModel.hasChanges())
                                 },
                             )
                         }

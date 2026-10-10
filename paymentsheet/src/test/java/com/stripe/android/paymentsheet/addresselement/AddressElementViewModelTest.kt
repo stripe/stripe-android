@@ -50,6 +50,26 @@ internal class AddressElementViewModelTest {
     }
 
     @Test
+    fun `fresh dismissal decision after keeping editing closes without confirmation`() = runScenario {
+        viewModel.showDiscardConfirmation.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.dismiss(shouldConfirmDismissal = true)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.keepEditing()
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.dismiss(shouldConfirmDismissal = false)
+
+            assertThat(viewModel.showDiscardConfirmation.value).isFalse()
+            assertThat(resultStateHolder.state.value)
+                .isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `can dismiss requests confirmation when required`() = runScenario {
         viewModel.showDiscardConfirmation.test {
             assertThat(awaitItem()).isFalse()

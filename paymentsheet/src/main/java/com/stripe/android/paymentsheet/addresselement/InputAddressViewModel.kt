@@ -132,6 +132,14 @@ internal class InputAddressViewModel @Inject constructor(
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
+
+    fun hasChanges(): Boolean {
+        val checkboxChanged = args.config?.additionalFields?.checkboxLabel != null &&
+            checkboxChecked.value != initialCheckboxChecked
+        return addressFormController.hasChanges() || checkboxChanged
+    }
+
     fun onScreenShown() {
         eventReporter.onShown(
             country = getCurrentAddress().address?.country,

@@ -40,6 +40,11 @@ internal class AddressFormController(
             textFieldControllerIds.lastOrNull()
         }
 
+    // Rendered defaults and formatting are part of the baseline, not user edits.
+    private val initialFormValues = getCurrentInputValues()
+
+    fun hasChanges(): Boolean = getCurrentInputValues() != initialFormValues
+
     fun getCurrentFormValues() = autocompleteAddressElement.getFormFieldValueFlow()
         .value
         .filter {
@@ -48,4 +53,18 @@ internal class AddressFormController(
         .toMap()
 
     fun setRawValues(values: Map<FormFieldId, String?>) = autocompleteAddressElement.setRawValue(values)
+
+    private fun getCurrentInputValues(): Map<FormFieldId, String> {
+        val addressElement = autocompleteAddressElement.sectionFieldErrorController().addressElementFlow.value
+        val formValues = addressElement.getFormFieldValueFlow().value.toMap()
+        val values = formValues
+            .filterKeys { it != FormFieldId.OneLineAddress }
+            .mapValues { it.value.value.orEmpty() }
+            .toMutableMap()
+        // Condensed autocomplete text is not included in submitted form values.
+        if (FormFieldId.Line1 !in formValues) {
+            values[FormFieldId.Line1] = addressElement.inlineQuery.value
+        }
+        return values.filterValues { it.isNotEmpty() }
+    }
 }
