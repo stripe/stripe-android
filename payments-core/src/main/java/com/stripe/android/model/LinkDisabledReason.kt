@@ -33,7 +33,7 @@ enum class LinkDisabledReason(val value: String) {
     AutomaticTaxBillingAddress("automatic_tax_billing_address"),
 
     /**
-     * Checkout Session initialization requires an email address and none was provided.
+     * Checkout Session initialization with web Link in passthrough mode requires an email address.
      */
     CheckoutSessionsRequiresEmail("checkout_sessions_requires_email")
 }
