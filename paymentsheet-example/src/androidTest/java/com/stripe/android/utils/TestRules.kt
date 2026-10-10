@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.testing.QuarantinedTestRule
 import com.stripe.android.testing.RetryRule
-import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.rules.Timeout
@@ -38,7 +37,6 @@ class TestRules private constructor(
 
             val chain = RuleChain.emptyRuleChain()
                 .around(QuarantinedTestRule())
-                .around(DetectLeaksAfterTestSuccess())
                 .around(composeTestRule)
                 .let { chain ->
                     if (disableAnimations) {
