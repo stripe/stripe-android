@@ -4,6 +4,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 
 internal fun NetworkRule.validateAnalyticsRequest(
@@ -12,7 +13,8 @@ internal fun NetworkRule.validateAnalyticsRequest(
     vararg requestMatchers: RequestMatcher,
 ) {
     enqueue(
-        host("q.stripe.com"),
+        host("r.stripe.com"),
+        path("/0"),
         method("GET"),
         analyticsPayloadField("event", eventName),
         analyticsPayloadField("product_usage", productUsage.joinToString(",")),
