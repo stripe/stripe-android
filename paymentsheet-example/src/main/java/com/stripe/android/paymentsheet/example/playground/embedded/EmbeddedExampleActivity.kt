@@ -112,7 +112,7 @@ fun CheckoutScreen(useApiConfiguration: Boolean = false) {
                 (prefetchedCheckout ?: checkout(context, initializePaymentConfiguration = true)).createIntentResult
             },
             resultCallback = { result -> handlePaymentResult(context, result) },
-        )
+        ).integrationName()
     }
 
     val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)

@@ -183,6 +183,19 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
+        internal var integrationName: String? = null
+            private set
+
+        /**
+         * Reuses this SDK integration's retained state when Embedded is mounted again.
+         * Use a distinct, stable name for each live integration. Ordinary merchant builders
+         * retain their generated instance identity unless this restricted API is called.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun integrationName(integrationName: String = "stripe_embedded") = apply {
+            this.integrationName = integrationName
+        }
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -819,15 +832,20 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 modelClass = EmbeddedPaymentElementViewModel::class.java,
             )
 
-            val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentFactory.build(
-                activityResultCaller = activityResultCaller,
+            return viewModel.getOrCreateElement(
                 lifecycleOwner = lifecycleOwner,
                 resultCallback = resultCallback,
-            )
-
-            embeddedPaymentElementSubcomponent.initializer.initialize(activity.applicationIsTaskOwner())
-
-            return embeddedPaymentElementSubcomponent.embeddedPaymentElement
+            ) { currentResultCallback ->
+                val subcomponent = viewModel.embeddedPaymentElementSubcomponentFactory.build(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                    resultCallback = currentResultCallback,
+                )
+                subcomponent.initializer.initialize(
+                    applicationIsTaskOwner = activity.applicationIsTaskOwner(),
+                )
+                subcomponent.embeddedPaymentElement
+            }
         }
     }
 }

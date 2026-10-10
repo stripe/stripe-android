@@ -1,11 +1,16 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.annotation.MainThread
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
@@ -16,9 +21,32 @@ import kotlin.reflect.KClass
 internal class EmbeddedPaymentElementViewModel @Inject constructor(
     val embeddedPaymentElementSubcomponentFactory: EmbeddedPaymentElementSubcomponent.Factory,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val stateHolder: EmbeddedPaymentElementStateHolder,
 ) : ViewModel() {
+    @MainThread
+    fun getOrCreateElement(
+        lifecycleOwner: LifecycleOwner,
+        resultCallback: EmbeddedPaymentElement.ResultCallback,
+        create: (EmbeddedPaymentElement.ResultCallback) -> EmbeddedPaymentElement,
+    ): EmbeddedPaymentElement {
+        stateHolder.element?.takeIf { stateHolder.lifecycleOwner === lifecycleOwner }?.let {
+            stateHolder.resultCallback = resultCallback
+            return it
+        }
+
+        stateHolder.lifecycleOwner = lifecycleOwner
+        stateHolder.element = null
+        stateHolder.resultCallback = resultCallback
+        val element = create { stateHolder.resultCallback?.onResult(it) }
+        if (stateHolder.lifecycleOwner === lifecycleOwner) stateHolder.element = element
+        return element
+    }
+
     override fun onCleared() {
         customViewModelScope.cancel()
+        stateHolder.clear()
+        PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
     }
 
     class Factory(

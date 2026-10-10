@@ -183,6 +183,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): LinkAccountStatusProvider
 
     @Binds
+    @Singleton
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds

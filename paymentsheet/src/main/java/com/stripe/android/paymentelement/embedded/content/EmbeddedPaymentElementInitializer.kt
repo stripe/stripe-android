@@ -17,6 +17,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val stateHolder: EmbeddedPaymentElementStateHolder,
 ) {
     fun initialize(applicationIsTaskOwner: Boolean) {
         if (!applicationIsTaskOwner && !savedStateHandle.previouslySentDeepLinkEvent) {
@@ -31,6 +32,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
                 override fun onDestroy(owner: LifecycleOwner) {
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     sheetStateHolder.sheetLauncher = null
+                    stateHolder.clear(owner)
                 }
             }
         )
