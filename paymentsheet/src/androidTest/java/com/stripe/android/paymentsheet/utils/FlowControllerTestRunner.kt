@@ -88,55 +88,62 @@ internal fun runFlowControllerTest(
         }
     )
 
-    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
+    withProfiledActivityScenario(MainActivity::class.java) { scenario ->
+        val testContext = TestTimingProfile.measure(TestTimingPhase.ActivitySetup) {
+            scenario.moveToState(Lifecycle.State.CREATED)
 
-        scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
-        }
+            scenario.onActivity {
+                apiConfigurationTestType.initializePaymentConfiguration(it)
+                DefaultLinkStore(it.applicationContext).clear()
+            }
 
-        var flowController: PaymentSheet.FlowController? = null
+            var flowController: PaymentSheet.FlowController? = null
 
-        scenario.onActivity { activity ->
-            when (integrationType) {
-                IntegrationType.Compose -> activity.setContent {
-                    flowController = factory.make()
+            scenario.onActivity { activity ->
+                when (integrationType) {
+                    IntegrationType.Compose -> activity.setContent {
+                        flowController = factory.make()
 
-                    if (showWalletButtons) {
-                        flowController?.WalletButtons(
-                            remember {
-                                WalletButtonsViewClickHandler { false }
-                            }
-                        )
+                        if (showWalletButtons) {
+                            flowController?.WalletButtons(
+                                remember {
+                                    WalletButtonsViewClickHandler { false }
+                                }
+                            )
+                        }
+                    }
+                    IntegrationType.Activity -> {
+                        flowController = factory.make(activity)
                     }
                 }
-                IntegrationType.Activity -> {
-                    flowController = factory.make(activity)
-                }
+            }
+
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            FlowControllerTestRunnerContext(
+                scenario = scenario,
+                flowController = flowController ?: throw IllegalStateException(
+                    "FlowController should have been created!"
+                ),
+                configureCallbackTurbine = configureCallbackTurbine,
+                countDownLatch = countDownLatch,
+                apiConfigurationTestType = apiConfigurationTestType,
+            )
+        }
+
+        TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
+            runTest {
+                block(testContext)
             }
         }
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
+        TestTimingProfile.measure(TestTimingPhase.Completion) {
+            testContext.configureCallbackTurbine.ensureAllEventsConsumed()
 
-        val testContext = FlowControllerTestRunnerContext(
-            scenario = scenario,
-            flowController = flowController ?: throw IllegalStateException(
-                "FlowController should have been created!"
-            ),
-            configureCallbackTurbine = configureCallbackTurbine,
-            countDownLatch = countDownLatch,
-            apiConfigurationTestType = apiConfigurationTestType,
-        )
-        runTest {
-            block(testContext)
+            val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+            networkRule.validate()
+            assertThat(didCompleteSuccessfully).isTrue()
         }
-
-        testContext.configureCallbackTurbine.ensureAllEventsConsumed()
-
-        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
     }
 }
 
@@ -203,54 +210,61 @@ internal fun runMultipleFlowControllerInstancesTest(
         }
     )
 
-    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
-        scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
+    withProfiledActivityScenario(MainActivity::class.java) { scenario ->
+        val testContext = TestTimingProfile.measure(TestTimingPhase.ActivitySetup) {
+            scenario.moveToState(Lifecycle.State.CREATED)
+            scenario.onActivity {
+                apiConfigurationTestType.initializePaymentConfiguration(it)
+                DefaultLinkStore(it.applicationContext).clear()
+            }
+
+            lateinit var firstFlowController: PaymentSheet.FlowController
+            lateinit var secondFlowController: PaymentSheet.FlowController
+
+            scenario.onActivity { activity ->
+                activity.setContent {
+                    firstFlowController = firstFlowControllerFactory.make()
+                    secondFlowController = secondFlowControllerFactory.make()
+                }
+            }
+
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            val flowController = if (testType == MultipleInstancesTestType.RunWithFirst) {
+                firstFlowController
+            } else {
+                secondFlowController
+            }
+
+            FlowControllerTestRunnerContext(
+                scenario = scenario,
+                flowController = flowController,
+                configureCallbackTurbine = configureCallbackTurbine,
+                countDownLatch = countDownLatch,
+                apiConfigurationTestType = apiConfigurationTestType,
+            )
         }
 
-        lateinit var firstFlowController: PaymentSheet.FlowController
-        lateinit var secondFlowController: PaymentSheet.FlowController
-
-        scenario.onActivity { activity ->
-            activity.setContent {
-                firstFlowController = firstFlowControllerFactory.make()
-                secondFlowController = secondFlowControllerFactory.make()
+        TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
+            runTest {
+                block(testContext)
             }
         }
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
+        TestTimingProfile.measure(TestTimingPhase.Completion) {
+            testContext.configureCallbackTurbine.ensureAllEventsConsumed()
 
-        val flowController = if (testType == MultipleInstancesTestType.RunWithFirst) {
-            firstFlowController
-        } else {
-            secondFlowController
-        }
+            val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+            networkRule.validate()
+            assertThat(didCompleteSuccessfully).isTrue()
 
-        val testContext = FlowControllerTestRunnerContext(
-            scenario = scenario,
-            flowController = flowController,
-            configureCallbackTurbine = configureCallbackTurbine,
-            countDownLatch = countDownLatch,
-            apiConfigurationTestType = apiConfigurationTestType,
-        )
-        runTest {
-            block(testContext)
-        }
-
-        testContext.configureCallbackTurbine.ensureAllEventsConsumed()
-
-        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
-
-        if (testType == MultipleInstancesTestType.RunWithFirst) {
-            assertThat(firstCreateIntentCallbackCalled).isTrue()
-            assertThat(secondCreateIntentCallbackCalled).isFalse()
-        } else {
-            assertThat(firstCreateIntentCallbackCalled).isFalse()
-            assertThat(secondCreateIntentCallbackCalled).isTrue()
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
+                assertThat(firstCreateIntentCallbackCalled).isTrue()
+                assertThat(secondCreateIntentCallbackCalled).isFalse()
+            } else {
+                assertThat(firstCreateIntentCallbackCalled).isFalse()
+                assertThat(secondCreateIntentCallbackCalled).isTrue()
+            }
         }
     }
 }
