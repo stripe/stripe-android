@@ -1,4 +1,4 @@
-+--- project :ml-core:base
++--- project ':ml-core:base'
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21
 |    |    \--- org.jetbrains:annotations:13.0
 |    \--- androidx.annotation:annotation:1.9.1

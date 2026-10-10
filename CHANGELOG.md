@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
+
 ### Payments
 * [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
 * [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
