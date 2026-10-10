@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -130,6 +131,7 @@ private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
 
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
+private val LinkButtonCompactWidth = 200.dp
 private val LinkButtonShape: RoundedCornerShape
     get() = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
@@ -147,6 +149,8 @@ private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
 private const val ONELINK_ICON_ASPECT_RATIO = 125f / 24f
 
 internal const val LinkButtonTestTag = "LinkButtonTestTag"
+internal const val LinkButtonCompactContentTestTag = "LinkButtonCompactContentTestTag"
+internal const val LinkButtonFullContentTestTag = "LinkButtonFullContentTestTag"
 
 @Preview(name = "LinkButton States and Themes")
 @Composable
@@ -160,6 +164,7 @@ private fun LinkButtonPreview(
             enabled = previewData.enabled,
             theme = previewData.theme,
             linkBrand = LinkBrand.Link,
+            containerWidth = null,
             onClick = {}
         )
     }
@@ -177,6 +182,7 @@ private fun LinkButtonLocalizedPreview(
             enabled = previewData.enabled,
             theme = previewData.theme,
             linkBrand = LinkBrand.Link,
+            containerWidth = null,
             onClick = {}
         )
     }
@@ -189,6 +195,7 @@ internal fun LinkButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     linkBrand: LinkBrand,
+    containerWidth: Dp?,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
 ) {
     val alpha = if (enabled) {
@@ -196,6 +203,7 @@ internal fun LinkButton(
     } else {
         ContentAlpha.disabled
     }
+    val compact = containerWidth?.let { it < LinkButtonCompactWidth } == true
     CompositionLocalProvider(
         LocalContentAlpha provides alpha
     ) {
@@ -223,16 +231,19 @@ internal fun LinkButton(
                         paymentUI = state.paymentUI,
                         theme = theme,
                         linkBrand = linkBrand,
+                        compact = compact,
                     )
 
                     is LinkButtonState.Email -> SignedInButtonContent(
                         email = state.email,
                         theme = theme,
                         linkBrand = linkBrand,
+                        compact = compact,
                     )
                     LinkButtonState.Default -> SignedOutButtonContent(
                         theme = theme,
                         linkBrand = linkBrand,
+                        compact = compact,
                     )
                 }
             }
@@ -245,27 +256,48 @@ private fun PaymentDetailsButtonContent(
     paymentUI: DefaultPaymentUI,
     theme: LinkButtonTheme,
     linkBrand: LinkBrand,
+    compact: Boolean,
 ) {
     val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LinkIconAndDivider(theme, linkBrand)
-
-        PaymentDetailsDisplay(paymentUI = paymentUI)
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = paymentUI.last4,
+        if (compact) {
+            CompactLinkIconAndDivider(theme)
+        } else {
+            FullLinkIconAndDivider(theme, linkBrand)
+        }
+        PaymentDetailsContent(
+            paymentUI = paymentUI,
             color = color,
-            style = LinkTheme.typography.bodyEmphasized,
-            fontSize = LINK_EMAIL_FONT_SIZE.sp,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
-            maxLines = 1
         )
     }
+}
+
+@Composable
+private fun RowScope.PaymentDetailsContent(
+    paymentUI: DefaultPaymentUI,
+    color: Color,
+) {
+    PaymentDetailsDisplay(paymentUI)
+    Spacer(modifier = Modifier.width(4.dp))
+    LastFourText(paymentUI.last4, color)
+}
+
+@Composable
+private fun RowScope.LastFourText(
+    last4: String,
+    color: Color,
+) {
+    Text(
+        text = last4,
+        color = color,
+        style = LinkTheme.typography.bodyEmphasized,
+        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
+        maxLines = 1
+    )
 }
 
 @Composable
@@ -292,6 +324,7 @@ private fun SignedInButtonContent(
     email: String,
     theme: LinkButtonTheme,
     linkBrand: LinkBrand,
+    compact: Boolean,
 ) {
     val annotatedEmail = remember(email) {
         buildAnnotatedString {
@@ -311,7 +344,11 @@ private fun SignedInButtonContent(
             this.role = Role.Button
         }
     ) {
-        LinkIconAndDivider(theme, linkBrand)
+        if (compact) {
+            CompactLinkIconAndDivider(theme)
+        } else {
+            FullLinkIconAndDivider(theme, linkBrand)
+        }
         Text(
             text = annotatedEmail,
             color = color,
@@ -326,9 +363,15 @@ private fun SignedInButtonContent(
 
 @Suppress("UnusedReceiverParameter")
 @Composable
-private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: LinkBrand) {
+private fun RowScope.SignedOutButtonContent(
+    theme: LinkButtonTheme,
+    linkBrand: LinkBrand,
+    compact: Boolean,
+) {
     val brandName = linkBrand.brandName()
-    val text = if (linkBrand == LinkBrand.Link) {
+    val text = if (compact) {
+        brandName
+    } else if (linkBrand == LinkBrand.Link) {
         stringResource(R.string.stripe_pay_with_link)
     } else {
         stringResource(R.string.stripe_pay_with_link_with_brand, brandName)
@@ -348,11 +391,20 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: L
                 LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
                 LinkBrand.Onelink -> iconHeight * ONELINK_ICON_ASPECT_RATIO
             }
-            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
+            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) {
+                LinkButtonIcon(theme, linkBrand)
+            }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
             .fillMaxWidth()
+            .testTag(
+                if (compact) {
+                    LinkButtonCompactContentTestTag
+                } else {
+                    LinkButtonFullContentTestTag
+                }
+            )
             .semantics {
                 this.contentDescription = contentDescription
             },
@@ -366,7 +418,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: L
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LinkIconAndDivider(
+private fun FullLinkIconAndDivider(
     theme: LinkButtonTheme,
     linkBrand: LinkBrand,
 ) {
@@ -403,7 +455,51 @@ private fun LinkIconAndDivider(
                 LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
                 LinkBrand.Onelink -> iconHeight * ONELINK_ICON_ASPECT_RATIO
             }
-            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
+            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) {
+                LinkButtonIcon(theme, linkBrand)
+            }
+            add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
+            addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
+        }.build(),
+        modifier = Modifier.semantics { this.hideFromAccessibility() },
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun CompactLinkIconAndDivider(theme: LinkButtonTheme) {
+    val annotatedLinkAndDivider = remember {
+        buildAnnotatedString {
+            appendInlineContent(
+                id = LINK_ICON_ID,
+                alternateText = "[icon]"
+            )
+            appendInlineContent(
+                id = LINK_DIVIDER_SPACER_ID,
+                alternateText = "[divider_spacer]"
+            )
+            appendInlineContent(
+                id = LINK_DIVIDER_ID,
+                alternateText = "[divider]"
+            )
+            appendInlineContent(
+                id = LINK_DIVIDER_SPACER_ID,
+                alternateText = "[divider_spacer]"
+            )
+        }
+    }
+
+    Text(
+        text = annotatedLinkAndDivider,
+        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        style = LinkTheme.typography.bodyEmphasized,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        inlineContent = InlineContentTemplateBuilder().apply {
+            val iconSize = 1.1.em
+            add(id = LINK_ICON_ID, width = iconSize, height = iconSize) {
+                CompactLinkButtonIcon(theme)
+            }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),
@@ -438,5 +534,21 @@ private fun LinkButtonIcon(
         painter = painterResource(logoRes),
         contentDescription = linkBrand.brandName(),
         tint = Color.Unspecified
+    )
+}
+
+@Composable
+private fun CompactLinkButtonIcon(theme: LinkButtonTheme) {
+    val logoRes = when (theme) {
+        LinkButtonTheme.WHITE -> R.drawable.stripe_link_mark_light
+        LinkButtonTheme.DEFAULT -> R.drawable.stripe_link_mark_bw
+    }
+    Icon(
+        painter = painterResource(logoRes),
+        contentDescription = LinkBrand.Link.brandName(),
+        modifier = Modifier
+            .fillMaxSize()
+            .alpha(LocalContentAlpha.current),
+        tint = Color.Unspecified,
     )
 }
