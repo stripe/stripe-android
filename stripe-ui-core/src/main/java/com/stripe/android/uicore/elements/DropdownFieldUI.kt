@@ -60,7 +60,7 @@ private fun DropDownPreview() {
     Column {
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
             ),
             enabled = true
         )

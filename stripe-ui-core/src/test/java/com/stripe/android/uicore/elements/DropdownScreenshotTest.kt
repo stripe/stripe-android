@@ -23,7 +23,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
                 ),
                 enabled = true
             )
@@ -35,7 +35,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
                 ),
                 enabled = false
             )
