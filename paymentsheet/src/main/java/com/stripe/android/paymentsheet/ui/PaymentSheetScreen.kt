@@ -11,11 +11,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,14 +40,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -57,7 +53,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
@@ -407,79 +402,26 @@ internal fun Wallet(
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
-    val padding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
-
-    Column(modifier = modifier.padding(padding)) {
-        WalletHeader(
-            state = state,
-            onGooglePayPressed = onGooglePayPressed,
-            onLinkPressed = onLinkPressed,
-            cardBrandFilter = cardBrandFilter,
-            cardFundingFilter = cardFundingFilter
-        )
-
-        when (processingState) {
-            is WalletsProcessingState.Idle -> processingState.error?.let { error ->
-                ErrorMessage(
-                    error = error.resolve(),
-                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-                )
-            }
-            else -> Unit
-        }
-
-        if (state.walletsInHeader) {
-            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
-
-            val text = stringResource(state.dividerTextResource)
-            WalletsDivider(text)
-        }
-    }
-}
-
-@Composable
-private fun WalletHeader(
-    state: WalletsState,
-    onGooglePayPressed: () -> Unit,
-    onLinkPressed: () -> Unit,
-    cardBrandFilter: CardBrandFilter,
-    cardFundingFilter: CardFundingFilter
-) {
-    val walletItems = remember(state) {
-        // Only show wallet if allowed in header
-        state.wallets(WalletLocation.HEADER)
-    }
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        for (wallet in walletItems) {
-            when (wallet) {
-                is WalletsState.GooglePay -> {
-                    GooglePayButton(
-                        apiConfiguration = wallet.apiConfiguration,
-                        state = PrimaryButton.State.Ready,
-                        allowCreditCards = wallet.allowCreditCards,
-                        buttonType = wallet.buttonType,
-                        billingAddressParameters = wallet.billingAddressParameters,
-                        isEnabled = state.buttonsEnabled,
-                        onPressed = onGooglePayPressed,
-                        cardBrandFilter = cardBrandFilter,
-                        cardFundingFilter = cardFundingFilter,
-                        additionalEnabledNetworks = wallet.additionalEnabledNetworks
+    WalletsHeader(
+        state = state,
+        onGooglePayPressed = onGooglePayPressed,
+        onLinkPressed = onLinkPressed,
+        dividerSpacing = dividerSpacing,
+        modifier = modifier,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        additionalContent = {
+            when (processingState) {
+                is WalletsProcessingState.Idle -> processingState.error?.let { error ->
+                    ErrorMessage(
+                        error = error.resolve(),
+                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
                     )
                 }
-                is WalletsState.Link -> {
-                    LinkButton(
-                        state = wallet.state,
-                        enabled = state.buttonsEnabled,
-                        linkBrand = wallet.linkBrand,
-                        onClick = onLinkPressed,
-                    )
-                }
+                else -> Unit
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable

@@ -221,6 +221,7 @@ internal class EmbeddedNavigator private constructor(
             private val customerStateHolder: CustomerStateHolder,
             private val linkAccountHolder: LinkAccountHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
+            private val showsWalletsHeader: Boolean,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -239,6 +240,7 @@ internal class EmbeddedNavigator private constructor(
                 val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
+                    showsWalletsHeader = showsWalletsHeader,
                     onClick = {
                         confirmationHelper.confirm()
                     },
@@ -268,6 +270,8 @@ internal class EmbeddedNavigator private constructor(
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
                 private val customerStateHolder: CustomerStateHolder,
                 private val linkAccountHolder: LinkAccountHolder,
+                private val launchMode: EmbeddedLaunchMode,
+                private val walletsInteractor: PaymentOptionsWalletsInteractor,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
                     val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
@@ -284,6 +288,9 @@ internal class EmbeddedNavigator private constructor(
                         customerStateHolder = customerStateHolder,
                         linkAccountHolder = linkAccountHolder,
                         launchMode = launchMode,
+                        showsWalletsHeader = this.launchMode is EmbeddedLaunchMode.PaymentOptions &&
+                            walletsInteractor.showsDirectForm &&
+                            walletsInteractor.walletsState.value?.walletsInHeader == true,
                     )
                 }
             }
