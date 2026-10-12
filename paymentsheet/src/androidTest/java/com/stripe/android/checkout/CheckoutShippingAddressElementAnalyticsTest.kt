@@ -64,9 +64,9 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 )
             )
 
-        runCheckoutShippingAddressElementAnalyticsTest(configuration) { context, controller ->
+        runCheckoutShippingAddressElementAnalyticsTest(configuration) {
             validateShippingAddressShown()
-            context.presentShippingAddressElement()
+            presentShippingAddressElement()
             page.waitUntilVisible()
 
             testRules.compose.replaceText("City", updatedCity)
@@ -83,7 +83,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 line1 = initialLine1,
                 city = updatedCity,
             )
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
@@ -99,9 +99,9 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 )
             )
 
-        runCheckoutShippingAddressElementAnalyticsTest(configuration) { context, controller ->
+        runCheckoutShippingAddressElementAnalyticsTest(configuration) {
             validateShippingAddressShown()
-            context.presentShippingAddressElement()
+            presentShippingAddressElement()
             page.waitUntilVisible()
 
             validateAddressElementAnalyticsRequest("mc_address_autocomplete_start")
@@ -137,27 +137,23 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 line1 = PICKED_LINE1,
                 city = PICKED_CITY,
             )
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 
     private fun runCheckoutShippingAddressElementAnalyticsTest(
         configuration: CheckoutController.Configuration,
-        block: (CheckoutPaymentElementTestRunnerContext, CheckoutController) -> Unit,
+        block: suspend CheckoutPaymentElementScenario.() -> Unit,
     ) {
-        var controller: CheckoutController? = null
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
             setup = { configuredController ->
-                controller = configuredController
                 validateCheckoutLoadRequests()
                 configuredController.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
-            block = { context ->
-                block(context, requireNotNull(controller))
-            },
+            block = block,
         )
     }
 
