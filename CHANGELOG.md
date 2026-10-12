@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
+* [Fixed] Test-only changelog entry without a PR link.
 * [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
 * [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
 * [Fixed] Return errors for invalid client secrets in legacy Stripe next-action APIs instead of throwing uncaught exceptions.
