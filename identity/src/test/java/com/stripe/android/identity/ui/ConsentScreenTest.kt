@@ -9,14 +9,22 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.networked.FakeNetworkedIdentityActions
+import com.stripe.android.identity.networked.FakeNetworkedIdentityLinkSession
+import com.stripe.android.identity.networked.NetworkedIdentityViewModel
+import com.stripe.android.identity.networked.niHandoff
+import com.stripe.android.identity.networked.niViewModel
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -192,6 +200,65 @@ class ConsentScreenTest {
     }
 
     @Test
+    fun `a saved ID shows its chip and offers Link once scrolled to the end`() {
+        setComposeTestRuleWith(Resource.success(verificationPage), niViewModel(handoff = niHandoff())) {
+            onNodeWithTag(LINK_SAVED_ID_CHIP_TAG).assertIsDisplayed()
+            onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertDoesNotExist()
+
+            scrollToEnd()
+
+            onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertIsDisplayed()
+            onNodeWithTag(LINK_MANUAL_BUTTON_TAG).assertIsDisplayed()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `dismissing the saved ID brings back Accept`() {
+        setComposeTestRuleWith(Resource.success(verificationPage), niViewModel(handoff = niHandoff())) {
+            scrollToEnd()
+
+            onNodeWithContentDescription("Dismiss").performClick()
+
+            onNodeWithTag(LINK_SAVED_ID_CHIP_TAG).assertDoesNotExist()
+            onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertDoesNotExist()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertTextEquals(CONSENT_ACCEPT_TEXT.uppercase())
+        }
+    }
+
+    @Test
+    fun `Continue with Link starts reuse`() {
+        val linkSession = FakeNetworkedIdentityLinkSession()
+        setComposeTestRuleWith(
+            Resource.success(verificationPage),
+            niViewModel(linkSession = linkSession, handoff = niHandoff()),
+        ) {
+            scrollToEnd()
+
+            onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).onChildAt(0).performClick()
+
+            runBlocking { linkSession.configureCalls.awaitItem() }
+        }
+        linkSession.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Manually verify instead records the skip`() {
+        val actions = FakeNetworkedIdentityActions()
+        setComposeTestRuleWith(
+            Resource.success(verificationPage),
+            niViewModel(actions = actions, handoff = niHandoff()),
+        ) {
+            scrollToEnd()
+
+            onNodeWithTag(LINK_MANUAL_BUTTON_TAG).onChildAt(0).performClick()
+
+            runBlocking { actions.skipCalls.awaitItem() }
+        }
+        actions.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `when VerificationPage is Loading UI is bound correctly`() {
         setComposeTestRuleWith(Resource.loading()) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
@@ -200,17 +267,23 @@ class ConsentScreenTest {
 
     private fun setComposeTestRuleWith(
         verificationState: Resource<VerificationPage>,
+        networkedIdentityViewModel: NetworkedIdentityViewModel? = null,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         verificationPageLiveData.postValue(verificationState)
         composeTestRule.setContent {
             ConsentScreen(
                 mockNavController,
-                mockIdentityViewModel
+                mockIdentityViewModel,
+                networkedIdentityViewModel
             )
         }
 
         with(composeTestRule, testBlock)
+    }
+
+    private fun ComposeContentTestRule.scrollToEnd() {
+        onNodeWithTag(SCROLLABLE_COLUMN_TAG).performTouchInput { swipeUp() }
     }
 
     private companion object {
