@@ -598,16 +598,23 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 ),
             )
         ).use { scenario ->
+            lateinit var activity: EmbeddedSheetActivity
+            scenario.onActivity { activity = it }
             Scenario(
                 activityScenario = scenario,
+                activity = activity,
             ).block()
         }
     }
 
-    private class Scenario(
+    private inner class Scenario(
         val activityScenario: ActivityScenario<EmbeddedSheetActivity>,
+        val activity: EmbeddedSheetActivity,
     ) {
         fun completedResult(): EmbeddedActivityResult.Complete {
+            composeTestRule.waitUntilWithIdle(conditionDescription = "Manage Activity to finish") {
+                composeTestRule.runOnIdle { activity.isFinishing }
+            }
             val result = EmbeddedSheetContract.parseResult(
                 activityScenario.result.resultCode,
                 activityScenario.result.resultData,
