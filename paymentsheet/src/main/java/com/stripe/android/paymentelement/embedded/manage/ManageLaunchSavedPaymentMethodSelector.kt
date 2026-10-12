@@ -55,6 +55,10 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
         return Result.success(Unit)
     }
 
+    /**
+     * Synchronizes Checkout billing tax only when [updated] is the currently selected saved payment method
+     * and its billing address differs from the address in [original].
+     */
     override suspend fun syncBillingAfterEdit(
         original: PaymentMethod,
         updated: PaymentMethod,
