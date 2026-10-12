@@ -14,6 +14,8 @@
 
 **Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
 
+**Changelog** — every new bullet entry in a `CHANGELOG.md` file must include a Markdown link to a relevant GitHub pull request. The link does not have to point to the pull request adding the entry. Follow the existing format, for example: `* [Fixed][12345](https://github.com/stripe/stripe-android/pull/12345) Description.`
+
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
