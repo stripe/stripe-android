@@ -141,6 +141,7 @@ class DropdownFieldUITest {
             CountryConfig(
                 onlyShowCountryCodes = countryCodes,
                 locale = locale,
+                autofillType = ContentType.AddressCountry,
             ),
             initialValue = "AT",
         )

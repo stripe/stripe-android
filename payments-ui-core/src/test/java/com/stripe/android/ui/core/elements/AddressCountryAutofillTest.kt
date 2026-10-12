@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AddressCountryAutofillTest {
     @Test
-    fun `address defaults construct a controller with country autofill`() {
+    fun `address constructs a controller with country autofill`() {
         val element = AddressElement(
             FormFieldId.Generic("address"),
             countryCodes = setOf("AT", "IT"),
@@ -23,7 +23,7 @@ class AddressCountryAutofillTest {
     }
 
     @Test
-    fun `billing address defaults construct a controller with country autofill`() {
+    fun `billing address constructs a controller with country autofill`() {
         val element = BillingAddressElement(
             FormFieldId.Generic("billing"),
             countryCodes = setOf("AT", "IT"),

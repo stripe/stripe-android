@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations
 
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -53,7 +54,7 @@ internal class BillingAddressFormElementsBuilder(
             CountryElement(
                 identifier = FormFieldId.Country,
                 controller = DropdownFieldController(
-                    config = CountryConfig(requirement.allowedCountryCodes),
+                    config = CountryConfig(requirement.allowedCountryCodes, autofillType = ContentType.AddressCountry),
                     initialValue = requirement.initialValue,
                 )
             )
