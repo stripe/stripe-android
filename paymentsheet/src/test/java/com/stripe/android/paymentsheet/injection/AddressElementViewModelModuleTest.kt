@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -210,11 +211,21 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
-    fun `provideAddressElementEventReporter preserves existing lifecycle analytics`() = runTest {
+    fun `provideAddressElementEventReporter forwards standalone computed values`() = runTest {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
-        val reporter = module.provideAddressElementEventReporter(addressLauncherEventReporter)
-        reporter.onShown(country = "CA")
-        reporter.onSaveCompleted(
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val eventReporter = module.provideAddressElementEventReporter(
+            args = AddressElementActivityContract.Args.Standalone(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration(),
+            ),
+            addressLauncherEventReporter = addressLauncherEventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = createAnalyticsRequestFactory(),
+        )
+
+        eventReporter.onShown(country = "CA")
+        eventReporter.onSaveCompleted(
             country = "US",
             autocompleteResultSelected = true,
             editDistance = 1,
@@ -227,6 +238,34 @@ class AddressElementViewModelModuleTest {
                 autocompleteResultSelected = true,
                 editDistance = 1,
             )
+        )
+        assertThat(analyticsRequestExecutor.getExecutedRequests()).isEmpty()
+        addressLauncherEventReporter.validate()
+    }
+
+    @Test
+    fun `provideAddressElementEventReporter reports Checkout shipping events for the Checkout Session`() = runTest {
+        val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+        val eventReporter = module.provideAddressElementEventReporter(
+            args = AddressElementActivityContract.Args.CheckoutShipping(
+                apiConfiguration = DEFAULT_API_CONFIG,
+                config = AddressLauncher.Configuration(),
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            addressLauncherEventReporter = addressLauncherEventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = createAnalyticsRequestFactory(),
+        )
+
+        eventReporter.onShown(country = "CA")
+
+        val params = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(params).containsEntry("event", "elements.shipping_address.shown")
+        assertThat(params).containsEntry("checkout_session_id", checkoutSessionResponse.id)
+        assertThat(params["address_data_blob"]).isEqualTo(
+            mapOf("address_country_code" to "CA")
         )
         addressLauncherEventReporter.validate()
     }
@@ -292,13 +331,7 @@ class AddressElementViewModelModuleTest {
                 viewModel = viewModel,
             ).block()
 
-            assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
-                FakeAddressLauncherEventReporter.CompletedCall(
-                    country = "US",
-                    autocompleteResultSelected = false,
-                    editDistance = null,
-                )
-            )
+            addressLauncherEventReporter.completedCalls.expectNoEvents()
         }
     }
 
@@ -316,7 +349,12 @@ class AddressElementViewModelModuleTest {
                 args = args,
                 navigator = navigator,
                 resultStateHolder = resultStateHolder,
-                eventReporter = module.provideAddressElementEventReporter(addressLauncherEventReporter),
+                eventReporter = module.provideAddressElementEventReporter(
+                    args = args,
+                    addressLauncherEventReporter = addressLauncherEventReporter,
+                    analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                    analyticsRequestFactory = createAnalyticsRequestFactory(),
+                ),
                 placesClient = null,
                 primaryButtonAction = module.providePrimaryButtonAction(
                     args = args,
@@ -336,6 +374,15 @@ class AddressElementViewModelModuleTest {
             addressLauncherEventReporter.validate()
         }
     }
+
+    private fun createAnalyticsRequestFactory() = AnalyticsRequestFactory(
+        packageManager = null,
+        packageInfo = null,
+        packageName = "",
+        publishableKeyProvider = { "" },
+        networkTypeProvider = { "" },
+        pluginTypeProvider = { null },
+    )
 
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
