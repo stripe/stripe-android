@@ -24,11 +24,10 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
-    fun `standalone onSaveCompleted forwards computed analytics`() = runScenario {
+    fun `standalone onSaveCompleted derives analytics from the saved and selected addresses`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
         assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
@@ -43,9 +42,8 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `standalone onSaveCompleted forwards a missing selection`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
@@ -60,9 +58,8 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `standalone onSaveCompleted does not report without a country`() = runScenario {
         standaloneReporter.onSaveCompleted(
-            country = null,
-            autocompleteResultSelected = true,
-            editDistance = 1,
+            addressDetails = createAddressDetails(country = null),
+            autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
         addressLauncherEventReporter.completedCalls.expectNoEvents()
@@ -118,9 +115,8 @@ internal class AddressElementEventReporterTest {
     @Test
     fun `Checkout onSaveCompleted omits distance without a selected address`() = runScenario {
         checkoutShippingReporter.onSaveCompleted(
-            country = "US",
-            autocompleteResultSelected = false,
-            editDistance = null,
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
