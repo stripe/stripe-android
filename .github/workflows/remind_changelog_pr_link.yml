@@ -35,7 +35,8 @@ jobs:
             const changelogFiles = files.filter(({ filename }) =>
               filename === 'CHANGELOG.md' || filename.endsWith('/CHANGELOG.md')
             );
-            const linkedPullRequest = `](${pullRequest.html_url})`;
+            const pullRequestLink =
+              /\]\(https:\/\/github\.com\/[^/\s)]+\/[^/\s)]+\/pull\/\d+(?:[/?#][^\s)]*)?\)/;
             const missingLinks = [];
 
             for (const file of changelogFiles) {
@@ -49,7 +50,7 @@ jobs:
                 .filter((line) => /^\+\s*[-*]\s+\[[^\]]+\]/.test(line));
 
               for (const entry of addedEntries) {
-                if (!entry.includes(linkedPullRequest)) {
+                if (!pullRequestLink.test(entry)) {
                   missingLinks.push({
                     filename: file.filename,
                     entry: entry.slice(1).trim(),
@@ -80,7 +81,7 @@ jobs:
               .join('\n');
             const body = [
               marker,
-              'Please link each new changelog entry to this PR so the release notes retain their context:',
+              'Please link each new changelog entry to a relevant PR so the release notes retain their context:',
               '',
               entries,
               '',
