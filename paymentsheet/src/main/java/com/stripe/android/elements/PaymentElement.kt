@@ -2,17 +2,18 @@ package com.stripe.android.elements
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
-import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
@@ -22,6 +23,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -29,6 +33,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
 
     /**
@@ -44,10 +49,14 @@ class PaymentElement @Inject internal constructor(
 
     /**
      * Presents a sheet for the customer to select or manage their payment method.
+     *
+     * May be called from any thread. Calls from a background thread are dispatched to the main thread.
      */
-    @MainThread
+    @AnyThread
     fun present() {
-        contentHelper.presentPaymentOptions()
+        coroutineScope.launch(Dispatchers.Main.immediate) {
+            contentHelper.presentPaymentOptions()
+        }
     }
 
     /**

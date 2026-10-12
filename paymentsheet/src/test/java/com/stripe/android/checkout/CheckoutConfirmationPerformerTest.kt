@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
@@ -22,16 +24,38 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.CoroutineTestRule
+import dagger.Lazy
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutConfirmationPerformerTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
+
+    @Test
+    fun `presenter confirm from a background thread resolves the performer on Main and starts confirmation`() =
+        runScenario(state = googlePayState(paymentSelection = PaymentSelection.GooglePay)) {
+            withContext(Dispatchers.IO) {
+                assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+                presenter.confirm()
+            }
+
+            assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
+            assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+                .isInstanceOf<GooglePayConfirmationOption>()
+        }
 
     @Test
     fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
@@ -199,19 +223,45 @@ internal class CheckoutConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
 
+        val performerProvider = FakeConfirmationPerformerProvider(performer)
+        val presenter = CheckoutPresenter(
+            paymentElementProvider = Lazy { error("Unexpected payment element access") },
+            currencySelectorElementProvider = Lazy { error("Unexpected currency selector access") },
+            shippingAddressElementProvider = Lazy { error("Unexpected shipping address element access") },
+            expressCheckoutElementProvider = Lazy { error("Unexpected express checkout element access") },
+            checkoutConfirmationPerformerProvider = performerProvider,
+            coroutineScope = backgroundScope,
+        )
+
         Scenario(
+            presenter = presenter,
+            performerProvider = performerProvider,
             performer = performer,
             confirmationHandler = confirmationHandler,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
         ).block()
 
+        performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         eventReporter.validate()
     }
 
+    private class FakeConfirmationPerformerProvider(
+        private val performer: CheckoutConfirmationPerformer,
+    ) : Provider<CheckoutConfirmationPerformer> {
+        val getCalls = Turbine<Thread>()
+
+        override fun get(): CheckoutConfirmationPerformer {
+            getCalls.add(Thread.currentThread())
+            return performer
+        }
+    }
+
     private class Scenario(
+        val presenter: CheckoutPresenter,
+        val performerProvider: FakeConfirmationPerformerProvider,
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val eventReporter: FakeEventReporter,

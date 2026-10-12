@@ -3,9 +3,9 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -114,45 +115,52 @@ class ShippingAddressElement internal constructor(
         )
     }
 
-    @MainThread
+    /**
+     * Presents a sheet for the customer to enter their shipping address.
+     *
+     * May be called from any thread. Calls from a background thread are dispatched to the main thread.
+     */
+    @AnyThread
     fun present() {
-        val state = stateHolder.state
-        val configuration = state?.configuration?.shippingAddressElementConfiguration
-        if (state == null || configuration == null) {
-            errorReporter.report(
-                ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
-            )
-            return
-        }
+        coroutineScope.launch(Dispatchers.Main.immediate) {
+            val state = stateHolder.state
+            val configuration = state?.configuration?.shippingAddressElementConfiguration
+            if (state == null || configuration == null) {
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED
+                )
+                return@launch
+            }
 
-        if (shippingAddressElementStateHolder.isPresenting) {
-            return
-        }
+            if (shippingAddressElementStateHolder.isPresenting) {
+                return@launch
+            }
 
-        val address = state.collectedDetails
-            .takeIf { it.shippingName != null || it.shippingAddress != null }
-            ?.toShippingDetails()
+            val address = state.collectedDetails
+                .takeIf { it.shippingName != null || it.shippingAddress != null }
+                ?.toShippingDetails()
 
-        shippingAddressElementStateHolder.isPresenting = true
-        activityLauncher.launch(
-            AddressElementActivityContract.Args.CheckoutShipping(
-                apiConfiguration = apiConfigurationProvider.get(),
-                checkoutSessionResponse = state.checkoutSessionResponse,
-                config = AddressLauncher.Configuration(
-                    appearance = configuration.appearance.asPaymentSheet(),
-                    buttonTitle = configuration.buttonTitle,
-                    title = configuration.title,
-                    additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
-                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+            shippingAddressElementStateHolder.isPresenting = true
+            activityLauncher.launch(
+                AddressElementActivityContract.Args.CheckoutShipping(
+                    apiConfiguration = apiConfigurationProvider.get(),
+                    checkoutSessionResponse = state.checkoutSessionResponse,
+                    config = AddressLauncher.Configuration(
+                        appearance = configuration.appearance.asPaymentSheet(),
+                        buttonTitle = configuration.buttonTitle,
+                        title = configuration.title,
+                        additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                        ),
+                        billingAddress = null,
+                        address = address,
+                        allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
+                            ?: emptySet(),
+                        useStripeHostedAutocomplete = true,
                     ),
-                    billingAddress = null,
-                    address = address,
-                    allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
-                        ?: emptySet(),
-                    useStripeHostedAutocomplete = true,
-                ),
+                )
             )
-        )
+        }
     }
 
     @CheckoutSessionPreview
