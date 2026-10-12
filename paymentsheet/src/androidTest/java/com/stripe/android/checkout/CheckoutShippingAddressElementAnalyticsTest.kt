@@ -44,7 +44,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())
 
     @Test
-    fun `manual edit of prefilled address reports no autocomplete selection`() {
+    fun testManualEditOfPrefilledAddressReportsNoAutocompleteSelection() {
         val initialLine1 = "510 Townsend St"
         val updatedCity = "Cambridge"
         val configuration = CheckoutController.Configuration()
@@ -88,7 +88,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     }
 
     @Test
-    fun `hosted autocomplete selection reports selected result`() {
+    fun testHostedAutocompleteSelectionReportsSelectedResult() {
         val configuration = CheckoutController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
