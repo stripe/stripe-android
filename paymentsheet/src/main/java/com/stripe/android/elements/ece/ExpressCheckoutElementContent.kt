@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.link.ui.LinkButton
@@ -108,6 +109,7 @@ internal fun ExpressCheckoutElementContent(
                                 button = button,
                                 enabled = state.enabled,
                                 interactor = interactor,
+                                buttonWidth = buttonWidth,
                                 googlePayButton = googlePayButton,
                             )
                         }
@@ -162,6 +164,7 @@ private fun ExpressButtonContent(
     button: ExpressButton,
     enabled: Boolean,
     interactor: ExpressCheckoutElementInteractor,
+    buttonWidth: Dp,
     googlePayButton: @Composable (ExpressButton.GooglePay, Boolean, () -> Unit) -> Unit,
 ) {
     key(button) {
@@ -178,6 +181,7 @@ private fun ExpressButtonContent(
                 enabled = enabled,
                 theme = button.buttonTheme.toLinkButtonTheme(),
                 linkBrand = button.linkBrand,
+                containerWidth = buttonWidth,
                 modifier = Modifier.fillMaxSize(),
                 onClick = {
                     interactor.handleViewAction(

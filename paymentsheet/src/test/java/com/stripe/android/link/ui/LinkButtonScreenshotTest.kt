@@ -107,7 +107,13 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testNewUser() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Default, enabled = true, linkBrand = LinkBrand.Link, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { },
+            )
         }
     }
 
@@ -118,6 +124,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Default,
                 enabled = true,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -130,6 +137,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Default,
                 enabled = false,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -142,6 +150,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email("jaynewstrom@test.com"),
                 enabled = true,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -154,6 +163,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email("jaynewstrom@test.com"),
                 enabled = false,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -166,6 +176,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email(email = "jaynewstrom12345678987654321@test.com"),
                 enabled = true,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -178,6 +189,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email("jaynewstrom12345678987654321@test.com"),
                 enabled = false,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -190,6 +202,7 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Default,
                 enabled = true,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -208,6 +221,7 @@ internal class LinkButtonScreenshotTest {
                 ),
                 enabled = true,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -221,6 +235,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 modifier = Modifier.width(179.dp),
                 linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
                 onClick = { },
             )
         }
@@ -234,6 +249,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 modifier = Modifier.width(179.dp),
                 linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
                 onClick = { },
             )
         }
@@ -253,6 +269,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 modifier = Modifier.width(179.dp),
                 linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
                 onClick = { },
             )
         }
@@ -271,6 +288,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 modifier = Modifier.width(179.dp),
                 linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
                 onClick = { },
             )
         }
@@ -284,6 +302,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 theme = LinkButtonThemes.currentTheme,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -297,6 +316,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = true,
                 theme = LinkButtonThemes.currentTheme,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -310,6 +330,7 @@ internal class LinkButtonScreenshotTest {
                 enabled = false,
                 theme = LinkButtonThemes.currentTheme,
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
