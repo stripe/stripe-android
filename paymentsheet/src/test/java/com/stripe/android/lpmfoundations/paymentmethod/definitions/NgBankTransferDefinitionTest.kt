@@ -21,6 +21,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import java.util.Locale
 
 @RunWith(RobolectricTestParameterInjector::class)
 internal class NgBankTransferDefinitionTest {
@@ -57,6 +58,51 @@ internal class NgBankTransferDefinitionTest {
     }
 
     @Test
+    fun `does not override the locale billing country with Nigeria`() {
+        val originalLocale = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.US)
+            val formElements = NgBankTransferDefinition.formElements(
+                metadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                initialValues = mapOf(FormFieldId.Country to null),
+            )
+
+            val addressElement = (formElements.first() as SectionElement).fields.single() as AddressElement
+            assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("US")
+        } finally {
+            Locale.setDefault(originalLocale)
+        }
+    }
+
+    @Test
+    fun `collects configured contact information before the disclosure`() {
+        val formElements = NgBankTransferDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                ),
+            )
+        )
+
+        assertThat(formElements).hasSize(4)
+        checkNameField(formElements, 0)
+        checkPhoneField(formElements, 1)
+        checkEmailField(formElements, 2)
+        val notice = formElements.last() as MandateTextElement
+        assertThat(notice.stringResId).isEqualTo(R.string.stripe_ng_payment_mor_notice)
+        assertThat(notice.args).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)
+    }
+
+    @Test
     fun `billing countries follow merchant configuration`(
         @TestParameter(value = ["Full", "AutomaticWithTax"])
         billingMode: LpmBillingDetailsCollectionMode,
@@ -87,6 +133,33 @@ internal class NgBankTransferDefinitionTest {
 
         assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
         assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `rejects payment method specific future usage`(
+        @TestParameter(value = ["on_session", "off_session"]) futureUsage: String,
+    ) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("ng_bank_transfer"),
+                paymentMethodOptionsJsonString = """{"ng_bank_transfer":{"setup_future_usage":"$futureUsage"}}""",
+            ),
+        )
+        assertThat(NgBankTransferDefinition.isSupported(metadata)).isFalse()
+    }
+
+    @Test
+    fun `disclosure remains visible without collecting payment method fields`(
+        @TestParameter termsDisplay: PaymentSheet.TermsDisplay,
+    ) {
+        val elements = NgBankTransferDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
+                termsDisplay = mapOf(PaymentMethod.Type.NgBankTransfer to termsDisplay),
+            ),
+        )
+        assertThat(elements).hasSize(1)
+        assertThat(elements.single()).isInstanceOf(MandateTextElement::class.java)
     }
 
     @Test
