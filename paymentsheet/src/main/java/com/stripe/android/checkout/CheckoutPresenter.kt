@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.elements.CurrencySelectorElement
@@ -25,6 +26,7 @@ class CheckoutPresenter @Inject internal constructor(
     /**
      * Returns the [PaymentElement], which displays and collects the customer's payment method.
      */
+    @MainThread
     fun paymentElement(): PaymentElement {
         return paymentElementProvider.get()
     }
@@ -33,6 +35,7 @@ class CheckoutPresenter @Inject internal constructor(
      * Returns the [CurrencySelectorElement], which lets the customer choose the checkout currency
      * when multiple currencies are available.
      */
+    @MainThread
     fun currencySelectorElement(): CurrencySelectorElement {
         return currencySelectorElementProvider.get()
     }
@@ -40,6 +43,7 @@ class CheckoutPresenter @Inject internal constructor(
     /**
      * Returns the [ShippingAddressElement], which collects the customer's shipping address.
      */
+    @MainThread
     fun shippingAddressElement(): ShippingAddressElement {
         return shippingAddressElementProvider.get()
     }
@@ -48,6 +52,7 @@ class CheckoutPresenter @Inject internal constructor(
      * Returns the [ExpressCheckoutElement], which displays express payment buttons such as Google
      * Pay and Link.
      */
+    @MainThread
     fun expressCheckoutElement(): ExpressCheckoutElement {
         return expressCheckoutElementProvider.get()
     }
@@ -58,6 +63,7 @@ class CheckoutPresenter @Inject internal constructor(
      * The result is delivered to the [CheckoutController.ResultCallback] supplied when building the
      * [CheckoutController].
      */
+    @MainThread
     fun confirm() {
         checkoutConfirmationPerformerProvider.get().confirm()
     }

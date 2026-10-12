@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -113,6 +114,7 @@ class ShippingAddressElement internal constructor(
         )
     }
 
+    @MainThread
     fun present() {
         val state = stateHolder.state
         val configuration = state?.configuration?.shippingAddressElementConfiguration

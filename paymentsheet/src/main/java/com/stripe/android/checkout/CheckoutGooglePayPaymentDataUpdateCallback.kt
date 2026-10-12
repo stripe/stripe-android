@@ -24,7 +24,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
-        val currentState = stateHolder.state ?: run {
+        // Google Pay invokes this callback on IO. Read the existing flow instead of SavedStateHandle.
+        val currentState = stateHolder.stateFlow.value ?: run {
             return notConfiguredResponse()
         }
 
