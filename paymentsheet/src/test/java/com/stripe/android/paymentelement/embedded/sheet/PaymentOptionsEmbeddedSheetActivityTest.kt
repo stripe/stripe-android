@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
@@ -57,6 +57,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
+import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
@@ -66,8 +67,6 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsEmbeddedSheetActivityTest {
@@ -396,13 +395,11 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
     @Test
     fun `processing disables payment options and blocks back`() {
-        val requestReceived = CountDownLatch(1)
-        val releaseResponse = CountDownLatch(1)
+        val responseGate = NetworkResponseGate()
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            requestReceived.countDown()
-            check(releaseResponse.await(10, TimeUnit.SECONDS))
+            responseGate.awaitRelease()
         }
 
         launch(
@@ -425,7 +422,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                         .isNotEmpty()
                 }
                 composeTestRule.waitUntilWithIdle {
-                    requestReceived.count == 0L
+                    responseGate.requestReceived.count == 0L
                 }
                 cardRow.assertIsNotEnabled()
                 composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()
@@ -437,7 +434,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 verticalModePage.waitUntilVisible()
                 cardRow.assertIsNotEnabled()
             } finally {
-                releaseResponse.countDown()
+                responseGate.releaseResponse.countDown()
             }
         }
     }
@@ -625,12 +622,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
         return PaymentMethodMetadataFactory.create(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                collectedEmail = null,
-                id = response.id,
-                instancesKey = "test_instances_key",
-                checkoutSessionResponse = response,
-            ),
+            integrationMetadata = IntegrationMetadataFactory.checkoutSession(response),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )
     }

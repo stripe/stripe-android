@@ -18,9 +18,9 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.AddressElementPage
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 internal class AddressElementActivityTestRunner(
     private val composeTestRule: ComposeTestRule,
@@ -85,9 +85,8 @@ internal class AddressElementActivityTestRunner(
         val checkoutSessionResponse: CheckoutSessionResponse
             get() = (args as AddressElementActivityContract.Args.CheckoutShipping).checkoutSessionResponse
 
-        fun enqueueTaxUpdate(fails: Boolean = false): TaxUpdate {
-            val requestReceived = CountDownLatch(1)
-            val releaseResponse = CountDownLatch(1)
+        fun enqueueTaxUpdate(fails: Boolean = false): NetworkResponseGate {
+            val responseGate = NetworkResponseGate()
             networkRule.checkoutUpdate { response ->
                 if (fails) {
                     response.setResponseCode(400)
@@ -95,14 +94,13 @@ internal class AddressElementActivityTestRunner(
                 } else {
                     response.testBodyFromFile("checkout-session-init.json")
                 }
-                requestReceived.countDown()
-                check(releaseResponse.await(10, TimeUnit.SECONDS))
+                responseGate.awaitRelease()
             }
 
-            return TaxUpdate(requestReceived, releaseResponse)
+            return responseGate
         }
 
-        fun startTaxUpdate(taxUpdate: TaxUpdate) {
+        fun startTaxUpdate(taxUpdate: NetworkResponseGate) {
             addressPage.assertReadyToSave()
             addressPage.clickSave()
             composeTestRule.waitUntilWithIdle {
@@ -110,7 +108,7 @@ internal class AddressElementActivityTestRunner(
             }
         }
 
-        fun startTaxUpdateWithAnalytics(taxUpdate: TaxUpdate) {
+        fun startTaxUpdateWithAnalytics(taxUpdate: NetworkResponseGate) {
             val startedRequest = expectShippingAnalytics("elements.shipping_address.save_started")
             startTaxUpdate(taxUpdate)
             awaitAnalytics(startedRequest)
@@ -169,9 +167,4 @@ internal class AddressElementActivityTestRunner(
             }
         }
     }
-
-    internal data class TaxUpdate(
-        val requestReceived: CountDownLatch,
-        val releaseResponse: CountDownLatch,
-    )
 }

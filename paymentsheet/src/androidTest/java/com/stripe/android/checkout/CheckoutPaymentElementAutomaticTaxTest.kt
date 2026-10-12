@@ -26,6 +26,8 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -43,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHO
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementnetwork.toJsonWithBillingDetails
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -943,18 +946,17 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     )
 
     private fun savedCardJson(postalCode: String): JSONObject {
-        return SAVED_CARD.createJson().put(
-            "billing_details",
-            JSONObject().put(
-                "address",
-                JSONObject()
-                    .put("line1", BILLING_ADDRESS_LINE_ONE)
-                    .put("city", BILLING_ADDRESS_CITY)
-                    .put("state", BILLING_ADDRESS_STATE)
-                    .put("country", "US")
-                    .put("postal_code", postalCode),
+        return SAVED_CARD.createPaymentMethod().copy(
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    line1 = BILLING_ADDRESS_LINE_ONE,
+                    city = BILLING_ADDRESS_CITY,
+                    state = BILLING_ADDRESS_STATE,
+                    country = "US",
+                    postalCode = postalCode,
+                ),
             ),
-        )
+        ).toJsonWithBillingDetails()
     }
 
     private companion object {
