@@ -660,6 +660,24 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
     }
 
+    override suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): Result<LinkAccount> {
+        return linkAuth.refreshConsumer(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            supportedVerificationTypes = supportedVerificationTypes,
+        )
+            .onFailure { error ->
+                linkEventsReporter.onAccountRefreshFailure(error)
+            }.map { refresh ->
+                setAccount(
+                    consumerSession = refresh.consumerSession,
+                    publishableKey = consumerPublishableKey,
+                )
+            }
+    }
+
     private val supportedVerificationTypes: List<String>
         get() = if (FeatureFlags.forceLinkWebAuth.isEnabled) {
             listOf("__fake__")

@@ -1915,6 +1915,7 @@ class OnrampInteractorTest {
         sessionState = LinkController.SessionState.LoggedIn,
         consumerSessionClientSecret = "secret_123",
         linkSessionKey = "lsk_123",
+        consumerPublishableKey = "pk_consumer_123",
     )
 
     private fun mockLinkAccountWithoutSecret(): LinkController.LinkAccount = LinkController.LinkAccount(
@@ -1923,6 +1924,7 @@ class OnrampInteractorTest {
         sessionState = LinkController.SessionState.LoggedIn,
         consumerSessionClientSecret = null,
         linkSessionKey = null,
+        consumerPublishableKey = null,
     )
 
     private fun createConfigurationState(

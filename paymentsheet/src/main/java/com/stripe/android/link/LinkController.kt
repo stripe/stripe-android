@@ -106,6 +106,28 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [IDENTITY ONLY] Restore a Link consumer session that was started outside of this [LinkController],
+     * e.g. by another Stripe SDK module, without presenting any UI.
+     *
+     * The session is refreshed to get its current verification state. Check
+     * [State.internalLinkAccount] afterwards: [SessionState.LoggedIn] needs no further authentication,
+     * [SessionState.NeedsVerification] needs [Presenter.authenticate].
+     *
+     * @param consumerSessionClientSecret The client secret of the consumer session to restore.
+     * @param consumerPublishableKey The publishable key of the consumer account, if known.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun restoreConsumerSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+    ): RestoreConsumerSessionResult {
+        return interactor.restoreConsumerSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consumerPublishableKey = consumerPublishableKey,
+        )
+    }
+
+    /**
      * Update the phone number associated with the current Link consumer account.
      *
      * @param phoneNumber The new phone number to associate with the Link account, in E.164 format.
@@ -457,9 +479,24 @@ class LinkController @Inject internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticate(email: String?) {
+            authenticate(email = email, phoneNumber = null, content = null)
+        }
+
+        /**
+         * [IDENTITY ONLY] Authenticate with Link, like [authenticate], with the sign-up screen's copy and
+         * consent supplied by the caller.
+         *
+         * @param email The email address to use for Link account lookup, or null to ask for it.
+         * @param phoneNumber Prefills the sign-up screen's phone number, in E.164 format.
+         * @param content Replaces the sign-up screen's copy and consent action. Null keeps Link's own.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authenticate(email: String?, phoneNumber: String?, content: AuthenticationContent?) {
             interactor.authenticate(
                 launcher = coordinator.linkActivityResultLauncher,
-                email = email
+                email = email,
+                phoneNumber = phoneNumber,
+                content = content,
             )
         }
 
@@ -637,7 +674,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Result of authenticating with Link.
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of authenticating with Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AuthenticationResult {
@@ -662,6 +699,31 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthenticationResult
+    }
+
+    /**
+     * [IDENTITY ONLY] What Link's sign-up screen shows and records during [Presenter.authenticate].
+     *
+     * @param title Replaces the sign-up screen's title.
+     * @param subtitle Replaces the sign-up screen's message.
+     * @param consentAction The consent recorded when the user creates a Link account.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    @Poko
+    class AuthenticationContent(
+        val title: String,
+        val subtitle: String,
+        val consentAction: AuthenticationConsentAction,
+    ) : Parcelable
+
+    /**
+     * [IDENTITY ONLY] The consent recorded when the user creates a Link account in Link's sign-up screen.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class AuthenticationConsentAction {
+        /** The user entered their phone number and email and chose to save their ID with Link. */
+        NetworkedIdentity,
     }
 
     /**
@@ -763,6 +825,28 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * [IDENTITY ONLY] Result of restoring a Link consumer session.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface RestoreConsumerSessionResult {
+
+        /**
+         * The session was restored. Check [State.internalLinkAccount] for its verification state.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : RestoreConsumerSessionResult
+
+        /**
+         * The session could not be restored, e.g. because it expired.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : RestoreConsumerSessionResult
+    }
+
+    /**
      * Result of confirming a SetupIntent after payment method creation.
      */
     @LinkControllerPreview
@@ -818,7 +902,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Callback for receiving results from [Presenter.authenticate] and
      * [Presenter.authenticateExistingConsumer].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -842,6 +926,8 @@ class LinkController @Inject internal constructor(
      * @param sessionState The current session state of the Link account.
      * @param consumerSessionClientSecret The client secret for the consumer session, if available.
      * @param linkSessionKey The key for authenticating Link-scoped API requests, if available.
+     * @param consumerPublishableKey The publishable key of the consumer account, if available. Used to
+     * authenticate consumer API calls made outside of Link, e.g. by Identity.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -852,6 +938,7 @@ class LinkController @Inject internal constructor(
         val sessionState: SessionState,
         val consumerSessionClientSecret: String?,
         val linkSessionKey: String?,
+        val consumerPublishableKey: String?,
     ) : Parcelable
 
     /**
