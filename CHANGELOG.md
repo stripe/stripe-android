@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+- FIXED[14986](https://githubs.com/stripe/stripe-android/pull/14986) Example changelog entry with linked PR
+
 ## 23.23.0 - 2026-10-12
 
 ### Payments
