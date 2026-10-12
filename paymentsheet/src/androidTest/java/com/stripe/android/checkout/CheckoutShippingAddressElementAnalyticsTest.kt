@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.ShippingAddressElement
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
@@ -17,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.replaceText
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
@@ -39,7 +41,10 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     )
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(AdvancedFraudSignalsTestRule())
+            .around(GooglePayRepositoryTestRule())
+    }
 
     private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())
 
