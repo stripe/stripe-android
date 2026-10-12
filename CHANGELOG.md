@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.23.0 - 2026-10-12
 
 ### Payments
 * [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
