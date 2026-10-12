@@ -98,6 +98,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Allgofnodi o %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Cadarnhewch y taliad yn eich ap MB WAY o fewn %s i gwblhau’r pryniant.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Rhagor o ddulliau talu</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
   <string name="stripe_nfc_developer_options_message">Er diogelwch, rhaid i opsiynau datblygwr fod wedi’u diffodd er mwyn defnyddio Tapio i ychwanegu.</string>
   <!-- Button that opens Android developer options settings. -->
@@ -140,6 +142,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ychwanegu eich manylion talu</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Cerdyn wedi’i ychwanegu</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Fydd y newidiadau i’ch cyfeiriad ddim yn cael eu cadw.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Gwaredu</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Gwaredu’r newidiadau?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Cadw\'r cyfeiriad</string>
   <!-- Title for shipping address entry section -->

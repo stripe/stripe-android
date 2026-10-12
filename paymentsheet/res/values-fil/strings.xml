@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Mag-log out sa %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Kumpirmahin ang pagbabayad sa iyong MB WAY app sa loob ng %s para makumpleto ang pagbili.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Higit pang mga pamamaraan sa pagbabayad</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">May nangyaring mali. Tingnan ang iyong koneksyon at subukan muli.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

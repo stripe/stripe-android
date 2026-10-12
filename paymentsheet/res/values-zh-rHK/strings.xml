@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">登出 %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">請在 %s 內透過你的 MB WAY 應用程式確認付款，以完成購買。</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">更多付款方式</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出錯了，檢查您的連接並重試。</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
