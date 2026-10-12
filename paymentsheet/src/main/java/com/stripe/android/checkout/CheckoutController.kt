@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
@@ -393,6 +394,7 @@ class CheckoutController @Inject internal constructor(
      *
      * @param activity The activity the payment UI will be presented from.
      */
+    @MainThread
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
         val subcomponent = checkoutPresenterSubcomponentFactory.create(
             activityResultCaller = PaymentElementActivityResultCaller(
@@ -411,6 +413,7 @@ class CheckoutController @Inject internal constructor(
      * Releases resources held by this controller and clears its loaded state. Call this when the
      * controller is no longer needed.
      */
+    @MainThread
     fun destroy() {
         viewModelScope.cancel()
         checkoutStateLoader.clear()
@@ -1104,6 +1107,7 @@ class CheckoutController @Inject internal constructor(
         /**
          * Builds a [CheckoutController] from the current configuration.
          */
+        @MainThread
         fun build(): CheckoutController {
             val checkoutControllerSavedState = CheckoutControllerSavedState(
                 parentHandle = savedStateHandle,
