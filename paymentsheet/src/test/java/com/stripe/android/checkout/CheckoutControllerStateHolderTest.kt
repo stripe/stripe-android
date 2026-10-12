@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.os.Bundle
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -22,7 +23,9 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -30,6 +33,23 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutControllerStateHolderTest {
+    @Test
+    fun `background state reads reflect committed and cleared state`() = testScenario {
+        suspend fun readState() = withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+            stateHolder.state
+        }
+
+        assertThat(readState()).isNull()
+
+        val committed = committedState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = committed
+        assertThat(readState()).isEqualTo(committed)
+
+        stateHolder.state = null
+        assertThat(readState()).isNull()
+    }
+
     @Test
     fun `selection projects paymentSelection from the committed state`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
