@@ -15,7 +15,7 @@ internal interface ManageScreenSavedPaymentMethodSelector {
     suspend fun syncBillingAfterEdit(
         original: PaymentMethod,
         updated: PaymentMethod,
-    ): Result<CheckoutSessionResponse?>
+    ): Result<Unit>
 
     fun clearError()
 }

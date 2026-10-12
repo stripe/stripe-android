@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
@@ -97,7 +96,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
 
     @Test
     fun `saving selected card with changed billing address waits for tax update`() = runScenario {
-        val taxUpdate = CompletableDeferred<Result<CheckoutSessionResponse?>>()
+        val taxUpdate = CompletableDeferred<Result<Unit>>()
         savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ ->
             assertThat(customerStateHolder.paymentMethods.value.single()).isEqualTo(UPDATED_PAYMENT_METHOD)
             taxUpdate.await()
@@ -132,8 +131,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Saved(UPDATED_PAYMENT_METHOD))
         navigatorResultCalls.expectNoEvents()
 
-        val response = CheckoutSessionResponseFactory.create(id = "edit_response")
-        taxUpdate.complete(Result.success(response))
+        taxUpdate.complete(Result.success(Unit))
         testScope.advanceUntilIdle()
 
         assertThat(interactor.state.value.status)
@@ -170,8 +168,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
         assertThat(interactor.state.value.isSaveButtonEnabled).isTrue()
         navigatorResultCalls.expectNoEvents()
 
-        val response = CheckoutSessionResponseFactory.create(id = "retry_response")
-        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.success(response) }
+        savedPaymentMethodSelector.onSyncBillingAfterEdit = { _, _ -> Result.success(Unit) }
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
         )
@@ -398,8 +395,8 @@ internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPay
     private val _clearErrorCalls = Turbine<Unit>()
 
     var onSelect: suspend (PaymentSelection.Saved) -> Result<Unit> = { Result.success(Unit) }
-    var onSyncBillingAfterEdit: suspend (PaymentMethod, PaymentMethod) -> Result<CheckoutSessionResponse?> = { _, _ ->
-        Result.success(null)
+    var onSyncBillingAfterEdit: suspend (PaymentMethod, PaymentMethod) -> Result<Unit> = { _, _ ->
+        Result.success(Unit)
     }
 
     override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
@@ -414,7 +411,7 @@ internal class FakeManageScreenSavedPaymentMethodSelector : ManageScreenSavedPay
     override suspend fun syncBillingAfterEdit(
         original: PaymentMethod,
         updated: PaymentMethod,
-    ): Result<CheckoutSessionResponse?> {
+    ): Result<Unit> {
         _syncBillingAfterEditCalls.add(SyncBillingCall(original, updated))
         return onSyncBillingAfterEdit(original, updated)
     }

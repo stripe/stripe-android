@@ -155,8 +155,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         ) {
             val updated = selection.paymentMethod.withPostalCode("10001")
             selectionHolder.setSelection(PaymentSelection.Saved(updated))
-            val editResponse = selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow()
-            assertThat(editResponse).isEqualTo(firstResponse)
+            assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow()).isEqualTo(Unit)
             assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", CHECKOUT_SESSION_RESPONSE)
             assertThat(selector.checkoutSessionResponse).isEqualTo(firstResponse)
 
@@ -194,7 +193,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
                 val response = CHECKOUT_SESSION_RESPONSE.copy(id = "edit_response")
                 update.complete(Result.success(response))
 
-                assertThat(result.await().getOrThrow()).isEqualTo(response)
+                assertThat(result.await().getOrThrow()).isEqualTo(Unit)
                 assertThat(selector.checkoutSessionResponse).isEqualTo(response)
                 assertThat(selectionHolder.selection.value).isEqualTo(selection)
                 expectNoEvents()
@@ -213,8 +212,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         ) {
             val updated = selection.paymentMethod.withPostalCode("10001")
             selectionHolder.setSelection(selection)
-            val editResponse = selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow()
-            assertThat(editResponse).isEqualTo(response)
+            assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow()).isEqualTo(Unit)
             assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", CHECKOUT_SESSION_RESPONSE)
             assertThat(selector.checkoutSessionResponse).isEqualTo(response)
 
@@ -232,7 +230,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
                 val retryResponse = CHECKOUT_SESSION_RESPONSE.copy(id = "retry_response")
                 nextResult = Result.success(retryResponse)
                 assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow())
-                    .isEqualTo(retryResponse)
+                    .isEqualTo(Unit)
                 assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", response)
                 assertThat(selector.checkoutSessionResponse).isEqualTo(retryResponse)
                 expectNoEvents()
@@ -246,7 +244,8 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         updateTaxRegion = { error("Tax update should not run") },
     ) {
         val original = selection.paymentMethod
-        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow()).isNull()
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow())
+            .isEqualTo(Unit)
 
         taxRegionUpdateCalls.expectNoEvents()
         assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
@@ -260,7 +259,8 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     ) {
         selectionHolder.setSelection(null)
         val original = selection.paymentMethod
-        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow()).isNull()
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow())
+            .isEqualTo(Unit)
 
         taxRegionUpdateCalls.expectNoEvents()
         assertThat(selectionHolder.selection.value).isNull()
@@ -276,13 +276,13 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         val response = CHECKOUT_SESSION_RESPONSE.copy(id = "previous_edit_response")
         val original = selection.paymentMethod
         assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow())
-            .isEqualTo(response)
+            .isEqualTo(Unit)
         assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", CHECKOUT_SESSION_RESPONSE)
         assertThat(selector.checkoutSessionResponse).isEqualTo(response)
         val updated = original.copy(card = original.card?.copy(expiryMonth = 12, expiryYear = 2030))
         assertThat(updated.card).isNotEqualTo(original.card)
 
-        assertThat(selector.syncBillingAfterEdit(original, updated).getOrThrow()).isNull()
+        assertThat(selector.syncBillingAfterEdit(original, updated).getOrThrow()).isEqualTo(Unit)
 
         taxRegionUpdateCalls.expectNoEvents()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
@@ -296,7 +296,8 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
     ) {
         selectionHolder.setSelection(selection)
         val original = selection.paymentMethod
-        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow()).isNull()
+        assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow())
+            .isEqualTo(Unit)
 
         taxRegionUpdateCalls.expectNoEvents()
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
@@ -312,7 +313,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         selectionHolder.setSelection(selection)
         val original = selection.paymentMethod
         assertThat(selector.syncBillingAfterEdit(original, original.withPostalCode("10001")).getOrThrow())
-            .isEqualTo(response)
+            .isEqualTo(Unit)
         assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", CHECKOUT_SESSION_RESPONSE)
         assertThat(selector.checkoutSessionResponse).isEqualTo(response)
         selector.selectionState.test {
@@ -339,7 +340,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             val updatedSelection = PaymentSelection.Saved(updated)
             selectionHolder.setSelection(updatedSelection)
             assertThat(selector.syncBillingAfterEdit(selection.paymentMethod, updated).getOrThrow())
-                .isEqualTo(editResponse)
+                .isEqualTo(Unit)
             assertTaxUpdateAddress(taxRegionUpdateCalls.awaitItem(), "10001", CHECKOUT_SESSION_RESPONSE)
             assertThat(selector.checkoutSessionResponse).isEqualTo(editResponse)
 

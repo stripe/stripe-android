@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdate
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -40,11 +41,8 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         val paymentMethodId = selection.paymentMethod.id
-        val update = taxRegionUpdater.prepareUpdate(
-            checkoutSessionResponse = checkoutSessionResponse ?: initialCheckoutSessionResponse,
-            selection = selection,
-        )
-        val response = update?.let {
+        val update = prepareTaxRegionUpdate(selection)
+        update?.let {
             _selectionState.value = SavedPaymentMethodSelectionState.Pending(paymentMethodId)
             it().getOrElse { error ->
                 _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
@@ -52,7 +50,6 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
             }
         }
 
-        response?.let { checkoutSessionResponse = it }
         selectionHolder.setSelection(selection)
         _selectionState.value = SavedPaymentMethodSelectionState.Idle
         return Result.success(Unit)
@@ -61,21 +58,33 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     override suspend fun syncBillingAfterEdit(
         original: PaymentMethod,
         updated: PaymentMethod,
-    ): Result<CheckoutSessionResponse?> {
+    ): Result<Unit> {
         val selected = selectionHolder.selection.value as? PaymentSelection.Saved
-            ?: return Result.success(null)
+            ?: return Result.success(Unit)
         if (selected.paymentMethod.id != updated.id ||
             original.billingDetails?.address == updated.billingDetails?.address
         ) {
-            return Result.success(null)
+            return Result.success(Unit)
         }
+        return prepareTaxRegionUpdate(PaymentSelection.Saved(updated))
+            ?.invoke()
+            ?.map { Unit }
+            ?: Result.success(Unit)
+    }
+
+    private fun prepareTaxRegionUpdate(
+        selection: PaymentSelection.Saved,
+    ): SheetTaxRegionUpdate? {
         val update = taxRegionUpdater.prepareUpdate(
             checkoutSessionResponse = checkoutSessionResponse ?: initialCheckoutSessionResponse,
-            selection = PaymentSelection.Saved(updated),
-        )
-        return update?.invoke()?.onSuccess { response ->
-            checkoutSessionResponse = response
-        } ?: Result.success(null)
+            selection = selection,
+        ) ?: return null
+
+        return {
+            update().onSuccess { response ->
+                checkoutSessionResponse = response
+            }
+        }
     }
 
     override fun clearError() {
