@@ -484,7 +484,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `manageSheetLauncher refreshes checkout session after save without invoking immediate action`() = testScenario {
+    fun `manageSheetLauncher refreshes checkout response without invoking the selection callback`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val response = CheckoutSessionResponseFactory.create(id = "saved_card_tax_response")
         val result = manageCompleteResult(checkoutSessionResponse = response).copy(
