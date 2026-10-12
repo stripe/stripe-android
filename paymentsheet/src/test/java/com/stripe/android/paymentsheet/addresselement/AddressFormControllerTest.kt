@@ -154,6 +154,45 @@ class AddressFormControllerTest {
     }
 
     @Test
+    fun `Optional phone blocks form completion only when incomplete`() = test {
+        val addressValues = mapOf(
+            FormFieldId.Name to "John Doe",
+            FormFieldId.Line1 to "123 Apple Street",
+            FormFieldId.City to "San Francisco",
+            FormFieldId.State to "CA",
+            FormFieldId.Country to "US",
+            FormFieldId.PostalCode to "94111",
+        )
+        val addressFormController = createAddressFormController(
+            initialValues = addressValues,
+            launcherConfig = AddressLauncher.Configuration(
+                additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL,
+                ),
+            ),
+        )
+
+        assertThat(registerCalls.awaitItem()).isNotNull()
+
+        addressFormController.completeFormValues.test {
+            assertThat(awaitItem()).isNotNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "123"))
+            assertThat(awaitItem()).isNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "1234567890"))
+            assertThat(awaitItem()?.get(FormFieldId.Phone))
+                .isEqualTo(FormFieldEntry(value = "+11234567890", isComplete = true))
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "123"))
+            assertThat(awaitItem()).isNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to ""))
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
     fun `Complete form values is empty when element flows are not complete`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
