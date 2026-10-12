@@ -1,0 +1,102 @@
+name: Remind changelog PR link
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+    paths:
+      - 'CHANGELOG.md'
+      - '**/CHANGELOG.md'
+
+concurrency:
+  group: remind-changelog-pr-link-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  remind-changelog-pr-link:
+    name: Remind changelog PR link
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check added changelog entries
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const marker = '<!-- remind-changelog-pr-link -->';
+            const pullRequest = context.payload.pull_request;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              ...context.repo,
+              pull_number: pullRequest.number,
+              per_page: 100,
+            });
+
+            const changelogFiles = files.filter(({ filename }) =>
+              filename === 'CHANGELOG.md' || filename.endsWith('/CHANGELOG.md')
+            );
+            const linkedPullRequest = `](${pullRequest.html_url})`;
+            const missingLinks = [];
+
+            for (const file of changelogFiles) {
+              if (!file.patch) {
+                core.warning(`Could not inspect the changes to ${file.filename}.`);
+                continue;
+              }
+
+              const addedEntries = file.patch
+                .split('\n')
+                .filter((line) => /^\+\s*[-*]\s+\[[^\]]+\]/.test(line));
+
+              for (const entry of addedEntries) {
+                if (!entry.includes(linkedPullRequest)) {
+                  missingLinks.push({
+                    filename: file.filename,
+                    entry: entry.slice(1).trim(),
+                  });
+                }
+              }
+            }
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo,
+              issue_number: pullRequest.number,
+              per_page: 100,
+            });
+            const existingComment = comments.find(({ body }) => body?.includes(marker));
+
+            if (missingLinks.length === 0) {
+              if (existingComment) {
+                await github.rest.issues.deleteComment({
+                  ...context.repo,
+                  comment_id: existingComment.id,
+                });
+              }
+              return;
+            }
+
+            const entries = missingLinks
+              .map(({ filename, entry }) => `- \`${filename}\`: ${entry}`)
+              .join('\n');
+            const body = [
+              marker,
+              'Please link each new changelog entry to this PR so the release notes retain their context:',
+              '',
+              entries,
+              '',
+              `For example: \`* [Fixed][${pullRequest.number}](${pullRequest.html_url}) Description.\``,
+            ].join('\n');
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                ...context.repo,
+                comment_id: existingComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pullRequest.number,
+                body,
+              });
+            }
