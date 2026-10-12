@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+- [FIXED] example issue fixed without linking to a PR
+
 ## 23.23.0 - 2026-10-12
 
 ### Payments
