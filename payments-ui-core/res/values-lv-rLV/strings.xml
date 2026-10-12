@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Tālrunis</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">Apstiprinot jūsu maksājumu ar NICEPAY, jūs atļaujat %s ar šo maksājuma veidu iekasēt turpmākos maksājumus saskaņā ar viņu noteikumiem.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Rēķina apmaksa uzņēmumu pircējiem.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Uz kartes norādītais vārds</string>
   <!-- Label for the Naver Pay funding source selector -->

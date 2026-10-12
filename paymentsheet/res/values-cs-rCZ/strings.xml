@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Odhlásit se z %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Pro dokončení nákupu potvrďte platbu v aplikaci MB WAY do %s.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Další způsoby platby</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Došlo k chybě. Zkontrolujte připojení a zkuste to znovu.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

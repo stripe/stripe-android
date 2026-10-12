@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Logi %sst välja</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Kinnitage makse oma MB WAY rakenduses %s jooksul, et ost lõpule viia.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Rohkem makseviise</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ilmnes viga. Kontrollige oma ühendust ja proovige uuesti.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
