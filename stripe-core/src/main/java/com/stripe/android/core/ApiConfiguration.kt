@@ -2,7 +2,6 @@ package com.stripe.android.core
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.paymentelement.ApiConfigurationPreview
 import kotlinx.parcelize.Parcelize
 
 /**

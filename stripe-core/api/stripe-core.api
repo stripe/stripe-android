@@ -3,6 +3,9 @@ public final class com/stripe/android/core/ApiConfiguration {
 	public final fun stripeAccountId (Ljava/lang/String;)Lcom/stripe/android/core/ApiConfiguration;
 }
 
+public abstract interface annotation class com/stripe/android/core/ApiConfigurationPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/core/AppInfo : android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/core/AppInfo$Companion;
@@ -274,8 +277,5 @@ public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
 	public static final field VERSION Ljava/lang/String;
 	public static final field VERSION_NAME Ljava/lang/String;
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/ApiConfigurationPreview : java/lang/annotation/Annotation {
 }
 

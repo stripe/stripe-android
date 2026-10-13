@@ -10,7 +10,7 @@ apply plugin: 'app.cash.paparazzi'
 android {
     kotlin {
         compilerOptions {
-            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
         }
     }
 

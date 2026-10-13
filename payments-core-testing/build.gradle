@@ -4,7 +4,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 android {
     kotlin {
         compilerOptions {
-            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
         }
     }
 
