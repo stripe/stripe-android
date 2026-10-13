@@ -8,13 +8,17 @@ import kotlinx.parcelize.Parcelize
  * Holds API credentials (publishable key and optional Stripe account ID) for use with
  * payment UI components. When not provided, components fall back to
  * [PaymentConfiguration.getInstance].
+ *
+ * @param publishableKey the Stripe publishable key for this payment session.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ApiConfiguration(
     private val publishableKey: String,
 ) {
     private var stripeAccountId: String? = null
 
+    /**
+     * Sets the connected account ID for this payment session. Pass null to use no connected account.
+     */
     fun stripeAccountId(stripeAccountId: String?) = apply {
         this.stripeAccountId = stripeAccountId
     }
