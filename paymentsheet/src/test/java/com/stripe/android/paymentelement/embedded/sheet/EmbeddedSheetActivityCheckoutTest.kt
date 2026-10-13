@@ -9,12 +9,11 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -23,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -36,10 +36,10 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.utils.NetworkResponseGate
-import com.stripe.paymentelementnetwork.toJsonWithBillingDetails
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -358,7 +358,12 @@ internal class EmbeddedSheetActivityCheckoutTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
-            integrationMetadata = IntegrationMetadataFactory.checkoutSession(checkoutSessionResponse),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = checkoutSessionResponse.id,
+                instancesKey = "test_instances_key",
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedEmail = null,
+            ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
                 sessionId = checkoutSessionResponse.id,
@@ -406,7 +411,9 @@ internal class EmbeddedSheetActivityCheckoutTest {
         paymentMethods: List<PaymentMethod>,
         taxAmount: Long,
     ) {
-        CheckoutInitResponseFactory.createWithModification(this) { json ->
+        testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("customer_email", "checkout@example.com")
+            json.put("account_settings", JSONObject().put("country", "US"))
             json.put(
                 "customer",
                 JSONObject()
@@ -452,6 +459,28 @@ internal class EmbeddedSheetActivityCheckoutTest {
             json.getJSONObject("server_built_elements_session_params")
                 .getJSONObject("deferred_intent").put("amount", BASE_AMOUNT + taxAmount)
         }
+    }
+
+    private fun PaymentMethod.toJsonWithBillingDetails(): JSONObject {
+        val billingDetails = requireNotNull(billingDetails)
+        val address = requireNotNull(billingDetails.address)
+        return PaymentMethodFactory.convertCardToJson(this).put(
+            "billing_details",
+            JSONObject()
+                .put("name", billingDetails.name)
+                .put("email", billingDetails.email)
+                .put("phone", billingDetails.phone)
+                .put(
+                    "address",
+                    JSONObject()
+                        .put("country", address.country)
+                        .put("line1", address.line1)
+                        .put("line2", address.line2)
+                        .put("city", address.city)
+                        .put("state", address.state)
+                        .put("postal_code", address.postalCode),
+                ),
+        )
     }
 
     private fun assertSuccessfulBillingUpdateResult(
