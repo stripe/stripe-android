@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### All SDKs
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
+
 ### Payments
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
