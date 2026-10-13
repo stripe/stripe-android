@@ -303,7 +303,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
-            paymentOptionFactory = { _, _ -> null },
+            paymentOptionFactory = { _, _, _ -> null },
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
                 availableExpressButtonTypes = availableExpressButtonTypes,
             ),

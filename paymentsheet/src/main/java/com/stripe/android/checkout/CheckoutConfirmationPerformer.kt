@@ -58,8 +58,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
         )?.withSepaMandateAcknowledgement(
-            hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+            hasAcknowledgedSepaMandate = state.mandateState.hasAcknowledgedSepaMandate(paymentSelection),
         ) ?: return null
 
         return ConfirmationHandler.Args(
