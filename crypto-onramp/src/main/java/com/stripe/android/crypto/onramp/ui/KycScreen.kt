@@ -1,6 +1,10 @@
 package com.stripe.android.crypto.onramp.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -104,41 +108,76 @@ internal fun KycScreen(
                 .background(LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.20f))
                 .statusBarsPadding()
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = if (state.page.isMessage) messageSurfaceColor() else LinkTheme.colors.surfacePrimary,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                elevation = 8.dp,
-            ) {
-                if (selectorSlotIndex != null) {
-                    val slot = state.document?.slots?.firstOrNull { it.index == selectorSlotIndex }
-                    if (slot != null) {
-                        DocumentTypeSelector(
-                            slot = slot,
-                            onClose = { selectorSlotIndex = null },
-                            onSelected = { subtypeId ->
-                                onDocumentSubtypeSelected(slot.index, subtypeId)
-                                selectorSlotIndex = null
-                            },
+            KycAnimatedContent(state, selectorSlotIndex) { screenState, selectedSlot ->
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = if (screenState.page.isMessage) messageSurfaceColor() else LinkTheme.colors.surfacePrimary,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                    elevation = 8.dp,
+                ) {
+                    if (selectedSlot != null) {
+                        val slot = screenState.document?.slots?.firstOrNull { it.index == selectedSlot }
+                        if (slot != null) {
+                            DocumentTypeSelector(
+                                slot = slot,
+                                onClose = { selectorSlotIndex = null },
+                                onSelected = { subtypeId ->
+                                    onDocumentSubtypeSelected(slot.index, subtypeId)
+                                    selectorSlotIndex = null
+                                },
+                            )
+                        }
+                    } else {
+                        KycContent(
+                            state = screenState,
+                            onClose = onClose,
+                            onBack = onBack,
+                            onQuestionAnswerChanged = onQuestionAnswerChanged,
+                            onShowDocumentTypes = { selectorSlotIndex = it },
+                            onChooseFile = onChooseFile,
+                            onRemoveFile = onRemoveFile,
+                            onAddDocuments = onAddDocuments,
+                            onEditDocuments = onEditDocuments,
+                            onSubmit = onSubmit,
+                            onContinue = onContinue,
                         )
                     }
-                } else {
-                    KycContent(
-                        state = state,
-                        onClose = onClose,
-                        onBack = onBack,
-                        onQuestionAnswerChanged = onQuestionAnswerChanged,
-                        onShowDocumentTypes = { selectorSlotIndex = it },
-                        onChooseFile = onChooseFile,
-                        onRemoveFile = onRemoveFile,
-                        onAddDocuments = onAddDocuments,
-                        onEditDocuments = onEditDocuments,
-                        onSubmit = onSubmit,
-                        onContinue = onContinue,
-                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun KycAnimatedContent(
+    state: KycScreenState,
+    selectorSlotIndex: Int?,
+    content: @Composable (KycScreenState, Int?) -> Unit,
+) {
+    AnimatedContent(
+        targetState = state to selectorSlotIndex,
+        modifier = Modifier.fillMaxSize(),
+        contentKey = { (screenState, selectedSlot) ->
+            Triple(screenState.currentRequirement, screenState.page, selectedSlot)
+        },
+        transitionSpec = {
+            val forward = when {
+                targetState.second != null -> true
+                initialState.second != null -> false
+                targetState.first.currentRequirement != initialState.first.currentRequirement -> true
+                else -> targetState.first.page.ordinal > initialState.first.page.ordinal
+            }
+            val direction = if (forward) {
+                AnimatedContentTransitionScope.SlideDirection.Start
+            } else {
+                AnimatedContentTransitionScope.SlideDirection.End
+            }
+            slideIntoContainer(direction, tween(KYC_TRANSITION_DURATION)) togetherWith
+                slideOutOfContainer(direction, tween(KYC_TRANSITION_DURATION))
+        },
+        label = "KycNavigation",
+    ) { (screenState, selectedSlot) ->
+        content(screenState, selectedSlot)
     }
 }
 
@@ -1465,3 +1504,5 @@ private val DocumentBorderLight = Color(0xFFA3A3A3)
 private val DocumentCritical = Color(0xFFE61947)
 
 private val DocumentErrorLight = Color(0xFFFEF4F6)
+
+private const val KYC_TRANSITION_DURATION = 300

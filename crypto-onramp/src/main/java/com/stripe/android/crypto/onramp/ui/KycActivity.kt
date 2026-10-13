@@ -455,7 +455,10 @@ internal class KycActivity : ComponentActivity() {
 
     override fun finish() {
         super.finish()
-        fadeOut()
+        fadeOut(
+            fadeIn = 0,
+            fadeOut = R.anim.stripe_onramp_kyc_exit,
+        )
     }
 
     private fun readSelectedFile(

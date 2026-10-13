@@ -3,6 +3,9 @@ package com.stripe.android.crypto.onramp.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -40,6 +43,58 @@ internal class KycScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `forward navigation retains the outgoing page until the slide finishes`() = runScenario(
+        state = screenState(page = KycCollectionPage.Context),
+    ) {
+        composeRule.mainClock.autoAdvance = false
+        composeRule.runOnIdle {
+            currentState = screenState(
+                page = KycCollectionPage.Questionnaire,
+                questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+            )
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertExists()
+        val questionBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+
+        composeRule.mainClock.advanceTimeBy(400)
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertDoesNotExist()
+        val settledBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+        assertThat(questionBounds.left).isGreaterThan(settledBounds.left)
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun `back navigation slides the questionnaire out to the right`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Questionnaire,
+            questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+        ),
+    ) {
+        val initialBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+        composeRule.mainClock.autoAdvance = false
+        composeRule.runOnIdle { currentState = screenState(page = KycCollectionPage.Context) }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+
+        val outgoingBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+        assertThat(outgoingBounds.left).isGreaterThan(initialBounds.left)
+
+        composeRule.mainClock.advanceTimeBy(400)
+        composeRule.onNodeWithTag(kycQuestionTag("purpose")).assertDoesNotExist()
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertIsDisplayed()
+        composeRule.mainClock.autoAdvance = true
+    }
 
     @Test
     fun `upload control is hidden at the per source limit`() = runScenario(
@@ -472,7 +527,7 @@ internal class KycScreenTest {
         screenHeight: Dp = Dp.Infinity,
         block: TestScenario.() -> Unit,
     ) {
-        val scenario = TestScenario()
+        val scenario = TestScenario(state)
         composeRule.setContent {
             val density = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
@@ -480,7 +535,7 @@ internal class KycScreenTest {
                     Box(Modifier.heightIn(max = screenHeight)) {
                         KycScreen(
                             appearance = null,
-                            state = state,
+                            state = scenario.currentState,
                             onClose = { scenario.closed = true },
                             onBack = { scenario.wentBack = true },
                             onQuestionAnswerChanged = { questionId, answer ->
@@ -503,7 +558,8 @@ internal class KycScreenTest {
         scenario.block()
     }
 
-    private data class TestScenario(
+    private class TestScenario(
+        state: KycScreenState,
         var closed: Boolean = false,
         var wentBack: Boolean = false,
         var changedAnswer: Pair<String, String>? = null,
@@ -514,7 +570,9 @@ internal class KycScreenTest {
         var editedDocumentSlot: Int? = null,
         var submitted: Boolean = false,
         var continued: Boolean = false,
-    )
+    ) {
+        var currentState by mutableStateOf(state)
+    }
 
     private companion object {
         fun screenState(
