@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Fixed] Address country dropdowns now support autofill from saved addresses.
+
 ## 23.23.0 - 2026-10-12
 
 ### Payments
