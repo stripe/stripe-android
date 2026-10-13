@@ -72,6 +72,7 @@ class EditPage(
 
     fun update(waitUntilComplete: Boolean = true) {
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .performScrollTo()
             .performClick()
         if (waitUntilComplete) {
             composeTestRule.waitUntilWithIdle {
