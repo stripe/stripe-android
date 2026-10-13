@@ -71,6 +71,7 @@ android {
 
     kotlin {
         compilerOptions {
+            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
             freeCompilerArgs.addAll([
                     "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
                     "-opt-in=com.stripe.android.link.LinkControllerPreview",

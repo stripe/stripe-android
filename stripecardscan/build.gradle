@@ -71,6 +71,7 @@ android {
 
     kotlinOptions {
         freeCompilerArgs += [
+                "-opt-in=com.stripe.android.paymentelement.ApiConfigurationPreview",
                 "-Xconsistent-data-class-copy-visibility",
         ]
     }

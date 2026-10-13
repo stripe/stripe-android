@@ -93,6 +93,7 @@ android {
 
     kotlin {
         compilerOptions {
+            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
             freeCompilerArgs.addAll([
                     "-opt-in=kotlin.RequiresOptIn",
                     "-opt-in=androidx.compose.material.ExperimentalMaterialApi",

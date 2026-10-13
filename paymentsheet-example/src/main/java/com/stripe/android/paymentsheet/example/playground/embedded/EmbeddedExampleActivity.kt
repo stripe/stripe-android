@@ -32,7 +32,6 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -61,7 +60,6 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
 }
 
 @Composable
-@OptIn(ApiConfigurationPreview::class)
 fun CheckoutScreen(useApiConfiguration: Boolean = false) {
     val context = LocalContext.current.applicationContext
     var prefetchedCheckout by remember { mutableStateOf<CheckoutResult?>(null) }

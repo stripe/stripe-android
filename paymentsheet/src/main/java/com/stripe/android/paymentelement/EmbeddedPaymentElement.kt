@@ -581,7 +581,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         }
 
         @OptIn(
-            ApiConfigurationPreview::class,
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             CardFundingFilteringPrivatePreview::class,
         )

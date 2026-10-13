@@ -276,3 +276,6 @@ public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field VERSION_NAME Ljava/lang/String;
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/ApiConfigurationPreview : java/lang/annotation/Annotation {
+}
+

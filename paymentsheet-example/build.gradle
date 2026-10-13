@@ -50,6 +50,12 @@ sentry {
 }
 
 android {
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
+        }
+    }
+
     testOptions {
         unitTests {
             includeAndroidResources = true

@@ -2,6 +2,12 @@ apply from: configs.androidLibrary
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 android {
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.paymentelement.ApiConfigurationPreview")
+        }
+    }
+
     buildFeatures {
         buildConfig true
     }
