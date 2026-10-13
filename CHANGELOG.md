@@ -9,6 +9,9 @@ NEXT_VERSION_BUMP: MINOR
 ### PaymentSheet
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 
+### Identity
+* [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
+
 ## 23.23.0 - 2026-10-12
 
 ### Payments

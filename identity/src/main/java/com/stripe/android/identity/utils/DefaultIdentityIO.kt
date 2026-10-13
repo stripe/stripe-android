@@ -103,6 +103,34 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         }
     }
 
+    @Synchronized
+    override fun createTestModeFileToUpload(image: TestModeImage): File {
+        val asset = when (image) {
+            TestModeImage.DOCUMENT_FRONT -> TestModeAsset(
+                path = "stripe_identity_test_mode/document_front.png",
+                fileName = "stripe_identity_test_mode_document_front.png"
+            )
+            TestModeImage.DOCUMENT_BACK -> TestModeAsset(
+                path = "stripe_identity_test_mode/document_back.png",
+                fileName = "stripe_identity_test_mode_document_back.png"
+            )
+            TestModeImage.SELFIE -> TestModeAsset(
+                path = "stripe_identity_test_mode/selfie.png",
+                fileName = "stripe_identity_test_mode_selfie.png"
+            )
+        }
+
+        return File(context.cacheDir, asset.fileName).also { file ->
+            if (!file.exists()) {
+                context.assets.open(asset.path).use { inputStream ->
+                    FileOutputStream(file, false).use { fileOutputStream ->
+                        inputStream.copyTo(fileOutputStream)
+                    }
+                }
+            }
+        }
+    }
+
     override fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
@@ -158,4 +186,9 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
     private fun generateTFLiteFileNameWithGitHash(modelUrl: String): String {
         return "${modelUrl.split('/')[5]}.tflite"
     }
+
+    private data class TestModeAsset(
+        val path: String,
+        val fileName: String
+    )
 }
