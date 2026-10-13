@@ -4,8 +4,8 @@ import android.content.Context
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal object GooglePayDisplayItemsFactory {
@@ -14,8 +14,7 @@ internal object GooglePayDisplayItemsFactory {
         paymentMethodMetadata: PaymentMethodMetadata,
         context: Context,
     ): List<GooglePayJsonFactory.DisplayItem> {
-        val response = (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
-            ?.checkoutSessionResponse ?: return emptyList()
+        val response = paymentMethodMetadata.checkoutSessionResponse ?: return emptyList()
 
         return create(response, context)
     }

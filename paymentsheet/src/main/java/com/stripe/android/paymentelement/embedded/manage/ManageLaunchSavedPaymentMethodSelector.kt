@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
@@ -28,8 +28,7 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
 ) : ManageScreenSavedPaymentMethodSelector {
-    private val initialCheckoutSessionResponse =
-        (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)?.checkoutSessionResponse
+    private val initialCheckoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse
 
     private val _selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
         SavedPaymentMethodSelectionState.Idle,
