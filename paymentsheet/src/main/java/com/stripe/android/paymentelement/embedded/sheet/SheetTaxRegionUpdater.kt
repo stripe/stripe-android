@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutInvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -24,7 +25,14 @@ internal class SheetTaxRegionUpdater internal constructor(
 ) {
     @Inject
     constructor(taxRegionUpdater: CheckoutSessionTaxRegionUpdater) : this(
-        updateTaxRegion = taxRegionUpdater::updateServerStateIfNeeded,
+        updateTaxRegion = { response, addressSource, address ->
+            taxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = response,
+                addressSource = addressSource,
+                address = address,
+                invocationSource = CheckoutInvocationSource.PaymentElement,
+            )
+        },
     )
 
     fun prepareUpdate(

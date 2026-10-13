@@ -69,6 +69,23 @@ class CheckoutSessionRepositoryTest {
     }
 
     @Test
+    fun `init attaches request id from successful response header`() = runTest {
+        val requestId = "req_checkout_init"
+        networkRule.checkoutInit { response ->
+            response.addHeader("Request-Id", requestId)
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.init(
+            clientParams = clientParams,
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            adaptivePricingAllowed = true,
+        ).getOrThrow()
+
+        assertThat(result.requestId).isEqualTo(requestId)
+    }
+
+    @Test
     fun `detach sends elements_session_client params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutUpdate(

@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.checkout.analytics.CheckoutInvocationSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
@@ -77,6 +78,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             checkoutSessionResponse = currentState.checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             address = address,
+            invocationSource = CheckoutInvocationSource.ExpressCheckoutElement,
         ).fold(
             onSuccess = { response ->
                 mapToResponse(countryCode, response, paymentDataUpdate)

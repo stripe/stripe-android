@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.analytics.CheckoutInvocationSource
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -221,6 +223,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(updateCall.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
             assertThat(updateCall.address).isEqualTo(ADDRESS)
             assertThat(updateCall.checkoutSessionResponse).isEqualTo(providedState?.checkoutSessionResponse)
+            assertThat(updateCall.invocationSource)
+                .isEqualTo(CheckoutInvocationSource.ExpressCheckoutElement)
 
             val toResponseCall = mapper.toResponseCalls.awaitItem()
             assertThat(toResponseCall.countryCode).isEqualTo(providedState?.checkoutSessionResponse?.merchantCountry)
@@ -307,7 +311,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 mocked.updateServerStateIfNeeded(
                     checkoutSessionResponse = any(),
                     addressSource = any(),
-                    address = any()
+                    address = any(),
+                    invocationSource = anyOrNull(),
                 )
             } doAnswer { invocation ->
                 updateServerStateIfNeededCalls.add(
@@ -315,6 +320,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                         checkoutSessionResponse = invocation.component1(),
                         addressSource = invocation.component2(),
                         address = invocation.component3(),
+                        invocationSource = invocation.component4(),
                     )
                 )
 
@@ -330,6 +336,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             val checkoutSessionResponse: CheckoutSessionResponse,
             val addressSource: CheckoutSessionResponse.TaxAddressSource,
             val address: CheckoutController.Address.State,
+            val invocationSource: CheckoutInvocationSource?,
         )
     }
 

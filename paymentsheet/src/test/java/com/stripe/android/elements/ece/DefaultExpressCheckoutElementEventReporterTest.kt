@@ -24,6 +24,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
+        assertThat(loggedParams).containsEntry("product_usage", "ExpressCheckoutElement")
         assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
         assertThat(loggedParams).containsEntry(

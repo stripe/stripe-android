@@ -760,6 +760,7 @@ internal class CheckoutOperationCoordinatorTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            analyticsPerformer = CheckoutAnalyticsPerformerFactory.create(),
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
