@@ -41,7 +41,7 @@ internal object MerchantSettingsDefinition :
         return CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
             country.code.value in supportedCountries
         }.map { country ->
-            option(country.name, Merchant.entries.first { it.countryCode == country.code.value })
+            option(country.name, convertToValue(country.code.value))
         }.toList() + listOf(
             option(Merchant.US_TAX.name, convertToValue(Merchant.US_TAX.value)),
             option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value)),

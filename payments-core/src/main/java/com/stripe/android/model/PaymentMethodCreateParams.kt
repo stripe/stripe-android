@@ -1459,6 +1459,7 @@ constructor(
             )
         }
 
+        /** Creates parameters for a Naira bank transfer payment method. */
         @JvmStatic
         @JvmOverloads
         fun createNgBankTransfer(

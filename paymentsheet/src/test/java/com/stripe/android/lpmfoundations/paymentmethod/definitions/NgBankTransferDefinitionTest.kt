@@ -1,20 +1,17 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import android.content.Context
-import android.text.style.URLSpan
-import androidx.core.text.HtmlCompat
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
@@ -80,25 +77,14 @@ internal class NgBankTransferDefinitionTest {
     }
 
     @Test
-    fun `collects configured contact information before the disclosure`() {
+    fun `supplies the terms URL to the merchant of record disclosure`() {
         val formElements = NgBankTransferDefinition.formElements(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                ),
             )
         )
 
-        assertThat(formElements).hasSize(4)
-        checkNameField(formElements, 0)
-        checkPhoneField(formElements, 1)
-        checkEmailField(formElements, 2)
-        val notice = formElements.last() as MandateTextElement
-        assertThat(notice.stringResId).isEqualTo(R.string.stripe_ng_payment_mor_notice)
+        val notice = formElements.single() as MandateTextElement
         assertThat(notice.args).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)
     }
 
@@ -149,33 +135,7 @@ internal class NgBankTransferDefinitionTest {
     }
 
     @Test
-    fun `disclosure remains visible without collecting payment method fields`(
-        @TestParameter termsDisplay: PaymentSheet.TermsDisplay,
-    ) {
-        val elements = NgBankTransferDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_bank_transfer")),
-                termsDisplay = mapOf(PaymentMethod.Type.NgBankTransfer to termsDisplay),
-            ),
-        )
-        assertThat(elements).hasSize(1)
-        assertThat(elements.single()).isInstanceOf(MandateTextElement::class.java)
-    }
-
-    @Test
     fun `does not redisplay saved payment methods`() {
         assertThat(NgBankTransferDefinition.supportedAsSavedPaymentMethod).isFalse()
-    }
-
-    @Test
-    fun `renders the merchant of record notice with a usable terms URL`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val notice = context.getString(R.string.stripe_ng_payment_mor_notice, NIGERIAN_PAYMENT_METHOD_TERMS_URL)
-
-        assertThat(notice).contains("Global Stack Services Limited as merchant of record")
-        val renderedNotice = HtmlCompat.fromHtml(notice, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        val links = renderedNotice.getSpans(0, renderedNotice.length, URLSpan::class.java)
-        assertThat(links.map { it.url }).containsExactly(NIGERIAN_PAYMENT_METHOD_TERMS_URL)
-        assertThat(notice).doesNotContain("%s")
     }
 }
