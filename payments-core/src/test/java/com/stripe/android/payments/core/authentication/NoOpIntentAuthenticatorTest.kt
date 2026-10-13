@@ -9,7 +9,7 @@ import com.stripe.android.FakeActivityResultLauncher
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
@@ -52,13 +52,14 @@ class NoOpIntentAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            REQUEST_OPTIONS
+            API_CONFIGURATION
         )
 
         assertThat(launcher.launchArgs)
             .containsExactly(
                 PaymentRelayStarter.Args.PaymentIntentArgs(
-                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+                    stripeAccountId = "acct_no_op",
                 )
             )
     }
@@ -76,7 +77,7 @@ class NoOpIntentAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            REQUEST_OPTIONS
+            API_CONFIGURATION
         )
 
         verify(host).startActivityForResult(
@@ -92,15 +93,16 @@ class NoOpIntentAuthenticatorTest {
         )
         val result =
             bundleArgumentCaptor.firstValue.get("extra_args") as PaymentFlowResult.Unvalidated
-        assertThat(result.stripeAccountId).isNull()
+        assertThat(result.stripeAccountId).isEqualTo("acct_no_op")
         assertThat(result.clientSecret).isEqualTo("pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s")
 
         assertThat(requestCodeArgumentCaptor.firstValue).isEqualTo(PAYMENT_REQUEST_CODE)
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = "acct_no_op",
         )
     }
 }

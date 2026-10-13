@@ -82,7 +82,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -111,7 +111,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -167,7 +167,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -196,7 +196,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -285,7 +285,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -313,7 +313,7 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             repository.retrieveStripeIntentCalls.expectNoEvents()
         }
@@ -327,7 +327,7 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             repository.retrieveStripeIntentCalls.expectNoEvents()
         }
@@ -510,7 +510,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(unredactedIntent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, unredactedIntent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, unredactedIntent, API_CONFIGURATION)
             )
         }
 
@@ -666,7 +666,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
@@ -771,6 +771,7 @@ class PaymentLauncherViewModelTest {
             stripeApiRepository = repository,
             nextActionHandlerRegistry = nextActionHandlerRegistry,
             defaultReturnUrl = defaultReturnUrl,
+            apiConfiguration = API_CONFIGURATION,
             apiRequestOptionsProvider = { API_REQUEST_OPTIONS },
             lazyPaymentIntentFlowResultProcessor = { paymentIntentFlowResultProcessor },
             lazySetupIntentFlowResultProcessor = { setupIntentFlowResultProcessor },
