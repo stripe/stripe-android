@@ -2,9 +2,11 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -44,14 +46,22 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -63,6 +73,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(CheckoutSessionPreview::class)
@@ -83,7 +94,7 @@ internal class CheckoutControllerTest {
         .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(CoroutineTestRule())
+        .around(CoroutineTestRule(StandardTestDispatcher()))
 
     // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
     // keyed by integration name. Clear it between tests so registrations don't leak across cases.
@@ -96,6 +107,50 @@ internal class CheckoutControllerTest {
     fun `configure returns success`() = runConfigureScenario {
         assertThat(result.isSuccess).isTrue()
     }
+
+    @Test
+    fun `configure succeeds from a background thread`() = runTest {
+        networkRule.defaultInit()
+        val controller = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME).controller
+
+        fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) }.getOrThrow()
+
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+    }
+
+    @Test
+    fun `canceling a background server update cancels its callback and releases the mutation lock`() =
+        runMutationScenario {
+            val callbackStarted = Turbine<Unit>()
+            val callbackCanceled = Turbine<Unit>()
+
+            fromBackgroundThread {
+                coroutineScope {
+                    val update = async {
+                        controller.runServerUpdate {
+                            callbackStarted.add(Unit)
+                            try {
+                                awaitCancellation()
+                            } finally {
+                                callbackCanceled.add(Unit)
+                            }
+                        }
+                    }
+                    callbackStarted.awaitItem()
+                    val emailUpdate = async { controller.updateEmail("after-cancel@example.com") }
+
+                    update.cancelAndJoin()
+
+                    callbackCanceled.awaitItem()
+                    assertThat(update.isCancelled).isTrue()
+                    emailUpdate.await().getOrThrow()
+                }
+            }
+
+            assertThat(controller.session.value?.email).isEqualTo("after-cancel@example.com")
+            callbackStarted.ensureAllEventsConsumed()
+            callbackCanceled.ensureAllEventsConsumed()
+        }
 
     @Test
     fun `configure emits session with id from response`() = runConfigureScenario {
@@ -727,7 +782,7 @@ internal class CheckoutControllerTest {
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
 
-            controller.clearPaymentOption().getOrThrow()
+            fromBackgroundThread { controller.clearPaymentOption() }.getOrThrow()
 
             assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
         }
@@ -907,7 +962,7 @@ internal class CheckoutControllerTest {
             ),
         )
 
-        val result = controller.applyPromotionCode("10OFF")
+        val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
 
         result.getOrThrow()
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
@@ -944,14 +999,16 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `removePromotionCode sends empty promotion code on success`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", ""),
-            responseFactory = successResponseFactory(),
+            responseFactory = successResponseFactory(withTotal(8000)),
         )
 
-        val result = controller.removePromotionCode()
+        val result = fromBackgroundThread { controller.removePromotionCode() }
 
-        assertThat(result.isSuccess).isTrue()
+        result.getOrThrow()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
     @Test
@@ -985,16 +1042,17 @@ internal class CheckoutControllerTest {
     fun `updateEmail stores email locally without a network call`() = runMutationScenario {
         // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
         // response, so NetworkRule will fail the test if a request is made.
-        val result = controller.updateEmail("checkout@example.com")
+        assertThat(controller.session.value?.email).isNotEqualTo("background@example.com")
+        val result = fromBackgroundThread { controller.updateEmail("background@example.com") }
 
         result.getOrThrow()
-        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(controller.session.value?.email).isEqualTo("background@example.com")
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
+            .isEqualTo("background@example.com")
         assertThat(
             (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
                 .collectedEmail
-        ).isEqualTo("checkout@example.com")
+        ).isEqualTo("background@example.com")
     }
 
     @Test
@@ -1179,10 +1237,10 @@ internal class CheckoutControllerTest {
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
-            val result = controller.updateShippingAddress(
-                name = "John",
-                address = fullAddress,
-            )
+            assertThat(committedState().collectedDetails.shippingAddress).isNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "John", address = fullAddress)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1214,7 +1272,10 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
+            assertThat(committedState().collectedDetails.shippingAddress).isNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "John", address = fullAddress)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1227,7 +1288,10 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
 
-            val result = controller.updateShippingAddress(name = "Ignored", address = null)
+            assertThat(committedState().collectedDetails.shippingAddress).isNotNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "Ignored", address = null)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1359,11 +1423,22 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutInit(
             responseFactory = successResponseFactory(withTotal(8000)),
         )
 
-        val result = controller.runServerUpdate { Result.success(Unit) }
+        val merchantContext = CoroutineName("merchant-server-update")
+        val result = fromBackgroundThread {
+            withContext(merchantContext) {
+                val callerDispatcher = currentCoroutineContext()[ContinuationInterceptor]
+                controller.runServerUpdate {
+                    assertThat(currentCoroutineContext()[ContinuationInterceptor]).isSameInstanceAs(callerDispatcher)
+                    assertThat(currentCoroutineContext()[CoroutineName]).isSameInstanceAs(merchantContext)
+                    Result.success(Unit)
+                }
+            }
+        }
 
         result.getOrThrow()
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
@@ -1489,11 +1564,16 @@ internal class CheckoutControllerTest {
     @Test
     fun `concurrent mutations are serialized so the second uses the first result's session id`() =
         runMutationScenario {
-            // The first mutation is delayed and returns a new session id.
+            val firstRequest = Turbine<Unit>()
+            val secondRequest = Turbine<Unit>()
+            val releaseFirstResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
-                response.setBodyDelay(200, TimeUnit.MILLISECONDS)
+                firstRequest.add(Unit)
+                check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the first mutation response"
+                }
                 successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
             }
             // The second mutation must target the session id produced by the first, proving the
@@ -1501,17 +1581,39 @@ internal class CheckoutControllerTest {
             networkRule.checkoutUpdate(
                 bodyPart("updated_currency", "eur"),
                 sessionId = "cs_test_after_promo",
-                responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
-            )
+            ) { response ->
+                secondRequest.add(Unit)
+                successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
+            }
 
-            val results = listOf(
-                async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateCurrency("eur") },
-            ).awaitAll()
+            fromBackgroundThread {
+                coroutineScope {
+                    val first = async { controller.applyPromotionCode("10OFF") }
+                    try {
+                        firstRequest.awaitItem()
+                        val second = async(start = CoroutineStart.UNDISPATCHED) {
+                            controller.updateCurrency("eur")
+                        }
+                        // The undispatched call queues its Main work before this barrier. Once
+                        // the barrier runs, the second mutation has reached the coordinator.
+                        withContext(Dispatchers.Main) { }
+                        assertThat(second.isCompleted).isFalse()
+                        secondRequest.expectNoEvents()
 
-            assertThat(results[0].isSuccess).isTrue()
-            assertThat(results[1].isSuccess).isTrue()
+                        releaseFirstResponse.countDown()
+
+                        first.await().getOrThrow()
+                        second.await().getOrThrow()
+                        secondRequest.awaitItem()
+                    } finally {
+                        releaseFirstResponse.countDown()
+                    }
+                }
+            }
+
             assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
+            firstRequest.ensureAllEventsConsumed()
+            secondRequest.ensureAllEventsConsumed()
         }
 
     @Test
@@ -1639,6 +1741,12 @@ internal class CheckoutControllerTest {
         }
 
     // endregion
+
+    private suspend fun <T> fromBackgroundThread(block: suspend () -> T): T = withContext(Dispatchers.IO) {
+        // A test dispatcher alone does not move the caller off Robolectric's main thread.
+        assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+        block()
+    }
 
     private fun NetworkRule.enqueueSuccessfulInit(
         jsonModifier: (JSONObject) -> Unit = {},
@@ -1968,6 +2076,10 @@ internal class CheckoutControllerTest {
             parentHandle = savedStateHandle,
             integrationName = integrationName,
         )
+        // SavedStateHandle requires main-thread access, but StateFlow alone does not enforce it.
+        // Creating LiveData for the same keys makes Android reject off-main state publication.
+        controllerSavedState.handle.getLiveData<CheckoutControllerState>(CheckoutControllerStateHolder.STATE_KEY)
+        controllerSavedState.handle.getLiveData<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)
         val controller = destroyControllerRule.track(
             DaggerCheckoutControllerComponent.factory().create(
                 application = applicationContext,

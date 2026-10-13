@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Fixed] Address country dropdowns now support autofill from saved addresses.
+
 ### Identity
 * [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
 

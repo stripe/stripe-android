@@ -239,6 +239,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so
     // embeddedNavigatorProvider.get() can't be called synchronously here without recursing into the @Singleton
     // mid-construction. flow { } defers the get() until first collection, by which point the navigator exists.
+    // Keep the screen inactive until then so its interactor doesn't overwrite the restored selection.
     private inline fun <reified T : EmbeddedNavigator.Screen> isCurrentScreen(): StateFlow<Boolean> = flow {
         emitAll(embeddedNavigatorProvider.get().screen)
     }.map { screen ->
@@ -246,7 +247,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = true,
+        initialValue = false,
     )
 
     private fun navigateToManageScreen() {

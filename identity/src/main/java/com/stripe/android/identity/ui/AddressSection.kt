@@ -11,6 +11,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.Country
@@ -46,7 +47,8 @@ internal fun AddressSection(
         DropdownFieldController(
             CountryConfig(
                 onlyShowCountryCodes = addressCountries.map { it.code.value }.toSet(),
-                disableDropdownWithSingleElement = true
+                disableDropdownWithSingleElement = true,
+                autofillType = ContentType.AddressCountry,
             )
         )
     }
