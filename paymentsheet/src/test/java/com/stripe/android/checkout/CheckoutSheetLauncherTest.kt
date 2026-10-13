@@ -14,6 +14,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -893,6 +894,54 @@ internal class CheckoutSheetLauncherTest {
         assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(linkAccountInfo)
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `continuing payment options acknowledges the saved SEPA mandate`() = testScenario {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        selectionHolder.setSelection(selection)
+        val mandateState = requireNotNull(selectionHolder.state).mandateState
+        assertThat(mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+        val result = EmbeddedActivityResult.Complete(
+            previousNewSelections = Bundle(),
+            customerState = null,
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+            selection = selection,
+            hasBeenConfirmed = false,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        )
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
+
+        assertThat(mandateState.hasAcknowledgedSepaMandate(selection)).isTrue()
+    }
+
+    @Test
+    fun `cancelling payment options does not acknowledge the saved SEPA mandate`() = testScenario {
+        val paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+        val selection = PaymentSelection.Saved(paymentMethod)
+        selectionHolder.setSelection(selection)
+
+        cancelPaymentOptions(createCustomerState(paymentMethods = listOf(paymentMethod)))
+
+        assertThat(requireNotNull(selectionHolder.state).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+    }
+
+    @Test
+    fun `reconciling a saved SEPA method after cancellation does not acknowledge its mandate`() = testScenario {
+        val paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+        selectionHolder.setSelection(PaymentSelection.Saved(paymentMethod))
+        val updatedPaymentMethod = paymentMethod.copy(
+            billingDetails = PaymentMethod.BillingDetails(name = "Updated name"),
+        )
+
+        cancelPaymentOptions(createCustomerState(paymentMethods = listOf(updatedPaymentMethod)))
+
+        val selection = selectionHolder.selection.value as PaymentSelection.Saved
+        assertThat(selection.paymentMethod).isEqualTo(updatedPaymentMethod)
+        assertThat(requireNotNull(selectionHolder.state).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
     }
 
     @Test

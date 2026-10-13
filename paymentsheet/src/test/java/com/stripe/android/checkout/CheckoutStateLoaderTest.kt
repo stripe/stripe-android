@@ -64,6 +64,42 @@ import kotlin.time.Duration.Companion.seconds
 internal class CheckoutStateLoaderTest {
 
     @Test
+    fun `loading a new configuration starts fresh mandate acknowledgement for the same session`() = runScenario {
+        val firstState = loadInitial().state
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        firstState.mandateState.recordContentAccess()
+        assertThat(firstState.mandateState.hasAcknowledgedSepaMandate(selection)).isTrue()
+
+        val secondState = loadInitial().state
+
+        assertThat(secondState.checkoutSessionResponse.id).isEqualTo(firstState.checkoutSessionResponse.id)
+        assertThat(secondState.mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+    }
+
+    @Test
+    fun `reloading the current session preserves mandate acknowledgement`() = runScenario {
+        val firstState = loadInitial().state
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        firstState.mandateState.recordMandateTextAccess(selection.paymentMethod)
+        assertThat(firstState.mandateState.hasAcknowledgedSepaMandate(selection)).isTrue()
+
+        loader.reload(firstState)
+
+        assertThat(stateHolder.state?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
+    }
+
+    @Test
+    fun `accessing a retained mandate tracker after reload acknowledges the current session`() = runScenario {
+        val firstState = loadInitial().state
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        loader.reload(firstState)
+        firstState.mandateState.recordMandateTextAccess(selection.paymentMethod)
+
+        assertThat(stateHolder.state?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
+    }
+
+    @Test
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 
@@ -510,6 +546,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = linkEagerPresentationSuppressed,
+        mandateState = CheckoutMandateState.initial(),
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
