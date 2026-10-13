@@ -23,7 +23,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 internal fun SearchSettingsField(
@@ -73,7 +72,7 @@ internal fun SearchSettingsField(
             @Composable {
                 IconButton(onClick = { onQueryChanged("") }) {
                     Icon(
-                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_close),
+                        painter = painterResource(R.drawable.ic_material_close),
                         contentDescription = null,
                     )
                 }
