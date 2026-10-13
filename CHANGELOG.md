@@ -1,7 +1,13 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Payments
+* [Fixed] Address country dropdowns now support autofill from saved addresses.
+
+### PaymentSheet
+* [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 
 ## 23.23.0 - 2026-10-12
 

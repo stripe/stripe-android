@@ -69,4 +69,34 @@ internal class LpmBillingAddressScreenshotTest {
             }
         }
     }
+
+    @Test
+    fun testNgBankTransferWithContactInformation() {
+        val paymentMethodType = PaymentMethod.Type.NgBankTransfer
+        val metadata = LpmBillingAddressTestConfiguration(
+            paymentMethodType = paymentMethodType,
+            billingDetailsCollectionMode = LpmBillingDetailsCollectionMode.Never,
+            intentScenario = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent,
+            termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
+        ).metadata().copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            ),
+        )
+
+        paparazziRule.snapshot {
+            ViewModelStoreOwnerContext {
+                VerticalModeFormUI(
+                    interactor = FakeVerticalModeFormInteractor.create(
+                        paymentMethodCode = paymentMethodType.code,
+                        metadata = metadata,
+                    ),
+                    showsWalletHeader = false,
+                )
+            }
+        }
+    }
 }

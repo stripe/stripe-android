@@ -27,9 +27,9 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
-import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
@@ -176,7 +176,7 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideSavedPaymentMethodMutator(
-            factory: ManageSavedPaymentMethodMutatorFactory
+            factory: EmbeddedSavedPaymentMethodMutatorFactory
         ): SavedPaymentMethodMutator {
             return factory.createSavedPaymentMethodMutator()
         }
