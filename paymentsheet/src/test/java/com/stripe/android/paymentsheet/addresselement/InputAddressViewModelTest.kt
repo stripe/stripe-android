@@ -206,7 +206,7 @@ class InputAddressViewModelTest {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries)
                 .isEqualTo(AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES)
-    }
+        }
 
     @Test
     fun `builder preserves custom autocomplete countries with stripe-hosted autocomplete`() {
@@ -221,6 +221,7 @@ class InputAddressViewModelTest {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries).isEqualTo(customCountries)
         }
+    }
 
     @Test
     fun `completion analytics does not treat merchant default as autocomplete selection`() = runScenario(
@@ -1116,7 +1117,6 @@ class InputAddressViewModelTest {
                 .build(),
             withPlacesClient = false,
         ) {
-
             viewModel.shippingSameAsBillingState.test {
                 // Should be checked
                 assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
