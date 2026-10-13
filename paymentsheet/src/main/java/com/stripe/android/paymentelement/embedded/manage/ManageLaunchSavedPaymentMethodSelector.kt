@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
@@ -36,11 +36,8 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
 
     override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         val paymentMethodId = selection.paymentMethod.id
-        val initialResponse =
-            (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
-                ?.checkoutSessionResponse
         val update = taxRegionUpdater.prepareUpdate(
-            checkoutSessionResponse = initialResponse,
+            checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
             selection = selection,
         )
         val response = update?.let {
