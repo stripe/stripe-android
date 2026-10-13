@@ -39,6 +39,22 @@ internal class NgUssdDefinitionTest {
     }
 
     @Test
+    fun `defaults billing country to Nigeria when no country is supplied`() {
+        val formElements = NgUssdDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("ng_ussd")),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+            ),
+            initialValues = mapOf(FormFieldId.Country to null),
+        )
+
+        val addressElement = (formElements.first() as SectionElement).fields.single() as AddressElement
+        assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("NG")
+    }
+
+    @Test
     fun `billing address uses all supported countries`() {
         val formElements = NgUssdDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
@@ -74,7 +90,7 @@ internal class NgUssdDefinitionTest {
         )
         val formElements = NgUssdDefinition.formElements(
             metadata = metadata,
-            initialValues = mapOf(FormFieldId.Country to "CA"),
+            initialValues = mapOf(FormFieldId.Country to null),
         )
         val addressField = formElements.filterIsInstance<SectionElement>()
             .flatMap { it.fields }
