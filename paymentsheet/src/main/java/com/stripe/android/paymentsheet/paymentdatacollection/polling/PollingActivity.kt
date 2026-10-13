@@ -34,7 +34,7 @@ internal class PollingActivity : AppCompatActivity() {
             initialDelay = args.initialDelayInSeconds.seconds,
             pollingInterval = args.pollingIntervalInSeconds.seconds,
             ctaText = args.ctaText,
-            requestOptions = args.requestOptions,
+            apiConfiguration = args.apiConfiguration,
             qrCodeUrl = args.qrCodeUrl,
             paymentMethodType = args.paymentMethodType,
         )

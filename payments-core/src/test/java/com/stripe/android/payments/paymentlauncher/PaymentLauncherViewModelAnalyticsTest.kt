@@ -91,7 +91,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             assertThat(repository.confirmPaymentIntentCalls.awaitItem().params.clientSecret).isEqualTo(CLIENT_SECRET)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             awaitIdle()
             networkRule.validate()
@@ -195,7 +195,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             awaitIdle()
             networkRule.validate()
@@ -239,7 +239,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             assertThat(repository.confirmSetupIntentCalls.awaitItem().params.returnUrl).isEqualTo(RETURN_URL)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -274,7 +274,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -356,7 +356,7 @@ class PaymentLauncherViewModelAnalyticsTest {
                 .isEqualTo(SETUP_CLIENT_SECRET)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -367,7 +367,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             viewModel.handleNextActionForStripeIntent(intent, authHost)
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             awaitIdle()
             networkRule.validate()
@@ -438,7 +438,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             awaitIdle()
             networkRule.validate()
@@ -603,6 +603,7 @@ class PaymentLauncherViewModelAnalyticsTest {
                 stripeApiRepository = repository,
                 nextActionHandlerRegistry = nextActionHandlerRegistry,
                 defaultReturnUrl = defaultReturnUrl,
+                apiConfiguration = API_CONFIGURATION,
                 apiRequestOptionsProvider = { API_REQUEST_OPTIONS },
                 lazyPaymentIntentFlowResultProcessor = { paymentIntentFlowResultProcessor },
                 lazySetupIntentFlowResultProcessor = { setupIntentFlowResultProcessor },
