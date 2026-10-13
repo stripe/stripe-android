@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choose Photo</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">Close</string>
+  <string name="stripe_close_button_text">close</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Complete with test data</string>
   <!-- Description for complete button on test mode -->
