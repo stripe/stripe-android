@@ -10,7 +10,6 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -77,7 +76,9 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddress(
     response: MockResponse,
     modify: (JSONObject) -> Unit = {},
 ) {
-    CheckoutInitResponseFactory.createWithModification(response) { json ->
+    response.testBodyFromFile("checkout-session-init.json") { json ->
+        json.put("customer_email", "checkout@example.com")
+        json.put("account_settings", JSONObject().put("country", "US"))
         json.put(
             "shipping_address_collection",
             JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))

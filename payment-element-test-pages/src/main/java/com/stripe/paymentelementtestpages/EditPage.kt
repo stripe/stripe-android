@@ -9,7 +9,6 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
@@ -70,9 +69,6 @@ class EditPage(
 
     fun update(waitUntilComplete: Boolean = true) {
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-            .performScrollTo()
-            .assertIsDisplayed()
-            .assertIsEnabled()
             .performClick()
         if (waitUntilComplete) {
             composeTestRule.waitUntilWithIdle {

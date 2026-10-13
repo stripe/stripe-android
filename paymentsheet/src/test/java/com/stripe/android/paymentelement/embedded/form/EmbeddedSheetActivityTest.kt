@@ -24,7 +24,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -232,7 +232,12 @@ internal class EmbeddedSheetActivityTest {
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
         return PaymentMethodMetadataFactory.create(
-            integrationMetadata = IntegrationMetadataFactory.checkoutSession(response),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
+                id = response.id,
+                instancesKey = "test_instances_key",
+                checkoutSessionResponse = response,
+            ),
         )
     }
 
