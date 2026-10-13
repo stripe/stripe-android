@@ -12,7 +12,6 @@ apply plugin: 'com.google.dagger.hilt.android'
 dependencies {
     implementation project(':connect')
     implementation project(':stripe-core')
-    compileOnly project(':stripe-ui-core')
 
     // Kotlin
     implementation libs.kotlin.coroutines
