@@ -38,9 +38,13 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -106,13 +110,13 @@ class CheckoutController @Inject internal constructor(
     suspend fun configure(
         clientSecret: String,
         configuration: Configuration = Configuration(),
-    ): kotlin.Result<Unit> {
+    ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
         if (sheetStateHolder.sheetIsOpen) {
-            return integrationLaunchedFailure()
+            return@withContext integrationLaunchedFailure()
         }
-        return operationCoordinator.runMutation {
+        operationCoordinator.runMutation {
             val configurationState = configuration.build()
             val sessionId = clientSecret.substringBefore("_secret_")
 
@@ -284,17 +288,24 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> kotlin.Result<Unit>,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
-            onSuccess = {
-                checkoutSessionRepository.init(
-                    clientParams = elementsSessionClientParams,
-                    sessionId = sessionId,
-                    adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                )
-            },
-            onFailure = { kotlin.Result.failure(it) },
-        )
+    ): kotlin.Result<Unit> {
+        // Preserve the merchant's context while keeping the callback a child of the mutation's
+        // timeout and cancellation scope.
+        val callerContext = currentCoroutineContext().minusKey(Job)
+        return withCheckoutState { sessionId ->
+            withContext(callerContext) {
+                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+            }.fold(
+                onSuccess = {
+                    checkoutSessionRepository.init(
+                        clientParams = elementsSessionClientParams,
+                        sessionId = sessionId,
+                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                    )
+                },
+                onFailure = { kotlin.Result.failure(it) },
+            )
+        }
     }
 
     private suspend fun updateAddress(
@@ -352,17 +363,17 @@ class CheckoutController @Inject internal constructor(
     private suspend fun withCheckoutState(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
-    ): kotlin.Result<Unit> {
+    ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
-            ?: return kotlin.Result.failure(
+            ?: return@withContext kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
         if (sheetStateHolder.sheetIsOpen) {
-            return kotlin.Result.failure(
+            return@withContext kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
             )
         }
-        return operationCoordinator.runMutation {
+        operationCoordinator.runMutation {
             runCatching {
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
