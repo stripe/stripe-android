@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
+
 ## 23.23.0 - 2026-10-12
 
 ### Payments
