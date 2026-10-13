@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.ElementsSessionContext
@@ -44,6 +45,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private val args: CollectBankAccountContract.Args,
     private val _viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
     // injected instances
+    private val apiConfiguration: ApiConfiguration.State,
     private val createFinancialConnectionsSession: CreateFinancialConnectionsSession,
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession,
     private val retrieveStripeIntent: RetrieveStripeIntent,
@@ -70,8 +72,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
             is CollectBankAccountContract.Args.ForDeferredPaymentIntent -> {
                 val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
@@ -86,8 +87,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
             is CollectBankAccountContract.Args.ForDeferredSetupIntent -> {
                 val elementsSessionContext = args.configuration.retrieveElementsSessionContext()
                 createFinancialConnectionsSession.forDeferredIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     elementsSessionId = args.elementsSessionId,
                     customerId = args.customerId,
@@ -101,8 +101,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
             is CollectBankAccountContract.Args.ForPaymentIntent ->
                 createFinancialConnectionsSession.forPaymentIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
@@ -110,8 +109,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
             is CollectBankAccountContract.Args.ForSetupIntent ->
                 createFinancialConnectionsSession.forSetupIntent(
-                    publishableKey = args.publishableKey,
-                    stripeAccountId = args.stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     hostedSurface = args.hostedSurface,
                     clientSecret = args.clientSecret,
                     configuration = args.configuration
@@ -126,8 +124,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 _viewEffect.emit(
                     OpenConnectionsFlow(
                         financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         elementsSessionContext = elementsSessionContext,
                         preCollectedConsent = args.preCollectedConsent.takeIf {
                             args.hostedSurface == null && args.configuration !is InstantDebits
@@ -229,7 +226,10 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 // client secret is null for deferred intents.
                 Result.success(null)
             } else {
-                retrieveStripeIntent(args.publishableKey, args.stripeAccountId, clientSecret)
+                retrieveStripeIntent(
+                    apiConfiguration,
+                    clientSecret
+                )
             }
 
             retrieveIntentResult.onFailure {
@@ -250,16 +250,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
                 is CollectBankAccountContract.Args.ForPaymentIntent ->
                     attachFinancialConnectionsSession.forPaymentIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         clientSecret = args.clientSecret,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
 
                 is CollectBankAccountContract.Args.ForSetupIntent ->
                     attachFinancialConnectionsSession.forSetupIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
+                        apiConfiguration = apiConfiguration,
                         clientSecret = args.clientSecret,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -18,7 +19,7 @@ class AutocompleteAddressController(
     interactorFactory: AutocompleteAddressInteractor.Factory,
     countryCodes: Set<String> = emptySet(),
     private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes),
+        CountryConfig(countryCodes, autofillType = ContentType.AddressCountry),
         initialValues[FormFieldId.Country]
     ),
     private val phoneNumberConfig: AddressFieldConfiguration,

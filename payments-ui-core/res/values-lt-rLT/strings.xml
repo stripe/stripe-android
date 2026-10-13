@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Telefonas</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">Patvirtindami savo mokėjimą naudojant „NICEPAY“, suteikiate leidimą %s periodiškai nurašyti lėšas iš jūsų sąskaitos pagal jų nustatytas sąlygas.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Sąskaitos faktūros apmokėjimas verslo pirkėjams</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Ant kortelės nurodytas vardas ir pavardė</string>
   <!-- Label for the Naver Pay funding source selector -->

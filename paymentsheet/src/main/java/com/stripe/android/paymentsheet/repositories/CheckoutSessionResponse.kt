@@ -32,6 +32,9 @@ internal data class CheckoutSessionResponse(
     val merchantCountry: String?,
     val businessName: String?,
 ) : StripeModel {
+    val fixedEmail: String?
+        get() = customerEmail ?: customer?.email
+
     val amount: Long
         get() = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } }
 
@@ -53,6 +56,7 @@ internal data class CheckoutSessionResponse(
     @Parcelize
     data class Customer(
         val id: String,
+        val email: String?,
         val paymentMethods: List<PaymentMethod>,
         val canDetachPaymentMethod: Boolean,
     ) : StripeModel

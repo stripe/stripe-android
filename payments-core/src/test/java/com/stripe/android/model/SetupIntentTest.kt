@@ -125,6 +125,30 @@ class SetupIntentTest {
     }
 
     @Test
+    fun `empty client secret throws a helpful error`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            SetupIntent.ClientSecret("")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid SetupIntent client secret. " +
+                "Pass the client_secret from the SetupIntent returned by your server."
+        )
+    }
+
+    @Test
+    fun `invalid client secret error does not include the supplied value`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            SetupIntent.ClientSecret("seti_example_secret_person@example.com_extra")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid SetupIntent client secret. " +
+                "Pass the client_secret from the SetupIntent returned by your server."
+        )
+    }
+
+    @Test
     fun clientSecret_withInvalidKeys_throwsException() {
         assertFailsWith<IllegalArgumentException> {
             SetupIntent.ClientSecret("seti_12345")

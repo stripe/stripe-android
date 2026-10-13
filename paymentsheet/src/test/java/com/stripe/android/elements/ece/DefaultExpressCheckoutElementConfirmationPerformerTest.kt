@@ -16,6 +16,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -196,6 +197,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+            val option = args.confirmationOption as LinkConfirmationOption
+            assertThat(option.linkLaunchMode).isEqualTo(
+                LinkLaunchMode.Full(showSecondaryButton = false)
+            )
             assertThat(args.paymentMethodMetadata)
                 .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
         }

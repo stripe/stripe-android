@@ -204,7 +204,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 bottomBarContent = {
                     when (status) {
                         CheckoutControllerExampleViewModel.Status.Settings -> {
-                            if (navigationPath.isEmpty() && !isBrowsingScenarios) {
+                            if (!isBrowsingScenarios) {
                                 SettingsActions(
                                     canStart = settingValues.isNotEmpty() &&
                                         viewModel.settings.validationErrors().isEmpty(),

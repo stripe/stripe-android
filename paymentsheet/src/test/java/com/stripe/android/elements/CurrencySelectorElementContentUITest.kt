@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -23,16 +24,16 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_CURRENCY_OPTION_PREFIX
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_CURRENCY_SELECTOR
 import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -40,11 +41,7 @@ internal class CurrencySelectorElementContentUITest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
-    @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
-
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
+    private val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     private val networkRule = NetworkRule()
 
@@ -53,7 +50,11 @@ internal class CurrencySelectorElementContentUITest {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(destroyControllerRule)
+        // Keep controller continuations on the test thread and let runTest drive Main work.
+        .outerRule(CoroutineTestRule(StandardTestDispatcher()))
+        .around(destroyControllerRule)
+        .around(createComposeCleanupRule())
+        .around(composeRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
@@ -102,17 +103,15 @@ internal class CurrencySelectorElementContentUITest {
             .assertContentDescriptionContains("50.99")
 
         enqueueCheckoutInit()
-        runBlocking {
-            controller.configure(
-                DEFAULT_CLIENT_SECRET,
-                CheckoutController.Configuration().currencySelectorElement(
-                    CurrencySelectorElement.Configuration().appearance(
-                        CurrencySelectorElement.Configuration.Appearance()
-                            .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
-                    )
-                ),
-            ).getOrThrow()
-        }
+        controller.configure(
+            DEFAULT_CLIENT_SECRET,
+            CheckoutController.Configuration().currencySelectorElement(
+                CurrencySelectorElement.Configuration().appearance(
+                    CurrencySelectorElement.Configuration.Appearance()
+                        .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
+                )
+            ),
+        ).getOrThrow()
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
             .assertContentDescriptionContains("USD")
@@ -134,15 +133,12 @@ internal class CurrencySelectorElementContentUITest {
             .isEqualTo("EUR")
 
         // The bodyPart matcher asserts the request carried updated_currency=USD; a request that
-        // doesn't match won't be served, so a satisfied latch also proves the currency was correct.
-        // The resulting session mutation runs through a real background dispatcher, so asserting the
-        // updated session state here would require a wall-clock wait; that path is covered
-        // deterministically by CheckoutControllerTest and CurrencySelectorViewModelTest instead.
-        val requestReceived = CountDownLatch(1)
+        // doesn't match won't be served, so receiving the event also proves the currency was correct.
+        val requestReceived = Turbine<Unit>()
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "USD"),
             responseFactory = { response ->
-                requestReceived.countDown()
+                requestReceived.add(Unit)
                 response.testBodyFromFile(FIXTURE_WITH_ADAPTIVE_PRICING) { json ->
                     json.put("customer_email", "checkout@example.com")
                     json.getJSONObject("elements_session").remove("link_settings")
@@ -154,7 +150,8 @@ internal class CurrencySelectorElementContentUITest {
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD").performClick()
 
-        assertThat(requestReceived.await(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)).isTrue()
+        requestReceived.awaitItem()
+        requestReceived.ensureAllEventsConsumed()
     }
 
     private fun runScenario(
@@ -164,8 +161,8 @@ internal class CurrencySelectorElementContentUITest {
             .currencySelectorElement(
                 CurrencySelectorElement.Configuration()
             ),
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         enqueueCheckoutInit(fixture)
 
         val controller = destroyControllerRule.track(
@@ -175,7 +172,7 @@ internal class CurrencySelectorElementContentUITest {
             ).build()
         )
 
-        runBlocking { controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow() }
+        controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
 
         val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
         if (setContent) {
@@ -203,7 +200,6 @@ internal class CurrencySelectorElementContentUITest {
     )
 
     private companion object {
-        const val REQUEST_TIMEOUT_SECONDS = 5L
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val FIXTURE_WITH_ADAPTIVE_PRICING = "checkout-session-adaptive-pricing-default.json"
         const val FIXTURE_WITHOUT_ADAPTIVE_PRICING = "checkout-session-init.json"

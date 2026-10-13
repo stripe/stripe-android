@@ -75,7 +75,7 @@ internal class CheckoutPlaygroundSettings private constructor(
     }
 
     fun applyPreset(preset: CheckoutPlaygroundPreset) {
-        _values.value = currentDefaults() + preset.serializedValues
+        _values.value += preset.serializedValues
         persist(_values.value.serialized())
     }
 

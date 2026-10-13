@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.os.Bundle
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -49,7 +50,9 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         state.confirmationState.configuration.appearance.parseAppearance()
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
-        selectionHolder.setPreviousNewSelections(state.previousNewSelections)
+        val previousNewSelections = Bundle(state.previousNewSelections)
+        selectionHolder.previousNewSelections.clear()
+        selectionHolder.setPreviousNewSelections(previousNewSelections)
         selectionHolder.setSelection(state.confirmationState.selection)
         contentStateHolder.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,

@@ -103,9 +103,7 @@ internal data class PaymentMethodMetadata(
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
-            ?.checkoutSessionResponse
-            ?.collectsTaxFromBillingAddress == true
+        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {

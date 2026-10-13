@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
@@ -194,8 +195,8 @@ internal class EmbeddedInitialScreenFactoryTest {
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _, _ -> },
-            isLinkEnabled = stateFlowOf(false),
-            isNotPaymentFlow = false,
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.shouldShowLinkButton),
+            isNotPaymentFlow = true,
             linkAccount = stateFlowOf(null),
         )
         val navigatorEventReporter = FakeEventReporter()
@@ -221,6 +222,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             linkAccountHolder = LinkAccountHolder(savedStateHandle),
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            onClickOverrideDelegate = OnClickDelegateOverrideImpl(),
             savedPaymentMethodMutator = savedPaymentMethodMutator,
         )
         val factory = EmbeddedInitialScreenFactory(

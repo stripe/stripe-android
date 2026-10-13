@@ -27,6 +27,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 internal const val TITLE_TAG = "Title"
+internal const val SUBTITLE_TAG = "Subtitle"
 internal const val CONSENT_HEADER_TAG = "ConsentHeader"
 internal const val PRIVACY_POLICY_TAG = "PrivacyPolicy"
 internal const val ACCEPT_BUTTON_TAG = "Accept"
@@ -156,34 +158,15 @@ private fun SuccessUI(
                 modifier = Modifier.testTag(CONSENT_HEADER_TAG),
                 merchantLogoUri = merchantLogoUri,
                 title = consentPage.title,
+                subtitle = consentPage.subtitle,
                 showLogos = !hideBrandingHeader && !visitedIndividualWelcomePage,
                 showStripeLogo = showStripeLogo
             )
             ConsentLines(
                 lines = consentPage.lines,
-                bottomSheets = bottomSheets
+                bottomSheets = bottomSheets,
+                textColor = MaterialTheme.colors.onBackground
             )
-
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                BottomSheetHTML(
-                    html = consentPage.privacyPolicy,
-                    bottomSheets = bottomSheets,
-                    modifier = Modifier
-                        .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
-                        .semantics {
-                            testTag = PRIVACY_POLICY_TAG
-                        },
-                    color = colorResource(id = R.color.stripe_html_line),
-                    style = MaterialTheme.typography.body1,
-                    urlSpanStyle = SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        color = colorResource(id = R.color.stripe_html_line)
-                    )
-                )
-            }
         }
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
@@ -202,10 +185,11 @@ private fun SuccessUI(
                 .semantics { testTag = ACCEPT_BUTTON_TAG },
             text =
             if (scrolledToBottom) {
-                consentPage.acceptButtonText.uppercase()
+                consentPage.acceptButtonText
             } else {
-                consentPage.scrollToContinueButtonText.uppercase()
+                consentPage.scrollToContinueButtonText
             },
+            uppercase = true,
             state = if (scrolledToBottom) {
                 acceptState
             } else {
@@ -221,7 +205,8 @@ private fun SuccessUI(
             LoadingTextButton(
                 modifier = Modifier
                     .semantics { testTag = DECLINE_BUTTON_TAG },
-                text = consentPage.declineButtonText.uppercase(),
+                text = consentPage.declineButtonText,
+                uppercase = true,
                 state = declineState
             ) {
                 acceptState = LoadingButtonState.Disabled
@@ -229,6 +214,40 @@ private fun SuccessUI(
                 onConsentDeclined()
             }
         }
+
+        ConsentPrivacyPolicy(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)),
+            privacyPolicy = consentPage.privacyPolicy,
+            bottomSheets = bottomSheets
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ConsentPrivacyPolicy(
+    modifier: Modifier,
+    privacyPolicy: String,
+    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        BottomSheetHTML(
+            html = privacyPolicy,
+            bottomSheets = bottomSheets,
+            modifier = Modifier
+                .semantics { testTag = PRIVACY_POLICY_TAG },
+            color = colorResource(id = R.color.stripe_html_line),
+            style = MaterialTheme.typography.body1.copy(textAlign = TextAlign.Center),
+            urlSpanStyle = SpanStyle(
+                textDecoration = TextDecoration.Underline,
+                color = colorResource(id = R.color.stripe_html_line)
+            )
+        )
     }
 }
 
@@ -244,6 +263,7 @@ internal fun ConsentPreview() {
                 declineButtonText = "Decline",
                 scrollToContinueButtonText = "scroll to button",
                 title = "Tora's cat food works with Stripe to verify your identity",
+                subtitle = null,
                 privacyPolicy = "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • " +
                     "<a href='https://tora.me'>Tora's cat food Privacy Policy</a>",
                 lines = listOf(

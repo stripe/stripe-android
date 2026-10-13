@@ -33,6 +33,7 @@ internal data class AdditionalKycDocumentRequirement(
     val acceptedFormats: List<String>,
     val minDocumentTypes: Int,
     val maxDocumentTypes: Int,
+    val maxFilesPerDocumentType: Int,
     val maxFileSizeBytes: Long,
     val fileRequirements: String,
     val instructions: List<String>,

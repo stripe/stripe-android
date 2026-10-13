@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
+import android.os.Build
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
@@ -21,14 +23,26 @@ internal object CheckoutSessionParamsFactory {
         val automaticTax = settings[session.automaticTax]
         val shippingAddressCollection = settings[session.shippingAddressCollection]
         val billingAddressCollection = settings[session.billingAddressCollection]
+        val invoiceCreation = settings[session.invoiceCreation]
         val email = resolvedEmail(settings)
         val currency = settings[session.currency].value
 
         return buildJsonObject {
-            put("ui_mode", "elements")
+            put("ui_mode", "mobile_elements")
+            put(
+                "metadata",
+                buildJsonObject {
+                    put("sdk", "stripe-android")
+                    put("sdk_version", StripeSdkVersion.VERSION_NAME)
+                    put("integration", "checkout-playground")
+                    put("android_version", Build.VERSION.RELEASE)
+                    put("android_api_level", Build.VERSION.SDK_INT.toString())
+                },
+            )
             put("currency", currency)
             putCart(currency)
-            putPaymentMethodTypes(settings)
+            putAllowedPaymentMethodTypes(settings)
+            putInvoiceCreation(invoiceCreation)
             putTaxAndAddresses(automaticTax, billingAddressCollection, shippingAddressCollection)
             putCustomer(
                 customerId,
@@ -68,12 +82,30 @@ internal object CheckoutSessionParamsFactory {
         )
     }
 
-    private fun JsonObjectBuilder.putPaymentMethodTypes(settings: CheckoutPlaygroundSettings.Snapshot) {
+    private fun JsonObjectBuilder.putAllowedPaymentMethodTypes(settings: CheckoutPlaygroundSettings.Snapshot) {
         val session = CheckoutPlaygroundDefinitions.session
         if (!settings[session.automaticPaymentMethods]) {
             put(
-                "payment_method_types",
-                JsonArray(settings[session.paymentMethodTypes].sorted().map(::JsonPrimitive)),
+                "allowed_payment_method_types",
+                JsonArray(settings[session.allowedPaymentMethodTypes].sorted().map(::JsonPrimitive)),
+            )
+        }
+    }
+
+    private fun JsonObjectBuilder.putInvoiceCreation(enabled: Boolean) {
+        if (enabled) {
+            put(
+                "invoice_creation",
+                buildJsonObject {
+                    put("enabled", true)
+                    put(
+                        "invoice_data",
+                        buildJsonObject {
+                            put("description", "Checkout live post-purchase invoice")
+                            put("metadata", buildJsonObject { put("suite", "checkout_live_billing_invoice") })
+                        },
+                    )
+                },
             )
         }
     }

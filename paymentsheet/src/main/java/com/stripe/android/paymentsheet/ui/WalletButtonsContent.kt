@@ -96,6 +96,7 @@ internal class WalletButtonsContent(
                     enabled = state.buttonsEnabled,
                     theme = button.theme,
                     linkBrand = button.linkBrand,
+                    containerWidth = null,
                     onClick = {
                         interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                     },

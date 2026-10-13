@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GCashDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
@@ -30,6 +31,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgUssdDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
@@ -75,6 +78,7 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
+        GCashDefinition,
         GoPayDefinition,
         GrabPayDefinition,
         IdealWeroDefinition,
@@ -88,6 +92,8 @@ internal object PaymentMethodRegistry {
         MobilePayDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
+        NgBankTransferDefinition,
+        NgCardDefinition,
         NgUssdDefinition,
         OxxoDefinition,
         P24Definition,

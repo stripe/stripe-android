@@ -59,6 +59,8 @@
   <string name="stripe_konbini_confirmation_number_label">Ffôn</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">Drwy gadarnhau eich taliad gyda NICEPAY, rydych chi’n caniatáu i %s godi tâl ar y dull talu hwn ar gyfer taliadau yn y dyfodol yn unol â’u telerau.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Taliad anfoneb ar gyfer prynwyr busnes.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Enw ar y cerdyn</string>
   <!-- Label for the Naver Pay funding source selector -->
