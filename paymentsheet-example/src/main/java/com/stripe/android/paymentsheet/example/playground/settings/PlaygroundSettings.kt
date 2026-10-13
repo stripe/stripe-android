@@ -1,4 +1,4 @@
-@file:OptIn(LinkControllerPreview::class)
+@file:OptIn(ApiConfigurationPreview::class, LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.settings
 
@@ -10,6 +10,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
