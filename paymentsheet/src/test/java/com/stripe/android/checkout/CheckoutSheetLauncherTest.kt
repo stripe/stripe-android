@@ -484,10 +484,11 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `manageSheetLauncher refreshes checkout response without invoking the selection callback`() = testScenario {
+    fun `manageSheetLauncher refreshes checkout after dismissal without invoking selection callback`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val response = CheckoutSessionResponseFactory.create(id = "saved_card_tax_response")
-        val result = manageCompleteResult(checkoutSessionResponse = response).copy(
+        val result = manageCompleteResult(
+            checkoutSessionResponse = response,
             shouldInvokeSelectionCallback = false,
         )
 
@@ -540,6 +541,7 @@ internal class CheckoutSheetLauncherTest {
 
     private fun manageCompleteResult(
         checkoutSessionResponse: CheckoutSessionResponse,
+        shouldInvokeSelectionCallback: Boolean = true,
     ) = EmbeddedActivityResult.Complete(
         previousNewSelections = Bundle(),
         customerState = null,
@@ -547,7 +549,7 @@ internal class CheckoutSheetLauncherTest {
         selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         hasBeenConfirmed = false,
         checkoutSessionResponse = checkoutSessionResponse,
-        shouldInvokeSelectionCallback = true,
+        shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
         launchMode = EmbeddedLaunchMode.Manage,
     )
 

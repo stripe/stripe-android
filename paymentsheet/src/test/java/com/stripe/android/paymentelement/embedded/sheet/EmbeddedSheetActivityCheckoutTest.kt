@@ -91,12 +91,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
         val paymentMethodResponseGate = NetworkResponseGate()
         val taxResponseGate = NetworkResponseGate()
 
-        launch(
-            paymentMethods = listOf(selectedCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
+        runScenario(multipleCards = false) {
             enqueuePaymentMethodUpdateResponse(
                 updatedSelectedCard,
                 listOf(updatedSelectedCard),
@@ -130,7 +125,6 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 editPage.waitUntilMissing()
 
                 assertSuccessfulBillingUpdateResult(
-                    completedResult(),
                     updatedSelectedCard,
                     listOf(updatedSelectedCard),
                 )
@@ -142,206 +136,144 @@ internal class EmbeddedSheetActivityCheckoutTest {
     }
 
     @Test
-    fun `selected nested billing save is returned when manage closes`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(selectedCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
-            enqueueTaxRegionUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
-            editPage.update()
-            managePage.waitUntilVisible()
+    fun `selected nested billing save is returned when manage closes`() = runScenario {
+        enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
+        enqueueTaxRegionUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
+        editPage.update()
+        managePage.waitUntilVisible()
 
-            managePage.clickClose(applicationContext)
+        managePage.clickClose(applicationContext)
 
-            assertSuccessfulBillingUpdateResult(
-                completedResult(),
-                updatedSelectedCard,
-                listOf(updatedSelectedCard, secondCard),
-            )
-        }
+        assertSuccessfulBillingUpdateResult(
+            updatedSelectedCard,
+            listOf(updatedSelectedCard, secondCard),
+        )
     }
 
     @Test
-    fun `selected nested billing save can retry after tax update fails`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(selectedCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[line1]", UPDATED_LINE1),
-                bodyPart("tax_region[city]", "San Francisco"),
-                bodyPart("tax_region[state]", "CA"),
-                bodyPart("tax_region[postal_code]", "94111"),
-            ) { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-            editPage.update()
-
-            editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
-
-            enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
-            enqueueTaxRegionUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
-            editPage.update()
-            managePage.waitUntilVisible()
-            Espresso.pressBack()
-
-            assertSuccessfulBillingUpdateResult(
-                completedResult(),
-                updatedSelectedCard,
-                listOf(updatedSelectedCard, secondCard),
-            )
+    fun `selected nested billing save can retry after tax update fails`() = runScenario {
+        enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", UPDATED_LINE1),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94111"),
+        ) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
+        editPage.update()
+
+        editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
+
+        enqueuePaymentMethodUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
+        enqueueTaxRegionUpdateResponse(updatedSelectedCard, listOf(updatedSelectedCard, secondCard))
+        editPage.update()
+        managePage.waitUntilVisible()
+        Espresso.pressBack()
+
+        assertSuccessfulBillingUpdateResult(
+            updatedSelectedCard,
+            listOf(updatedSelectedCard, secondCard),
+        )
     }
 
     @Test
-    fun `editing an unselected card does not update the checkout tax region`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(secondCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            enqueuePaymentMethodUpdateResponse(updatedSecondCard, listOf(selectedCard, updatedSecondCard))
-            editPage.update()
-            managePage.waitUntilVisible()
-            Espresso.pressBack()
+    fun `editing an unselected card does not update the checkout tax region`() = runScenario(
+        paymentMethodToEdit = secondCard,
+    ) {
+        enqueuePaymentMethodUpdateResponse(updatedSecondCard, listOf(selectedCard, updatedSecondCard))
+        editPage.update()
+        managePage.waitUntilVisible()
+        Espresso.pressBack()
 
-            val result = completedResult()
-            val returnedSelection = result.selection as PaymentSelection.Saved
-            assertThat(returnedSelection.paymentMethod.id).isEqualTo(selectedCard.id)
-            val returnedSecondCard = requireNotNull(result.customerState)
-                .paymentMethods
-                .single { it.id == secondCard.id }
-            assertThat(returnedSecondCard.billingDetails?.address).isEqualTo(UPDATED_ADDRESS)
-            assertThat(result.checkoutSessionResponse).isNull()
-            assertThat(result.shouldInvokeSelectionCallback).isFalse()
-        }
+        val result = completedResult()
+        val returnedSelection = result.selection as PaymentSelection.Saved
+        assertThat(returnedSelection.paymentMethod.id).isEqualTo(selectedCard.id)
+        val returnedSecondCard = requireNotNull(result.customerState)
+            .paymentMethods
+            .single { it.id == secondCard.id }
+        assertThat(returnedSecondCard.billingDetails?.address).isEqualTo(UPDATED_ADDRESS)
+        assertThat(result.checkoutSessionResponse).isNull()
+        assertThat(result.shouldInvokeSelectionCallback).isFalse()
     }
 
     @Test
-    fun `selecting another card after billing save returns the row tax response`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(selectedCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            val updatedPaymentMethods = listOf(updatedSelectedCard, secondCard)
-            enqueuePaymentMethodUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
-            enqueueTaxRegionUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
-            editPage.update()
-            managePage.waitUntilVisible()
-            managePage.clickDone()
-            managePage.assertLpmIsSelected(selectedCard.id)
+    fun `selecting another card after billing save returns the row tax response`() = runScenario {
+        val updatedPaymentMethods = listOf(updatedSelectedCard, secondCard)
+        enqueuePaymentMethodUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
+        enqueueTaxRegionUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
+        editPage.update()
+        managePage.waitUntilVisible()
+        managePage.clickDone()
+        managePage.assertLpmIsSelected(selectedCard.id)
 
-            enqueueTaxRegionUpdateResponse(secondCard, updatedPaymentMethods, taxAmount = ROW_TAX_AMOUNT)
-            managePage.selectPaymentMethod(secondCard.id)
+        enqueueTaxRegionUpdateResponse(secondCard, updatedPaymentMethods, taxAmount = ROW_TAX_AMOUNT)
+        managePage.selectPaymentMethod(secondCard.id)
 
-            assertSuccessfulBillingUpdateResult(
-                completedResult(),
-                secondCard,
-                updatedPaymentMethods,
-                taxAmount = ROW_TAX_AMOUNT,
-                shouldInvokeSelectionCallback = true,
-            )
-        }
+        assertSuccessfulBillingUpdateResult(
+            secondCard,
+            updatedPaymentMethods,
+            taxAmount = ROW_TAX_AMOUNT,
+            shouldInvokeSelectionCallback = true,
+        )
     }
 
     @Test
-    fun `failed row tax update after billing save preserves the edit response when manage closes`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(selectedCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            val updatedPaymentMethods = listOf(updatedSelectedCard, secondCard)
-            enqueuePaymentMethodUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
-            enqueueTaxRegionUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
-            editPage.update()
-            managePage.waitUntilVisible()
-            managePage.clickDone()
+    fun `failed row tax update after billing save preserves the edit response when manage closes`() = runScenario {
+        val updatedPaymentMethods = listOf(updatedSelectedCard, secondCard)
+        enqueuePaymentMethodUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
+        enqueueTaxRegionUpdateResponse(updatedSelectedCard, updatedPaymentMethods)
+        editPage.update()
+        managePage.waitUntilVisible()
+        managePage.clickDone()
 
-            val address = requireNotNull(secondCard.billingDetails?.address)
-            networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", requireNotNull(address.country)),
-                bodyPart("tax_region[line1]", requireNotNull(address.line1)),
-                bodyPart("tax_region[city]", requireNotNull(address.city)),
-                bodyPart("tax_region[state]", requireNotNull(address.state)),
-                bodyPart("tax_region[postal_code]", requireNotNull(address.postalCode)),
-            ) { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            }
-            managePage.selectPaymentMethod(secondCard.id)
-
-            val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
-            managePage.assertErrorDisplayed(expectedError)
-            managePage.assertLpmIsSelected(selectedCard.id)
-            managePage.clickClose(applicationContext)
-
-            assertSuccessfulBillingUpdateResult(
-                completedResult(),
-                updatedSelectedCard,
-                updatedPaymentMethods,
-            )
+        val address = requireNotNull(secondCard.billingDetails?.address)
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", requireNotNull(address.country)),
+            bodyPart("tax_region[line1]", requireNotNull(address.line1)),
+            bodyPart("tax_region[city]", requireNotNull(address.city)),
+            bodyPart("tax_region[state]", requireNotNull(address.state)),
+            bodyPart("tax_region[postal_code]", requireNotNull(address.postalCode)),
+        ) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
         }
+        managePage.selectPaymentMethod(secondCard.id)
+
+        val expectedError = applicationContext.getString(R.string.stripe_something_went_wrong)
+        managePage.assertErrorDisplayed(expectedError)
+        managePage.assertLpmIsSelected(selectedCard.id)
+        managePage.clickClose(applicationContext)
+
+        assertSuccessfulBillingUpdateResult(
+            updatedSelectedCard,
+            updatedPaymentMethods,
+        )
     }
 
     @Test
-    fun `failed payment method save returns no tax response and preserves the selected card`() {
-        launch(
-            paymentMethods = listOf(selectedCard, secondCard),
-            selection = PaymentSelection.Saved(selectedCard),
-        ) {
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(selectedCard.id)
-            editPage.waitUntilVisible()
-            billingDetailsPage.updateLine1(UPDATED_LINE1)
-            networkRule.checkoutUpdate(
-                bodyPart("payment_method_to_update[payment_method_id]", selectedCard.id),
-                bodyPart("payment_method_to_update[billing_details][address][line1]", UPDATED_LINE1),
-            ) { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Could not update card"}}""")
-            }
-            editPage.update()
-            editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
-            Espresso.pressBack()
-            managePage.waitUntilVisible()
-            Espresso.pressBack()
-
-            val result = completedResult()
-            assertThat((result.selection as PaymentSelection.Saved).paymentMethod).isEqualTo(selectedCard)
-            assertThat(requireNotNull(result.customerState).paymentMethods)
-                .containsExactly(selectedCard, secondCard)
-            assertThat(result.checkoutSessionResponse).isNull()
-            assertThat(result.shouldInvokeSelectionCallback).isFalse()
+    fun `failed payment method save returns no tax response and preserves the selected card`() = runScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("payment_method_to_update[payment_method_id]", selectedCard.id),
+            bodyPart("payment_method_to_update[billing_details][address][line1]", UPDATED_LINE1),
+        ) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Could not update card"}}""")
         }
+        editPage.update()
+        editPage.assertSaveError(updateCardBrandErrorMessage.resolve(applicationContext))
+        Espresso.pressBack()
+        managePage.waitUntilVisible()
+        Espresso.pressBack()
+
+        val result = completedResult()
+        assertThat((result.selection as PaymentSelection.Saved).paymentMethod).isEqualTo(selectedCard)
+        assertThat(requireNotNull(result.customerState).paymentMethods)
+            .containsExactly(selectedCard, secondCard)
+        assertThat(result.checkoutSessionResponse).isNull()
+        assertThat(result.shouldInvokeSelectionCallback).isFalse()
     }
 
     private fun checkoutPaymentMethodMetadata(): PaymentMethodMetadata {
@@ -483,50 +415,12 @@ internal class EmbeddedSheetActivityCheckoutTest {
         )
     }
 
-    private fun assertSuccessfulBillingUpdateResult(
-        result: EmbeddedActivityResult.Complete,
-        selectedPaymentMethod: PaymentMethod,
-        paymentMethods: List<PaymentMethod>,
-        taxAmount: Long = EDIT_TAX_AMOUNT,
-        shouldInvokeSelectionCallback: Boolean = false,
-    ) {
-        val returnedSelection = (result.selection as PaymentSelection.Saved).paymentMethod
-        assertThat(returnedSelection.id).isEqualTo(selectedPaymentMethod.id)
-        assertThat(returnedSelection.billingDetails?.address).isEqualTo(selectedPaymentMethod.billingDetails?.address)
-
-        val returnedPaymentMethods = requireNotNull(result.customerState).paymentMethods
-        assertThat(returnedPaymentMethods.map { it.id }).containsExactlyElementsIn(paymentMethods.map { it.id })
-        paymentMethods.forEach { expected ->
-            val returned = returnedPaymentMethods.single { it.id == expected.id }
-            assertThat(returned.billingDetails?.address).isEqualTo(expected.billingDetails?.address)
-        }
-
-        val checkoutSessionResponse = requireNotNull(result.checkoutSessionResponse)
-        assertThat(checkoutSessionResponse.amount).isEqualTo(BASE_AMOUNT + taxAmount)
-        assertThat(checkoutSessionResponse.automaticTaxEnabled).isTrue()
-        assertThat(checkoutSessionResponse.taxAddressSource)
-            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
-        assertThat(checkoutSessionResponse.taxMeta?.computationType)
-            .isEqualTo(CheckoutSessionResponse.TaxComputationType.AUTOMATIC)
-        assertThat(checkoutSessionResponse.taxMeta?.status)
-            .isEqualTo(CheckoutSessionResponse.TaxStatus.COMPLETE)
-        val item = checkoutSessionResponse.checkoutItems.single().oneTimePrice.items.single()
-        assertThat(item.taxAmounts.single().amount).isEqualTo(taxAmount)
-        assertThat(item.taxExclusive).isEqualTo(taxAmount)
-        val checkoutPaymentMethods = requireNotNull(checkoutSessionResponse.customer).paymentMethods
-        assertThat(checkoutPaymentMethods.map { it.id }).containsExactlyElementsIn(paymentMethods.map { it.id })
-        paymentMethods.forEach { expected ->
-            val returned = checkoutPaymentMethods.single { it.id == expected.id }
-            assertThat(returned.billingDetails?.address).isEqualTo(expected.billingDetails?.address)
-        }
-        assertThat(result.shouldInvokeSelectionCallback).isEqualTo(shouldInvokeSelectionCallback)
-    }
-
-    private fun launch(
-        paymentMethods: List<PaymentMethod>,
-        selection: PaymentSelection.Saved,
+    private fun runScenario(
+        multipleCards: Boolean = true,
+        paymentMethodToEdit: PaymentMethod = selectedCard,
         block: Scenario.() -> Unit,
     ) {
+        val paymentMethods = if (multipleCards) listOf(selectedCard, secondCard) else listOf(selectedCard)
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
@@ -537,7 +431,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                     productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityCheckoutTestCallbackIdentifier",
                     statusBarColor = null,
-                    selection = selection,
+                    selection = PaymentSelection.Saved(selectedCard),
                     previousNewSelections = Bundle(),
                     customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                         paymentMethods = paymentMethods,
@@ -551,6 +445,13 @@ internal class EmbeddedSheetActivityCheckoutTest {
         ).use { scenario ->
             lateinit var activity: EmbeddedSheetActivity
             scenario.onActivity { activity = it }
+            if (multipleCards) {
+                managePage.waitUntilVisible()
+                managePage.clickEdit()
+                managePage.clickEdit(paymentMethodToEdit.id)
+            }
+            editPage.waitUntilVisible()
+            billingDetailsPage.updateLine1(UPDATED_LINE1)
             Scenario(
                 activityScenario = scenario,
                 activity = activity,
@@ -562,6 +463,46 @@ internal class EmbeddedSheetActivityCheckoutTest {
         val activityScenario: ActivityScenario<EmbeddedSheetActivity>,
         val activity: EmbeddedSheetActivity,
     ) {
+        fun assertSuccessfulBillingUpdateResult(
+            selectedPaymentMethod: PaymentMethod,
+            paymentMethods: List<PaymentMethod>,
+            taxAmount: Long = EDIT_TAX_AMOUNT,
+            shouldInvokeSelectionCallback: Boolean = false,
+        ) {
+            val result = completedResult()
+            val returnedSelection = (result.selection as PaymentSelection.Saved).paymentMethod
+            assertThat(returnedSelection.id).isEqualTo(selectedPaymentMethod.id)
+            assertThat(returnedSelection.billingDetails?.address)
+                .isEqualTo(selectedPaymentMethod.billingDetails?.address)
+
+            val returnedPaymentMethods = requireNotNull(result.customerState).paymentMethods
+            assertThat(returnedPaymentMethods.map { it.id }).containsExactlyElementsIn(paymentMethods.map { it.id })
+            paymentMethods.forEach { expected ->
+                val returned = returnedPaymentMethods.single { it.id == expected.id }
+                assertThat(returned.billingDetails?.address).isEqualTo(expected.billingDetails?.address)
+            }
+
+            val checkoutSessionResponse = requireNotNull(result.checkoutSessionResponse)
+            assertThat(checkoutSessionResponse.amount).isEqualTo(BASE_AMOUNT + taxAmount)
+            assertThat(checkoutSessionResponse.automaticTaxEnabled).isTrue()
+            assertThat(checkoutSessionResponse.taxAddressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+            assertThat(checkoutSessionResponse.taxMeta?.computationType)
+                .isEqualTo(CheckoutSessionResponse.TaxComputationType.AUTOMATIC)
+            assertThat(checkoutSessionResponse.taxMeta?.status)
+                .isEqualTo(CheckoutSessionResponse.TaxStatus.COMPLETE)
+            val item = checkoutSessionResponse.checkoutItems.single().oneTimePrice.items.single()
+            assertThat(item.taxAmounts.single().amount).isEqualTo(taxAmount)
+            assertThat(item.taxExclusive).isEqualTo(taxAmount)
+            val checkoutPaymentMethods = requireNotNull(checkoutSessionResponse.customer).paymentMethods
+            assertThat(checkoutPaymentMethods.map { it.id }).containsExactlyElementsIn(paymentMethods.map { it.id })
+            paymentMethods.forEach { expected ->
+                val returned = checkoutPaymentMethods.single { it.id == expected.id }
+                assertThat(returned.billingDetails?.address).isEqualTo(expected.billingDetails?.address)
+            }
+            assertThat(result.shouldInvokeSelectionCallback).isEqualTo(shouldInvokeSelectionCallback)
+        }
+
         fun completedResult(): EmbeddedActivityResult.Complete {
             composeTestRule.waitUntilWithIdle(conditionDescription = "Manage Activity to finish") {
                 composeTestRule.runOnIdle { activity.isFinishing }
