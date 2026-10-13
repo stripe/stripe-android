@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import com.stripe.paymentelementtestpages.FormPage
 import org.junit.Rule
@@ -52,8 +53,6 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @RunWith(RobolectricTestRunner::class)
@@ -119,13 +118,11 @@ internal class EmbeddedSheetActivityTest {
 
     @Test
     fun `processing shows progress and blocks back on form`() {
-        val requestReceived = CountDownLatch(1)
-        val releaseResponse = CountDownLatch(1)
+        val responseGate = NetworkResponseGate()
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-            requestReceived.countDown()
-            check(releaseResponse.await(10, TimeUnit.SECONDS))
+            responseGate.awaitRelease()
         }
 
         launch(paymentMethodMetadata = checkoutPaymentMethodMetadata()) { scenario ->
@@ -141,7 +138,7 @@ internal class EmbeddedSheetActivityTest {
                         .isNotEmpty()
                 }
                 composeTestRule.waitUntilWithIdle {
-                    requestReceived.count == 0L
+                    responseGate.requestReceived.count == 0L
                 }
                 composeTestRule.onNodeWithText(processingLabel).assertIsDisplayed()
 
@@ -151,7 +148,7 @@ internal class EmbeddedSheetActivityTest {
 
                 formPage.waitUntilVisible()
             } finally {
-                releaseResponse.countDown()
+                responseGate.releaseResponse.countDown()
             }
         }
     }
