@@ -17,8 +17,8 @@ internal class AdditionalKycCollectionValidationTest {
     @Test
     fun `answer limit preserves composed characters and emoji`() {
         val character = "👨‍👩‍👧‍👦"
-        assertThat(limitAdditionalKycAnswer(character.repeat(5_001))).isEqualTo(character.repeat(5_000))
-        assertThat(limitAdditionalKycAnswer("e\u0301".repeat(5_001))).isEqualTo("e\u0301".repeat(5_000))
+        assertThat(limitAdditionalKycAnswer(character.repeat(5_001))).isEqualTo(character.repeat(714))
+        assertThat(limitAdditionalKycAnswer("e\u0301".repeat(5_001))).isEqualTo("e\u0301".repeat(2_500))
     }
 
     @Test
@@ -57,6 +57,31 @@ internal class AdditionalKycCollectionValidationTest {
             document = requireNotNull(requirement.document).copy(minDocumentTypes = 3, maxDocumentTypes = 1)
         )
         assertThat(unsupported.isSupportedForCollection()).isFalse()
+    }
+
+    @Test
+    fun `scalar boundary never splits a composed character`() {
+        assertThat(limitAdditionalKycAnswer("a".repeat(4_999) + "e\u0301"))
+            .isEqualTo("a".repeat(4_999))
+        assertThat(limitAdditionalKycAnswer("😀".repeat(5_001))).isEqualTo("😀".repeat(5_000))
+    }
+
+    @Test
+    fun `nonpositive file allowance is unsupported`() {
+        val requirement = requirement()
+        val unsupported = requirement.copy(
+            document = requireNotNull(requirement.document).copy(maxFilesPerDocumentType = 0),
+        )
+        assertThat(unsupported.isSupportedForCollection()).isFalse()
+        val negative = requirement.copy(
+            document = requireNotNull(requirement.document).copy(maxFilesPerDocumentType = -1),
+        )
+        assertThat(negative.isSupportedForCollection()).isFalse()
+    }
+
+    @Test
+    fun `omitted file allowance defaults to ten`() {
+        assertThat(requirement().document?.maxFilesPerDocumentType).isEqualTo(10)
     }
 
     private fun requirement() = Json.decodeFromString<RetrieveAdditionalKycRequirementsResponse>(

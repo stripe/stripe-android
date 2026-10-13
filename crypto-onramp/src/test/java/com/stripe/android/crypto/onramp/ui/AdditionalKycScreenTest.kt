@@ -42,6 +42,21 @@ internal class AdditionalKycScreenTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `upload control is hidden at the per source limit`() = runScenario(
+        state = screenState(
+            page = AdditionalKycCollectionPage.DocumentEditor,
+            requirementType = AdditionalKycRequirementType.SourceOfFunds,
+            document = documentState(
+                slots = listOf(documentSlot(0, "first.pdf"), documentSlot(1)),
+                editingSlotIndex = 1,
+            ).copy(maxFilesPerDocumentType = 1),
+        ),
+    ) {
+        composeRule.onNodeWithTag(additionalKycChooseFileTag(1)).assertDoesNotExist()
+        composeRule.onNodeWithTag(additionalKycRemoveFileTag(0)).assertExists()
+    }
+
+    @Test
     fun `uploading document shows accessible progress and cannot be removed`() = runScenario(
         state = screenState(
             page = AdditionalKycCollectionPage.DocumentEditor,
@@ -504,6 +519,7 @@ internal class AdditionalKycScreenTest {
                 maxFileSizeMegabytes = 5,
                 minDocumentTypes = 1,
                 maxDocumentTypes = 10,
+                maxFilesPerDocumentType = 10,
                 editingSlotIndex = editingSlotIndex,
                 slots = slots,
             )
