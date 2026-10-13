@@ -33,8 +33,11 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -159,14 +162,24 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
             paymentMethods = PaymentMethodFixtures.createCards(1),
         ),
+        // Match the activity, which collects navigator state after creating the initial screens.
+        testDispatcher = StandardTestDispatcher(),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         val screens = factory.createInitialScreen()
 
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(screens).hasSize(2)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+
+        navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screens.last()))
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        testScope.runCurrent()
+
+        assertThat(navigator.screen.value).isSameInstanceAs(screens.last())
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -255,6 +268,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
         customerState: CustomerState? = null,
+        testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -267,7 +281,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
         customerStateHolder.setCustomerState(customerState)
         val eventReporter = FakeEventReporter()
-        val testScope = TestScope(UnconfinedTestDispatcher())
+        val testScope = TestScope(testDispatcher)
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
@@ -379,6 +393,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             continueCoordinator = continueCoordinator,
             onClickOverrideDelegate = onClickOverrideDelegate,
             onClickOverrideCalls = onClickOverrideCalls,
+            eventReporter = eventReporter,
+            testScope = testScope,
         ).block()
         eventReporter.validate()
         continueCoordinator.validate()
@@ -394,6 +410,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val continueCoordinator: FakeSheetActivityContinueCoordinator,
         val onClickOverrideDelegate: OnClickDelegateOverrideImpl,
         val onClickOverrideCalls: Turbine<Unit>,
+        val eventReporter: FakeEventReporter,
+        val testScope: TestScope,
     )
 }
 

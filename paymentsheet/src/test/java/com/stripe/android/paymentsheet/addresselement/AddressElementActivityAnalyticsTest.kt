@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
@@ -88,7 +89,7 @@ internal class AddressElementActivityAnalyticsTest {
 
     private fun runTaxScenario(
         fails: Boolean = false,
-        block: AddressElementActivityTestRunner.Scenario.(AddressElementActivityTestRunner.TaxUpdate) -> Unit,
+        block: AddressElementActivityTestRunner.Scenario.(NetworkResponseGate) -> Unit,
     ) = runScenario {
         val taxUpdate = enqueueTaxUpdate(fails = fails)
         try {

@@ -20,9 +20,8 @@ internal interface AddressElementEventReporter {
     )
 
     fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     )
 }
 
@@ -45,15 +44,14 @@ internal class StandaloneAddressElementEventReporter(
     ) = Unit
 
     override fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
-        val savedCountry = country ?: return
+        val savedCountry = addressDetails.address?.country ?: return
         addressLauncherEventReporter.onCompleted(
             country = savedCountry,
-            autocompleteResultSelected = autocompleteResultSelected,
-            editDistance = editDistance,
+            autocompleteResultSelected = autocompleteAddressDetails != null,
+            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
         )
     }
 }
@@ -100,17 +98,12 @@ internal class CheckoutShippingAddressElementEventReporter(
     }
 
     override fun onSaveCompleted(
-        country: String?,
-        autocompleteResultSelected: Boolean,
-        editDistance: Int?,
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
     ) {
         fireEvent(
             ShippingAddressElementEvent.SaveCompleted(
-                ShippingAddressElementAnalyticsData(
-                    country = country.orEmpty(),
-                    autocompleteResultSelected = autocompleteResultSelected,
-                    editDistance = editDistance,
-                )
+                analyticsData(addressDetails, autocompleteAddressDetails)
             )
         )
     }
