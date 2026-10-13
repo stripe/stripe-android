@@ -351,8 +351,6 @@ class InputAddressViewModelTest {
             assertThat(resultStateHolder.state.value).isEqualTo(
                 State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
             )
-
-            primaryButtonAction.calls.expectNoEvents()
         }
     }
 
@@ -437,10 +435,7 @@ class InputAddressViewModelTest {
 
                 viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
 
-                primaryButtonAction.calls.expectNoEvents()
-                eventReporter.saveStartedCalls.expectNoEvents()
-                eventReporter.saveFailedCalls.expectNoEvents()
-                eventReporter.saveCompletedCalls.expectNoEvents()
+                expectNoEvents(primaryButtonAction)
                 expectNoEvents()
                 assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
 
@@ -1369,6 +1364,11 @@ class InputAddressViewModelTest {
         }
     }
 
+    private fun Scenario.expectNoEvents(primaryButtonAction: RecordingPrimaryButtonAction) {
+        primaryButtonAction.calls.expectNoEvents()
+        eventReporter.expectNoEvents()
+    }
+
     private fun runScenario(
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
@@ -1397,7 +1397,7 @@ class InputAddressViewModelTest {
             placesClient = placesClient,
         ).apply { block() }
 
-        eventReporter.validate()
+        eventReporter.expectNoEvents()
         placesClient.ensureAllEventsConsumed()
     }
 

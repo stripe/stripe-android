@@ -48,6 +48,13 @@ internal class FakeAddressElementEventReporter : AddressElementEventReporter {
         _saveCompletedCalls.add(AddressCall(addressDetails, autocompleteAddressDetails))
     }
 
+    fun expectNoEvents() {
+        _shownCalls.expectNoEvents()
+        _saveStartedCalls.expectNoEvents()
+        _saveFailedCalls.expectNoEvents()
+        _saveCompletedCalls.expectNoEvents()
+    }
+
     fun validate() {
         _shownCalls.ensureAllEventsConsumed()
         _saveStartedCalls.ensureAllEventsConsumed()
