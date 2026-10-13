@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -86,7 +87,7 @@ class AddressFormControllerTest {
         val element = awaitItem()
 
         assertThat(element.countryElement.controller.displayItems)
-            .isEqualTo(CountryConfig(setOf("US", "CA")).displayItems)
+            .isEqualTo(CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry).displayItems)
     }
 
     @Test
@@ -150,6 +151,45 @@ class AddressFormControllerTest {
                 .isEqualTo(FormFieldEntry(value = "US", isComplete = true))
             assertThat(completeFormValues?.get(FormFieldId.PostalCode))
                 .isEqualTo(FormFieldEntry(value = "94111", isComplete = true))
+        }
+    }
+
+    @Test
+    fun `Optional phone blocks form completion only when incomplete`() = test {
+        val addressValues = mapOf(
+            FormFieldId.Name to "John Doe",
+            FormFieldId.Line1 to "123 Apple Street",
+            FormFieldId.City to "San Francisco",
+            FormFieldId.State to "CA",
+            FormFieldId.Country to "US",
+            FormFieldId.PostalCode to "94111",
+        )
+        val addressFormController = createAddressFormController(
+            initialValues = addressValues,
+            launcherConfig = AddressLauncher.Configuration(
+                additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL,
+                ),
+            ),
+        )
+
+        assertThat(registerCalls.awaitItem()).isNotNull()
+
+        addressFormController.completeFormValues.test {
+            assertThat(awaitItem()).isNotNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "123"))
+            assertThat(awaitItem()).isNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "1234567890"))
+            assertThat(awaitItem()?.get(FormFieldId.Phone))
+                .isEqualTo(FormFieldEntry(value = "+11234567890", isComplete = true))
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to "123"))
+            assertThat(awaitItem()).isNull()
+
+            addressFormController.setRawValues(addressValues + (FormFieldId.Phone to ""))
+            assertThat(awaitItem()).isNotNull()
         }
     }
 

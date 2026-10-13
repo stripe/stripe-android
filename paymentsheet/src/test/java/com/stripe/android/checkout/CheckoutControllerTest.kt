@@ -2,9 +2,11 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -19,6 +21,8 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -42,14 +46,22 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.json.JSONObject
@@ -61,6 +73,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.EmptyCoroutineContext
 
 @OptIn(CheckoutSessionPreview::class)
@@ -81,7 +94,7 @@ internal class CheckoutControllerTest {
         .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(CoroutineTestRule())
+        .around(CoroutineTestRule(StandardTestDispatcher()))
 
     // The controller resolves callbacks from the process-global PaymentElementCallbackReferences,
     // keyed by integration name. Clear it between tests so registrations don't leak across cases.
@@ -94,6 +107,50 @@ internal class CheckoutControllerTest {
     fun `configure returns success`() = runConfigureScenario {
         assertThat(result.isSuccess).isTrue()
     }
+
+    @Test
+    fun `configure succeeds from a background thread`() = runTest {
+        networkRule.defaultInit()
+        val controller = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME).controller
+
+        fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) }.getOrThrow()
+
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+    }
+
+    @Test
+    fun `canceling a background server update cancels its callback and releases the mutation lock`() =
+        runMutationScenario {
+            val callbackStarted = Turbine<Unit>()
+            val callbackCanceled = Turbine<Unit>()
+
+            fromBackgroundThread {
+                coroutineScope {
+                    val update = async {
+                        controller.runServerUpdate {
+                            callbackStarted.add(Unit)
+                            try {
+                                awaitCancellation()
+                            } finally {
+                                callbackCanceled.add(Unit)
+                            }
+                        }
+                    }
+                    callbackStarted.awaitItem()
+                    val emailUpdate = async { controller.updateEmail("after-cancel@example.com") }
+
+                    update.cancelAndJoin()
+
+                    callbackCanceled.awaitItem()
+                    assertThat(update.isCancelled).isTrue()
+                    emailUpdate.await().getOrThrow()
+                }
+            }
+
+            assertThat(controller.session.value?.email).isEqualTo("after-cancel@example.com")
+            callbackStarted.ensureAllEventsConsumed()
+            callbackCanceled.ensureAllEventsConsumed()
+        }
 
     @Test
     fun `configure emits session with id from response`() = runConfigureScenario {
@@ -385,6 +442,160 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `configure sends default shipping address for shipping tax despite saved and default billing addresses`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                savedCustomerWithBillingAddress(),
+            ),
+            networkSetup = {
+                networkRule.defaultShippingAddressTaxUpdate(
+                    responseFactory = successResponseFactory(
+                        combine(
+                            automaticTaxFor("shipping"),
+                            savedCustomerWithBillingAddress(),
+                        ),
+                    ),
+                )
+            },
+        ) {
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `configure sends partial default shipping address without requiring a complete address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = Address().country("CA").postalCode("M5V 3L9"),
+            ),
+            initModifier = automaticTaxFor("shipping"),
+            networkSetup = {
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "CA"),
+                    bodyPart("tax_region[postal_code]", "M5V 3L9"),
+                    not(hasBodyPart("tax_region[city]")),
+                    not(hasBodyPart("tax_region[state]")),
+                    not(hasBodyPart("tax_region[line1]")),
+                    not(hasBodyPart("tax_region[line2]")),
+                    responseFactory = successResponseFactory(automaticTaxFor("shipping")),
+                )
+            },
+        ) {
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `configure skips tax update and loads the init session when default shipping has no address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = null,
+            ),
+            initModifier = automaticTaxFor("shipping"),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun `configure skips tax update and loads the init session when automatic tax is disabled`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                { json ->
+                    json.getJSONObject("tax_context").put("automatic_tax_enabled", false)
+                    json.getJSONObject("tax_meta").put("computation_type", "Off").put("status", JSONObject.NULL)
+                },
+            ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun `configure does not sync shipping tax when SAE filters a disallowed default address`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(
+                address = Address().country("DE"),
+            ).shippingAddressElement(ShippingAddressElement.Configuration()),
+            initModifier = combine(
+                automaticTaxFor("shipping"),
+                allowedShippingCountries(listOf("US", "CA")),
+            ),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun `configure skips tax update and loads the init session for an unknown tax address source`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = automaticTaxFor("unknown"),
+        ) {
+            result.getOrThrow()
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun `configure uses default billing address for billing tax even with default shipping`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = automaticTaxFor("billing"),
+            networkSetup = {
+                networkRule.defaultBillingAddressTaxUpdate(
+                    responseFactory = successResponseFactory(automaticTaxFor("billing")),
+                )
+            },
+        ) {
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `configure does not emit session or state when the default shipping tax update fails`() =
+        runConfigureScenario(
+            configuration = configurationWithDefaultShippingAddress(),
+            initModifier = automaticTaxFor("shipping"),
+            networkSetup = {
+                networkRule.defaultShippingAddressTaxUpdate { response ->
+                    response.setResponseCode(400)
+                    response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+                }
+            },
+        ) {
+            assertThat(result.isFailure).isTrue()
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
+        }
+
+    @Test
+    fun `reconfigure preserves the published session and state when default shipping tax update fails`() =
+        runConfigureScenario {
+            result.getOrThrow()
+            val beforeSession = requireNotNull(controller.session.value)
+            val beforeState = requireNotNull(committedState)
+            networkRule.enqueueSuccessfulInit(automaticTaxFor("shipping"))
+            networkRule.defaultShippingAddressTaxUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            val reconfigureResult = controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                configurationWithDefaultShippingAddress(),
+            )
+
+            assertThat(reconfigureResult.isFailure).isTrue()
+            assertThat(controller.session.value).isEqualTo(beforeSession)
+            assertThat(committedState).isEqualTo(beforeState)
+        }
+
+    @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
         configuration = CheckoutController.Configuration().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
@@ -571,7 +782,7 @@ internal class CheckoutControllerTest {
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
 
-            controller.clearPaymentOption().getOrThrow()
+            fromBackgroundThread { controller.clearPaymentOption() }.getOrThrow()
 
             assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
         }
@@ -735,15 +946,29 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `applyPromotionCode sends promotion code and reloads on success`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
+        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+            .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(),
+            responseFactory = successResponseFactory(
+                combine(
+                    withTotal(4099),
+                    { json ->
+                        json.getJSONObject("server_built_elements_session_params")
+                            .getJSONObject("deferred_intent").put("amount", 4099)
+                    },
+                ),
+            ),
         )
 
-        val result = controller.applyPromotionCode("10OFF")
+        val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
 
         result.getOrThrow()
-        assertThat(committedState().paymentMethodMetadata).isNotNull()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
+        assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
+        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+            .isEqualTo(4099L)
     }
 
     @Test
@@ -774,14 +999,16 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `removePromotionCode sends empty promotion code on success`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", ""),
-            responseFactory = successResponseFactory(),
+            responseFactory = successResponseFactory(withTotal(8000)),
         )
 
-        val result = controller.removePromotionCode()
+        val result = fromBackgroundThread { controller.removePromotionCode() }
 
-        assertThat(result.isSuccess).isTrue()
+        result.getOrThrow()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
     @Test
@@ -815,22 +1042,41 @@ internal class CheckoutControllerTest {
     fun `updateEmail stores email locally without a network call`() = runMutationScenario {
         // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
         // response, so NetworkRule will fail the test if a request is made.
-        val result = controller.updateEmail("checkout@example.com")
+        assertThat(controller.session.value?.email).isNotEqualTo("background@example.com")
+        val result = fromBackgroundThread { controller.updateEmail("background@example.com") }
 
         result.getOrThrow()
-        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(controller.session.value?.email).isEqualTo("background@example.com")
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
+            .isEqualTo("background@example.com")
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("background@example.com")
     }
 
     @Test
     fun `updateEmail clears email when session has no customer email`() = runMutationScenario(
         initModifier = { it.remove("customer_email") },
     ) {
+        controller.updateEmail("local@example.com").getOrThrow()
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+            .isEqualTo("local@example.com")
+
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
+        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
+        assertThat(
+            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
+                .collectedEmail
+        ).isNull()
     }
 
     @Test
@@ -991,10 +1237,10 @@ internal class CheckoutControllerTest {
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
-            val result = controller.updateShippingAddress(
-                name = "John",
-                address = fullAddress,
-            )
+            assertThat(committedState().collectedDetails.shippingAddress).isNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "John", address = fullAddress)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1026,7 +1272,10 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
             // and the payment element is reloaded from the existing response, firing no request.
-            val result = controller.updateShippingAddress(name = "John", address = fullAddress)
+            assertThat(committedState().collectedDetails.shippingAddress).isNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "John", address = fullAddress)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1039,7 +1288,10 @@ internal class CheckoutControllerTest {
         runMutationScenario {
             controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
 
-            val result = controller.updateShippingAddress(name = "Ignored", address = null)
+            assertThat(committedState().collectedDetails.shippingAddress).isNotNull()
+            val result = fromBackgroundThread {
+                controller.updateShippingAddress(name = "Ignored", address = null)
+            }
 
             result.getOrThrow()
             val state = committedState()
@@ -1169,12 +1421,24 @@ internal class CheckoutControllerTest {
             )
         }
 
+    @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutInit(
             responseFactory = successResponseFactory(withTotal(8000)),
         )
 
-        val result = controller.runServerUpdate { Result.success(Unit) }
+        val merchantContext = CoroutineName("merchant-server-update")
+        val result = fromBackgroundThread {
+            withContext(merchantContext) {
+                val callerDispatcher = currentCoroutineContext()[ContinuationInterceptor]
+                controller.runServerUpdate {
+                    assertThat(currentCoroutineContext()[ContinuationInterceptor]).isSameInstanceAs(callerDispatcher)
+                    assertThat(currentCoroutineContext()[CoroutineName]).isSameInstanceAs(merchantContext)
+                    Result.success(Unit)
+                }
+            }
+        }
 
         result.getOrThrow()
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
@@ -1300,11 +1564,16 @@ internal class CheckoutControllerTest {
     @Test
     fun `concurrent mutations are serialized so the second uses the first result's session id`() =
         runMutationScenario {
-            // The first mutation is delayed and returns a new session id.
+            val firstRequest = Turbine<Unit>()
+            val secondRequest = Turbine<Unit>()
+            val releaseFirstResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
-                response.setBodyDelay(200, TimeUnit.MILLISECONDS)
+                firstRequest.add(Unit)
+                check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the first mutation response"
+                }
                 successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
             }
             // The second mutation must target the session id produced by the first, proving the
@@ -1312,17 +1581,39 @@ internal class CheckoutControllerTest {
             networkRule.checkoutUpdate(
                 bodyPart("updated_currency", "eur"),
                 sessionId = "cs_test_after_promo",
-                responseFactory = successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") },
-            )
+            ) { response ->
+                secondRequest.add(Unit)
+                successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
+            }
 
-            val results = listOf(
-                async { controller.applyPromotionCode("10OFF") },
-                async { controller.updateCurrency("eur") },
-            ).awaitAll()
+            fromBackgroundThread {
+                coroutineScope {
+                    val first = async { controller.applyPromotionCode("10OFF") }
+                    try {
+                        firstRequest.awaitItem()
+                        val second = async(start = CoroutineStart.UNDISPATCHED) {
+                            controller.updateCurrency("eur")
+                        }
+                        // The undispatched call queues its Main work before this barrier. Once
+                        // the barrier runs, the second mutation has reached the coordinator.
+                        withContext(Dispatchers.Main) { }
+                        assertThat(second.isCompleted).isFalse()
+                        secondRequest.expectNoEvents()
 
-            assertThat(results[0].isSuccess).isTrue()
-            assertThat(results[1].isSuccess).isTrue()
+                        releaseFirstResponse.countDown()
+
+                        first.await().getOrThrow()
+                        second.await().getOrThrow()
+                        secondRequest.awaitItem()
+                    } finally {
+                        releaseFirstResponse.countDown()
+                    }
+                }
+            }
+
             assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
+            firstRequest.ensureAllEventsConsumed()
+            secondRequest.ensureAllEventsConsumed()
         }
 
     @Test
@@ -1451,6 +1742,12 @@ internal class CheckoutControllerTest {
 
     // endregion
 
+    private suspend fun <T> fromBackgroundThread(block: suspend () -> T): T = withContext(Dispatchers.IO) {
+        // A test dispatcher alone does not move the caller off Robolectric's main thread.
+        assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+        block()
+    }
+
     private fun NetworkRule.enqueueSuccessfulInit(
         jsonModifier: (JSONObject) -> Unit = {},
     ) {
@@ -1504,6 +1801,19 @@ internal class CheckoutControllerTest {
         )
     }
 
+    private fun NetworkRule.defaultShippingAddressTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[city]", "Denver"),
+            bodyPart("tax_region[state]", "CO"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            bodyPart("tax_region[line1]", "123 Main St"),
+            bodyPart("tax_region[line2]", "Apt 4"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
     // The base fixture omits customer_email. Inject one for standard success paths; a test can
     // remove it in the JSON modifier when exercising an absent session email.
     // Link is disabled so the loader doesn't fire a consumer session lookup that's unrelated to
@@ -1541,12 +1851,22 @@ internal class CheckoutControllerTest {
     // Enables automatic tax with the given address source ("shipping" or "billing"), so an address
     // update sends tax_region to the server.
     private fun automaticTaxFor(source: String): (JSONObject) -> Unit = { json ->
+        val addressSource = when (source) {
+            "shipping", "billing" -> "session.$source"
+            else -> source
+        }
         json.put(
             "tax_context",
             JSONObject()
                 .put("automatic_tax_enabled", true)
-                .put("automatic_tax_address_source", source),
+                .put("automatic_tax_address_source", addressSource),
         )
+        json.getJSONObject("tax_meta")
+            .put("computation_type", "automatic")
+            .put("status", "requires_location_inputs")
+        if (source == "shipping" && !json.has("shipping_address_collection")) {
+            allowedShippingCountries(listOf("US", "CA"))(json)
+        }
     }
 
     private fun successfulSavedPaymentMethodResponse(response: MockResponse) {
@@ -1573,6 +1893,27 @@ internal class CheckoutControllerTest {
                 )
             )
         )
+    }
+
+    private fun configurationWithDefaultShippingAddress(
+        address: Address? = fullAddress,
+    ): CheckoutController.Configuration {
+        val shippingDetails = CheckoutController.Configuration.Defaults.ContactDetails().name("John Shipping")
+        address?.let(shippingDetails::address)
+        val defaults = CheckoutController.Configuration.Defaults()
+            .shippingDetails(shippingDetails)
+            .billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    Address()
+                        .city("San Francisco")
+                        .country("US")
+                        .line1("510 Townsend St")
+                        .line2("Suite 100")
+                        .postalCode("94103")
+                        .state("CA")
+                )
+            )
+        return CheckoutController.Configuration().defaults(defaults)
     }
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
@@ -1735,6 +2076,10 @@ internal class CheckoutControllerTest {
             parentHandle = savedStateHandle,
             integrationName = integrationName,
         )
+        // SavedStateHandle requires main-thread access, but StateFlow alone does not enforce it.
+        // Creating LiveData for the same keys makes Android reject off-main state publication.
+        controllerSavedState.handle.getLiveData<CheckoutControllerState>(CheckoutControllerStateHolder.STATE_KEY)
+        controllerSavedState.handle.getLiveData<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)
         val controller = destroyControllerRule.track(
             DaggerCheckoutControllerComponent.factory().create(
                 application = applicationContext,
@@ -1848,14 +2193,6 @@ internal class CheckoutControllerTest {
     ) : CoroutineScope by testScope {
         val testScheduler: TestCoroutineScheduler get() = testScope.testScheduler
 
-        val fullAddress: Address = Address()
-            .city("Denver")
-            .country("US")
-            .line1("123 Main St")
-            .line2("Apt 4")
-            .postalCode("80202")
-            .state("CO")
-
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
@@ -1872,5 +2209,13 @@ internal class CheckoutControllerTest {
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val DEFAULT_INTEGRATION_NAME = "stripe_checkout"
+
+        val fullAddress: Address = Address()
+            .city("Denver")
+            .country("US")
+            .line1("123 Main St")
+            .line2("Apt 4")
+            .postalCode("80202")
+            .state("CO")
     }
 }

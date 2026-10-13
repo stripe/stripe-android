@@ -348,10 +348,11 @@ private fun DocumentCaptureScreen(
                 isManualCaptureMode &&
                 documentScannerState is IdentityScanViewModel.State.Scanning
             ) {
-                stringResource(id = R.string.stripe_take_photo).uppercase()
+                stringResource(id = R.string.stripe_take_photo)
             } else {
-                stringResource(id = R.string.stripe_kontinue).uppercase()
+                stringResource(id = R.string.stripe_kontinue)
             },
+            uppercase = true,
             state = loadingButtonState
         ) {
             loadingButtonState = LoadingButtonState.Loading

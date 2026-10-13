@@ -174,10 +174,12 @@ internal class KycActivity : ComponentActivity() {
                     add(R.string.stripe_onramp_kyc_take_photo to { takePhoto(slotIndex) })
                 }
                 if (photoMediaType != null) {
-                    add(R.string.stripe_onramp_kyc_choose_photo to {
-                        pendingFileSlot = slotIndex
-                        photoPicker.launch(PickVisualMediaRequest(photoMediaType))
-                    })
+                    add(
+                        R.string.stripe_onramp_kyc_choose_photo to {
+                            pendingFileSlot = slotIndex
+                            photoPicker.launch(PickVisualMediaRequest(photoMediaType))
+                        }
+                    )
                 }
                 add(R.string.stripe_onramp_kyc_choose_file to chooseExisting)
             }

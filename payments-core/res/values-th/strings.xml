@@ -160,6 +160,8 @@
   <string name="stripe_google_pay_cost_excluding_tax">ค่าใช้จ่ายไม่รวมภาษี</string>
   <!-- Google Pay total label when the final tax may change with the selected billing address. -->
   <string name="stripe_google_pay_estimated_total">ยอดรวมโดยประมาณ (ภาษีขั้นสุดท้ายอาจแตกต่างกันไป)</string>
+  <!-- Google Pay summary label for the subtotal when automatic tax is disabled. -->
+  <string name="stripe_google_pay_subtotal">ยอดรวมย่อย</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">ยอดรวม</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

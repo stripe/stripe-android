@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import android.os.Bundle
+import androidx.annotation.AnyThread
+import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutController.Session
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
@@ -31,6 +33,20 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
+    val stateFlow: StateFlow<CheckoutControllerState?> =
+        savedStateHandle.getStateFlow(STATE_KEY, null)
+
+    /**
+     * Snapshot reads are safe from any thread. Writes and read-modify-write operations require Main.
+     */
+    @get:AnyThread
+    @set:MainThread
+    var state: CheckoutControllerState?
+        get() = stateFlow.value
+        set(value) {
+            savedStateHandle[STATE_KEY] = value
+        }
+
     init {
         // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
         state?.let { restoredState ->
@@ -41,15 +57,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             }
         }
     }
-
-    var state: CheckoutControllerState?
-        get() = savedStateHandle[STATE_KEY]
-        set(value) {
-            savedStateHandle[STATE_KEY] = value
-        }
-
-    val stateFlow: StateFlow<CheckoutControllerState?> =
-        savedStateHandle.getStateFlow(STATE_KEY, null)
 
     val session: StateFlow<Session?> =
         stateFlow.mapAsStateFlow {

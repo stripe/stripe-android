@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Telefon</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">NICEPAY kaudu makse kinnitamisega lubate ettevõttel %s debiteerida edaspidi makseid sellelt makseviisilt vastavalt nende tingimustele.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Arvega maksmine äriklientidele.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nimi kaardil</string>
   <!-- Label for the Naver Pay funding source selector -->

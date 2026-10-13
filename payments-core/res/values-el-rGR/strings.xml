@@ -160,6 +160,8 @@
   <string name="stripe_google_pay_cost_excluding_tax">Κόστος χωρίς φόρο</string>
   <!-- Google Pay total label when the final tax may change with the selected billing address. -->
   <string name="stripe_google_pay_estimated_total">Εκτιμώμενο σύνολο (ο τελικός φόρος ενδέχεται να διαφέρει)</string>
+  <!-- Google Pay summary label for the subtotal when automatic tax is disabled. -->
+  <string name="stripe_google_pay_subtotal">Μερικό σύνολο</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Σύνολο</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

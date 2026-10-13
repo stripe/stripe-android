@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -262,7 +261,7 @@ private fun MenuItemRow(item: MenuItem) {
                 ),
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
+                        painter = painterResource(R.drawable.ic_material_info),
                         contentDescription = null,
                     )
                 },

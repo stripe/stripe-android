@@ -156,6 +156,8 @@ internal class IdentityViewModelTest {
             brandLogo = BRAND_LOGO,
             brandColor = null,
             biometricConsent = null,
+            primaryButtonStyle = null,
+            secondaryButtonStyle = null,
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),
