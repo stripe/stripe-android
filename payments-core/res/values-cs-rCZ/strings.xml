@@ -160,6 +160,8 @@
   <string name="stripe_google_pay_cost_excluding_tax">Cena bez daně</string>
   <!-- Google Pay total label when the final tax may change with the selected billing address. -->
   <string name="stripe_google_pay_estimated_total">Odhadovaná celková částka (konečná daň se může lišit)</string>
+  <!-- Google Pay summary label for the subtotal when automatic tax is disabled. -->
+  <string name="stripe_google_pay_subtotal">Mezisoučet</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Celkem</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

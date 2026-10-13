@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -71,8 +72,10 @@ class FinancialConnectionsSheet internal constructor(
     ): FinancialConnectionsSheetConfiguration {
         return FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret,
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+            ),
             preCollectedConsent = preCollectedConsent,
         )
     }

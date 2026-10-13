@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.app.Activity
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,7 +32,10 @@ class CustomerSheetContractTest {
     @Test
     fun `parseResult parses a canceled result from the intent`() {
         val contract = CustomerSheetContract()
-        val expected = InternalCustomerSheetResult.Canceled(paymentSelection = null)
+        val expected = InternalCustomerSheetResult.Canceled(
+            paymentSelection = null,
+            appearance = PaymentSheet.Appearance(),
+        )
         val intent = Intent().putExtras(expected.toBundle())
 
         val result = contract.parseResult(Activity.RESULT_OK, intent)
@@ -42,7 +46,10 @@ class CustomerSheetContractTest {
     @Test
     fun `parseResult parses a selected result from the intent`() {
         val contract = CustomerSheetContract()
-        val expected = InternalCustomerSheetResult.Selected(paymentSelection = null)
+        val expected = InternalCustomerSheetResult.Selected(
+            paymentSelection = null,
+            appearance = PaymentSheet.Appearance(),
+        )
         val intent = Intent().putExtras(expected.toBundle())
 
         val result = contract.parseResult(Activity.RESULT_OK, intent)

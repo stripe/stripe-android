@@ -318,7 +318,6 @@ internal class EmbeddedNavigatorTest {
         val screen = EmbeddedNavigator.Screen.ManageAll(interactor)
 
         val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isFalse()
         assertThat(topBarState.showEditMenu).isTrue()
         assertThat(topBarState.isEditing).isFalse()
     }
@@ -455,7 +454,6 @@ internal class EmbeddedNavigatorTest {
         )
 
         val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isFalse()
         assertThat(topBarState.showEditMenu).isTrue()
         assertThat(topBarState.isEditing).isFalse()
 
@@ -480,31 +478,14 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `HorizontalPaymentOptions topBarState hides test mode label in live mode`() {
+    fun `HorizontalPaymentOptions topBarState hides edit menu`() {
         val screen = createHorizontalPaymentOptionsScreen(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState(),
-                isLiveMode = true,
             ),
         )
 
         val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isFalse()
-        assertThat(topBarState.showEditMenu).isFalse()
-        assertThat(topBarState.isEditing).isFalse()
-    }
-
-    @Test
-    fun `HorizontalPaymentOptions topBarState shows test mode label in test mode`() {
-        val screen = createHorizontalPaymentOptionsScreen(
-            interactor = FakeAddPaymentMethodInteractor(
-                initialState = FakeAddPaymentMethodInteractor.createState(),
-                isLiveMode = false,
-            ),
-        )
-
-        val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isTrue()
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()
     }
@@ -567,7 +548,6 @@ internal class EmbeddedNavigatorTest {
         val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = paymentOptionsInteractor,
-            isLiveMode = true,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
@@ -603,19 +583,9 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `PaymentOptions topBarState returns correct state for live mode`() {
-        val screen = createPaymentOptionsScreen(isLiveMode = true)
+    fun `PaymentOptions topBarState hides edit menu`() {
+        val screen = createPaymentOptionsScreen()
         val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isFalse()
-        assertThat(topBarState.showEditMenu).isFalse()
-        assertThat(topBarState.isEditing).isFalse()
-    }
-
-    @Test
-    fun `PaymentOptions topBarState returns correct state for test mode`() {
-        val screen = createPaymentOptionsScreen(isLiveMode = false)
-        val topBarState = screen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isTrue()
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()
     }
@@ -715,24 +685,11 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `SavedPaymentMethodConfirm topBarState hides test mode label in live mode`() {
-        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = true)
+    fun `SavedPaymentMethodConfirm topBarState hides edit menu`() {
+        val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
 
         val topBarState = screen.topBarState().value!!
 
-        assertThat(topBarState.showTestModeLabel).isFalse()
-        assertThat(topBarState.showEditMenu).isFalse()
-        assertThat(topBarState.isEditing).isFalse()
-        interactor.validate()
-    }
-
-    @Test
-    fun `SavedPaymentMethodConfirm topBarState shows test mode label in test mode`() {
-        val (screen, interactor) = createSavedPaymentMethodConfirmScreen(isLiveMode = false)
-
-        val topBarState = screen.topBarState().value!!
-
-        assertThat(topBarState.showTestModeLabel).isTrue()
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()
         interactor.validate()
@@ -766,22 +723,10 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `Form topBarState hides test mode label in live mode`() {
-        val (formScreen, formInteractor) = createFormScreen(isLiveMode = true)
+    fun `Form topBarState hides edit menu`() {
+        val (formScreen, formInteractor) = createFormScreen()
 
         val topBarState = formScreen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isFalse()
-        assertThat(topBarState.showEditMenu).isFalse()
-        assertThat(topBarState.isEditing).isFalse()
-        formInteractor.validate()
-    }
-
-    @Test
-    fun `Form topBarState shows test mode label in test mode`() {
-        val (formScreen, formInteractor) = createFormScreen(isLiveMode = false)
-
-        val topBarState = formScreen.topBarState().value!!
-        assertThat(topBarState.showTestModeLabel).isTrue()
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()
         formInteractor.validate()
@@ -907,14 +852,12 @@ internal class EmbeddedNavigatorTest {
     }
 
     private fun createPaymentOptionsScreen(
-        isLiveMode: Boolean = true,
         isProcessing: Boolean = false,
         interactor: FakePaymentMethodVerticalLayoutInteractor =
             FakePaymentMethodVerticalLayoutInteractor.create(),
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = interactor,
-            isLiveMode = isLiveMode,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
@@ -970,10 +913,8 @@ internal class EmbeddedNavigatorTest {
         )
     }
 
-    private fun createFormScreen(
-        isLiveMode: Boolean = true,
-    ): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
-        val formInteractor = TestFormInteractor(isLiveMode = isLiveMode)
+    private fun createFormScreen(): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
+        val formInteractor = TestFormInteractor()
         val screen = EmbeddedNavigator.Screen.Form(
             formInteractor = formInteractor,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
@@ -989,7 +930,6 @@ internal class EmbeddedNavigatorTest {
     }
 
     private fun createSavedPaymentMethodConfirmScreen(
-        isLiveMode: Boolean = true,
         stateHolder: FakeSheetActivityStateHolder = FakeSheetActivityStateHolder(),
         confirmationHelper: FakeSheetActivityConfirmationHelper = FakeSheetActivityConfirmationHelper(),
         selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
@@ -1004,7 +944,6 @@ internal class EmbeddedNavigatorTest {
         val interactor = FakeSavedPaymentMethodConfirmInteractor()
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = interactor,
-            isLiveMode = isLiveMode,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
@@ -1015,9 +954,7 @@ internal class EmbeddedNavigatorTest {
         return screen to interactor
     }
 
-    private class TestFormInteractor(
-        override val isLiveMode: Boolean = true,
-    ) : VerticalModeFormInteractor {
+    private class TestFormInteractor : VerticalModeFormInteractor {
         override val state: StateFlow<VerticalModeFormInteractor.State>
             get() = throw AssertionError("Not expected")
 

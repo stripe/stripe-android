@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal class FakeEmbeddedContentHelper(
     override val embeddedContent: MutableStateFlow<EmbeddedContent?> = MutableStateFlow(null),
 ) : EmbeddedContentHelper {
-    val presentPaymentOptionsCalls: Turbine<Unit> = Turbine()
+    val presentPaymentOptionsCalls: Turbine<Thread> = Turbine()
 
     override fun presentPaymentOptions() {
-        presentPaymentOptionsCalls.add(Unit)
+        presentPaymentOptionsCalls.add(Thread.currentThread())
     }
 }

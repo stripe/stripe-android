@@ -6,5 +6,4 @@ internal data class Args(
     val lastFour: String,
     val cardBrand: CardBrand,
     val cvc: String,
-    val isTestMode: Boolean
 )

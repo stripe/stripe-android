@@ -667,7 +667,6 @@ internal class DefaultSheetActivityStateHolderTest {
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
@@ -704,7 +703,6 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     private class RecordingVerticalModeFormInteractor : VerticalModeFormInteractor {
-        override val isLiveMode: Boolean = true
         override val state: StateFlow<VerticalModeFormInteractor.State>
             get() = error("Not expected")
 
@@ -744,7 +742,6 @@ internal class DefaultSheetActivityStateHolderTest {
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = interactor,
-            isLiveMode = true,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,

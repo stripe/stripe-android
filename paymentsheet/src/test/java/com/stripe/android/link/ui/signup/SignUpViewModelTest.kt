@@ -762,7 +762,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAccountManager = linkAccountManager,
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 navigateAndClearStack = { screen -> screens.add(screen) }
             )
 
@@ -785,7 +785,7 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             navigateAndClearStack = { screen -> screens.add(screen) }
         )
 
@@ -812,7 +812,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAccountManager = linkAccountManager,
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 navigateAndClearStack = { screen -> screens.add(screen) },
                 verifyDuringSignUp = {
                     verifyDuringSignUpCalled = true
@@ -839,7 +839,7 @@ internal class SignUpViewModelTest {
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: (Throwable) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         verifyDuringSignUp: () -> Unit = {},
     ): SignUpViewModel {
         return SignUpViewModel(

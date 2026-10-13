@@ -80,7 +80,6 @@ internal class FakeUpdatePaymentMethodInteractor(
     }
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
-        isLiveMode = false,
         editable = PaymentSheetTopBarState.Editable.Never,
     )
 

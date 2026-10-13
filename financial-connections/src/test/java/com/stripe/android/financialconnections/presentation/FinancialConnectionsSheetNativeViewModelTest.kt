@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -46,13 +47,19 @@ import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import kotlin.test.assertIs
 
@@ -71,7 +78,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
@@ -491,6 +498,45 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     }
 
     @Test
+    fun `onPaneLaunched tracks PaneNotFound for unknown pane`() {
+        val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
+        val viewModel = createViewModel(eventTracker = eventTracker)
+        val pane = Json.decodeFromJsonElement<FinancialConnectionsSessionManifest.Pane>(
+            JsonPrimitive("unsupported_pane")
+        )
+
+        viewModel.onPaneLaunched(
+            pane = pane,
+            referrer = FinancialConnectionsSessionManifest.Pane.CONSENT,
+        )
+
+        val eventCaptor = argumentCaptor<FinancialConnectionsAnalyticsEvent>()
+        verify(eventTracker).track(eventCaptor.capture())
+        verifyNoMoreInteractions(eventTracker)
+        assertThat(eventCaptor.firstValue.eventName).isEqualTo("linked_accounts.error.unexpected")
+        assertThat(eventCaptor.firstValue.params).containsExactly(
+            "pane", "unsupported_pane",
+            "error", "PaneNotFound",
+            "error_type", "PaneNotFound",
+            "error_message",
+            "Pane not found: an unsupported pane was requested.",
+        )
+    }
+
+    @Test
+    fun `onPaneLaunched does not track PaneNotFound for unexpected error pane`() {
+        val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
+        val viewModel = createViewModel(eventTracker = eventTracker)
+
+        viewModel.onPaneLaunched(
+            pane = FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR,
+            referrer = FinancialConnectionsSessionManifest.Pane.CONSENT,
+        )
+
+        verifyNoInteractions(eventTracker)
+    }
+
+    @Test
     fun `topAppBarState uses current linkBrand over state linkBrand`() = runTest {
         val initialState = stateWithLinkBrand(LinkBrand.Link)
         val viewModel = createViewModel(
@@ -563,6 +609,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         },
         currentLinkBrand: CurrentLinkBrand =
             FakeCurrentLinkBrand(initialState.linkBrand),
+        eventTracker: FinancialConnectionsAnalyticsTracker = this.eventTracker,
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = eventTracker,
         eventContext = FinancialConnectionsEventContext(null),

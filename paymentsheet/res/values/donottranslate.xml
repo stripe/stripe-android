@@ -7,8 +7,6 @@
     <string name="stripe_paymentsheet_update_card_number">\u2066•••• •••• •••• %1$s\u2069</string>
     <string name="stripe_link_payment_method_last4">\u2066•••• %1$s\u2069</string>
 
-    <!-- Label indicating the payment intent is in testmode -->
-    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>
 
     <string name="stripe_paymentsheet_bacs_guarantee">Direct Debit Guarantee</string>
     <string name="stripe_paymentsheet_bacs_guarantee_url">https://stripe.com/legal/bacs-direct-debit-guarantee</string>

@@ -4,9 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -49,33 +46,12 @@ internal class SavedPaymentMethodConfirmScreenFactoryTest {
         interactorFactory.validate()
     }
 
-    @Test
-    fun `create derives live mode from payment method metadata`() = runTest {
-        val interactorFactory = FakeInteractorFactory()
-        val factory = createFactory(
-            interactorFactory = interactorFactory,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    isLiveMode = true,
-                )
-            ),
-        )
-
-        val screen = factory.create(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-
-        assertThat(screen.topBarState().value!!.showTestModeLabel).isFalse()
-        interactorFactory.createCalls.awaitItem()
-        interactorFactory.validate()
-    }
-
     private fun createFactory(
         interactorFactory: SavedPaymentMethodConfirmInteractor.Factory,
         selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ): SavedPaymentMethodConfirmScreenFactory {
         return SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = interactorFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,

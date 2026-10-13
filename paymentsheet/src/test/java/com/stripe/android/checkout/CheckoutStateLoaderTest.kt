@@ -273,19 +273,7 @@ internal class CheckoutStateLoaderTest {
         // The loader would recompute a card selection, but the customer's Google Pay pick must win.
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         isGooglePayAvailable = true,
-        selectionChooser = { savedStateHandle ->
-            DefaultEmbeddedSelectionChooser(
-                savedStateHandle = savedStateHandle,
-                formHelperFactory = EmbeddedFormHelperFactory(
-                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
-                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                    savedStateHandle = savedStateHandle,
-                    isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-                ),
-                internalRowSelectionCallback = { null },
-            )
-        },
+        selectionChooser = ::realSelectionChooser,
     ) {
         // Initial load seeds the chooser's stored previous configuration.
         val initialState = loadInitial().state
@@ -414,6 +402,75 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(state.linkEagerPresentationSuppressed).isFalse()
     }
+
+    @Test
+    fun `initial loading preselects a saved method`() = runScenario(
+        customer = savedCustomer(),
+        loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        assertThat(loadInitial().state.paymentSelection)
+            .isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+    }
+
+    @Test
+    fun `empty selection survives repeated reloads with saved inventory`() = runScenario(
+        customer = savedCustomer(),
+        loaderSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        val initial = loadInitial().state
+        assertThat(initial.paymentSelection).isNotNull()
+        loader.publish(CheckoutStateLoader.LoadedState(initial.copy(paymentSelection = null), savedCustomer()))
+        repeat(3) {
+            loader.reload(requireNotNull(stateHolder.state))
+            assertThat(stateHolder.state?.paymentSelection).isNull()
+            assertThat(customerStateHolder.paymentMethods.value).isEqualTo(savedCustomer().paymentMethods)
+        }
+        assertThat(loadInitial().state.paymentSelection).isNotNull()
+    }
+
+    @Test
+    fun `reload preserves a valid saved selection`() = runScenario(
+        customer = savedCustomer(),
+        loaderSelection = PaymentSelection.GooglePay,
+        isGooglePayAvailable = true,
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        val selected = loadInitial().state.copy(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+        loader.reload(selected)
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(selected.paymentSelection)
+    }
+
+    @Test
+    fun `reload falls back when a previously selected method is removed`() = runScenario(
+        customer = savedCustomer(),
+        loaderSelection = PaymentSelection.GooglePay,
+        isGooglePayAvailable = true,
+        selectionChooser = ::realSelectionChooser,
+    ) {
+        val selected = loadInitial().state.copy(
+            paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+        paymentElementLoader.updatePaymentMethods(emptyList())
+        loader.reload(selected)
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    private fun realSelectionChooser(savedStateHandle: SavedStateHandle): EmbeddedSelectionChooser =
+        DefaultEmbeddedSelectionChooser(
+            savedStateHandle = savedStateHandle,
+            formHelperFactory = EmbeddedFormHelperFactory(
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                savedStateHandle = savedStateHandle,
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            ),
+            internalRowSelectionCallback = { null },
+        )
 
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 

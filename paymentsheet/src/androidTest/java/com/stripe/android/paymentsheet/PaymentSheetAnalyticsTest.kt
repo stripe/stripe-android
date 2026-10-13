@@ -90,6 +90,10 @@ internal class PaymentSheetAnalyticsTest(
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(
             eventName = "mc_load_succeeded",
+            analyticsPayloadField(
+                Uri.encode("mpe_config[api_configuration]"),
+                (apiConfigurationTestType.apiConfiguration != null).toString(),
+            ),
             analyticsPayloadField(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
         )
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")

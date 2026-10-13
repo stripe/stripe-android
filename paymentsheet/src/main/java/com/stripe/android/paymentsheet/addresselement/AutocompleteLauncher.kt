@@ -132,7 +132,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
             isRootScreen: Boolean,
             onBack: () -> Unit,
         ) {
-            AddressOptionsAppBar(isRootScreen = isRootScreen) {
+            AddressOptionsAppBar(isRootScreen = isRootScreen, isEnabled = true) {
                 onBack()
             }
         }

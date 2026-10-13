@@ -37,7 +37,7 @@ class CheckoutPlaygroundScenariosTest {
         assertThat(snapshot[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.US)
         assertThat(snapshot[CheckoutPlaygroundDefinitions.session.currency]).isEqualTo(Currency.USD)
         assertThat(snapshot[CheckoutPlaygroundDefinitions.session.automaticPaymentMethods]).isFalse()
-        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.paymentMethodTypes]).containsExactly(
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes]).containsExactly(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.USBankAccount.code,
             PaymentMethod.Type.Link.code,
@@ -52,7 +52,7 @@ class CheckoutPlaygroundScenariosTest {
 
         assertThat(snapshot[CheckoutPlaygroundDefinitions.session.merchant]).isEqualTo(Merchant.JP)
         assertThat(snapshot[CheckoutPlaygroundDefinitions.session.currency]).isEqualTo(Currency.JPY)
-        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.paymentMethodTypes]).containsExactly(
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes]).containsExactly(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.Konbini.code,
             PaymentMethod.Type.PayPay.code,

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
@@ -32,6 +33,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
@@ -50,6 +52,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
             )
         }
 
@@ -68,6 +71,7 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
@@ -84,11 +88,44 @@ class LinkButtonTest {
                 enabled = true,
                 onClick = {},
                 linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
             )
         }
 
         composeRule.onNodeWithTag(
             LinkButtonTestTag
         ).assertContentDescriptionContains("Pay with Onelink")
+    }
+
+    @Test
+    fun signedOutButton_displaysCompactContent_belowCompactWidth() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 199.dp,
+            )
+        }
+
+        composeRule.onNodeWithTag(LinkButtonCompactContentTestTag, useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithTag(LinkButtonFullContentTestTag, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun signedOutButton_displaysFullContent_atCompactWidth() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 200.dp,
+            )
+        }
+
+        composeRule.onNodeWithTag(LinkButtonFullContentTestTag, useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithTag(LinkButtonCompactContentTestTag, useUnmergedTree = true).assertDoesNotExist()
     }
 }

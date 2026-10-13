@@ -27,6 +27,26 @@ class AdministrativeAreaConfigTest {
     }
 
     @Test
+    fun `matches state codes without regard to case`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.US()
+        )
+
+        Truth.assertThat(config.convertFromRaw("wa"))
+            .isEqualTo("Washington")
+    }
+
+    @Test
+    fun `matches state names without regard to case`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.US()
+        )
+
+        Truth.assertThat(config.convertFromRaw("washington"))
+            .isEqualTo("Washington")
+    }
+
+    @Test
     fun `us displays state`() {
         val config = AdministrativeAreaConfig(
             AdministrativeAreaConfig.Country.US()
@@ -59,6 +79,26 @@ class AdministrativeAreaConfigTest {
             AdministrativeAreaConfig.Country.Brazil()
         )
         Truth.assertThat(config.convertFromRaw("SP"))
+            .isEqualTo("São Paulo")
+    }
+
+    @Test
+    fun `brazil matches state codes without regard to case`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.Brazil()
+        )
+
+        Truth.assertThat(config.convertFromRaw("sp"))
+            .isEqualTo("São Paulo")
+    }
+
+    @Test
+    fun `brazil matches state names without regard to case`() {
+        val config = AdministrativeAreaConfig(
+            AdministrativeAreaConfig.Country.Brazil()
+        )
+
+        Truth.assertThat(config.convertFromRaw("são paulo"))
             .isEqualTo("São Paulo")
     }
 

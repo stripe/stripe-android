@@ -145,7 +145,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Maybe(
                         isEditing = state.isEditing,
                         canEdit = state.canEdit,
@@ -202,7 +201,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -248,7 +246,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -294,7 +291,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -346,7 +342,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -424,7 +419,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.cvcCompletionState.mapAsStateFlow { complete ->
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = interactor.viewState.value.isTestMode.not(),
                     editable = PaymentSheetTopBarState.Editable.Maybe(
                         isEditing = complete is CvcCompletionState.Incomplete,
                         canEdit = false,
@@ -476,7 +470,6 @@ internal sealed interface PaymentSheetScreen {
 
     class SavedPaymentMethodConfirm(
         private val interactor: SavedPaymentMethodConfirmInteractor,
-        private val isLiveMode: Boolean,
     ) : PaymentSheetScreen, Closeable {
         override val buyButtonState = stateFlowOf(
             BuyButtonState(visible = true)
@@ -490,7 +483,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    isLiveMode = isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
             )
@@ -528,7 +520,6 @@ internal sealed interface PaymentSheetScreen {
                         initialSelection = initialSelection,
                         viewModel = viewModel,
                     ),
-                    isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 )
             }
         }

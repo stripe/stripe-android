@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import android.app.Application
 import android.content.pm.ActivityInfo
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -12,9 +13,12 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -241,6 +245,92 @@ class CustomerSheetTest {
         completeTest()
     }
 
+    @Test
+    fun `retrieving saved payment method passes configured appearance to factory`() = runFactoryScenario {
+        val call = retrieveFactoryCall()
+
+        assertThat(call.selection).isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        assertThat(call.canUseGooglePay).isFalse()
+        assertThat(call.appearance).isEqualTo(CUSTOM_CONFIGURATION.appearance)
+    }
+
+    @Test
+    fun `retrieving Google Pay passes configured appearance to factory`() = runFactoryScenario(
+        paymentOption = CustomerAdapter.PaymentOption.GooglePay,
+        configuration = CUSTOM_CONFIGURATION.newBuilder().googlePayEnabled(true).build(),
+    ) {
+        val call = retrieveFactoryCall()
+
+        assertThat(call.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(call.canUseGooglePay).isTrue()
+        assertThat(call.appearance).isEqualTo(CUSTOM_CONFIGURATION.appearance)
+    }
+
+    @Test
+    fun `retrieving payment option passes default appearance to factory`() = runFactoryScenario(
+        configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc."),
+    ) {
+        val call = retrieveFactoryCall()
+
+        assertThat(call.selection).isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        assertThat(call.appearance).isEqualTo(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun `retrieving null selection passes configured appearance to factory`() = runFactoryScenario(
+        paymentOption = null,
+    ) {
+        val call = retrieveFactoryCall()
+
+        assertThat(call.selection).isNull()
+        assertThat(call.appearance).isEqualTo(CUSTOM_CONFIGURATION.appearance)
+    }
+
+    @Test
+    fun `retrieving after reconfiguration passes updated appearance to factory`() = runFactoryScenario {
+        assertThat(retrieveFactoryCall().appearance).isEqualTo(CUSTOM_CONFIGURATION.appearance)
+        val updatedAppearance = PaymentSheet.Appearance(
+            shapes = PaymentSheet.Shapes(cornerRadiusDp = 20f, borderStrokeWidthDp = 1f),
+        )
+
+        customerSheet.configure(CUSTOM_CONFIGURATION.newBuilder().appearance(updatedAppearance).build())
+
+        assertThat(retrieveFactoryCall().appearance).isEqualTo(updatedAppearance)
+    }
+
+    private fun runFactoryScenario(
+        paymentOption: CustomerAdapter.PaymentOption? = CustomerAdapter.PaymentOption.fromId(CARD_PAYMENT_METHOD.id!!),
+        configuration: CustomerSheet.Configuration = CUSTOM_CONFIGURATION,
+        test: suspend FactoryScenario.() -> Unit,
+    ) = runTestActivityTest {
+        val factory = FakePaymentOptionSelectionFactory()
+        CustomerSheetHacks.initialize(
+            application = activity.application,
+            lifecycleOwner = activity,
+            integration = CustomerSheetIntegration.Adapter(
+                FakeCustomerAdapter(selectedPaymentOption = CustomerAdapter.Result.success(paymentOption)),
+            ),
+        )
+        val customerSheet = CustomerSheet(
+            application = activity.application,
+            lifecycleOwner = activity,
+            activityResultRegistryOwner = activity,
+            viewModelStoreOwner = activity,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+            paymentOptionSelectionFactory = factory,
+            callback = {},
+            statusBarColor = { null },
+        )
+        customerSheet.configure(configuration)
+
+        runBlocking {
+            FactoryScenario(customerSheet, factory).test()
+        }
+
+        factory.ensureAllEventsConsumed()
+        completeTest()
+    }
+
     private fun runPaymentOptionTest(
         configuration: CustomerSheet.Configuration?,
         paymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =
@@ -308,4 +398,23 @@ class CustomerSheetTest {
     )
 
     private class TestActivity : AppCompatActivity()
+
+    private class FactoryScenario(
+        val customerSheet: CustomerSheet,
+        val factory: FakePaymentOptionSelectionFactory,
+    ) {
+        suspend fun retrieveFactoryCall(): FakePaymentOptionSelectionFactory.CreateCall {
+            customerSheet.retrievePaymentOptionSelection()
+            return factory.createCalls.awaitItem()
+        }
+    }
+
+    private companion object {
+        val CUSTOM_CONFIGURATION = CustomerSheet.Configuration(
+            merchantDisplayName = "Merchant, Inc.",
+            appearance = PaymentSheet.Appearance(
+                colorsLight = PaymentSheet.Colors.Builder.light().component(Color.BLACK).build(),
+            ),
+        )
+    }
 }

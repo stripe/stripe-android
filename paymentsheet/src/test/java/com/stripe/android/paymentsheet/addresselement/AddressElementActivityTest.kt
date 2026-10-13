@@ -253,6 +253,7 @@ internal class AddressElementActivityTest {
         try {
             startTaxUpdate(taxUpdate)
             assertSaving()
+            addressPage.assertCloseDisabled()
             taxUpdate.releaseResponse.countDown()
 
             addressPage.assertErrorDisplayed(expectedError)
@@ -286,6 +287,93 @@ internal class AddressElementActivityTest {
         addressPage.dismissViaScrimAccessibilityAction()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `checkout shipping close is disabled while tax update is in flight`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+            addressPage.assertCloseDisabled()
+
+            addressPage.clickClose()
+            assertSaving()
+            addressPage.assertCloseDisabled()
+
+            taxUpdate.releaseResponse.countDown()
+            awaitResult()
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping back does not dismiss while tax update is in flight`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+
+            activityScenario.onActivity { activity ->
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+            assertSaving()
+
+            taxUpdate.releaseResponse.countDown()
+            awaitResult()
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping scrim accessibility action does not dismiss while tax update is in flight`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+
+            addressPage.dismissViaScrimAccessibilityAction()
+            assertSaving()
+
+            taxUpdate.releaseResponse.countDown()
+            awaitResult()
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    @Test
+    fun `checkout shipping keeps save and close disabled after recreation during tax update`() = runScenario {
+        val taxUpdate = enqueueTaxUpdate()
+
+        try {
+            startTaxUpdate(taxUpdate)
+            assertSaving()
+            addressPage.assertCloseDisabled()
+
+            activityScenario.recreate()
+            activityScenario.onActivity { activity = it }
+            composeTestRule.waitForIdle()
+
+            addressPage.assertVisible()
+            assertSaving()
+            addressPage.assertCloseDisabled()
+
+            taxUpdate.releaseResponse.countDown()
+
+            val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+            assertThat(result.address.name).isEqualTo(SHIPPING_ADDRESS.name)
+            assertThat(result.address.address?.line1).isEqualTo(SHIPPING_ADDRESS.address?.line1)
+            assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+            assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
+        } finally {
+            taxUpdate.releaseResponse.countDown()
+        }
     }
 
     private fun runScenario(

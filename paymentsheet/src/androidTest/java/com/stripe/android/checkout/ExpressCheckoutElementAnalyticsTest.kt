@@ -303,12 +303,12 @@ internal class ExpressCheckoutElementAnalyticsTest {
     private fun runExpressCheckoutElementAnalyticsTest(
         linkEnabled: Boolean = true,
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
-        block: () -> Unit,
+        block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
         enqueueLoadingRequests(linkEnabled = linkEnabled)
         validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
 
-        runExpressCheckoutElementTest(
+        runExpressCheckoutElementScenario(
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = initialCheckoutSessionResponseFactory,
             resultCallback = {

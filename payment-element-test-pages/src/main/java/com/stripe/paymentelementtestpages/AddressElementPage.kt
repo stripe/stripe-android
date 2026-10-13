@@ -93,6 +93,16 @@ class AddressElementPage(
         scrim.performSemanticsAction(SemanticsActions.OnClick)
     }
 
+    fun assertVisible() {
+        primaryButton.performScrollTo().assertIsDisplayed()
+        closeButton.assertIsDisplayed()
+        scrim.assertIsDisplayed()
+    }
+
+    fun assertCloseDisabled() {
+        closeButton.assertIsNotEnabled()
+    }
+
     fun assertReadyToSave() {
         primaryButton.assertIsEnabled()
         closeButton.assertIsEnabled()

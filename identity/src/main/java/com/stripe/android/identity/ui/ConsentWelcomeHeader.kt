@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,6 +44,7 @@ internal fun ConsentWelcomeHeader(
     modifier: Modifier = Modifier,
     merchantLogoUri: Uri,
     title: String?,
+    subtitle: String?,
     showLogos: Boolean = true,
     showStripeLogo: Boolean = true
 ) {
@@ -106,9 +109,14 @@ internal fun ConsentWelcomeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                vertical = dimensionResource(
+                top = dimensionResource(
                     id = R.dimen.stripe_item_vertical_margin
-                )
+                ),
+                bottom = if (subtitle != null) {
+                    12.dp
+                } else {
+                    dimensionResource(id = R.dimen.stripe_item_vertical_margin)
+                }
             )
             .semantics {
                 testTag = TITLE_TAG
@@ -117,6 +125,18 @@ internal fun ConsentWelcomeHeader(
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center
     )
+    if (subtitle != null) {
+        Text(
+            text = subtitle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
+                .semantics { testTag = SUBTITLE_TAG },
+            color = colorResource(id = R.color.stripe_html_line),
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Preview
@@ -129,6 +149,7 @@ internal fun ConsentWelcomeHeaderPreview() {
                 modifier = Modifier,
                 merchantLogoUri = Uri.EMPTY,
                 title = "TEST TITLE",
+                subtitle = null,
                 showLogos = true
             )
         }

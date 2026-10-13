@@ -25,8 +25,8 @@ internal class DefaultFinancialConnectionsAnalyticsEventSender(
     )
 
     private val configurationParams = mapOf(
-        "key" to configuration.publishableKey,
-        "stripe_account" to configuration.stripeAccountId,
+        "key" to configuration.apiConfiguration.publishableKey,
+        "stripe_account" to configuration.apiConfiguration.stripeAccountId,
         "navigator_language" to locale.toLanguageTag(),
         "is_webview" to false.toString()
     )

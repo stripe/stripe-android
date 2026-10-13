@@ -1,7 +1,30 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.23.0 - 2026-10-12
+
+### Payments
+* [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+* [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
+* [Fixed] Return errors for invalid client secrets in legacy Stripe next-action APIs instead of throwing uncaught exceptions.
+
+### PaymentSheet
+* [Fixed] Address forms now recognize country and state codes and names case-insensitively when prefilling default values.
+* [ADDED][14585](https://github.com/stripe/stripe-android/pull/14585) Added Naira card API bindings and PaymentSheet support for one-time payments.
+* [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
+* [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
+
+### AddressElement
+* [Fixed] Address Element now rejects incomplete optional phone numbers.
+
+### Financial Connections
+* [REMOVED] Removed the test mode indicator from the header.
+
+## 23.22.0 - 2026-10-05
 
 ### Crypto Onramp
 * [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
@@ -9,6 +32,7 @@ NEXT_VERSION_BUMP: MINOR
 * [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
 * [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
 * [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+* [FIXED] Fixed missing callbacks when reusing an `OnrampCoordinator` to create a new presenter after its previous host activity finishes.
 
 ### Payments
 * [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.

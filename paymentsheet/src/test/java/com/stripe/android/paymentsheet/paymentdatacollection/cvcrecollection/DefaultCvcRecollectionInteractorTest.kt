@@ -20,7 +20,6 @@ class DefaultCvcRecollectionInteractorTest {
             lastFour = "4242",
             cardBrand = CardBrand.Visa,
             cvc = "",
-            isTestMode = true,
             processing = processing,
             coroutineScope = scope,
         )
@@ -34,7 +33,6 @@ class DefaultCvcRecollectionInteractorTest {
             val viewState = awaitItem()
             assertThat(viewState.lastFour).isEqualTo("4242")
             assertThat(viewState.cvcState).isEqualTo(CvcState(cvc = "", cardBrand = CardBrand.Visa))
-            assertThat(viewState.isTestMode).isEqualTo(true)
         }
     }
 

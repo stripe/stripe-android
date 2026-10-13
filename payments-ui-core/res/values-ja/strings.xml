@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">電話番号</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">NICEPAY による支払いを確定すると、%s が規約に従って今後の支払いをこの決済手段に請求することを許可することになります。</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">法人の購入者向けの請求書払い。</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">カード名義人</string>
   <!-- Label for the Naver Pay funding source selector -->

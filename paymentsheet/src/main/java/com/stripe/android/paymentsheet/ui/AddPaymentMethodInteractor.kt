@@ -28,8 +28,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
-    val isLiveMode: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
@@ -85,7 +83,6 @@ internal class DefaultAddPaymentMethodInteractor(
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
-    override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
     companion object {
@@ -131,7 +128,6 @@ internal class DefaultAddPaymentMethodInteractor(
                 coroutineScope = coroutineScope,
                 validationRequested = viewModel.validationRequested,
                 uiContext = Dispatchers.Main,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                     viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                         visiblePaymentMethods = visiblePaymentMethods,

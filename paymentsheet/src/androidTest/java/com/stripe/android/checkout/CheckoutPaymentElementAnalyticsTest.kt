@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
@@ -48,7 +47,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Test
-    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementTest(
+    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
@@ -65,7 +64,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         },
-    ) { context ->
+    ) {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_carousel_payment_method_tapped",
             productUsage = setOf("Checkout"),
@@ -89,12 +88,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         contentPage.clickOnLpm("card")
         formPage.waitUntilVisible()
-        context.markTestSucceeded()
+        markTestSucceeded()
     }
 
     @Test
     fun testGooglePayTotalChangeFailureSendsAnalyticsErrorCode() {
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
@@ -117,7 +116,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
-        ) { context ->
+        ) {
             // Google Pay returns a new payment method, so its billing address is only synced to
             // the Checkout Session during confirmation.
             enqueueSuccessfulGooglePayPayment(paymentMethod = createPaymentMethodWithBillingAddress())
@@ -154,7 +153,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
 
             contentPage.clickOnLpm("google_pay")
-            context.confirm()
+            confirm()
         }
 
         assertGooglePayCalledWithRequiredBillingAddress()
@@ -162,8 +161,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
     @Test
     fun testSelectingSavedPaymentMethodWithoutBillingAddressReportsUnexpectedError() {
-        lateinit var controller: CheckoutController
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
@@ -176,8 +174,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     )
                 }
             },
-            setup = { configuredController ->
-                controller = configuredController
+            setup = { controller ->
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_load_started",
                     productUsage = setOf("Checkout"),
@@ -192,7 +189,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
-        ) { context ->
+        ) {
             contentPage.waitUntilVisible()
             networkRule.validateAnalyticsRequest(
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
@@ -229,13 +226,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     )
                 )
             )
-            runBlocking {
-                withContext(Dispatchers.Main) {
-                    controller.selectSavedPaymentMethod(PaymentSelection.Saved(addresslessPaymentMethod))
-                        .getOrThrow()
-                }
+            withContext(Dispatchers.Main) {
+                controller.selectSavedPaymentMethod(PaymentSelection.Saved(addresslessPaymentMethod))
+                    .getOrThrow()
             }
-            context.markTestSucceeded()
+            markTestSucceeded()
         }
     }
 

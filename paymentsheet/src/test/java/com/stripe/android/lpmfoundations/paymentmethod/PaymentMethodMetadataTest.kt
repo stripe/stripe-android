@@ -2222,10 +2222,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2243,10 +2245,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2264,10 +2268,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2285,10 +2291,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,

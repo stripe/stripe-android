@@ -75,9 +75,7 @@ internal class PlaygroundSettings private constructor(
          * this case `US`)
          */
         displayableDefinitions.value.forEach { definition ->
-            val values = definition.createOptions(configurationData).map { option ->
-                option.value
-            }
+            val values = definition.createOptions(configurationData).map { option -> option.value }
 
             if (values.isEmpty()) {
                 return@forEach
@@ -97,7 +95,15 @@ internal class PlaygroundSettings private constructor(
                 }
             }
 
-            if (!values.contains(value)) {
+            @Suppress("UNCHECKED_CAST")
+            val valueMatchesOption = values.any { optionValue ->
+                (definition as PlaygroundSettingDefinition.Displayable<Any?>).optionMatchesValue(
+                    optionValue = optionValue,
+                    value = value,
+                )
+            }
+
+            if (!valueMatchesOption) {
                 currentSettings = currentSettings + (definition to values.firstOrNull())
             }
         }

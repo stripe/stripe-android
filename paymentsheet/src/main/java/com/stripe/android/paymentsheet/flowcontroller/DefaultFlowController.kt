@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -39,7 +40,6 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -251,7 +251,7 @@ internal class DefaultFlowController @Inject internal constructor(
         return paymentOptionFactory.create(
             selection = selection,
             linkBrand = linkBrand,
-            appearance = viewModel.state?.config?.appearance,
+            appearance = viewModel.state?.config?.appearance ?: ConfigurationDefaults.appearance,
         )
     }
 
@@ -516,10 +516,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
                 cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-                googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                    configuration = state.config,
-                    paymentMethodMetadata = state.paymentMethodMetadata,
-                ),
             )
 
             confirmationOption?.let { option ->

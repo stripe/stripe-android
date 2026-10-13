@@ -24,15 +24,21 @@ import okhttp3.mockwebserver.MockResponse
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-internal class CheckoutPaymentElementTestRunnerContext(
+internal class CheckoutPaymentElementScenario(
     private var presenter: CheckoutPresenter,
-    private val controller: CheckoutController,
+    val controller: CheckoutController,
     private val countDownLatch: CountDownLatch,
     private val scenario: ActivityScenario<MainActivity>,
     private val renderPaymentElementContent: Boolean,
 ) {
     fun presentPaymentOptions() {
         presenter.paymentElement().present()
+    }
+
+    fun presentShippingAddressElement() {
+        scenario.onActivity {
+            presenter.shippingAddressElement().present()
+        }
     }
 
     fun confirm() {
@@ -58,7 +64,7 @@ internal class CheckoutPaymentElementTestRunnerContext(
     }
 }
 
-internal fun runCheckoutPaymentElementTest(
+internal fun runCheckoutPaymentElementScenario(
     networkRule: NetworkRule,
     resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
         error("Override + validate if expected.")
@@ -73,7 +79,7 @@ internal fun runCheckoutPaymentElementTest(
     renderPaymentElementContent: Boolean = true,
     rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
     setup: suspend (CheckoutController) -> Unit,
-    block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
+    block: suspend CheckoutPaymentElementScenario.() -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -107,15 +113,17 @@ internal fun runCheckoutPaymentElementTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        block(
-            CheckoutPaymentElementTestRunnerContext(
-                presenter = presenter,
-                controller = controller,
-                countDownLatch = countDownLatch,
-                scenario = scenario,
-                renderPaymentElementContent = renderPaymentElementContent,
+        runBlocking {
+            block(
+                CheckoutPaymentElementScenario(
+                    presenter = presenter,
+                    controller = controller,
+                    countDownLatch = countDownLatch,
+                    scenario = scenario,
+                    renderPaymentElementContent = renderPaymentElementContent,
+                )
             )
-        )
+        }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()

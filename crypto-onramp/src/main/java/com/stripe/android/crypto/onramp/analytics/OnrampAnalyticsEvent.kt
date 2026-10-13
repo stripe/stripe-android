@@ -86,6 +86,14 @@ internal sealed class OnrampAnalyticsEvent(
         )
     )
 
+    data object KycRequirementFulfillmentStarted : OnrampAnalyticsEvent(
+        name = "fulfill_kyc_requirement_started"
+    )
+
+    data object KycRequirementFulfillmentCompleted : OnrampAnalyticsEvent(
+        name = "fulfill_kyc_requirement_completed"
+    )
+
     data object UserAttestationStarted : OnrampAnalyticsEvent(
         name = "user_attestation_started"
     )
@@ -266,7 +274,7 @@ internal sealed class OnrampAnalyticsEvent(
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
             RetrieveAdditionalKycRequirements("retrieve_additional_kyc_requirements"),
-            FulfillKycRequirements("fulfill_additional_kyc_requirement"),
+            FulfillKycRequirements("fulfill_kyc_requirement"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
             PresentUserAttestation("present_user_attestation"),

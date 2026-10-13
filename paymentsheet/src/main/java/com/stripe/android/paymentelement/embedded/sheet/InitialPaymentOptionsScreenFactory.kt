@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -59,6 +60,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
     private val continueCoordinator: SheetActivityContinueCoordinator,
+    private val onClickOverrideDelegate: OnClickOverrideDelegate,
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
@@ -82,7 +84,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         val formHelper = createFormHelper(formHelperScope)
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper, coroutineScope),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
@@ -151,13 +152,17 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
             updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun onContinueClick() {
+        val onClickOverride = onClickOverrideDelegate.onClickOverride
+        if (onClickOverride != null) {
+            onClickOverride()
+            return
+        }
         continueCoordinator.onContinue()
     }
 

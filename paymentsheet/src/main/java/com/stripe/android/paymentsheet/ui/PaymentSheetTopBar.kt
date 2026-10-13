@@ -2,10 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.graphics.Typeface
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -19,11 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -71,11 +66,7 @@ internal fun PaymentSheetTopBar(
     val tintColor = MaterialTheme.stripeColors.appBarIcon
 
     TopAppBar(
-        title = {
-            if (state.showTestModeLabel) {
-                TestModeBadge()
-            }
-        },
+        title = {},
         navigationIcon = {
             IconButton(
                 enabled = isEnabled,
@@ -157,30 +148,11 @@ private fun EditButton(
     }
 }
 
-@Composable
-internal fun TestModeBadge() {
-    val badgeColor = colorResource(R.color.stripe_paymentsheet_testmode_background)
-    val textColor = colorResource(R.color.stripe_paymentsheet_testmode_text)
-
-    Box(
-        modifier = Modifier
-            .background(badgeColor, shape = RoundedCornerShape(5.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    ) {
-        Text(
-            text = "TEST",
-            fontWeight = FontWeight.Bold,
-            color = textColor,
-        )
-    }
-}
-
 @Preview
 @Composable
 internal fun PaymentSheetTopBar_Preview() {
     StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
         val state = PaymentSheetTopBarState(
-            showTestModeLabel = true,
             showEditMenu = true,
             isEditing = false,
             onEditIconPressed = {},
@@ -193,14 +165,6 @@ internal fun PaymentSheetTopBar_Preview() {
             elevation = 0.dp,
             onNavigationIconPressed = {},
         )
-    }
-}
-
-@Preview
-@Composable
-internal fun TestModeBadge_Preview() {
-    StripeTheme {
-        TestModeBadge()
     }
 }
 

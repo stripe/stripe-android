@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GCashDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
@@ -30,6 +31,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinitio
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
@@ -39,11 +41,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PaycoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PixDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.QrisDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ScalapayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
@@ -72,6 +76,7 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
+        GCashDefinition,
         GoPayDefinition,
         GrabPayDefinition,
         IdealWeroDefinition,
@@ -85,6 +90,7 @@ internal object PaymentMethodRegistry {
         MobilePayDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
+        NgCardDefinition,
         OxxoDefinition,
         P24Definition,
         PayByBankDefinition,
@@ -94,11 +100,13 @@ internal object PaymentMethodRegistry {
         PaycoDefinition,
         PixDefinition,
         PromptPayDefinition,
+        QrisDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
         ScalapayDefinition,
         SepaDebitDefinition,
         SequraDefinition,
+        ShopeePayDefinition,
         SunbitDefinition,
         SwishDefinition,
         TwintDefinition,

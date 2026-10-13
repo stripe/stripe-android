@@ -83,26 +83,6 @@ class DefaultManageScreenInteractorTest {
     }
 
     @Test
-    fun hasCorrectTobBarState_forLiveMode() {
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
-        runScenario(initialPaymentMethods, currentSelection = null, isLiveMode = true) {
-            interactor.state.map { it.topBarState(interactor) }.test {
-                assertThat(awaitItem().showTestModeLabel).isFalse()
-            }
-        }
-    }
-
-    @Test
-    fun hasCorrectTobBarState_forTestMode() {
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
-        runScenario(initialPaymentMethods, currentSelection = null, isLiveMode = false) {
-            interactor.state.map { it.topBarState(interactor) }.test {
-                assertThat(awaitItem().showTestModeLabel).isTrue()
-            }
-        }
-    }
-
-    @Test
     fun hasCorrectTobBarState_forEditing() {
         val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
         runScenario(initialPaymentMethods, currentSelection = null) {
