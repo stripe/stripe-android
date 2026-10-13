@@ -13,9 +13,8 @@ import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
-import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -29,6 +28,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +41,7 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val resultStateHolder = AddressElementResultStateHolder()
-    private val eventReporter = mock<AddressLauncherEventReporter>()
+    private val eventReporter = FakeAddressElementEventReporter()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -51,7 +51,7 @@ class InputAddressViewModelTest {
         primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
-        eventReporter: AddressLauncherEventReporter = this.eventReporter,
+        eventReporter: AddressElementEventReporter = this.eventReporter,
         placesClient: PlacesClientProxy? = null,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
@@ -65,7 +65,7 @@ class InputAddressViewModelTest {
             argsFactory(config),
             navigator,
             resultStateHolder,
-            StandaloneAddressElementEventReporter(eventReporter),
+            eventReporter,
             placesClient = placesClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
@@ -77,13 +77,20 @@ class InputAddressViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
+    @After
+    fun ensureEventReporterEventsConsumed() {
+        eventReporter.validate()
+    }
+
     @Test
     fun `onScreenShown fires onShow with the form country from the initial address`() = runScenario(
         address = AddressDetails(address = PaymentSheet.Address(country = "US")),
     ) {
         viewModel.onScreenShown()
 
-        assertThat(eventReporter.showCalls.awaitItem()).isEqualTo("US")
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "US")
+        )
     }
 
     @Test
@@ -93,7 +100,9 @@ class InputAddressViewModelTest {
 
         viewModel.onScreenShown()
 
-        assertThat(eventReporter.showCalls.awaitItem()).isEqualTo("US")
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "US")
+        )
     }
 
     @Test
@@ -107,7 +116,9 @@ class InputAddressViewModelTest {
 
         viewModel.onScreenShown()
 
-        assertThat(eventReporter.showCalls.awaitItem()).isEqualTo("CA")
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "CA")
+        )
     }
 
     @Test
@@ -209,6 +220,15 @@ class InputAddressViewModelTest {
             )
         ),
     ) {
+        val addressDetails = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US",
+            ),
+            isCheckboxSelected = true,
+        )
+
         viewModel.clickPrimaryButton(
             completedFormValues = mapOf(
                 FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
@@ -221,26 +241,18 @@ class InputAddressViewModelTest {
         assertThat(resultStateHolder.state.value).isEqualTo(
             State.Finished(
                 AddressElementActivityContract.Result.StandaloneSucceeded(
-                    AddressDetails(
-                        address = PaymentSheet.Address(
-                            line1 = "99 Broadway St",
-                            city = "Seattle",
-                            country = "US",
-                        ),
-                        isCheckboxSelected = true,
-                    )
+                    addressDetails
                 )
             )
         )
         assertThat(viewModel.formEnabled.value).isFalse()
 
-        assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
-            FakeAddressLauncherEventReporter.CompletedCall(
-                country = "US",
-                autocompleteResultSelected = false,
-                editDistance = null,
-            )
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = null,
         )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
     }
 
     @Test
@@ -262,13 +274,18 @@ class InputAddressViewModelTest {
             checkboxChecked = false,
         )
 
-        assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
-            FakeAddressLauncherEventReporter.CompletedCall(
-                country = "US",
-                autocompleteResultSelected = true,
-                editDistance = 0,
-            )
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = false,
+            ),
+            autocompleteAddressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = null,
+            ),
         )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
     }
 
     @Test
@@ -281,21 +298,26 @@ class InputAddressViewModelTest {
             checkboxChecked = false,
         )
 
-        assertThat(eventReporter.completedCalls.awaitItem()).isEqualTo(
-            FakeAddressLauncherEventReporter.CompletedCall(
-                country = "US",
-                autocompleteResultSelected = true,
-                // "123 Main Street" -> "123 Main St"
-                editDistance = 4,
-            )
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = selectedAutocompleteAddressDetails(
+                line1 = "123 Main St",
+                isCheckboxSelected = false,
+            ),
+            autocompleteAddressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = null,
+            ),
         )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
     }
 
     @Test
     fun `clickPrimaryButton accepts a second click when first submission fails`() = runTest {
+        val firstError = IllegalStateException("first submission failed")
         val results = ArrayDeque<Result<AddressElementActivityContract.Result>>(
             listOf(
-                Result.failure(IllegalStateException("first submission failed")),
+                Result.failure(firstError),
                 Result.success(
                     AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
                 ),
@@ -304,10 +326,14 @@ class InputAddressViewModelTest {
         val primaryButtonAction = RecordingPrimaryButtonAction {
             results.removeFirst()
         }
-        val eventReporter = FakeAddressLauncherEventReporter()
+        val eventReporter = FakeAddressElementEventReporter()
         val viewModel = createViewModel(
             primaryButtonAction = primaryButtonAction,
             eventReporter = eventReporter,
+        )
+        val expectedAddressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
         )
 
         assertThat(viewModel.saveError.value).isNull()
@@ -315,18 +341,23 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
+        )
         assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(viewModel.saveError.value)
-            .isEqualTo(IllegalStateException("first submission failed").stripeErrorMessage())
-        eventReporter.completedCalls.expectNoEvents()
+        assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
+        eventReporter.saveCompletedCalls.expectNoEvents()
         assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
         assertThat(viewModel.formEnabled.value).isFalse()
         assertThat(viewModel.saveError.value).isNull()
-        assertThat(eventReporter.completedCalls.awaitItem().country).isEqualTo("US")
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        eventReporter.saveFailedCalls.expectNoEvents()
         assertThat(resultStateHolder.state.value).isEqualTo(
             State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
@@ -349,25 +380,37 @@ class InputAddressViewModelTest {
         val primaryButtonAction = RecordingPrimaryButtonAction {
             results.removeFirst()
         }
-        val eventReporter = FakeAddressLauncherEventReporter()
+        val eventReporter = FakeAddressElementEventReporter()
         val viewModel = createViewModel(
             primaryButtonAction = primaryButtonAction,
             eventReporter = eventReporter,
+        )
+        val expectedAddressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
         )
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
+        )
         assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
         assertThat(viewModel.formEnabled.value).isTrue()
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, secondError)
+        )
         assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
         assertThat(viewModel.formEnabled.value).isTrue()
         assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
-        eventReporter.completedCalls.expectNoEvents()
+        eventReporter.saveCompletedCalls.expectNoEvents()
 
         primaryButtonAction.validate()
         eventReporter.validate()
@@ -387,6 +430,14 @@ class InputAddressViewModelTest {
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
         assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        val expectedAddressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, error)
+        )
         assertThat(viewModel.saveError.value).isEqualTo(error.stripeErrorMessage())
 
         viewModel.setRawValues(mapOf(FormFieldId.Line1 to ""))
@@ -402,10 +453,14 @@ class InputAddressViewModelTest {
         val primaryButtonAction = RecordingPrimaryButtonAction {
             primaryButtonResult.await()
         }
-        val eventReporter = FakeAddressLauncherEventReporter()
+        val eventReporter = FakeAddressElementEventReporter()
         val viewModel = createViewModel(
             primaryButtonAction = primaryButtonAction,
             eventReporter = eventReporter,
+        )
+        val expectedAddressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
         )
         val controller = (
             (viewModel.addressFormController.elements.single() as SectionElement).fields.single()
@@ -418,12 +473,15 @@ class InputAddressViewModelTest {
             viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
             assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
             assertThat(viewModel.formEnabled.value).isFalse()
 
             viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
 
             primaryButtonAction.calls.expectNoEvents()
-            eventReporter.completedCalls.expectNoEvents()
+            eventReporter.saveStartedCalls.expectNoEvents()
+            eventReporter.saveFailedCalls.expectNoEvents()
+            eventReporter.saveCompletedCalls.expectNoEvents()
             expectNoEvents()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
 
@@ -432,7 +490,7 @@ class InputAddressViewModelTest {
                     AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
                 )
             )
-            eventReporter.completedCalls.awaitItem()
+            assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedAddressCall)
         }
 
         primaryButtonAction.validate()
@@ -1223,11 +1281,17 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `standalone save emits standalone success`() {
+    fun `standalone save emits standalone success`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
         assertThat(resultStateHolder.state.value).isEqualTo(
             State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
@@ -1258,7 +1322,7 @@ class InputAddressViewModelTest {
             ),
             navigator,
             resultStateHolder,
-            StandaloneAddressElementEventReporter(eventReporter),
+            eventReporter,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
@@ -1311,6 +1375,20 @@ class InputAddressViewModelTest {
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
 
+    private fun selectedAutocompleteAddressDetails(
+        line1: String?,
+        isCheckboxSelected: Boolean?,
+    ) = AddressDetails(
+        address = PaymentSheet.Address(
+            city = SELECTED_AUTOCOMPLETE_ADDRESS.city,
+            country = SELECTED_AUTOCOMPLETE_ADDRESS.country,
+            line1 = line1,
+            postalCode = SELECTED_AUTOCOMPLETE_ADDRESS.postalCode,
+            state = SELECTED_AUTOCOMPLETE_ADDRESS.state,
+        ),
+        isCheckboxSelected = isCheckboxSelected,
+    )
+
     private fun runScenario(
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
@@ -1318,7 +1396,7 @@ class InputAddressViewModelTest {
             .build(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val eventReporter = FakeAddressLauncherEventReporter()
+        val eventReporter = FakeAddressElementEventReporter()
         val placesClient = FakePlacesClientProxy(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
             fetchPlaceResult = Result.success(Address()),
@@ -1341,7 +1419,7 @@ class InputAddressViewModelTest {
 
     private data class Scenario(
         val viewModel: InputAddressViewModel,
-        val eventReporter: FakeAddressLauncherEventReporter,
+        val eventReporter: FakeAddressElementEventReporter,
         val placesClient: FakePlacesClientProxy,
     ) {
         suspend fun selectAutocompletePrediction(address: Address) {
