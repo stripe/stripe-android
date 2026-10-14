@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.Stripe.Companion.advancedFraudSignalsEnabled
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -125,7 +126,10 @@ class Stripe internal constructor(
         stripeRepository,
         StripePaymentController(
             context.applicationContext,
-            { publishableKey },
+            ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+            ),
             stripeRepository,
             enableLogging
         ),

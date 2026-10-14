@@ -336,7 +336,10 @@ internal class GooglePayLauncherViewModel(
                 stripeRepository = stripeRepository,
                 paymentController = StripePaymentController(
                     application,
-                    { publishableKey },
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = null,
+                    ),
                     stripeRepository,
                     enableLogging,
                     workContext = workContext
