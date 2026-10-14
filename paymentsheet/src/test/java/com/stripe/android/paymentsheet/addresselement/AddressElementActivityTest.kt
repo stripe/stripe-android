@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -274,7 +275,14 @@ internal class AddressElementActivityTest {
         addressPage.assertReadyToSave()
 
         activityScenario.onActivity { activity ->
+            val viewModel = ViewModelProvider(activity)[AddressElementViewModel::class.java]
+            val navController = requireNotNull(viewModel.navigator.navigationController)
+            val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
+
             activity.onBackPressedDispatcher.onBackPressed()
+
+            assertThat(navController.getBackStackEntry(AddressElementScreen.InputAddress.route))
+                .isSameInstanceAs(inputEntry)
         }
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)

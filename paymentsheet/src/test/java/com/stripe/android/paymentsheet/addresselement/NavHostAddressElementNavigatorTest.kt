@@ -35,15 +35,6 @@ internal class NavHostAddressElementNavigatorTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `root Back returns false and leaves Input entry accessible`() = runScenario {
-        val backHandled = composeRule.runOnIdle { navigator.onBack() }
-
-        assertThat(backHandled).isFalse()
-        composeRule.onNodeWithText(INPUT_DESTINATION).assertIsDisplayed()
-        assertThat(inputResultFlow()).isNotNull()
-    }
-
-    @Test
     fun `Back returns true and pops nested destination`() = runScenario {
         navigateToAutocomplete()
 
