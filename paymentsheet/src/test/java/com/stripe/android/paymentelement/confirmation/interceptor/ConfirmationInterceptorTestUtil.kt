@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation.interceptor
 
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
@@ -15,7 +14,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.RadarOptions
-import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -105,22 +103,9 @@ internal fun ConfirmStripeIntentParams.radarOptions(): RadarOptions? {
     }
 }
 
-internal data class CreateSavedPaymentMethodRadarSessionCall(
-    val paymentMethodId: String,
-    val requestOptions: ApiRequest.Options
-)
-
 internal fun stripeRepositoryReturning(
     onCreatePaymentMethodId: String,
     onRetrievePaymentMethodId: String,
-    createSavedPaymentMethodRadarSessionCalls: Turbine<CreateSavedPaymentMethodRadarSessionCall> = Turbine(),
-    createSavedPaymentMethodRadarSessionResult: Result<RadarSessionWithHCaptcha> = Result.success(
-        RadarSessionWithHCaptcha(
-            id = "rse_123",
-            passiveCaptchaSiteKey = "1234",
-            passiveCaptchaRqdata = "123456789",
-        )
-    ),
 ): StripeRepository {
     return object : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
@@ -144,17 +129,6 @@ internal fun stripeRepositoryReturning(
                     paymentMethodId = onRetrievePaymentMethodId
                 )
             )
-        }
-
-        override suspend fun createSavedPaymentMethodRadarSession(
-            paymentMethodId: String,
-            requestOptions: ApiRequest.Options
-        ): Result<RadarSessionWithHCaptcha> {
-            createSavedPaymentMethodRadarSessionCalls.add(
-                CreateSavedPaymentMethodRadarSessionCall(paymentMethodId, requestOptions)
-            )
-
-            return createSavedPaymentMethodRadarSessionResult
         }
     }
 }

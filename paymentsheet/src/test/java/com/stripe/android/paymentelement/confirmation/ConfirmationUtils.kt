@@ -136,7 +136,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
                     handler = handler,
                     stripeRepository = stripeRepository,
-                    errorReporter = errorReporter,
                     requestOptions = requestOptions,
                 )
             }
