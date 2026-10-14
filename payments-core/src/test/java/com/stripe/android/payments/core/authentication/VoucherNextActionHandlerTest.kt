@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -68,7 +69,7 @@ internal class VoucherNextActionHandlerTest {
                 analyticsRequestExecutor = analyticsExecutor,
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = context,
-                    publishableKeyProvider = { "pk_test_analytics" },
+                    publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 ),
                 enableLogging = false,
                 uiContext = UnconfinedTestDispatcher(testScheduler),
@@ -121,7 +122,13 @@ internal class VoucherNextActionHandlerTest {
     }
 
     private companion object {
-        val API_CONFIGURATION = ApiConfiguration.State("pk_test_voucher", null)
-        val REQUEST_OPTIONS = ApiRequest.Options("pk_test_voucher", "acct_voucher")
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        )
+        val REQUEST_OPTIONS = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
     }
 }
