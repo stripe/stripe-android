@@ -2,10 +2,12 @@ package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -66,6 +68,12 @@ private fun rememberCustomerSheet(
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "CustomerSheet must be created with access to a ViewModelStoreOwner"
+    }
+
+    DisposableEffect(integration) {
+        onDispose {
+            CustomerSheetHacks.clear()
+        }
     }
 
     return remember(
