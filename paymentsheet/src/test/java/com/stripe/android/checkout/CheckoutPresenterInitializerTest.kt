@@ -58,6 +58,33 @@ internal class CheckoutPresenterInitializerTest {
     }
 
     @Test
+    fun `destroying an old presenter keeps the new presenter's sheet launcher`() = runScenario {
+        initializer.initialize()
+        confirmationHandler.registerTurbine.awaitItem()
+
+        val newLifecycleOwner = TestLifecycleOwner()
+        val newSheetLauncher = FakeEmbeddedSheetLauncher()
+        val newConfirmationHandler = FakeConfirmationHandler()
+        CheckoutPresenterInitializer(
+            confirmationHandler = newConfirmationHandler,
+            activityResultCaller = mock(),
+            lifecycleOwner = newLifecycleOwner,
+            sheetLauncher = newSheetLauncher,
+            sheetStateHolder = sheetStateHolder,
+            stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()),
+        ).initialize()
+        newConfirmationHandler.registerTurbine.awaitItem()
+        assertThat(sheetStateHolder.sheetLauncher).isSameInstanceAs(newSheetLauncher)
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(sheetStateHolder.sheetLauncher).isSameInstanceAs(newSheetLauncher)
+
+        newLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
+        newConfirmationHandler.validate()
+    }
+
+    @Test
     fun `initialize applies the restored embedded appearance`() = runTest {
         val appearance = PaymentSheet.Appearance.Builder()
             .colorsLight(PaymentSheet.Colors.Builder.light().primary(0xFF123456.toInt()).build())
