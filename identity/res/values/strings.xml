@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Details not visible</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">continue</string>
+  <string name="stripe_kontinue">Continue</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">Last 4 of Social Security number</string>
   <!-- Label for last (family) name field -->
