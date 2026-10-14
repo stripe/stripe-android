@@ -40,6 +40,38 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
+    fun `standalone onSaveCompleted reports zero edit distance for an unchanged selection`() = runScenario {
+        standaloneReporter.onSaveCompleted(
+            addressDetails = createAddressDetails(line1 = "123 Main Street"),
+            autocompleteAddressDetails = createAddressDetails(line1 = "123 Main Street"),
+        )
+
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 0,
+            )
+        )
+    }
+
+    @Test
+    fun `standalone onSaveCompleted reports four edited characters in the address line`() = runScenario {
+        standaloneReporter.onSaveCompleted(
+            addressDetails = createAddressDetails(line1 = "123 Main St"),
+            autocompleteAddressDetails = createAddressDetails(line1 = "123 Main Street"),
+        )
+
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 4,
+            )
+        )
+    }
+
+    @Test
     fun `standalone onSaveCompleted forwards a missing selection`() = runScenario {
         standaloneReporter.onSaveCompleted(
             addressDetails = createAddressDetails(),
