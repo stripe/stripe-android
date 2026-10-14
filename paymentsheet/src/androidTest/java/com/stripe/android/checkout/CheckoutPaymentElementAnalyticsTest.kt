@@ -63,7 +63,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
             )
-            controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
         networkRule.validateAnalyticsRequest(
@@ -122,7 +123,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Google Pay returns a new payment method, so its billing address is only synced to
@@ -195,7 +197,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.waitUntilVisible()

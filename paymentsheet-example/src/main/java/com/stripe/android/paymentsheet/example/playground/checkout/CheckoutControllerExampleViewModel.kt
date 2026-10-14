@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
@@ -30,9 +31,10 @@ import kotlinx.coroutines.launch
 internal class CheckoutControllerExampleViewModel(
     private val repository: CheckoutControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
-    application: Application,
+    private val application: Application,
 ) : ViewModel() {
     val settings = CheckoutPlaygroundSettings.create(application)
+    private val genericErrorMessage = application.getString(R.string.stripe_something_went_wrong)
 
     val controller = CheckoutController.Builder(
         application = application,
@@ -135,16 +137,21 @@ internal class CheckoutControllerExampleViewModel(
                     )
                     if (generation != configurationGeneration) return@launch
 
-                    configurationResult.fold(
-                        onSuccess = {
+                    when (configurationResult) {
+                        is CheckoutController.OperationResult.Succeeded -> {
                             if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == CheckoutCustomer.New) {
                                 response.customerId?.let(settings::saveReturningCustomer)
                             }
                             savedStateHandle[RUN_ACTIVE_KEY] = true
                             _status.value = Status.Configured
-                        },
-                        onFailure = { error -> showError("Failed to configure", error) },
-                    )
+                        }
+                        is CheckoutController.OperationResult.Failed -> {
+                            Log.e(TAG, "Failed to configure", configurationResult.error)
+                            _status.value = Status.Error(
+                                configurationResult.displayMessage ?: genericErrorMessage
+                            )
+                        }
+                    }
                 },
                 onFailure = { error -> showError("Failed to fetch checkout session", error) },
             )
@@ -153,13 +160,16 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun runOperation(
         successMessage: String,
-        operation: suspend () -> Result<Unit>,
+        operation: suspend () -> CheckoutController.OperationResult,
     ) {
         viewModelScope.launch {
-            _operationMessage.value = operation().fold(
-                onSuccess = { successMessage },
-                onFailure = { it.message ?: "Operation failed" },
-            )
+            _operationMessage.value = when (val result = operation()) {
+                is CheckoutController.OperationResult.Succeeded -> successMessage
+                is CheckoutController.OperationResult.Failed -> {
+                    Log.e(TAG, "Checkout operation failed", result.error)
+                    result.displayMessage ?: genericErrorMessage
+                }
+            }
         }
     }
 
@@ -172,14 +182,15 @@ internal class CheckoutControllerExampleViewModel(
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
             is CheckoutController.Result.Failed -> {
-                result.error.message?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+                Log.e(TAG, "Checkout confirmation failed", result.error)
+                "Confirmation failed: ${result.displayMessage ?: genericErrorMessage}"
             }
         }
     }
 
     private fun showError(prefix: String, error: Throwable) {
         Log.e(TAG, prefix, error)
-        _status.value = Status.Error(error.message ?: prefix)
+        _status.value = Status.Error(genericErrorMessage)
     }
 
     private fun clearMessages() {

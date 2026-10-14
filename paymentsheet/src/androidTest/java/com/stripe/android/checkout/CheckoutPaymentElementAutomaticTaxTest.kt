@@ -101,10 +101,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             },
             setup = { configuredController ->
                 controller = configuredController
-                controller.configure(
-                    clientSecret = DEFAULT_CLIENT_SECRET,
-                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
-                ).getOrThrow()
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = checkoutConfiguration(
+                            PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+                        ),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
@@ -181,10 +185,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             ),
             setup = { controller ->
                 enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
-                controller.configure(
-                    clientSecret = DEFAULT_CLIENT_SECRET,
-                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
-                ).getOrThrow()
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = checkoutConfiguration(
+                            PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+                        ),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
@@ -675,10 +683,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             rowSelectionBehavior = rowSelectionBehavior,
             setup = { controller ->
                 configureNetworkSetup()
-                controller.configure(
-                    clientSecret = DEFAULT_CLIENT_SECRET,
-                    configuration = configuration,
-                ).getOrThrow()
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = configuration,
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             val scenario = Scenario(

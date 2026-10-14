@@ -2,11 +2,15 @@
 
 package com.stripe.android.checkout
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
@@ -16,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
@@ -33,13 +38,18 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 
+@RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
 internal class CheckoutOperationCoordinatorTest {
+
+    private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -386,15 +396,17 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `failed confirmation preserves its cause`() = runScenario {
-        val expected = IllegalStateException("Confirmation failed")
+    fun `failed confirmation preserves its cause and server display message`() = runScenario {
+        val expected = APIException(
+            stripeError = StripeError(type = "api_error", message = "Server confirmation message"),
+        )
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = expected,
-                message = "Confirmation failed".resolvableString,
+                message = "Confirmation fallback message".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
@@ -402,7 +414,9 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage).isEqualTo("Server confirmation message")
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -417,7 +431,10 @@ internal class CheckoutOperationCoordinatorTest {
         refreshCalls.awaitItem()
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage)
+            .isEqualTo(application.getString(R.string.stripe_something_went_wrong))
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -761,6 +778,7 @@ internal class CheckoutOperationCoordinatorTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
+            checkoutErrorMapper = CheckoutErrorMapper(application),
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
         )
