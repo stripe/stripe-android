@@ -23,13 +23,26 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
+        val state = stateHolder.state ?: run {
+            operationCoordinator.reportConfirmationFailure(
+                IllegalStateException(
+                    "CheckoutPresenter.confirm() cannot be called before " +
+                        "CheckoutController.configure() has completed successfully."
+                )
+            )
+            return
+        }
+        val paymentSelection = state.paymentSelection ?: run {
+            operationCoordinator.reportConfirmationFailure(
+                IllegalStateException("Cannot confirm without a payment selection.")
+            )
+            return
+        }
         val arguments = operationCoordinator.tryBeginConfirmation {
-          confirmationArgs(
-              state = state,
-              paymentSelection = paymentSelection,
-          )
+            confirmationArgs(
+                state = state,
+                paymentSelection = paymentSelection,
+            )
         } ?: return
         analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
         viewModelScope.launch {
