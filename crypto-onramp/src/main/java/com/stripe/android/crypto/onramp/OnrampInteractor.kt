@@ -81,6 +81,7 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -1152,7 +1153,7 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Google Pay",
-            sublabel = paymentMethod.card?.onrampSublabel()?.resolve(application),
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.GooglePay
         )
     }
@@ -1166,7 +1167,7 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Samsung Pay",
-            sublabel = paymentMethod.card?.onrampSublabel()?.resolve(application),
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.SamsungPay,
         )
     }
