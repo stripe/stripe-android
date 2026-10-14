@@ -8,7 +8,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -144,19 +143,15 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentOptionResultCallback: PaymentOptionResultCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    val storeKey = rememberSaveable {
+    val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
     }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
     }
-    val storeViewModel = viewModel<PaymentSheet.StoreViewModel>(
-        viewModelStoreOwner = viewModelStoreOwner,
-        key = storeKey,
-        factory = PaymentSheet.StoreViewModel.Factory,
-    )
-
-    UpdateCallbacks(storeViewModel.paymentElementCallbackIdentifier, callbacks)
 
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
@@ -176,7 +171,7 @@ internal fun internalRememberPaymentSheetFlowController(
             statusBarColor = { StatusBarCompat.color(activity) },
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
-            paymentElementCallbackIdentifier = storeViewModel.paymentElementCallbackIdentifier,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()
     }
