@@ -24,6 +24,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -50,6 +52,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -208,6 +212,12 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     @Test
     fun `new selection requiring a form survives recreation and back returns to the list`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
     ) { scenario ->
         formPage.waitUntilVisible()
 
@@ -229,6 +239,43 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         ),
     ) {
         formPage.waitUntilVisible()
+    }
+
+    @Test
+    fun `restored single card form keeps its title until returning to the wallet header`() = launch(
+        selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        paymentMethodMetadata = walletMetadata(PaymentSheet.PaymentMethodLayout.Vertical),
+    ) { scenario ->
+        formPage.waitUntilVisible()
+        formPage.title.assertIsDisplayed()
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+
+        scenario.recreate()
+
+        formPage.waitUntilVisible()
+        formPage.title.assertIsDisplayed()
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+
+        Espresso.pressBack()
+
+        verticalModePage.waitUntilVisible()
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `single horizontal method selects Google Pay from the sheet header`() = launch(
+        paymentMethodMetadata = walletMetadata(PaymentSheet.PaymentMethodLayout.Horizontal),
+    ) { scenario ->
+        formPage.waitUntilVisible()
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed().performClick()
+
+        val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
+        assertThat(result.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(result.hasBeenConfirmed).isFalse()
     }
 
     @Test
@@ -439,6 +486,18 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         }
     }
 
+    private fun ActivityScenario<EmbeddedSheetActivity>.awaitResult(): EmbeddedActivityResult {
+        lateinit var activity: EmbeddedSheetActivity
+        onActivity { activity = it }
+        composeTestRule.waitUntilWithIdle(
+            conditionDescription = "embedded sheet activity to finish",
+        ) {
+            activity.isFinishing
+        }
+        val activityResult = result
+        return EmbeddedSheetContract.parseResult(activityResult.resultCode, activityResult.resultData)
+    }
+
     private fun launch(
         selection: PaymentSelection? = null,
         previousNewSelections: Bundle = Bundle(),
@@ -516,6 +575,18 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     private fun customerStateWith(paymentMethod: PaymentMethod): CustomerState {
         return PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
             paymentMethods = listOf(paymentMethod),
+        )
+    }
+
+    private fun walletMetadata(layout: PaymentSheet.PaymentMethodLayout): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = layout,
+            isGooglePayReady = true,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
         )
     }
 
