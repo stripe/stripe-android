@@ -97,10 +97,20 @@ internal class CheckoutAnalyticsPerformerTest {
 
     @Test
     fun `confirmation request id is preserved across later refresh`() = runScenario {
+        val initialResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_initial_confirmation",
+            configId = "cfg_initial_confirmation",
+            requestId = "req_initial",
+        )
+        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         val confirmed = CheckoutSessionResponseFactory.create(requestId = "req_confirm")
         stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = confirmed.copy(requestId = "req_refresh"),
+            checkoutSessionResponse = confirmed.copy(
+                id = "cs_refreshed_confirmation",
+                configId = "cfg_refreshed_confirmation",
+                requestId = "req_refresh",
+            ),
         )
         performer.reportConfirmationResult(
             successResult.copy(metadata = MutableConfirmationMetadata().apply {
@@ -109,8 +119,34 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         eventReporter.paymentSuccessCalls.awaitItem()
+        assertThat(events().first()).containsEntry("checkout_session_id", "cs_initial_confirmation")
+        assertThat(events().first()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
         assertThat(events().first()).doesNotContainKey("request_id")
+        assertThat(events().last()).containsEntry("checkout_session_id", "cs_refreshed_confirmation")
+        assertThat(events().last()).containsEntry("checkout_config_id", "cfg_refreshed_confirmation")
         assertThat(events().last()).containsEntry("request_id", "req_confirm")
+    }
+
+    @Test
+    fun `refreshed response with null config id preserves initial config id`() = runScenario {
+        val initialResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_initial_confirmation",
+            configId = "cfg_initial_confirmation",
+        )
+        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+
+        val refreshedResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_refreshed_confirmation",
+            configId = null,
+        )
+        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = refreshedResponse)
+        performer.reportConfirmationResult(successResult)
+
+        eventReporter.paymentSuccessCalls.awaitItem()
+        assertThat(events().first()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
+        assertThat(events().last()).containsEntry("checkout_session_id", "cs_refreshed_confirmation")
+        assertThat(events().last()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
     }
 
     @Test

@@ -3,11 +3,13 @@ package com.stripe.android.checkout
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsOperation
 import com.stripe.android.checkout.analytics.CheckoutEventReporter
 import com.stripe.android.checkout.analytics.CheckoutInvocationSource
+import com.stripe.android.checkout.analytics.checkoutAnalyticsParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
+import kotlin.time.TimeMark
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
@@ -33,8 +35,10 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             invocationSource?.value?.let { put(FIELD_INVOCATION_SOURCE, it) }
             put(FIELD_DID_REQUEST_TAX_UPDATE, didRequestTaxUpdate)
         }
-        val span = invocationSource?.let {
-            eventReporter.start(
+        val initialResponseParams = checkoutSessionResponse.checkoutAnalyticsParams()
+        val operationParams = additionalParams.filterValues { it != null }
+        val startedAt: TimeMark? = invocationSource?.let {
+            eventReporter.started(
                 operation = addressSource.toAnalyticsOperation(),
                 response = checkoutSessionResponse,
                 additionalParams = additionalParams,
@@ -53,15 +57,24 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
         val error = result.exceptionOrNull()
         if (error == null) {
             val response = result.getOrThrow()
-            span?.succeeded(
-                response = response,
-                requestId = response.requestId.takeIf { didRequestTaxUpdate },
-                additionalParams = additionalParams,
-            )
-        } else if (error !is CancellationException) {
-            span?.failed(
+            if (startedAt != null) {
+                eventReporter.succeeded(
+                    operation = addressSource.toAnalyticsOperation(),
+                    response = response,
+                    requestId = response.requestId.takeIf { didRequestTaxUpdate },
+                    duration = startedAt.elapsedNow(),
+                    additionalParams = initialResponseParams +
+                        response.checkoutAnalyticsParams() +
+                        operationParams,
+                )
+            }
+        } else if (error !is CancellationException && startedAt != null) {
+            eventReporter.failed(
+                operation = addressSource.toAnalyticsOperation(),
                 error = error,
                 response = checkoutSessionResponse,
+                requestId = null,
+                duration = startedAt.elapsedNow(),
                 additionalParams = additionalParams,
             )
         }

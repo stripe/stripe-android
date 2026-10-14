@@ -25,6 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.TestTimeSource
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -54,7 +55,10 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     @Test
-    fun `updateServerStateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
+    fun `updateServerStateIfNeeded preserves initial config ID omitted by updated response`() = runScenario(
+        currency = "eur",
+        configId = "cfg_initial",
+    ) {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
@@ -75,7 +79,12 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
         val updatedResponse = result.getOrThrow()
         assertThat(updatedResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(updatedResponse.configId).isNull()
+        assertThat(updatedResponse.currency).isEqualTo("usd")
         assertThat(updatedResponse.requestId).isEqualTo("req_fresh_tax_region_update")
+        val succeededEvent = reportedEvents().last()
+        assertThat(succeededEvent).containsEntry("checkout_config_id", "cfg_initial")
+        assertThat(succeededEvent).containsEntry("currency", "usd")
         assertAddressEventPair(
             operation = CheckoutAnalyticsOperation.UpdateBillingAddress,
             didRequestTaxUpdate = true,
@@ -189,6 +198,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
     private fun runScenario(
         automaticTaxEnabled: Boolean = true,
+        currency: String = "usd",
+        configId: String? = null,
         requestId: String? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -208,14 +219,17 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         )
 
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val timeSource = TestTimeSource()
         val updater = CheckoutSessionTaxRegionUpdater(
             checkoutSessionRepository = checkoutSessionRepository,
-            eventReporter = CheckoutEventReporterFactory.create(analyticsRequestExecutor),
+            eventReporter = CheckoutEventReporterFactory.create(analyticsRequestExecutor, timeSource),
         )
 
         val scenario = Scenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = automaticTaxEnabled,
+                currency = currency,
+                configId = configId,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 requestId = requestId,
             ),
@@ -245,6 +259,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val eventPrefix = "checkout_elements.${operation.value}"
 
         assertThat(events).hasSize(2)
+        assertThat(events.first()).doesNotContainKey("duration")
+        assertThat(events.last()).containsEntry("duration", 0f)
         assertThat(events.map { it["event"] }).containsExactly(
             "$eventPrefix.started",
             "$eventPrefix.$terminalPhase",

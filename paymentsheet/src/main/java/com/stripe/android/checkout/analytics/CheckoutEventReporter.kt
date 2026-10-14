@@ -6,13 +6,11 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
-@Singleton
 internal class CheckoutEventReporter internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
@@ -28,33 +26,78 @@ internal class CheckoutEventReporter internal constructor(
         timeSource = TimeSource.Monotonic,
     )
 
-    fun start(
+    fun markNow(): TimeMark = timeSource.markNow()
+
+    fun started(
         operation: CheckoutAnalyticsOperation,
         response: CheckoutSessionResponse?,
         additionalParams: Map<String, Any?>,
-    ): Span {
-        val startedAt = timeSource.markNow()
-        val initialParams = snapshotParams(response, additionalParams)
-            .filterKeys { it != FIELD_DURATION }
-        val span = Span(
-            operation = operation,
-            initialParams = initialParams,
-            startedAt = startedAt,
+    ): TimeMark {
+        val startedAt = markNow()
+        reportEvent(
+            eventName = eventName(operation, PHASE_STARTED),
+            additionalParams = snapshotParams(response, additionalParams)
+                .filterKeys { it != FIELD_DURATION },
         )
-        span.reportStarted()
-        return span
+        return startedAt
     }
 
-    fun resume(
+    fun succeeded(
         operation: CheckoutAnalyticsOperation,
         response: CheckoutSessionResponse?,
+        requestId: String?,
+        duration: Duration?,
         additionalParams: Map<String, Any?>,
-    ): Span = Span(
-        operation = operation,
-        initialParams = snapshotParams(response, additionalParams)
-            .filterKeys { it != FIELD_DURATION },
-        startedAt = null,
-    )
+    ) {
+        reportEvent(
+            eventName = eventName(operation, PHASE_SUCCEEDED),
+            additionalParams = terminalParams(
+                response = response,
+                additionalParams = additionalParams,
+                requestId = requestId,
+                error = null,
+                duration = duration,
+            ),
+        )
+    }
+
+    fun failed(
+        operation: CheckoutAnalyticsOperation,
+        error: Throwable,
+        response: CheckoutSessionResponse?,
+        requestId: String?,
+        duration: Duration?,
+        additionalParams: Map<String, Any?>,
+    ) {
+        reportEvent(
+            eventName = eventName(operation, PHASE_FAILED),
+            additionalParams = terminalParams(
+                response = response,
+                additionalParams = additionalParams,
+                requestId = requestId,
+                error = error,
+                duration = duration,
+            ),
+        )
+    }
+
+    fun canceled(
+        operation: CheckoutAnalyticsOperation,
+        response: CheckoutSessionResponse?,
+        duration: Duration?,
+        additionalParams: Map<String, Any?>,
+    ) {
+        reportEvent(
+            eventName = eventName(operation, PHASE_CANCELED),
+            additionalParams = terminalParams(
+                response = response,
+                additionalParams = additionalParams,
+                requestId = null,
+                error = null,
+                duration = duration,
+            ),
+        )
+    }
 
     fun reportClearPaymentOption(response: CheckoutSessionResponse?) {
         reportEvent(
@@ -70,7 +113,7 @@ internal class CheckoutEventReporter internal constructor(
         response?.checkoutAnalyticsParams()
             ?.filterKeys { it != FIELD_REQUEST_ID }
             ?.forEach { (key, value) ->
-                if (value != null) put(key, snapshotValue(value))
+                put(key, snapshotValue(value))
             }
         additionalParams.forEach { (key, value) ->
             if (value != null && key != FIELD_REQUEST_ID) put(key, snapshotValue(value))
@@ -93,20 +136,20 @@ internal class CheckoutEventReporter internal constructor(
     }
 
     private fun terminalParams(
-        currentResponse: CheckoutSessionResponse?,
+        response: CheckoutSessionResponse?,
         additionalParams: Map<String, Any?>,
         requestId: String?,
-        recordedRequestId: String?,
         error: Throwable?,
         duration: Duration?,
-        measuredDurations: Map<String, Float>,
     ): Map<String, Any> = buildMap {
-        putAll(snapshotParams(currentResponse, emptyMap()))
-        putAll(snapshotParams(response = null, additionalParams = additionalParams))
+        putAll(snapshotParams(response, emptyMap()))
+        putAll(
+            snapshotParams(response = null, additionalParams = additionalParams)
+                .filterKeys { it != FIELD_DURATION }
+        )
         putAll(errorParams(error))
-        (requestId ?: (error as? StripeException)?.requestId ?: recordedRequestId)
+        ((error as? StripeException)?.requestId ?: requestId)
             ?.let { put(FIELD_REQUEST_ID, it) }
-        measuredDurations.forEach { (key, value) -> put(key, value) }
         duration?.let {
             put(FIELD_DURATION, it.toDouble(DurationUnit.SECONDS).toFloat())
         }
@@ -138,146 +181,14 @@ internal class CheckoutEventReporter internal constructor(
         else -> value
     }
 
-    internal inner class Span internal constructor(
-        private val operation: CheckoutAnalyticsOperation,
-        private val initialParams: Map<String, Any>,
-        private val startedAt: TimeMark?,
-    ) {
-        private val lock = Any()
-        private val addedParams = mutableMapOf<String, Any>()
-        private val measuredDurations = mutableMapOf<String, Float>()
-        private var terminalReported = false
-        private var recordedRequestId: String? = null
-
-        internal fun recordRequestId(requestId: String?) {
-            synchronized(lock) {
-                if (!terminalReported) {
-                    recordedRequestId = requestId
-                }
-            }
-        }
-
-        internal fun addParams(additionalParams: Map<String, Any?>) {
-            synchronized(lock) {
-                if (!terminalReported) {
-                    addedParams.putAll(
-                        snapshotParams(response = null, additionalParams = additionalParams)
-                    )
-                }
-            }
-        }
-
-        internal suspend fun <T> measure(key: String, block: suspend () -> T): T {
-            val measureStartedAt = timeSource.markNow()
-            return try {
-                block()
-            } finally {
-                synchronized(lock) {
-                    if (!terminalReported) {
-                        measuredDurations[key] = measureStartedAt.elapsedNow()
-                            .toDouble(DurationUnit.SECONDS)
-                            .toFloat()
-                    }
-                }
-            }
-        }
-
-        internal fun succeeded(
-            response: CheckoutSessionResponse?,
-            requestId: String?,
-            additionalParams: Map<String, Any?>,
-        ) {
-            reportTerminal(
-                phase = PHASE_SUCCEEDED,
-                response = response,
-                additionalParams = additionalParams,
-                requestId = requestId,
-                error = null,
-            )
-        }
-
-        internal fun failed(
-            error: Throwable,
-            response: CheckoutSessionResponse?,
-            additionalParams: Map<String, Any?>,
-        ) {
-            reportTerminal(
-                phase = PHASE_FAILED,
-                response = response,
-                additionalParams = additionalParams,
-                requestId = null,
-                error = error,
-            )
-        }
-
-        internal fun canceled(
-            response: CheckoutSessionResponse?,
-            additionalParams: Map<String, Any?>,
-        ) {
-            reportTerminal(
-                phase = PHASE_CANCELED,
-                response = response,
-                additionalParams = additionalParams,
-                requestId = null,
-                error = null,
-            )
-        }
-
-        internal fun reportStarted() {
-            reportEvent(
-                eventName = eventName(PHASE_STARTED),
-                additionalParams = initialParams,
-            )
-        }
-
-        private fun reportTerminal(
-            phase: String,
-            response: CheckoutSessionResponse?,
-            additionalParams: Map<String, Any?>,
-            requestId: String?,
-            error: Throwable?,
-        ) {
-            val snapshot = synchronized(lock) {
-                if (terminalReported) {
-                    null
-                } else {
-                    terminalReported = true
-                    SpanTerminalSnapshot(
-                        addedParams = addedParams.toMap(),
-                        measuredDurations = measuredDurations.toMap(),
-                        recordedRequestId = recordedRequestId,
-                        duration = startedAt?.elapsedNow(),
-                    )
-                }
-            } ?: return
-
-            reportEvent(
-                eventName = eventName(phase),
-                additionalParams = buildMap {
-                    putAll(initialParams)
-                    putAll(snapshot.addedParams)
-                    putAll(
-                        terminalParams(
-                            currentResponse = response,
-                            additionalParams = additionalParams,
-                            requestId = requestId,
-                            recordedRequestId = snapshot.recordedRequestId,
-                            error = error,
-                            duration = snapshot.duration,
-                            measuredDurations = snapshot.measuredDurations,
-                        )
-                    )
-                },
-            )
-        }
-
-        private fun eventName(phase: String): String =
-            "$EVENT_NAMESPACE.${operation.value}.$phase"
-    }
+    private fun eventName(
+        operation: CheckoutAnalyticsOperation,
+        phase: String,
+    ): String = EVENT_NAMESPACE + "." + operation.value + "." + phase
 
     private companion object {
         const val EVENT_NAMESPACE = "checkout_elements"
-        const val EVENT_CLEAR_PAYMENT_OPTION = "$EVENT_NAMESPACE.clear_payment_option"
+        const val EVENT_CLEAR_PAYMENT_OPTION = "checkout_elements.clear_payment_option"
 
         const val FIELD_DURATION = "duration"
         const val FIELD_ERROR_TYPE = "error_type"
@@ -293,11 +204,4 @@ internal class CheckoutEventReporter internal constructor(
         const val PHASE_FAILED = "failed"
         const val PHASE_CANCELED = "canceled"
     }
-
-    private data class SpanTerminalSnapshot(
-        val addedParams: Map<String, Any>,
-        val measuredDurations: Map<String, Float>,
-        val recordedRequestId: String?,
-        val duration: Duration?,
-    )
 }

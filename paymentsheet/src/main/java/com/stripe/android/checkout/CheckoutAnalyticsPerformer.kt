@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsOperation
 import com.stripe.android.checkout.analytics.CheckoutEventReporter
 import com.stripe.android.checkout.analytics.CheckoutInvocationSource
+import com.stripe.android.checkout.analytics.checkoutAnalyticsParams
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
@@ -15,10 +16,12 @@ import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.analytics.linkContext
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.TimeMark
 
 @Singleton
 internal class CheckoutAnalyticsPerformer @Inject constructor(
@@ -28,7 +31,8 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val checkoutEventReporter: CheckoutEventReporter,
 ) {
-    private var confirmationSpan: CheckoutEventReporter.Span? = null
+    private var confirmationStartedAt: TimeMark? = null
+    private var confirmationInitialParams: Map<String, Any?>? = null
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
@@ -40,41 +44,60 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
 
     fun reportConfirmationResult(result: ConfirmationHandler.Result) {
         val selection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY) ?: return
-        val span = currentSpan() ?: return
-        val response = (result as? ConfirmationHandler.Result.Succeeded)?.metadata?.get(CheckoutSessionResponseKey)
+        val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY) ?: return
+        val initialParams = initialConfirmationParams(integrationType, selection)
+        val response = stateHolder.state?.checkoutSessionResponse
+        val additionalParams = terminalParams(initialParams, response)
+        val duration = confirmationStartedAt?.elapsedNow()
+        val confirmationResponse = (result as? ConfirmationHandler.Result.Succeeded)
+            ?.metadata
+            ?.get(CheckoutSessionResponseKey)
+
         eventReporter.reportPaymentResult(result, selection)
         when (result) {
-            is ConfirmationHandler.Result.Succeeded -> span.succeeded(
-                response = stateHolder.state?.checkoutSessionResponse,
-                requestId = response?.requestId,
-                additionalParams = emptyMap(),
+            is ConfirmationHandler.Result.Succeeded -> checkoutEventReporter.succeeded(
+                operation = CheckoutAnalyticsOperation.Confirm,
+                response = response,
+                requestId = confirmationResponse?.requestId,
+                duration = duration,
+                additionalParams = additionalParams,
             )
-            is ConfirmationHandler.Result.Failed -> span.failed(
+            is ConfirmationHandler.Result.Failed -> checkoutEventReporter.failed(
+                operation = CheckoutAnalyticsOperation.Confirm,
                 error = result.cause,
-                response = stateHolder.state?.checkoutSessionResponse,
-                additionalParams = emptyMap(),
+                response = response,
+                requestId = null,
+                duration = duration,
+                additionalParams = additionalParams,
             )
-            is ConfirmationHandler.Result.Canceled -> span.canceled(
-                response = stateHolder.state?.checkoutSessionResponse,
-                additionalParams = emptyMap(),
+            is ConfirmationHandler.Result.Canceled -> checkoutEventReporter.canceled(
+                operation = CheckoutAnalyticsOperation.Confirm,
+                response = response,
+                duration = duration,
+                additionalParams = additionalParams,
             )
         }
         clearConfirmation()
     }
 
     fun reportConfirmationFailure(error: Throwable) {
-        currentSpan()?.failed(error, stateHolder.state?.checkoutSessionResponse, emptyMap())
+        val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY)
+        val selection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY)
+        if (integrationType != null && selection != null) {
+            val response = stateHolder.state?.checkoutSessionResponse
+            checkoutEventReporter.failed(
+                operation = CheckoutAnalyticsOperation.Confirm,
+                error = error,
+                response = response,
+                requestId = null,
+                duration = confirmationStartedAt?.elapsedNow(),
+                additionalParams = terminalParams(
+                    initialParams = initialConfirmationParams(integrationType, selection),
+                    currentResponse = response,
+                ),
+            )
+        }
         clearConfirmation()
-    }
-
-    private fun currentSpan(): CheckoutEventReporter.Span? {
-        val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY) ?: return null
-        val selection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY) ?: return null
-        return confirmationSpan ?: checkoutEventReporter.resume(
-            operation = CheckoutAnalyticsOperation.Confirm,
-            response = stateHolder.state?.checkoutSessionResponse,
-            additionalParams = confirmationParams(integrationType, selection),
-        )
     }
 
     private fun saveConfirmation(
@@ -84,7 +107,9 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         savedStateHandle[INTEGRATION_TYPE_KEY] = integrationType
         savedStateHandle[PAYMENT_SELECTION_KEY] = paymentSelection
         savedStateHandle.remove<Bundle>(PARAMS_KEY)
+        val response = stateHolder.state?.checkoutSessionResponse
         val params = confirmationParams(integrationType, paymentSelection)
+        val initialParams = initialParams(response, params)
         savedStateHandle[PARAMS_KEY] = Bundle().apply {
             params.forEach { (key, value) ->
                 when (value) {
@@ -93,26 +118,56 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                 }
             }
         }
-        confirmationSpan = checkoutEventReporter.start(
+        confirmationInitialParams = initialParams
+        confirmationStartedAt = checkoutEventReporter.started(
             operation = CheckoutAnalyticsOperation.Confirm,
-            response = stateHolder.state?.checkoutSessionResponse,
+            response = response,
             additionalParams = params,
         )
     }
+
+    private fun initialConfirmationParams(
+        integrationType: IntegrationType,
+        selection: PaymentSelection,
+    ): Map<String, Any?> {
+        confirmationInitialParams?.let { return it }
+        savedStateHandle.get<Bundle>(PARAMS_KEY)?.let { restored ->
+            val restoredParams = restored.keySet().associateWith { key ->
+                @Suppress("DEPRECATION")
+                restored.get(key)
+            }
+            return initialParams(
+                response = stateHolder.state?.checkoutSessionResponse,
+                additionalParams = restoredParams,
+            )
+        }
+        return initialParams(
+            response = stateHolder.state?.checkoutSessionResponse,
+            additionalParams = confirmationParams(integrationType, selection),
+        )
+    }
+
+    private fun initialParams(
+        response: CheckoutSessionResponse?,
+        additionalParams: Map<String, Any?>,
+    ): Map<String, Any?> = response?.checkoutAnalyticsParams().orEmpty() +
+        additionalParams.filterValues { it != null }
+
+    private fun terminalParams(
+        initialParams: Map<String, Any?>,
+        currentResponse: CheckoutSessionResponse?,
+    ): Map<String, Any?> = initialParams.filterValues { it != null } +
+        currentResponse?.checkoutAnalyticsParams().orEmpty()
 
     private fun confirmationParams(
         integrationType: IntegrationType,
         selection: PaymentSelection,
     ): Map<String, Any?> {
-        val restored = savedStateHandle.get<Bundle>(PARAMS_KEY)
         val metadata = when (integrationType) {
             IntegrationType.PaymentElement -> stateHolder.state?.paymentMethodMetadata
             IntegrationType.ExpressCheckoutElement -> stateHolder.state?.expressCheckoutElementPaymentMethodMetadata
         }
-        return restored?.keySet()?.associateWith { key ->
-            @Suppress("DEPRECATION")
-            restored.get(key)
-        } ?: mapOf(
+        return mapOf(
             "selected_lpm" to selection.code(),
             "is_saved_payment_method" to selection.isSaved,
             "link_context" to selection.linkContext(),
@@ -128,7 +183,8 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun clearConfirmation() {
-        confirmationSpan = null
+        confirmationStartedAt = null
+        confirmationInitialParams = null
         savedStateHandle.remove<IntegrationType>(INTEGRATION_TYPE_KEY)
         savedStateHandle.remove<PaymentSelection>(PAYMENT_SELECTION_KEY)
         savedStateHandle.remove<Bundle>(PARAMS_KEY)
