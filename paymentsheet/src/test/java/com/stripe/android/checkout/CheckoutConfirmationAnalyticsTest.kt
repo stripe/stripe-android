@@ -78,7 +78,7 @@ internal class CheckoutConfirmationAnalyticsTest {
         }
         val executor = FakeAnalyticsRequestExecutor()
         val eventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformerFactory.create(
+        val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,

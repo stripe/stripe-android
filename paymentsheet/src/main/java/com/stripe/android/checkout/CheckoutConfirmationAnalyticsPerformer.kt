@@ -24,7 +24,7 @@ import javax.inject.Singleton
 import kotlin.time.TimeMark
 
 @Singleton
-internal class CheckoutAnalyticsPerformer @Inject constructor(
+internal class CheckoutConfirmationAnalyticsPerformer @Inject constructor(
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val stateHolder: CheckoutControllerStateHolder,
@@ -196,6 +196,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private companion object {
+        // Keep saved-state keys stable across class renames.
         const val INTEGRATION_TYPE_KEY = "CheckoutAnalyticsPerformer.integrationType"
         const val PAYMENT_SELECTION_KEY = "CheckoutAnalyticsPerformer.paymentSelection"
         const val PARAMS_KEY = "CheckoutAnalyticsPerformer.params"

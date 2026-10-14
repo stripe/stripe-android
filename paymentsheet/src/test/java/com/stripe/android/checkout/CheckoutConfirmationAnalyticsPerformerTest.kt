@@ -27,7 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TestTimeSource
 
 @RunWith(RobolectricTestRunner::class)
-internal class CheckoutAnalyticsPerformerTest {
+internal class CheckoutConfirmationAnalyticsPerformerTest {
     @Test
     fun `payment element success reports once and clears saved context`() = runScenario {
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
@@ -217,12 +217,13 @@ internal class CheckoutAnalyticsPerformerTest {
     ) {
         val performer = recreatePerformer()
 
-        fun recreatePerformer(): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformerFactory.create(
-            eventReporter = eventReporter,
-            savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            checkoutEventReporter = CheckoutEventReporterFactory.create(executor, timeSource),
-        )
+        fun recreatePerformer(): CheckoutConfirmationAnalyticsPerformer =
+            CheckoutConfirmationAnalyticsPerformerFactory.create(
+                eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
+                stateHolder = stateHolder,
+                checkoutEventReporter = CheckoutEventReporterFactory.create(executor, timeSource),
+            )
 
         fun events(): List<Map<String, *>> = executor.getExecutedRequests().map { it.params }
     }

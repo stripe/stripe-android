@@ -200,7 +200,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val eventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformerFactory.create(
+        val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,

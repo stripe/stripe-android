@@ -24,7 +24,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
-    private val analyticsPerformer: CheckoutAnalyticsPerformer,
+    private val analyticsPerformer: CheckoutConfirmationAnalyticsPerformer,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,

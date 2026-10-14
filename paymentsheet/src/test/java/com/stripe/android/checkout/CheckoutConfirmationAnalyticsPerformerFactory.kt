@@ -7,14 +7,14 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 
-internal object CheckoutAnalyticsPerformerFactory {
+internal object CheckoutConfirmationAnalyticsPerformerFactory {
     fun create(
         eventReporter: EventReporter = FakeEventReporter(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         stateHolder: CheckoutControllerStateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),
         checkoutEventReporter: CheckoutEventReporter = CheckoutEventReporterFactory.create(),
-    ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
+    ): CheckoutConfirmationAnalyticsPerformer = CheckoutConfirmationAnalyticsPerformer(
         eventReporter = eventReporter,
         savedStateHandle = savedStateHandle,
         stateHolder = stateHolder,

@@ -3,8 +3,8 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutAnalyticsPerformerFactory
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
+import com.stripe.android.checkout.CheckoutConfirmationAnalyticsPerformerFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -247,7 +247,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val paymentSheetEventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformerFactory.create(
+        val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
             eventReporter = paymentSheetEventReporter,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,

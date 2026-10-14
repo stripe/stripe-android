@@ -1,8 +1,8 @@
 package com.stripe.android.elements.ece
 
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
+import com.stripe.android.checkout.CheckoutConfirmationAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
@@ -26,7 +26,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val analyticsPerformer: CheckoutAnalyticsPerformer,
+    private val analyticsPerformer: CheckoutConfirmationAnalyticsPerformer,
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,

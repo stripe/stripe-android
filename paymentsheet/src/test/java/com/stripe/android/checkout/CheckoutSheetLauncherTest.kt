@@ -1287,7 +1287,7 @@ internal class CheckoutSheetLauncherTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
-            analyticsPerformer = CheckoutAnalyticsPerformerFactory.create(
+            analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
                 savedStateHandle = savedStateHandle,
                 stateHolder = selectionHolder,
                 linkAccountHolder = linkAccountHolder,
