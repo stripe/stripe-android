@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
@@ -19,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
+@OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedUpdateScreenInteractorFactoryTest {
 
     @get:Rule
@@ -47,6 +50,11 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
+            savedPaymentMethodSelector = ManageLaunchSavedPaymentMethodSelector(
+                taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ -> error("Not expected") },
+                paymentMethodMetadata = paymentMethodMetadata,
+                selectionHolder = selectionHolder,
+            ),
             eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
