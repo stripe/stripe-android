@@ -17,6 +17,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.net.HttpURLConnection
 
@@ -40,6 +42,23 @@ class FinancialConnectionsRepositoryImplTest {
         apiRequestFactory = apiRequestFactory,
         fraudDetectionDataRepository = fraudDetectionDataRepository,
     )
+
+    @Test
+    fun `creating a payment method starts background fraud collection`() = runTest {
+        val response = """{"id":"pm_123"}"""
+        givenGetRequestReturns(response)
+        verify(fraudDetectionDataRepository, never()).refresh(any())
+
+        val result = financialConnectionsRepositoryImpl.createPaymentMethod(
+            paymentDetailsId = "pd_123",
+            consumerSessionClientSecret = "client_secret",
+            billingDetails = null,
+        )
+
+        assertThat(result).isEqualTo(response)
+        verify(fraudDetectionDataRepository).refresh(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        verify(fraudDetectionDataRepository, never()).getLatest(any())
+    }
 
     @Test
     fun `getFinancialConnectionsSession - accounts under linked_accounts json key`() =

@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import android.app.Application
-import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.core.ApiConfiguration
@@ -44,7 +42,6 @@ internal interface ElementsSessionRepository {
 }
 
 internal class RealElementsSessionRepository @Inject constructor(
-    private val application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
     @IOContext private val workContext: CoroutineContext,
@@ -67,12 +64,6 @@ internal class RealElementsSessionRepository @Inject constructor(
         apiConfiguration: ApiConfiguration.State,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
-        DefaultFraudDetectionDataRepository(
-            context = application,
-            apiConfigurationProvider = { apiConfiguration },
-            workContext = workContext,
-        ).refresh()
-
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
             customPaymentMethods = customPaymentMethods,

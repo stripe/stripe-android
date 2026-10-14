@@ -94,7 +94,7 @@ public class StripeTest {
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
             DefaultFraudDetectionDataRepository(
                     context,
-                    () -> new ApiConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY).build()
+                    (CoroutineContext) testDispatcher
             );
     @NonNull
     private final Stripe defaultStripe = createStripe();

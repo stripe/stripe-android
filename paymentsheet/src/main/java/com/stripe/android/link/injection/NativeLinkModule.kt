@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -152,6 +154,12 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        fun provideFraudDetectionDataRepository(
+            context: Context,
+            @IOContext workContext: CoroutineContext,
+        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext)
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(

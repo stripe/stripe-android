@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyValidator
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -107,16 +106,6 @@ constructor(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId
                 )
-
-            DefaultFraudDetectionDataRepository(
-                context = context,
-                apiConfigurationProvider = {
-                    ApiConfiguration.State(
-                        publishableKey = publishableKey,
-                        stripeAccountId = stripeAccountId,
-                    )
-                },
-            ).refresh()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -1,8 +1,9 @@
 package com.stripe.android.link.repositories
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
@@ -30,6 +31,7 @@ import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -67,6 +69,16 @@ class LinkApiRepositoryTest {
     @Before
     fun clearErrorReporter() {
         errorReporter.clear()
+    }
+
+    @Test
+    fun `construction does not collect fraud data`() {
+        val fraudRepository = FakeFraudDetectionDataRepository()
+
+        linkRepository(fraudDetectionDataRepository = fraudRepository)
+
+        fraudRepository.refreshCalls.expectNoEvents()
+        fraudRepository.refreshCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -914,7 +926,8 @@ class LinkApiRepositoryTest {
     @Test
     fun `sharePaymentDetails sends correct parameters`() = runTest {
         val consumersApiService = FakeConsumersApiService()
-        val linkRepository = linkRepository(consumersApiService)
+        val fraudRepository = FakeFraudDetectionDataRepository()
+        val linkRepository = linkRepository(consumersApiService, fraudRepository)
 
         val consumerSessionSecret = "consumer_session_secret"
         val paymentDetailsId = "csmrpd*AYq4D_sXdAAAAOQ0"
@@ -931,6 +944,8 @@ class LinkApiRepositoryTest {
             apiConfiguration = DEFAULT_API_CONFIGURATION,
         )
 
+        assertThat(fraudRepository.refreshCalls.awaitItem()).isEqualTo(DEFAULT_API_CONFIGURATION.publishableKey)
+        fraudRepository.refreshCalls.ensureAllEventsConsumed()
         assertThat(consumersApiService.sharePaymentDetailsCalls).hasSize(1)
         val sharePaymentDetailsCall = consumersApiService.sharePaymentDetailsCalls.first()
         assertThat(sharePaymentDetailsCall.extraParams).containsEntry(
@@ -944,7 +959,10 @@ class LinkApiRepositoryTest {
     @Test
     fun `sharePaymentDetails sends correct parameters if apiKey not provided`() = runTest {
         val consumersApiService = FakeConsumersApiService()
-        val linkRepository = linkRepository(consumersApiService)
+        val fraudData = FraudDetectionData("guid", "muid", "sid")
+        val fraudRepository = mock<FraudDetectionDataRepository>()
+        whenever(fraudRepository.getCached()).thenReturn(fraudData)
+        val linkRepository = linkRepository(consumersApiService, fraudRepository)
 
         val consumerSessionSecret = "consumer_session_secret"
         val paymentDetailsId = "csmrpd*AYq4D_sXdAAAAOQ0"
@@ -963,6 +981,8 @@ class LinkApiRepositoryTest {
 
         assertThat(consumersApiService.sharePaymentDetailsCalls).hasSize(1)
         val sharePaymentDetailsCall = consumersApiService.sharePaymentDetailsCalls.first()
+        verify(fraudRepository).refresh(DEFAULT_API_CONFIGURATION.publishableKey)
+        assertThat(sharePaymentDetailsCall.extraParams).containsAtLeastEntriesIn(fraudData.params)
         assertThat(sharePaymentDetailsCall.requestOptions.stripeAccount)
             .isEqualTo(DEFAULT_API_CONFIGURATION.stripeAccountId)
         assertThat(sharePaymentDetailsCall.requestOptions.apiKey)
@@ -1111,11 +1131,11 @@ class LinkApiRepositoryTest {
     }
 
     private fun linkRepository(
-        consumersApiService: ConsumersApiService = FakeConsumersApiService()
+        consumersApiService: ConsumersApiService = FakeConsumersApiService(),
+        fraudDetectionDataRepository: FraudDetectionDataRepository = mock(),
     ): LinkApiRepository {
         return LinkApiRepository(
-            application = ApplicationProvider.getApplicationContext(),
-            apiConfigurationProvider = { DEFAULT_API_CONFIGURATION },
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
             requestSurface = RequestSurface.PaymentElement,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,

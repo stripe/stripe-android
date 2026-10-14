@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
 import androidx.core.os.LocaleListCompat
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -160,7 +159,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val session = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -195,7 +193,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val session = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -273,7 +270,6 @@ internal class ElementsSessionRepositoryTest {
         val expectedPaymentMethodTypes = listOf("card", "amazon_pay")
 
         val session = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -307,7 +303,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -342,7 +337,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -377,7 +371,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -409,7 +402,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -458,7 +450,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -501,7 +492,6 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
-            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             testDispatcher,
@@ -1051,7 +1041,6 @@ internal class ElementsSessionRepositoryTest {
     }
 
     private fun createRepository() = RealElementsSessionRepository(
-        ApplicationProvider.getApplicationContext(),
         stripeNetworkClient,
         stripeRepository,
         testDispatcher,

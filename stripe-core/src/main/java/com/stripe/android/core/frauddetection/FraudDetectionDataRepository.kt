@@ -13,12 +13,12 @@ import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface FraudDetectionDataRepository {
-    fun refresh()
+    fun refresh(publishableKey: String)
 
     /**
-     * Get the cached [FraudDetectionData]. This is not a blocking request.
+     * Read locally stored [FraudDetectionData] without making a network request.
      */
-    fun getCached(): FraudDetectionData?
+    suspend fun getCached(): FraudDetectionData?
 
     /**
      * Get the latest [FraudDetectionData]. This is a blocking request.
@@ -26,7 +26,7 @@ interface FraudDetectionDataRepository {
      * 1. From [FraudDetectionDataStore] if that value is not expired.
      * 2. Otherwise, from the network.
      */
-    suspend fun getLatest(): FraudDetectionData?
+    suspend fun getLatest(publishableKey: String): FraudDetectionData?
 
     fun save(fraudDetectionData: FraudDetectionData)
 }
@@ -37,7 +37,7 @@ private val timestampSupplier: () -> Long = {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface FraudDetectionErrorReporter {
-    fun reportFraudDetectionError(error: StripeException)
+    fun reportFraudDetectionError(error: StripeException, publishableKey: String)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -54,21 +54,19 @@ class DefaultFraudDetectionDataRepository(
     private val workContext: CoroutineContext,
     private val fraudDetectionEnabledProvider: FraudDetectionEnabledProvider,
 ) : FraudDetectionDataRepository {
-    private var cachedFraudDetectionData: FraudDetectionData? = null
-
     private val fraudDetectionEnabled: Boolean
         get() = fraudDetectionEnabledProvider.provideFraudDetectionEnabled()
 
-    override fun refresh() {
+    override fun refresh(publishableKey: String) {
         if (fraudDetectionEnabled) {
             CoroutineScope(workContext).launch {
-                getLatest()
+                getLatest(publishableKey)
             }
         }
     }
 
-    override suspend fun getLatest() = withContext(workContext) {
-        val latestFraudDetectionData = localStore.get().let { localFraudDetectionData ->
+    override suspend fun getLatest(publishableKey: String) = withContext(workContext) {
+        localStore.get().let { localFraudDetectionData ->
             if (localFraudDetectionData == null ||
                 localFraudDetectionData.isExpired(timestampSupplier())
             ) {
@@ -81,28 +79,19 @@ class DefaultFraudDetectionDataRepository(
                     ).fraudDetectionData()
                 }.onFailure {
                     val error = StripeException.create(it)
-                    errorReporter.reportFraudDetectionError(error)
-                }.getOrNull()
+                    errorReporter.reportFraudDetectionError(error, publishableKey)
+                }.getOrNull()?.also(::save)
             } else {
                 localFraudDetectionData
             }
         }
-
-        if (cachedFraudDetectionData != latestFraudDetectionData) {
-            latestFraudDetectionData?.let(::save)
-        }
-
-        latestFraudDetectionData
     }
 
-    override fun getCached(): FraudDetectionData? {
-        return cachedFraudDetectionData.takeIf {
-            fraudDetectionEnabled
-        }
+    override suspend fun getCached(): FraudDetectionData? {
+        return if (fraudDetectionEnabled) localStore.get() else null
     }
 
     override fun save(fraudDetectionData: FraudDetectionData) {
-        cachedFraudDetectionData = fraudDetectionData
         localStore.save(fraudDetectionData)
     }
 }
