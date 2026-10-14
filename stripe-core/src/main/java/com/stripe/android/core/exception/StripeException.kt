@@ -22,7 +22,7 @@ abstract class StripeException(
      * A message intended for the customer, or `null` when no display message is available.
      * Checkout failures populate this separately from the diagnostic [message].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     open val displayMessage: String?
         get() = checkoutDisplayMessage
 
