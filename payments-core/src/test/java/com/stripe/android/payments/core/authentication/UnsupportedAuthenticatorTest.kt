@@ -8,8 +8,8 @@ import com.stripe.android.FakeActivityResultLauncher
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_SUCCEEDED
@@ -54,7 +54,7 @@ class UnsupportedAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-            REQUEST_OPTIONS
+            API_CONFIGURATION
         )
 
         assertThat(launcher.launchArgs)
@@ -78,7 +78,7 @@ class UnsupportedAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PI_SUCCEEDED,
-            REQUEST_OPTIONS
+            API_CONFIGURATION
         )
 
         assertThat(launcher.launchArgs)
@@ -93,8 +93,9 @@ class UnsupportedAuthenticatorTest {
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = null,
         )
     }
 }

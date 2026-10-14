@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
@@ -78,9 +79,18 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_123"))
             )
         }
+
+    @Test
+    fun `An empty next action key uses the merchant key and account`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS.copy(nextActionData = ARGS.nextActionData.copy(publishableKey = ""))
+        )
+
+        assertThat(viewModel.threeDS2RequestOptions).isEqualTo(ARGS.requestOptions)
+    }
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized`() {
@@ -131,7 +141,7 @@ class Stripe3ds2TransactionViewModelTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
                 as StripeIntent.NextActionData.SdkData.Use3DS2,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_123"),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
             ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),

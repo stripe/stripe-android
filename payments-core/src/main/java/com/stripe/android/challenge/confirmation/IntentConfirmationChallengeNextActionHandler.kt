@@ -7,7 +7,6 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult.Unvalidated
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
@@ -16,7 +15,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -24,7 +22,6 @@ import kotlin.coroutines.CoroutineContext
  * through a JavaScript-based WebView implementation.
  */
 internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentNextActionHandler<StripeIntent>() {
@@ -71,12 +68,12 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) = withContext(uiContext) {
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(
             IntentConfirmationChallengeActivityContract.Args(
-                apiConfiguration = apiConfigProvider.get(),
+                apiConfiguration = apiConfiguration,
                 intent = actionable,
                 productUsage = productUsageTokens
             )
