@@ -93,6 +93,7 @@ internal class AddressElementResultStateHolderTest {
 
             resultStateHolder.onSaveCompleted(AddressElementActivityContract.Result.Canceled)
             resultStateHolder.onSaveFailed()
+            resultStateHolder.onCancelCompleted()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
             assertThat(resultStateHolder.onUserCancel()).isFalse()
 
@@ -115,15 +116,80 @@ internal class AddressElementResultStateHolderTest {
     }
 
     @Test
-    fun `user cancellation finishes with canceled result when idle`() = runTest {
+    fun `accepted cancellation stays pending and blocks saves and repeated requests`() = runTest {
         val resultStateHolder = AddressElementResultStateHolder()
 
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
 
             assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
 
-            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            assertThat(resultStateHolder.onUserCancel()).isFalse()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `cancel completion is rejected without a pending cancellation`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            resultStateHolder.onCancelCompleted()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `cancel completion is rejected while saving`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+
+            resultStateHolder.onCancelCompleted()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `save failure cannot reset an accepted cancellation`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
+
+            resultStateHolder.onSaveFailed()
+
+            expectNoEvents()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
+        }
+    }
+
+    @Test
+    fun `cancel completion finishes with canceled result`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
+
+            resultStateHolder.onCancelCompleted()
+
+            assertThat(awaitItem()).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.Canceled)
+            )
         }
     }
 
@@ -135,7 +201,11 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
             assertThat(resultStateHolder.onUserCancel()).isTrue()
-            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
+            resultStateHolder.onCancelCompleted()
+            assertThat(awaitItem()).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.Canceled)
+            )
 
             resultStateHolder.onSaveCompleted(result)
             resultStateHolder.onSaveFailed()
@@ -158,8 +228,13 @@ internal class AddressElementResultStateHolderTest {
             assertThat(awaitItem()).isEqualTo(State.Idle)
 
             assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
 
-            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+            resultStateHolder.onCancelCompleted()
+
+            assertThat(awaitItem()).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.Canceled)
+            )
         }
     }
 }
