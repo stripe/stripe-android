@@ -15,6 +15,8 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -664,11 +666,47 @@ internal class CheckoutControllerTest {
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
-                response.setBody("""{"error": {"message": "Internal server error"}}""")
+                response.setBody("""{"error": {"type": "api_error", "message": "Internal server error"}}""")
             }
         },
     ) {
         assertThat(result.isFailure).isTrue()
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(APIException::class.java)
+        assertThat((failure.error as APIException).stripeError?.type).isEqualTo("api_error")
+        assertThat(failure.displayMessage).isEqualTo("Internal server error")
+    }
+
+    @Test
+    fun `configure uses generic display message when server error has no message`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.setResponseCode(500)
+                response.setBody("""{"error": {"type": "api_error"}}""")
+            }
+        },
+    ) {
+        val failure = result as CheckoutController.OperationResult.Failed
+
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+    }
+
+    @Test
+    fun `configure uses generic display message when server error is malformed`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.setResponseCode(500)
+                response.setBody("{}")
+            }
+        },
+    ) {
+        val failure = result as CheckoutController.OperationResult.Failed
+
+        assertThat((failure.error as APIException).stripeError?.message)
+            .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
     }
 
     @Test
@@ -994,6 +1032,10 @@ internal class CheckoutControllerTest {
         val result = controller.applyPromotionCode("INVALID")
 
         assertThat(result.isFailure).isTrue()
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(APIException::class.java)
+        assertThat((failure.error as APIException).stripeError?.type).isNull()
+        assertThat(failure.displayMessage).isEqualTo("Invalid promotion code")
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1460,22 +1502,31 @@ internal class CheckoutControllerTest {
     @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
         val before = controller.session.value
+        val expected = IllegalStateException("Server error")
 
-        val result = controller.runServerUpdate { throw IllegalStateException("Server error") }
+        val result = controller.runServerUpdate { throw expected }
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isSameInstanceAs(expected)
+        assertThat(failure.error).hasMessageThat().isEqualTo("Server error")
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
         assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
     fun `runServerUpdate returns failure when serverUpdate fails`() = runMutationScenario {
+        val expected = IllegalStateException("Server error")
         val result = controller.runServerUpdate {
-            Result.failure(IllegalStateException("Server error"))
+            Result.failure(expected)
         }
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isSameInstanceAs(expected)
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
     }
 
     @Test
@@ -2125,7 +2176,7 @@ internal class CheckoutControllerTest {
 
     private class Scenario(
         val controller: CheckoutController,
-        val result: Result<Unit>,
+        val result: CheckoutController.OperationResult,
         val savedStateHandle: SavedStateHandle,
         private val stateHolder: CheckoutControllerStateHolder,
     ) {
@@ -2134,6 +2185,23 @@ internal class CheckoutControllerTest {
 
         val committedSavedPaymentMethodId: String?
             get() = (stateHolder.state?.paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.id
+    }
+
+    private val CheckoutController.OperationResult.isSuccess: Boolean
+        get() = this is CheckoutController.OperationResult.Succeeded
+
+    private val CheckoutController.OperationResult.isFailure: Boolean
+        get() = this is CheckoutController.OperationResult.Failed
+
+    private fun CheckoutController.OperationResult.getOrThrow() {
+        when (this) {
+            is CheckoutController.OperationResult.Succeeded -> Unit
+            is CheckoutController.OperationResult.Failed -> throw error
+        }
+    }
+
+    private fun CheckoutController.OperationResult.exceptionOrNull(): Throwable? {
+        return (this as? CheckoutController.OperationResult.Failed)?.error
     }
 
     // Configures a controller from a fresh init, seeds the requested scenario state, then hands it

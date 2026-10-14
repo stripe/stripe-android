@@ -1,6 +1,8 @@
 package com.stripe.android.elements.ece
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
@@ -9,6 +11,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutErrorMapper
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.core.Logger
@@ -251,6 +254,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
+            checkoutErrorMapper = CheckoutErrorMapper(ApplicationProvider.getApplicationContext<Application>()),
             resultCallback = {},
             viewModelScope = backgroundScope,
         )

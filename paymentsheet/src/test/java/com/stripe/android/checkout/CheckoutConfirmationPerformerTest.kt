@@ -1,7 +1,9 @@
 package com.stripe.android.checkout
 
+import android.app.Application
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -201,6 +203,7 @@ internal class CheckoutConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
+            checkoutErrorMapper = CheckoutErrorMapper(ApplicationProvider.getApplicationContext<Application>()),
             resultCallback = {},
             viewModelScope = backgroundScope,
         )

@@ -172,7 +172,8 @@ internal class CurrencySelectorElementContentUITest {
             ).build()
         )
 
-        controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
         if (setContent) {

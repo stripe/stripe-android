@@ -74,6 +74,7 @@ class CheckoutController @Inject internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
+    private val checkoutErrorMapper: CheckoutErrorMapper,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
@@ -110,7 +111,7 @@ class CheckoutController @Inject internal constructor(
     suspend fun configure(
         clientSecret: String,
         configuration: Configuration = Configuration(),
-    ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
+    ): OperationResult = withContext(Dispatchers.Main.immediate) {
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
         if (sheetStateHolder.sheetIsOpen) {
@@ -151,7 +152,7 @@ class CheckoutController @Inject internal constructor(
                 }
             }
         }
-    }
+    }.toOperationResult()
 
     /**
      * Applies a promotion code to the checkout session.
@@ -160,16 +161,16 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState { sessionId ->
         checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
-    }
+    }.toOperationResult()
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
         checkoutSessionRepository.applyPromotionCode(sessionId, "")
-    }
+    }.toOperationResult()
 
     /**
      * Sets the shipping address for this checkout.
@@ -184,13 +185,13 @@ class CheckoutController @Inject internal constructor(
     suspend fun updateShippingAddress(
         name: String?,
         address: Address?,
-    ): kotlin.Result<Unit> {
+    ): OperationResult {
         if (address == null) {
-            return clearShippingAddress()
+            return clearShippingAddress().toOperationResult()
         }
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
-            ?.onFailure { return kotlin.Result.failure(it) }
+            ?.onFailure { return kotlin.Result.failure<Unit>(it).toOperationResult() }
         return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
             copy(
                 collectedDetails = collectedDetails.copy(
@@ -198,7 +199,7 @@ class CheckoutController @Inject internal constructor(
                     shippingAddress = it,
                 ),
             )
-        }
+        }.toOperationResult()
     }
 
     internal suspend fun commitShippingAddress(
@@ -225,14 +226,14 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun updateEmail(
         email: String?,
-    ): kotlin.Result<Unit> {
+    ): OperationResult {
         return withCheckoutState(
             additionalStateMutations = {
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse)
-        }
+        }.toOperationResult()
     }
 
     internal suspend fun selectSavedPaymentMethod(
@@ -281,14 +282,14 @@ class CheckoutController @Inject internal constructor(
      * then automatically refreshes [session] with the latest session data.
      *
      * A 20-second timeout is enforced. If [serverUpdate] doesn't complete within 20 seconds,
-     * this method returns a [kotlin.Result.failure] with a timeout exception.
+     * this method returns an [OperationResult.Failed] with a timeout exception.
      *
      * @param serverUpdate A suspend function that makes a request to your server to update
      * the Checkout Session.
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> kotlin.Result<Unit>,
-    ): kotlin.Result<Unit> {
+    ): OperationResult {
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
@@ -305,7 +306,7 @@ class CheckoutController @Inject internal constructor(
                 },
                 onFailure = { kotlin.Result.failure(it) },
             )
-        }
+        }.toOperationResult()
     }
 
     private suspend fun updateAddress(
@@ -389,6 +390,16 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    private fun kotlin.Result<Unit>.toOperationResult(): OperationResult = fold(
+        onSuccess = { OperationResult.Succeeded() },
+        onFailure = { error ->
+            OperationResult.Failed(
+                error = error,
+                displayMessage = checkoutErrorMapper.displayMessage(error),
+            )
+        },
+    )
+
     private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
         IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
     )
@@ -434,10 +445,10 @@ class CheckoutController @Inject internal constructor(
     /**
      * Clears the customer's selected payment option, resetting it to `null`.
      *
-     * Returns [kotlin.Result.failure] if the session hasn't been configured yet, a payment flow is
+     * Returns [OperationResult.Failed] if the session hasn't been configured yet, a payment flow is
      * currently presented.
      */
-    suspend fun clearPaymentOption(): kotlin.Result<Unit> {
+    suspend fun clearPaymentOption(): OperationResult {
         return withCheckoutState(
             additionalStateMutations = {
                 copy(
@@ -448,7 +459,7 @@ class CheckoutController @Inject internal constructor(
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse)
-        }
+        }.toOperationResult()
     }
 
     /**
@@ -1399,6 +1410,35 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
+     * The result of a Checkout Controller operation such as [configure] or [applyPromotionCode].
+     * Use [Failed.displayMessage] for customer-facing text. [Failed.error] retains diagnostic details.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface OperationResult {
+        /**
+         * The operation succeeded.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Succeeded internal constructor() : OperationResult
+
+        /**
+         * The operation failed with [error].
+         *
+         * @property error Diagnostic details for the operation failure.
+         * @property displayMessage A user-facing message, or `null` when no display message is available.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Failed internal constructor(
+            val error: Throwable,
+            val displayMessage: String?,
+        ) : OperationResult
+    }
+
+    /**
      * The result of a checkout payment flow, delivered to [ResultCallback].
      */
     @CheckoutSessionPreview
@@ -1421,12 +1461,16 @@ class CheckoutController @Inject internal constructor(
         /**
          * The payment flow failed with [error].
          *
-         * @property error The error that caused the payment flow to fail.
+         * @property error Diagnostic details for the payment flow failure.
+         * @property displayMessage A user-facing message, or `null` when no display message is available.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Failed internal constructor(val error: Throwable) : Result
+        class Failed internal constructor(
+            val error: Throwable,
+            val displayMessage: String?,
+        ) : Result
     }
 
     /**
