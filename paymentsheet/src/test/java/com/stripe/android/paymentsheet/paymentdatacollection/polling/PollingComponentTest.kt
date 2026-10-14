@@ -5,9 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentsheet.R
@@ -52,9 +52,6 @@ internal class PollingComponentTest {
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_intents/pi_polling"),
-            header("Authorization", "Bearer pk_test_polling_component"),
-            header("Stripe-Account", "acct_polling_component"),
-            applyDefaultAuthorization = false,
         ) { response ->
             response.setBody(
                 """{"id":"pi_polling","object":"payment_intent","status":"succeeded"}"""
@@ -86,6 +83,9 @@ internal class PollingComponentTest {
 
     private companion object {
         const val CLIENT_SECRET = "pi_polling_secret_example"
-        val REQUEST_OPTIONS = ApiRequest.Options("pk_test_polling_component", "acct_polling_component")
+        val REQUEST_OPTIONS = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        )
     }
 }
