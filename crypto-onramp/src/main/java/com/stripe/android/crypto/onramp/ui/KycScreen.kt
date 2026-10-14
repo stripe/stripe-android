@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,11 +87,10 @@ internal fun KycScreen(
     onSubmit: () -> Unit,
     onContinue: () -> Unit,
 ) {
-    var selectorSlotIndex by remember { mutableStateOf<Int?>(null) }
+    var selectorSlotIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     val canNavigate = state.submissionState != KycSubmissionState.Submitting &&
         state.page !in setOf(
             KycCollectionPage.Submitted,
-            KycCollectionPage.Pending,
         )
 
     BackHandler {
@@ -203,7 +203,6 @@ private fun KycContent(
         SheetHandle()
         val showHeader = state.page !in setOf(
             KycCollectionPage.Submitted,
-            KycCollectionPage.Pending,
             KycCollectionPage.Unavailable,
         )
         if (showHeader) {
@@ -241,7 +240,6 @@ private fun KycContent(
                 KycCollectionPage.Submitted -> SubmittedContent(
                     state.requirementType == KycRequirementType.ProofOfAddress
                 )
-                KycCollectionPage.Pending -> SubmittedContent(documentsUploaded = false)
                 KycCollectionPage.Unavailable -> UnavailableContent()
             }
         }
@@ -1144,7 +1142,6 @@ private val KycCollectionPage.isMessage: Boolean
     get() = this in setOf(
         KycCollectionPage.Context,
         KycCollectionPage.Submitted,
-        KycCollectionPage.Pending,
         KycCollectionPage.Unavailable,
     )
 
@@ -1256,7 +1253,6 @@ private fun KycPrimaryButton(
         slot.fileName != null && slot.selectedSubtypeId == editingSubtype
     }
     val isSubmitted = state.page == KycCollectionPage.Submitted
-    val isPending = state.page == KycCollectionPage.Pending
     val isUnavailable = state.page == KycCollectionPage.Unavailable
     val isDocumentEditor = state.page == KycCollectionPage.DocumentEditor
     val isQuestionnaireOnly = state.page == KycCollectionPage.Questionnaire &&
@@ -1265,7 +1261,7 @@ private fun KycPrimaryButton(
         state.requirementType == KycRequirementType.SourceOfFunds
     val label = when {
         isUnavailable -> stringResource(R.string.stripe_link_onramp_kyc_close)
-        isSubmitted || isPending -> stringResource(R.string.stripe_link_onramp_kyc_done)
+        isSubmitted -> stringResource(R.string.stripe_link_onramp_kyc_done)
         isSourceEditor && editingDocumentCount == 0 ->
             stringResource(R.string.stripe_link_onramp_kyc_add_documents)
         isSourceEditor -> stringResource(
@@ -1283,7 +1279,7 @@ private fun KycPrimaryButton(
         else -> stringResource(R.string.stripe_link_onramp_kyc_submit)
     }
     val enabled = when {
-        isUnavailable || isSubmitted || isPending -> true
+        isUnavailable || isSubmitted -> true
         state.submissionState == KycSubmissionState.Submitting -> false
         isSourceEditor -> state.canContinue
         state.page in setOf(
@@ -1293,7 +1289,7 @@ private fun KycPrimaryButton(
         else -> state.canSubmit
     }
     val action = when {
-        isUnavailable || isPending -> onClose
+        isUnavailable -> onClose
         isSubmitted -> onContinue
         isSourceEditor || state.page in setOf(
             KycCollectionPage.Context,
@@ -1378,7 +1374,6 @@ internal data class KycScreenState(
     val currentRequirement: Int,
     val totalRequirements: Int,
     val hasMoreRequirements: Boolean,
-    val pendingRequirements: List<KycPendingRequirementState>,
     val completedDocumentCount: Int,
 )
 
@@ -1388,18 +1383,7 @@ internal enum class KycCollectionPage {
     DocumentOverview,
     DocumentEditor,
     Submitted,
-    Pending,
     Unavailable,
-}
-
-internal data class KycPendingRequirementState(
-    val requirementType: KycRequirementType,
-    val status: KycPendingRequirementStatus,
-)
-
-internal enum class KycPendingRequirementStatus {
-    WaitingForReview,
-    Processing,
 }
 
 internal enum class KycSubmissionState {

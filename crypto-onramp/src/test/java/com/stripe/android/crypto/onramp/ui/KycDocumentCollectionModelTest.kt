@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
-import java.io.File
 
 internal class KycDocumentCollectionModelTest {
     @Test
@@ -12,11 +11,11 @@ internal class KycDocumentCollectionModelTest {
         val model = model()
         assertThat(model.onAddDocuments()).isTrue()
         val slot = requireNotNull(model.editingDocumentSlot)
-        model.onFileSelected(slot, File("salary.pdf"), "salary.pdf", "file_salary")
+        model.onFileSelected(slot, "salary.pdf", "file_salary")
         val nextSlot = requireNotNull(model.editingDocumentSlot)
         assertThat(model.canSelectFile(nextSlot)).isFalse()
         assertThat(model.createSubmission().single().uploadedFileIds).containsExactly("file_salary")
-        assertThat(model.onFileRemoved(slot, true)).isEqualTo(File("salary.pdf"))
+        model.onFileRemoved(slot, true)
         assertThat(model.canSelectFile(requireNotNull(model.editingDocumentSlot))).isTrue()
     }
 
@@ -34,7 +33,7 @@ internal class KycDocumentCollectionModelTest {
         onFileUploadStarted(slot, "salary.pdf")
         assertThat(uploadingFileSlot).isEqualTo(slot)
 
-        onFileSelected(slot, File("salary.pdf"), "salary.pdf", "file_salary")
+        onFileSelected(slot, "salary.pdf", "file_salary")
         assertThat(uploadingFileSlot).isNull()
         assertThat(selectingFileSlot).isNull()
     }
@@ -76,7 +75,7 @@ internal class KycDocumentCollectionModelTest {
         maxFilesPerDocumentType = 2,
     ) {
         onAddDocuments()
-        onFileSelected(0, File("salary.pdf"), "salary.pdf", "file_salary")
+        onFileSelected(0, "salary.pdf", "file_salary")
         finishEditing()
 
         assertThat(onAddDocuments()).isTrue()
@@ -92,11 +91,11 @@ internal class KycDocumentCollectionModelTest {
     @Test
     fun `editing retains its own type at the file limit and excludes other source types`() = runScenario {
         onAddDocuments()
-        onFileSelected(0, File("salary.pdf"), "salary.pdf", "file_salary")
+        onFileSelected(0, "salary.pdf", "file_salary")
         finishEditing()
         onAddDocuments()
         val bankSlot = requireNotNull(editingDocumentSlot)
-        onFileSelected(bankSlot, File("bank.pdf"), "bank.pdf", "file_bank")
+        onFileSelected(bankSlot, "bank.pdf", "file_bank")
         finishEditing()
 
         assertThat(onEditDocuments(0)).isTrue()
@@ -115,8 +114,8 @@ internal class KycDocumentCollectionModelTest {
         maxFilesPerDocumentType = 2,
     ) {
         onAddDocuments()
-        onFileSelected(0, File("salary.pdf"), "salary.pdf", "file_salary")
-        onFileSelected(requireNotNull(editingDocumentSlot), File("bonus.pdf"), "bonus.pdf", "file_bonus")
+        onFileSelected(0, "salary.pdf", "file_salary")
+        onFileSelected(requireNotNull(editingDocumentSlot), "bonus.pdf", "file_bonus")
         finishEditing()
         onEditDocuments(0)
 
@@ -133,11 +132,11 @@ internal class KycDocumentCollectionModelTest {
     @Test
     fun `removing a source makes its type available again`() = runScenario {
         onAddDocuments()
-        onFileSelected(0, File("salary.pdf"), "salary.pdf", "file_salary")
+        onFileSelected(0, "salary.pdf", "file_salary")
         finishEditing()
         onAddDocuments()
         val bankSlot = requireNotNull(editingDocumentSlot)
-        onFileSelected(bankSlot, File("bank.pdf"), "bank.pdf", "file_bank")
+        onFileSelected(bankSlot, "bank.pdf", "file_bank")
         finishEditing()
         onEditDocuments(bankSlot)
         assertThat(requireNotNull(buildState()).slots.first { it.index == editingDocumentSlot }.subtypes.map { it.id })

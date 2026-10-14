@@ -11,7 +11,6 @@ import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import kotlinx.serialization.json.Json
 import org.junit.Test
-import java.io.File
 
 internal class KycStateHolderTest {
     @Test
@@ -28,7 +27,7 @@ internal class KycStateHolderTest {
         assertThat(document.instructions).contains("Documents must include your full name and address.")
 
         stateHolder.onDocumentSubtypeSelected(0, "utility_provider")
-        stateHolder.onFileSelected(0, File("utility.pdf"), "utility.pdf", fileId = "file_uploaded")
+        stateHolder.onFileSelected(0, "utility.pdf", fileId = "file_uploaded")
         val submission = requireNotNull(stateHolder.startSubmission())
 
         assertThat(submission.requirements.values.single().requestedBy).isEqualTo("swapped")
@@ -76,7 +75,7 @@ internal class KycStateHolderTest {
         assertThat(stateHolder.state.validationError).isEqualTo(KycValidationError.FileTooLarge)
         assertThat(stateHolder.state.validationFileName).isEqualTo("oversized.pdf")
 
-        assertThat(stateHolder.onFileRemoved(slotIndex)).isNull()
+        stateHolder.onFileRemoved(slotIndex)
 
         assertThat(stateHolder.state.validationError).isNull()
         assertThat(stateHolder.state.validationFileName).isNull()
@@ -88,7 +87,7 @@ internal class KycStateHolderTest {
 
         stateHolder.onFileSelectionStarted(slotIndex)
         assertThat(stateHolder.state.selectingFileSlot).isEqualTo(slotIndex)
-        stateHolder.onFileSelected(slotIndex, File("retry.pdf"), "retry.pdf", "file_retry")
+        stateHolder.onFileSelected(slotIndex, "retry.pdf", "file_retry")
         val document = requireNotNull(stateHolder.createSubmission()).requirements.values.single().documents.single()
         assertThat(document.documentSubtype).isEqualTo(subtypeId)
         assertThat(document.uploadedFileIds).containsExactly("file_retry")
@@ -107,7 +106,7 @@ internal class KycStateHolderTest {
         stateHolder.onContinue()
         stateHolder.onAddDocuments()
         assertThat(stateHolder.isAcceptedFile("payslip.docx", null)).isTrue()
-        stateHolder.onFileSelected(0, File("payslip.docx"), "payslip.docx", fileId = "file_uploaded")
+        stateHolder.onFileSelected(0, "payslip.docx", fileId = "file_uploaded")
 
         val submission = requireNotNull(stateHolder.startSubmission())
         assertThat(submission.requirements.values.single().documents.single().documentSubtype).isEqualTo("payslip")
@@ -194,7 +193,6 @@ internal class KycStateHolderTest {
         assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Context)
         assertThat(stateHolder.state.errorMessages).containsExactly("The previous document was too old")
         assertThat(stateHolder.state.canSubmit).isFalse()
-        assertThat(stateHolder.state.pendingRequirements).isEmpty()
     }
 
     @Test
@@ -252,14 +250,12 @@ internal class KycStateHolderTest {
         stateHolder.onQuestionAnswerChanged("funding_sources", "Savings and salary")
         stateHolder.onFileSelected(
             slotIndex = 0,
-            file = File("/tmp/bank.pdf"),
             displayName = "bank.pdf",
             fileId = "file_uploaded",
         )
         assertThat(stateHolder.isAcceptedFile("income.jpg", null)).isTrue()
         stateHolder.onFileSelected(
             slotIndex = 1,
-            file = File("/tmp/income.jpg"),
             displayName = "income.jpg",
             fileId = "file_uploaded",
         )
@@ -402,68 +398,6 @@ internal class KycStateHolderTest {
     }
 
     @Test
-    fun `partner requirement produces waiting for review state`() {
-        val stateHolder = KycStateHolder(
-            requirements(
-                userActionRequired = emptyList(),
-                pendingPartnerAction = listOf(
-                    documentRequirement(minDocumentTypes = 1).copy(awaitingActionFrom = "partner")
-                ),
-                pendingStripeAction = emptyList(),
-            )
-        )
-
-        assertThat(stateHolder.state.isCollectionAvailable).isFalse()
-        assertThat(stateHolder.state.canSubmit).isFalse()
-        assertThat(stateHolder.state.pendingRequirements.single().requirementType)
-            .isEqualTo(KycRequirementType.ProofOfAddress)
-        assertThat(stateHolder.state.pendingRequirements.single().status)
-            .isEqualTo(KycPendingRequirementStatus.WaitingForReview)
-        assertThat(stateHolder.createSubmission()).isNull()
-    }
-
-    @Test
-    fun `Stripe requirement produces processing state`() {
-        val stateHolder = KycStateHolder(
-            requirements(
-                userActionRequired = emptyList(),
-                pendingPartnerAction = emptyList(),
-                pendingStripeAction = listOf(
-                    questionnaireRequirement().copy(awaitingActionFrom = "stripe")
-                ),
-            )
-        )
-
-        assertThat(stateHolder.state.isCollectionAvailable).isFalse()
-        assertThat(stateHolder.state.pendingRequirements.single().requirementType)
-            .isEqualTo(KycRequirementType.SourceOfFunds)
-        assertThat(stateHolder.state.pendingRequirements.single().status)
-            .isEqualTo(KycPendingRequirementStatus.Processing)
-    }
-
-    @Test
-    fun `partner and Stripe requirements are both represented`() {
-        val stateHolder = KycStateHolder(
-            requirements(
-                userActionRequired = emptyList(),
-                pendingPartnerAction = listOf(
-                    documentRequirement(minDocumentTypes = 1).copy(awaitingActionFrom = "partner")
-                ),
-                pendingStripeAction = listOf(
-                    questionnaireRequirement().copy(awaitingActionFrom = "stripe")
-                ),
-            )
-        )
-
-        assertThat(stateHolder.state.pendingRequirements.map { requirement -> requirement.status })
-            .containsExactly(
-                KycPendingRequirementStatus.WaitingForReview,
-                KycPendingRequirementStatus.Processing,
-            )
-            .inOrder()
-    }
-
-    @Test
     fun `no recognized requirement produces unavailable state`() {
         val stateHolder = KycStateHolder(
             requirements(
@@ -474,7 +408,6 @@ internal class KycStateHolderTest {
         )
 
         assertThat(stateHolder.state.isCollectionAvailable).isFalse()
-        assertThat(stateHolder.state.pendingRequirements).isEmpty()
         assertThat(stateHolder.state.page).isEqualTo(KycCollectionPage.Unavailable)
         assertThat(stateHolder.createSubmission()).isNull()
     }
@@ -546,15 +479,15 @@ internal class KycStateHolderTest {
     fun `multiple files of one type do not satisfy minimum distinct types`() = runDocumentScenario(
         minDocumentTypes = 2,
     ) {
-        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf", fileId = "file_uploaded")
-        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
+        onFileSelected(0, "bank.pdf", fileId = "file_uploaded")
+        onFileSelected(1, "bank-2.pdf", fileId = "file_uploaded")
 
         assertThat(createSubmission()).isNull()
         assertThat(state.validationError).isEqualTo(KycValidationError.MissingDocuments)
 
         onAddDocuments()
         val slot = requireNotNull(state.document?.editingSlotIndex)
-        onFileSelected(slot, File("/tmp/salary.pdf"), "salary.pdf", fileId = "file_salary")
+        onFileSelected(slot, "salary.pdf", fileId = "file_salary")
 
         assertThat(createSubmission()?.requirements?.values?.single()?.documents?.map { it.documentSubtype })
             .containsExactly("bank_statement", "payslip")
@@ -564,13 +497,13 @@ internal class KycStateHolderTest {
     fun `maximum distinct types permits replacing the existing source type`() = runDocumentScenario(
         maxDocumentTypes = 1,
     ) {
-        onFileSelected(0, File("/tmp/bank.pdf"), "bank.pdf", fileId = "file_uploaded")
+        onFileSelected(0, "bank.pdf", fileId = "file_uploaded")
 
         val slot = requireNotNull(state.document).slots.first { it.index == 1 }
         assertThat(slot.subtypes.first { it.id == "payslip" }.isEnabled).isTrue()
         assertThat(slot.subtypes.first { it.id == "bank_statement" }.isEnabled).isTrue()
         onDocumentSubtypeSelected(1, "payslip")
-        onFileSelected(1, File("/tmp/bank-2.pdf"), "bank-2.pdf", fileId = "file_uploaded")
+        onFileSelected(1, "bank-2.pdf", fileId = "file_uploaded")
 
         val documents = requireNotNull(createSubmission()).requirements.values.single().documents
         assertThat(documents.single().documentSubtype).isEqualTo("payslip")
@@ -594,7 +527,7 @@ internal class KycStateHolderTest {
 
         onAddDocuments()
         val slot = requireNotNull(state.document?.editingSlotIndex)
-        onFileSelected(slot, File("salary.pdf"), "salary.pdf", fileId = "file_salary")
+        onFileSelected(slot, "salary.pdf", fileId = "file_salary")
 
         val requirement = requireNotNull(createSubmission()).requirements.getValue("source_of_funds")
         assertThat(requirement.questionnaire).isNull()
@@ -605,12 +538,11 @@ internal class KycStateHolderTest {
     fun `per source limit blocks additional uploads and removal restores capacity`() = runDocumentScenario(
         maxFilesPerDocumentType = 1,
     ) {
-        onFileSelected(0, File("first.pdf"), "first.pdf", "file_first")
+        onFileSelected(0, "first.pdf", "file_first")
         assertThat(canSelectFile(1)).isFalse()
         onFileSelectionStarted(1)
         assertThat(state.selectingFileSlot).isNull()
-        val rejected = File("second.pdf")
-        assertThat(onFileSelected(1, rejected, "second.pdf", "file_second")).isEqualTo(rejected)
+        onFileSelected(1, "second.pdf", "file_second")
         assertThat(createSubmission()?.requirements?.values?.single()?.documents?.single()?.uploadedFileIds)
             .containsExactly("file_first")
         onFileRemoved(0)
@@ -621,10 +553,10 @@ internal class KycStateHolderTest {
     fun `file allowance is independent for each source`() = runDocumentScenario(
         maxFilesPerDocumentType = 1,
     ) {
-        onFileSelected(0, File("bank.pdf"), "bank.pdf", "file_bank")
+        onFileSelected(0, "bank.pdf", "file_bank")
         onAddDocuments()
         assertThat(canSelectFile(1)).isTrue()
-        onFileSelected(1, File("salary.pdf"), "salary.pdf", "file_salary")
+        onFileSelected(1, "salary.pdf", "file_salary")
         assertThat(createSubmission()?.requirements?.values?.single()?.documents).hasSize(2)
     }
 

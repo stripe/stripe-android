@@ -15,6 +15,7 @@ import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -43,6 +44,18 @@ internal class KycScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `document type selector remains open after state restoration`() = runScenario(
+        state = screenState(page = KycCollectionPage.DocumentEditor),
+    ) {
+        composeRule.onNodeWithTag(kycSubtypePickerTag(0)).performClick()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
+        restorationTester.emulateSavedInstanceStateRestore()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
+        composeRule.onNodeWithText("Utility bill").performClick()
+        assertThat(selectedSubtype).isEqualTo(0 to "utility_bill")
+    }
 
     @Test
     fun `proof of address falls back to localized collection prompt`() = runScenario(
@@ -479,8 +492,8 @@ internal class KycScreenTest {
     }
 
     @Test
-    fun `pending documents retain review message and close on done`() = runScenario(
-        state = screenState(page = KycCollectionPage.Pending),
+    fun `submitted source of funds shows review confirmation and continues`() = runScenario(
+        state = screenState(page = KycCollectionPage.Submitted),
     ) {
         composeRule.onNodeWithText("Submitted for review").assertIsDisplayed()
         composeRule.onNodeWithText(
@@ -488,8 +501,8 @@ internal class KycScreenTest {
         ).assertIsDisplayed()
         composeRule.onNodeWithText("Document uploaded successfully").assertDoesNotExist()
         composeRule.onNodeWithText("Done").performClick()
-        assertThat(closed).isTrue()
-        assertThat(continued).isFalse()
+        assertThat(closed).isFalse()
+        assertThat(continued).isTrue()
     }
 
     @Test
@@ -568,8 +581,9 @@ internal class KycScreenTest {
         screenHeight: Dp = Dp.Infinity,
         block: TestScenario.() -> Unit,
     ) {
-        val scenario = TestScenario(state)
-        composeRule.setContent {
+        val restorationTester = StateRestorationTester(composeRule)
+        val scenario = TestScenario(state, restorationTester)
+        restorationTester.setContent {
             val density = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
                 Box {
@@ -601,6 +615,7 @@ internal class KycScreenTest {
 
     private class TestScenario(
         state: KycScreenState,
+        val restorationTester: StateRestorationTester,
         var closed: Boolean = false,
         var wentBack: Boolean = false,
         var changedAnswer: Pair<String, String>? = null,
@@ -646,7 +661,6 @@ internal class KycScreenTest {
                 currentRequirement = 1,
                 totalRequirements = 1,
                 hasMoreRequirements = false,
-                pendingRequirements = emptyList(),
                 completedDocumentCount = completedDocumentCount,
             )
         }

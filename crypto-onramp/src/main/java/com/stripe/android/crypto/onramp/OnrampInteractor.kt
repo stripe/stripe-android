@@ -29,7 +29,6 @@ import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycCollectionSubmissionRequest
-import com.stripe.android.crypto.onramp.model.KycDocumentSubmission
 import com.stripe.android.crypto.onramp.model.KycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswerRequest
@@ -495,8 +494,12 @@ internal class OnrampInteractor @Inject constructor(
         }
 
         val requirements = submission.requirements.mapValues { (_, requirement) ->
-            val documents = uploadKycDocuments(requirement.documents, linkSessionKey)
-                .getOrElse { error -> return fulfillKycRequirementsFailure(error) }
+            val documents = requirement.documents.map { document ->
+                KycDocumentSubmissionRequest(
+                    documentSubtype = document.documentSubtype,
+                    fileIds = document.uploadedFileIds,
+                )
+            }
 
             val collectionRequirements = requirement.questionnaire?.let { questionnaire ->
                 KycCollectionSubmissionRequest(
@@ -543,30 +546,6 @@ internal class OnrampInteractor @Inject constructor(
             },
             onFailure = { fulfillKycRequirementsFailure(it) },
         )
-    }
-
-    private suspend fun uploadKycDocuments(
-        documents: List<KycDocumentSubmission>,
-        linkSessionKey: String,
-    ): Result<List<KycDocumentSubmissionRequest>> {
-        val requests = mutableListOf<KycDocumentSubmissionRequest>()
-        for (document in documents) {
-            val fileIds = document.uploadedFileIds.toMutableList()
-            for (file in document.files) {
-                val uploadedFile = cryptoApiRepository.uploadKycDocument(file, linkSessionKey)
-                    .getOrElse { error -> return Result.failure(error) }
-                val fileId = uploadedFile.id
-                    ?: return Result.failure(MissingKycFileIdException())
-
-                fileIds += fileId
-            }
-            requests += KycDocumentSubmissionRequest(
-                documentSubtype = document.documentSubtype,
-                fileIds = fileIds,
-            )
-        }
-
-        return Result.success(requests)
     }
 
     private fun <T> fulfillKycRequirementsFailure(error: Throwable): Result<T> {

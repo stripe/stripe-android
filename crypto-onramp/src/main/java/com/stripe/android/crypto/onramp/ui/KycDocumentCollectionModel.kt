@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp.ui
 
 import com.stripe.android.crypto.onramp.model.KycDocumentRequirement
 import com.stripe.android.crypto.onramp.model.KycDocumentSubmission
-import java.io.File
 import java.util.Locale
 
 @Suppress("TooManyFunctions")
@@ -182,21 +181,18 @@ internal class KycDocumentCollectionModel(
         return isAccepted
     }
 
-    fun onFileSelected(slotIndex: Int, file: File, displayName: String, fileId: String): File? {
+    fun onFileSelected(slotIndex: Int, displayName: String, fileId: String) {
         if (!canSelectFile(slotIndex)) {
             onFileSelectionCancelled()
-            return file
+            return
         }
-        var replacedFile: File? = null
         updateDocumentSlot(slotIndex) { slot ->
-            replacedFile = slot.file?.file
-            slot.copy(file = SelectedKycFile(file = file, displayName = displayName, fileId = fileId))
+            slot.copy(file = SelectedKycFile(displayName = displayName, fileId = fileId))
         }
         onFileSelectionCancelled()
         validationError = null
         validationFileName = null
         addNextUploadSlotIfNeeded(completedSlotIndex = slotIndex)
-        return replacedFile
     }
 
     fun onFileSelectionFailed() {
@@ -211,9 +207,8 @@ internal class KycDocumentCollectionModel(
         onFileSelectionCancelled()
     }
 
-    fun onFileRemoved(slotIndex: Int, isEditing: Boolean): File? {
-        val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return null
-        val removedFile = slot.file?.file
+    fun onFileRemoved(slotIndex: Int, isEditing: Boolean) {
+        val slot = documentSlots.firstOrNull { it.index == slotIndex } ?: return
         documentSlots = if (slot.file != null && documentSlots.count { it.file != null } > 1) {
             documentSlots.filterNot { it.index == slotIndex }
         } else {
@@ -224,14 +219,9 @@ internal class KycDocumentCollectionModel(
         ensureEditingSlot(isEditing)
         validationError = null
         validationFileName = null
-        return removedFile
     }
 
     fun containsSlot(slotIndex: Int): Boolean = documentSlots.any { it.index == slotIndex }
-
-    fun currentFiles(): List<File> {
-        return documentSlots.mapNotNull { slot -> slot.file?.file }
-    }
 
     private fun canSelectSubtype(slotIndex: Int, subtypeId: String): Boolean {
         val document = document ?: return false
@@ -321,7 +311,6 @@ internal class KycDocumentCollectionModel(
     )
 
     private data class SelectedKycFile(
-        val file: File,
         val displayName: String,
         val fileId: String,
     )
@@ -332,7 +321,6 @@ internal class KycDocumentCollectionModel(
             completedSlots.groupBy { it.subtypeId }.map { (subtypeId, slots) ->
                 KycDocumentSubmission(
                     documentSubtype = requireNotNull(subtypeId),
-                    files = emptyList(),
                     uploadedFileIds = slots.map { requireNotNull(it.file).fileId },
                 )
             }

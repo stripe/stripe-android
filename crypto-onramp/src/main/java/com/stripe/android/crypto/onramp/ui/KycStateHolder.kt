@@ -7,7 +7,6 @@ import com.stripe.android.crypto.onramp.model.KycRequirement
 import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.crypto.onramp.model.KycSubmission
-import java.io.File
 
 @Suppress("TooManyFunctions")
 internal class KycStateHolder(
@@ -16,21 +15,6 @@ internal class KycStateHolder(
     private val userActionRequirements = requirements.userActionRequired.sortedBy {
         if (it.description == PROOF_OF_ADDRESS) 0 else 1
     }
-    private val pendingRequirements = if (userActionRequirements.isEmpty()) {
-        requirements.pendingPartnerAction.map { requirement ->
-            KycPendingRequirementState(
-                requirementType = requirement.toRequirementType(),
-                status = KycPendingRequirementStatus.WaitingForReview,
-            )
-        } + requirements.pendingStripeAction.map { requirement ->
-            KycPendingRequirementState(
-                requirementType = requirement.toRequirementType(),
-                status = KycPendingRequirementStatus.Processing,
-            )
-        }
-    } else {
-        emptyList()
-    }
     private var requirementIndex = 0
     private val requirement: KycRequirement?
         get() = userActionRequirements.getOrNull(requirementIndex)
@@ -38,7 +22,7 @@ internal class KycStateHolder(
     private var documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
     private var validationError: KycValidationError? = null
     private var submissionState = KycSubmissionState.Collecting
-    private var page = initialPage(requirement, pendingRequirements)
+    private var page = initialPage(requirement)
 
     var state by mutableStateOf(buildState())
         private set
@@ -79,7 +63,6 @@ internal class KycStateHolder(
                 page = KycCollectionPage.DocumentOverview
             }
             KycCollectionPage.DocumentOverview,
-            KycCollectionPage.Pending,
             KycCollectionPage.Submitted,
             KycCollectionPage.Unavailable,
             -> return false
@@ -188,16 +171,15 @@ internal class KycStateHolder(
         return accepted
     }
 
-    fun onFileSelected(slotIndex: Int, file: File, displayName: String, fileId: String): File? {
+    fun onFileSelected(slotIndex: Int, displayName: String, fileId: String) {
         if (!canSelectFile(slotIndex)) {
             onFileSelectionCancelled()
-            return file
+            return
         }
-        val replacedFile = documents.onFileSelected(slotIndex, file, displayName, fileId)
+        documents.onFileSelected(slotIndex, displayName, fileId)
         submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
-        return replacedFile
     }
 
     fun onFileSelectionFailed() {
@@ -212,13 +194,12 @@ internal class KycStateHolder(
         refreshState()
     }
 
-    fun onFileRemoved(slotIndex: Int): File? {
-        if (!canEdit() || !documents.containsSlot(slotIndex)) return null
-        val removedFile = documents.onFileRemoved(slotIndex, page == KycCollectionPage.DocumentEditor)
+    fun onFileRemoved(slotIndex: Int) {
+        if (!canEdit() || !documents.containsSlot(slotIndex)) return
+        documents.onFileRemoved(slotIndex, page == KycCollectionPage.DocumentEditor)
         submissionState = KycSubmissionState.Collecting
         validationError = null
         refreshState()
-        return removedFile
     }
 
     fun startSubmission(): KycSubmission? {
@@ -263,12 +244,10 @@ internal class KycStateHolder(
         documents.clearValidation()
         documents.onFileSelectionCancelled()
         submissionState = KycSubmissionState.Collecting
-        page = initialPage(requirement, emptyList())
+        page = initialPage(requirement)
         refreshState()
         return true
     }
-
-    fun currentFiles(): List<File> = documents.currentFiles()
 
     fun createSubmission(): KycSubmission? {
         val requirement = requirement ?: return null
@@ -314,7 +293,6 @@ internal class KycStateHolder(
             currentRequirement = if (userActionRequirements.isEmpty()) 0 else requirementIndex + 1,
             totalRequirements = userActionRequirements.size,
             hasMoreRequirements = requirementIndex < userActionRequirements.lastIndex,
-            pendingRequirements = pendingRequirements,
             completedDocumentCount = documents.completedDocumentCount,
         )
     }
@@ -368,10 +346,8 @@ internal class KycStateHolder(
         private const val SOURCE_OF_FUNDS_QUESTIONS = "source_of_funds_questions"
         private fun initialPage(
             requirement: KycRequirement?,
-            pendingRequirements: List<KycPendingRequirementState>,
         ): KycCollectionPage {
             return when {
-                pendingRequirements.isNotEmpty() -> KycCollectionPage.Pending
                 requirement == null -> KycCollectionPage.Unavailable
                 !requirement.isSupportedForCollection() ->
                     KycCollectionPage.Unavailable

@@ -7,6 +7,7 @@ import android.webkit.MimeTypeMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.crypto.onramp.KycDocumentUploader
+import com.stripe.android.crypto.onramp.KycSubmissionHandler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -22,11 +23,33 @@ internal class KycViewModel(
     context: Context,
     val stateHolder: KycStateHolder,
     private val uploader: KycDocumentUploader?,
+    private val submissionHandler: KycSubmissionHandler,
 ) : ViewModel() {
     private val contentResolver = context.applicationContext.contentResolver
     private val cacheDir = context.applicationContext.cacheDir
     private var fileSelectionJob: Job? = null
     private var selectionToken: Any? = null
+
+    fun submit() {
+        val submission = stateHolder.startSubmission() ?: return
+        viewModelScope.launch {
+            try {
+                val result = submissionHandler.submit(submission)
+                currentCoroutineContext().ensureActive()
+                result.fold(
+                    onSuccess = {
+                        stateHolder.onSubmissionSucceeded()
+                    },
+                    onFailure = { stateHolder.onSubmissionFailed() },
+                )
+            } catch (error: CancellationException) {
+                stateHolder.onSubmissionFailed()
+                throw error
+            } catch (_: Exception) {
+                stateHolder.onSubmissionFailed()
+            }
+        }
+    }
 
     fun selectFile(uri: Uri, slotIndex: Int) {
         startFileSelection { handleSelectedFile(uri, slotIndex) }
@@ -98,37 +121,20 @@ internal class KycViewModel(
         try {
             val displayName = withContext(Dispatchers.IO) { selectedFileName(uri) }
             stateHolder.onFilePreparationStarted(slotIndex, displayName)
-            val selectedFile = withContext(Dispatchers.IO) {
-                readSelectedFile(
-                    uri = uri,
-                    displayName = displayName,
-                    maximumFileSizeBytes = stateHolder.maximumFileSizeBytes,
-                ).also { localCopy = it.getOrNull()?.file }
+            val selection = withContext(Dispatchers.IO) {
+                readSelectedFile(uri, displayName, stateHolder.maximumFileSizeBytes).also { localCopy = it.file }
             }
-            selectedFile.fold(
-                onSuccess = { selection ->
-                    if (
-                        stateHolder.isAcceptedFileSize(selection.file.length()) &&
-                        stateHolder.isAcceptedFile(
-                            displayName = selection.displayName,
-                            mimeTypeExtension = selection.mimeTypeExtension,
-                        )
-                    ) {
-                        uploadSelectedFile(selection, slotIndex)
-                    } else {
-                        selection.file.delete()
-                    }
-                },
-                onFailure = { error ->
-                    if (error is KycFileTooLargeException) {
-                        stateHolder.onFileTooLarge()
-                    } else {
-                        stateHolder.onFileSelectionFailed()
-                    }
-                },
-            )
+            if (
+                stateHolder.isAcceptedFileSize(selection.file.length()) &&
+                stateHolder.isAcceptedFile(selection.displayName, selection.mimeTypeExtension)
+            ) {
+                uploadSelectedFile(selection, slotIndex)
+            }
         } catch (error: CancellationException) {
             throw error
+        } catch (_: KycFileTooLargeException) {
+            currentCoroutineContext().ensureActive()
+            stateHolder.onFileTooLarge()
         } catch (_: Exception) {
             currentCoroutineContext().ensureActive()
             stateHolder.onFileSelectionFailed()
@@ -150,10 +156,9 @@ internal class KycViewModel(
             onSuccess = { fileId ->
                 stateHolder.onFileSelected(
                     slotIndex = slotIndex,
-                    file = selection.file,
                     displayName = selection.displayName,
                     fileId = fileId,
-                )?.delete()
+                )
             },
             onFailure = { error ->
                 if (error is CancellationException) throw error
@@ -162,11 +167,11 @@ internal class KycViewModel(
         )
     }
 
-    private fun readSelectedFile(
+    private suspend fun readSelectedFile(
         uri: Uri,
         displayName: String,
         maximumFileSizeBytes: Long?,
-    ): Result<SelectedFile> = runCatching {
+    ): SelectedFile {
         val mimeTypeExtension = contentResolver.getType(uri)
             ?.let(MimeTypeMap.getSingleton()::getExtensionFromMimeType)
         val suffix = displayName
@@ -183,14 +188,14 @@ internal class KycViewModel(
             maximumFileSizeBytes = maximumFileSizeBytes,
         )
 
-        SelectedFile(
+        return SelectedFile(
             file = destination,
             displayName = displayName,
             mimeTypeExtension = mimeTypeExtension,
         )
     }
 
-    private fun copySelectedFile(
+    private suspend fun copySelectedFile(
         uri: Uri,
         destination: File,
         maximumFileSizeBytes: Long?,

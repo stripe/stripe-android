@@ -14,8 +14,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
@@ -89,7 +87,7 @@ internal data class KycDocumentRequirementResponse(
     val fileRequirements: String,
     val instructions: List<String>,
     @SerialName("document_collection_prompt")
-    val documentCollectionPrompt: String?,
+    val documentCollectionPrompt: String? = null,
 )
 
 @Serializable
@@ -174,21 +172,8 @@ private fun KycQuestionnaireResponse.toKycQuestionnaire(): KycQuestionnaire {
 
 internal object EmptyArrayAsNullDocumentRequirementSerializer :
     EmptyArrayAsNullSerializer<KycDocumentRequirementResponse>(
-        KycDocumentRequirementSerializer
+        KycDocumentRequirementResponse.serializer()
     )
-
-// Supply the optional wire field without making internal construction arguments optional.
-private object KycDocumentRequirementSerializer : JsonTransformingSerializer<KycDocumentRequirementResponse>(
-    KycDocumentRequirementResponse.serializer()
-) {
-    override fun transformDeserialize(element: JsonElement): JsonElement {
-        return if (element is JsonObject && "document_collection_prompt" !in element) {
-            JsonObject(element + ("document_collection_prompt" to JsonNull))
-        } else {
-            element
-        }
-    }
-}
 
 internal object EmptyArrayAsNullCollectionRequirementsSerializer :
     EmptyArrayAsNullSerializer<KycCollectionRequirementsResponse>(

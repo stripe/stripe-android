@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
@@ -35,7 +34,6 @@ import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.io.File
 import java.util.Locale
@@ -60,6 +58,8 @@ internal class KycActivity : ComponentActivity() {
                     context = applicationContext,
                     stateHolder = KycStateHolder(args.requirements),
                     uploader = KycSubmissionHandlerRegistry.uploader(args.submissionHandlerKey),
+                    submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
+                        ?: missingSubmissionHandler(args.submissionHandlerKey),
                 ) as T
             }
         }
@@ -68,8 +68,6 @@ internal class KycActivity : ComponentActivity() {
             KycActivityContent(
                 stateHolder = viewModel.stateHolder,
                 args = args,
-                submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
-                    ?: missingSubmissionHandler(args.submissionHandlerKey),
             )
         }
     }
@@ -78,9 +76,7 @@ internal class KycActivity : ComponentActivity() {
     private fun KycActivityContent(
         stateHolder: KycStateHolder,
         args: KycArgs,
-        submissionHandler: KycSubmissionHandler,
     ) {
-        val scope = rememberCoroutineScope()
         val chooseFile = rememberFilePicker(stateHolder)
 
         KycScreen(
@@ -96,19 +92,10 @@ internal class KycActivity : ComponentActivity() {
             onQuestionAnswerChanged = stateHolder::onQuestionAnswerChanged,
             onDocumentSubtypeSelected = stateHolder::onDocumentSubtypeSelected,
             onChooseFile = chooseFile,
-            onRemoveFile = { slotIndex ->
-                stateHolder.onFileRemoved(slotIndex)?.delete()
-            },
+            onRemoveFile = stateHolder::onFileRemoved,
             onAddDocuments = stateHolder::onAddDocuments,
             onEditDocuments = stateHolder::onEditDocuments,
-            onSubmit = {
-                scope.launch {
-                    submit(
-                        stateHolder = stateHolder,
-                        submissionHandler = submissionHandler,
-                    )
-                }
-            },
+            onSubmit = viewModel::submit,
             onContinue = {
                 if (stateHolder.state.submissionState == KycSubmissionState.Submitted) {
                     if (!stateHolder.advanceToNextRequirement()) {
@@ -277,30 +264,11 @@ internal class KycActivity : ComponentActivity() {
             return
         }
         stateHolder.onFileSelectionCancelled()
-        stateHolder.currentFiles().forEach { file -> file.delete() }
         setResult(
             RESULT_CANCELED,
             createResultIntent(KycScreenAction.Cancelled),
         )
         finish()
-    }
-
-    private suspend fun submit(
-        stateHolder: KycStateHolder,
-        submissionHandler: KycSubmissionHandler,
-    ) {
-        val submission = stateHolder.startSubmission() ?: return
-        val submittedFiles = stateHolder.currentFiles()
-
-        submissionHandler.submit(submission).fold(
-            onSuccess = {
-                submittedFiles.forEach { file -> file.delete() }
-                stateHolder.onSubmissionSucceeded()
-            },
-            onFailure = {
-                stateHolder.onSubmissionFailed()
-            },
-        )
     }
 
     private fun finishSubmitted() {
