@@ -345,6 +345,7 @@ internal class KycDocumentCollectionModel(
         KycDocumentState(
             acceptedFormats = it.acceptedFormats,
             instructions = it.instructions,
+            documentCollectionPrompt = it.documentCollectionPrompt,
             fileRequirements = it.fileRequirements,
             maxFileSizeMegabytes = maximumFileSizeBytes
                 ?.div(BYTES_PER_MEGABYTE)

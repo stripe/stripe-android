@@ -45,6 +45,47 @@ internal class KycScreenTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `proof of address falls back to localized collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+        ),
+    ) {
+        composeRule.onNodeWithText("Make sure your document meets following requirements.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds falls back to localized collection prompt`() = runScenario(
+        state = screenState(page = KycCollectionPage.DocumentOverview),
+    ) {
+        composeRule.onNodeWithText(
+            "How are you funding your transactions on Swapped? Please list all of your sources. " +
+                "For example, salary, savings, investment earnings, etc."
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun `proof of address displays backend collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            document = documentState().copy(documentCollectionPrompt = "Backend address instructions"),
+        ),
+    ) {
+        composeRule.onNodeWithText("Backend address instructions").assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds displays backend collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState().copy(documentCollectionPrompt = "Backend funding instructions"),
+        ),
+    ) {
+        composeRule.onNodeWithText("Backend funding instructions").assertIsDisplayed()
+    }
+
+    @Test
     fun `forward navigation retains the outgoing page until the slide finishes`() = runScenario(
         state = screenState(page = KycCollectionPage.Context),
     ) {
@@ -633,6 +674,7 @@ internal class KycScreenTest {
                 maxFilesPerDocumentType = 10,
                 editingSlotIndex = editingSlotIndex,
                 slots = slots,
+                documentCollectionPrompt = null,
             )
         }
 

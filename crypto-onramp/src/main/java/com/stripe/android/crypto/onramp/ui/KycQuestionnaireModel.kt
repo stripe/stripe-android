@@ -20,8 +20,8 @@ internal class KycQuestionnaireModel(
         }
 
     fun updateAnswer(questionId: String, answer: String): Boolean {
-        if (questionId !in answers) return false
-        answers[questionId] = limitKycAnswer(answer)
+        val question = questions.firstOrNull { it.id == questionId } ?: return false
+        answers[questionId] = limitKycAnswer(answer, question.maxQuestionnaireAnswerCharacters)
         return true
     }
 

@@ -72,6 +72,7 @@ class KycActivityContractTest {
                                     prompt = "Why are you purchasing cryptocurrency?",
                                     answerType = "free_text",
                                     required = true,
+                                    maxQuestionnaireAnswerCharacters = 5_000,
                                 )
                             )
                         ),

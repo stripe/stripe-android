@@ -238,6 +238,7 @@ internal class KycStateHolderTest {
                                     prompt = "How are you funding your transactions?",
                                     answerType = "free_text",
                                     required = true,
+                                    maxQuestionnaireAnswerCharacters = 5_000,
                                 )
                             )
                         ),
@@ -660,6 +661,7 @@ internal class KycStateHolderTest {
                 prompt = "Question $id",
                 answerType = "free_text",
                 required = true,
+                maxQuestionnaireAnswerCharacters = 5_000,
             )
         }
 
@@ -690,6 +692,7 @@ internal class KycStateHolderTest {
                             prompt = "Why are you purchasing cryptocurrency?",
                             answerType = "free_text",
                             required = true,
+                            maxQuestionnaireAnswerCharacters = 5_000,
                         )
                     )
                 ),
@@ -706,6 +709,7 @@ internal class KycStateHolderTest {
                             prompt = "How are you funding your transactions?",
                             answerType = "free_text",
                             required = true,
+                            maxQuestionnaireAnswerCharacters = 5_000,
                         )
                     )
                 ),
@@ -743,6 +747,7 @@ internal class KycStateHolderTest {
                     maxFileSizeBytes = 5_000_000L,
                     fileRequirements = "PDF, JPEG, or PNG, up to 5 MB per file.",
                     instructions = listOf("Show your full name and address"),
+                    documentCollectionPrompt = null,
                 ),
                 questionnaire = null,
             )

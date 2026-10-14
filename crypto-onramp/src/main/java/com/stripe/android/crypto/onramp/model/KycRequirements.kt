@@ -37,6 +37,7 @@ internal data class KycDocumentRequirement(
     val maxFileSizeBytes: Long,
     val fileRequirements: String,
     val instructions: List<String>,
+    val documentCollectionPrompt: String?,
 ) : Parcelable
 
 @Parcelize
@@ -57,4 +58,5 @@ internal data class KycQuestion(
     val prompt: String,
     val answerType: String,
     val required: Boolean,
+    val maxQuestionnaireAnswerCharacters: Int,
 ) : Parcelable

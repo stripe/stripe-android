@@ -14,6 +14,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 
@@ -82,10 +84,12 @@ internal data class KycDocumentRequirementResponse(
     @SerialName("max_document_types")
     val maxDocumentTypes: Int,
     @SerialName("max_files_per_document_type")
-    val maxFilesPerDocumentType: Int? = null,
+    val maxFilesPerDocumentType: Int,
     @SerialName("file_requirements")
     val fileRequirements: String,
     val instructions: List<String>,
+    @SerialName("document_collection_prompt")
+    val documentCollectionPrompt: String?,
 )
 
 @Serializable
@@ -113,6 +117,8 @@ internal data class KycQuestionResponse(
     @SerialName("answer_type")
     val answerType: String,
     val required: Boolean,
+    @SerialName("max_questionnaire_answer_characters")
+    val maxQuestionnaireAnswerCharacters: Int,
 )
 
 private fun KycRequirementResponse.toKycRequirement(name: String): KycRequirement {
@@ -144,10 +150,11 @@ private fun KycDocumentRequirementResponse.toKycDocumentRequirement():
         acceptedFormats = acceptedFormats,
         minDocumentTypes = minDocumentTypes,
         maxDocumentTypes = maxDocumentTypes,
-        maxFilesPerDocumentType = maxFilesPerDocumentType ?: 10,
+        maxFilesPerDocumentType = maxFilesPerDocumentType,
         maxFileSizeBytes = maxFileSizeBytes,
         fileRequirements = fileRequirements,
         instructions = instructions,
+        documentCollectionPrompt = documentCollectionPrompt,
     )
 }
 
@@ -159,6 +166,7 @@ private fun KycQuestionnaireResponse.toKycQuestionnaire(): KycQuestionnaire {
                 prompt = question.prompt,
                 answerType = question.answerType,
                 required = question.required,
+                maxQuestionnaireAnswerCharacters = question.maxQuestionnaireAnswerCharacters,
             )
         }
     )
@@ -166,8 +174,21 @@ private fun KycQuestionnaireResponse.toKycQuestionnaire(): KycQuestionnaire {
 
 internal object EmptyArrayAsNullDocumentRequirementSerializer :
     EmptyArrayAsNullSerializer<KycDocumentRequirementResponse>(
-        KycDocumentRequirementResponse.serializer()
+        KycDocumentRequirementSerializer
     )
+
+// Supply the optional wire field without making internal construction arguments optional.
+private object KycDocumentRequirementSerializer : JsonTransformingSerializer<KycDocumentRequirementResponse>(
+    KycDocumentRequirementResponse.serializer()
+) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return if (element is JsonObject && "document_collection_prompt" !in element) {
+            JsonObject(element + ("document_collection_prompt" to JsonNull))
+        } else {
+            element
+        }
+    }
+}
 
 internal object EmptyArrayAsNullCollectionRequirementsSerializer :
     EmptyArrayAsNullSerializer<KycCollectionRequirementsResponse>(

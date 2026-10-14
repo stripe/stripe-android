@@ -13,19 +13,66 @@ class RetrieveKycRequirementsResponseTest {
     @Test
     fun `server per source file allowance is preserved`() {
         val response = parseFixture("source_of_funds_required.json") {
-            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": 3, \"max_document_types\":")
+            it.replace("\"max_files_per_document_type\": 10", "\"max_files_per_document_type\": 3")
         }
         val document = response.requirements.toKycRequirements().userActionRequired.single().document
         assertThat(document?.maxFilesPerDocumentType).isEqualTo(3)
     }
 
     @Test
-    fun `null per source file allowance uses fallback`() {
-        val response = parseFixture("source_of_funds_required.json") {
-            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": null, \"max_document_types\":")
+    fun `null per source file allowance fails decoding`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace("\"max_files_per_document_type\": 10", "\"max_files_per_document_type\": null")
+            }
         }
-        val document = response.requirements.toKycRequirements().userActionRequired.single().document
-        assertThat(document?.maxFilesPerDocumentType).isEqualTo(10)
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `omitted per source file allowance fails decoding`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace("\"max_files_per_document_type\": 10,", "")
+            }
+        }
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `question answer limits are required`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace(",\n              \"max_questionnaire_answer_characters\": 5000", "")
+            }
+        }
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `backend prompt and answer limit reach the domain model`() {
+        val response = parseFixture("source_of_funds_required.json") {
+            it.replace("\"instructions\":", "\"document_collection_prompt\": \"Backend prompt\", \"instructions\":")
+                .replace("\"max_questionnaire_answer_characters\": 5000", "\"max_questionnaire_answer_characters\": 42")
+        }
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isEqualTo("Backend prompt")
+        assertThat(requirement.questionnaire?.questions?.single()?.maxQuestionnaireAnswerCharacters).isEqualTo(42)
+    }
+
+    @Test
+    fun `omitted document collection prompt remains absent`() {
+        val requirement = parseFixture("proof_of_address_required.json")
+            .requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isNull()
+    }
+
+    @Test
+    fun `explicit null document collection prompt remains absent`() {
+        val requirement = parseFixture("proof_of_address_required.json") {
+            it.replace("\"instructions\":", "\"document_collection_prompt\": null, \"instructions\":")
+        }.requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isNull()
     }
 
     @Test
@@ -171,7 +218,7 @@ class RetrieveKycRequirementsResponseTest {
                 document = "null",
                 collectionRequirements = """
                     {"questionnaire":{"questions":[{
-                      "id":"purpose", "prompt":"Why?", "answer_type":"future_type", "required":true
+                      "id":"purpose", "prompt":"Why?", "answer_type":"future_type", "required":true, "max_questionnaire_answer_characters": 5000
                     }]}}
                 """.trimIndent(),
             )

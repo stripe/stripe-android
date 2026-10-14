@@ -476,7 +476,8 @@ private fun DocumentOverviewContent(
     ) {
         ScreenTitle(state.requirementType)
         Text(
-            text = stringResource(R.string.stripe_link_onramp_kyc_funding_sources_prompt),
+            text = state.document?.documentCollectionPrompt
+                ?: stringResource(R.string.stripe_link_onramp_kyc_funding_sources_prompt),
             style = LinkTheme.typography.detail,
             color = LinkTheme.colors.textPrimary,
         )
@@ -641,16 +642,7 @@ private fun DocumentEditorContent(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ScreenTitle(state.requirementType)
-        if (state.requirementType == KycRequirementType.ProofOfAddress) {
-            Text(
-                text = stringResource(R.string.stripe_link_onramp_kyc_proof_of_address_upload_message),
-                modifier = Modifier.fillMaxWidth(),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textTertiary,
-                textAlign = TextAlign.Center,
-            )
-        }
+        DocumentEditorHeader(state.requirementType, document)
 
         if (state.errorMessages.isNotEmpty()) {
             Text(
@@ -697,6 +689,21 @@ private fun DocumentEditorContent(
             serverInstructions = document.instructions,
         )
         Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun DocumentEditorHeader(requirementType: KycRequirementType, document: KycDocumentState) {
+    ScreenTitle(requirementType)
+    if (requirementType == KycRequirementType.ProofOfAddress) {
+        Text(
+            text = document.documentCollectionPrompt
+                ?: stringResource(R.string.stripe_link_onramp_kyc_proof_of_address_upload_message),
+            modifier = Modifier.fillMaxWidth(),
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textTertiary,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -1418,6 +1425,7 @@ internal data class KycQuestionState(
 internal data class KycDocumentState(
     val acceptedFormats: List<String>,
     val instructions: List<String>,
+    val documentCollectionPrompt: String?,
     val fileRequirements: String,
     val maxFileSizeMegabytes: Int?,
     val minDocumentTypes: Int,

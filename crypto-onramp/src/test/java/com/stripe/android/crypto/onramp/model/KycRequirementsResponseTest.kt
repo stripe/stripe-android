@@ -118,6 +118,7 @@ class KycRequirementsResponseTest {
                         prompt = "Question prompt",
                         answerType = "free_text",
                         required = true,
+                        maxQuestionnaireAnswerCharacters = 5_000,
                     )
                 )
             )
