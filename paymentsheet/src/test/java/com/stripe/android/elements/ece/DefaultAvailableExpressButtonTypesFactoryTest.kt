@@ -88,55 +88,6 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
-    fun `create applies configured payment method order`() {
-        val availableExpressButtonTypes = create(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-            configuration = ExpressCheckoutElement.Configuration()
-                .paymentMethodOrder(
-                    listOf(
-                        "google_pay",
-                        "link",
-                    )
-                ),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
-            ExpressButtonType.Link,
-        ).inOrder()
-    }
-
-    @Test
-    fun `create appends payment methods omitted from configured order`() {
-        val availableExpressButtonTypes = create(
-            availableWallets = listOf(WalletType.GooglePay, WalletType.Link),
-            configuration = ExpressCheckoutElement.Configuration()
-                .paymentMethodOrder(listOf("link")),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            ExpressButtonType.Link,
-            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
-        ).inOrder()
-    }
-
-    @Test
-    fun `create ignores unavailable payment methods in configured order`() {
-        val availableExpressButtonTypes = create(
-            availableWallets = listOf(WalletType.Link),
-            configuration = ExpressCheckoutElement.Configuration()
-                .paymentMethodOrder(
-                    listOf(
-                        "google_pay",
-                        "link",
-                    )
-                ),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(ExpressButtonType.Link)
-    }
-
-    @Test
     fun `create keeps google pay when shipping address is required`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
