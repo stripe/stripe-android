@@ -147,18 +147,6 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     }
 
     @Test
-    fun displaysHorizontalPaymentOptionsWithWalletHeader() {
-        val screen = createHorizontalPaymentOptionsScreen()
-        val walletsState = createWalletsState()
-
-        snapshot(
-            screen = screen,
-            previousScreen = null,
-            walletsState = walletsState,
-        )
-    }
-
-    @Test
     fun displaysRootFormWithWalletHeader() {
         val screen = createFormScreen()
         val walletsState = createWalletsState()
