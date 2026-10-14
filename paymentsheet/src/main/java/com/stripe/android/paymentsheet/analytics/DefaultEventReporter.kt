@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -607,8 +608,13 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
         return if (paymentMethodMetadata != null) {
-            paymentMethodMetadata.analyticsMetadata.paramsMap +
+            val defaultParams = paymentMethodMetadata.analyticsMetadata.paramsMap +
                 ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
+            if (paymentMethodMetadata.integrationMetadata is IntegrationMetadata.CheckoutSession) {
+                defaultParams + ("product_usage" to "PaymentElement")
+            } else {
+                defaultParams
+            }
         } else {
             emptyMap()
         }

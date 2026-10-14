@@ -1306,6 +1306,11 @@ internal class CheckoutSheetLauncherTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
+                savedStateHandle = savedStateHandle,
+                stateHolder = selectionHolder,
+                linkAccountHolder = linkAccountHolder,
+            ),
             logger = logger,
             resultCallback = {},
             viewModelScope = backgroundScope,

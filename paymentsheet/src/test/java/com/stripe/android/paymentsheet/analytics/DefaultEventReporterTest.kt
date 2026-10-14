@@ -17,6 +17,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -36,6 +37,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.WalletsState
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -55,6 +57,14 @@ class DefaultEventReporterTest {
     private val paymentMethodMetadataWithTestAnalyticsMetadata = PaymentMethodMetadataFactory.create(
         analyticsMetadata = AnalyticsMetadata(
             mapOf("example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true))
+        )
+    )
+    private val checkoutPaymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(
+        integrationMetadata = IntegrationMetadata.CheckoutSession(
+            id = "cs_test_123",
+            instancesKey = "checkout_instances",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedEmail = null,
         )
     )
 
@@ -1377,6 +1387,32 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `checkout ui events use PaymentElement product usage`() = runScenario(
+        defaultProductUsageTokens = setOf("L3Token"),
+    ) {
+        paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
+
+        eventReporter.onDismiss()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_dismiss")
+        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
+    }
+
+    @Test
+    fun `non-checkout ui events preserve existing product usage tokens`() = runScenario(
+        defaultProductUsageTokens = setOf("L3Token"),
+    ) {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onDismiss()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_dismiss")
+        assertThat(request.params).containsEntry("product_usage", "L3Token")
+    }
+
+    @Test
     fun `emitting event after changing paymentMethodMetadata fires event with updated data`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
@@ -1516,6 +1552,7 @@ class DefaultEventReporterTest {
 
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
+        defaultProductUsageTokens: Set<String> = setOf(""),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -1525,7 +1562,7 @@ class DefaultEventReporterTest {
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
             publishableKey = DEFAULT_API_CONFIG.publishableKey,
-            defaultProductUsageTokens = setOf(""),
+            defaultProductUsageTokens = defaultProductUsageTokens,
         )
 
         val durationProvider = FakeDurationProvider()

@@ -24,6 +24,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
+    private val analyticsPerformer: CheckoutConfirmationAnalyticsPerformer,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -92,6 +93,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                             sessionRefresher.refresh()
                         }
                     }
+                    analyticsPerformer.reportConfirmationResult(state.result)
                     state.result.asCheckoutResult(wasRestored)
                 }
             }
@@ -101,6 +103,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
             refreshSession { sessionRefresher.refresh() }
+            analyticsPerformer.reportConfirmationFailure(error)
             CheckoutController.Result.Failed(error)
         }
     }

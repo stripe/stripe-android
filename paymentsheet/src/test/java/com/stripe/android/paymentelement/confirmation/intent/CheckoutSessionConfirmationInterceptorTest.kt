@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutEventReporterFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
@@ -391,6 +392,15 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             assertThat(result)
                 .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+            val analyticsEvents = eventAnalyticsRequestExecutor.getExecutedRequests().map { it.params }
+            assertThat(analyticsEvents.map { it["event"] }).containsExactly(
+                "checkout_elements.update_billing_address.started",
+                "checkout_elements.update_billing_address.succeeded",
+            ).inOrder()
+            analyticsEvents.forEach { params ->
+                assertThat(params).containsEntry("did_request_tax_update", true)
+                assertThat(params).doesNotContainKey("invocation_source")
+            }
         }
 
     @Test
@@ -947,6 +957,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 )
             },
         )
+        val eventAnalyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
@@ -965,13 +976,17 @@ class CheckoutSessionConfirmationInterceptorTest {
             context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
-            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                checkoutSessionRepository = checkoutSessionRepository,
+                eventReporter = CheckoutEventReporterFactory.create(eventAnalyticsRequestExecutor),
+            ),
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
         )
 
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
+                eventAnalyticsRequestExecutor = eventAnalyticsRequestExecutor,
             )
 
             scenario.block()
@@ -980,6 +995,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
+        val eventAnalyticsRequestExecutor: FakeAnalyticsRequestExecutor,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,

@@ -145,10 +145,13 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        sessionRefresher.enqueueRefreshAction {}
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
+        assertThat(sessionRefresher.calls.awaitItem())
+            .isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
             .isEqualTo(PaymentSelection.GooglePay)
     }
@@ -196,22 +199,23 @@ internal class CheckoutConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val eventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
+            eventReporter = eventReporter,
+            savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+        )
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
+            analyticsPerformer = analyticsPerformer,
             logger = Logger.noop(),
             resultCallback = {},
             viewModelScope = backgroundScope,
         )
-        val eventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
-            confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
-            savedStateHandle = savedStateHandle,
-        )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            analyticsPerformer.reportConfirmationResults()
+            operationCoordinator.observeConfirmationResults()
         }
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
@@ -238,6 +242,7 @@ internal class CheckoutConfirmationPerformerTest {
             performerProvider = performerProvider,
             performer = performer,
             confirmationHandler = confirmationHandler,
+            sessionRefresher = sessionRefresher,
             eventReporter = eventReporter,
             stateHolder = stateHolder,
         ).block()
@@ -264,6 +269,7 @@ internal class CheckoutConfirmationPerformerTest {
         val performerProvider: FakeConfirmationPerformerProvider,
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
         val eventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
     )

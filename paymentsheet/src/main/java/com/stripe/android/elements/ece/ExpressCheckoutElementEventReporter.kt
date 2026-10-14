@@ -26,7 +26,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
         fireEvent(
             eventName = ECE_DISPLAYED_EVENT_NAME,
-            additionalParams = emptyMap(),
+            additionalParams = mapOf("product_usage" to "ExpressCheckoutElement"),
         )
     }
 

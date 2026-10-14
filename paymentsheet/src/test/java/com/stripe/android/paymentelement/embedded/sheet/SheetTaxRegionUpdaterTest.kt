@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutEventReporterFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -192,7 +193,10 @@ internal class SheetTaxRegionUpdaterTest {
             },
         )
 
-        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        return CheckoutSessionTaxRegionUpdater(
+            checkoutSessionRepository = checkoutSessionRepository,
+            eventReporter = CheckoutEventReporterFactory.create(),
+        )
     }
 
     private fun checkoutSessionResponse(

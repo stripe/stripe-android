@@ -58,6 +58,22 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `checkout config id is null when the response omits it`() {
+        val result = parse(base())
+
+        assertThat(result?.configId).isNull()
+        assertThat(result?.requestId).isNull()
+    }
+
+    @Test
+    fun `parses checkout config id`() {
+        val result = parse(base().put("config_id", "cfg_checkout_123"))
+
+        assertThat(result?.configId).isEqualTo("cfg_checkout_123")
+        assertThat(result?.requestId).isNull()
+    }
+
+    @Test
     fun `shipping address collection requires a shipping address`() {
         val json = base().put(
             "shipping_address_collection",

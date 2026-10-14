@@ -48,27 +48,20 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Test
-    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementScenario(
+    fun testPaymentElementAndCheckoutAnalyticsUseTheirOwnProductUsage() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-            )
+            validateCheckoutOperationAnalytics("init")
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("PaymentElement"),
             )
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         },
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_carousel_payment_method_tapped",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
@@ -76,7 +69,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_form_shown",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
@@ -84,7 +77,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_cardscan_api_check_failed",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
         )
 
         contentPage.clickOnLpm("card")
@@ -110,17 +103,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
+                validateCheckoutOperationAnalytics("init")
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("PaymentElement"),
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
@@ -145,20 +131,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_failure",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("PaymentElement"),
                 analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
-            // The Checkout Session is refreshed after confirmation fails.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-            )
+            validateCheckoutOperationAnalytics("update_billing_address")
+            validateCheckoutOperationAnalytics("confirm", terminalPhase = "failed")
 
             contentPage.clickOnLpm("google_pay")
             confirm()
@@ -183,17 +162,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             },
             setup = { controller ->
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
+                validateCheckoutOperationAnalytics("init")
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("PaymentElement"),
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
@@ -203,15 +175,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
                 productUsage = setOf("Checkout"),
             )
-            // Changing the selection reloads the payment element.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-            )
+            validateCheckoutOperationAnalytics("update_billing_address")
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so
             // select one directly.
@@ -262,6 +226,20 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     .put("status", "requires_location_inputs"),
             )
         }
+    }
+
+    private fun validateCheckoutOperationAnalytics(
+        operation: String,
+        terminalPhase: String = "succeeded",
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.$operation.started",
+            productUsage = setOf("checkout_elements"),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.$operation.$terminalPhase",
+            productUsage = setOf("checkout_elements"),
+        )
     }
 
     private companion object {

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.checkout.analytics.checkoutAnalyticsParams
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
@@ -45,14 +46,14 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         isTapToAddAvailable: Boolean,
     ): AnalyticsMetadata = buildMap<String, AnalyticsMetadata.Value> {
         putAll(
-            initialization(
-                initializationMode = initializationMode,
-                integrationMetadata = integrationMetadata,
+            intent(
+                stripeIntent = elementsSession.stripeIntent,
             )
         )
         putAll(
-            intent(
-                stripeIntent = elementsSession.stripeIntent,
+            initialization(
+                initializationMode = initializationMode,
+                integrationMetadata = integrationMetadata,
             )
         )
         putAll(
@@ -84,6 +85,13 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("is_decoupled", SimpleBoolean(integrationMetadata.isDeferred()))
         put("is_spt", SimpleBoolean(integrationMetadata.isSpt()))
         put("is_confirmation_tokens", SimpleBoolean(integrationMetadata.isConfirmationTokens()))
+        if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+            putAll(
+                integrationMetadata.checkoutSessionResponse.checkoutAnalyticsParams().mapValues { (_, value) ->
+                    value.toAnalyticsMetadataValue()
+                }
+            )
+        }
     }
 
     private fun intent(
@@ -243,6 +251,12 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("style", SimpleBoolean(style != PaymentSheet.Appearance.Embedded.default.style))
         put("row_style", SimpleString(style.toAnalyticsValue()))
     }
+}
+
+private fun Any.toAnalyticsMetadataValue(): AnalyticsMetadata.Value = when (this) {
+    is Boolean -> SimpleBoolean(this)
+    is String -> SimpleString(this)
+    else -> error("Unsupported Checkout analytics metadata value")
 }
 
 private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String

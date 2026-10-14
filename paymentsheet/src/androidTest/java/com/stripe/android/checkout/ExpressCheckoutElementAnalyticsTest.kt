@@ -58,15 +58,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
+            validateCheckoutOperationStarted("confirm")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "google_pay"),
+                productUsage = setOf("PaymentElement"),
             )
-
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
+            validateCheckoutOperationTerminal("confirm")
 
             page.clickGooglePayButton()
         }
@@ -81,17 +79,18 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             networkRule.checkoutInit()
 
+            validateCheckoutOperationStarted("confirm")
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
+                productUsage = setOf("PaymentElement"),
             )
+            validateCheckoutOperationTerminal("confirm")
 
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            // We also re-load Link state since the confirmation was for a Link payment method.
-            enqueueLoadingRequests(linkEnabled = true)
+            enqueueLinkAccountLookups(linkEnabled = true)
 
             page.clickLinkButton()
         }
@@ -106,15 +105,17 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
             networkRule.checkoutInit()
+            validateCheckoutOperationStarted("confirm")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_failure",
                 analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_message", "googlePay_1"),
                 analyticsPayloadField("error_code", "1"),
+                productUsage = setOf("PaymentElement"),
             )
+            validateCheckoutOperationTerminal("confirm", terminalPhase = "failed")
 
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            enqueueLoadingRequests(linkEnabled = true)
+            enqueueLinkAccountLookups(linkEnabled = true)
 
             page.clickGooglePayButton()
         }
@@ -128,6 +129,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
             networkRule.checkoutInit()
+            validateCheckoutOperationStarted("confirm")
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(
                 eventName = "link.popup.error",
@@ -138,13 +140,12 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
                 analyticsPayloadField("error_message", "java.lang.IllegalStateException"),
+                productUsage = setOf("PaymentElement"),
             )
+            validateCheckoutOperationTerminal("confirm", terminalPhase = "failed")
 
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            // We also re-load Link state since the confirmation was for a Link payment method.
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
-                validateLoadingAnalyticsRequests()
                 validateLinkAccountLookupAnalyticsRequest()
             }
 
@@ -198,15 +199,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
+            validateCheckoutOperationStarted("confirm")
+            validateCheckoutOperationAnalytics("update_shipping_address")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "google_pay"),
+                productUsage = setOf("PaymentElement"),
             )
-
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
+            validateCheckoutOperationTerminal("confirm")
 
             page.clickGooglePayButton()
         }
@@ -246,15 +246,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
+            validateCheckoutOperationStarted("confirm")
+            validateCheckoutOperationAnalytics("update_billing_address")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_success",
                 analyticsPayloadField("selected_lpm", "google_pay"),
+                productUsage = setOf("PaymentElement"),
             )
-
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
+            validateCheckoutOperationTerminal("confirm")
 
             page.clickGooglePayButton()
         }
@@ -282,17 +281,16 @@ internal class ExpressCheckoutElementAnalyticsTest {
             networkRule.checkoutInit(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
+            validateCheckoutOperationStarted("confirm")
+            validateCheckoutOperationAnalytics("update_billing_address")
             validateAnalyticsRequest(
                 eventName = "mc_embedded_payment_failure",
                 analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
+                productUsage = setOf("PaymentElement"),
             )
-
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
+            validateCheckoutOperationTerminal("confirm", terminalPhase = "failed")
 
             page.clickGooglePayButton()
         }
@@ -305,8 +303,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
-        enqueueLoadingRequests(linkEnabled = linkEnabled)
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
+        validateCheckoutOperationStarted("init")
+        enqueueLinkAccountLookups(linkEnabled = linkEnabled)
+        validateCheckoutOperationTerminal("init")
+        validateAnalyticsRequest(
+            eventName = "elements.express_checkout_element.init",
+            productUsage = setOf("ExpressCheckoutElement"),
+        )
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
@@ -319,20 +322,39 @@ internal class ExpressCheckoutElementAnalyticsTest {
         }
     }
 
-    private fun enqueueLoadingRequests(linkEnabled: Boolean) {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            if (linkEnabled) {
+    private fun enqueueLinkAccountLookups(linkEnabled: Boolean) {
+        if (linkEnabled) {
+            // We load twice, once for PE and once for ECE.
+            repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
                 validateLinkAccountLookupAnalyticsRequest()
             }
-            validateLoadingAnalyticsRequests()
         }
     }
 
-    private fun validateLoadingAnalyticsRequests() {
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+    private fun validateCheckoutOperationAnalytics(
+        operation: String,
+        terminalPhase: String = "succeeded",
+    ) {
+        validateCheckoutOperationStarted(operation)
+        validateCheckoutOperationTerminal(operation, terminalPhase)
+    }
+
+    private fun validateCheckoutOperationStarted(operation: String) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.$operation.started",
+            productUsage = setOf("checkout_elements"),
+        )
+    }
+
+    private fun validateCheckoutOperationTerminal(
+        operation: String,
+        terminalPhase: String = "succeeded",
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.$operation.$terminalPhase",
+            productUsage = setOf("checkout_elements"),
+        )
     }
 
     private fun validateLinkAccountLookupAnalyticsRequest() {
@@ -342,10 +364,11 @@ internal class ExpressCheckoutElementAnalyticsTest {
     private fun validateAnalyticsRequest(
         eventName: String,
         vararg requestMatchers: RequestMatcher,
+        productUsage: Set<String> = setOf("Checkout"),
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("Checkout"),
+            productUsage = productUsage,
             *requestMatchers,
         )
     }

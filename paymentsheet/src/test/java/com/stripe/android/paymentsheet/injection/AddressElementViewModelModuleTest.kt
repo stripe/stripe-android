@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutEventReporterFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -408,6 +409,7 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
+            CheckoutEventReporterFactory.create(),
         )
     }
 

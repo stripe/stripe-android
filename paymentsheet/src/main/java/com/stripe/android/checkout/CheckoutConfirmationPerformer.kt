@@ -17,7 +17,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val stateHolder: CheckoutControllerStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val analyticsPerformer: CheckoutAnalyticsPerformer,
+    private val analyticsPerformer: CheckoutConfirmationAnalyticsPerformer,
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,

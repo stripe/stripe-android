@@ -3,8 +3,8 @@ package com.stripe.android.elements.ece
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
+import com.stripe.android.checkout.CheckoutConfirmationAnalyticsPerformerFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
@@ -246,22 +246,23 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
+            eventReporter = paymentSheetEventReporter,
+            savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+        )
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
+            analyticsPerformer = analyticsPerformer,
             logger = Logger.noop(),
             resultCallback = {},
             viewModelScope = backgroundScope,
         )
-        val paymentSheetEventReporter = FakeEventReporter()
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
-            confirmationHandler = confirmationHandler,
-            eventReporter = paymentSheetEventReporter,
-            savedStateHandle = savedStateHandle,
-        )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            analyticsPerformer.reportConfirmationResults()
+            operationCoordinator.observeConfirmationResults()
         }
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,

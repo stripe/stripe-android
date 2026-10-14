@@ -37,6 +37,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
@@ -71,6 +73,13 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(resultMap).containsKey("mpe_config")
         assertThat((resultMap["mpe_config"] as? Map<*, *>)?.get("customer")).isEqualTo(false)
+        assertThat(resultMap).doesNotContainKey("checkout_session_id")
+        assertThat(resultMap).doesNotContainKey("checkout_config_id")
+        assertThat(resultMap).doesNotContainKey("session_status")
+        assertThat(resultMap).doesNotContainKey("payment_status")
+        assertThat(resultMap).doesNotContainKey("elements_session_config_id")
+        assertThat(resultMap).doesNotContainKey("adaptive_pricing_active")
+        assertThat(resultMap).doesNotContainKey("automatic_tax_enabled")
 
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
@@ -132,6 +141,52 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap["is_decoupled"]).isEqualTo(false)
         assertThat(resultMap["is_spt"]).isEqualTo(false)
         assertThat(resultMap["is_confirmation_tokens"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `create includes checkout response analytics metadata`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(
+            id = "cs_test_123",
+            configId = "cfg_checkout_123",
+            requestId = "req_stale",
+            currency = "cad",
+            paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            elementsSession = createElementsSession().copy(elementsSessionConfigId = "elements_config_123"),
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "eur",
+                integrationAmount = 1000,
+                integrationCurrency = "cad",
+                localCurrencyOptions = emptyList(),
+            ),
+            automaticTaxEnabled = true,
+        )
+        val initializationMode = InitializationMode.CheckoutSession(
+            instancesKey = "checkout_instances",
+            checkoutSessionResponse = response,
+            collectedEmail = null,
+        )
+        val resultMap = createAnalyticsMetadata(
+            initializationMode = initializationMode,
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = response.id,
+                instancesKey = "checkout_instances",
+                checkoutSessionResponse = response,
+                collectedEmail = null,
+            ),
+            elementsSession = requireNotNull(response.elementsSession),
+        )
+
+        assertThat(resultMap).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(resultMap).containsEntry("checkout_config_id", "cfg_checkout_123")
+        assertThat(resultMap).containsEntry("currency", "cad")
+        assertThat(resultMap).containsEntry("session_status", "complete")
+        assertThat(resultMap).containsEntry("payment_status", "paid")
+        assertThat(resultMap).containsEntry("elements_session_config_id", "elements_config_123")
+        assertThat(resultMap).containsEntry("adaptive_pricing_active", true)
+        assertThat(resultMap).containsEntry("automatic_tax_enabled", true)
+        assertThat(resultMap).doesNotContainKey("request_id")
+        assertThat(resultMap).doesNotContainKey("product_usage")
     }
 
     @Test

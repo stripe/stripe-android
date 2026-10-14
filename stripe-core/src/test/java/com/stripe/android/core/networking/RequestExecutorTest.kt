@@ -143,6 +143,24 @@ internal class RequestExecutorTest {
     }
 
     @Test
+    fun `executeRequestWithResultParser maps parsed model with transport response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
+        whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseMapper = { parsedModel, response ->
+                TestStripeModel("${parsedModel.data}-${response.requestId?.value}")
+            },
+        )
+
+        assertEquals(TestStripeModel("test_data-req_test"), result.getOrThrow())
+    }
+
+    @Test
     fun `executeRequestWithResultParser should return failure result on error response`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
         whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
@@ -152,6 +170,26 @@ internal class RequestExecutorTest {
             stripeErrorJsonParser = mockErrorParser,
             request = testRequest,
             responseJsonParser = mockModelParser
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull() as APIException
+        assertEquals("req_error", exception.requestId)
+        assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, exception.statusCode)
+        assertEquals(testStripeError, exception.stripeError)
+    }
+
+    @Test
+    fun `executeRequestWithResultParser preserves failures when response mapper is provided`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
+        whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseMapper = { _, _ -> error("Response mapper should not run for an error response") },
         )
 
         assertTrue(result.isFailure)
