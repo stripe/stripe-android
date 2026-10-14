@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.addresselement
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
