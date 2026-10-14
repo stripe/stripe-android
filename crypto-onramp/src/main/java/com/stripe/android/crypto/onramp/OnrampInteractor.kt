@@ -1152,7 +1152,7 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Google Pay",
-            sublabel = paymentMethod.card?.last4,
+            sublabel = paymentMethod.card?.onrampSublabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.GooglePay
         )
     }
@@ -1166,7 +1166,7 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Samsung Pay",
-            sublabel = paymentMethod.card?.last4,
+            sublabel = paymentMethod.card?.onrampSublabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.SamsungPay,
         )
     }
