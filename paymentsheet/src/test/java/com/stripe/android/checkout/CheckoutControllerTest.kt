@@ -15,6 +15,7 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -106,6 +107,67 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure returns success`() = runConfigureScenario {
         assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `configure failure supplies display text without replacing diagnostics`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"type":"invalid_request_error","message":"Session expired"}}""")
+            }
+        },
+    ) {
+        val error = result.exceptionOrNull() as APIException
+        assertThat(error.displayMessage).isEqualTo("Session expired")
+        assertThat(error.message).isEqualTo("Session expired")
+        assertThat(error.statusCode).isEqualTo(400)
+        assertThat(controller.session.value).isNull()
+    }
+
+    @Test
+    fun `promotion failure supplies display text through Kotlin onFailure`() = runMutationScenario {
+        val previousSession = controller.session.value
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "INVALID")) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid promotion code"}}""")
+        }
+
+        val result = controller.applyPromotionCode("INVALID")
+        result.onFailure { error ->
+            assertThat((error as APIException).displayMessage).isEqualTo("Invalid promotion code")
+            assertThat(error.message).isEqualTo("Invalid promotion code")
+            assertThat(error.statusCode).isEqualTo(400)
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(controller.session.value).isEqualTo(previousSession)
+    }
+
+    @Test
+    fun `missing promotion error message preserves the diagnostic fallback`() = runMutationScenario {
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "INVALID")) { response ->
+            response.setResponseCode(500)
+            response.setBody("""{"error":{"type":"api_error"}}""")
+        }
+
+        val error = controller.applyPromotionCode("INVALID").exceptionOrNull() as APIException
+
+        assertThat(error.displayMessage).isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(error.message).isEqualTo("Request failed with status code 500 and non-JSON error body.")
+    }
+
+    @Test
+    fun `malformed promotion response supplies generic display text`() = runMutationScenario {
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "INVALID")) { response ->
+            response.setResponseCode(500)
+            response.setBody("{}")
+        }
+
+        val error = controller.applyPromotionCode("INVALID").exceptionOrNull() as APIException
+
+        assertThat(error.displayMessage).isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(error.message).isEqualTo("An improperly formatted error response was found.")
     }
 
     @Test

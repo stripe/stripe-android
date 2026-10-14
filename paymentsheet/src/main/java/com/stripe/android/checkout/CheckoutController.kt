@@ -58,7 +58,10 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
  * [session], mutate it with the various `update`/`apply`/`select` methods, and present
  * payment UI with a [CheckoutPresenter] created via [createPresenter].
  *
- * Create instances with [Builder].
+ * Create instances with [Builder]. Failures expose a customer-facing message through
+ * [com.stripe.android.core.exception.StripeException.displayMessage] when available.
+ * Use a localized generic message when the failure is not a Stripe exception or the property is `null`.
+ * Exception messages remain diagnostic information.
  */
 @Singleton
 @CheckoutSessionPreview

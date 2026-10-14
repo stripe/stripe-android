@@ -2,11 +2,15 @@
 
 package com.stripe.android.checkout
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
@@ -33,11 +37,14 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 
+@RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
 internal class CheckoutOperationCoordinatorTest {
 
@@ -407,6 +414,51 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `failed confirmation populates customer text on the original Stripe exception`() = runScenario {
+        val expected = APIException(
+            stripeError = StripeError(type = "invalid_request_error", message = "Update your payment details"),
+            requestId = "req_test",
+            statusCode = 400,
+        )
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        enqueueRefreshAction {}
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = expected,
+                message = "Generic confirmation message".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+        refreshCalls.awaitItem()
+
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+
+        assertThat(result.error).isSameInstanceAs(expected)
+        assertThat(expected.displayMessage).isEqualTo("Update your payment details")
+        assertThat(expected.message).isEqualTo("Update your payment details")
+        assertThat(expected.requestId).isEqualTo("req_test")
+        assertThat(expected.statusCode).isEqualTo(400)
+        assertThat(coordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `confirmation start failure populates display text on the original Stripe exception`() = runScenario {
+        val expected = APIException(
+            stripeError = StripeError(type = "invalid_request_error", message = "Session expired"),
+        )
+        coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
+        enqueueRefreshAction {}
+
+        coordinator.failConfirmation(expected)
+        refreshCalls.awaitItem()
+        val result = resultTurbine.awaitItem() as CheckoutController.Result.Failed
+
+        assertThat(result.error).isSameInstanceAs(expected)
+        assertThat(expected.displayMessage).isEqualTo("Session expired")
+        assertThat(coordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `confirmation start failure releases the operation gate`() = runScenario {
         val expected = IllegalStateException("Start failed")
         coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }
@@ -763,6 +815,7 @@ internal class CheckoutOperationCoordinatorTest {
             logger = logger,
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
+            errorMapper = CheckoutErrorMapper(ApplicationProvider.getApplicationContext<Context>()),
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()

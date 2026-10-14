@@ -25,6 +25,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
+    private val errorMapper: CheckoutErrorMapper,
     private val resultCallback: CheckoutController.ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
@@ -49,7 +50,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
         return try {
             mutex.withLock {
-                block()
+                block().onFailure(errorMapper::populateDisplayMessage)
             }
         } finally {
             synchronized(admissionLock) {
@@ -92,7 +93,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                             sessionRefresher.refresh()
                         }
                     }
-                    state.result.asCheckoutResult(wasRestored)
+                    state.result.asCheckoutResult(wasRestored, errorMapper)
                 }
             }
         }
@@ -101,6 +102,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
             refreshSession { sessionRefresher.refresh() }
+            errorMapper.populateDisplayMessage(error)
             CheckoutController.Result.Failed(error)
         }
     }
@@ -151,6 +153,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
     confirmationWasRestored: Boolean,
+    errorMapper: CheckoutErrorMapper,
 ): CheckoutController.Result? {
     return when (this) {
         is ConfirmationHandler.Result.Succeeded -> CheckoutController.Result.Completed()
@@ -161,6 +164,9 @@ private fun ConfirmationHandler.Result.asCheckoutResult(
                 CheckoutController.Result.Canceled().takeIf { confirmationWasRestored }
             ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> null
         }
-        is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(cause)
+        is ConfirmationHandler.Result.Failed -> {
+            errorMapper.populateDisplayMessage(cause)
+            CheckoutController.Result.Failed(cause)
+        }
     }
 }

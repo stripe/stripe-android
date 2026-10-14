@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.app.Application
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
@@ -1309,6 +1310,7 @@ internal class CheckoutSheetLauncherTest {
             logger = logger,
             resultCallback = {},
             viewModelScope = backgroundScope,
+            errorMapper = CheckoutErrorMapper(ApplicationProvider.getApplicationContext<Context>()),
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
         val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(
