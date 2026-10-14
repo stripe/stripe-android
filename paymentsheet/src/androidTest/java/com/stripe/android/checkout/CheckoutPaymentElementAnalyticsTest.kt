@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -88,6 +89,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         contentPage.clickOnLpm("card")
         formPage.waitUntilVisible()
+
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_dismiss",
+            productUsage = setOf("Checkout"),
+        )
+        Espresso.pressBack()
+        formPage.waitUntilMissing()
         markTestSucceeded()
     }
 
