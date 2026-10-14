@@ -50,6 +50,7 @@ private object NgUssdUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
         if (collectsFullAddress || collectsAutomaticTaxAddress) {
             val allowedCountries = billingDetails.allowedBillingCountries
+            // Match iOS's USSD default without restricting the merchant's allowed billing countries.
             val country = arguments.initialValues[FormFieldId.Country]
                 ?: "NG".takeIf { allowedCountries.isEmpty() || it in allowedCountries }
 
