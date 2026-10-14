@@ -23,6 +23,31 @@ import org.junit.Test
 class WalletUiStateTest {
 
     @Test
+    fun `markdown link conversion leaves plain text unchanged`() {
+        assertThat("Plain text.".markdownLinksToHtml()).isEqualTo("Plain text.")
+    }
+
+    @Test
+    fun `markdown link conversion creates links`() {
+        assertThat(
+            "Read [one](https://one.example) and [two](https://two.example).".markdownLinksToHtml()
+        ).isEqualTo(
+            "Read <a href=\"https://one.example\">one</a> and " +
+                "<a href=\"https://two.example\">two</a>."
+        )
+    }
+
+    @Test
+    fun `markdown link conversion renders malformed links as plain text`() {
+        assertThat("Broken [link]().".markdownLinksToHtml()).isEqualTo("Broken link.")
+    }
+
+    @Test
+    fun `markdown link conversion escapes html`() {
+        assertThat("A & <B>".markdownLinksToHtml()).isEqualTo("A &amp; &lt;B&gt;")
+    }
+
+    @Test
     fun testCompletedButtonState() {
         val state = walletUiState(
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
@@ -91,6 +116,36 @@ class WalletUiStateTest {
         assertThat(state.mandate).isEqualTo(
             resolvableString(R.string.stripe_wallet_bank_account_terms)
         )
+    }
+
+    @Test
+    fun `bank account data consent is shown for a selected bank account`() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            linkPaymentMethodBankAccountDataConsent = "Merchant can access balances.",
+        )
+
+        assertThat(state.bankAccountDataConsent).isEqualTo("Merchant can access balances.")
+    }
+
+    @Test
+    fun `bank account data consent is hidden for a selected card`() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkPaymentMethodBankAccountDataConsent = "Merchant can access balances.",
+        )
+
+        assertThat(state.bankAccountDataConsent).isNull()
+    }
+
+    @Test
+    fun `blank bank account data consent is hidden`() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            linkPaymentMethodBankAccountDataConsent = "   ",
+        )
+
+        assertThat(state.bankAccountDataConsent).isNull()
     }
 
     @Test
@@ -373,6 +428,7 @@ class WalletUiStateTest {
         signupToggleEnabled: Boolean = false,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
+        linkPaymentMethodBankAccountDataConsent: String? = null,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -398,6 +454,7 @@ class WalletUiStateTest {
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             linkBrand = LinkBrand.Link,
+            linkPaymentMethodBankAccountDataConsent = linkPaymentMethodBankAccountDataConsent,
         )
     }
 

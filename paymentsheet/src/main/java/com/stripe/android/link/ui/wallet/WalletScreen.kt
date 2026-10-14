@@ -273,6 +273,16 @@ private fun PaymentDetailsSection(
             )
         }
 
+        AnimatedVisibility(visible = state.bankAccountDataConsent != null) {
+            state.bankAccountDataConsent?.let { dataConsent ->
+                LinkMandate(
+                    text = dataConsent.markdownLinksToHtml(),
+                    linkBrand = state.linkBrand,
+                    modifier = Modifier.testTag(WALLET_BANK_ACCOUNT_DATA_CONSENT_TAG),
+                )
+            }
+        }
+
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
                 LinkMandate(mandate.resolve(), state.linkBrand)
@@ -776,14 +786,18 @@ private fun AddPaymentMethodRow(
 }
 
 @Composable
-private fun LinkMandate(text: String, linkBrand: LinkBrand) {
+private fun LinkMandate(
+    text: String,
+    linkBrand: LinkBrand,
+    modifier: Modifier = Modifier,
+) {
     Html(
         html = text.replaceHyperlinks(linkBrand),
         color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
@@ -791,6 +805,48 @@ private fun LinkMandate(text: String, linkBrand: LinkBrand) {
         )
     )
 }
+
+internal fun String.markdownLinksToHtml(): String {
+    val result = StringBuilder()
+    var lastIndex = 0
+    MarkdownLinkRegex.findAll(this).forEach { match ->
+        result.append(substring(lastIndex, match.range.first).escapeHtml())
+        val label = match.groupValues[1]
+        val url = match.groupValues[2]
+        val validUrl = runCatching { java.net.URI(url) }
+            .getOrNull()
+            ?.takeIf { it.scheme != null }
+        if (validUrl != null) {
+            result.append("<a href=\"")
+            result.append(url.escapeHtml())
+            result.append("\">")
+            result.append(label.escapeHtml())
+            result.append("</a>")
+        } else {
+            result.append(label.escapeHtml())
+        }
+        lastIndex = match.range.last + 1
+    }
+    result.append(substring(lastIndex).escapeHtml())
+    return result.toString()
+}
+
+private fun String.escapeHtml(): String = buildString {
+    this@escapeHtml.forEach { character ->
+        append(
+            when (character) {
+                '&' -> "&amp;"
+                '<' -> "&lt;"
+                '>' -> "&gt;"
+                '\"' -> "&quot;"
+                '\'' -> "&#39;"
+                else -> character
+            }
+        )
+    }
+}
+
+private val MarkdownLinkRegex = Regex("\\[([^\\]]+)]\\(([^)]*)\\)")
 
 @Composable
 internal fun CardDetailsRecollectionForm(
@@ -921,6 +977,7 @@ internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"
 internal const val WALLET_SCREEN_RECOLLECTION_FORM_ERROR = "wallet_screen_recollection_form_error"
 internal const val WALLET_SCREEN_RECOLLECTION_FORM_FIELDS = "wallet_screen_recollection_form_fields"
+internal const val WALLET_BANK_ACCOUNT_DATA_CONSENT_TAG = "wallet_bank_account_data_consent_tag"
 internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
 internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
 internal const val WALLET_SCREEN_DIALOG_BUTTON_TAG = "wallet_screen_dialog_button_tag"
