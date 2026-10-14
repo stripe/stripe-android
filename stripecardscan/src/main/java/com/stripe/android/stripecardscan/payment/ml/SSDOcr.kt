@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.image.hasOpenGl31
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
+import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.ml.TFLAnalyzerFactory
 import com.stripe.android.stripecardscan.framework.ml.TensorFlowLiteAnalyzer
@@ -162,11 +163,39 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
     /**
      * A factory for creating instances of this analyzer.
      */
-    class Factory(
+    class Factory private constructor(
         context: Context,
         fetchedModel: FetchedData,
-        threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<CardOcr.Input, CardOcr.Prediction, SSDOcr>(context, fetchedModel) {
+        threads: Int,
+        interpreterFactory: (ByteBuffer, InterpreterOptionsWrapper) -> InterpreterWrapper,
+    ) : TFLAnalyzerFactory<CardOcr.Input, CardOcr.Prediction, SSDOcr>(
+        context,
+        fetchedModel,
+        interpreterFactory,
+    ) {
+        constructor(
+            context: Context,
+            fetchedModel: FetchedData,
+            threads: Int = DEFAULT_THREADS,
+        ) : this(
+            context,
+            fetchedModel,
+            threads,
+            interpreterFactory = { model, options -> InterpreterWrapperImpl(model, options) },
+        )
+
+        @VisibleForTesting
+        internal constructor(
+            context: Context,
+            fetchedModel: FetchedData,
+            interpreterFactory: (ByteBuffer, InterpreterOptionsWrapper) -> InterpreterWrapper,
+        ) : this(
+            context,
+            fetchedModel,
+            DEFAULT_THREADS,
+            interpreterFactory,
+        )
+
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 4
