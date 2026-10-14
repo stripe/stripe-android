@@ -16,7 +16,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    private val cardScanConfiguration: CardScanConfiguration
+    private val cardScanConfiguration: CardScanConfiguration,
 ) : CardScanEventsReporter {
     private var hasLoggedMlKitFoundPan = false
     private var hasLoggedMlKitFoundExp = false
@@ -114,7 +114,8 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
                     override val eventName: String
                         get() = eventName
                 },
-                additionalParams = additionalParams + baseParams
+                additionalParams = additionalParams + baseParams,
+                publishableKey = cardScanConfiguration.apiConfiguration?.publishableKey,
             )
         )
     }

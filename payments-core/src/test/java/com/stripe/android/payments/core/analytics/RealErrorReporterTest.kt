@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -23,10 +24,13 @@ class RealErrorReporterTest {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageInfo,
-        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         networkTypeProvider = { "5G" },
     )
-    val realErrorReporter: RealErrorReporter = RealErrorReporter(analyticsRequestExecutor, analyticsRequestFactory)
+    val realErrorReporter = RealErrorReporter(
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestFactory = analyticsRequestFactory,
+        apiConfigurationProvider = { ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null) },
+    )
 
     @Before
     fun clearAnalyticsRequestExecutor() {

@@ -35,7 +35,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
-    fun onElementsSessionLoadFailed(error: Throwable)
+    fun onElementsSessionLoadFailed(error: Throwable, publishableKey: String)
 }
 
 @Suppress("TooManyFunctions")

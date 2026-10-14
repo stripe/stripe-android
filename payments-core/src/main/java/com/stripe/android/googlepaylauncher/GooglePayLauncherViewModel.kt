@@ -288,8 +288,7 @@ internal class GooglePayLauncherViewModel(
 
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 application,
-                publishableKey,
-                productUsageTokens
+                productUsageTokens,
             )
 
             val stripeRepository = StripeApiRepository(

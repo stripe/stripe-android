@@ -4,12 +4,14 @@ import com.stripe.android.common.nfcscan.scanner.NfcScanningError
 import com.stripe.android.common.nfcscan.tapzone.DeviceManufacturer
 import com.stripe.android.common.nfcscan.tapzone.DeviceModel
 import com.stripe.android.common.nfcscan.tapzone.SdkVersion
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface NfcScanningEventReporter {
     /**
@@ -71,6 +73,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
     @DeviceManufacturer private val deviceManufacturer: String,
     @DeviceModel private val deviceModel: String,
     @SdkVersion private val sdkVersion: Int,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : NfcScanningEventReporter {
     override fun onNfcScanStarted() {
         durationProvider.start(DurationProvider.Key.NfcScan)
@@ -144,6 +147,7 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
                         get() = eventPrefix + eventName
                 },
                 additionalParams = additionalParams,
+                publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
             )
         )
     }

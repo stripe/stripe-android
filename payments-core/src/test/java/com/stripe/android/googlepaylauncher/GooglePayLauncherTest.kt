@@ -49,9 +49,10 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    defaultProductUsageTokens = emptySet(),
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
 
             assertThat(firedEvents).containsExactly("stripe_android.googlepaylauncher_init")
@@ -79,9 +80,10 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    defaultProductUsageTokens = emptySet(),
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
 
             GooglePayLauncher(
@@ -94,9 +96,10 @@ internal class GooglePayLauncherTest {
                 },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    defaultProductUsageTokens = emptySet(),
                 ),
                 analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             )
 
             assertThat(firedEvents).containsExactly("stripe_android.googlepaylauncher_init")

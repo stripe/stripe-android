@@ -7,6 +7,7 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -46,6 +47,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @Module(
@@ -111,10 +113,12 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         internal fun providesErrorReporter(
             analyticsRequestFactory: AnalyticsRequestFactory,
-            analyticsRequestExecutor: AnalyticsRequestExecutor
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
         ): ErrorReporter = RealErrorReporter(
             analyticsRequestFactory = analyticsRequestFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            apiConfigurationProvider = apiConfigurationProvider,
         )
 
         @Provides

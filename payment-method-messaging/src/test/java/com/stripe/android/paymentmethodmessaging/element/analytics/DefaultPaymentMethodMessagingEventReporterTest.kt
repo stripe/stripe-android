@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DurationProvider
@@ -196,14 +197,14 @@ class DefaultPaymentMethodMessagingEventReporterTest {
             packageManager = application.packageManager,
             packageName = application.packageName.orEmpty(),
             packageInfo = application.packageInfo,
-            publishableKeyProvider = { "pk_test_123" },
             networkTypeProvider = { "5G" },
         )
         val eventReporter = DefaultPaymentMethodMessagingEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            apiConfigurationProvider = { ApiConfiguration.State("pk_test_123", null) },
         )
         Scenario(
             eventReporter = eventReporter,

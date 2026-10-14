@@ -58,22 +58,23 @@ constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
-        PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
+        PaymentAnalyticsRequestFactory(context.applicationContext, defaultProductUsageTokens = emptySet()),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
-    private val pollingAnalyticsEventReporter = DefaultPollingAnalyticsEventReporter(
-        analyticsRequestExecutor,
-        paymentAnalyticsRequestFactory,
-    )
     private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
         ApiConfiguration.State(
             publishableKey = publishableKeyProvider(),
             stripeAccountId = null,
         )
     }
+    private val pollingAnalyticsEventReporter = DefaultPollingAnalyticsEventReporter(
+        analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory,
+        apiConfigurationProvider = apiConfigProvider,
+    )
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
         apiConfigProvider,
@@ -298,7 +299,12 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthSourceStart,
+                publishableKey = runCatching {
+                publishableKeyProvider()
+            }.getOrNull(),
+            )
         )
 
         stripeRepository.retrieveSource(
@@ -391,7 +397,12 @@ constructor(
         )
 
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthSourceResult,
+                publishableKey = runCatching {
+                publishableKeyProvider()
+            }.getOrNull(),
+            )
         )
 
         return stripeRepository.retrieveSource(
@@ -479,7 +490,12 @@ constructor(
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event,
+                    publishableKey = runCatching {
+                    publishableKeyProvider()
+                }.getOrNull()
+                )
             )
         }
     }

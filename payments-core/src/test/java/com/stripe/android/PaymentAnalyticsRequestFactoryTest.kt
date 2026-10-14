@@ -33,8 +33,37 @@ class PaymentAnalyticsRequestFactoryTest {
 
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = context,
-        publishableKeyProvider = { API_KEY },
+        defaultProductUsageTokens = emptySet(),
     )
+
+    @Test
+    fun `same factory uses the key supplied to each request`() {
+        val first = analyticsRequestFactory.createRequest(
+            event = PaymentAnalyticsEvent.PaymentMethodCreate,
+            publishableKey = "pk_test_first",
+        )
+        val second = analyticsRequestFactory.createRequest(
+            event = PaymentAnalyticsEvent.PaymentMethodCreate,
+            publishableKey = "pk_test_second",
+        )
+
+        assertThat(first.params).containsEntry("publishable_key", "pk_test_first")
+        assertThat(second.params).containsEntry("publishable_key", "pk_test_second")
+    }
+
+    @Test
+    fun `missing key does not reuse a previous requests key`() {
+        analyticsRequestFactory.createRequest(
+            event = PaymentAnalyticsEvent.PaymentMethodCreate,
+            publishableKey = "pk_test_first",
+        )
+        val request = analyticsRequestFactory.createRequest(
+            event = PaymentAnalyticsEvent.PaymentMethodCreate,
+            publishableKey = null,
+        )
+
+        assertThat(request.params).containsEntry("publishable_key", "pk_undefined")
+    }
 
     @Test
     fun getTokenCreationParams_withValidInput_createsCorrectMap() {
@@ -43,7 +72,8 @@ class PaymentAnalyticsRequestFactoryTest {
 
         val params = analyticsRequestFactory.createTokenCreation(
             ATTRIBUTION,
-            Token.Type.Pii
+            Token.Type.Pii,
+            publishableKey = API_KEY,
         ).params
 
         // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
@@ -63,7 +93,8 @@ class PaymentAnalyticsRequestFactoryTest {
 
         val params = analyticsRequestFactory.createTokenCreation(
             ATTRIBUTION,
-            Token.Type.CvcUpdate
+            Token.Type.CvcUpdate,
+            publishableKey = API_KEY,
         ).params
 
         // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
@@ -77,7 +108,8 @@ class PaymentAnalyticsRequestFactoryTest {
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsRequestFactory.createSourceCreation(
             Source.SourceType.CARD,
-            ATTRIBUTION
+            ATTRIBUTION,
+            publishableKey = API_KEY,
         ).params
 
         // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
@@ -104,7 +136,8 @@ class PaymentAnalyticsRequestFactoryTest {
         val params = analyticsRequestFactory
             .createPaymentMethodCreation(
                 PaymentMethod.Type.Card.code,
-                ATTRIBUTION
+                ATTRIBUTION,
+                publishableKey = API_KEY,
             ).params
 
         val timestamp = params["timestamp"] as? Double
@@ -139,7 +172,8 @@ class PaymentAnalyticsRequestFactoryTest {
         val params = analyticsRequestFactory
             .createPaymentMethodUpdate(
                 PaymentMethod.Type.Card.code,
-                ATTRIBUTION
+                ATTRIBUTION,
+                publishableKey = API_KEY,
             ).params
 
         val timestamp = params["timestamp"] as? Double
@@ -175,6 +209,7 @@ class PaymentAnalyticsRequestFactoryTest {
             analyticsRequestFactory.createPaymentIntentConfirmation(
                 paymentMethodType = PaymentMethod.Type.Card.code,
                 errorMessage = null,
+                publishableKey = API_KEY,
             ).params
 
         assertThat(loggingParams)
@@ -195,6 +230,7 @@ class PaymentAnalyticsRequestFactoryTest {
             analyticsRequestFactory.createPaymentIntentConfirmation(
                 paymentMethodType = PaymentMethod.Type.Card.code,
                 errorMessage = "connectionError",
+                publishableKey = API_KEY,
             ).params
 
         assertThat(loggingParams)
@@ -212,7 +248,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun getPaymentIntentRetrieveParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsRequestFactory.createRequest(
-            PaymentAnalyticsEvent.PaymentIntentRetrieve
+            PaymentAnalyticsEvent.PaymentIntentRetrieve,
+            publishableKey = API_KEY,
         ).params
 
         assertThat(loggingParams)
@@ -233,6 +270,7 @@ class PaymentAnalyticsRequestFactoryTest {
         val params = analyticsRequestFactory.createSetupIntentConfirmation(
             paymentMethodType = PaymentMethod.Type.Card.code,
             errorMessage = null,
+            publishableKey = API_KEY,
         ).params
 
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE])
@@ -246,6 +284,7 @@ class PaymentAnalyticsRequestFactoryTest {
         val params = analyticsRequestFactory.createSetupIntentConfirmation(
             paymentMethodType = PaymentMethod.Type.Card.code,
             errorMessage = "connectionError",
+            publishableKey = API_KEY,
         ).params
 
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE])
@@ -271,12 +310,13 @@ class PaymentAnalyticsRequestFactoryTest {
             packageManager = packageManager,
             packageInfo = packageInfo,
             packageName = packageName,
-            publishableKeyProvider = { API_KEY },
             networkTypeProvider = { "5G" },
+            defaultProductUsageTokens = emptySet(),
         )
         val params = factory.createTokenCreation(
             ATTRIBUTION,
-            Token.Type.Card
+            Token.Type.Card,
+            publishableKey = API_KEY,
         ).params
 
         assertThat(params)
@@ -308,7 +348,8 @@ class PaymentAnalyticsRequestFactoryTest {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
         val params = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.CARD
+            Source.SourceType.CARD,
+            publishableKey = API_KEY,
         ).params
 
         assertThat(params)
@@ -347,7 +388,8 @@ class PaymentAnalyticsRequestFactoryTest {
         assertThat(
             analyticsRequestFactory.create3ds2Challenge(
                 PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-                "01"
+                "01",
+                publishableKey = API_KEY,
             ).params
         ).containsEntry("3ds2_ui_type", "text")
     }
@@ -356,7 +398,8 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `create3ds2ChallengeParams with uiTypeCode '99' should create params with expected 3ds2_ui_type`() {
         val params = analyticsRequestFactory.create3ds2Challenge(
             PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
-            "99"
+            "99",
+            publishableKey = API_KEY,
         ).params
 
         assertThat(params)
@@ -368,7 +411,8 @@ class PaymentAnalyticsRequestFactoryTest {
         val sdkVersion = StripeSdkVersion.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
             PaymentMethod.Type.Card.code,
-            emptySet()
+            emptySet(),
+            publishableKey = API_KEY,
         )
         assertThat(analyticsRequest.headers)
             .isEqualTo(
@@ -414,13 +458,13 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `product_usage param should include defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKeyProvider = { API_KEY },
-            defaultProductUsageTokens = setOf("Hello")
+            defaultProductUsageTokens = setOf("Hello"),
         )
 
         val analyticsRequest = analyticsRequestFactory.createSourceCreation(
             Source.SourceType.CARD,
-            setOf("World")
+            setOf("World"),
+            publishableKey = API_KEY,
         )
 
         val productUsage = analyticsRequest.params["product_usage"]
@@ -432,13 +476,13 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `product_usage param should de-dupe defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKeyProvider = { API_KEY },
-            defaultProductUsageTokens = setOf("Hello")
+            defaultProductUsageTokens = setOf("Hello"),
         )
 
         val analyticsRequest = analyticsRequestFactory.createSourceCreation(
             Source.SourceType.CARD,
-            setOf("Hello")
+            setOf("Hello"),
+            publishableKey = API_KEY,
         )
 
         assertThat(analyticsRequest.params["product_usage"])
@@ -449,12 +493,12 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `product_usage param should use defaultProductUsageTokens`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
-            publishableKeyProvider = { API_KEY },
-            defaultProductUsageTokens = setOf("Hello")
+            defaultProductUsageTokens = setOf("Hello"),
         )
 
         val analyticsRequest = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.CARD
+            Source.SourceType.CARD,
+            publishableKey = API_KEY,
         )
 
         val productUsage = analyticsRequest.params["product_usage"]
@@ -472,11 +516,12 @@ class PaymentAnalyticsRequestFactoryTest {
         try {
             val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
-                publishableKeyProvider = { API_KEY }
+                defaultProductUsageTokens = emptySet(),
             )
 
             val params = analyticsRequestFactory.createSourceCreation(
-                Source.SourceType.CARD
+                Source.SourceType.CARD,
+                publishableKey = API_KEY,
             ).params
 
             assertThat(params[AnalyticsFields.LIBRARY_NAME]).isEqualTo("MyAwesomePlugin")
@@ -485,7 +530,8 @@ class PaymentAnalyticsRequestFactoryTest {
             Stripe.appInfo = null
 
             val updatedParams = analyticsRequestFactory.createSourceCreation(
-                Source.SourceType.CARD
+                Source.SourceType.CARD,
+                publishableKey = API_KEY,
             ).params
 
             assertThat(updatedParams).doesNotContainKey(AnalyticsFields.LIBRARY_NAME)

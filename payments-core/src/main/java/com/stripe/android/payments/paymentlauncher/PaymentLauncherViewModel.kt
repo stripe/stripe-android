@@ -166,6 +166,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(
                 event = PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
                 additionalParams = analyticsParams,
+                publishableKey = runCatching { apiRequestOptionsProvider.get().apiKey }.getOrNull(),
             )
         )
         return analyticsParams
@@ -269,6 +270,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(
                 event = PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
                 additionalParams = analyticsParams,
+                publishableKey = runCatching { apiRequestOptionsProvider.get().apiKey }.getOrNull(),
             )
         )
         return analyticsParams
@@ -382,6 +384,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = analyticsParams + intentParams + errorParams + durationParams,
+                    publishableKey = runCatching { apiRequestOptionsProvider.get().apiKey }.getOrNull(),
                 )
             )
         }
@@ -400,7 +403,10 @@ internal class PaymentLauncherViewModel @Inject constructor(
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event,
+                    publishableKey = runCatching { apiRequestOptionsProvider.get().apiKey }.getOrNull(),
+                )
             )
         }
     }

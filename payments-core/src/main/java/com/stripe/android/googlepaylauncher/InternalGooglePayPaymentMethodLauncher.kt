@@ -14,6 +14,7 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import javax.inject.Provider
 
 /**
  * The internal engine backing [GooglePayPaymentMethodLauncher]. Unlike the public wrapper, this
@@ -31,13 +32,15 @@ class InternalGooglePayPaymentMethodLauncher @AssistedInject internal constructo
     @Assisted private val onPaymentDataChangedCallback: GooglePayPaymentDataUpdateCallback?,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) {
     init {
         if (!GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT) {
             GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = true
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
-                    PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit
+                    PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit,
+                    publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull(),
                 )
             )
         }

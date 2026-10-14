@@ -1,5 +1,6 @@
 package com.stripe.android.link.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
@@ -11,6 +12,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -22,6 +24,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
@@ -151,11 +154,13 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         additionalParams: Map<String, Any>? = null
     ) {
         logger.debug("Link event: ${event.eventName} $additionalParams")
+        val publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    additionalParams ?: emptyMap()
+                    additionalParams ?: emptyMap(),
+                    publishableKey = publishableKey,
                 )
             )
         }

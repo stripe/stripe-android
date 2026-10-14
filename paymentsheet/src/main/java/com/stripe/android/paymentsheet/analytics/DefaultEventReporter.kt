@@ -150,12 +150,13 @@ internal class DefaultEventReporter @Inject internal constructor(
         }.toMap()
     }
 
-    override fun onElementsSessionLoadFailed(error: Throwable) {
+    override fun onElementsSessionLoadFailed(error: Throwable, publishableKey: String) {
         fireEvent(
             event = PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error,
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
+            publishableKey = publishableKey,
         )
     }
 
@@ -496,13 +497,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        val metadata = paymentMethodMetadataProvider.get()
+        val request = paymentAnalyticsRequestFactory.createRequest(
+            event = event,
+            additionalParams = defaultParams(metadata),
+            publishableKey = metadata?.apiConfiguration?.publishableKey,
+        )
         CoroutineScope(workContext).launch {
-            analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
-                )
-            )
+            analyticsRequestExecutor.executeAsync(request)
         }
     }
 
@@ -619,13 +621,13 @@ internal class DefaultEventReporter @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
         publishableKey: String? = null,
     ) {
-        val publishableKeyOverride = publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
+        val resolvedPublishableKey = publishableKey ?: paymentMethodMetadata?.apiConfiguration?.publishableKey
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = defaultParams(paymentMethodMetadata) + event.params,
-                    publishableKeyOverride = publishableKeyOverride,
+                    publishableKey = resolvedPublishableKey,
                 )
             )
         }

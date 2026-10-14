@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.analytics
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -12,12 +13,14 @@ import com.stripe.android.ui.core.cardscan.CardScanEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultCustomerSheetEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : CustomerSheetEventReporter {
     override fun onInit(
         configuration: CustomerSheet.Configuration,
@@ -235,11 +238,13 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        val publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = emptyMap(),
+                    publishableKey = publishableKey,
                 )
             )
         }
@@ -256,11 +261,13 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     }
 
     private fun fireEvent(event: CustomerSheetEvent) {
+        val publishableKey = runCatching { apiConfigurationProvider.get().publishableKey }.getOrNull()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event,
                     event.additionalParams,
+                    publishableKey = publishableKey,
                 )
             )
         }

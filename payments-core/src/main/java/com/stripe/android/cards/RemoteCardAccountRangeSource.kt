@@ -54,7 +54,10 @@ internal class RemoteCardAccountRangeSource(
 
     private fun onCardMetadataMissingRange() {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataMissingRange)
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.CardMetadataMissingRange,
+                publishableKey = requestOptions.apiKey,
+            )
         )
     }
 

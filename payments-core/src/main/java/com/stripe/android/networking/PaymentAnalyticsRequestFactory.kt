@@ -7,7 +7,6 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -30,68 +29,32 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     packageManager: PackageManager?,
     packageInfo: PackageInfo?,
     packageName: String,
-    publishableKeyProvider: Provider<String>,
     networkTypeProvider: Provider<String?>,
-    internal val defaultProductUsageTokens: Set<String> = emptySet(),
+    internal val defaultProductUsageTokens: Set<String>,
 ) : AnalyticsRequestFactory(
     packageManager,
     packageInfo,
     packageName,
-    publishableKeyProvider,
     networkTypeProvider,
 ) {
     private val appInfo get() = Stripe.appInfo
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Inject
     constructor(
         context: Context,
-        publishableKey: String,
-        defaultProductUsageTokens: Set<String> = emptySet()
-    ) : this(
-        context,
-        { publishableKey },
-        defaultProductUsageTokens
-    )
-
-    internal constructor(
-        context: Context,
-        publishableKeyProvider: Provider<String>
-    ) : this(
-        packageManager = context.applicationContext.packageManager,
-        packageInfo = context.applicationContext.packageInfo,
-        packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
-        networkTypeProvider = NetworkTypeDetector(context)::invoke,
-    )
-
-    internal constructor(
-        context: Context,
-        publishableKeyProvider: () -> String,
-        defaultProductUsageTokens: Set<String>
-    ) : this(
-        packageManager = context.applicationContext.packageManager,
-        packageInfo = context.applicationContext.packageInfo,
-        packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
-        networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        defaultProductUsageTokens = defaultProductUsageTokens,
-    )
-
-    @Inject
-    internal constructor(
-        context: Context,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
-        apiConfigurationProvider: Provider<ApiConfiguration.State>,
     ) : this(
-        context = context,
-        publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     override fun createRequest(
         event: AnalyticsEvent,
         additionalParams: Map<String, Any?>,
-        publishableKeyOverride: String?,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return super.createRequest(
             event = event,
@@ -100,7 +63,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 .orEmpty()
                 .plus(additionalParams)
                 .plus(libraryParams()),
-            publishableKeyOverride = publishableKeyOverride,
+            publishableKey = publishableKey,
         )
     }
 
@@ -116,35 +79,41 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun create3ds2Challenge(
         event: PaymentAnalyticsEvent,
-        uiTypeCode: String?
+        uiTypeCode: String?,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             event,
-            threeDS2UiType = ThreeDS2UiType.fromUiTypeCode(uiTypeCode)
+            threeDS2UiType = ThreeDS2UiType.fromUiTypeCode(uiTypeCode),
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createTokenCreation(
         productUsageTokens: Set<String>,
-        tokenType: Token.Type
+        tokenType: Token.Type,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.TokenCreate,
             productUsageTokens = productUsageTokens,
-            tokenType = tokenType
+            tokenType = tokenType,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createPaymentMethodCreation(
         paymentMethodCode: PaymentMethodCode,
-        productUsageTokens: Set<String>
+        productUsageTokens: Set<String>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodCreate,
             sourceType = paymentMethodCode,
-            productUsageTokens = productUsageTokens
+            productUsageTokens = productUsageTokens,
+            publishableKey = publishableKey,
         )
     }
 
@@ -152,65 +121,77 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal fun createPaymentMethodUpdate(
         paymentMethodCode: PaymentMethodCode?,
         productUsageTokens: Set<String>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentMethodUpdate,
             sourceType = paymentMethodCode,
             productUsageTokens = productUsageTokens,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createSourceCreation(
         @Source.SourceType sourceType: String,
-        productUsageTokens: Set<String> = emptySet()
+        productUsageTokens: Set<String> = emptySet(),
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SourceCreate,
             productUsageTokens = productUsageTokens,
-            sourceType = sourceType
+            sourceType = sourceType,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createAddSource(
         productUsageTokens: Set<String> = emptySet(),
-        @Source.SourceType sourceType: String
+        @Source.SourceType sourceType: String,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAddSource,
             productUsageTokens = productUsageTokens,
-            sourceType = sourceType
+            sourceType = sourceType,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createDeleteSource(
-        productUsageTokens: Set<String>
+        productUsageTokens: Set<String>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerDeleteSource,
-            productUsageTokens = productUsageTokens
+            productUsageTokens = productUsageTokens,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createAttachPaymentMethod(
-        productUsageTokens: Set<String>
+        productUsageTokens: Set<String>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerAttachPaymentMethod,
-            productUsageTokens = productUsageTokens
+            productUsageTokens = productUsageTokens,
+            publishableKey = publishableKey,
         )
     }
 
     @JvmSynthetic
     internal fun createDetachPaymentMethod(
-        productUsageTokens: Set<String>
+        productUsageTokens: Set<String>,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.CustomerDetachPaymentMethod,
-            productUsageTokens = productUsageTokens
+            productUsageTokens = productUsageTokens,
+            publishableKey = publishableKey,
         )
     }
 
@@ -218,11 +199,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal fun createPaymentIntentConfirmation(
         paymentMethodType: String? = null,
         errorMessage: String?,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentIntentConfirm,
             sourceType = paymentMethodType,
             errorMessage = errorMessage,
+            publishableKey = publishableKey,
         )
     }
 
@@ -230,11 +213,13 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal fun createSetupIntentConfirmation(
         paymentMethodType: String?,
         errorMessage: String?,
+        publishableKey: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SetupIntentConfirm,
             sourceType = paymentMethodType,
             errorMessage = errorMessage,
+            publishableKey = publishableKey,
         )
     }
 
@@ -246,7 +231,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         tokenType: Token.Type? = null,
         threeDS2UiType: ThreeDS2UiType? = null,
         errorMessage: String? = null,
-        publishableKeyOverride: String? = null
+        publishableKey: String?
     ): AnalyticsRequest {
         return createRequest(
             event,
@@ -257,7 +242,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 threeDS2UiType = threeDS2UiType,
                 errorMessage = errorMessage,
             ),
-            publishableKeyOverride
+            publishableKey
         )
     }
 

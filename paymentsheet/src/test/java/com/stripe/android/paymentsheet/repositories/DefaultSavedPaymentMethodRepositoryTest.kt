@@ -346,7 +346,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
+                defaultProductUsageTokens = emptySet(),
             ),
             apiRequestOptionsProvider = {
                 ApiRequest.Options(

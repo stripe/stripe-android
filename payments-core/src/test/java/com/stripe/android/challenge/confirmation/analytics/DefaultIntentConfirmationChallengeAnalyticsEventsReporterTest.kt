@@ -1,6 +1,7 @@
 package com.stripe.android.challenge.confirmation.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -133,11 +134,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
                 packageManager = null,
                 packageInfo = null,
                 packageName = "",
-                publishableKeyProvider = { "" },
                 networkTypeProvider = { "" },
-                pluginTypeProvider = { null }
+                pluginTypeProvider = { null },
             ),
-            durationProvider = durationProvider
+            durationProvider = durationProvider,
+            apiConfigurationProvider = { ApiConfiguration.State("", null) },
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)

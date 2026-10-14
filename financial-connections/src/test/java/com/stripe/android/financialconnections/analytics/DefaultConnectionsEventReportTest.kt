@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -28,14 +29,14 @@ class DefaultConnectionsEventReportTest {
         packageManager = application.packageManager,
         packageName = application.packageName.orEmpty(),
         packageInfo = application.packageManager.getPackageInfo(application.packageName, 0),
-        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
         networkTypeProvider = { "5G" },
     )
 
     private val eventReporter = DefaultFinancialConnectionsEventReporter(
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        testDispatcher
+        testDispatcher,
+        apiConfigurationProvider = { ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null) },
     )
 
     private val financialConnectionsSession = FinancialConnectionsSession(
