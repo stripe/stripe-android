@@ -123,10 +123,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains("google_pay")
-                assertThat(
-                    controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).contains("link")
+                ).containsExactly("google_pay", "link")
             },
         ) {
             // Just testing load, no need to confirm.
