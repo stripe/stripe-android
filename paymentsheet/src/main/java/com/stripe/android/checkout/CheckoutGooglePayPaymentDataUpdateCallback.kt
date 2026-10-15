@@ -33,7 +33,20 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         return when (val trigger = paymentDataUpdate.callbackTrigger) {
             GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress -> {
-                updateShippingAddress(countryCode, currentState, paymentDataUpdate)
+                updateAddress(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                )
+            }
+            GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod -> {
+                updateAddress(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                )
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
             GooglePayPaymentDataUpdate.CallbackTrigger.Offer,
@@ -55,10 +68,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         }
     }
 
-    private suspend fun updateShippingAddress(
+    private suspend fun updateAddress(
         countryCode: String?,
         currentState: CheckoutControllerState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
     ): GooglePayPaymentDataUpdateResponse {
         val address = when (val result = addressBuilder.build(paymentDataUpdate)) {
             is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> {
@@ -75,7 +89,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
 
         return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = currentState.checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            addressSource = addressSource,
             address = address,
         ).fold(
             onSuccess = { response ->
@@ -85,9 +99,19 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 GooglePayPaymentDataUpdateResponse(
                     newTransactionInfo = null,
                     error = GooglePayPaymentDataError(
-                        reason = GooglePayPaymentDataError.Reason.ShippingAddressInvalid,
+                        reason = when (addressSource) {
+                            CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                                GooglePayPaymentDataError.Reason.ShippingAddressInvalid
+                            CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                                GooglePayPaymentDataError.Reason.OtherError
+                        },
                         message = error.stripeErrorMessage(context),
-                        intent = GooglePayPaymentDataError.Intent.ShippingAddress,
+                        intent = when (addressSource) {
+                            CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                                GooglePayPaymentDataError.Intent.ShippingAddress
+                            CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                                GooglePayPaymentDataError.Intent.PaymentMethod
+                        },
                     ),
                 )
             },

@@ -164,6 +164,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
         val PAYMENT_DATA_UPDATE = GooglePayPaymentDataUpdate(
             callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             shippingAddress = null,
+            billingAddress = null,
         )
     }
 }

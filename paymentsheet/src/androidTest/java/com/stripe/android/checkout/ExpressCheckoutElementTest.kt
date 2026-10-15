@@ -277,6 +277,7 @@ internal class ExpressCheckoutElementTest {
                         postalCode = "94103",
                         iso3166AdministrativeArea = "US-CA",
                     ),
+                    billingAddress = null,
                 ),
             )
             networkRule.checkoutUpdate(

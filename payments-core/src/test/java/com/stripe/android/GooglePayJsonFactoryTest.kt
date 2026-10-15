@@ -40,6 +40,46 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun `payment data request includes payment method callback intent when billing address is required`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = true,
+        )
+
+        assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
+            .containsExactly("PAYMENT_METHOD")
+    }
+
+    @Test
+    fun `payment data request includes shipping and payment method callback intents`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+            ),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = true,
+        )
+
+        assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
+            .containsExactly("SHIPPING_ADDRESS", "PAYMENT_METHOD")
+            .inOrder()
+    }
+
+    @Test
     fun `payment data request omits callback intents without dynamic callbacks`() {
         val json = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(

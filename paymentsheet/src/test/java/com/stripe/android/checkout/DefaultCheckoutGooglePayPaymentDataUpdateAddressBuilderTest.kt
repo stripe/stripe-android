@@ -15,6 +15,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
                 shippingAddress = null,
+                billingAddress = null,
             )
         )
 
@@ -33,6 +34,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
                     postalCode = "94080",
                     iso3166AdministrativeArea = null,
                 ),
+                billingAddress = null,
             )
         )
 
@@ -45,6 +47,30 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
     }
 
     @Test
+    fun `build returns address from payment method billing address fields`() = runScenario {
+        val result = builder.build(
+            GooglePayPaymentDataUpdate(
+                callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+                shippingAddress = null,
+                billingAddress = shippingAddress(
+                    administrativeArea = "New York",
+                    countryCode = "US",
+                    locality = "New York",
+                    postalCode = "10011",
+                    iso3166AdministrativeArea = "US-NY",
+                ),
+            )
+        )
+
+        val available = result.assertAvailable()
+
+        assertThat(available.address.country).isEqualTo("US")
+        assertThat(available.address.city).isEqualTo("New York")
+        assertThat(available.address.postalCode).isEqualTo("10011")
+        assertThat(available.address.state).isEqualTo("NY")
+    }
+
+    @Test
     fun `build uses normalized iso3166AdministrativeArea subdivision for US addresses`() = runScenario {
         val result = builder.build(
             GooglePayPaymentDataUpdate(
@@ -54,6 +80,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
                     countryCode = "US",
                     iso3166AdministrativeArea = "US-ca",
                 ),
+                billingAddress = null,
             )
         )
 
@@ -72,6 +99,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
                     countryCode = "CA",
                     iso3166AdministrativeArea = "CA-ON",
                 ),
+                billingAddress = null,
             )
         )
 
@@ -86,6 +114,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
                 shippingAddress = shippingAddress(countryCode = "US"),
+                billingAddress = null,
             )
         )
 

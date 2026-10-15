@@ -23,15 +23,18 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilder @Inject c
     override fun build(
         paymentDataUpdate: GooglePayPaymentDataUpdate
     ): CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result {
-        val shippingAddress = paymentDataUpdate.shippingAddress
+        val paymentAddress = when (paymentDataUpdate.callbackTrigger) {
+            GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod -> paymentDataUpdate.billingAddress
+            else -> paymentDataUpdate.shippingAddress
+        }
             ?: return CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable
 
         return CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(
             address = CheckoutController.Address()
-                .country(shippingAddress.countryCode)
-                .city(shippingAddress.locality.takeIf { it.isNotEmpty() })
-                .postalCode(shippingAddress.postalCode.takeIf { it.isNotEmpty() })
-                .state(shippingAddress.normalizedAdministrativeArea.takeIf { it.isNotEmpty() })
+                .country(paymentAddress.countryCode)
+                .city(paymentAddress.locality.takeIf { it.isNotEmpty() })
+                .postalCode(paymentAddress.postalCode.takeIf { it.isNotEmpty() })
+                .state(paymentAddress.normalizedAdministrativeArea.takeIf { it.isNotEmpty() })
                 .build()
         )
     }
