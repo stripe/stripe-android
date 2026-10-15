@@ -26,7 +26,7 @@ data class OnrampSessionResponse(
     @SerialName("preferred_region")
     val preferredRegion: String? = null,
     @SerialName("redirect_url")
-    val redirectUrl: String,
+    val redirectUrl: String? = null,
     @SerialName("skip_quote_screen")
     val skipQuoteScreen: Boolean,
     @SerialName("source_total_amount")
