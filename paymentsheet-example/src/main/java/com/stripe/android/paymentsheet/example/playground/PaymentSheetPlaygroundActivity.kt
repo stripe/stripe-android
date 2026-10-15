@@ -39,8 +39,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
-import com.stripe.android.elements.StandaloneExpressCheckoutElement
-import com.stripe.android.elements.rememberStandaloneExpressCheckoutElement
+import com.stripe.android.elements.ElementsController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -59,9 +58,9 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.elements.ElementsControllerPlayground
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
-import com.stripe.android.paymentsheet.example.playground.expresscheckout.ExpressCheckoutPlayground
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
@@ -139,6 +138,7 @@ internal class PaymentSheetPlaygroundActivity :
         enableEdgeToEdge()
 
         super.onCreate(savedInstanceState)
+        viewModel.elementsController.register(this)
 
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -187,12 +187,6 @@ internal class PaymentSheetPlaygroundActivity :
                 }
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
-
-            val standaloneExpressCheckoutElement = rememberStandaloneExpressCheckoutElement(
-                StandaloneExpressCheckoutElement.Builder(viewModel::onPaymentSheetResult)
-                    .createIntentCallback(viewModel::createIntentCallback)
-                    .googlePayPaymentDataUpdateCallback(viewModel::onExpressCheckoutGooglePayUpdate)
-            )
 
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
@@ -290,7 +284,7 @@ internal class PaymentSheetPlaygroundActivity :
                                 flowController = flowController,
                                 customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
-                                standaloneExpressCheckoutElement = standaloneExpressCheckoutElement,
+                                elementsController = viewModel.elementsController,
                             )
                         }
                     }
@@ -439,7 +433,7 @@ internal class PaymentSheetPlaygroundActivity :
         flowController: PaymentSheet.FlowController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher,
-        standaloneExpressCheckoutElement: StandaloneExpressCheckoutElement,
+        elementsController: ElementsController,
     ) {
         if (playgroundState == null) {
             return
@@ -480,12 +474,13 @@ internal class PaymentSheetPlaygroundActivity :
                         LinkControllerButton(playgroundState = playgroundState)
                     }
 
-                    PlaygroundConfigurationData.IntegrationType.ExpressCheckoutElement -> {
-                        val lastUpdate by viewModel.expressCheckoutGooglePayUpdate.collectAsState()
-                        ExpressCheckoutPlayground(
-                            standaloneElement = standaloneExpressCheckoutElement,
-                            playgroundState = playgroundState,
-                            lastGooglePayUpdate = lastUpdate,
+                    PlaygroundConfigurationData.IntegrationType.ElementsController -> {
+                        val lastUpdate by viewModel.elementsShippingUpdate.collectAsState()
+                        val configurationResult by viewModel.elementsConfigurationResult.collectAsState()
+                        ElementsControllerPlayground(
+                            elementsController = elementsController,
+                            configurationResult = configurationResult,
+                            lastShippingUpdate = lastUpdate,
                         )
                     }
 

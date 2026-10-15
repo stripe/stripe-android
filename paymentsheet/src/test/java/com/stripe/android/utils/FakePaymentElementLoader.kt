@@ -80,7 +80,7 @@ internal class FakePaymentElementLoader(
                 ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
             paymentMethodLayout = when (integrationConfiguration) {
                 is PaymentElementLoader.Configuration.CryptoOnramp,
-                is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+                is PaymentElementLoader.Configuration.Elements,
                 is PaymentElementLoader.Configuration.StandaloneLink,
                 is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
                 is PaymentElementLoader.Configuration.PaymentSheet ->

@@ -1,4 +1,4 @@
-package com.stripe.android.elements.ece.injection
+package com.stripe.android.elements.injection
 
 import android.app.Application
 import android.content.Context
@@ -8,24 +8,26 @@ import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.elements.ElementsController
+import com.stripe.android.elements.ElementsControllerSavedState
+import com.stripe.android.elements.ElementsControllerStateHolder
+import com.stripe.android.elements.ece.ElementsExpressCheckoutElementIntegration
+import com.stripe.android.elements.ece.ElementsGooglePayPaymentDataUpdateCallback
 import com.stripe.android.elements.ece.ExpressCheckoutElementIntegration
-import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
-import com.stripe.android.elements.ece.StandaloneExpressCheckoutElementController
+import com.stripe.android.elements.ece.injection.ExpressCheckoutElementCommonModule
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
-import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
@@ -38,15 +40,16 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
 @Component(
     modules = [
-        StandaloneExpressCheckoutElementModule::class,
-        ExpressCheckoutElementInteractorModule::class,
+        ElementsControllerModule::class,
+        ExpressCheckoutElementCommonModule::class,
         StripeRepositoryModule::class,
         ApiRequestOptionsModule::class,
         ApiConfigurationModule::class,
@@ -64,28 +67,34 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
-internal interface StandaloneExpressCheckoutElementComponent {
-    val controller: StandaloneExpressCheckoutElementController
-    val interactor: ExpressCheckoutElementInteractor
+internal interface ElementsControllerComponent {
+    val controller: ElementsController
 
     @Component.Factory
     interface Factory {
         fun create(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance savedState: ElementsControllerSavedState,
+            @BindsInstance resultCallback: PaymentSheetResultCallback,
             @BindsInstance @PaymentElementCallbackIdentifier callbackIdentifier: String,
-            @BindsInstance @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
-            @BindsInstance @ViewModelScope coroutineScope: CoroutineScope,
-        ): StandaloneExpressCheckoutElementComponent
+        ): ElementsControllerComponent
     }
 }
 
 @Module
-internal object StandaloneExpressCheckoutElementModule {
+internal object ElementsControllerModule {
+    @Provides
+    fun provideSavedStateHandle(savedState: ElementsControllerSavedState): SavedStateHandle = savedState.handle
+
+    @Provides
+    @Singleton
+    @ViewModelScope
+    fun provideCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     @Provides
     fun provideIntegration(
-        controller: StandaloneExpressCheckoutElementController,
-    ): ExpressCheckoutElementIntegration = controller
+        integration: ElementsExpressCheckoutElementIntegration,
+    ): ExpressCheckoutElementIntegration = integration
 
     @Provides
     fun provideContext(application: Application): Context = application
@@ -95,7 +104,7 @@ internal object StandaloneExpressCheckoutElementModule {
 
     @Provides
     @Named(PRODUCT_USAGE)
-    fun provideProductUsage(): Set<String> = setOf("ExpressCheckoutElement")
+    fun provideProductUsage(): Set<String> = setOf("ElementsController")
 
     @Provides
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
@@ -114,17 +123,11 @@ internal object StandaloneExpressCheckoutElementModule {
 
     @Provides
     fun providePaymentMethodMetadata(
-        controller: Provider<StandaloneExpressCheckoutElementController>,
-    ): PaymentMethodMetadata? = controller.get().paymentMethodMetadata()
+        stateHolder: ElementsControllerStateHolder,
+    ): PaymentMethodMetadata? = stateHolder.state?.paymentMethodMetadata
 
     @Provides
     fun provideGooglePayCallback(
-        @PaymentElementCallbackIdentifier callbackIdentifier: String,
-    ): GooglePayPaymentDataUpdateCallback = GooglePayPaymentDataUpdateCallback { update ->
-        val callback = PaymentElementCallbackReferences.getExact(callbackIdentifier)?.googlePayPaymentDataUpdateCallback
-        callback?.onPaymentDataChanged(update) ?: GooglePayPaymentDataUpdateResponse(
-            newTransactionInfo = null,
-            error = null,
-        )
-    }
+        callback: ElementsGooglePayPaymentDataUpdateCallback,
+    ): GooglePayPaymentDataUpdateCallback = callback
 }

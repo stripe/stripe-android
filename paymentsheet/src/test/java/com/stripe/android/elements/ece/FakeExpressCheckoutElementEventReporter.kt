@@ -4,8 +4,8 @@ import app.cash.turbine.Turbine
 internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementEventReporter {
     val calls = Turbine<Call>()
 
-    override fun onEceDisplayed() {
-        calls.add(Call.OnEceDisplayed)
+    override fun onEceDisplayed(content: ExpressCheckoutElementIntegration.Content?) {
+        calls.add(Call.OnEceDisplayed(content))
     }
 
     fun ensureAllEventsConsumed() {
@@ -13,6 +13,6 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
     }
 
     sealed interface Call {
-        data object OnEceDisplayed : Call
+        data class OnEceDisplayed(val content: ExpressCheckoutElementIntegration.Content?) : Call
     }
 }

@@ -36,6 +36,8 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                 }
                 WalletType.Link -> ExpressButtonType.Link.takeIf {
                     paymentMethodMetadata.shouldShowLinkButton &&
+                        expressCheckoutElementConfiguration.linkConfiguration.display ==
+                        ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic &&
                         !requiresShippingAddress
                 }
             }

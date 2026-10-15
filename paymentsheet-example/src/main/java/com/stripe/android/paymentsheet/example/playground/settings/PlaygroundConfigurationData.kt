@@ -30,8 +30,9 @@ data class PlaygroundConfigurationData(
         @SerialName("LinkController")
         LinkController,
 
+        // Preserve the original serialized name for saved playground configurations.
         @SerialName("ExpressCheckoutElement")
-        ExpressCheckoutElement;
+        ElementsController;
 
         fun isPaymentFlow(): Boolean {
             return this in paymentFlows()
@@ -47,7 +48,7 @@ data class PlaygroundConfigurationData(
 
         companion object {
             fun paymentFlows(): Set<IntegrationType> {
-                return setOf(PaymentSheet, FlowController, Embedded, LinkController, ExpressCheckoutElement)
+                return setOf(PaymentSheet, FlowController, Embedded, LinkController, ElementsController)
             }
 
             fun sptFlows(): Set<IntegrationType> {

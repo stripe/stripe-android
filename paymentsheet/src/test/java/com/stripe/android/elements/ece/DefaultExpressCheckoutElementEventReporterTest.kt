@@ -1,11 +1,6 @@
-@file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
-import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.DefaultExpressCheckoutElementEventReporter
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -13,7 +8,6 @@ import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePa
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
 import org.junit.Test
@@ -21,7 +15,7 @@ import org.junit.Test
 internal class DefaultExpressCheckoutElementEventReporterTest {
     @Test
     fun `onEceDisplayed fires event with default params`() = runScenario {
-        reporter.onEceDisplayed()
+        reporter.onEceDisplayed(content)
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
@@ -49,7 +43,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                     .display(ExpressCheckoutElement.Configuration.GooglePayConfiguration.Display.Never)
             ),
     ) {
-        reporter.onEceDisplayed()
+        reporter.onEceDisplayed(content)
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry(
@@ -63,6 +57,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
     private class Scenario(
         val reporter: ExpressCheckoutElementEventReporter,
+        val content: ExpressCheckoutElementIntegration.Content,
         val executor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
     )
@@ -81,20 +76,14 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             ),
         )
         val googlePayConfiguration = GooglePayConfiguration().build()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
-            savedStateHandle = SavedStateHandle(),
-            availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
-                availableExpressButtonTypes = listOf(
-                    ExpressButtonType.Link,
-                    ExpressButtonType.GooglePay(googlePayConfiguration),
-                ),
+        val content = ExpressCheckoutElementIntegration.Content(
+            configuration = expressCheckoutElementConfiguration.build(),
+            paymentMethodMetadata = paymentMethodMetadata,
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.Link,
+                ExpressButtonType.GooglePay(googlePayConfiguration),
             ),
-        )
-        stateHolder.state = CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
-                .expressCheckoutElement(expressCheckoutElementConfiguration)
-                .build(),
-            expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
+            requiresShippingAddress = false,
         )
         val reporter = DefaultExpressCheckoutElementEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -107,12 +96,12 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 pluginTypeProvider = { null },
             ),
             durationProvider = durationProvider,
-            stateHolder = stateHolder,
         )
 
         block(
             Scenario(
                 reporter = reporter,
+                content = content,
                 executor = analyticsRequestExecutor,
                 durationProvider = durationProvider,
             )

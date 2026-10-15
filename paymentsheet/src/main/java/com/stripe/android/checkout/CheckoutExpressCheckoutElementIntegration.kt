@@ -45,7 +45,7 @@ internal class CheckoutExpressCheckoutElementIntegration @Inject constructor(
     override fun onDisplayed() {
         if (savedStateHandle.get<Boolean>(KEY_ECE_DISPLAYED) != true) {
             savedStateHandle[KEY_ECE_DISPLAYED] = true
-            eventReporter.onEceDisplayed()
+            eventReporter.onEceDisplayed(state.value.content)
         }
     }
 

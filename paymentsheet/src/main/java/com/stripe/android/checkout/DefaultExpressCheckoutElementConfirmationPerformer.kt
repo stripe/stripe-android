@@ -4,9 +4,9 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.elements.ece.ExpressButton
 import com.stripe.android.elements.ece.ExpressCheckoutElementConfirmationPerformer
+import com.stripe.android.elements.ece.toConfirmationOption
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import kotlinx.coroutines.CancellationException
@@ -77,12 +77,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
         } else {
             null
         }
-        val confirmationOption = expressButton.toSelection().toConfirmationOption(
+        val confirmationOption = expressButton.toConfirmationOption(
             configuration = configuration,
-            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+            paymentMethodMetadata = paymentMethodMetadata,
             googlePayShippingAddressParameters = shippingAddressParameters,
-            showSecondaryButtonForLink = false,
         ) ?: return null
 
         return ConfirmationHandler.Args(

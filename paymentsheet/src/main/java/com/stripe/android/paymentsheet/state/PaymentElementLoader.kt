@@ -111,7 +111,7 @@ internal interface PaymentElementLoader {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
 
-        data class ExpressCheckoutElement(
+        data class Elements(
             override val commonConfiguration: CommonConfiguration
         ) : Configuration
     }
@@ -649,7 +649,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
+            is PaymentElementLoader.Configuration.Elements,
             is PaymentElementLoader.Configuration.StandaloneLink -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.Embedded ->
                 if (

@@ -209,8 +209,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     fun `handleViewAction OnDisplayed reports displayed event`() = runScenario {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+        val call = eventReporter.calls.awaitItem() as FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed
+        assertThat(call.content?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     @Test
@@ -220,8 +220,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
         restoredInteractor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+        val call = eventReporter.calls.awaitItem() as FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed
+        assertThat(call.content?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     @Test

@@ -21,8 +21,9 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
-import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
+import com.stripe.android.elements.ElementsController
+import com.stripe.android.elements.ElementsController.ExpressCheckoutElement.ShippingAddressChangeEvent
+import com.stripe.android.elements.ElementsController.ExpressCheckoutElement.ShippingChangeResult
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
@@ -36,7 +37,8 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
-import com.stripe.android.paymentsheet.example.playground.expresscheckout.expressCheckoutGooglePayResponse
+import com.stripe.android.paymentsheet.example.playground.elements.configureElementsController
+import com.stripe.android.paymentsheet.example.playground.elements.elementsShippingResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
@@ -52,7 +54,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretK
 import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
-import com.stripe.android.paymentsheet.example.playground.settings.ExpressCheckoutShippingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -64,6 +65,8 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,7 +88,14 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-    val expressCheckoutGooglePayUpdate = MutableStateFlow<String?>(null)
+    val elementsShippingUpdate = MutableStateFlow<String?>(null)
+    val elementsConfigurationResult = MutableStateFlow<kotlin.Result<Unit>?>(null)
+    val elementsController = ElementsController.Builder(application, savedStateHandle)
+        .resultCallback(::onPaymentSheetResult)
+        .integrationName("playground")
+        .createIntentCallback(::createIntentCallback)
+        .shippingAddressChangeCallback(::onElementsShippingAddressChange)
+        .build()
 
     private val baseUrl: String
         get() {
@@ -101,6 +111,17 @@ internal class PaymentSheetPlaygroundViewModel(
                         PlaygroundSettings.createFromSharedPreferences(application)
                     }
         }
+        viewModelScope.launch {
+            state.collectLatest { playgroundState ->
+                elementsConfigurationResult.value = null
+                val paymentState = playgroundState?.asPaymentState()
+                if (paymentState?.integrationType == PlaygroundConfigurationData.IntegrationType.ElementsController) {
+                    paymentState.snapshot.setValues()
+                    elementsController.isUpdating.first { !it }
+                    elementsConfigurationResult.value = configureElementsController(elementsController, paymentState)
+                }
+            }
+        }
     }
 
     fun prepare(
@@ -109,7 +130,7 @@ internal class PaymentSheetPlaygroundViewModel(
         setPlaygroundState(null)
         flowControllerState.value = null
         customerSheetState.value = null
-        expressCheckoutGooglePayUpdate.value = null
+        elementsShippingUpdate.value = null
 
         if (
             playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
@@ -553,13 +574,13 @@ internal class PaymentSheetPlaygroundViewModel(
         )
     }
 
-    suspend fun onExpressCheckoutGooglePayUpdate(
-        update: GooglePayPaymentDataUpdate,
-    ): GooglePayPaymentDataUpdateResponse {
-        val shipping = requireNotNull(state.value).snapshot[ExpressCheckoutShippingSettingsDefinition]
-        val response = expressCheckoutGooglePayResponse(shipping, update)
-        val outcome = if (response.error == null) "accepted" else "rejected"
-        expressCheckoutGooglePayUpdate.value = "Google Pay ${update.callbackTrigger}: $outcome"
+    suspend fun onElementsShippingAddressChange(
+        event: ShippingAddressChangeEvent,
+    ): ShippingChangeResult {
+        val paymentState = requireNotNull(state.value?.asPaymentState())
+        val response = elementsShippingResponse(paymentState, event)
+        val outcome = if (response is ShippingChangeResult.Resolve) "accepted" else "rejected"
+        elementsShippingUpdate.value = "Shipping address (${event.address.country}): $outcome"
         return response
     }
 
@@ -805,6 +826,11 @@ internal class PaymentSheetPlaygroundViewModel(
                 shouldFetchPaymentOption = false
             )
         }
+    }
+
+    override fun onCleared() {
+        elementsController.destroy()
+        super.onCleared()
     }
 
     private fun setPlaygroundState(state: PlaygroundState?) {

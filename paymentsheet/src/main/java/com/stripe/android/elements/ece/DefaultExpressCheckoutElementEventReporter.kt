@@ -1,6 +1,4 @@
-@file:OptIn(CheckoutSessionPreview::class)
-
-package com.stripe.android.checkout
+package com.stripe.android.elements.ece
 
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -8,31 +6,26 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
-import com.stripe.android.elements.ece.ExpressButtonType
-import com.stripe.android.elements.ece.ExpressCheckoutElementEventReporter
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
 
 internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    private val stateHolder: CheckoutControllerStateHolder,
 ) : ExpressCheckoutElementEventReporter {
-    override fun onEceDisplayed() {
+    override fun onEceDisplayed(content: ExpressCheckoutElementIntegration.Content?) {
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
         fireEvent(
             eventName = ECE_DISPLAYED_EVENT_NAME,
-            additionalParams = emptyMap(),
+            additionalParams = defaultParams(content),
         )
     }
 
-    private fun defaultParams(): Map<String, Any> {
-        val state = stateHolder.state ?: return emptyMap()
-        val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
-            ?: return emptyMap()
-        val paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata ?: return emptyMap()
-        val orderedLpms = stateHolder.session.value?.availableExpressButtonTypes.orEmpty().map {
+    private fun defaultParams(content: ExpressCheckoutElementIntegration.Content?): Map<String, Any> {
+        content ?: return emptyMap()
+        val expressCheckoutElementConfiguration = content.configuration
+        val paymentMethodMetadata = content.paymentMethodMetadata
+        val orderedLpms = content.availableExpressButtonTypes.map {
             when (it) {
                 is ExpressButtonType.GooglePay -> "google_pay"
                 ExpressButtonType.Link -> "link"
@@ -59,7 +52,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
                 event = object : AnalyticsEvent {
                     override val eventName: String = eventName
                 },
-                additionalParams = defaultParams() + additionalParams,
+                additionalParams = additionalParams,
             )
         )
     }

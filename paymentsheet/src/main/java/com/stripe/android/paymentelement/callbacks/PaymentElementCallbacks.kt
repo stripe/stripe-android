@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement.callbacks
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
+import com.stripe.android.elements.ElementsController.ExpressCheckoutElement.ShippingAddressChangeCallback
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -31,7 +31,7 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
     val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
-    val googlePayPaymentDataUpdateCallback: GooglePayPaymentDataUpdateCallback?,
+    val shippingAddressChangeCallback: ShippingAddressChangeCallback?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -42,10 +42,10 @@ internal data class PaymentElementCallbacks private constructor(
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
         private var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
-        private var googlePayPaymentDataUpdateCallback: GooglePayPaymentDataUpdateCallback? = null
+        private var shippingAddressChangeCallback: ShippingAddressChangeCallback? = null
 
-        fun googlePayPaymentDataUpdateCallback(callback: GooglePayPaymentDataUpdateCallback?) = apply {
-            googlePayPaymentDataUpdateCallback = callback
+        fun shippingAddressChangeCallback(callback: ShippingAddressChangeCallback?) = apply {
+            shippingAddressChangeCallback = callback
         }
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
@@ -120,7 +120,7 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
                 createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
-                googlePayPaymentDataUpdateCallback = googlePayPaymentDataUpdateCallback,
+                shippingAddressChangeCallback = shippingAddressChangeCallback,
             )
         }
     }

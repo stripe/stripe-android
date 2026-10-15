@@ -167,7 +167,7 @@ internal class CheckoutStateLoader @Inject constructor(
             async {
                 paymentElementLoader.load(
                     initializationMode = initializationMode,
-                    integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                    integrationConfiguration = PaymentElementLoader.Configuration.Elements(
                         commonConfiguration = configuration,
                     ),
                     metadata = metadata,

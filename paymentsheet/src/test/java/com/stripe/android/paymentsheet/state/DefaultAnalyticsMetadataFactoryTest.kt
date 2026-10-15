@@ -106,7 +106,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         ).commonConfiguration
 
         val resultMap = createAnalyticsMetadata(
-            configuration = PaymentElementLoader.Configuration.ExpressCheckoutElement(commonConfiguration)
+            configuration = PaymentElementLoader.Configuration.Elements(commonConfiguration)
         )
 
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>

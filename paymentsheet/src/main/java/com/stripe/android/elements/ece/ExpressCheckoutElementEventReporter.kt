@@ -1,5 +1,5 @@
 package com.stripe.android.elements.ece
 
 internal interface ExpressCheckoutElementEventReporter {
-    fun onEceDisplayed()
+    fun onEceDisplayed(content: ExpressCheckoutElementIntegration.Content?)
 }
