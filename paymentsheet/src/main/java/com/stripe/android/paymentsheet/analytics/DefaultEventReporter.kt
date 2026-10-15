@@ -499,10 +499,12 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
         CoroutineScope(workContext).launch {
+            val paymentMethodMetadata = paymentMethodMetadataProvider.get()
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadataProvider.get(), event),
+                    additionalParams = defaultParams(paymentMethodMetadata) +
+                        checkoutAdditionalParams(event, paymentMethodMetadata),
                 )
             )
         }
@@ -607,34 +609,33 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    private fun defaultParams(
-        paymentMethodMetadata: PaymentMethodMetadata?,
-        event: AnalyticsEvent,
-    ): Map<String, Any> {
+    private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
         return if (paymentMethodMetadata != null) {
-            val checkoutParams = when (event) {
-                is PaymentSheetEvent.LoadStarted,
-                is PaymentSheetEvent.LoadSucceeded,
-                is PaymentSheetEvent.LoadFailed,
-                is PaymentSheetEvent.ElementsSessionLoadFailed,
-                is PaymentSheetEvent.Payment,
-                is PaymentSheetEvent.ExperimentExposure -> emptyMap()
-                else -> {
-                    val integrationMetadata = paymentMethodMetadata.integrationMetadata
-                    if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
-                        mapOf(
-                            "product_usage" to "PaymentElement",
-                            "checkout_session_id" to integrationMetadata.id,
-                        )
-                    } else {
-                        emptyMap()
-                    }
-                }
-            }
-            paymentMethodMetadata.analyticsMetadata.paramsMap + checkoutParams +
+            paymentMethodMetadata.analyticsMetadata.paramsMap +
                 ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
         } else {
             emptyMap()
+        }
+    }
+
+    private fun checkoutAdditionalParams(
+        event: AnalyticsEvent,
+        paymentMethodMetadata: PaymentMethodMetadata?,
+    ): Map<String, Any> {
+        val checkoutSession = paymentMethodMetadata?.integrationMetadata as? IntegrationMetadata.CheckoutSession
+            ?: return emptyMap()
+
+        return when (event) {
+            is PaymentSheetEvent.LoadStarted,
+            is PaymentSheetEvent.LoadSucceeded,
+            is PaymentSheetEvent.LoadFailed,
+            is PaymentSheetEvent.ElementsSessionLoadFailed,
+            is PaymentSheetEvent.Payment,
+            is PaymentSheetEvent.ExperimentExposure -> emptyMap()
+            else -> mapOf(
+                "product_usage" to "PaymentElement",
+                "checkout_session_id" to checkoutSession.id,
+            )
         }
     }
 
@@ -648,7 +649,8 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadata, event) + event.params,
+                    additionalParams = defaultParams(paymentMethodMetadata) +
+                        checkoutAdditionalParams(event, paymentMethodMetadata) + event.params,
                     publishableKeyOverride = publishableKeyOverride,
                 )
             )
@@ -659,7 +661,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
-            additionalParams = defaultParams(paymentMethodMetadataProvider.get(), event) + event.params,
+            additionalParams = defaultParams(paymentMethodMetadataProvider.get()) + event.params,
         )
 
         CoroutineScope(workContext).launch {
