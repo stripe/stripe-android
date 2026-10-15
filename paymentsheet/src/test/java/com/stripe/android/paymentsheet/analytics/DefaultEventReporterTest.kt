@@ -26,7 +26,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -37,6 +36,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.WalletsState
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonObject
@@ -58,14 +60,20 @@ class DefaultEventReporterTest {
             mapOf("example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true))
         )
     )
-    private val checkoutSessionId = "cs_test_123"
-    private val paymentMethodMetadataWithCheckoutSession = paymentMethodMetadataWithTestAnalyticsMetadata.copy(
+    private val checkoutPaymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
-            id = checkoutSessionId,
-            instancesKey = "DefaultEventReporterTest",
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = checkoutSessionId),
+            id = "cs_test_123",
+            instancesKey = "checkout_instances",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_123"),
             collectedEmail = null,
         ),
+        analyticsMetadata = AnalyticsMetadata(
+            mapOf(
+                "example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true),
+                "checkout_session_id" to AnalyticsMetadata.Value.SimpleString("cs_test_123"),
+            )
+        ),
+        apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "pk_test_checkout_metadata"),
     )
 
     @Test
@@ -79,18 +87,18 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onExperimentExposure does not add Checkout session params to V2 event`() = runScenario(
+    fun `onExperimentExposure includes Checkout metadata without product usage in V2 event`() = runScenario(
         defaultProductUsageTokens = setOf("Checkout"),
     ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithCheckoutSession)
+        paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
 
         eventReporter.onExperimentExposure(createLinkHoldbackExperiment())
 
         val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
         assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
         assertThat(request.params.jsonObject).containsKey("example_from_test")
+        assertThat(request.params.jsonObject).containsKey("checkout_session_id")
         assertThat(request.params.jsonObject).doesNotContainKey("product_usage")
-        assertThat(request.params.jsonObject).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -135,34 +143,6 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
         assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
-    }
-
-    @Test
-    fun `onLoadSucceeded retains Checkout product usage with Checkout metadata`() = runScenario(
-        defaultProductUsageTokens = setOf("Checkout"),
-    ) {
-        durationProvider.startCalls.push(
-            FakeDurationProvider.StartCall(
-                key = DurationProvider.Key.Checkout,
-                reset = true,
-            )
-        )
-        durationProvider.endCalls.push(
-            FakeDurationProvider.EndCall(
-                key = DurationProvider.Key.Loading,
-                duration = 1.seconds,
-            )
-        )
-
-        eventReporter.onLoadSucceeded(
-            paymentSelection = PaymentSelection.GooglePay,
-            paymentMethodMetadata = paymentMethodMetadataWithCheckoutSession,
-        )
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
-        assertThat(request.params).containsEntry("product_usage", "Checkout")
-        assertThat(request.params).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -329,51 +309,6 @@ class DefaultEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_elements_session_load_failed")
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
-    }
-
-    @Test
-    fun `onDismiss adds PaymentElement attribution for Checkout metadata`() = runScenario(
-        defaultProductUsageTokens = setOf("Checkout"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithCheckoutSession)
-
-        eventReporter.onDismiss()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_dismiss")
-        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
-        assertThat(request.params).containsEntry("checkout_session_id", checkoutSessionId)
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `Embedded UI event retains Embedded product usage`() = runScenario(
-        mode = EventReporter.Mode.Embedded,
-        defaultProductUsageTokens = setOf("EmbeddedPaymentElement"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShowManageSavedPaymentMethods()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_embedded_manage_savedpm_show")
-        assertThat(request.params).containsEntry("product_usage", "EmbeddedPaymentElement")
-        assertThat(request.params).doesNotContainKey("checkout_session_id")
-    }
-
-    @Test
-    fun `FlowController event retains FlowController product usage`() = runScenario(
-        mode = EventReporter.Mode.Custom,
-        defaultProductUsageTokens = setOf("PaymentSheet.FlowController"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShowManageSavedPaymentMethods()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_custom_manage_savedpm_show")
-        assertThat(request.params).containsEntry("product_usage", "PaymentSheet.FlowController")
-        assertThat(request.params).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -1202,21 +1137,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onAnalyticsEvent adds PaymentElement attribution to forwarded card metadata event`() = runScenario(
-        defaultProductUsageTokens = setOf("Checkout"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithCheckoutSession)
-        val event = PaymentAnalyticsEvent.CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields
-
-        eventReporter.onAnalyticsEvent(event)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", event.eventName)
-        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
-        assertThat(request.params).containsEntry("checkout_session_id", checkoutSessionId)
-    }
-
-    @Test
     fun `onPaymentSuccess fires event with null deferredIntentConfirmationType`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.endCalls.push(
@@ -1239,32 +1159,6 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
         assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
-    }
-
-    @Test
-    fun `Embedded payment success retains Checkout product usage with Checkout metadata`() = runScenario(
-        mode = EventReporter.Mode.Embedded,
-        defaultProductUsageTokens = setOf("Checkout"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithCheckoutSession)
-        durationProvider.endCalls.push(
-            FakeDurationProvider.EndCall(
-                key = DurationProvider.Key.Checkout,
-                duration = 10.seconds,
-            )
-        )
-
-        eventReporter.onPaymentSuccess(
-            paymentSelection = PaymentSelection.GooglePay,
-            deferredIntentConfirmationType = null,
-            intentId = null,
-        )
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_embedded_payment_success")
-        assertThat(request.params).containsEntry("duration", 10.0f)
-        assertThat(request.params).containsEntry("product_usage", "Checkout")
-        assertThat(request.params).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -1426,33 +1320,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `Embedded payment failure retains Checkout product usage with Checkout metadata`() = runScenario(
-        mode = EventReporter.Mode.Embedded,
-        defaultProductUsageTokens = setOf("Checkout"),
-    ) {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithCheckoutSession)
-        durationProvider.endCalls.push(
-            FakeDurationProvider.EndCall(
-                key = DurationProvider.Key.Checkout,
-                duration = 6.seconds,
-            )
-        )
-
-        eventReporter.onPaymentFailure(
-            paymentSelection = PaymentSelection.GooglePay,
-            error = PaymentSheetConfirmationError.Stripe(
-                cause = RuntimeException("Payment failed")
-            ),
-        )
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_embedded_payment_failure")
-        assertThat(request.params).containsEntry("duration", 6.0f)
-        assertThat(request.params).containsEntry("product_usage", "Checkout")
-        assertThat(request.params).doesNotContainKey("checkout_session_id")
-    }
-
-    @Test
     fun `onPaymentFailure fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.endCalls.push(
@@ -1508,18 +1375,80 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onAnalyticsEvent fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+    fun `onAnalyticsEvent snapshots checkout metadata and API key before dispatch`() = runScenario(
+        defaultProductUsageTokens = setOf("PaymentElement"),
+        workContextFactory = { scheduler -> StandardTestDispatcher(scheduler) },
+    ) {
+        paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
 
         val testEvent = object : AnalyticsEvent {
             override val eventName: String = "test_analytics_event"
         }
 
         eventReporter.onAnalyticsEvent(testEvent)
+        val changedMetadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(
+            apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "pk_test_changed_metadata"),
+            analyticsMetadata = AnalyticsMetadata(
+                mapOf("changed_metadata" to AnalyticsMetadata.Value.SimpleBoolean(true))
+            ),
+        )
+        paymentMethodMetadataStack.push(changedMetadata)
+        testScheduler.advanceUntilIdle()
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "test_analytics_event")
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
+        assertThat(request.params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(request.params).containsEntry("publishable_key", "pk_test_checkout_metadata")
+        assertThat(request.params).doesNotContainKey("changed_metadata")
+        assertThat(paymentMethodMetadataStack.pop()).isSameInstanceAs(changedMetadata)
+    }
+
+    @Test
+    fun `checkout UI events use PaymentElement factory usage and metadata context`() = runScenario(
+        defaultProductUsageTokens = setOf("PaymentElement"),
+    ) {
+        paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
+
+        eventReporter.onDismiss()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_dismiss")
+        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
+        assertThat(request.params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
+    }
+
+    @Test
+    fun `Embedded UI event retains Embedded product usage`() = runScenario(
+        mode = EventReporter.Mode.Embedded,
+        defaultProductUsageTokens = setOf("EmbeddedPaymentElement"),
+    ) {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onShowManageSavedPaymentMethods()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_embedded_manage_savedpm_show")
+        assertThat(request.params).containsEntry("product_usage", "EmbeddedPaymentElement")
+        assertThat(request.params).doesNotContainKey("checkout_session_id")
+    }
+
+    @Test
+    fun `FlowController event retains FlowController product usage`() = runScenario(
+        mode = EventReporter.Mode.Custom,
+        defaultProductUsageTokens = setOf("PaymentSheet.FlowController"),
+    ) {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onShowManageSavedPaymentMethods()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_custom_manage_savedpm_show")
+        assertThat(request.params).containsEntry("product_usage", "PaymentSheet.FlowController")
+        assertThat(request.params).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -1684,10 +1613,13 @@ class DefaultEventReporterTest {
         throwInAnalyticsCallback: Boolean = false,
         mode: EventReporter.Mode = EventReporter.Mode.Complete,
         defaultProductUsageTokens: Set<String> = setOf(""),
+        workContextFactory: (TestCoroutineScheduler) -> TestDispatcher = { scheduler ->
+            UnconfinedTestDispatcher(scheduler)
+        },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = UnconfinedTestDispatcher()
+        val testDispatcher = workContextFactory(testScheduler)
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -1737,6 +1669,7 @@ class DefaultEventReporterTest {
             paymentMethodMetadataStack = paymentMethodMetadataStack,
             analyticsEventTurbine = analyticsEventTurbine,
             userFacingLoggerTurbine = userFacingLoggerTurbine,
+            testScheduler = testScheduler,
         )
 
         block(scenario)
@@ -1757,6 +1690,7 @@ class DefaultEventReporterTest {
         val paymentMethodMetadataStack: Stack<PaymentMethodMetadata?>,
         val analyticsEventTurbine: Turbine<AnalyticEvent>,
         val userFacingLoggerTurbine: Turbine<String>,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     private class FakeDurationProvider : DurationProvider {

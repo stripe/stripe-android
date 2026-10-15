@@ -307,7 +307,7 @@ internal class DefaultPaymentElementLoaderTest {
                 "Customer information is provided by the checkout session."
         )
 
-        assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
+        expectNoLoadingEvents()
     }
 
     @Test
@@ -362,6 +362,25 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `CheckoutSession Express Checkout Element load does not report loading analytics`() = runScenario {
+        val result = createPaymentElementLoader().load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            ),
+            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                commonConfiguration = PaymentSheet.Configuration("Some name").asCommonConfiguration(),
+            ),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        consumeLoadingEvents()
+        expectNoLoadingEvents()
+    }
+
+    @Test
     fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
@@ -400,8 +419,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        expectNoLoadingEvents()
     }
 
     @Test
@@ -477,8 +495,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        expectNoLoadingEvents()
     }
 
     @Test
@@ -3192,8 +3209,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
 
-            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            expectNoLoadingEvents()
         }
     }
 
@@ -4982,6 +4998,13 @@ internal class DefaultPaymentElementLoaderTest {
     private suspend fun Scenario.consumeLoadingEvents() {
         customerRepository.getPaymentMethodsRequests.cancelAndIgnoreRemainingEvents()
         customerRepository.retrieveCustomerRequests.cancelAndIgnoreRemainingEvents()
+    }
+
+    private suspend fun Scenario.expectNoLoadingEvents() {
+        eventReporter.loadStartedTurbine.expectNoEvents()
+        eventReporter.loadSucceededTurbine.expectNoEvents()
+        eventReporter.loadFailedTurbine.expectNoEvents()
+        eventReporter.elementsSessionLoadFailedTurbine.expectNoEvents()
     }
 
     private fun Scenario.createPaymentElementLoader(

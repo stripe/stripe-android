@@ -37,6 +37,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
@@ -132,6 +134,51 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap["is_decoupled"]).isEqualTo(false)
         assertThat(resultMap["is_spt"]).isEqualTo(false)
         assertThat(resultMap["is_confirmation_tokens"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `create includes only checkout session id from session metadata`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(
+            id = "cs_test_123",
+            configId = "cfg_checkout_123",
+            requestId = "req_stale",
+            currency = "cad",
+            paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+            status = CheckoutSessionResponse.Status.COMPLETE,
+            elementsSession = createElementsSession().copy(elementsSessionConfigId = "elements_config_123"),
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "eur",
+                integrationAmount = 1000,
+                integrationCurrency = "cad",
+                localCurrencyOptions = emptyList(),
+            ),
+            automaticTaxEnabled = true,
+        )
+        val initializationMode = InitializationMode.CheckoutSession(
+            instancesKey = "checkout_instances",
+            checkoutSessionResponse = response,
+            collectedEmail = null,
+        )
+        val resultMap = createAnalyticsMetadata(
+            initializationMode = initializationMode,
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = response.id,
+                instancesKey = "checkout_instances",
+                checkoutSessionResponse = response,
+                collectedEmail = null,
+            ),
+            elementsSession = requireNotNull(response.elementsSession),
+        )
+
+        assertThat(resultMap).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(resultMap).doesNotContainKey("checkout_config_id")
+        assertThat(resultMap).doesNotContainKey("session_status")
+        assertThat(resultMap).doesNotContainKey("payment_status")
+        assertThat(resultMap).doesNotContainKey("elements_session_config_id")
+        assertThat(resultMap).doesNotContainKey("adaptive_pricing_active")
+        assertThat(resultMap).doesNotContainKey("automatic_tax_enabled")
+        assertThat(resultMap).doesNotContainKey("request_id")
+        assertThat(resultMap).doesNotContainKey("product_usage")
     }
 
     @Test

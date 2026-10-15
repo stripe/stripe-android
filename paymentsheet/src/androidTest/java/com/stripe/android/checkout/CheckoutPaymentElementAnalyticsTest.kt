@@ -49,19 +49,9 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Test
-    fun testPaymentElementUiAnalyticsUsesPaymentElementProductUsage() = runCheckoutPaymentElementScenario(
+    fun testSheetAnalyticsUsesPaymentElementProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-                query("checkout_session_id", null),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-                query("checkout_session_id", null),
-            )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("PaymentElement"),
@@ -119,14 +109,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("PaymentElement"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -172,15 +154,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
                 query("error_message", null),
             )
-            // The Checkout Session is refreshed after confirmation fails.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
-            )
 
             contentPage.clickOnLpm("google_pay")
             confirm()
@@ -206,14 +179,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
-                )
-                networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("PaymentElement"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -224,15 +189,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             contentPage.waitUntilVisible()
             networkRule.validateAnalyticsRequest(
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
-                productUsage = setOf("Checkout"),
-            )
-            // Changing the selection reloads the payment element.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
                 productUsage = setOf("Checkout"),
             )
 
