@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.isDarkTheme
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
 
@@ -64,16 +63,12 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
     }
 }
 
-private fun useDarkThemeIcon(context: Context): Boolean {
-    return context.isSystemDarkTheme() ||
-        StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
-}
-
 internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(
     isSystemDarkTheme: Boolean?,
     context: Context,
 ): Boolean {
-    return isSystemDarkTheme?.let { shouldUseDarkThemeIcon(it) } ?: useDarkThemeIcon(context)
+    val isSystemDarkTheme = isSystemDarkTheme ?: context.isSystemDarkTheme()
+    return shouldUseDarkThemeIcon(isSystemDarkTheme)
 }
 
 internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
