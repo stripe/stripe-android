@@ -70,7 +70,6 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
-                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = paymentMethodMetadata,

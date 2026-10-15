@@ -36,7 +36,6 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.linkBrand).isEqualTo(LinkBrand.Onelink)
@@ -54,7 +53,6 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.linkBrand).isEqualTo(LinkBrand.Link)
@@ -67,7 +65,6 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-            buttonTheme = ButtonTheme.Automatic,
         )
 
         assertThat(button.state).isEqualTo(LinkButtonState.Email(TestFactory.LINK_ACCOUNT.email))
@@ -96,7 +93,6 @@ internal class ExpressButtonTest {
         val button = ExpressButton.Link.create(
             paymentMethodMetadata = paymentMethodMetadata,
             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-            buttonTheme = ButtonTheme.Automatic,
         )
 
         val buttonState = button.state as LinkButtonState.DefaultPayment
@@ -110,7 +106,6 @@ internal class ExpressButtonTest {
                 linkBrand = LinkBrand.Onelink,
             ),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            buttonTheme = ButtonTheme.Automatic,
         ).toSelection()
 
         assertThat(selection).isInstanceOf<PaymentSelection.Link>()

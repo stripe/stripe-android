@@ -378,12 +378,10 @@ internal class SavedPaymentMethodMutator(
             setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-                val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
                 val paymentMethodMetadata = viewModel.paymentMethodMetadata.value
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
                         DefaultUpdatePaymentMethodInteractor(
-                            isLiveMode = isLiveMode,
                             canRemove = canRemove,
                             canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                                 .canUpdateCardExpiryAndBillingDetails.value,

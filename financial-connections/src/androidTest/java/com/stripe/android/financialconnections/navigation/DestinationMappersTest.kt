@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.navigation
 
+import androidx.navigation.NavDestination
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -22,5 +24,19 @@ class DestinationMappersTest {
                 assertThrows(IllegalArgumentException::class.java) { pane.destination }
             }
         }
+    }
+
+    @Test
+    fun unknownPaneMapsToUnknownDestination() {
+        assertThat(Pane.UNKNOWN.destination).isEqualTo(Destination.UnknownPane)
+    }
+
+    @Test
+    fun unknownDestinationMapsToUnknownPane() {
+        val navDestination = NavDestination("").apply {
+            route = Destination.UnknownPane.fullRoute
+        }
+
+        assertThat(navDestination.pane).isEqualTo(Pane.UNKNOWN)
     }
 }

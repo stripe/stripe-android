@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.Placeholder
@@ -62,7 +61,6 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun CvcRecollectionScreen(
     lastFour: String,
-    isTestMode: Boolean,
     cvcState: CvcState,
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
@@ -71,7 +69,7 @@ internal fun CvcRecollectionScreen(
             .background(MaterialTheme.stripeColors.materialColors.surface)
             .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
-        CvcRecollectionTopBar(isTestMode) {
+        CvcRecollectionTopBar {
             viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
         }
         CvcRecollectionTitle()
@@ -211,7 +209,6 @@ internal fun CvcRecollectionField(
 
 @Composable
 private fun CvcRecollectionTopBar(
-    isTestMode: Boolean,
     onClosePressed: () -> Unit
 ) {
     Row(
@@ -219,9 +216,6 @@ private fun CvcRecollectionTopBar(
             .padding(0.dp, 16.dp, 0.dp, 0.dp)
             .height(32.dp)
     ) {
-        if (isTestMode) {
-            TestModeBadge()
-        }
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
             onClick = { onClosePressed.invoke() },
@@ -270,7 +264,6 @@ private fun CvcRecollectionFieldPreview() {
     StripeTheme {
         CvcRecollectionScreen(
             lastFour = "4242",
-            isTestMode = false,
             cvcState = CvcState(
                 cvc = "",
                 cardBrand = CardBrand.Visa

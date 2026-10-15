@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +16,7 @@ internal class AddressElementTest {
     @get:Rule
     val rules = TestRules.create()
 
-    private val page = AddressElementPage(rules.compose)
+    private val page = AddressElementPage(rules.compose, ApplicationProvider.getApplicationContext())
 
     @Test
     fun completedAddressReturnsSucceededResult() = runAddressElementTest(page) {

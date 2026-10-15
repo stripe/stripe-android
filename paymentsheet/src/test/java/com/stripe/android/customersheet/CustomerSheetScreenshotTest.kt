@@ -132,7 +132,6 @@ internal class CustomerSheetScreenshotTest {
         title = null,
         savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         paymentSelection = null,
-        isLiveMode = false,
         isProcessing = false,
         isEditing = false,
         showGooglePay = false,
@@ -173,7 +172,6 @@ internal class CustomerSheetScreenshotTest {
                 SupportedPaymentMethodFixtures.usBankAccount,
             ),
             enabled = true,
-            isLiveMode = false,
             isProcessing = false,
             errorMessage = null,
             isFirstPaymentMethod = false,
@@ -445,7 +443,6 @@ internal class CustomerSheetScreenshotTest {
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
                 setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
                 canRemove = canRemove,
-                isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
                 addressCollectionMode = AddressCollectionMode.Automatic,
                 onBrandChoiceSelected = {},
@@ -457,7 +454,6 @@ internal class CustomerSheetScreenshotTest {
                 onUpdateSuccess = {},
                 autocompleteAddressInteractorFactory = null,
             ).also { closeInteractorRule.track(it) },
-            isLiveMode = true,
         )
     }
 

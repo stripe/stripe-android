@@ -11,7 +11,6 @@ internal class PaymentSheetScreenSavedPaymentMethodConfirmTest {
         val interactor = FakeSavedPaymentMethodConfirmInteractor()
         val screen = PaymentSheetScreen.SavedPaymentMethodConfirm(
             interactor = interactor,
-            isLiveMode = true,
         )
 
         screen.close()

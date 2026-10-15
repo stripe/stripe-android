@@ -362,7 +362,7 @@ internal class SignUpScreenTest {
             navigateAndClearStack = {},
             dismissalCoordinator = dismissalCoordinator,
             moveToWeb = moveToWeb,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             dismissWithResult = {},
             verifyDuringSignUp = {},
         ).also { viewModelStoreRule.track(it) }

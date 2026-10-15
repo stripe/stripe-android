@@ -57,6 +57,7 @@ internal class CustomPaymentMethodsTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
@@ -115,6 +116,7 @@ internal class CustomPaymentMethodsTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
@@ -192,6 +194,7 @@ internal class CustomPaymentMethodsTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             builder = {
                 confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->

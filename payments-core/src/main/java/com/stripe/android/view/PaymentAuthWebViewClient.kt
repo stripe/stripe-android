@@ -82,7 +82,11 @@ class PaymentAuthWebViewClient(
         logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
         runCatching {
             openIntent(
-                Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+                Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME).apply {
+                    component = null
+                    selector = null
+                    addCategory(Intent.CATEGORY_BROWSABLE)
+                }
             )
         }.onFailure { error ->
             logger.error("Failed to start Intent.", error)

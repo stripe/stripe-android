@@ -10,11 +10,11 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkControllerPreview
-import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
@@ -75,9 +75,7 @@ internal class PlaygroundSettings private constructor(
          * this case `US`)
          */
         displayableDefinitions.value.forEach { definition ->
-            val values = definition.createOptions(configurationData).map { option ->
-                option.value
-            }
+            val values = definition.createOptions(configurationData).map { option -> option.value }
 
             if (values.isEmpty()) {
                 return@forEach
@@ -97,7 +95,15 @@ internal class PlaygroundSettings private constructor(
                 }
             }
 
-            if (!values.contains(value)) {
+            @Suppress("UNCHECKED_CAST")
+            val valueMatchesOption = values.any { optionValue ->
+                (definition as PlaygroundSettingDefinition.Displayable<Any?>).optionMatchesValue(
+                    optionValue = optionValue,
+                    value = value,
+                )
+            }
+
+            if (!valueMatchesOption) {
                 currentSettings = currentSettings + (definition to values.firstOrNull())
             }
         }

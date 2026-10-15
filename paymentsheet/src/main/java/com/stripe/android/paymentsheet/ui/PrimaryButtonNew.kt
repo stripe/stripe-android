@@ -33,7 +33,6 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -89,6 +88,7 @@ internal fun PrimaryButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
+    subduedWhileProcessing: Boolean = true,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -116,37 +116,34 @@ internal fun PrimaryButton(
         ).value
     }
 
-    CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            TextButton(
-                onClick = onClick,
-                modifier = Modifier
-                    .testTag(PRIMARY_BUTTON_TEST_TAG)
-                    .fillMaxWidth()
-                    .defaultMinSize(
-                        minHeight = shape.height
-                    ),
-                enabled = enabled,
-                shape = RoundedCornerShape(shape.cornerRadius),
-                border = BorderStroke(shape.borderStrokeWidth, colors.border),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = animatedBackground,
-                    disabledBackgroundColor = animatedBackground,
+        TextButton(
+            onClick = onClick,
+            modifier = Modifier
+                .testTag(PRIMARY_BUTTON_TEST_TAG)
+                .fillMaxWidth()
+                .defaultMinSize(
+                    minHeight = shape.height
                 ),
-            ) {
-                Content(
-                    label = label,
-                    processingState = processingState,
-                    areAnimationsDisabled = areAnimationsDisabled,
-                    locked = locked,
-                    onProcessingCompleted = onProcessingCompleted,
-                )
-            }
+            enabled = enabled,
+            shape = RoundedCornerShape(shape.cornerRadius),
+            border = BorderStroke(shape.borderStrokeWidth, colors.border),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = animatedBackground,
+                disabledBackgroundColor = animatedBackground,
+            ),
+        ) {
+            Content(
+                label = label,
+                processingState = processingState,
+                areAnimationsDisabled = areAnimationsDisabled,
+                subduedWhileProcessing = subduedWhileProcessing,
+                locked = locked,
+                onProcessingCompleted = onProcessingCompleted,
+            )
         }
     }
 }
@@ -156,6 +153,7 @@ private fun Content(
     label: String,
     processingState: PrimaryButtonProcessingState,
     areAnimationsDisabled: Boolean,
+    subduedWhileProcessing: Boolean,
     locked: Boolean,
     onProcessingCompleted: () -> Unit,
 ) {
@@ -181,6 +179,7 @@ private fun Content(
                         else -> stringResource(R.string.stripe_paymentsheet_primary_button_processing)
                     },
                     processing = processingState !is PrimaryButtonProcessingState.Idle,
+                    subduedWhileProcessing = subduedWhileProcessing,
                     locked = locked,
                 )
             }
@@ -234,6 +233,7 @@ private fun areAnimationsDisabled(): Boolean {
 private fun BoxScope.StaticIncompleteProcessing(
     text: String,
     processing: Boolean,
+    subduedWhileProcessing: Boolean,
     locked: Boolean,
 ) {
     val colors = PrimaryButtonTheme.colors
@@ -245,7 +245,9 @@ private fun BoxScope.StaticIncompleteProcessing(
         fontWeight = FontWeight.Medium,
     )
 
-    val onBackground = colors.onBackground.copy(LocalContentAlpha.current)
+    val onBackground = colors.onBackground.copy(
+        alpha = if (processing && !subduedWhileProcessing) ContentAlpha.high else LocalContentAlpha.current
+    )
 
     Text(
         text = text,

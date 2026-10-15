@@ -24,6 +24,7 @@ class OnrampConfiguration {
     private var publishableKey: String? = null
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
+    private var countryHint: String? = null
     private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
     private var samsungPayConfig: SamsungPayConfig? = null
     private var additionalSdkVersions: List<SDKVersion> = emptyList()
@@ -55,6 +56,15 @@ class OnrampConfiguration {
      */
     fun cryptoCustomerId(cryptoCustomerId: String?) = apply {
         this.cryptoCustomerId = cryptoCustomerId
+    }
+
+    /**
+     * Sets a merchant-provided ISO 3166-1 alpha-2 country hint for customers without an
+     * established KYC region. The API determines country precedence and validates the hint.
+     * An established KYC region takes precedence. Omit the hint when the country is unknown.
+     */
+    fun countryHint(countryHint: String?) = apply {
+        this.countryHint = countryHint
     }
 
     /**
@@ -94,7 +104,19 @@ class OnrampConfiguration {
             CardBrand.AmericanExpress,
             CardBrand.Discover,
         ),
-    )
+    ) {
+        internal var collectContactInformation: Boolean = false
+            private set
+
+        /**
+         * Requests Samsung Pay's billing address and any available name, email, and phone.
+         * Returned fields are optional prefill data in [KycInfo], not verified identity data.
+         * Disabled by default.
+         */
+        fun collectContactInformation(enabled: Boolean) = apply {
+            collectContactInformation = enabled
+        }
+    }
 
     /**
      * Additional wrapper SDK versions to include in developer diagnostics, such as the
@@ -107,6 +129,7 @@ class OnrampConfiguration {
     }
 
     internal class State(
+        val countryHint: String?,
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
@@ -118,6 +141,7 @@ class OnrampConfiguration {
 
     internal fun build(): State {
         return State(
+            countryHint = countryHint,
             merchantDisplayName = requireNotNull(merchantDisplayName) {
                 "merchantDisplayName must not be null"
             },

@@ -17,6 +17,7 @@ class CustomSheetPaymentInfo private constructor(
     val extraPaymentInfo: Bundle?,
 ) {
     enum class AddressInPaymentSheet {
+        NEED_BILLING_SPAY,
         DO_NOT_SHOW,
     }
 
@@ -75,7 +76,8 @@ class PaymentManager(
     }
 
     fun updateSheet(customSheet: CustomSheet) {
-        FakeSamsungPaySdkState.updatedSheet = customSheet
+        FakeSamsungPaySdkState.updatedSheets.add(customSheet)
+        FakeSamsungPaySdkState.updateSheetError?.let { throw it }
     }
 
     interface CustomSheetTransactionInfoListener {

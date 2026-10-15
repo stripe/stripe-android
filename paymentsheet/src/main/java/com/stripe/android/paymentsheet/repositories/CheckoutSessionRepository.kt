@@ -79,10 +79,12 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun detachPaymentMethod(
         sessionId: String,
         paymentMethodId: String,
+        clientParams: ElementsSessionClientParams,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
+            "elements_session_client" to clientParams.toCheckoutSessionMap(),
         ),
     )
 

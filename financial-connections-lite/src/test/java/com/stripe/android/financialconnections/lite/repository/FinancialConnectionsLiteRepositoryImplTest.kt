@@ -10,7 +10,6 @@ import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -28,6 +27,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - includes pre_collected_consent in request when provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
@@ -42,10 +42,11 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         verify(apiRequestFactory).createPost(
             url = any(),
-            options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            options = optionsCaptor.capture(),
+            params = paramsCaptor.capture()
         )
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
                 "consent" to "fccons_123",
@@ -57,6 +58,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - omits pre_collected_consent from request when not provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
@@ -66,10 +68,11 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
 
         verify(apiRequestFactory).createPost(
             url = any(),
-            options = any(),
-            params = paramsCaptor.capture(),
-            shouldCache = eq(false)
+            options = optionsCaptor.capture(),
+            params = paramsCaptor.capture()
         )
+        assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
+        assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
 
@@ -79,8 +82,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any(),
-                shouldCache = eq(false)
+                params = any()
             )
         ).thenReturn(request)
         whenever(requestExecutor.execute(any(), any<KSerializer<*>>())).thenReturn(

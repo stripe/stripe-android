@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -16,7 +18,10 @@ import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteR
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.CheckoutShippingAddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -57,6 +62,25 @@ internal class AddressElementViewModelModule {
             CheckoutShippingPrimaryButtonAction(
                 checkoutSessionResponse = args.checkoutSessionResponse,
                 taxRegionUpdater = taxRegionUpdater,
+            )
+        }
+    }
+
+    @Provides
+    internal fun provideAddressElementEventReporter(
+        args: AddressElementActivityContract.Args,
+        addressLauncherEventReporter: AddressLauncherEventReporter,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+    ): AddressElementEventReporter = when (args) {
+        is AddressElementActivityContract.Args.Standalone -> {
+            StandaloneAddressElementEventReporter(addressLauncherEventReporter)
+        }
+        is AddressElementActivityContract.Args.CheckoutShipping -> {
+            CheckoutShippingAddressElementEventReporter(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                analyticsRequestFactory = analyticsRequestFactory,
+                checkoutSessionId = args.checkoutSessionResponse.id,
             )
         }
     }

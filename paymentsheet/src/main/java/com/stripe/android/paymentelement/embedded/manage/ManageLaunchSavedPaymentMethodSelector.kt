@@ -1,28 +1,35 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdate
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * In Manage mode the selection is the sheet result, so this syncs the Checkout Session billing
- * tax region, when required, before committing. Other launch modes sync on Continue in
+ * Manage mode has no Continue step, so selections and saved-card edits sync the Checkout Session
+ * billing tax region before returning the sheet result. Other launch modes sync on Continue in
  * [SheetActivityContinueCoordinator].
  */
 @Singleton
 internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     private val taxRegionUpdater: SheetTaxRegionUpdater,
-    private val paymentMethodMetadata: PaymentMethodMetadata,
+    paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
 ) : ManageScreenSavedPaymentMethodSelector {
+    private val initialCheckoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse
+
     private val _selectionState = MutableStateFlow<SavedPaymentMethodSelectionState>(
         SavedPaymentMethodSelectionState.Idle,
     )
@@ -31,16 +38,65 @@ internal class ManageLaunchSavedPaymentMethodSelector @Inject constructor(
     override var checkoutSessionResponse: CheckoutSessionResponse? = null
         private set
 
-    override suspend fun select(selection: PaymentSelection.Saved) {
+    override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
         val paymentMethodId = selection.paymentMethod.id
-        val update = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
-        val response = update?.let {
+        val update = prepareTaxRegionUpdate(selection)
+        update?.let {
             _selectionState.value = SavedPaymentMethodSelectionState.Pending(paymentMethodId)
-            it().getOrNull()
+            it().getOrElse { error ->
+                _selectionState.value = SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage())
+                return Result.failure(error)
+            }
         }
 
-        checkoutSessionResponse = response
         selectionHolder.setSelection(selection)
         _selectionState.value = SavedPaymentMethodSelectionState.Idle
+        return Result.success(Unit)
+    }
+
+    /**
+     * Synchronizes Checkout billing tax only when [updated] is the currently selected saved payment method
+     * and its billing address differs from the address in [original].
+     */
+    override suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<Unit> {
+        val selected = selectionHolder.selection.value as? PaymentSelection.Saved
+            ?: return Result.success(Unit)
+        if (selected.paymentMethod.id != updated.id ||
+            original.billingDetails?.address == updated.billingDetails?.address
+        ) {
+            return Result.success(Unit)
+        }
+        return prepareTaxRegionUpdate(PaymentSelection.Saved(updated))
+            ?.invoke()
+            ?.map { Unit }
+            ?: Result.success(Unit)
+    }
+
+    private fun prepareTaxRegionUpdate(
+        selection: PaymentSelection.Saved,
+    ): SheetTaxRegionUpdate? {
+        val update = taxRegionUpdater.prepareUpdate(
+            checkoutSessionResponse = checkoutSessionResponse ?: initialCheckoutSessionResponse,
+            selection = selection,
+        ) ?: return null
+
+        return {
+            update().onSuccess { response ->
+                checkoutSessionResponse = response
+            }
+        }
+    }
+
+    override fun clearError() {
+        _selectionState.update { state ->
+            if (state is SavedPaymentMethodSelectionState.Failed) {
+                SavedPaymentMethodSelectionState.Idle
+            } else {
+                state
+            }
+        }
     }
 }

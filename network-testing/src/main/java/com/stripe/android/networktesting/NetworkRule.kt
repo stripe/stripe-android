@@ -192,9 +192,6 @@ private class DelegatingStripeRequest(
 
     override var postHeaders: Map<String, String>? = original.postHeaders
 
-    override val shouldCache: Boolean
-        get() = original.shouldCache
-
     override fun writePostBody(outputStream: OutputStream) {
         original.writePostBody(outputStream)
     }

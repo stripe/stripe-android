@@ -170,7 +170,7 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkLaunchMode.Authentication,
             is LinkLaunchMode.Authorization,
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full -> true
+            is LinkLaunchMode.Full -> true
             is LinkLaunchMode.PaymentMethodSelection -> linkLaunchMode.canContinueWithoutLink
         }
 
@@ -234,7 +234,7 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             // Flows that end up in confirmation -> we can launch the web flow.
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
+            is LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
                 navigate(LinkScreen.Loading, clearStack = true)
                 launcher.invoke(linkConfiguration, paymentMethodMetadata)
             }
@@ -481,7 +481,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 }
             }
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full,
+            is LinkLaunchMode.Full,
             is LinkLaunchMode.PaymentMethodSelection -> {
                 val linkScreen =
                     if (linkAccount.completedSignup && linkLaunchMode.selectedPayment() == null) {

@@ -28,14 +28,12 @@ internal class DefaultCvcRecollectionInteractor(
     private val lastFour: String,
     private val cardBrand: CardBrand,
     private val cvc: String,
-    private val isTestMode: Boolean,
     private val processing: StateFlow<Boolean>,
     coroutineScope: CoroutineScope,
 ) : CvcRecollectionInteractor {
     private val _viewState = MutableStateFlow(
         CvcRecollectionViewState(
             lastFour = lastFour,
-            isTestMode = isTestMode,
             cvcState = CvcState(
                 cvc = cvc,
                 cardBrand = cardBrand,
@@ -83,7 +81,6 @@ internal class DefaultCvcRecollectionInteractor(
                 lastFour = args.lastFour,
                 cardBrand = args.cardBrand,
                 cvc = args.cvc,
-                isTestMode = args.isTestMode,
                 processing = processing,
                 coroutineScope = coroutineScope,
             )

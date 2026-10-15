@@ -75,6 +75,7 @@ internal class PaymentSheetNextActionTest(
     ) = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         successTimeoutSeconds = 10L,
         resultCallback = resultCallback,
     ) { testContext ->
@@ -136,7 +137,7 @@ internal class PaymentSheetNextActionTest(
             }
         }
 
-        page.clickPrimaryButton()
+        page.clickPrimaryButtonWithoutWaitingForDismissal()
 
         waitForBrowserAuthToLaunch()
 

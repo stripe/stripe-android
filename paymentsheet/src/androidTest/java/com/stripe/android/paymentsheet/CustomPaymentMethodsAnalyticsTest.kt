@@ -51,6 +51,7 @@ internal class CustomPaymentMethodsAnalyticsTest(
     fun testSuccessful() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = IntegrationType.Compose,
         builder = {
             confirmCustomPaymentMethodCallback { _, _ ->

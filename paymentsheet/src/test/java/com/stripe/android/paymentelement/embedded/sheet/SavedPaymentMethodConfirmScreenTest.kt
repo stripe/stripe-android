@@ -143,7 +143,6 @@ internal class SavedPaymentMethodConfirmScreenTest {
         val eventReporter = FakeEventReporter()
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = interactor,
-            isLiveMode = true,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
@@ -158,7 +157,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
             ) {
                 EventReporterProvider(eventReporter) {
                     StripeTheme {
-                        screen.Content()
+                        screen.Content(showsWalletsHeader = false)
                     }
                 }
             }

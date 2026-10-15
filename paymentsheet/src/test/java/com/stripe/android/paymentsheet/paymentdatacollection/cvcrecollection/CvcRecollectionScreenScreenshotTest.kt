@@ -41,12 +41,11 @@ class CvcRecollectionScreenScreenshotTest {
         .around(paparazziRule)
         .around(scopedThemePaparazziRule)
 
-    private fun interactor(cvc: String = "", isTestMode: Boolean = true): CvcRecollectionInteractor {
+    private fun interactor(cvc: String = ""): CvcRecollectionInteractor {
         return DefaultCvcRecollectionInteractor(
             lastFour = "4242",
             cardBrand = CardBrand.Visa,
             cvc = cvc,
-            isTestMode = isTestMode,
             processing = stateFlowOf(false),
             coroutineScope = scopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         )
@@ -97,22 +96,6 @@ class CvcRecollectionScreenScreenshotTest {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
                 lastFour = "4242",
-                isTestMode = false,
-                viewActionHandler = {},
-                cvcState = CvcState(
-                    cardBrand = CardBrand.Visa,
-                    cvc = ""
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun testFilledTestMode() {
-        paparazziRule.snapshot {
-            CvcRecollectionScreen(
-                lastFour = "4242",
-                isTestMode = true,
                 viewActionHandler = {},
                 cvcState = CvcState(
                     cardBrand = CardBrand.Visa,
@@ -136,7 +119,6 @@ class CvcRecollectionScreenScreenshotTest {
     private fun TestCvcRecollectionScreen() {
         CvcRecollectionScreen(
             lastFour = "4242",
-            isTestMode = false,
             cvcState = CvcState(
                 cardBrand = CardBrand.Visa,
                 cvc = ""

@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -16,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.updatedWithProductUsage
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import dagger.assisted.Assisted
@@ -27,7 +25,6 @@ import dagger.assisted.AssistedInject
 internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val handler: PreparePaymentMethodHandler,
-    private val errorReporter: ErrorReporter,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
@@ -75,18 +72,6 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        runCatching {
-            stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = paymentMethod.id,
-                requestOptions = requestOptions,
-            ).getOrThrow()
-        }.onFailure {
-            errorReporter.report(
-                ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
-                stripeException = StripeException.create(it),
-            )
-        }
-
         return try {
             handler.onPreparePaymentMethod(
                 paymentMethod = paymentMethod,

@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.di
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsSheetState
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
@@ -11,6 +13,11 @@ import java.util.Locale
 
 @Module
 internal object FinancialConnectionsSheetModule {
+
+    @ActivityRetainedScope
+    @Provides
+    fun providesEventContext(initialState: FinancialConnectionsSheetState): FinancialConnectionsEventContext =
+        FinancialConnectionsEventContext(initialState.manifest)
 
     @ActivityRetainedScope
     @Provides
@@ -28,13 +35,15 @@ internal object FinancialConnectionsSheetModule {
         apiRequestFactory: ApiRequest.Factory,
         provideApiRequestOptions: ProvideApiRequestOptions,
         locale: Locale?,
-        logger: Logger
+        logger: Logger,
+        eventContext: FinancialConnectionsEventContext
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
         provideApiRequestOptions = provideApiRequestOptions,
         logger = logger,
         locale = locale ?: Locale.getDefault(),
-        initialSync = null
+        initialSync = null,
+        eventContext = eventContext
     )
 }

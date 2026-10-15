@@ -46,6 +46,7 @@ internal class DefaultPaymentMethodsTest(
     fun setDefaultCard_selectsCard() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = {},
     ) { testContext ->
@@ -95,6 +96,7 @@ internal class DefaultPaymentMethodsTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = integrationType,
             resultCallback = {},
         ) { testContext ->
@@ -140,6 +142,7 @@ internal class DefaultPaymentMethodsTest(
     fun defaultPaymentMethod_displayedWithDefaultBadge() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = {},
     ) { testContext ->
@@ -169,6 +172,7 @@ internal class DefaultPaymentMethodsTest(
     fun defaultPaymentMethod_isSelected() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = {},
     ) { testContext ->

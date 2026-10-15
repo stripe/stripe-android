@@ -1,6 +1,4 @@
 @file:OptIn(
-    com.stripe.android.CollectMissingLinkBillingDetailsPreview::class,
-    com.stripe.android.LinkDisallowFundingSourceCreationPreview::class,
     com.stripe.android.paymentelement.CheckoutSessionPreview::class,
 )
 
@@ -25,7 +23,7 @@ internal fun CheckoutPlaygroundSettings.Snapshot.checkoutControllerConfiguration
                 currencySelectorElement(currencySelectorConfiguration())
             }
             if (this@checkoutControllerConfiguration[Controller.shippingAddress.shouldSetConfiguration]) {
-                shippingAddressElement(ShippingAddressElement.Configuration())
+                shippingAddressElement(shippingAddressElementConfiguration())
             }
             if (this@checkoutControllerConfiguration[Controller.express.shouldSetConfiguration]) {
                 expressCheckoutElement(expressCheckoutConfiguration())
@@ -221,15 +219,98 @@ private fun CheckoutPlaygroundSettings.Snapshot.currencySelectorConfiguration():
     return CurrencySelectorElement.Configuration().appearance(appearance)
 }
 
+private fun CheckoutPlaygroundSettings.Snapshot.shippingAddressElementConfiguration():
+    ShippingAddressElement.Configuration {
+    val definitions = Controller.shippingAddress
+    return ShippingAddressElement.Configuration()
+        .appearance(shippingAppearance())
+        .apply {
+            this@shippingAddressElementConfiguration[definitions.title]?.let(::title)
+            this@shippingAddressElementConfiguration[definitions.buttonTitle]?.let(::buttonTitle)
+        }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.shippingAppearance(): ShippingAddressElement.Configuration.Appearance {
+    val definitions = Controller.shippingAddress.appearance
+    return ShippingAddressElement.Configuration.Appearance()
+        .colorsLight(shippingColors(definitions.lightColors, light = true))
+        .colorsDark(shippingColors(definitions.darkColors, light = false))
+        .themeMode(this[definitions.themeMode])
+        .primaryButton(shippingPrimaryButtonAppearance())
+        .formInsetValues(
+            ShippingAddressElement.Configuration.Appearance.Insets(
+                startDp = this[definitions.insets.start],
+                topDp = this[definitions.insets.top],
+                endDp = this[definitions.insets.end],
+                bottomDp = this[definitions.insets.bottom],
+            )
+        )
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.shippingColors(
+    definitions: CheckoutPaymentColorsDefinitions,
+    light: Boolean,
+): ShippingAddressElement.Configuration.Appearance.Colors {
+    val colors = if (light) {
+        ShippingAddressElement.Configuration.Appearance.Colors.light()
+    } else {
+        ShippingAddressElement.Configuration.Appearance.Colors.dark()
+    }
+    return colors.apply {
+        this@shippingColors[definitions.primary]?.let(::primary)
+        this@shippingColors[definitions.surface]?.let(::surface)
+        this@shippingColors[definitions.component]?.let(::component)
+        this@shippingColors[definitions.componentBorder]?.let(::componentBorder)
+        this@shippingColors[definitions.componentDivider]?.let(::componentDivider)
+        this@shippingColors[definitions.onComponent]?.let(::onComponent)
+        this@shippingColors[definitions.subtitle]?.let(::subtitle)
+        this@shippingColors[definitions.placeholderText]?.let(::placeholderText)
+        this@shippingColors[definitions.onSurface]?.let(::onSurface)
+        this@shippingColors[definitions.appBarIcon]?.let(::appBarIcon)
+        this@shippingColors[definitions.error]?.let(::error)
+    }
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButtonAppearance():
+    ShippingAddressElement.Configuration.Appearance.PrimaryButton {
+    val definitions = Controller.shippingAddress.appearance.primaryButton
+    return ShippingAddressElement.Configuration.Appearance.PrimaryButton()
+        .colorsLight(shippingPrimaryButtonColors(definitions.lightColors, light = true))
+        .colorsDark(shippingPrimaryButtonColors(definitions.darkColors, light = false))
+        .shape(
+            ShippingAddressElement.Configuration.Appearance.PrimaryButton.Shape()
+                .cornerRadiusDp(this[definitions.shape.cornerRadius])
+                .borderStrokeWidthDp(this[definitions.shape.borderWidth])
+                .heightDp(this[definitions.shape.height])
+        )
+        .typography(
+            ShippingAddressElement.Configuration.Appearance.PrimaryButton.Typography()
+                .fontResId(this[definitions.typography.font].resourceId)
+                .fontSizeSp(this[definitions.typography.size])
+        )
+}
+
+private fun CheckoutPlaygroundSettings.Snapshot.shippingPrimaryButtonColors(
+    definitions: CheckoutPrimaryButtonColorsDefinitions,
+    light: Boolean,
+): ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors {
+    val colors = if (light) {
+        ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.light()
+    } else {
+        ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark()
+    }
+    return colors.apply {
+        this@shippingPrimaryButtonColors[definitions.background]?.let(::background)
+        this@shippingPrimaryButtonColors[definitions.onBackground]?.let(::onBackground)
+        this@shippingPrimaryButtonColors[definitions.border]?.let(::border)
+    }
+}
+
 private fun CheckoutPlaygroundSettings.Snapshot.expressCheckoutConfiguration(): ExpressCheckoutElement.Configuration {
     return ExpressCheckoutElement.Configuration()
         .linkConfiguration(
             ExpressCheckoutElement.Configuration.LinkConfiguration()
                 .display(this[Controller.express.link.display])
-                .collectMissingBillingDetailsForExistingPaymentMethods(
-                    this[Controller.express.link.collectMissingBilling]
-                )
-                .disallowFundingSourceCreation(this[Controller.express.link.disallowedFunding].toSet())
         )
         .googlePayConfiguration(expressGooglePayConfiguration())
         .appearance(

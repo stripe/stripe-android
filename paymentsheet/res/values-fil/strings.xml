@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Mag-log out sa %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Kumpirmahin ang pagbabayad sa iyong MB WAY app sa loob ng %s para makumpleto ang pagbili.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Higit pang mga pamamaraan sa pagbabayad</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">May nangyaring mali. Tingnan ang iyong koneksyon at subukan muli.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
@@ -152,6 +154,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Magdagdag ng iyong impormasyon sa pagbabayad</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Idinagdag ang card</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Hindi mase-save ang mga pagbabago sa iyong address.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">I-discard</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">I-discard ang mga pagbabago?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">I-save ang address</string>
   <!-- Title for shipping address entry section -->

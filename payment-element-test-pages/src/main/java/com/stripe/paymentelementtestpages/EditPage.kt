@@ -6,9 +6,12 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
@@ -69,6 +72,7 @@ class EditPage(
 
     fun update(waitUntilComplete: Boolean = true) {
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .performScrollTo()
             .performClick()
         if (waitUntilComplete) {
             composeTestRule.waitUntilWithIdle {
@@ -88,6 +92,17 @@ class EditPage(
 
     fun onRemoveButton(): SemanticsNodeInteraction {
         return composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
+    }
+
+    fun assertSaveError(error: String) {
+        composeTestRule.waitUntilWithIdle(conditionDescription = "Save error to appear") {
+            composeTestRule.onAllNodesWithText(error)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithText(error).performScrollTo().assertIsDisplayed()
+        assertIsVisible()
+        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsEnabled()
     }
 
     fun clickRemove() {

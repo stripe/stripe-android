@@ -10,9 +10,11 @@ internal data class WalletContactInfo(
     val rawPhone: String?,
 )
 
-internal fun PaymentMethod.walletContactInfo(): WalletContactInfo? {
-    val email = billingDetails?.email?.trim()?.takeIf { it.isNotEmpty() }
-    val rawPhone = billingDetails?.phone?.takeIf { it.isNotBlank() }
+internal fun PaymentMethod.walletContactInfo(): WalletContactInfo? = billingDetails?.walletContactInfo()
+
+internal fun PaymentMethod.BillingDetails.walletContactInfo(): WalletContactInfo? {
+    val email = email?.trim()?.takeIf { it.isNotEmpty() }
+    val rawPhone = phone?.takeIf { it.isNotBlank() }
     if (email == null && rawPhone == null) return null
 
     // Use the wallet's country, never the device locale. International numbers can be parsed
@@ -20,7 +22,7 @@ internal fun PaymentMethod.walletContactInfo(): WalletContactInfo? {
     val phone = rawPhone?.let {
         PhoneNumberUtils.formatNumberToE164(
             it,
-            billingDetails?.address?.country?.trim()?.uppercase(Locale.ROOT) ?: "ZZ"
+            address?.country?.trim()?.uppercase(Locale.ROOT) ?: "ZZ"
         )
     }
     return WalletContactInfo(email = email, phone = phone, rawPhone = rawPhone)

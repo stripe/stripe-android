@@ -47,6 +47,7 @@ internal class CardNumberControllerNetworkTest(
     fun testNoCardMetadataRequestWhenAllFundingTypesAllowed() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -85,6 +86,7 @@ internal class CardNumberControllerNetworkTest(
     fun testCardMetadataRequestMadeWhenFundingTypesRestricted() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -138,6 +140,7 @@ internal class CardNumberControllerNetworkTest(
     fun testNoWarningForAllowedFundingWithNetworkRequest() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -189,6 +192,7 @@ internal class CardNumberControllerNetworkTest(
     fun testNoCardMetadataRequestWhenServerFlagDisabled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->

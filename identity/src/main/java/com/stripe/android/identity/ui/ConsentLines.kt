@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -20,7 +20,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
@@ -32,7 +31,8 @@ import com.stripe.android.identity.networking.models.getResourceId
 @Composable
 internal fun ConsentLines(
     lines: List<VerificationPageStaticConsentLineContent>,
-    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
+    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
+    textColor: Color
 ) {
     for (line in lines) {
         Row(
@@ -58,12 +58,12 @@ internal fun ConsentLines(
                     // Remove the distance between lines to find the first line's center.
                     (it.measuredHeight - (it[LastBaseline] - it[FirstBaseline])) / 2
                 },
-                color = colorResource(id = R.color.stripe_html_line),
-                style = LocalTextStyle.current.merge(fontSize = 16.sp),
+                color = textColor,
+                style = MaterialTheme.typography.body1,
                 bottomSheets = bottomSheets,
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
-                    color = colorResource(id = R.color.stripe_html_line)
+                    color = textColor
                 )
             )
         }
@@ -100,7 +100,8 @@ internal fun ConsentLinePreview() {
                             "bottomsheet link</a>"
                     )
                 ),
-                bottomSheets = mapOf()
+                bottomSheets = mapOf(),
+                textColor = MaterialTheme.colors.onBackground
             )
         }
     }

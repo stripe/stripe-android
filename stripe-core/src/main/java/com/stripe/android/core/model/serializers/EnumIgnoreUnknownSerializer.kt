@@ -37,7 +37,12 @@ abstract class EnumIgnoreUnknownSerializer<T : Enum<T>>(
 
     override fun deserialize(decoder: Decoder): T {
         // only run 'decoder.decodeString()' once
-        return revLookup[decoder.decodeString()]
+        val value = decoder.decodeString()
+        val result = revLookup[value]
             ?: defaultValue // map.getOrDefault is not available < API-24
+        onDeserialize(value, result)
+        return result
     }
+
+    protected open fun onDeserialize(value: String, result: T) = Unit
 }

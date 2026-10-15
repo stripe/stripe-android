@@ -26,13 +26,16 @@ import com.stripe.android.crypto.onramp.example.REGISTRATION_REGISTER_BUTTON_TAG
 @Composable
 internal fun RegistrationScreen(
     initialEmail: String,
+    initialPhone: String,
+    initialCountry: String,
+    initialFullName: String,
     onRegister: (String, String, String, String?) -> Unit,
     onBack: () -> Unit
 ) {
     var email by remember { mutableStateOf(initialEmail) }
-    var phone by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
-    var fullName by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var country by remember { mutableStateOf(initialCountry) }
+    var fullName by remember { mutableStateOf(initialFullName) }
 
     Column {
         Text(

@@ -14,7 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
-import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.ManagePage
@@ -42,8 +42,8 @@ internal class CheckoutPaymentElementSavedSepaTest {
         runSavedSepaTest(
             paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD),
             renderPaymentElementContent = false,
-        ) { context ->
-            context.confirm()
+        ) {
+            confirm()
             waitForSepaMandate()
 
             enqueueConfirmation()
@@ -60,17 +60,17 @@ internal class CheckoutPaymentElementSavedSepaTest {
         runSavedSepaTest(
             paymentMethods = savedPaymentMethods(SEPA_PAYMENT_METHOD, CARD_PAYMENT_METHOD),
             configuration = configuration,
-        ) { context ->
+        ) {
             contentPage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
 
             enqueueConfirmation()
-            context.confirm()
+            confirm()
         }
     }
 
     @Test
     fun testReselectedSavedSepaConfirmsWithoutAnotherMandateScreen() {
-        runSavedSepaTest(paymentMethods = savedPaymentMethods(CARD_PAYMENT_METHOD, SEPA_PAYMENT_METHOD)) { context ->
+        runSavedSepaTest(paymentMethods = savedPaymentMethods(CARD_PAYMENT_METHOD, SEPA_PAYMENT_METHOD)) {
             contentPage.assertHasSelectedSavedPaymentMethod(CARD_PAYMENT_METHOD_ID)
             contentPage.clickViewMore()
             managePage.waitUntilVisible()
@@ -79,7 +79,7 @@ internal class CheckoutPaymentElementSavedSepaTest {
             contentPage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
 
             enqueueConfirmation()
-            context.confirm()
+            confirm()
         }
     }
 
@@ -94,9 +94,9 @@ internal class CheckoutPaymentElementSavedSepaTest {
         runSavedSepaTest(
             paymentMethods = savedPaymentMethods(CARD_PAYMENT_METHOD, SEPA_PAYMENT_METHOD),
             configuration = configuration,
-        ) { context ->
+        ) {
             contentPage.assertHasSelectedSavedPaymentMethod(CARD_PAYMENT_METHOD_ID)
-            context.presentPaymentOptions()
+            presentPaymentOptions()
 
             verticalModePage.waitUntilVisible()
             verticalModePage.clickViewMore()
@@ -109,7 +109,7 @@ internal class CheckoutPaymentElementSavedSepaTest {
             contentPage.assertHasSelectedSavedPaymentMethod(SEPA_PAYMENT_METHOD_ID)
 
             enqueueConfirmation()
-            context.confirm()
+            confirm()
         }
     }
 
@@ -117,10 +117,10 @@ internal class CheckoutPaymentElementSavedSepaTest {
         paymentMethods: JSONArray,
         configuration: CheckoutController.Configuration = checkoutConfiguration(PaymentElement.Configuration()),
         renderPaymentElementContent: Boolean = true,
-        block: (CheckoutPaymentElementTestRunnerContext) -> Unit,
+        block: suspend CheckoutPaymentElementScenario.() -> Unit,
     ) {
         var checkoutResult: CheckoutController.Result? = null
-        runCheckoutPaymentElementTest(
+        runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             checkoutInitResponse = checkoutInitResponse(paymentMethods),
@@ -182,10 +182,10 @@ internal class CheckoutPaymentElementSavedSepaTest {
     private fun clickPaymentOptionsPrimaryButton() {
         testRules.compose.waitUntilWithIdle {
             testRules.compose.onAllNodes(
-                hasTestTag(SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
+                hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
-        testRules.compose.onNodeWithTag(SHEET_PRIMARY_BUTTON_TEST_TAG)
+        testRules.compose.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
             .performScrollTo()
             .performClick()
     }

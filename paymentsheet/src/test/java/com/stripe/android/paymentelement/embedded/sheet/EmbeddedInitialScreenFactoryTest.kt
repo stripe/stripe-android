@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
@@ -134,6 +135,16 @@ internal class EmbeddedInitialScreenFactoryTest {
         val viewModelScope = TestScope(UnconfinedTestDispatcher())
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val promotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        val continueCoordinator = FakeSheetActivityContinueCoordinator()
+        val linkAccountHolder = LinkAccountHolder(savedStateHandle)
+        val walletsInteractor = PaymentOptionsWalletsInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            linkAccountHolder = linkAccountHolder,
+            continueCoordinator = continueCoordinator,
+            sheetActivityStateHolder = sheetActivityStateHolder,
+        )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -158,7 +169,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            linkAccountHolder = linkAccountHolder,
         )
         val manageInteractorFactory = FakeInitialScreenManageInteractorFactory()
         val updateInteractorFactory = FakeInitialScreenUpdateInteractorFactory()
@@ -180,7 +191,6 @@ internal class EmbeddedInitialScreenFactoryTest {
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
-        val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
             eventReporter = eventReporter,
@@ -194,8 +204,8 @@ internal class EmbeddedInitialScreenFactoryTest {
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _, _ -> },
-            isLinkEnabled = stateFlowOf(false),
-            isNotPaymentFlow = false,
+            isLinkEnabled = stateFlowOf(paymentMethodMetadata.shouldShowLinkButton),
+            isNotPaymentFlow = true,
             linkAccount = stateFlowOf(null),
         )
         val navigatorEventReporter = FakeEventReporter()
@@ -218,10 +228,12 @@ internal class EmbeddedInitialScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = promotionsHelper,
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = DefaultEmbeddedFormScreenFactory(formFactory),
-            linkAccountHolder = LinkAccountHolder(savedStateHandle),
+            linkAccountHolder = linkAccountHolder,
             addPaymentMethodInteractorFactory = addPaymentMethodInteractorFactory,
             continueCoordinator = continueCoordinator,
+            onClickOverrideDelegate = OnClickDelegateOverrideImpl(),
             savedPaymentMethodMutator = savedPaymentMethodMutator,
+            walletsInteractor = walletsInteractor,
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,

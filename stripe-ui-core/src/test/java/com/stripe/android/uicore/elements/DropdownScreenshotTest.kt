@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -23,7 +24,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
                 ),
                 enabled = true
             )
@@ -35,7 +36,7 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                    CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
                 ),
                 enabled = false
             )
@@ -47,7 +48,10 @@ class DropdownScreenshotTest {
         paparazziRule.snapshot {
             DropDown(
                 controller = DropdownFieldController(
-                    CountryConfig(mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false))
+                    CountryConfig(
+                        mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false),
+                        autofillType = ContentType.AddressCountry,
+                    )
                 ),
                 enabled = true
             )
@@ -61,7 +65,8 @@ class DropdownScreenshotTest {
                 controller = DropdownFieldController(
                     CountryConfig(
                         onlyShowCountryCodes = setOf("US"),
-                        disableDropdownWithSingleElement = true
+                        disableDropdownWithSingleElement = true,
+                        autofillType = ContentType.AddressCountry,
                     )
                 ),
                 enabled = true
@@ -75,7 +80,8 @@ class DropdownScreenshotTest {
             DropDown(
                 controller = DropdownFieldController(
                     CountryConfig(
-                        onlyShowCountryCodes = setOf("US")
+                        onlyShowCountryCodes = setOf("US"),
+                        autofillType = ContentType.AddressCountry,
                     )
                 ),
                 enabled = true

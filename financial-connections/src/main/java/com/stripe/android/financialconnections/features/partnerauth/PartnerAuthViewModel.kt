@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
@@ -454,7 +453,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             } else {
                 AccountPicker(referrer = pane)
             }
-            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            eventTracker.emitEvent(Name.INSTITUTION_AUTHORIZED)
             navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(

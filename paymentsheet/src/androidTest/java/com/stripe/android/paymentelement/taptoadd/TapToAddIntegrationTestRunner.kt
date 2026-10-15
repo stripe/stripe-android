@@ -78,6 +78,7 @@ internal sealed class TapToAddIntegrationTestRunner {
         ) {
             runPaymentSheetTest(
                 networkRule = networkRule,
+                composeTestRule = composeTestRule,
                 apiConfigurationTestType = apiConfigurationTestType,
                 builder = {
                     integrationBuilder.applyToPaymentSheetBuilder(this)

@@ -1,17 +1,11 @@
 package com.stripe.android.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
-@OptIn(
-    CheckoutSessionPreview::class,
-    CollectMissingLinkBillingDetailsPreview::class,
-    LinkDisallowFundingSourceCreationPreview::class,
-)
+@OptIn(CheckoutSessionPreview::class)
 internal class ExpressCheckoutElementTest {
     @Test
     fun `configuration builds default values`() {
@@ -20,8 +14,6 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.display).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Automatic
         )
-        assertThat(state.linkConfiguration.collectMissingBillingDetailsForExistingPaymentMethods).isTrue()
-        assertThat(state.linkConfiguration.disallowFundingSourceCreation).isEmpty()
         assertThat(state.googlePayConfiguration.display).isEqualTo(
             CheckoutGooglePayConfiguration.Display.Automatic
         )
@@ -30,7 +22,6 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
-        assertThat(state.paymentMethodOrder).isEmpty()
         assertThat(state.appearance.buttonLayout.maxColumns).isNull()
         assertThat(state.appearance.buttonLayout.maxRows).isNull()
         assertThat(state.appearance.buttonTheme).isEqualTo(
@@ -44,8 +35,6 @@ internal class ExpressCheckoutElementTest {
             .linkConfiguration(
                 ExpressCheckoutElement.Configuration.LinkConfiguration()
                     .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
-                    .collectMissingBillingDetailsForExistingPaymentMethods(false)
-                    .disallowFundingSourceCreation(setOf("card", "bank_account"))
             )
             .googlePayConfiguration(
                 ExpressCheckoutElement.Configuration.GooglePayConfiguration()
@@ -59,9 +48,6 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.linkConfiguration.display).isEqualTo(
             ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
         )
-        assertThat(state.linkConfiguration.collectMissingBillingDetailsForExistingPaymentMethods).isFalse()
-        assertThat(state.linkConfiguration.disallowFundingSourceCreation)
-            .containsExactly("card", "bank_account")
         assertThat(state.googlePayConfiguration.display).isEqualTo(
             CheckoutGooglePayConfiguration.Display.Never
         )
@@ -70,34 +56,6 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
-    }
-
-    @Test
-    fun `configuration builds payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(
-                listOf(
-                    "link",
-                    "google_pay",
-                )
-            )
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay,
-        ).inOrder()
-    }
-
-    @Test
-    fun `configuration ignores invalid payment methods in payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(listOf("invalid", "link"))
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-        )
     }
 
     @Test
@@ -131,9 +89,27 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
+    fun `button layout rejects maximum columns greater than ten`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxColumns(11)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
     fun `button layout rejects non-positive maximum rows`() {
         val exception = runCatching {
             ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(-1)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `button layout rejects maximum rows greater than ten`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().maxRows(11)
         }.exceptionOrNull()
 
         assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)

@@ -55,6 +55,7 @@ internal class PreparePaymentMethodTest(
         runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             builder = {
                 preparePaymentMethodHandler { paymentMethod, shippingAddress ->
                     completablePaymentMethod.complete(paymentMethod)

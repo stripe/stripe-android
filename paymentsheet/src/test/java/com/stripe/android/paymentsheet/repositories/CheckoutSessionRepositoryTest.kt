@@ -69,6 +69,28 @@ class CheckoutSessionRepositoryTest {
     }
 
     @Test
+    fun `detach sends elements_session_client params`() = runTest {
+        val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
+        networkRule.checkoutUpdate(
+            bodyPart("payment_method_to_detach", "pm_123"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("elements_session_client[locale]", clientParams.locale),
+            bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
+            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.detachPaymentMethod(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            paymentMethodId = "pm_123",
+            clientParams = clientParams,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
     fun `updateCurrency sends currency code and returns response on success`() = runTest {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "eur"),

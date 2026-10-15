@@ -39,6 +39,7 @@ internal interface SavedPaymentMethodRepository {
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : SavedPaymentMethodRepository {
 
@@ -50,6 +51,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             checkoutSessionRepository.detachPaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
+                clientParams = elementsSessionClientParams,
             ).map {
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }

@@ -143,5 +143,8 @@ internal object SamsungPaySdkClassNames {
     const val CUSTOM_SHEET = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet"
     const val SHEET_CONTROL = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.SheetControl"
     const val AMOUNT_BOX_CONTROL = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountBoxControl"
+    const val ADDRESS_CONTROL = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.AddressControl"
+    const val SHEET_ITEM_TYPE = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.SheetItemType"
+    const val SHEET_UPDATED_LISTENER = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.SheetUpdatedListener"
     const val AMOUNT_CONSTANTS = "com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountConstants"
 }

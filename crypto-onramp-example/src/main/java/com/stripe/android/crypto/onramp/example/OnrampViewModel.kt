@@ -40,6 +40,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -83,6 +84,7 @@ internal class OnrampViewModel(
     internal val callbacks = OnrampCallbacks()
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
+        .kycCallback(callback = ::onKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
@@ -103,7 +105,14 @@ internal class OnrampViewModel(
         get() = savedStateHandle[KEY_UI_STATE]
 
     private val _uiState = MutableStateFlow(
-        savedUiState ?: OnrampUiState(kycResidence = KycResidence.UnitedStates)
+        savedUiState ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
+            walletRawPhone = null,
+            kycResidence = KycResidence.UnitedStates,
+        )
     )
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
@@ -297,6 +306,11 @@ internal class OnrampViewModel(
 
         _uiState.value = savedUser?.let {
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
+                walletRawPhone = null,
                 email = it.email,
                 authToken = it.authToken,
                 screen = Screen.SeamlessSignIn,
@@ -305,6 +319,11 @@ internal class OnrampViewModel(
                 kycResidence = KycResidence.UnitedStates,
             )
         } ?: OnrampUiState(
+            walletEmail = null,
+            walletPhone = null,
+            walletCountry = null,
+            walletFullName = null,
+            walletRawPhone = null,
             screen = Screen.LoginSignup,
             googlePayIsReady = googlePayIsReady,
             samsungPayIsReady = samsungPayIsReady,
@@ -387,6 +406,16 @@ internal class OnrampViewModel(
         }
     }
 
+    fun onKycResult(result: OnrampKycResult) {
+        _message.value = when (result) {
+            is OnrampKycResult.NotRequired -> "KYC Not Required"
+            is OnrampKycResult.PendingVerification -> "KYC Pending Verification"
+            is OnrampKycResult.Submitted -> "KYC Submitted"
+            is OnrampKycResult.Cancelled -> "KYC Cancelled"
+            is OnrampKycResult.Failed -> "KYC Failed: ${result.error.message}"
+        }
+    }
+
     fun clearUpdateAddressEvent() {
         _updateAddressEvent.value = false
     }
@@ -397,7 +426,14 @@ internal class OnrampViewModel(
                 _message.value = "Payment selection completed"
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
+                        walletEmail = result.kycInfo?.email,
+                        walletPhone = result.kycInfo?.phone,
+                        walletCountry = result.kycInfo?.address?.country,
+                        walletFullName = listOfNotNull(result.kycInfo?.firstName, result.kycInfo?.lastName)
+                            .filter { it.isNotBlank() }
+                            .joinToString(" ")
+                            .takeIf { it.isNotEmpty() },
+                        walletRawPhone = result.kycInfo?.rawPhone,
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
@@ -421,7 +457,6 @@ internal class OnrampViewModel(
                     _message.value = "Payment selection failed: ${result.error.message}"
                     _uiState.update {
                         it.copy(
-                            screen = Screen.AuthenticatedOperations,
                             loadingMessage = null
                         )
                     }
@@ -1386,6 +1421,11 @@ internal class OnrampViewModel(
 
         _uiState.update { currentState ->
             OnrampUiState(
+                walletEmail = null,
+                walletPhone = null,
+                walletCountry = null,
+                walletFullName = null,
+                walletRawPhone = null,
                 screen = Screen.LoginSignup,
                 googlePayIsReady = currentState.googlePayIsReady,
                 samsungPayIsReady = currentState.samsungPayIsReady,

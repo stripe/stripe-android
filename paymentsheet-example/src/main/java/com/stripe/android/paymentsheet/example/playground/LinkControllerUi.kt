@@ -57,8 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkControllerPreview
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.ui.core.R
 
 @Composable
 internal fun LinkControllerUi(
@@ -147,7 +147,7 @@ internal fun LinkControllerUi(
                     .graphicsLayer {
                         rotationZ = chevronRotation
                     },
-                painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_chevron_down),
+                painter = painterResource(R.drawable.ic_chevron_down),
                 contentDescription = null,
                 tint = color,
             )
@@ -487,7 +487,7 @@ private fun PaymentMethodButton(
                 } else {
                     Icon(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(R.drawable.stripe_ic_paymentsheet_pm_card),
+                        painter = painterResource(R.drawable.ic_card),
                         contentDescription = null,
                         tint = contentColor,
                     )
@@ -508,7 +508,7 @@ private fun PaymentMethodButton(
         }
         Icon(
             modifier = Modifier.size(18.dp),
-            painter = painterResource(com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right),
+            painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
             tint = contentColor.copy(alpha = 0.6f),
         )
@@ -533,7 +533,7 @@ private fun PaymentMethodButtonPreview() {
                     imageLoader = {
                         ContextCompat.getDrawable(
                             context,
-                            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
+                            R.drawable.ic_link_arrow,
                         )!!
                     },
                     label = "Link",

@@ -19,5 +19,7 @@ internal data class VerificationPageStaticContentConsentPage(
     @SerialName("privacy_policy")
     val privacyPolicy: String,
     @SerialName("lines")
-    val lines: List<VerificationPageStaticConsentLineContent>
+    val lines: List<VerificationPageStaticConsentLineContent>,
+    @SerialName("subtitle")
+    val subtitle: String? = null
 ) : Parcelable

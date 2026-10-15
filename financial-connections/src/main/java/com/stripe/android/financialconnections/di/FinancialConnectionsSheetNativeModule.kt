@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.CurrentLinkBrand
@@ -87,6 +88,12 @@ internal interface FinancialConnectionsSheetNativeModule {
     companion object {
         @Provides
         @ActivityRetainedScope
+        fun providesEventContext(
+            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
+        ): FinancialConnectionsEventContext = FinancialConnectionsEventContext(initialSyncResponse?.manifest)
+
+        @Provides
+        @ActivityRetainedScope
         fun provideConsumersApiService(
             apiVersion: ApiVersion,
             stripeNetworkClient: StripeNetworkClient,
@@ -114,14 +121,16 @@ internal interface FinancialConnectionsSheetNativeModule {
             provideApiRequestOptions: ProvideApiRequestOptions,
             locale: Locale?,
             logger: Logger,
-            @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
+            @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?,
+            eventContext: FinancialConnectionsEventContext
         ) = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
             provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
-            initialSync = initialSynchronizeSessionResponse
+            initialSync = initialSynchronizeSessionResponse,
+            eventContext = eventContext
         )
 
         @ActivityRetainedScope

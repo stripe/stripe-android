@@ -57,6 +57,7 @@ internal sealed class NfcScanningIntegrationTestRunner {
         ) {
             runPaymentSheetTest(
                 networkRule = networkRule,
+                composeTestRule = composeTestRule,
                 apiConfigurationTestType = apiConfigurationTestType,
                 builder = {
                     createIntentCallback(NfcScanningIntegrationTestRunner.createIntentCallback)

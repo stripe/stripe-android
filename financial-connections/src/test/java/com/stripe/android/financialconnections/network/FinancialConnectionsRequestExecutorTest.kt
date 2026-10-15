@@ -10,7 +10,10 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FakeFinancialConnectionsAnalyticsEventSender
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventEmitter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import kotlinx.coroutines.test.runTest
@@ -53,6 +56,7 @@ internal class FinancialConnectionsRequestExecutorTest {
         val event = publicEvents.awaitItem()
         assertThat(event.name).isEqualTo(FinancialConnectionsEvent.Name.ERROR)
         assertThat(event.metadata.errorCode).isEqualTo(FinancialConnectionsEvent.ErrorCode.NO_ELIGIBLE_ACCOUNTS)
+        assertThat(analyticsSender.calls.awaitItem().manifest.id).isEqualTo(event.financialConnectionsSessionId)
     }
 
     @Test
@@ -90,9 +94,20 @@ internal class FinancialConnectionsRequestExecutorTest {
     ) = runTest {
         val publicEvents = Turbine<FinancialConnectionsEvent>()
         val networkClient = FakeEventNetworkClient(response)
+        val analyticsSender = FakeFinancialConnectionsAnalyticsEventSender()
+        val eventContext = FinancialConnectionsEventContext(ApiKeyFixtures.sessionManifest())
         val requestExecutor = FinancialConnectionsRequestExecutor(
             stripeNetworkClient = networkClient,
-            eventEmitter = FinancialConnectionsResponseEventEmitter(Json.Default, Logger.noop()),
+            eventEmitter = FinancialConnectionsResponseEventEmitter(
+                json = Json.Default,
+                logger = Logger.noop(),
+                eventEmitter = FinancialConnectionsEventEmitter(
+                    eventContext = eventContext,
+                    analyticsSender = analyticsSender,
+                    logger = Logger.noop(),
+                    workContext = backgroundScope.coroutineContext
+                )
+            ),
             json = Json.Default,
             logger = Logger.noop()
         )
@@ -102,15 +117,17 @@ internal class FinancialConnectionsRequestExecutorTest {
             provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             logger = Logger.noop(),
             locale = Locale.US,
-            initialSync = null
+            initialSync = null,
+            eventContext = eventContext
         )
         FinancialConnections.setEventListener(publicEvents::add)
         try {
-            Scenario(requestExecutor, repository, networkClient, publicEvents).block()
+            Scenario(requestExecutor, repository, networkClient, publicEvents, analyticsSender).block()
         } finally {
             FinancialConnections.clearEventListener()
             networkClient.requests.ensureAllEventsConsumed()
             publicEvents.ensureAllEventsConsumed()
+            analyticsSender.calls.ensureAllEventsConsumed()
         }
     }
 
@@ -118,7 +135,8 @@ internal class FinancialConnectionsRequestExecutorTest {
         val requestExecutor: FinancialConnectionsRequestExecutor,
         val repository: FinancialConnectionsManifestRepository,
         val networkClient: FakeEventNetworkClient,
-        val publicEvents: Turbine<FinancialConnectionsEvent>
+        val publicEvents: Turbine<FinancialConnectionsEvent>,
+        val analyticsSender: FakeFinancialConnectionsAnalyticsEventSender
     )
 }
 

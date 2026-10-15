@@ -9,7 +9,8 @@ class FinancialConnectionsSheetTest {
     private val financialConnectionsSheetLauncher = mock<FinancialConnectionsSheetLauncher>()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
     )
     private val financialConnectionsSheet =
         FinancialConnectionsSheet(financialConnectionsSheetLauncher)
@@ -20,7 +21,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
             )
         )
@@ -38,7 +39,7 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = null,
