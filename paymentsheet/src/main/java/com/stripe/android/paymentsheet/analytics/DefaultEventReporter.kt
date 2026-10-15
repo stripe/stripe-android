@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.defaultAnalyticsParams
 import com.stripe.android.model.CardBrand
@@ -501,7 +502,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams(),
+                    additionalParams = defaultParams(paymentMethodMetadataProvider.get(), event),
                 )
             )
         }
@@ -606,6 +607,37 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    private fun defaultParams(
+        paymentMethodMetadata: PaymentMethodMetadata?,
+        event: AnalyticsEvent,
+    ): Map<String, Any> {
+        return if (paymentMethodMetadata != null) {
+            val checkoutParams = when (event) {
+                is PaymentSheetEvent.LoadStarted,
+                is PaymentSheetEvent.LoadSucceeded,
+                is PaymentSheetEvent.LoadFailed,
+                is PaymentSheetEvent.ElementsSessionLoadFailed,
+                is PaymentSheetEvent.Payment,
+                is PaymentSheetEvent.ExperimentExposure -> emptyMap()
+                else -> {
+                    val integrationMetadata = paymentMethodMetadata.integrationMetadata
+                    if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+                        mapOf(
+                            "product_usage" to "PaymentElement",
+                            "checkout_session_id" to integrationMetadata.id,
+                        )
+                    } else {
+                        emptyMap()
+                    }
+                }
+            }
+            paymentMethodMetadata.analyticsMetadata.paramsMap + checkoutParams +
+                ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
+        } else {
+            emptyMap()
+        }
+    }
+
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
@@ -616,7 +648,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = paymentMethodMetadata.defaultAnalyticsParams() + event.params,
+                    additionalParams = defaultParams(paymentMethodMetadata, event) + event.params,
                     publishableKeyOverride = publishableKeyOverride,
                 )
             )
@@ -627,7 +659,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
-            additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams() + event.params,
+            additionalParams = defaultParams(paymentMethodMetadataProvider.get(), event) + event.params,
         )
 
         CoroutineScope(workContext).launch {

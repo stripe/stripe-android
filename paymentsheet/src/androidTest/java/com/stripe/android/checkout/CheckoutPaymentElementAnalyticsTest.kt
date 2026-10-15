@@ -48,27 +48,31 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Test
-    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementScenario(
+    fun testPaymentElementUiAnalyticsUsesPaymentElementProductUsage() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
                 productUsage = setOf("Checkout"),
+                query("checkout_session_id", null),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_succeeded",
                 productUsage = setOf("Checkout"),
+                query("checkout_session_id", null),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("PaymentElement"),
+                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             )
             controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
         },
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_carousel_payment_method_tapped",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
@@ -76,7 +80,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_form_shown",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
@@ -84,7 +89,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_cardscan_api_check_failed",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
 
         contentPage.clickOnLpm("card")
@@ -92,7 +98,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         networkRule.validateAnalyticsRequest(
             eventName = "mc_dismiss",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         Espresso.pressBack()
         formPage.waitUntilMissing()
@@ -120,7 +127,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("PaymentElement"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
@@ -195,7 +203,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("PaymentElement"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
                 controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
