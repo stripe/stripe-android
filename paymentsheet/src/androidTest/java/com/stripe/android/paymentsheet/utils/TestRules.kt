@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
-import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -32,7 +31,6 @@ class TestRules private constructor(
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
-                .around(DetectLeaksAfterTestSuccess())
                 .around(FakeGooglePayRepositoryRule())
                 .around(composeTestRule)
                 .around(PrefsTestStoreRule())

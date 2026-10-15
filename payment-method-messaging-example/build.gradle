@@ -21,8 +21,6 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.material
-
-    debugImplementation libs.leakCanary
 }
 
 android {

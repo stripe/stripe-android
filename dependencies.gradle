@@ -47,7 +47,6 @@ ext.versions = [
         kotlinSerialization         : '1.9.0',
         lint                        : '32.0.1',
         layoutlib                   : '16.2.2',
-        leakCanary                  : '2.14',
         material                    : '1.13.0',
         mediapipeTasksVision        : '0.10.35',
         mockito                     : '5.21.0',
@@ -178,7 +177,6 @@ ext.libs = [
         ],
         lint                                : "com.android.tools.lint:lint-api:${versions.lint}",
         lintChecks                          : "com.android.tools.lint:lint-checks:${versions.lint}",
-        leakCanary                          : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
         loggingInterceptor                  : "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         material                            : "com.google.android.material:material:${versions.material}",
         mediapipeTasksVision                : "com.google.mediapipe:tasks-vision:${versions.mediapipeTasksVision}",
@@ -242,7 +240,6 @@ ext.testLibs = [
                 reflect    : "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}",
                 test       : "org.jetbrains.kotlin:kotlin-test:${versions.kotlin}",
         ],
-        leakCanaryInstrumentation : "com.squareup.leakcanary:leakcanary-android-instrumentation:${versions.leakCanary}",
         layoutlib            : "com.android.tools.layoutlib:layoutlib:${versions.layoutlib}",
         mockito              : [
                 android: "org.mockito:mockito-android:${versions.mockito}",

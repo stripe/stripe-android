@@ -45,8 +45,6 @@ dependencies {
     implementation libs.fuelCoroutines
     implementation libs.kotlin.serialization
 
-    debugImplementation libs.leakCanary
-
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.androidx.junitKtx
