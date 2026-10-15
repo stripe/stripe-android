@@ -224,7 +224,7 @@ class ExpressCheckoutElement @Inject internal constructor(
             private var buttonLayout: ButtonLayout = ButtonLayout()
             private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
 
-            /** Themes for the Google Pay button. */
+            /** Themes for express buttons. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @CheckoutSessionPreview
             enum class ButtonTheme {
@@ -292,7 +292,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.buttonLayout = buttonLayout
             }
 
-            /** Sets the theme of the Google Pay button. */
+            /** Sets the theme of the express buttons. */
             fun buttonTheme(buttonTheme: ButtonTheme): Appearance = apply {
                 this.buttonTheme = buttonTheme
             }
