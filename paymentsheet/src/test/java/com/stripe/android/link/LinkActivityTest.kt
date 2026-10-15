@@ -196,6 +196,7 @@ internal class LinkActivityTest {
     ): ViewModelProvider.Factory = viewModelFactory {
         initializer {
             LinkActivityViewModel(
+                fraudDetectionDataRepository = mock(),
                 activityRetainedComponent = FakeNativeLinkComponent(
                     linkAccountManager = linkAccountManager,
                     linkLaunchMode = linkLaunchMode,

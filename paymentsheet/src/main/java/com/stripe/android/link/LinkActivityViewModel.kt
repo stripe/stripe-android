@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivity.Companion.getArgs
@@ -64,6 +65,7 @@ import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 @NativeLinkScope
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
+    fraudDetectionDataRepository: FraudDetectionDataRepository,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
@@ -88,6 +90,10 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
 
     init {
+        fraudDetectionDataRepository.refresh(
+            linkConfiguration.apiConfiguration.publishableKey,
+            linkConfiguration.apiConfiguration.stripeAccountId,
+        )
         viewModelScope.launch {
             linkAccountManager.linkAccountInfo.collect { accountUpdate ->
                 val linkBrand = linkConfiguration.effectiveLinkBrand(accountUpdate.account)

@@ -154,11 +154,15 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             mapOf("billing_details" to billingDetails.toApiParams())
         }.orEmpty()
 
-        val fraudDetectionParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false)
+        fraudDetectionDataRepository.refresh(requestOptions.apiKey, requestOptions.stripeAccount)
+        val fraudDetectionParams = fraudDetectionDataRepository.getCached(
+            requestOptions.apiKey, requestOptions.stripeAccount
+        )?.params.orEmpty()
 
         val request = apiRequestFactory.createPost(
             url = paymentMethodsUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
+            options = requestOptions,
             params = linkParams + billingParams + fraudDetectionParams,
         )
 

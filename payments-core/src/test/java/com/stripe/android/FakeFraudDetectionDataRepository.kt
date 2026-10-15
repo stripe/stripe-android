@@ -20,13 +20,13 @@ internal class FakeFraudDetectionDataRepository(
         )
     )
 
-    override fun refresh() {
+    override fun refresh(publishableKey: String, stripeAccountId: String?) {
     }
 
-    override fun getCached() = fraudDetectionData
+    override suspend fun getCached(publishableKey: String, stripeAccountId: String?) = fraudDetectionData
 
-    override suspend fun getLatest() = fraudDetectionData
+    override suspend fun getLatest(publishableKey: String, stripeAccountId: String?) = fraudDetectionData
 
-    override fun save(fraudDetectionData: FraudDetectionData) {
+    override fun save(publishableKey: String, stripeAccountId: String?, fraudDetectionData: FraudDetectionData) {
     }
 }

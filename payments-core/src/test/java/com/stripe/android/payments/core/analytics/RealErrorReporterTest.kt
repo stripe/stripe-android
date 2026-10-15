@@ -34,6 +34,18 @@ class RealErrorReporterTest {
     }
 
     @Test
+    fun `fraud errors use the request key instead of the reporter default`() {
+        val exception = StripeException.create(IllegalStateException("Collection failed"))
+
+        realErrorReporter.reportFraudDetectionError(exception, ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)
+
+        val request = analyticsRequestExecutor.getExecutedRequests().single()
+        assertThat(request.params["publishable_key"]).isEqualTo(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)
+        assertThat(request.params["event"])
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE.eventName)
+    }
+
+    @Test
     fun `RealErrorReporter logs correct info via analyticsRequestExecutor`() {
         val exception = StripeException.create(IllegalArgumentException("this arg isn't legal"))
         val expectedAnalyticsValue = exception.analyticsValue()

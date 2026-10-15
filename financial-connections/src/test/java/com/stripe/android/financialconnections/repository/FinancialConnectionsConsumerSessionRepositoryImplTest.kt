@@ -44,6 +44,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         mock()
     private val apiOptions: ApiRequest.Options = ApiRequest.Options(
         apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccount = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
     )
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
@@ -64,6 +65,13 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         fraudDetectionDataRepository = fraudDetectionDataRepository,
         elementsSessionContext = elementsSessionContext,
     )
+
+    @Test
+    fun `construction with resolved credentials starts fraud collection`() {
+        buildRepository()
+
+        verify(fraudDetectionDataRepository).refresh(apiOptions.apiKey, apiOptions.stripeAccount)
+    }
 
     @Test
     fun testSignUp() = runTest {
@@ -380,7 +388,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             timestamp = 1234567890L,
         )
 
-        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudParams)
+        whenever(fraudDetectionDataRepository.getCached(any(), anyOrNull())).thenReturn(fraudParams)
 
         whenever(
             consumersApiService.sharePaymentDetails(
@@ -408,6 +416,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             billingPhone = null,
         )
 
-        verify(fraudDetectionDataRepository, never()).getLatest()
+        verify(fraudDetectionDataRepository, org.mockito.kotlin.times(2)).refresh(
+            apiOptions.apiKey, apiOptions.stripeAccount
+        )
+        verify(fraudDetectionDataRepository, never()).getLatest(any(), anyOrNull())
     }
 }

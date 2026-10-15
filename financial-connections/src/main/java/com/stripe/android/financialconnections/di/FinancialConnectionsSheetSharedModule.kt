@@ -226,6 +226,7 @@ internal interface FinancialConnectionsSheetSharedModule {
         }
 
         @Provides
+        @ActivityRetainedScope
         internal fun provideFraudDetectionDataRepository(
             application: Application,
         ): FraudDetectionDataRepository {

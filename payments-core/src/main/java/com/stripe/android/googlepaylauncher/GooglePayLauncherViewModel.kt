@@ -300,7 +300,7 @@ internal class GooglePayLauncherViewModel(
                 workContext = workContext,
                 productUsageTokens = productUsageTokens,
                 paymentAnalyticsRequestFactory = analyticsRequestFactory
-            )
+            ).also { it.fireFraudDetectionDataRequest(ApiRequest.Options(publishableKey, stripeAccountId)) }
 
             val errorReporter = ErrorReporter.createFallbackInstance(
                 context = application,

@@ -36,12 +36,14 @@ import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Scope
+import javax.inject.Singleton
 
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
 internal annotation class NativeLinkScope
 
 @NativeLinkScope
+@Singleton
 @Component(
     modules = [
         NativeLinkModule::class,
