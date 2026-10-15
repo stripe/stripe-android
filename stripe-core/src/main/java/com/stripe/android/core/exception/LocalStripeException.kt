@@ -5,7 +5,7 @@ import com.stripe.android.core.StripeError
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LocalStripeException(
-    val displayMessage: String?,
+    displayMessage: String?,
     val analyticsValue: String?,
     val errorCode: String? = null,
     val declineCode: String? = null,
@@ -18,6 +18,11 @@ class LocalStripeException(
         type = type,
     )
 ) {
+    private val localDisplayMessage = displayMessage
+
+    override val displayMessage: String?
+        get() = localDisplayMessage ?: super.displayMessage
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = analyticsValue ?: "unknown"
 }

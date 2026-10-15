@@ -38,7 +38,8 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @VisibleForTesting
-        internal const val MALFORMED_RESPONSE_MESSAGE =
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val MALFORMED_RESPONSE_MESSAGE =
             "An improperly formatted error response was found."
 
         internal const val FIELD_CHARGE = "charge"

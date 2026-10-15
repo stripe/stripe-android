@@ -12,7 +12,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
@@ -30,7 +32,7 @@ import kotlinx.coroutines.launch
 internal class CheckoutControllerExampleViewModel(
     private val repository: CheckoutControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
-    application: Application,
+    private val application: Application,
 ) : ViewModel() {
     val settings = CheckoutPlaygroundSettings.create(application)
 
@@ -158,7 +160,10 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             _operationMessage.value = operation().fold(
                 onSuccess = { successMessage },
-                onFailure = { it.message ?: "Operation failed" },
+                onFailure = { error ->
+                    Log.e(TAG, "Checkout operation failed", error)
+                    customerMessage(error)
+                },
             )
         }
     }
@@ -172,14 +177,19 @@ internal class CheckoutControllerExampleViewModel(
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
             is CheckoutController.Result.Failed -> {
-                result.error.message?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+                customerMessage(result.error)
             }
         }
     }
 
     private fun showError(prefix: String, error: Throwable) {
         Log.e(TAG, prefix, error)
-        _status.value = Status.Error(error.message ?: prefix)
+        _status.value = Status.Error(customerMessage(error))
+    }
+
+    private fun customerMessage(error: Throwable): String {
+        return (error as? StripeException)?.displayMessage
+            ?: application.getString(R.string.stripe_something_went_wrong)
     }
 
     private fun clearMessages() {

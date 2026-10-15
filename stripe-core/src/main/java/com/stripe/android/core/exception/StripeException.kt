@@ -16,6 +16,21 @@ abstract class StripeException(
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
+    private var checkoutDisplayMessage: String? = null
+
+    /**
+     * A message intended for the customer, or `null` when no display message is available.
+     * Checkout failures populate this separately from the diagnostic [message].
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    open val displayMessage: String?
+        get() = checkoutDisplayMessage
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setCheckoutDisplayMessage(displayMessage: String) {
+        checkoutDisplayMessage = displayMessage
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val isClientError = statusCode in 400..499
 

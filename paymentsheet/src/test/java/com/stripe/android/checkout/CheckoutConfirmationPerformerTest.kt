@@ -1,7 +1,9 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -203,6 +205,7 @@ internal class CheckoutConfirmationPerformerTest {
             logger = Logger.noop(),
             resultCallback = {},
             viewModelScope = backgroundScope,
+            errorMapper = CheckoutErrorMapper(ApplicationProvider.getApplicationContext<Context>()),
         )
         val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
