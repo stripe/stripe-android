@@ -15,7 +15,12 @@ internal object InitializationTypeSettingsDefinition :
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = buildList<PlaygroundSettingDefinition.Displayable.Option<InitializationType>> {
-        if (configurationData.integrationType != PlaygroundConfigurationData.IntegrationType.Embedded) {
+        if (
+            configurationData.integrationType !in setOf(
+                PlaygroundConfigurationData.IntegrationType.Embedded,
+                PlaygroundConfigurationData.IntegrationType.ElementsController,
+            )
+        ) {
             add(option("Normal", InitializationType.Normal))
         }
         add(option("Deferred CSC", InitializationType.DeferredClientSideConfirmation))

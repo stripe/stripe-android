@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import dagger.Lazy
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
@@ -32,8 +31,9 @@ import com.stripe.android.elements.ExpressCheckoutElement as ExpressCheckoutElem
 
 /**
  * Owns the intent, elements/session metadata, and confirmation lifecycle shared by its elements.
- * Configure with a PaymentIntent, SetupIntent, or deferred intent before displaying an element.
- * Reconfigure the controller when the intent or configuration changes.
+ * Configure with a deferred intent before displaying an element. Your server creates the
+ * PaymentIntent or SetupIntent during confirmation using [Builder.createIntentCallback].
+ * Reconfigure the controller when the intent configuration changes.
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -90,33 +90,13 @@ class ElementsController @Inject internal constructor(
         savedState.clear()
     }
 
-    /** Loads an existing PaymentIntent and its elements/session metadata. */
-    suspend fun configureWithPaymentIntent(
-        clientSecret: String,
-        configuration: Configuration,
-    ): Result<Unit> = configure(PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret), configuration)
-
-    /** Loads an existing SetupIntent and its elements/session metadata. */
-    suspend fun configureWithSetupIntent(
-        clientSecret: String,
-        configuration: Configuration,
-    ): Result<Unit> = configure(PaymentElementLoader.InitializationMode.SetupIntent(clientSecret), configuration)
-
     /**
      * Loads elements/session metadata before creating an intent.
-     * Supply [Builder.createIntentCallback] to create the intent on your server after the customer
+     * Requires [Builder.createIntentCallback] to create the intent on your server after the customer
      * supplies their payment details. The SDK confirms it and handles required authentication.
      */
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
-        configuration: Configuration,
-    ): Result<Unit> = configure(
-        PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
-        configuration,
-    )
-
-    private suspend fun configure(
-        initializationMode: PaymentElementLoader.InitializationMode,
         configuration: Configuration,
     ): Result<Unit> {
         if (!coroutineScope.isActive) {
@@ -124,7 +104,7 @@ class ElementsController @Inject internal constructor(
         }
         val task = coroutineScope.async {
             operationCoordinator.configure {
-                stateLoader.load(initializationMode, configuration.build(), initializedViaCompose = false)
+                stateLoader.load(intentConfiguration, configuration.build(), initializedViaCompose = false)
             }
         }
         return try {
@@ -139,7 +119,7 @@ class ElementsController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Session internal constructor(
         /**
-         * The intent loaded from elements/session. For deferred configuration, this is a placeholder;
+         * The placeholder intent loaded from elements/session;
          * your server creates the real intent during confirmation using [Builder.createIntentCallback].
          */
         val intent: StripeIntent,
@@ -172,7 +152,7 @@ class ElementsController @Inject internal constructor(
             this.integrationName = integrationName
         }
 
-        /** Creates an intent on your server when using deferred [configure]. */
+        /** Required. Creates an intent on your server after the customer supplies their payment details. */
         fun createIntentCallback(callback: CreateIntentCallback): Builder = apply {
             createIntentCallback = callback
         }

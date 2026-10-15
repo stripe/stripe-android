@@ -18,16 +18,15 @@ internal class ElementsStateLoader @Inject constructor(
     @PaymentElementCallbackIdentifier private val callbackIdentifier: String,
 ) {
     suspend fun load(
-        initializationMode: PaymentElementLoader.InitializationMode,
+        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: ElementsController.Configuration.State,
         initializedViaCompose: Boolean,
     ) {
         stateHolder.state = null
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         initializationMode.validate()
-        if (initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent) {
-            require(PaymentElementCallbackReferences.getExact(callbackIdentifier)?.createIntentCallback != null) {
-                "A createIntentCallback is required for deferred intent configuration."
-            }
+        require(PaymentElementCallbackReferences.getExact(callbackIdentifier)?.createIntentCallback != null) {
+            "A createIntentCallback is required for deferred intent configuration."
         }
         val loaded = loader.load(
             initializationMode = initializationMode,

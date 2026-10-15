@@ -3,12 +3,12 @@
 The APIs are currently restricted to the SDK library group.
 
 `ElementsController` owns the intent configuration, elements/session metadata, payment selection,
-and confirmation lifecycle shared by its elements. It supports PaymentIntents, SetupIntents, and
-deferred intent creation. It currently exposes the display-only `expressCheckoutElement`;
-reconfigure the controller when the intent or configuration changes.
+and confirmation lifecycle shared by its elements. It supports deferred intent creation for
+PaymentIntents and SetupIntents. It currently exposes the display-only `expressCheckoutElement`;
+reconfigure the controller when the intent configuration changes.
 
 The controller's `session` flow publishes the loaded intent metadata, and `isUpdating` tracks
-configuration and confirmation across all elements. In deferred mode, the session initially
+configuration and confirmation across all elements. The session
 contains the placeholder intent returned by elements/session. A single saved state holder,
 loader, and operation coordinator back the controller. Future Payment Element and Shipping
 Address Element adapters can use that same state and lifecycle; those integrations are not
@@ -65,9 +65,7 @@ returned intent and handles required authentication. For deferred setup, use
 `PaymentSheet.IntentConfiguration.Mode.Setup(currency = "usd")` and return a SetupIntent client
 secret instead.
 
-For an intent created ahead of time, call `elementsController.configureWithPaymentIntent(clientSecret, configuration)`
-or `elementsController.configureWithSetupIntent(clientSecret, configuration)`. These flows do not require a
-`createIntentCallback`. Always supply a Google Pay currency code when using a SetupIntent.
+`createIntentCallback` is required. Always supply a Google Pay currency code when using setup mode.
 
 ## Activity registration and ownership
 
@@ -87,6 +85,9 @@ class CheckoutViewModel(
 ) : AndroidViewModel(application) {
     val elementsController = ElementsController.Builder(application, savedStateHandle)
         .resultCallback { result -> /* Handle the result. */ }
+        .createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+            createIntentOnYourServer(paymentMethod.id, shouldSavePaymentMethod)
+        }
         .build()
 
     override fun onCleared() {
@@ -110,6 +111,7 @@ a shipping address change must resolve or reject. Kotlin uses a suspend callback
 ```kotlin
 ElementsController.Builder(application, savedStateHandle)
     .resultCallback(resultCallback)
+    .createIntentCallback(createIntentCallback)
     .shippingAddressChangeCallback { event ->
         // The wallet may redact the address; country, state, city, and postalCode are available.
         val order = updateOrderOnYourServer(event.address)
@@ -134,10 +136,9 @@ Google Pay configuration for setup) and cannot change in a shipping response. Th
 called for the wallet's initial address as well as subsequent address changes. Google Pay translates
 these generic events and results internally. Shipping rate selection is not exposed yet.
 
-Update your order on your server before resolving. For an existing intent, update that intent on
-your server as needed. For a deferred intent, create it from the latest order when `createIntentCallback`
-runs. Resolving changes the wallet display; the SDK does not calculate shipping or tax or update
-intents on your behalf.
+Update your order on your server before resolving, then create the intent from the latest order
+when `createIntentCallback` runs. Resolving changes the wallet display; the SDK does not calculate
+shipping or tax or update intents on your behalf.
 
 ## Wallet configuration
 
@@ -152,8 +153,8 @@ In the PaymentSheet example app, choose **Elements Controller** under **Integrat
 configure the settings, and tap **Reload**. The playground configures an `ElementsController` and
 displays its Express Checkout Element below Reload.
 
-- Use **Initialization → Normal** to configure an existing intent, or **Deferred CSC** to create
-  the intent in the merchant callback. The existing playground backend supplies the intent and keys.
+- **Initialization → Deferred CSC** is the only supported flow. The merchant callback requests
+  intent creation from the existing playground backend.
 - Use **Checkout Mode → Pay**, **P & S**, or **Setup** to exercise payment, payment with future use,
   or setup. Currency, merchant country, Google Pay, Link, and default billing settings are shared
   with the existing playground.
@@ -164,5 +165,5 @@ displays its Express Checkout Element below Reload.
   disables shipping collection. The last address country and callback outcome appear below the buttons.
 
 The shipping callback exercises merchant-controlled acceptance, rejection, and line-item updates.
-It preserves the existing intent amount and currency. Shipping collection hides Link, so use **Off**
+It preserves the configured amount and currency. Shipping collection hides Link, so use **Off**
 when testing both wallets together.

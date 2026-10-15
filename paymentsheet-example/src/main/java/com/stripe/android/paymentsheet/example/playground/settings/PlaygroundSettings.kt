@@ -36,7 +36,7 @@ internal class PlaygroundSettings private constructor(
     initialConfigurationData: PlaygroundConfigurationData,
     initialSettings: Map<PlaygroundSettingDefinition<*>, Any?>
 ) {
-    private val _settings = MutableStateFlow(initialSettings)
+    private val _settings = MutableStateFlow(initialSettings.withSupportedInitializationType(initialConfigurationData))
     val settings: StateFlow<Map<PlaygroundSettingDefinition<*>, Any?>> = _settings.asStateFlow()
 
     private val _configurationData = MutableStateFlow(initialConfigurationData)
@@ -119,8 +119,10 @@ internal class PlaygroundSettings private constructor(
     @Stable
     class Snapshot private constructor(
         val configurationData: PlaygroundConfigurationData,
-        private val settings: Map<PlaygroundSettingDefinition<*>, Any?>
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>
     ) : Parcelable {
+        private val settings = settings.withSupportedInitializationType(configurationData)
+
         constructor(parcel: Parcel) : this(
             configurationData = parcel.readParcelable<PlaygroundConfigurationData>(
                 PlaygroundConfigurationData::class.java.classLoader
@@ -443,6 +445,18 @@ internal class PlaygroundSettings private constructor(
     companion object {
         private const val sharedPreferencesName = "PlaygroundSettings"
         private const val sharedPreferencesKey = "json"
+
+        private fun Map<PlaygroundSettingDefinition<*>, Any?>.withSupportedInitializationType(
+            configurationData: PlaygroundConfigurationData,
+        ): Map<PlaygroundSettingDefinition<*>, Any?> {
+            return if (
+                configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.ElementsController
+            ) {
+                this + (InitializationTypeSettingsDefinition to InitializationType.DeferredClientSideConfirmation)
+            } else {
+                this
+            }
+        }
 
         fun createFromDefaults(): PlaygroundSettings {
             val defaultConfigurationData = PlaygroundConfigurationData()

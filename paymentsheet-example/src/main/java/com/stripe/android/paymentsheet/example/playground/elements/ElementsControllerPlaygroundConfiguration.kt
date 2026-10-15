@@ -6,14 +6,12 @@ import com.stripe.android.elements.ElementsController.ExpressCheckoutElement.Shi
 import com.stripe.android.elements.ElementsController.ExpressCheckoutElement.ShippingChangeResult
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.ElementsShipping
 import com.stripe.android.paymentsheet.example.playground.settings.ElementsShippingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.ElementsWalletOrder
 import com.stripe.android.paymentsheet.example.playground.settings.ElementsWalletOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.createBillingDetails
@@ -22,16 +20,7 @@ internal suspend fun configureElementsController(
     elementsController: ElementsController,
     state: PlaygroundState.Payment,
 ): Result<Unit> {
-    val configuration = state.elementsConfiguration()
-    return if (state.initializationType == InitializationType.Normal) {
-        if (state.checkoutMode == CheckoutMode.SETUP) {
-            elementsController.configureWithSetupIntent(state.clientSecret, configuration)
-        } else {
-            elementsController.configureWithPaymentIntent(state.clientSecret, configuration)
-        }
-    } else {
-        elementsController.configure(state.intentConfiguration(), configuration)
-    }
+    return elementsController.configure(state.intentConfiguration(), state.elementsConfiguration())
 }
 
 private fun PlaygroundState.Payment.elementsConfiguration(): ElementsController.Configuration {
@@ -82,7 +71,7 @@ internal fun elementsShippingResponse(
     return if (state.snapshot[ElementsShippingSettingsDefinition] == ElementsShipping.Reject) {
         ShippingChangeResult.Reject("This shipping address was rejected by the playground callback.")
     } else {
-        // Keep the existing intent amount. A real integration updates its order and intent on its server.
+        // Keep the configured amount. A real integration updates its server order before creating an intent.
         ShippingChangeResult.Resolve(
             amount = null,
             lineItems = listOf(LineItem("Order shipping to ${event.address.country}", state.amount ?: 0L)),
