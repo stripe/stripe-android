@@ -183,6 +183,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 
         put("appearance", Nested(appearance.analyticsMap()))
         put("card_funding_acceptance", SimpleBoolean(allowedCardFundingTypes.toAnalyticsValue()))
+        put("api_configuration", SimpleBoolean(apiConfiguration != null))
     }
 
     private fun PaymentSheet.BillingDetailsCollectionConfiguration.analyticsMap() =

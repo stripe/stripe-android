@@ -78,7 +78,6 @@ internal class EmbeddedActivityModuleTest {
 
             assertThat(selector.select(selection).isSuccess).isTrue()
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
-            assertThat(selector.checkoutSessionResponse).isNull()
         }
     }
 

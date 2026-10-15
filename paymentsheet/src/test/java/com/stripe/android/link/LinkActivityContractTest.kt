@@ -28,7 +28,7 @@ class LinkActivityContractTest {
             account = null,
             lastUpdateReason = null
         ),
-        launchMode = LinkLaunchMode.Full,
+        launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         statusBarColor = null,
     )
 

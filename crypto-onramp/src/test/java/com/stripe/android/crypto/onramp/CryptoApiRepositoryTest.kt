@@ -194,7 +194,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun `retrieve additional KYC requirements uses dedicated endpoint`() = runTest {
+    fun `retrieve KYC requirements uses dedicated endpoint`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             """
@@ -215,6 +215,7 @@ class CryptoApiRepositoryTest {
                                 "accepted_formats": ["pdf", "jpeg", "png"],
                                 "min_document_types": 1,
                                 "max_document_types": 2,
+                                "max_files_per_document_type": 10,
                                 "max_file_size_bytes": 5000000,
                                 "file_requirements": "PDF, JPEG, or PNG, up to 5 MB per file.",
                                 "instructions": []
@@ -227,7 +228,7 @@ class CryptoApiRepositoryTest {
         )
         whenever(stripeNetworkClient.executeRequest(any<StripeRequest>())).thenReturn(stripeResponse)
 
-        val result = cryptoApiRepository.retrieveAdditionalKycRequirements(
+        val result = cryptoApiRepository.retrieveKycRequirements(
             consumerSessionClientSecret = "test-secret",
         )
 

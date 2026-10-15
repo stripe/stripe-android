@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -141,6 +142,15 @@ internal class InputAddressViewModel @Inject constructor(
     init {
 
         viewModelScope.launch {
+            resultStateHolder.state.first { it == State.Canceling }
+            eventReporter.onCanceled(
+                addressDetails = getCurrentAddress(),
+                autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
+            )
+            resultStateHolder.onCancelCompleted()
+        }
+
+        viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
                 AddressElementNavigator.AutocompleteEvent.KEY
             )?.collect { event ->
@@ -244,6 +254,11 @@ internal class InputAddressViewModel @Inject constructor(
             phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
             isCheckboxSelected = checkboxChecked
         )
+        val selectedAddress = autocompleteSelectedAddressDetails()
+        eventReporter.onSaveStarted(
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = selectedAddress,
+        )
         viewModelScope.launch {
             primaryButtonAction(addressDetails).fold(
                 onSuccess = { result ->
@@ -253,6 +268,11 @@ internal class InputAddressViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
+                    eventReporter.onSaveFailed(
+                        addressDetails = addressDetails,
+                        autocompleteAddressDetails = selectedAddress,
+                        error = error,
+                    )
                     _saveError.value = error.stripeErrorMessage()
                     resultStateHolder.onSaveFailed()
                 },
@@ -264,25 +284,25 @@ internal class InputAddressViewModel @Inject constructor(
         addressDetails: AddressDetails,
         result: AddressElementActivityContract.Result,
     ) {
-        val autocompleteFilledAddress = inlineAutocompleteController?.autocompleteFilledAddress
-        val autocompleteAddressDetails = autocompleteFilledAddress?.let { address ->
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    city = address.city,
-                    country = address.country,
-                    line1 = address.line1,
-                    line2 = address.line2,
-                    postalCode = address.postalCode,
-                    state = address.state,
-                )
-            )
-        }
         eventReporter.onSaveCompleted(
-            country = addressDetails.address?.country,
-            autocompleteResultSelected = autocompleteFilledAddress != null,
-            editDistance = autocompleteAddressDetails?.let { addressDetails.editDistance(it) },
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
         )
         resultStateHolder.onSaveCompleted(result)
+    }
+
+    private fun autocompleteSelectedAddressDetails(): AddressDetails? {
+        val address = inlineAutocompleteController?.autocompleteFilledAddress ?: return null
+        return AddressDetails(
+            address = PaymentSheet.Address(
+                city = address.city,
+                country = address.country,
+                line1 = address.line1,
+                line2 = address.line2,
+                postalCode = address.postalCode,
+                state = address.state,
+            )
+        )
     }
 
     fun clickBillingSameAsShipping(newValue: Boolean) {

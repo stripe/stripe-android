@@ -34,6 +34,7 @@ internal class CheckoutSessionLoaderTest {
         response: CheckoutSessionResponse,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
         )
@@ -64,6 +65,7 @@ internal class CheckoutSessionLoaderTest {
                 merchantId = "acct_123",
             ),
             customer = CheckoutSessionResponse.Customer(
+                email = null,
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = true,

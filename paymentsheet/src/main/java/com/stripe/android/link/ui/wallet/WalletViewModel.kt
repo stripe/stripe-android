@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -471,7 +472,10 @@ internal class WalletViewModel(
                 .mapCatching { session ->
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
-                        publishableKey = linkAccount.consumerPublishableKey!!,
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = linkAccount.consumerPublishableKey!!,
+                            stripeAccountId = null,
+                        ),
                         preCollectedConsent = null,
                     )
                 }
@@ -654,11 +658,8 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
 
 private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
     return when (linkLaunchMode) {
-        is LinkLaunchMode.Full,
-        is LinkLaunchMode.Confirmation -> when (this) {
-            is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
-            is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
-        }
+        is LinkLaunchMode.Full -> payAnotherWayLabel().takeIf { linkLaunchMode.showSecondaryButton }
+        is LinkLaunchMode.Confirmation -> payAnotherWayLabel()
         is LinkLaunchMode.PaymentMethodSelection -> {
             if (linkLaunchMode.canContinueWithoutLink) {
                 R.string.stripe_wallet_continue_another_way.resolvableString
@@ -669,5 +670,12 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
         is LinkLaunchMode.Authentication,
         is LinkLaunchMode.Authorization ->
             R.string.stripe_wallet_continue_another_way.resolvableString
+    }
+}
+
+private fun StripeIntent.payAnotherWayLabel(): ResolvableString {
+    return when (this) {
+        is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
+        is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
     }
 }

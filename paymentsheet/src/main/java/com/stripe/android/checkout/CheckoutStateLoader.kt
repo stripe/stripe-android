@@ -100,7 +100,11 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val loadResults = loadPaymentElements(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(response.id, response),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = response.id,
+                checkoutSessionResponse = response,
+                collectedEmail = collectedDetails.email,
+            ),
             embeddedConfiguration = embeddedConfig,
             paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,

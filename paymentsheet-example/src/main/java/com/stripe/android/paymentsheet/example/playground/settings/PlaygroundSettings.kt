@@ -10,11 +10,11 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkControllerPreview
-import com.stripe.android.paymentelement.ApiConfigurationPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings

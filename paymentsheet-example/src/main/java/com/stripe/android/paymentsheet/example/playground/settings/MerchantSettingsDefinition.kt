@@ -41,7 +41,7 @@ internal object MerchantSettingsDefinition :
         return CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
             country.code.value in supportedCountries
         }.map { country ->
-            option(country.name, Merchant.entries.first { it.countryCode == country.code.value })
+            option(country.name, convertToValue(country.code.value))
         }.toList() + listOf(
             option("Naira Wallet", Merchant.NG_WALLET),
             option(Merchant.US_TAX.name, convertToValue(Merchant.US_TAX.value)),
@@ -126,7 +126,7 @@ enum class Merchant(override val value: String) : ValueEnum {
     ES("ES"),
     IT("IT"),
     TH("TH"),
-    NG("ng"),
+    NG("NG"),
     NG_WALLET("ng_wallet"),
     StripeShop("stripe_shop_test"),
     US_TAX("us_tax"),

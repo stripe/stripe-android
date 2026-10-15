@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Se déconnecter de %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Pour finaliser l’achat, confirmez le paiement dans votre application MB WAY dans un délai de %s.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Autres moyens de paiement</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

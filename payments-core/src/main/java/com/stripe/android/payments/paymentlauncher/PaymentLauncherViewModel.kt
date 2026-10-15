@@ -11,7 +11,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
@@ -265,7 +264,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private fun logHandleNextActionStarted(clientSecret: String): Map<String, String> {
         val analyticsParams = mapOf(
             "intent_id" to clientSecret.toStripeId(),
-        )
+        ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
@@ -420,10 +419,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .create(
                     context = application,
                     enableLogging = arg.enableLogging,
-                    apiConfiguration = ApiConfiguration.State(
-                        publishableKey = arg.publishableKey,
-                        stripeAccountId = arg.stripeAccountId,
-                    ),
+                    apiConfiguration = arg.apiConfiguration,
                     productUsage = arg.productUsage,
                     includePaymentSheetNextHandlers = arg.includePaymentSheetNextHandlers,
                 ).viewModelSubcomponentFactory
@@ -484,6 +480,10 @@ private fun StripeIntentResult<StripeIntent>.type(): String? {
     }
 }
 
-private fun String.toStripeId(): String {
-    return substringBefore("_secret_")
+private fun String.toStripeId(): String? {
+    return when {
+        PaymentIntent.ClientSecret.isMatch(this) -> PaymentIntent.ClientSecret(this).paymentIntentId
+        SetupIntent.ClientSecret.isMatch(this) -> SetupIntent.ClientSecret(this).setupIntentId
+        else -> null
+    }
 }

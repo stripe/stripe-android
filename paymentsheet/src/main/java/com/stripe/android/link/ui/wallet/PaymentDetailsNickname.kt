@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
@@ -9,11 +10,26 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails.BankAccount
 import com.stripe.android.model.LinkPaymentDetails.Card
 import com.stripe.android.model.LinkPaymentDetails.Generic
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentMethod.Card.paymentOptionLabel(): ResolvableString? {
+    val last4 = last4 ?: return null
+    return makeCardPaymentOptionLabel(
+        nickname = null,
+        funding = funding.orEmpty().uppercase(),
+        brand = brand,
+        last4 = last4,
+    )
+}
+
 internal val LinkPaymentDetails.paymentOptionLabel: ResolvableString
     get() {
+        if (this is Card) {
+            return makeCardPaymentOptionLabel(nickname, funding, brand, last4)
+        }
         val components = listOfNotNull(label, sublabel)
         return components.joinToString(separator = " ")
     }
@@ -46,7 +62,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
     get() {
         val components = when (this) {
             is ConsumerPaymentDetails.Card -> {
-                listOf(makeCardDisplayName(nickname, funding.code, brand), maskedLast4(last4))
+                return makeCardPaymentOptionLabel(nickname, funding.code, brand, last4)
             }
             is ConsumerPaymentDetails.BankAccount -> {
                 listOf(makeBankAccountDisplayName(nickname, bankAccountName), maskedLast4(last4))
@@ -69,6 +85,15 @@ internal fun makeFallbackCardName(funding: String, brand: String): ResolvableStr
         "CHARGE", "FUNDING_INVALID" -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
         else -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
     }
+}
+
+private fun makeCardPaymentOptionLabel(
+    nickname: String?,
+    funding: String,
+    brand: CardBrand,
+    last4: String,
+): ResolvableString {
+    return listOf(makeCardDisplayName(nickname, funding, brand), maskedLast4(last4)).joinToString(separator = " ")
 }
 
 private fun makeCardDisplayName(nickname: String?, funding: String, brand: CardBrand): ResolvableString {

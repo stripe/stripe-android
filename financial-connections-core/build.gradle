@@ -20,6 +20,7 @@ dependencies {
 android {
     kotlin {
         compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
             freeCompilerArgs.addAll([
                     "-opt-in=kotlin.RequiresOptIn",
                     "-Xconsistent-data-class-copy-visibility",

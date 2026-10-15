@@ -9,8 +9,9 @@ import com.stripe.android.core.R as CoreR
 class AdministrativeAreaConfig(
     country: Country
 ) : DropdownConfig {
-    private val shortAdministrativeAreaNames = country.administrativeAreas.map { it.first }
-    private val fullAdministrativeAreaNames = country.administrativeAreas.map { it.second }
+    private val administrativeAreas = country.administrativeAreas
+    private val shortAdministrativeAreaNames = administrativeAreas.map { it.first }
+    private val fullAdministrativeAreaNames = administrativeAreas.map { it.second }
 
     override val mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false)
     override val debugLabel = "administrativeArea"
@@ -25,11 +26,9 @@ class AdministrativeAreaConfig(
     override fun getSelectedItemLabel(index: Int) = fullAdministrativeAreaNames[index]
 
     override fun convertFromRaw(rawValue: String): String {
-        return if (shortAdministrativeAreaNames.contains(rawValue)) {
-            fullAdministrativeAreaNames[shortAdministrativeAreaNames.indexOf(rawValue)]
-        } else {
-            fullAdministrativeAreaNames[0]
-        }
+        return administrativeAreas.firstOrNull { (code, name) ->
+            code.equals(rawValue, ignoreCase = true) || name.equals(rawValue, ignoreCase = true)
+        }?.second ?: fullAdministrativeAreaNames[0]
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

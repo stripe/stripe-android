@@ -635,9 +635,6 @@ public abstract interface class com/stripe/android/paymentelement/AnalyticEventC
 	public abstract fun onEvent (Lcom/stripe/android/paymentelement/AnalyticEvent;)V
 }
 
-public abstract interface annotation class com/stripe/android/paymentelement/ApiConfigurationPreview : java/lang/annotation/Annotation {
-}
-
 public abstract interface annotation class com/stripe/android/paymentelement/AppearanceAPIAdditionsPreview : java/lang/annotation/Annotation {
 }
 

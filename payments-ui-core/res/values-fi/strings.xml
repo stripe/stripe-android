@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Puhelin</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">Vahvistamalla maksusi NICEPAYn avulla annat taholle %s luvan veloittaa tältä maksutavalta tulevia maksuja heidän ehtojensa mukaisesti.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Laskulla maksaminen yritysasiakkaille.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Kortissa oleva nimi</string>
   <!-- Label for the Naver Pay funding source selector -->

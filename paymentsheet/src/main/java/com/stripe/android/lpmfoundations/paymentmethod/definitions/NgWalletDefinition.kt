@@ -39,13 +39,11 @@ private object NgWalletUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (metadata.mandateAllowed(PaymentMethod.Type.NgWallet)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_ng_wallet_mor_notice,
-                    args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
-                )
+        builder.footer(
+            MandateTextElement(
+                stringResId = R.string.stripe_ng_wallet_mor_notice,
+                args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
             )
-        }
+        )
     }
 }

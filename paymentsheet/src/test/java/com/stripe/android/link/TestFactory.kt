@@ -351,7 +351,7 @@ internal object TestFactory {
         linkExpressMode = LinkExpressMode.DISABLED,
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-        launchMode = LinkLaunchMode.Full,
+        launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         statusBarColor = null,
     )
 

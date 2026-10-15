@@ -58,6 +58,10 @@ internal interface EmbeddedSheetPresentationFactory {
 }
 
 internal fun EmbeddedSheetActivity.finishWithResult(result: EmbeddedActivityResult) {
+    // Bottom-sheet dismissal can arrive after a selection has already finished the Activity.
+    if (isFinishing) {
+        return
+    }
     setResult(
         Activity.RESULT_OK,
         EmbeddedActivityResult.toIntent(intent, result),
