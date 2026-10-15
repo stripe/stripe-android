@@ -274,7 +274,7 @@ internal sealed class OnrampAnalyticsEvent(
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
             RetrieveKycRequirements("retrieve_additional_kyc_requirements"),
-            FulfillKycRequirements("fulfill_kyc_requirement"),
+            FulfillKycRequirements("fulfill_kyc_requirements"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
             PresentUserAttestation("present_user_attestation"),
