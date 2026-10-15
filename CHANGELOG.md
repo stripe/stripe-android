@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### Crypto Onramp
+* [Changed] Google Pay and Samsung Pay card sublabels now include the funding type (Credit, Debit, or Prepaid), falling back to Card when unavailable, matching Link's formatting.
+
 ### Payments
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
