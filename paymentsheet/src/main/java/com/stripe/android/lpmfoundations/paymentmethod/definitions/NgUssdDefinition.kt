@@ -7,10 +7,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.uicore.elements.FormFieldId
 
 internal object NgUssdDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.NgUssd
@@ -41,32 +39,11 @@ private object NgUssdUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val billingDetails = arguments.billingDetailsCollectionConfiguration
-        val collectsFullAddress = billingDetails.address ==
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-        val collectsAutomaticTaxAddress = billingDetails.address ==
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic &&
-            arguments.requiresBillingAddressForAutomaticTax
-
-        if (collectsFullAddress || collectsAutomaticTaxAddress) {
-            val allowedCountries = billingDetails.allowedBillingCountries
-            // Match iOS's USSD default without restricting the merchant's allowed billing countries.
-            val country = arguments.initialValues[FormFieldId.Country]
-                ?: "NG".takeIf { allowedCountries.isEmpty() || it in allowedCountries }
-
-            builder.requireCountry(
-                allowedCountryCodes = allowedCountries,
-                initialValue = country,
+        builder.footer(
+            MandateTextElement(
+                stringResId = R.string.stripe_ng_payment_mor_notice,
+                args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
             )
-        }
-
-        if (metadata.mandateAllowed(PaymentMethod.Type.NgUssd)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_ng_payment_mor_notice,
-                    args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
-                )
-            )
-        }
+        )
     }
 }
