@@ -29,6 +29,7 @@ internal data class CheckoutControllerState(
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
     val linkEagerPresentationSuppressed: Boolean,
+    val mandateState: CheckoutMandateState,
 ) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
@@ -42,6 +43,7 @@ internal data class CheckoutControllerState(
             paymentOption = paymentOptionFactory.create(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
+                mandateState = mandateState,
             ),
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
@@ -53,14 +55,13 @@ internal data class CheckoutControllerState(
 }
 
 /**
- * Acknowledges the passed selection's SEPA mandate, stashes new selections, and returns the saved
- * payment method selection state to [SavedPaymentMethodSelectionState.Idle] when the selection changes.
+ * Stashes new selections and returns the saved payment method selection state to
+ * [SavedPaymentMethodSelectionState.Idle] when the selection changes.
  */
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutControllerState.commitSelection(
     selection: PaymentSelection?,
 ): CheckoutControllerState {
-    selection?.hasAcknowledgedSepaMandate = true
     val updatedPreviousNewSelections = Bundle(previousNewSelections).apply {
         stashNewSelection(selection)
     }

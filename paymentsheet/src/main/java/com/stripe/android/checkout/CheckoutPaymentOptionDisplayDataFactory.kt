@@ -27,6 +27,7 @@ internal fun interface CheckoutPaymentOptionDisplayDataFactory {
     fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        mandateState: CheckoutMandateState,
     ): PaymentOptionDisplayData?
 }
 
@@ -40,6 +41,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
     override fun create(
         selection: PaymentSelection?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        mandateState: CheckoutMandateState,
     ): PaymentOptionDisplayData? {
         if (selection == null) {
             return null
@@ -58,6 +60,7 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
             is PaymentSelection.GooglePay,
             is PaymentSelection.Link -> null
         }
+        val mandateText = mandate?.let { AnnotatedString(it.resolve(context)) }
 
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
@@ -87,7 +90,12 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
             sublabel = labels.sublabel,
             billingDetails = selection.billingDetails?.toCheckoutBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
-            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
+            mandateTextProvider = {
+                if (mandateText != null && selection is PaymentSelection.Saved) {
+                    mandateState.recordMandateTextAccess(selection.paymentMethod)
+                }
+                mandateText
+            },
         )
     }
 }

@@ -9,10 +9,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -33,6 +35,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
+    private val stateHolder: CheckoutControllerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
 
@@ -43,6 +46,11 @@ class PaymentElement @Inject internal constructor(
      */
     @Composable
     fun Content() {
+        val state by stateHolder.stateFlow.collectAsState()
+        val mandateState = state?.mandateState
+        SideEffect {
+            mandateState?.recordContentAccess()
+        }
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
     }
