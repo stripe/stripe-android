@@ -271,6 +271,7 @@ internal class IntentConfirmationFlowTest {
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
+            checkoutSessionFinalizer = createTestCheckoutSessionFinalizer(),
             intentConfirmationInterceptorFactory =
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(

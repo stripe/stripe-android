@@ -26,11 +26,13 @@ internal fun EventReporter.reportPaymentResult(
 ) {
     paymentSelection?.let { selection ->
         when (result) {
-            is ConfirmationHandler.Result.Succeeded -> onPaymentSuccess(
-                paymentSelection = selection,
-                deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
-                intentId = result.intent.id,
-            )
+            is ConfirmationHandler.Result.Succeeded -> result.intent?.let { intent ->
+                onPaymentSuccess(
+                    paymentSelection = selection,
+                    deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
+                    intentId = intent.id,
+                )
+            }
             is ConfirmationHandler.Result.Failed -> {
                 result.toConfirmationError()?.let { confirmationError ->
                     onPaymentFailure(selection, confirmationError)

@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -24,14 +25,14 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 ) {
     fun confirm() {
         val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
+        val paymentSelection = state.paymentSelection
         val arguments = operationCoordinator.tryBeginConfirmation {
           confirmationArgs(
               state = state,
               paymentSelection = paymentSelection,
           )
         } ?: return
-        analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
+        paymentSelection?.let(analyticsPerformer::onPaymentElementConfirmationStarted)
         viewModelScope.launch {
             try {
                 confirmationHandler.start(arguments)
@@ -46,21 +47,25 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
         state: CheckoutControllerState,
-        paymentSelection: PaymentSelection,
+        paymentSelection: PaymentSelection?,
     ): ConfirmationHandler.Args? {
         val configuration = commonConfigurationFactory.createForPaymentElement(
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
         )
-        val confirmationOption = paymentSelection.toConfirmationOption(
-            configuration = configuration,
-            linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-        )?.withSepaMandateAcknowledgement(
-            hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
-        ) ?: return null
+        val confirmationOption = if (paymentSelection == null) {
+            CheckoutSessionConfirmationOption.WithoutPaymentMethod(state.collectedDetails.email)
+        } else {
+            paymentSelection.toConfirmationOption(
+                configuration = configuration,
+                linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+            )?.withSepaMandateAcknowledgement(
+                hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
+                    !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+            ) ?: return null
+        }
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,

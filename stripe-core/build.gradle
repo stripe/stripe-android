@@ -53,6 +53,8 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+    testImplementation testLibs.testParameterInjector
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

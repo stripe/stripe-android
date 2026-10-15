@@ -43,9 +43,11 @@ internal class IntentConfirmationModule {
     fun providesIntentConfirmationDefinition(
         interceptorFactory: IntentConfirmationInterceptor.Factory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
+        checkoutSessionFinalizer: CheckoutSessionConfirmationFinalizer,
     ): ConfirmationDefinition<*, *, *, *> {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = interceptorFactory,
+            checkoutSessionFinalizer = checkoutSessionFinalizer,
             paymentLauncherFactory = { hostActivityLauncher, statusBarColor, apiConfiguration ->
                 stripePaymentLauncherAssistedFactory.create(
                     apiConfigurationProvider = { apiConfiguration },

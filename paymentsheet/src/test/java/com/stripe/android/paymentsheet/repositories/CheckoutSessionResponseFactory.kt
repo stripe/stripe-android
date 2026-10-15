@@ -33,6 +33,8 @@ internal object CheckoutSessionResponseFactory {
         requiresBillingAddress: Boolean = false,
         merchantCountry: String? = "US",
         businessName: String? = "Example, Inc.",
+        submissionAttempt: CheckoutSessionResponse.SubmissionAttempt? = null,
+        routeToOrchestrationInterface: Boolean? = null,
     ) = CheckoutSessionResponse(
         id = id,
         currency = currency,
@@ -56,6 +58,8 @@ internal object CheckoutSessionResponseFactory {
         requiresBillingAddress = requiresBillingAddress,
         merchantCountry = merchantCountry,
         businessName = businessName,
+        submissionAttempt = submissionAttempt,
+        routeToOrchestrationInterface = routeToOrchestrationInterface,
     )
 
     fun checkoutItem(
