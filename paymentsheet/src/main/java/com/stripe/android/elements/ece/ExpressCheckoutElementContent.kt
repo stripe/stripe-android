@@ -179,7 +179,7 @@ private fun ExpressButtonContent(
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
                 enabled = enabled,
-                theme = button.buttonTheme.toLinkButtonTheme(),
+                theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                 linkBrand = button.linkBrand,
                 containerWidth = buttonWidth,
                 modifier = Modifier.fillMaxSize(),
@@ -191,19 +191,6 @@ private fun ExpressButtonContent(
                     )
                 },
             )
-        }
-    }
-}
-
-@Composable
-private fun ButtonTheme.toLinkButtonTheme(): PaymentSheet.ButtonThemes.LinkButtonTheme {
-    return when (this) {
-        ButtonTheme.Light -> PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-        ButtonTheme.Dark -> PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
-        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
-            PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-        } else {
-            PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
         }
     }
 }
