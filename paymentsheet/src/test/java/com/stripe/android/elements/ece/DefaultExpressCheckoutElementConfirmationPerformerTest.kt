@@ -12,12 +12,14 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
+import com.stripe.android.checkout.analytics.CheckoutEventReporterTestFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -27,10 +29,10 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -267,11 +269,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             resultCallback = results::add,
             viewModelScope = backgroundScope,
         )
-        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            eventReporter = paymentSheetEventReporter,
             savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+            linkAccountHolder = LinkAccountHolder(savedStateHandle),
+            checkoutEventReporter = CheckoutEventReporterTestFactory.create(analyticsRequestExecutor),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -291,7 +295,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             errorReporter = errorReporter,
-            paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
             results = results,
@@ -301,14 +304,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
-        paymentSheetEventReporter.validate()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
-        val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
         val results: Turbine<CheckoutController.Result>,

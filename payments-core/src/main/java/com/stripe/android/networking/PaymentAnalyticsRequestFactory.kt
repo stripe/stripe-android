@@ -78,7 +78,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     )
 
     @Inject
-    internal constructor(
+    constructor(
         context: Context,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
         apiConfigurationProvider: Provider<ApiConfiguration.State>,

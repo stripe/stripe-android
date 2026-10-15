@@ -2,6 +2,7 @@ package com.stripe.android.checkout.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.di.DisplayDensity
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
@@ -13,7 +14,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
-@Module(includes = [StripeNetworkClientModule::class])
+@Module(includes = [StripeNetworkClientModule::class, CheckoutAnalyticsModule::class])
 internal object CheckoutModule {
     @Provides
     fun provideContext(application: Application): Context = application.applicationContext
