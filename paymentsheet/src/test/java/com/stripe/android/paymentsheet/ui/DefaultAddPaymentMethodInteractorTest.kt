@@ -379,6 +379,7 @@ class DefaultAddPaymentMethodInteractorTest {
         createFormArguments: (PaymentMethodCode) -> FormArguments = {
             FormArguments(
                 initiallySelectedPaymentMethodType,
+                prefillEmail = null,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = true,
                     preferredNetworks = emptyList(),

@@ -670,6 +670,7 @@ internal class AddPaymentMethodTest {
             selectedPaymentMethodCode = initiallySelectedPaymentMethodType,
             supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods(),
             arguments = FormArguments(
+                prefillEmail = null,
                 paymentMethodCode = initiallySelectedPaymentMethodType,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",

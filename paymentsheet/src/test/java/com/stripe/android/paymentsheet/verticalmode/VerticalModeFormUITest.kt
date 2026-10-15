@@ -202,6 +202,7 @@ internal class VerticalModeFormUITest {
             isProcessing = false,
             usBankAccountFormArguments = mock(),
             formArguments = FormArguments(
+                prefillEmail = null,
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",
@@ -234,6 +235,7 @@ internal class VerticalModeFormUITest {
             isProcessing = false,
             usBankAccountFormArguments = mock(),
             formArguments = FormArguments(
+                prefillEmail = null,
                 paymentMethodCode = PaymentMethod.Type.CashAppPay.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",
@@ -268,6 +270,7 @@ internal class VerticalModeFormUITest {
             isProcessing = false,
             usBankAccountFormArguments = mock(),
             formArguments = FormArguments(
+                prefillEmail = null,
                 paymentMethodCode = PaymentMethod.Type.Klarna.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "Example, Inc.",
