@@ -40,6 +40,38 @@ internal class AddressElementEventReporterTest {
     }
 
     @Test
+    fun `standalone onSaveCompleted reports zero edit distance for an unchanged selection`() = runScenario {
+        standaloneReporter.onSaveCompleted(
+            addressDetails = createAddressDetails(line1 = "123 Main Street"),
+            autocompleteAddressDetails = createAddressDetails(line1 = "123 Main Street"),
+        )
+
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 0,
+            )
+        )
+    }
+
+    @Test
+    fun `standalone onSaveCompleted reports four edited characters in the address line`() = runScenario {
+        standaloneReporter.onSaveCompleted(
+            addressDetails = createAddressDetails(line1 = "123 Main St"),
+            autocompleteAddressDetails = createAddressDetails(line1 = "123 Main Street"),
+        )
+
+        assertThat(addressLauncherEventReporter.completedCalls.awaitItem()).isEqualTo(
+            FakeAddressLauncherEventReporter.CompletedCall(
+                country = "US",
+                autocompleteResultSelected = true,
+                editDistance = 4,
+            )
+        )
+    }
+
+    @Test
     fun `standalone onSaveCompleted forwards a missing selection`() = runScenario {
         standaloneReporter.onSaveCompleted(
             addressDetails = createAddressDetails(),
@@ -75,6 +107,17 @@ internal class AddressElementEventReporterTest {
             addressDetails = createAddressDetails(),
             autocompleteAddressDetails = null,
             error = IllegalStateException("sensitive details"),
+        )
+
+        addressLauncherEventReporter.showCalls.expectNoEvents()
+        addressLauncherEventReporter.completedCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `standalone ignores Checkout cancellation`() = runScenario {
+        standaloneReporter.onCanceled(
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
         )
 
         addressLauncherEventReporter.showCalls.expectNoEvents()
@@ -121,6 +164,24 @@ internal class AddressElementEventReporterTest {
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.shipping_address.save_completed")
+        assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(params["address_data_blob"]).isEqualTo(
+            mapOf(
+                "address_country_code" to "US",
+                "auto_complete_result_selected" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `Checkout onCanceled reports canceled`() = runScenario {
+        checkoutShippingReporter.onCanceled(
+            addressDetails = createAddressDetails(),
+            autocompleteAddressDetails = null,
+        )
+
+        val params = analyticsRequestExecutor.getExecutedRequests().single().params
+        assertThat(params).containsEntry("event", "elements.shipping_address.canceled")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(

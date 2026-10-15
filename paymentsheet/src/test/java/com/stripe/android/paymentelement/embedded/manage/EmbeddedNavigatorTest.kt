@@ -841,12 +841,13 @@ internal class EmbeddedNavigatorTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         )
+        val customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods)
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
-            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
     }
@@ -879,7 +880,6 @@ internal class EmbeddedNavigatorTest {
     ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = interactor,
-            walletsState = stateFlowOf(null),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,

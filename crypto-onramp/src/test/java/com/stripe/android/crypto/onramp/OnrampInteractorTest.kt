@@ -106,6 +106,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.AdditionalAnswers.delegatesTo
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
@@ -367,6 +368,8 @@ class OnrampInteractorTest {
         )
 
         assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        assertThat((result as OnrampCollectPaymentMethodResult.Completed).displayData.sublabel)
+            .isEqualTo("Visa Card \u2066•••• 4242\u2069")
         val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
         assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
         assertThat(selected.platformPublishableKey).isNull()
@@ -1631,7 +1634,7 @@ class OnrampInteractorTest {
         assertThat((collectionResult as OnrampCollectPaymentMethodResult.Completed).displayData.type)
             .isEqualTo(PaymentMethodDisplayData.Type.SamsungPay)
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
-        assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
+        assertThat(collectionResult.displayData.sublabel).isEqualTo("Visa Card \u2066•••• 4242\u2069")
         assertThat(interactor.state.value.selectedPaymentSource)
             .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
@@ -2590,7 +2593,7 @@ class OnrampInteractorTest {
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
-        return mock {
+        return mock(defaultAnswer = delegatesTo(runtimeApplication)) {
             on { applicationContext } doReturn runtimeApplication
             on { packageName } doReturn runtimeApplication.packageName
             on { getString(R.string.stripe_onramp_platform_pay_account_changed) } doReturn

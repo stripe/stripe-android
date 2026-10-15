@@ -26,6 +26,13 @@ internal class AddressElementResultStateHolder @Inject constructor() {
     fun onUserCancel(): Boolean {
         return _state.compareAndSet(
             expect = State.Idle,
+            update = State.Canceling,
+        )
+    }
+
+    fun onCancelCompleted() {
+        _state.compareAndSet(
+            expect = State.Canceling,
             update = State.Finished(AddressElementActivityContract.Result.Canceled),
         )
     }
@@ -34,6 +41,8 @@ internal class AddressElementResultStateHolder @Inject constructor() {
         data object Idle : State
 
         data object Saving : State
+
+        data object Canceling : State
 
         data class Finished(val result: AddressElementActivityContract.Result) : State
     }

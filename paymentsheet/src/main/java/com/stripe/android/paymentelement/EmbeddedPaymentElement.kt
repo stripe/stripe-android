@@ -17,6 +17,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
@@ -581,7 +582,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         }
 
         @OptIn(
-            ApiConfigurationPreview::class,
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             CardFundingFilteringPrivatePreview::class,
         )
