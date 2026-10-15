@@ -11,21 +11,18 @@ import com.stripe.android.checkout.analytics.checkoutAnalyticsParams
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.analytics.linkContext
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.TimeMark
 
 @Singleton
 internal class CheckoutConfirmationAnalyticsPerformer @Inject constructor(
-    private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val stateHolder: CheckoutControllerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
@@ -53,7 +50,6 @@ internal class CheckoutConfirmationAnalyticsPerformer @Inject constructor(
             ?.metadata
             ?.get(CheckoutSessionResponseKey)
 
-        eventReporter.reportPaymentResult(result, selection)
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> checkoutEventReporter.succeeded(
                 operation = CheckoutAnalyticsOperation.Confirm,

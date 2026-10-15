@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.core.injection.CoreCommonModule
@@ -47,6 +48,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Module(
     includes = [
+        CheckoutAnalyticsModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
         TapToAddConnectionModule::class,

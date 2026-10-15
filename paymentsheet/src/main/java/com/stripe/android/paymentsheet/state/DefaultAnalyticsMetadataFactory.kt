@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.checkout.analytics.checkoutAnalyticsParams
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
@@ -86,11 +85,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("is_spt", SimpleBoolean(integrationMetadata.isSpt()))
         put("is_confirmation_tokens", SimpleBoolean(integrationMetadata.isConfirmationTokens()))
         if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
-            putAll(
-                integrationMetadata.checkoutSessionResponse.checkoutAnalyticsParams().mapValues { (_, value) ->
-                    value.toAnalyticsMetadataValue()
-                }
-            )
+            put("checkout_session_id", SimpleString(integrationMetadata.id))
         }
     }
 
@@ -251,12 +246,6 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("style", SimpleBoolean(style != PaymentSheet.Appearance.Embedded.default.style))
         put("row_style", SimpleString(style.toAnalyticsValue()))
     }
-}
-
-private fun Any.toAnalyticsMetadataValue(): AnalyticsMetadata.Value = when (this) {
-    is Boolean -> SimpleBoolean(this)
-    is String -> SimpleString(this)
-    else -> error("Unsupported Checkout analytics metadata value")
 }
 
 private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: String

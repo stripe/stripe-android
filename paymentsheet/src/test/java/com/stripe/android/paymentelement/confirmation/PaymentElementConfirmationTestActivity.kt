@@ -13,6 +13,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
@@ -123,6 +124,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        CheckoutAnalyticsModule::class,
         ElementsSessionClientParamsModule::class,
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,

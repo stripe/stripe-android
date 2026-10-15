@@ -14,12 +14,15 @@ import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
@@ -43,6 +46,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmatio
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -54,6 +58,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -142,6 +147,25 @@ internal interface EmbeddedActivityModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @PaymentElementAnalytics
+        fun provideEventReporterAnalyticsRequestFactory(
+            context: Context,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            @Named(PRODUCT_USAGE) productUsage: Set<String>,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
+        ): PaymentAnalyticsRequestFactory {
+            val eventProductUsage = when (paymentMethodMetadata.integrationMetadata) {
+                is IntegrationMetadata.CheckoutSession -> setOf("PaymentElement")
+                else -> productUsage
+            }
+            return PaymentAnalyticsRequestFactory(
+                context = context,
+                defaultProductUsageTokens = eventProductUsage,
+                apiConfigurationProvider = apiConfigurationProvider,
+            )
+        }
+
         @Provides
         fun providesContext(application: Application): Context {
             return application

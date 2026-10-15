@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
@@ -129,6 +130,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        CheckoutAnalyticsModule::class,
         ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
         ApiRequestOptionsModule::class,

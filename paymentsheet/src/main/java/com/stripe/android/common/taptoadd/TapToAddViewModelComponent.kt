@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.common.spms.DefaultCvcFormHelper
@@ -66,6 +67,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -138,6 +140,7 @@ internal interface TapToAddViewModelComponent {
     ],
     includes = [
         TapToAddLinkModule::class,
+        CheckoutAnalyticsModule::class,
         StripeNetworkClientModule::class,
     ]
 )
@@ -207,6 +210,12 @@ internal interface TapToAddViewModelModule {
     ): TapToAddConfirmationInteractor.Factory
 
     companion object {
+        @Provides
+        @PaymentElementAnalytics
+        fun provideEventReporterAnalyticsRequestFactory(
+            factory: PaymentAnalyticsRequestFactory,
+        ): PaymentAnalyticsRequestFactory = factory
+
         @Provides
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG

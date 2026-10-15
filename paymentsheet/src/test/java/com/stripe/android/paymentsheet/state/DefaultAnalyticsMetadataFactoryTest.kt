@@ -144,7 +144,7 @@ class DefaultAnalyticsMetadataFactoryTest {
     }
 
     @Test
-    fun `create includes checkout response analytics metadata`() = runScenario {
+    fun `create includes checkout session id without flattening response analytics fields`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
             configId = "cfg_checkout_123",
@@ -178,13 +178,12 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
 
         assertThat(resultMap).containsEntry("checkout_session_id", "cs_test_123")
-        assertThat(resultMap).containsEntry("checkout_config_id", "cfg_checkout_123")
-        assertThat(resultMap).containsEntry("currency", "cad")
-        assertThat(resultMap).containsEntry("session_status", "complete")
-        assertThat(resultMap).containsEntry("payment_status", "paid")
-        assertThat(resultMap).containsEntry("elements_session_config_id", "elements_config_123")
-        assertThat(resultMap).containsEntry("adaptive_pricing_active", true)
-        assertThat(resultMap).containsEntry("automatic_tax_enabled", true)
+        assertThat(resultMap).doesNotContainKey("checkout_config_id")
+        assertThat(resultMap).doesNotContainKey("session_status")
+        assertThat(resultMap).doesNotContainKey("payment_status")
+        assertThat(resultMap).doesNotContainKey("elements_session_config_id")
+        assertThat(resultMap).doesNotContainKey("adaptive_pricing_active")
+        assertThat(resultMap).doesNotContainKey("automatic_tax_enabled")
         assertThat(resultMap).doesNotContainKey("request_id")
         assertThat(resultMap).doesNotContainKey("product_usage")
     }

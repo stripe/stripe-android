@@ -12,7 +12,6 @@ import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -40,17 +39,18 @@ internal class CheckoutConfirmationAnalyticsTest {
         sessionRefresher.calls.awaitItem()
 
         coordinator.failConfirmation(IllegalStateException("competing failure"))
-        assertThat(events()).containsExactly("checkout_elements.confirm.started")
+        assertThat(events().map { it["event"] })
+            .containsExactly("checkout_elements.confirm.started")
 
         releaseRefresh.complete(Unit)
         results.awaitItem()
-        eventReporter.paymentSuccessCalls.awaitItem()
+        assertThat(events().last()).containsEntry("selected_lpm", "google_pay")
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        assertThat(events()).containsExactly(
+        assertThat(events().map { it["event"] }).containsExactly(
             "checkout_elements.confirm.started",
             "checkout_elements.confirm.succeeded",
         ).inOrder()
@@ -65,10 +65,12 @@ internal class CheckoutConfirmationAnalyticsTest {
 
         sessionRefresher.calls.awaitItem()
         assertThat((results.awaitItem() as CheckoutController.Result.Failed).error).isSameInstanceAs(error)
-        assertThat(events()).containsExactly(
+        assertThat(events().map { it["event"] }).containsExactly(
             "checkout_elements.confirm.started",
             "checkout_elements.confirm.failed",
         ).inOrder()
+        assertThat(events().last()).containsEntry("selected_lpm", "google_pay")
+        assertThat(events().last()).containsEntry("error_type", "IllegalStateException")
     }
 
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
@@ -77,9 +79,7 @@ internal class CheckoutConfirmationAnalyticsTest {
             state = CheckoutControllerStateFactory.create()
         }
         val executor = FakeAnalyticsRequestExecutor()
-        val eventReporter = FakeEventReporter()
         val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
-            eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
             checkoutEventReporter = CheckoutEventReporterFactory.create(executor),
@@ -102,12 +102,11 @@ internal class CheckoutConfirmationAnalyticsTest {
         assertThat(coordinator.tryBeginConfirmation { CONFIRMATION_PARAMETERS }).isNotNull()
         analyticsPerformer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
 
-        Scenario(coordinator, confirmationHandler, sessionRefresher, results, eventReporter, executor).block()
+        Scenario(coordinator, confirmationHandler, sessionRefresher, results, executor).block()
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         results.ensureAllEventsConsumed()
-        eventReporter.validate()
     }
 
     private class Scenario(
@@ -115,9 +114,8 @@ internal class CheckoutConfirmationAnalyticsTest {
         val confirmationHandler: FakeConfirmationHandler,
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val results: Turbine<CheckoutController.Result>,
-        val eventReporter: FakeEventReporter,
         private val executor: FakeAnalyticsRequestExecutor,
     ) {
-        fun events(): List<Any?> = executor.getExecutedRequests().map { it.params["event"] }
+        fun events(): List<Map<String, *>> = executor.getExecutedRequests().map { it.params }
     }
 }

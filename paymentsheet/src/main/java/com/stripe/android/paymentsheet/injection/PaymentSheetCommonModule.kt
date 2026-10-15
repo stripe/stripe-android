@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -45,6 +46,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLa
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -81,6 +83,7 @@ import javax.inject.Singleton
         LinkComponent::class,
     ],
     includes = [
+        CheckoutAnalyticsModule::class,
         LinkCommonModule::class,
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
@@ -194,6 +197,12 @@ internal abstract class PaymentSheetCommonModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @PaymentElementAnalytics
+        fun provideEventReporterAnalyticsRequestFactory(
+            factory: PaymentAnalyticsRequestFactory,
+        ): PaymentAnalyticsRequestFactory = factory
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

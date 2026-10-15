@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -35,13 +34,11 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
         performer.reportConfirmationResult(successResult)
         performer.reportConfirmationResult(successResult)
 
-        val call = eventReporter.paymentSuccessCalls.awaitItem()
-        assertThat(call.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(call.intentId).isEqualTo(successResult.intent.id)
         assertThat(events().map { it["event"] }).containsExactly(
             "checkout_elements.confirm.started",
             "checkout_elements.confirm.succeeded",
         ).inOrder()
+        assertThat(events().last()).containsEntry("selected_lpm", "google_pay")
         assertThat(events().last()).containsEntry("duration", 2f)
         assertThat(events().last()).containsEntry("invocation_source", "merchant")
         assertThat(savedStateHandle.keys()).doesNotContain("CheckoutAnalyticsPerformer.paymentSelection")
@@ -54,7 +51,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
         timeSource += 2.seconds
         recreatePerformer().reportConfirmationResult(successResult)
 
-        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection).isEqualTo(selection)
         assertThat(events()).hasSize(2)
         assertThat(events().last()).containsEntry("selected_lpm", "link")
         assertThat(events().last()).containsEntry("link_context", "wallet")
@@ -89,7 +85,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         performer.reportConfirmationResult(successResult)
 
-        eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(events()[2]).containsEntry("selected_lpm", "google_pay")
         assertThat(events()[2]).containsEntry("invocation_source", "merchant")
         assertThat(events()[2]).doesNotContainKey("link_context")
@@ -118,7 +113,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
             })
         )
 
-        eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(events().first()).containsEntry("checkout_session_id", "cs_initial_confirmation")
         assertThat(events().first()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
         assertThat(events().first()).doesNotContainKey("request_id")
@@ -143,7 +137,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
         stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = refreshedResponse)
         performer.reportConfirmationResult(successResult)
 
-        eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(events().first()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
         assertThat(events().last()).containsEntry("checkout_session_id", "cs_refreshed_confirmation")
         assertThat(events().last()).containsEntry("checkout_config_id", "cfg_initial_confirmation")
@@ -154,7 +147,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         performer.reportConfirmationResult(successResult)
 
-        eventReporter.paymentSuccessCalls.awaitItem()
         assertThat(events().last()).doesNotContainKey("request_id")
     }
 
@@ -198,18 +190,15 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
             )
         }
         val scenario = Scenario(
-            eventReporter = FakeEventReporter(),
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
             executor = FakeAnalyticsRequestExecutor(),
             timeSource = TestTimeSource(),
         )
         scenario.block()
-        scenario.eventReporter.validate()
     }
 
     private class Scenario(
-        val eventReporter: FakeEventReporter,
         val savedStateHandle: SavedStateHandle,
         val stateHolder: CheckoutControllerStateHolder,
         val executor: FakeAnalyticsRequestExecutor,
@@ -219,7 +208,6 @@ internal class CheckoutConfirmationAnalyticsPerformerTest {
 
         fun recreatePerformer(): CheckoutConfirmationAnalyticsPerformer =
             CheckoutConfirmationAnalyticsPerformerFactory.create(
-                eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
                 stateHolder = stateHolder,
                 checkoutEventReporter = CheckoutEventReporterFactory.create(executor, timeSource),

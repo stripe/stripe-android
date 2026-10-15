@@ -42,7 +42,6 @@ internal class CheckoutEventReporterTest {
             "ignored_null" to null,
             "request_id" to "req_stale",
             "duration" to 99.0f,
-            "product_usage" to "PaymentElement",
         )
 
         val startedAt = scenario.reporter.started(
@@ -76,14 +75,12 @@ internal class CheckoutEventReporterTest {
         assertThat(started).doesNotContainKey("duration")
         assertThat(started).doesNotContainKey("ignored_null")
         assertThat(started).doesNotContainKey("request_id")
-        assertThat(started).containsEntry("product_usage", "checkout_elements")
 
         assertThat(succeeded[FIELD_EVENT]).isEqualTo("checkout_elements.init.succeeded")
         assertThat(succeeded).containsEntry("selected_lpm", "link")
         assertThat(succeeded["metadata"]).isEqualTo(mapOf("provider" to "after_started"))
         assertThat(succeeded).containsEntry("request_id", "req_current")
         assertThat(succeeded).containsEntry("duration", 0.75f)
-        assertThat(succeeded).containsEntry("product_usage", "checkout_elements")
     }
 
     @Test
@@ -219,7 +216,6 @@ internal class CheckoutEventReporterTest {
         val params = scenario.events().single()
         assertThat(params[FIELD_EVENT]).isEqualTo("checkout_elements.confirm.canceled")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_canceled")
-        assertThat(params).containsEntry("product_usage", "checkout_elements")
         assertThat(params).doesNotContainKey("request_id")
         assertThat(params).doesNotContainKey("duration")
         assertThat(params).doesNotContainKey("error_type")
@@ -237,7 +233,6 @@ internal class CheckoutEventReporterTest {
         val params = scenario.events().single()
         assertThat(params[FIELD_EVENT]).isEqualTo("checkout_elements.clear_payment_option")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_clear")
-        assertThat(params).containsEntry("product_usage", "checkout_elements")
         assertThat(params).doesNotContainKey("duration")
     }
 

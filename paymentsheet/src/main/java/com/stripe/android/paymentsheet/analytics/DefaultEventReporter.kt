@@ -9,7 +9,6 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -39,7 +38,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    @PaymentElementAnalytics private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
@@ -497,11 +496,13 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        val paymentMethodMetadata = paymentMethodMetadataProvider.get()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
+                    additionalParams = defaultParams(paymentMethodMetadata),
+                    publishableKeyOverride = paymentMethodMetadata?.apiConfiguration?.publishableKey,
                 )
             )
         }
@@ -608,13 +609,8 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
         return if (paymentMethodMetadata != null) {
-            val defaultParams = paymentMethodMetadata.analyticsMetadata.paramsMap +
+            paymentMethodMetadata.analyticsMetadata.paramsMap +
                 ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
-            if (paymentMethodMetadata.integrationMetadata is IntegrationMetadata.CheckoutSession) {
-                defaultParams + ("product_usage" to "PaymentElement")
-            } else {
-                defaultParams
-            }
         } else {
             emptyMap()
         }

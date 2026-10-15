@@ -4,6 +4,7 @@ import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutEventReporterFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -19,12 +20,12 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -152,8 +153,14 @@ internal class CheckoutConfirmationPerformerTest {
 
         assertThat(sessionRefresher.calls.awaitItem())
             .isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
-        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
-            .isEqualTo(PaymentSelection.GooglePay)
+        results.awaitItem()
+        val analyticsEvents = analyticsRequestExecutor.getExecutedRequests().map { it.params }
+        assertThat(analyticsEvents.map { it["event"] }).containsExactly(
+            "checkout_elements.confirm.started",
+            "checkout_elements.confirm.succeeded",
+        ).inOrder()
+        assertThat(analyticsEvents[0]).containsEntry("selected_lpm", "google_pay")
+        assertThat(analyticsEvents[1]).containsEntry("selected_lpm", "google_pay")
     }
 
     private fun googlePayState(
@@ -199,11 +206,12 @@ internal class CheckoutConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val eventReporter = FakeEventReporter()
+        val results = Turbine<CheckoutController.Result>()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsPerformer = CheckoutConfirmationAnalyticsPerformerFactory.create(
-            eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
+            checkoutEventReporter = CheckoutEventReporterFactory.create(analyticsRequestExecutor),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
@@ -211,7 +219,7 @@ internal class CheckoutConfirmationPerformerTest {
             sessionRefresher = sessionRefresher,
             analyticsPerformer = analyticsPerformer,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = CheckoutController.ResultCallback(results::add),
             viewModelScope = backgroundScope,
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -243,14 +251,15 @@ internal class CheckoutConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             sessionRefresher = sessionRefresher,
-            eventReporter = eventReporter,
+            results = results,
+            analyticsRequestExecutor = analyticsRequestExecutor,
             stateHolder = stateHolder,
         ).block()
 
         performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
-        eventReporter.validate()
+        results.ensureAllEventsConsumed()
     }
 
     private class FakeConfirmationPerformerProvider(
@@ -270,7 +279,8 @@ internal class CheckoutConfirmationPerformerTest {
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val sessionRefresher: FakeCheckoutSessionRefresher,
-        val eventReporter: FakeEventReporter,
+        val results: Turbine<CheckoutController.Result>,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val stateHolder: CheckoutControllerStateHolder,
     )
 

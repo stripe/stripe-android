@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.checkout.injection.CheckoutModule
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -39,6 +40,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.WalletsState
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -65,7 +68,14 @@ class DefaultEventReporterTest {
             instancesKey = "checkout_instances",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedEmail = null,
-        )
+        ),
+        analyticsMetadata = AnalyticsMetadata(
+            mapOf(
+                "example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true),
+                "checkout_session_id" to AnalyticsMetadata.Value.SimpleString("cs_test_123"),
+            )
+        ),
+        apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "pk_test_checkout_metadata"),
     )
 
     @Test
@@ -1372,23 +1382,39 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onAnalyticsEvent fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+    fun `onAnalyticsEvent uses captured checkout session and API key`() = runScenario(
+        requestFactory = checkoutAnalyticsRequestFactory(),
+        queueAnalyticsEvents = true,
+    ) {
+        paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
 
         val testEvent = object : AnalyticsEvent {
             override val eventName: String = "test_analytics_event"
         }
 
         eventReporter.onAnalyticsEvent(testEvent)
+        val changedMetadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(
+            apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "pk_test_changed_metadata"),
+            analyticsMetadata = AnalyticsMetadata(
+                mapOf("changed_metadata" to AnalyticsMetadata.Value.SimpleBoolean(true))
+            ),
+        )
+        paymentMethodMetadataStack.push(changedMetadata)
+        testScheduler.advanceUntilIdle()
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "test_analytics_event")
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("product_usage", "PaymentElement")
+        assertThat(request.params).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(request.params).containsEntry("publishable_key", "pk_test_checkout_metadata")
+        assertThat(request.params).doesNotContainKey("changed_metadata")
+        assertThat(paymentMethodMetadataStack.pop()).isSameInstanceAs(changedMetadata)
     }
 
     @Test
     fun `checkout ui events use PaymentElement product usage`() = runScenario(
-        defaultProductUsageTokens = setOf("L3Token"),
+        requestFactory = checkoutAnalyticsRequestFactory(),
     ) {
         paymentMethodMetadataStack.push(checkoutPaymentMethodMetadata)
 
@@ -1553,13 +1579,19 @@ class DefaultEventReporterTest {
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
         defaultProductUsageTokens: Set<String> = setOf(""),
+        requestFactory: PaymentAnalyticsRequestFactory? = null,
+        queueAnalyticsEvents: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = UnconfinedTestDispatcher()
+        val testDispatcher = if (queueAnalyticsEvents) {
+            StandardTestDispatcher(testScheduler)
+        } else {
+            UnconfinedTestDispatcher()
+        }
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
-        val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+        val paymentAnalyticsRequestFactory = requestFactory ?: PaymentAnalyticsRequestFactory(
             context = context,
             publishableKey = DEFAULT_API_CONFIG.publishableKey,
             defaultProductUsageTokens = defaultProductUsageTokens,
@@ -1606,6 +1638,7 @@ class DefaultEventReporterTest {
             paymentMethodMetadataStack = paymentMethodMetadataStack,
             analyticsEventTurbine = analyticsEventTurbine,
             userFacingLoggerTurbine = userFacingLoggerTurbine,
+            testScheduler = testScheduler,
         )
 
         block(scenario)
@@ -1618,6 +1651,12 @@ class DefaultEventReporterTest {
         analyticsEventTurbine.ensureAllEventsConsumed()
     }
 
+    private fun checkoutAnalyticsRequestFactory(): PaymentAnalyticsRequestFactory =
+        CheckoutModule.provideEventReporterAnalyticsRequestFactory(
+            context = ApplicationProvider.getApplicationContext(),
+            apiConfigurationProvider = Provider { DEFAULT_API_CONFIG },
+        )
+
     private data class Scenario(
         val eventReporter: DefaultEventReporter,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
@@ -1626,6 +1665,7 @@ class DefaultEventReporterTest {
         val paymentMethodMetadataStack: Stack<PaymentMethodMetadata?>,
         val analyticsEventTurbine: Turbine<AnalyticEvent>,
         val userFacingLoggerTurbine: Turbine<String>,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     private class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {

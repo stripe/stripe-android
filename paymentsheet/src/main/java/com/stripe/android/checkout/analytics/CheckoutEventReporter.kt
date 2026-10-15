@@ -19,7 +19,7 @@ internal class CheckoutEventReporter internal constructor(
     @Inject
     constructor(
         analyticsRequestExecutor: AnalyticsRequestExecutor,
-        analyticsRequestFactory: AnalyticsRequestFactory,
+        @CheckoutAnalytics analyticsRequestFactory: AnalyticsRequestFactory,
     ) : this(
         analyticsRequestExecutor = analyticsRequestExecutor,
         analyticsRequestFactory = analyticsRequestFactory,
@@ -129,8 +129,7 @@ internal class CheckoutEventReporter internal constructor(
                 event = object : AnalyticsEvent {
                     override val eventName: String = eventName
                 },
-                additionalParams = additionalParams.filterValues { it != null } +
-                    (FIELD_PRODUCT_USAGE to PRODUCT_USAGE_CHECKOUT_ELEMENTS),
+                additionalParams = additionalParams.filterValues { it != null },
             )
         )
     }
@@ -193,10 +192,8 @@ internal class CheckoutEventReporter internal constructor(
         const val FIELD_DURATION = "duration"
         const val FIELD_ERROR_TYPE = "error_type"
         const val FIELD_ERROR_CODE = "error_code"
-        const val FIELD_PRODUCT_USAGE = "product_usage"
         const val FIELD_REQUEST_ID = "request_id"
 
-        const val PRODUCT_USAGE_CHECKOUT_ELEMENTS = "checkout_elements"
         const val VALUE_UNKNOWN_ERROR_TYPE = "unknown"
 
         const val PHASE_STARTED = "started"

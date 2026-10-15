@@ -7,6 +7,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsModule
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -58,6 +59,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -74,6 +76,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Module(
     includes = [
+        CheckoutAnalyticsModule::class,
         StripeRepositoryModule::class,
         PaymentsIntegrityModule::class,
         LinkAccountAnalyticsModule::class,
@@ -152,6 +155,12 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @PaymentElementAnalytics
+        fun provideEventReporterAnalyticsRequestFactory(
+            factory: PaymentAnalyticsRequestFactory,
+        ): PaymentAnalyticsRequestFactory = factory
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(

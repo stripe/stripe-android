@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -121,15 +122,20 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
-                productUsage = setOf("PaymentElement"),
-                analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
-                analyticsPayloadField("error_code", "checkout_session_total_changed"),
-            )
             validateCheckoutOperationAnalytics("update_billing_address")
-            validateCheckoutOperationAnalytics("confirm", terminalPhase = "failed")
+            validateCheckoutOperationAnalytics(
+                operation = "confirm",
+                terminalPhase = "failed",
+                requestMatchers = listOf(
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+                    analyticsPayloadField("selected_lpm", "google_pay"),
+                    analyticsPayloadField("invocation_source", "merchant"),
+                ),
+                terminalRequestMatchers = listOf(
+                    analyticsPayloadField("error_type", "LocalStripeException"),
+                    analyticsPayloadField("error_code", "checkout_session_total_changed"),
+                ),
+            )
 
             contentPage.clickOnLpm("google_pay")
             confirm()
@@ -223,14 +229,18 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private fun validateCheckoutOperationAnalytics(
         operation: String,
         terminalPhase: String = "succeeded",
+        requestMatchers: List<RequestMatcher> = emptyList(),
+        terminalRequestMatchers: List<RequestMatcher> = emptyList(),
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = "checkout_elements.$operation.started",
             productUsage = setOf("checkout_elements"),
+            *requestMatchers.toTypedArray(),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "checkout_elements.$operation.$terminalPhase",
             productUsage = setOf("checkout_elements"),
+            *(requestMatchers + terminalRequestMatchers).toTypedArray(),
         )
     }
 
