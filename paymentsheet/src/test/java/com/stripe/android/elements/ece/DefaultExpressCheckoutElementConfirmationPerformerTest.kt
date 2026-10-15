@@ -190,7 +190,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             expressButton = ExpressButton.Link.create(
                 paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 linkAccountInfo = LinkAccountUpdate.Value(null),
-                buttonTheme = ButtonTheme.Automatic,
             ),
         ) {
             performer.confirm(expressButton)
