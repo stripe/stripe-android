@@ -1,14 +1,15 @@
 package com.stripe.android.crypto.onramp.ui
 
 import android.icu.text.BreakIterator
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirement
+import com.stripe.android.crypto.onramp.model.KycQuestion
+import com.stripe.android.crypto.onramp.model.KycRequirement
 
-internal fun AdditionalKycRequirement.isSupportedForCollection(): Boolean {
+internal fun KycRequirement.isSupportedForCollection(): Boolean {
     if (description !in setOf("proof_of_address", "source_of_funds", "source_of_funds_questions")) {
         return false
     }
     val questions = questionnaire?.questions.orEmpty()
-    if (questions.any { it.id.isBlank() || it.answerType != "free_text" } ||
+    if (questions.any { !it.isSupportedForCollection() } ||
         questions.map { it.id }.distinct().size != questions.size
     ) {
         return false
@@ -26,8 +27,8 @@ internal fun AdditionalKycRequirement.isSupportedForCollection(): Boolean {
         (description != "proof_of_address" || document.minDocumentTypes <= 1)
 }
 
-internal fun limitAdditionalKycAnswer(answer: String): String {
-    if (answer.length <= MAXIMUM_ANSWER_LENGTH) {
+internal fun limitKycAnswer(answer: String, maximumLength: Int): String {
+    if (answer.length <= maximumLength) {
         return answer
     }
     val iterator = BreakIterator.getCharacterInstance().apply { setText(answer) }
@@ -37,10 +38,12 @@ internal fun limitAdditionalKycAnswer(answer: String): String {
         val next = iterator.next()
         if (next == BreakIterator.DONE) return answer
         val nextCount = answer.codePointCount(end, next)
-        if (scalarCount + nextCount > MAXIMUM_ANSWER_LENGTH) return answer.substring(0, end)
+        if (scalarCount + nextCount > maximumLength) return answer.substring(0, end)
         scalarCount += nextCount
         end = next
     }
 }
 
-private const val MAXIMUM_ANSWER_LENGTH = 5_000
+private fun KycQuestion.isSupportedForCollection(): Boolean {
+    return id.isNotBlank() && answerType == "free_text" && maxQuestionnaireAnswerCharacters > 0
+}

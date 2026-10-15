@@ -46,6 +46,7 @@
         ],
         "min_document_types": 1,
         "max_document_types": 2,
+        "max_files_per_document_type": 10,
         "max_file_size_bytes": 50000000,
         "file_requirements": "PDF, JPEG/JPG, or PNG, up to 50 MB per file."
       }

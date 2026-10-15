@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
@@ -21,6 +22,7 @@ class OnrampCallbacks {
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var userAttestationCallback: OnrampUserAttestationCallback? = null
+    private var kycCallback: OnrampKycCallback? = null
     private var termsAndConditionsCallback: OnrampPartnerTermsCallback? = null
     private var termsOfServiceCallback: OnrampPartnerTermsCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
@@ -67,6 +69,14 @@ class OnrampCallbacks {
      */
     fun userAttestationCallback(callback: OnrampUserAttestationCallback) = apply {
         this.userAttestationCallback = callback
+    }
+
+    /**
+     * Callback invoked when the KYC collection flow completes.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun kycCallback(callback: OnrampKycCallback) = apply {
+        this.kycCallback = callback
     }
 
     /**
@@ -123,6 +133,7 @@ class OnrampCallbacks {
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
         val userAttestationCallback: OnrampUserAttestationCallback?,
+        val kycCallback: OnrampKycCallback?,
         val termsAndConditionsCallback: OnrampPartnerTermsCallback?,
         val termsOfServiceCallback: OnrampPartnerTermsCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
@@ -148,6 +159,7 @@ class OnrampCallbacks {
                 "checkoutCallback must not be null"
             },
             userAttestationCallback = userAttestationCallback,
+            kycCallback = kycCallback,
             termsAndConditionsCallback = termsAndConditionsCallback,
             termsOfServiceCallback = termsOfServiceCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {

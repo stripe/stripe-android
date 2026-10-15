@@ -1,10 +1,12 @@
 package com.stripe.android.crypto.onramp.ui
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-internal fun copyAdditionalKycFile(
+internal suspend fun copyKycFile(
     input: InputStream,
     output: OutputStream,
     maximumFileSizeBytes: Long?,
@@ -13,17 +15,19 @@ internal fun copyAdditionalKycFile(
     var copiedBytes = 0L
 
     while (true) {
+        currentCoroutineContext().ensureActive()
         val bytesRead = input.read(buffer)
+        currentCoroutineContext().ensureActive()
         if (bytesRead == -1) {
             return
         }
 
         copiedBytes += bytesRead
         if (maximumFileSizeBytes != null && copiedBytes > maximumFileSizeBytes) {
-            throw AdditionalKycFileTooLargeException()
+            throw KycFileTooLargeException()
         }
         output.write(buffer, 0, bytesRead)
     }
 }
 
-internal class AdditionalKycFileTooLargeException : IOException()
+internal class KycFileTooLargeException : IOException()

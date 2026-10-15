@@ -1,6 +1,10 @@
 package com.stripe.android.crypto.onramp.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,9 +73,9 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import java.util.Locale
 
 @Composable
-internal fun AdditionalKycScreen(
+internal fun KycScreen(
     appearance: LinkAppearance.State?,
-    state: AdditionalKycScreenState,
+    state: KycScreenState,
     onClose: () -> Unit,
     onBack: () -> Unit,
     onQuestionAnswerChanged: (questionId: String, answer: String) -> Unit,
@@ -82,11 +87,10 @@ internal fun AdditionalKycScreen(
     onSubmit: () -> Unit,
     onContinue: () -> Unit,
 ) {
-    var selectorSlotIndex by remember { mutableStateOf<Int?>(null) }
-    val canNavigate = state.submissionState != AdditionalKycSubmissionState.Submitting &&
+    var selectorSlotIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    val canNavigate = state.submissionState != KycSubmissionState.Submitting &&
         state.page !in setOf(
-            AdditionalKycCollectionPage.Submitted,
-            AdditionalKycCollectionPage.Pending,
+            KycCollectionPage.Submitted,
         )
 
     BackHandler {
@@ -104,38 +108,40 @@ internal fun AdditionalKycScreen(
                 .background(LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.20f))
                 .statusBarsPadding()
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = if (state.page.isMessage) messageSurfaceColor() else LinkTheme.colors.surfacePrimary,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                elevation = 8.dp,
-            ) {
-                if (selectorSlotIndex != null) {
-                    val slot = state.document?.slots?.firstOrNull { it.index == selectorSlotIndex }
-                    if (slot != null) {
-                        DocumentTypeSelector(
-                            slot = slot,
-                            onClose = { selectorSlotIndex = null },
-                            onSelected = { subtypeId ->
-                                onDocumentSubtypeSelected(slot.index, subtypeId)
-                                selectorSlotIndex = null
-                            },
+            KycAnimatedContent(state, selectorSlotIndex) { screenState, selectedSlot ->
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = if (screenState.page.isMessage) messageSurfaceColor() else LinkTheme.colors.surfacePrimary,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                    elevation = 8.dp,
+                ) {
+                    if (selectedSlot != null) {
+                        val slot = screenState.document?.slots?.firstOrNull { it.index == selectedSlot }
+                        if (slot != null) {
+                            DocumentTypeSelector(
+                                slot = slot,
+                                onClose = { selectorSlotIndex = null },
+                                onSelected = { subtypeId ->
+                                    onDocumentSubtypeSelected(slot.index, subtypeId)
+                                    selectorSlotIndex = null
+                                },
+                            )
+                        }
+                    } else {
+                        KycContent(
+                            state = screenState,
+                            onClose = onClose,
+                            onBack = onBack,
+                            onQuestionAnswerChanged = onQuestionAnswerChanged,
+                            onShowDocumentTypes = { selectorSlotIndex = it },
+                            onChooseFile = onChooseFile,
+                            onRemoveFile = onRemoveFile,
+                            onAddDocuments = onAddDocuments,
+                            onEditDocuments = onEditDocuments,
+                            onSubmit = onSubmit,
+                            onContinue = onContinue,
                         )
                     }
-                } else {
-                    AdditionalKycContent(
-                        state = state,
-                        onClose = onClose,
-                        onBack = onBack,
-                        onQuestionAnswerChanged = onQuestionAnswerChanged,
-                        onShowDocumentTypes = { selectorSlotIndex = it },
-                        onChooseFile = onChooseFile,
-                        onRemoveFile = onRemoveFile,
-                        onAddDocuments = onAddDocuments,
-                        onEditDocuments = onEditDocuments,
-                        onSubmit = onSubmit,
-                        onContinue = onContinue,
-                    )
                 }
             }
         }
@@ -143,8 +149,41 @@ internal fun AdditionalKycScreen(
 }
 
 @Composable
-private fun AdditionalKycContent(
-    state: AdditionalKycScreenState,
+private fun KycAnimatedContent(
+    state: KycScreenState,
+    selectorSlotIndex: Int?,
+    content: @Composable (KycScreenState, Int?) -> Unit,
+) {
+    AnimatedContent(
+        targetState = state to selectorSlotIndex,
+        modifier = Modifier.fillMaxSize(),
+        contentKey = { (screenState, selectedSlot) ->
+            Triple(screenState.currentRequirement, screenState.page, selectedSlot)
+        },
+        transitionSpec = {
+            val forward = when {
+                targetState.second != null -> true
+                initialState.second != null -> false
+                targetState.first.currentRequirement != initialState.first.currentRequirement -> true
+                else -> targetState.first.page.ordinal > initialState.first.page.ordinal
+            }
+            val direction = if (forward) {
+                AnimatedContentTransitionScope.SlideDirection.Start
+            } else {
+                AnimatedContentTransitionScope.SlideDirection.End
+            }
+            slideIntoContainer(direction, tween(KYC_TRANSITION_DURATION)) togetherWith
+                slideOutOfContainer(direction, tween(KYC_TRANSITION_DURATION))
+        },
+        label = "KycNavigation",
+    ) { (screenState, selectedSlot) ->
+        content(screenState, selectedSlot)
+    }
+}
+
+@Composable
+private fun KycContent(
+    state: KycScreenState,
     onClose: () -> Unit,
     onBack: () -> Unit,
     onQuestionAnswerChanged: (questionId: String, answer: String) -> Unit,
@@ -163,13 +202,12 @@ private fun AdditionalKycContent(
     ) {
         SheetHandle()
         val showHeader = state.page !in setOf(
-            AdditionalKycCollectionPage.Submitted,
-            AdditionalKycCollectionPage.Pending,
-            AdditionalKycCollectionPage.Unavailable,
+            KycCollectionPage.Submitted,
+            KycCollectionPage.Unavailable,
         )
         if (showHeader) {
-            AdditionalKycHeader(
-                showBack = state.page != AdditionalKycCollectionPage.Context,
+            KycHeader(
+                showBack = state.page != KycCollectionPage.Context,
                 onBack = onBack,
                 onClose = onClose,
             )
@@ -183,32 +221,31 @@ private fun AdditionalKycContent(
                 .fillMaxWidth()
         ) {
             when (state.page) {
-                AdditionalKycCollectionPage.Context -> ContextContent(state.requirementType)
-                AdditionalKycCollectionPage.Questionnaire -> QuestionnaireContent(
+                KycCollectionPage.Context -> ContextContent(state.requirementType)
+                KycCollectionPage.Questionnaire -> QuestionnaireContent(
                     state = state,
                     onQuestionAnswerChanged = onQuestionAnswerChanged,
                 )
-                AdditionalKycCollectionPage.DocumentOverview -> DocumentOverviewContent(
+                KycCollectionPage.DocumentOverview -> DocumentOverviewContent(
                     state = state,
                     onAddDocuments = onAddDocuments,
                     onEditDocuments = onEditDocuments,
                 )
-                AdditionalKycCollectionPage.DocumentEditor -> DocumentEditorContent(
+                KycCollectionPage.DocumentEditor -> DocumentEditorContent(
                     state = state,
                     onShowDocumentTypes = onShowDocumentTypes,
                     onChooseFile = onChooseFile,
                     onRemoveFile = onRemoveFile,
                 )
-                AdditionalKycCollectionPage.Submitted -> SubmittedContent(
-                    state.requirementType == AdditionalKycRequirementType.ProofOfAddress
+                KycCollectionPage.Submitted -> SubmittedContent(
+                    state.requirementType == KycRequirementType.ProofOfAddress
                 )
-                AdditionalKycCollectionPage.Pending -> SubmittedContent(documentsUploaded = false)
-                AdditionalKycCollectionPage.Unavailable -> UnavailableContent()
+                KycCollectionPage.Unavailable -> UnavailableContent()
             }
         }
 
         SubmissionError(state.submissionState)
-        AdditionalKycPrimaryButton(
+        KycPrimaryButton(
             state = state,
             onClose = onClose,
             onSubmit = onSubmit,
@@ -218,11 +255,11 @@ private fun AdditionalKycContent(
 }
 
 @Composable
-private fun SubmissionError(state: AdditionalKycSubmissionState) {
-    if (state == AdditionalKycSubmissionState.Failed) {
+private fun SubmissionError(state: KycSubmissionState) {
+    if (state == KycSubmissionState.Failed) {
         Text(
             text = stringResource(R.string.stripe_onramp_default_api_error_user_message),
-            modifier = Modifier.padding(horizontal = 20.dp).testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
+            modifier = Modifier.padding(horizontal = 20.dp).testTag(KYC_VALIDATION_ERROR_TAG),
             style = LinkTheme.typography.detail,
             color = LinkTheme.colors.textCritical,
         )
@@ -250,7 +287,7 @@ private fun SheetHandle() {
 }
 
 @Composable
-private fun AdditionalKycHeader(
+private fun KycHeader(
     showBack: Boolean,
     onBack: () -> Unit,
     onClose: () -> Unit,
@@ -266,8 +303,8 @@ private fun AdditionalKycHeader(
         if (showBack) {
             HeaderIcon(
                 iconRes = R.drawable.stripe_link_chevron_left_kyc,
-                contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_back),
-                testTag = ADDITIONAL_KYC_BACK_BUTTON_TAG,
+                contentDescription = stringResource(R.string.stripe_link_onramp_kyc_back),
+                testTag = KYC_BACK_BUTTON_TAG,
                 onClick = onBack,
             )
         } else {
@@ -275,8 +312,8 @@ private fun AdditionalKycHeader(
         }
         HeaderIcon(
             iconRes = R.drawable.stripe_link_close_kyc,
-            contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_cancel),
-            testTag = ADDITIONAL_KYC_CANCEL_BUTTON_TAG,
+            contentDescription = stringResource(R.string.stripe_link_onramp_kyc_cancel),
+            testTag = KYC_CANCEL_BUTTON_TAG,
             onClick = onClose,
         )
     }
@@ -308,22 +345,22 @@ private fun HeaderIcon(
 }
 
 @Composable
-private fun ContextContent(requirementType: AdditionalKycRequirementType) {
-    val isProofOfAddress = requirementType == AdditionalKycRequirementType.ProofOfAddress
+private fun ContextContent(requirementType: KycRequirementType) {
+    val isProofOfAddress = requirementType == KycRequirementType.ProofOfAddress
     MessageContent(
         icon = if (isProofOfAddress) R.drawable.stripe_link_location else R.drawable.stripe_link_wallet,
         title = stringResource(
             if (isProofOfAddress) {
-                R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_title
+                R.string.stripe_link_onramp_kyc_proof_of_address_context_title
             } else {
-                R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title
+                R.string.stripe_link_onramp_kyc_source_of_funds_context_title
             },
         ),
         body = stringResource(
             if (isProofOfAddress) {
-                R.string.stripe_link_onramp_additional_kyc_proof_of_address_context_message
+                R.string.stripe_link_onramp_kyc_proof_of_address_context_message
             } else {
-                R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_message
+                R.string.stripe_link_onramp_kyc_source_of_funds_context_message
             },
         ),
         iconBackground = LinkTheme.colors.surfaceSecondary,
@@ -335,7 +372,7 @@ private fun ContextContent(requirementType: AdditionalKycRequirementType) {
 @Composable
 @Suppress("LongMethod")
 private fun QuestionnaireContent(
-    state: AdditionalKycScreenState,
+    state: KycScreenState,
     onQuestionAnswerChanged: (questionId: String, answer: String) -> Unit,
 ) {
     val questions = state.questions
@@ -350,7 +387,7 @@ private fun QuestionnaireContent(
         questions.forEachIndexed { index, question ->
             val interactionSource = remember(question.id) { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
-            val isError = state.validationError == AdditionalKycValidationError.MissingRequiredAnswers &&
+            val isError = state.validationError == KycValidationError.MissingRequiredAnswers &&
                 question.required && question.answer.isBlank()
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
@@ -373,9 +410,9 @@ private fun QuestionnaireContent(
                             shape = RoundedCornerShape(12.dp),
                         )
                         .semantics { contentDescription = question.prompt }
-                        .testTag(additionalKycQuestionTag(question.id)),
+                        .testTag(kycQuestionTag(question.id)),
                     interactionSource = interactionSource,
-                    label = { Text(stringResource(R.string.stripe_link_onramp_additional_kyc_answer)) },
+                    label = { Text(stringResource(R.string.stripe_link_onramp_kyc_answer)) },
                     textStyle = LinkTheme.typography.body,
                     singleLine = false,
                     minLines = 1,
@@ -406,12 +443,12 @@ private fun QuestionnaireContent(
 }
 
 @Composable
-private fun ScreenTitle(requirementType: AdditionalKycRequirementType) {
+private fun ScreenTitle(requirementType: KycRequirementType) {
     Text(
-        text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-            stringResource(R.string.stripe_link_onramp_additional_kyc_proof_of_address_upload_title)
+        text = if (requirementType == KycRequirementType.ProofOfAddress) {
+            stringResource(R.string.stripe_link_onramp_kyc_proof_of_address_upload_title)
         } else {
-            stringResource(R.string.stripe_link_onramp_additional_kyc_source_of_funds_context_title)
+            stringResource(R.string.stripe_link_onramp_kyc_source_of_funds_context_title)
         },
         modifier = Modifier.fillMaxWidth(),
         style = LinkTheme.typography.title,
@@ -422,7 +459,7 @@ private fun ScreenTitle(requirementType: AdditionalKycRequirementType) {
 
 @Composable
 private fun DocumentOverviewContent(
-    state: AdditionalKycScreenState,
+    state: KycScreenState,
     onAddDocuments: () -> Unit,
     onEditDocuments: (slotIndex: Int) -> Unit,
 ) {
@@ -437,7 +474,8 @@ private fun DocumentOverviewContent(
     ) {
         ScreenTitle(state.requirementType)
         Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_funding_sources_prompt),
+            text = state.document?.documentCollectionPrompt
+                ?: stringResource(R.string.stripe_link_onramp_kyc_funding_sources_prompt),
             style = LinkTheme.typography.detail,
             color = LinkTheme.colors.textPrimary,
         )
@@ -454,7 +492,7 @@ private fun DocumentOverviewContent(
 @Composable
 @Suppress("LongMethod")
 private fun SourceDocumentsCard(
-    groups: Map<String?, List<AdditionalKycDocumentSlotState>>,
+    groups: Map<String?, List<KycDocumentSlotState>>,
     canAddDocuments: Boolean,
     onAddDocuments: () -> Unit,
     onEditDocuments: (slotIndex: Int) -> Unit,
@@ -466,14 +504,14 @@ private fun SourceDocumentsCard(
             .background(LinkTheme.colors.surfaceSecondary)
             .padding(horizontal = 16.dp),
     ) {
-        groups.values.forEach { slots ->
+        groups.values.forEachIndexed { index, slots ->
             val first = slots.first()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onEditDocuments(first.index) }
                     .padding(vertical = 12.dp)
-                    .testTag(additionalKycDocumentGroupTag(first.index)),
+                    .testTag(kycDocumentGroupTag(first.index)),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -516,43 +554,52 @@ private fun SourceDocumentsCard(
                 }
                 ChevronRight()
             }
-            Spacer(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(LinkTheme.colors.textPrimary.copy(alpha = 0.08f))
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(enabled = canAddDocuments, onClick = onAddDocuments)
-                .padding(vertical = 12.dp)
-                .testTag(ADDITIONAL_KYC_ADD_DOCUMENTS_TAG),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stripe_link_add),
-                    contentDescription = null,
-                    tint = LinkTheme.colors.iconPrimary,
-                    modifier = Modifier.size(20.dp),
+            if (index < groups.size - 1 || canAddDocuments) {
+                Spacer(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(LinkTheme.colors.textPrimary.copy(alpha = 0.08f))
                 )
             }
-            Spacer(Modifier.width(16.dp))
-            Text(
-                text = stringResource(R.string.stripe_link_onramp_additional_kyc_add_documents),
-                modifier = Modifier.weight(1f),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textPrimary,
-            )
-            ChevronRight()
         }
+        if (canAddDocuments) {
+            AddDocumentsRow(onAddDocuments)
+        }
+    }
+}
+
+@Composable
+private fun AddDocumentsRow(onAddDocuments: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onAddDocuments)
+            .padding(vertical = 12.dp)
+            .testTag(KYC_ADD_DOCUMENTS_TAG),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .background(LinkTheme.colors.surfaceTertiary, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_link_add),
+                contentDescription = null,
+                tint = LinkTheme.colors.iconPrimary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = stringResource(R.string.stripe_link_onramp_kyc_add_documents),
+            modifier = Modifier.weight(1f),
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textPrimary,
+        )
+        ChevronRight()
     }
 }
 
@@ -569,7 +616,7 @@ private fun ChevronRight() {
 @Composable
 @Suppress("LongMethod")
 private fun DocumentEditorContent(
-    state: AdditionalKycScreenState,
+    state: KycScreenState,
     onShowDocumentTypes: (slotIndex: Int) -> Unit,
     onChooseFile: (slotIndex: Int) -> Unit,
     onRemoveFile: (slotIndex: Int) -> Unit,
@@ -581,7 +628,7 @@ private fun DocumentEditorContent(
         ?: return
     val selectedSubtypeId = editingSlot.selectedSubtypeId
     val completedSlots = document.slots.filter { slot ->
-        val matchesSelectedType = state.requirementType == AdditionalKycRequirementType.ProofOfAddress ||
+        val matchesSelectedType = state.requirementType == KycRequirementType.ProofOfAddress ||
             slot.selectedSubtypeId == selectedSubtypeId
         slot.fileName != null && matchesSelectedType
     }
@@ -593,20 +640,11 @@ private fun DocumentEditorContent(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ScreenTitle(state.requirementType)
-        if (state.requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-            Text(
-                text = stringResource(R.string.stripe_link_onramp_additional_kyc_proof_of_address_upload_message),
-                modifier = Modifier.fillMaxWidth(),
-                style = LinkTheme.typography.body,
-                color = LinkTheme.colors.textTertiary,
-                textAlign = TextAlign.Center,
-            )
-        }
+        DocumentEditorHeader(state.requirementType, document)
 
         if (state.errorMessages.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.stripe_link_onramp_additional_kyc_previous_document_issue),
+                text = stringResource(R.string.stripe_link_onramp_kyc_previous_document_issue),
                 style = LinkTheme.typography.detail,
                 color = LinkTheme.colors.textCritical,
             )
@@ -618,8 +656,8 @@ private fun DocumentEditorContent(
         )
 
         if (state.validationError in setOf(
-                AdditionalKycValidationError.UnsupportedFileType,
-                AdditionalKycValidationError.FileTooLarge,
+                KycValidationError.UnsupportedFileType,
+                KycValidationError.FileTooLarge,
             )
         ) {
             FileErrorCard(state = state, slotIndex = editingSlot.index, onRemoveFile = onRemoveFile)
@@ -631,7 +669,7 @@ private fun DocumentEditorContent(
                 UploadDocumentControl(
                     slot = editingSlot,
                     fileRequirements = document.fileRequirements,
-                    isUploading = state.selectingFileSlot == editingSlot.index,
+                    isUploading = state.uploadingFileSlot == editingSlot.index,
                     uploadingFileName = state.selectingFileName,
                     enabled = selectedSubtypeId != null && state.selectingFileSlot == null,
                     onChooseFile = onChooseFile,
@@ -639,7 +677,7 @@ private fun DocumentEditorContent(
             }
         }
 
-        if (state.validationError == AdditionalKycValidationError.FileUnavailable) {
+        if (state.validationError == KycValidationError.FileUnavailable) {
             InlineUploadError()
         }
 
@@ -653,9 +691,24 @@ private fun DocumentEditorContent(
 }
 
 @Composable
+private fun DocumentEditorHeader(requirementType: KycRequirementType, document: KycDocumentState) {
+    ScreenTitle(requirementType)
+    if (requirementType == KycRequirementType.ProofOfAddress) {
+        Text(
+            text = document.documentCollectionPrompt
+                ?: stringResource(R.string.stripe_link_onramp_kyc_proof_of_address_upload_message),
+            modifier = Modifier.fillMaxWidth(),
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textTertiary,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
 private fun DocumentTypeField(
-    requirementType: AdditionalKycRequirementType,
-    slot: AdditionalKycDocumentSlotState,
+    requirementType: KycRequirementType,
+    slot: KycDocumentSlotState,
     onClick: () -> Unit,
 ) {
     Row(
@@ -664,22 +717,22 @@ private fun DocumentTypeField(
             .background(LinkTheme.colors.surfaceSecondary, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .testTag(additionalKycSubtypePickerTag(slot.index)),
+            .testTag(kycSubtypePickerTag(slot.index)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
-                    stringResource(R.string.stripe_link_onramp_additional_kyc_document_type)
+                text = if (requirementType == KycRequirementType.ProofOfAddress) {
+                    stringResource(R.string.stripe_link_onramp_kyc_document_type)
                 } else {
-                    stringResource(R.string.stripe_link_onramp_additional_kyc_funds_source)
+                    stringResource(R.string.stripe_link_onramp_kyc_funds_source)
                 },
                 style = LinkTheme.typography.caption,
                 color = LinkTheme.colors.textTertiary,
             )
             Text(
                 text = slot.selectedSubtypeLabel
-                    ?: stringResource(R.string.stripe_link_onramp_additional_kyc_select_document_type),
+                    ?: stringResource(R.string.stripe_link_onramp_kyc_select_document_type),
                 style = LinkTheme.typography.body,
                 color = LinkTheme.colors.textPrimary,
             )
@@ -695,7 +748,7 @@ private fun DocumentTypeField(
 
 @Composable
 private fun UploadDocumentControl(
-    slot: AdditionalKycDocumentSlotState,
+    slot: KycDocumentSlotState,
     fileRequirements: String,
     isUploading: Boolean,
     uploadingFileName: String?,
@@ -710,12 +763,12 @@ private fun UploadDocumentControl(
             .dashedBorder(borderColor)
             .clickable(enabled = enabled) { onChooseFile(slot.index) }
             .padding(horizontal = 16.dp)
-            .testTag(additionalKycChooseFileTag(slot.index)),
+            .testTag(kycChooseFileTag(slot.index)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isUploading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(16.dp).testTag(ADDITIONAL_KYC_FILE_PROGRESS_TAG),
+                modifier = Modifier.size(16.dp).testTag(KYC_FILE_PROGRESS_TAG),
                 color = documentSuccessColor(),
                 strokeWidth = 3.dp,
             )
@@ -735,14 +788,14 @@ private fun UploadDocumentControl(
                 text = if (isUploading && uploadingFileName != null) {
                     uploadingFileName
                 } else {
-                    stringResource(R.string.stripe_link_onramp_additional_kyc_upload_document)
+                    stringResource(R.string.stripe_link_onramp_kyc_upload_document)
                 },
                 style = LinkTheme.typography.body,
                 color = if (enabled || isUploading) LinkTheme.colors.textPrimary else LinkTheme.colors.textTertiary,
             )
             Text(
                 text = if (isUploading) {
-                    stringResource(R.string.stripe_link_onramp_additional_kyc_uploading)
+                    stringResource(R.string.stripe_link_onramp_kyc_uploading)
                 } else {
                     fileRequirements
                 },
@@ -755,7 +808,7 @@ private fun UploadDocumentControl(
 
 @Composable
 private fun UploadedFileCard(
-    slot: AdditionalKycDocumentSlotState,
+    slot: KycDocumentSlotState,
     onRemoveFile: (slotIndex: Int) -> Unit,
 ) {
     Row(
@@ -776,14 +829,14 @@ private fun UploadedFileCard(
         Column(Modifier.weight(1f)) {
             Text(
                 text = slot.fileName.orEmpty(),
-                modifier = Modifier.testTag(additionalKycFileNameTag(slot.index)),
+                modifier = Modifier.testTag(kycFileNameTag(slot.index)),
                 style = LinkTheme.typography.body,
                 color = LinkTheme.colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = stringResource(R.string.stripe_link_onramp_additional_kyc_uploaded),
+                text = stringResource(R.string.stripe_link_onramp_kyc_uploaded),
                 style = LinkTheme.typography.caption,
                 color = LinkTheme.colors.textTertiary,
             )
@@ -798,7 +851,7 @@ private fun UploadedFileCard(
 
 @Composable
 private fun FileErrorCard(
-    state: AdditionalKycScreenState,
+    state: KycScreenState,
     slotIndex: Int,
     onRemoveFile: (slotIndex: Int) -> Unit,
 ) {
@@ -808,7 +861,7 @@ private fun FileErrorCard(
             .heightIn(min = 76.dp)
             .background(documentErrorBackground(), RoundedCornerShape(12.dp))
             .padding(start = 16.dp, end = 6.dp, top = 16.dp, bottom = 16.dp)
-            .testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
+            .testTag(KYC_VALIDATION_ERROR_TAG),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -821,7 +874,7 @@ private fun FileErrorCard(
         Column(Modifier.weight(1f)) {
             Text(
                 text = state.validationFileName
-                    ?: stringResource(R.string.stripe_link_onramp_additional_kyc_selected_document),
+                    ?: stringResource(R.string.stripe_link_onramp_kyc_selected_document),
                 style = LinkTheme.typography.body,
                 color = LinkTheme.colors.textPrimary,
                 maxLines = 1,
@@ -847,13 +900,13 @@ private fun RemoveDocumentButton(
     slotIndex: Int,
     onRemoveFile: (Int) -> Unit,
 ) {
-    val description = stringResource(R.string.stripe_link_onramp_additional_kyc_remove_file)
+    val description = stringResource(R.string.stripe_link_onramp_kyc_remove_file)
     IconButton(
         onClick = { onRemoveFile(slotIndex) },
         modifier = Modifier
             .size(48.dp)
             .semantics { contentDescription = "$description, $fileName" }
-            .testTag(additionalKycRemoveFileTag(slotIndex)),
+            .testTag(kycRemoveFileTag(slotIndex)),
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_link_trash),
@@ -876,14 +929,14 @@ private fun documentBorderColor(): Color =
 private fun documentErrorBackground(): Color =
     if (LinkTheme.colors.isDark) DocumentCritical.copy(alpha = 0.12f) else DocumentErrorLight
 
-internal const val ADDITIONAL_KYC_FILE_PROGRESS_TAG = "additional_kyc_file_progress"
+internal const val KYC_FILE_PROGRESS_TAG = "kyc_file_progress"
 
 @Composable
 private fun InlineUploadError() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag(ADDITIONAL_KYC_VALIDATION_ERROR_TAG),
+            .testTag(KYC_VALIDATION_ERROR_TAG),
         verticalAlignment = Alignment.Top,
     ) {
         Icon(
@@ -894,7 +947,7 @@ private fun InlineUploadError() {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.stripe_link_onramp_additional_kyc_upload_failed),
+            text = stringResource(R.string.stripe_link_onramp_kyc_upload_failed),
             style = LinkTheme.typography.caption,
             color = LinkTheme.colors.textCritical,
         )
@@ -903,7 +956,7 @@ private fun InlineUploadError() {
 
 @Composable
 private fun DocumentInstructions(
-    requirementType: AdditionalKycRequirementType,
+    requirementType: KycRequirementType,
     subtypeId: String?,
     serverInstructions: List<String>,
 ) {
@@ -912,14 +965,14 @@ private fun DocumentInstructions(
         return
     }
 
-    if (requirementType == AdditionalKycRequirementType.ProofOfAddress) {
+    if (requirementType == KycRequirementType.ProofOfAddress) {
         BulletList(
             items = listOf(
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_instruction_name_address),
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_instruction_id_valid),
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_instruction_recent),
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_instruction_corners),
-                stringResource(R.string.stripe_link_onramp_additional_kyc_proof_instruction_digital),
+                stringResource(R.string.stripe_link_onramp_kyc_proof_instruction_name_address),
+                stringResource(R.string.stripe_link_onramp_kyc_proof_instruction_id_valid),
+                stringResource(R.string.stripe_link_onramp_kyc_proof_instruction_recent),
+                stringResource(R.string.stripe_link_onramp_kyc_proof_instruction_corners),
+                stringResource(R.string.stripe_link_onramp_kyc_proof_instruction_digital),
             )
         )
         return
@@ -930,34 +983,34 @@ private fun DocumentInstructions(
     val isCompanyProfits = "company" in normalizedSubtype || "profit" in normalizedSubtype
     val documents = when {
         isSalary -> listOf(
-            stringResource(R.string.stripe_link_onramp_additional_kyc_salary_document_payslips),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_salary_document_statements),
+            stringResource(R.string.stripe_link_onramp_kyc_salary_document_payslips),
+            stringResource(R.string.stripe_link_onramp_kyc_salary_document_statements),
         )
         isCompanyProfits -> listOf(
-            stringResource(R.string.stripe_link_onramp_additional_kyc_company_profits_document),
+            stringResource(R.string.stripe_link_onramp_kyc_company_profits_document),
         )
         else -> serverInstructions
     }
     val criteria = when {
         isSalary -> listOf(
-            stringResource(R.string.stripe_link_onramp_additional_kyc_salary_criteria_date),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_criteria_value),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_criteria_name),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_salary_criteria_payslip),
+            stringResource(R.string.stripe_link_onramp_kyc_salary_criteria_date),
+            stringResource(R.string.stripe_link_onramp_kyc_criteria_value),
+            stringResource(R.string.stripe_link_onramp_kyc_criteria_name),
+            stringResource(R.string.stripe_link_onramp_kyc_salary_criteria_payslip),
         )
         isCompanyProfits -> listOf(
-            stringResource(R.string.stripe_link_onramp_additional_kyc_company_profits_criteria_date),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_criteria_value),
-            stringResource(R.string.stripe_link_onramp_additional_kyc_criteria_name),
+            stringResource(R.string.stripe_link_onramp_kyc_company_profits_criteria_date),
+            stringResource(R.string.stripe_link_onramp_kyc_criteria_value),
+            stringResource(R.string.stripe_link_onramp_kyc_criteria_name),
         )
         else -> emptyList()
     }
     if (documents.isNotEmpty()) {
-        SectionHeading(R.string.stripe_link_onramp_additional_kyc_document_section_title)
+        SectionHeading(R.string.stripe_link_onramp_kyc_document_section_title)
         BulletList(documents)
     }
     if (criteria.isNotEmpty()) {
-        SectionHeading(R.string.stripe_link_onramp_additional_kyc_acceptance_criteria)
+        SectionHeading(R.string.stripe_link_onramp_kyc_acceptance_criteria)
         BulletList(criteria)
     }
 }
@@ -993,11 +1046,11 @@ private fun BulletList(items: List<String>) {
 private fun DocumentUploadedContent() {
     MessageContent(
         icon = R.drawable.stripe_link_check_kyc,
-        title = stringResource(R.string.stripe_link_onramp_additional_kyc_document_uploaded_title),
-        body = stringResource(R.string.stripe_link_onramp_additional_kyc_document_uploaded_message),
+        title = stringResource(R.string.stripe_link_onramp_kyc_document_uploaded_title),
+        body = stringResource(R.string.stripe_link_onramp_kyc_document_uploaded_message),
         iconBackground = MessageSuccessBackground,
         iconForeground = MessageSuccessForeground,
-        titleModifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
+        titleModifier = Modifier.testTag(KYC_SUBMITTED_TITLE_TAG),
     )
 }
 
@@ -1009,11 +1062,11 @@ private fun SubmittedContent(documentsUploaded: Boolean) {
     }
     MessageContent(
         icon = R.drawable.stripe_link_clock,
-        title = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_title),
-        body = stringResource(R.string.stripe_link_onramp_additional_kyc_submitted_review_message),
+        title = stringResource(R.string.stripe_link_onramp_kyc_submitted_title),
+        body = stringResource(R.string.stripe_link_onramp_kyc_submitted_review_message),
         iconBackground = LinkTheme.colors.surfaceSecondary,
         iconForeground = LinkTheme.colors.textPrimary,
-        titleModifier = Modifier.testTag(ADDITIONAL_KYC_SUBMITTED_TITLE_TAG),
+        titleModifier = Modifier.testTag(KYC_SUBMITTED_TITLE_TAG),
     )
 }
 
@@ -1021,8 +1074,8 @@ private fun SubmittedContent(documentsUploaded: Boolean) {
 private fun UnavailableContent() {
     MessageContent(
         icon = R.drawable.stripe_link_error_template,
-        title = stringResource(R.string.stripe_link_onramp_additional_kyc_something_went_wrong),
-        body = stringResource(R.string.stripe_link_onramp_additional_kyc_try_again_later),
+        title = stringResource(R.string.stripe_link_onramp_kyc_something_went_wrong),
+        body = stringResource(R.string.stripe_link_onramp_kyc_try_again_later),
         iconBackground = MessageErrorBackground,
         iconForeground = Color.White,
         titleModifier = Modifier,
@@ -1085,18 +1138,17 @@ private fun MessageContent(
 private fun messageSurfaceColor(): Color =
     if (LinkTheme.colors.isDark) MessageDarkSurface else LinkTheme.colors.surfacePrimary
 
-private val AdditionalKycCollectionPage.isMessage: Boolean
+private val KycCollectionPage.isMessage: Boolean
     get() = this in setOf(
-        AdditionalKycCollectionPage.Context,
-        AdditionalKycCollectionPage.Submitted,
-        AdditionalKycCollectionPage.Pending,
-        AdditionalKycCollectionPage.Unavailable,
+        KycCollectionPage.Context,
+        KycCollectionPage.Submitted,
+        KycCollectionPage.Unavailable,
     )
 
 @Composable
 @Suppress("LongMethod")
 private fun DocumentTypeSelector(
-    slot: AdditionalKycDocumentSlotState,
+    slot: KycDocumentSlotState,
     onClose: () -> Unit,
     onSelected: (subtypeId: String) -> Unit,
 ) {
@@ -1116,7 +1168,7 @@ private fun DocumentTypeSelector(
         ) {
             Spacer(Modifier.size(44.dp))
             Text(
-                text = stringResource(R.string.stripe_link_onramp_additional_kyc_document_type),
+                text = stringResource(R.string.stripe_link_onramp_kyc_document_type),
                 modifier = Modifier.weight(1f),
                 style = LinkTheme.typography.bodyEmphasized,
                 color = LinkTheme.colors.textPrimary,
@@ -1124,8 +1176,8 @@ private fun DocumentTypeSelector(
             )
             HeaderIcon(
                 iconRes = R.drawable.stripe_link_close_kyc,
-                contentDescription = stringResource(R.string.stripe_link_onramp_additional_kyc_close),
-                testTag = ADDITIONAL_KYC_SELECTOR_CLOSE_TAG,
+                contentDescription = stringResource(R.string.stripe_link_onramp_kyc_close),
+                testTag = KYC_SELECTOR_CLOSE_TAG,
                 onClick = onClose,
             )
         }
@@ -1142,7 +1194,7 @@ private fun DocumentTypeSelector(
                         .fillMaxWidth()
                         .clickable(enabled = subtype.isEnabled) { onSelected(subtype.id) }
                         .padding(vertical = 6.dp)
-                        .testTag(additionalKycSubtypeOptionTag(slot.index, subtype.id)),
+                        .testTag(kycSubtypeOptionTag(slot.index, subtype.id)),
                     verticalAlignment = Alignment.Top,
                 ) {
                     Box(
@@ -1187,8 +1239,8 @@ private fun DocumentTypeSelector(
 
 @Composable
 @Suppress("CyclomaticComplexMethod", "LongMethod")
-private fun AdditionalKycPrimaryButton(
-    state: AdditionalKycScreenState,
+private fun KycPrimaryButton(
+    state: KycScreenState,
     onClose: () -> Unit,
     onSubmit: () -> Unit,
     onContinue: () -> Unit,
@@ -1200,49 +1252,48 @@ private fun AdditionalKycPrimaryButton(
     val editingDocumentCount = document?.slots.orEmpty().count { slot ->
         slot.fileName != null && slot.selectedSubtypeId == editingSubtype
     }
-    val isSubmitted = state.page == AdditionalKycCollectionPage.Submitted
-    val isPending = state.page == AdditionalKycCollectionPage.Pending
-    val isUnavailable = state.page == AdditionalKycCollectionPage.Unavailable
-    val isDocumentEditor = state.page == AdditionalKycCollectionPage.DocumentEditor
-    val isQuestionnaireOnly = state.page == AdditionalKycCollectionPage.Questionnaire &&
+    val isSubmitted = state.page == KycCollectionPage.Submitted
+    val isUnavailable = state.page == KycCollectionPage.Unavailable
+    val isDocumentEditor = state.page == KycCollectionPage.DocumentEditor
+    val isQuestionnaireOnly = state.page == KycCollectionPage.Questionnaire &&
         state.document == null
     val isSourceEditor = isDocumentEditor &&
-        state.requirementType == AdditionalKycRequirementType.SourceOfFunds
+        state.requirementType == KycRequirementType.SourceOfFunds
     val label = when {
-        isUnavailable -> stringResource(R.string.stripe_link_onramp_additional_kyc_close)
-        isSubmitted || isPending -> stringResource(R.string.stripe_link_onramp_additional_kyc_done)
+        isUnavailable -> stringResource(R.string.stripe_link_onramp_kyc_close)
+        isSubmitted -> stringResource(R.string.stripe_link_onramp_kyc_done)
         isSourceEditor && editingDocumentCount == 0 ->
-            stringResource(R.string.stripe_link_onramp_additional_kyc_add_documents)
+            stringResource(R.string.stripe_link_onramp_kyc_add_documents)
         isSourceEditor -> stringResource(
             if (editingDocumentCount == 1) {
-                R.string.stripe_link_onramp_additional_kyc_add_one_document
+                R.string.stripe_link_onramp_kyc_add_one_document
             } else {
-                R.string.stripe_link_onramp_additional_kyc_add_multiple_documents
+                R.string.stripe_link_onramp_kyc_add_multiple_documents
             },
             editingDocumentCount,
         )
         state.page in setOf(
-            AdditionalKycCollectionPage.Context,
-            AdditionalKycCollectionPage.Questionnaire,
-        ) && !isQuestionnaireOnly -> stringResource(R.string.stripe_link_onramp_additional_kyc_continue)
-        else -> stringResource(R.string.stripe_link_onramp_additional_kyc_submit)
+            KycCollectionPage.Context,
+            KycCollectionPage.Questionnaire,
+        ) && !isQuestionnaireOnly -> stringResource(R.string.stripe_link_onramp_kyc_continue)
+        else -> stringResource(R.string.stripe_link_onramp_kyc_submit)
     }
     val enabled = when {
-        isUnavailable || isSubmitted || isPending -> true
-        state.submissionState == AdditionalKycSubmissionState.Submitting -> false
+        isUnavailable || isSubmitted -> true
+        state.submissionState == KycSubmissionState.Submitting -> false
         isSourceEditor -> state.canContinue
         state.page in setOf(
-            AdditionalKycCollectionPage.Context,
-            AdditionalKycCollectionPage.Questionnaire,
+            KycCollectionPage.Context,
+            KycCollectionPage.Questionnaire,
         ) && !isQuestionnaireOnly -> state.canContinue
         else -> state.canSubmit
     }
     val action = when {
-        isUnavailable || isPending -> onClose
+        isUnavailable -> onClose
         isSubmitted -> onContinue
         isSourceEditor || state.page in setOf(
-            AdditionalKycCollectionPage.Context,
-            AdditionalKycCollectionPage.Questionnaire,
+            KycCollectionPage.Context,
+            KycCollectionPage.Questionnaire,
         ) && !isQuestionnaireOnly -> onContinue
         else -> onSubmit
     }
@@ -1260,7 +1311,7 @@ private fun AdditionalKycPrimaryButton(
         PrimaryButton(
             label = label,
             state = when {
-                state.submissionState == AdditionalKycSubmissionState.Submitting ->
+                state.submissionState == KycSubmissionState.Submitting ->
                     PrimaryButtonState.Processing
                 enabled -> PrimaryButtonState.Enabled
                 else -> PrimaryButtonState.Disabled
@@ -1268,24 +1319,24 @@ private fun AdditionalKycPrimaryButton(
             onButtonClick = action,
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(ADDITIONAL_KYC_SUBMIT_BUTTON_TAG),
+                .testTag(KYC_SUBMIT_BUTTON_TAG),
         )
     }
 }
 
 @Composable
 private fun validationErrorMessage(
-    error: AdditionalKycValidationError?,
+    error: KycValidationError?,
     maxFileSizeMegabytes: Int?,
 ): String {
     return when (error) {
-        AdditionalKycValidationError.UnsupportedFileType ->
-            stringResource(R.string.stripe_link_onramp_additional_kyc_unsupported_file_type)
-        AdditionalKycValidationError.FileTooLarge -> stringResource(
-            R.string.stripe_link_onramp_additional_kyc_file_too_large_design,
+        KycValidationError.UnsupportedFileType ->
+            stringResource(R.string.stripe_link_onramp_kyc_unsupported_file_type)
+        KycValidationError.FileTooLarge -> stringResource(
+            R.string.stripe_link_onramp_kyc_file_too_large_design,
             maxFileSizeMegabytes ?: DEFAULT_MAX_FILE_SIZE_MEGABYTES,
         )
-        else -> stringResource(R.string.stripe_link_onramp_additional_kyc_upload_failed)
+        else -> stringResource(R.string.stripe_link_onramp_kyc_upload_failed)
     }
 }
 
@@ -1305,95 +1356,85 @@ private fun Modifier.dashedBorder(color: androidx.compose.ui.graphics.Color): Mo
     )
 }
 
-internal data class AdditionalKycScreenState(
-    val page: AdditionalKycCollectionPage,
-    val requirementType: AdditionalKycRequirementType,
+internal data class KycScreenState(
+    val page: KycCollectionPage,
+    val requirementType: KycRequirementType,
     val errorMessages: List<String>,
-    val questions: List<AdditionalKycQuestionState>,
-    val document: AdditionalKycDocumentState?,
-    val validationError: AdditionalKycValidationError?,
+    val questions: List<KycQuestionState>,
+    val document: KycDocumentState?,
+    val validationError: KycValidationError?,
     val validationFileName: String?,
     val selectingFileSlot: Int?,
     val selectingFileName: String?,
+    val uploadingFileSlot: Int?,
     val canSubmit: Boolean,
     val canContinue: Boolean,
     val isCollectionAvailable: Boolean,
-    val submissionState: AdditionalKycSubmissionState,
+    val submissionState: KycSubmissionState,
     val currentRequirement: Int,
     val totalRequirements: Int,
     val hasMoreRequirements: Boolean,
-    val pendingRequirements: List<AdditionalKycPendingRequirementState>,
     val completedDocumentCount: Int,
 )
 
-internal enum class AdditionalKycCollectionPage {
+internal enum class KycCollectionPage {
     Context,
     Questionnaire,
     DocumentOverview,
     DocumentEditor,
     Submitted,
-    Pending,
     Unavailable,
 }
 
-internal data class AdditionalKycPendingRequirementState(
-    val requirementType: AdditionalKycRequirementType,
-    val status: AdditionalKycPendingRequirementStatus,
-)
-
-internal enum class AdditionalKycPendingRequirementStatus {
-    WaitingForReview,
-    Processing,
-}
-
-internal enum class AdditionalKycSubmissionState {
+internal enum class KycSubmissionState {
     Collecting,
     Submitting,
     Failed,
     Submitted,
 }
 
-internal enum class AdditionalKycRequirementType {
+internal enum class KycRequirementType {
     ProofOfAddress,
     SourceOfFunds,
-    AdditionalVerification,
+    Verification,
 }
 
-internal data class AdditionalKycQuestionState(
+internal data class KycQuestionState(
     val id: String,
     val prompt: String,
     val answer: String,
     val required: Boolean,
 )
 
-internal data class AdditionalKycDocumentState(
+internal data class KycDocumentState(
     val acceptedFormats: List<String>,
     val instructions: List<String>,
+    val documentCollectionPrompt: String?,
     val fileRequirements: String,
     val maxFileSizeMegabytes: Int?,
     val minDocumentTypes: Int,
     val maxDocumentTypes: Int,
     val maxFilesPerDocumentType: Int,
     val editingSlotIndex: Int?,
-    val slots: List<AdditionalKycDocumentSlotState>,
+    val slots: List<KycDocumentSlotState>,
 )
 
-internal data class AdditionalKycDocumentSlotState(
+internal data class KycDocumentSlotState(
     val index: Int,
-    val subtypes: List<AdditionalKycDocumentSubtypeState>,
+    val subtypes: List<KycDocumentSubtypeState>,
     val selectedSubtypeId: String?,
     val selectedSubtypeLabel: String?,
     val fileName: String?,
 )
 
-internal data class AdditionalKycDocumentSubtypeState(
+internal data class KycDocumentSubtypeState(
     val id: String,
     val label: String,
     val description: String?,
     val isEnabled: Boolean,
 )
 
-internal enum class AdditionalKycValidationError {
+internal enum class KycValidationError {
     MissingRequiredAnswers,
     MissingDocumentType,
     MissingDocuments,
@@ -1402,35 +1443,35 @@ internal enum class AdditionalKycValidationError {
     FileTooLarge,
 }
 
-internal fun additionalKycQuestionTag(questionId: String): String =
-    "AdditionalKycQuestion-$questionId"
+internal fun kycQuestionTag(questionId: String): String =
+    "KycQuestion-$questionId"
 
-internal fun additionalKycSubtypePickerTag(slotIndex: Int): String =
-    "AdditionalKycSubtypePicker-$slotIndex"
+internal fun kycSubtypePickerTag(slotIndex: Int): String =
+    "KycSubtypePicker-$slotIndex"
 
-internal fun additionalKycSubtypeOptionTag(slotIndex: Int, subtypeId: String): String =
-    "AdditionalKycSubtypeOption-$slotIndex-$subtypeId"
+internal fun kycSubtypeOptionTag(slotIndex: Int, subtypeId: String): String =
+    "KycSubtypeOption-$slotIndex-$subtypeId"
 
-internal fun additionalKycChooseFileTag(slotIndex: Int): String =
-    "AdditionalKycChooseFile-$slotIndex"
+internal fun kycChooseFileTag(slotIndex: Int): String =
+    "KycChooseFile-$slotIndex"
 
-internal fun additionalKycRemoveFileTag(slotIndex: Int): String =
-    "AdditionalKycRemoveFile-$slotIndex"
+internal fun kycRemoveFileTag(slotIndex: Int): String =
+    "KycRemoveFile-$slotIndex"
 
-internal fun additionalKycFileNameTag(slotIndex: Int): String =
-    "AdditionalKycFileName-$slotIndex"
+internal fun kycFileNameTag(slotIndex: Int): String =
+    "KycFileName-$slotIndex"
 
-internal fun additionalKycDocumentGroupTag(slotIndex: Int): String =
-    "AdditionalKycDocumentGroup-$slotIndex"
+internal fun kycDocumentGroupTag(slotIndex: Int): String =
+    "KycDocumentGroup-$slotIndex"
 
 private const val DEFAULT_MAX_FILE_SIZE_MEGABYTES = 5
-internal const val ADDITIONAL_KYC_CANCEL_BUTTON_TAG = "AdditionalKycCancelButton"
-internal const val ADDITIONAL_KYC_BACK_BUTTON_TAG = "AdditionalKycBackButton"
-internal const val ADDITIONAL_KYC_SELECTOR_CLOSE_TAG = "AdditionalKycSelectorClose"
-internal const val ADDITIONAL_KYC_ADD_DOCUMENTS_TAG = "AdditionalKycAddDocuments"
-internal const val ADDITIONAL_KYC_SUBMIT_BUTTON_TAG = "AdditionalKycSubmitButton"
-internal const val ADDITIONAL_KYC_VALIDATION_ERROR_TAG = "AdditionalKycValidationError"
-internal const val ADDITIONAL_KYC_SUBMITTED_TITLE_TAG = "AdditionalKycSubmittedTitle"
+internal const val KYC_CANCEL_BUTTON_TAG = "KycCancelButton"
+internal const val KYC_BACK_BUTTON_TAG = "KycBackButton"
+internal const val KYC_SELECTOR_CLOSE_TAG = "KycSelectorClose"
+internal const val KYC_ADD_DOCUMENTS_TAG = "KycAddDocuments"
+internal const val KYC_SUBMIT_BUTTON_TAG = "KycSubmitButton"
+internal const val KYC_VALIDATION_ERROR_TAG = "KycValidationError"
+internal const val KYC_SUBMITTED_TITLE_TAG = "KycSubmittedTitle"
 
 private val MessageErrorBackground = Color(0xFFE61947)
 
@@ -1455,3 +1496,5 @@ private val DocumentBorderLight = Color(0xFFA3A3A3)
 private val DocumentCritical = Color(0xFFE61947)
 
 private val DocumentErrorLight = Color(0xFFFEF4F6)
+
+private const val KYC_TRANSITION_DURATION = 300

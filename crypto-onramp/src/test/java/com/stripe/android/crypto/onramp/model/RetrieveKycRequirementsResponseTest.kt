@@ -5,7 +5,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.Test
 
-class RetrieveAdditionalKycRequirementsResponseTest {
+class RetrieveKycRequirementsResponseTest {
     private val json = Json {
         ignoreUnknownKeys = true
     }
@@ -13,19 +13,66 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `server per source file allowance is preserved`() {
         val response = parseFixture("source_of_funds_required.json") {
-            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": 3, \"max_document_types\":")
+            it.replace("\"max_files_per_document_type\": 10", "\"max_files_per_document_type\": 3")
         }
-        val document = response.requirements.toAdditionalKycRequirements().userActionRequired.single().document
+        val document = response.requirements.toKycRequirements().userActionRequired.single().document
         assertThat(document?.maxFilesPerDocumentType).isEqualTo(3)
     }
 
     @Test
-    fun `null per source file allowance uses fallback`() {
-        val response = parseFixture("source_of_funds_required.json") {
-            it.replace("\"max_document_types\":", "\"max_files_per_document_type\": null, \"max_document_types\":")
+    fun `null per source file allowance fails decoding`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace("\"max_files_per_document_type\": 10", "\"max_files_per_document_type\": null")
+            }
         }
-        val document = response.requirements.toAdditionalKycRequirements().userActionRequired.single().document
-        assertThat(document?.maxFilesPerDocumentType).isEqualTo(10)
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `omitted per source file allowance fails decoding`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace("\"max_files_per_document_type\": 10,", "")
+            }
+        }
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `question answer limits are required`() {
+        val result = runCatching {
+            parseFixture("source_of_funds_required.json") {
+                it.replace(",\n              \"max_questionnaire_answer_characters\": 5000", "")
+            }
+        }
+        assertThat(result.exceptionOrNull()).isInstanceOf(SerializationException::class.java)
+    }
+
+    @Test
+    fun `backend prompt and answer limit reach the domain model`() {
+        val response = parseFixture("source_of_funds_required.json") {
+            it.replace("\"instructions\":", "\"document_collection_prompt\": \"Backend prompt\", \"instructions\":")
+                .replace("\"max_questionnaire_answer_characters\": 5000", "\"max_questionnaire_answer_characters\": 42")
+        }
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isEqualTo("Backend prompt")
+        assertThat(requirement.questionnaire?.questions?.single()?.maxQuestionnaireAnswerCharacters).isEqualTo(42)
+    }
+
+    @Test
+    fun `omitted document collection prompt remains absent`() {
+        val requirement = parseFixture("proof_of_address_required.json")
+            .requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isNull()
+    }
+
+    @Test
+    fun `explicit null document collection prompt remains absent`() {
+        val requirement = parseFixture("proof_of_address_required.json") {
+            it.replace("\"instructions\":", "\"document_collection_prompt\": null, \"instructions\":")
+        }.requirements.toKycRequirements().userActionRequired.single()
+        assertThat(requirement.document?.documentCollectionPrompt).isNull()
     }
 
     @Test
@@ -50,14 +97,14 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         assertThat(document.acceptedSubtypes.first().description)
             .isEqualTo("ID card, passport, residence permit, or driver's license.")
         assertThat(document.instructions).hasSize(5)
-        assertThat(requirement.additionalRequirements).isNull()
+        assertThat(requirement.collectionRequirements).isNull()
     }
 
     @Test
     fun `source of funds questionnaire is parsed beside document requirements`() {
         val requirement = parseFixture("source_of_funds_required.json")
             .requirements.entries.getValue("source_of_funds")
-        val questionnaire = requirement.additionalRequirements
+        val questionnaire = requirement.collectionRequirements
             ?.questionnaire
         val questions = requireNotNull(questionnaire).questions
 
@@ -77,7 +124,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
 
         assertThat(requirement.awaitingActionFrom).isEqualTo("partner")
         assertThat(requirement.document).isNull()
-        assertThat(requirement.additionalRequirements).isNull()
+        assertThat(requirement.collectionRequirements).isNull()
     }
 
     @Test
@@ -120,11 +167,11 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         val requirement = decode(
             userRequirementJson(
                 document = "null",
-                additionalRequirements = "[]"
+                collectionRequirements = "[]"
             )
         ).requirements.entries.values.single()
 
-        assertThat(requirement.additionalRequirements).isNull()
+        assertThat(requirement.collectionRequirements).isNull()
     }
 
     @Test
@@ -132,11 +179,11 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         val requirement = decode(
             userRequirementJson(
                 document = "null",
-                additionalRequirements = """{"questionnaire": []}"""
+                collectionRequirements = """{"questionnaire": []}"""
             )
         ).requirements.entries.values.single()
 
-        assertThat(requirement.additionalRequirements?.questionnaire).isNull()
+        assertThat(requirement.collectionRequirements?.questionnaire).isNull()
     }
 
     @Test
@@ -158,7 +205,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `unknown action owner is preserved when decoding`() {
         val response = decode(userRequirementJson(document = "null").replace("user", "future_owner"))
-        val requirement = response.requirements.toAdditionalKycRequirements().unrecognizedActionOwner.single()
+        val requirement = response.requirements.toKycRequirements().unrecognizedActionOwner.single()
 
         assertThat(requirement.description).isEqualTo("proof_of_address")
         assertThat(requirement.awaitingActionFrom).isEqualTo("future_owner")
@@ -169,14 +216,14 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         val response = decode(
             userRequirementJson(
                 document = "null",
-                additionalRequirements = """
+                collectionRequirements = """
                     {"questionnaire":{"questions":[{
-                      "id":"purpose", "prompt":"Why?", "answer_type":"future_type", "required":true
+                      "id":"purpose", "prompt":"Why?", "answer_type":"future_type", "required":true, "max_questionnaire_answer_characters": 5000
                     }]}}
                 """.trimIndent(),
             )
         )
-        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
 
         assertThat(requirement.document).isNull()
         assertThat(requirement.questionnaire?.questions?.single()?.answerType).isEqualTo("future_type")
@@ -185,7 +232,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `document collection settings are preserved in domain model`() {
         val response = parseFixture("proof_of_address_required.json")
-        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
         val document = requireNotNull(requirement.document)
 
         assertThat(requirement.description).isEqualTo("proof_of_address")
@@ -205,7 +252,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
                 """"errors": [{"code":"document_rejected","description":"Verification failed"}]""",
             )
         )
-        val error = response.requirements.toAdditionalKycRequirements().userActionRequired.single().errors.single()
+        val error = response.requirements.toKycRequirements().userActionRequired.single().errors.single()
 
         assertThat(error.code).isEqualTo("document_rejected")
         assertThat(error.developerMessage).isEqualTo("Verification failed")
@@ -214,7 +261,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     @Test
     fun `missing subtype description is preserved as null`() {
         val response = parseFixture("source_of_funds_required.json")
-        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
         val subtypes = requireNotNull(requirement.document).acceptedSubtypes
 
         assertThat(subtypes.first().description).isEqualTo("Recent payslips from your employer")
@@ -228,7 +275,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
         val response = parseFixture("source_of_funds_required.json") { fixture ->
             fixture.replace("\"description\": \"Recent payslips from your employer\"", "\"description\": null")
         }
-        val requirement = response.requirements.toAdditionalKycRequirements().userActionRequired.single()
+        val requirement = response.requirements.toKycRequirements().userActionRequired.single()
         val subtype = requireNotNull(requirement.document).acceptedSubtypes.first()
 
         assertThat(subtype.id).isEqualTo("payslip")
@@ -238,19 +285,19 @@ class RetrieveAdditionalKycRequirementsResponseTest {
     private fun parseFixture(
         fileName: String,
         transform: (String) -> String = { it },
-    ): RetrieveAdditionalKycRequirementsResponse {
+    ): RetrieveKycRequirementsResponse {
         val fixture = requireNotNull(
-            javaClass.classLoader?.getResourceAsStream("additional_kyc_requirements/$fileName")
+            javaClass.classLoader?.getResourceAsStream("kyc_requirements/$fileName")
         ).bufferedReader().use { it.readText() }
 
         return decode(transform(fixture))
     }
 
-    private fun decode(value: String): RetrieveAdditionalKycRequirementsResponse {
-        return json.decodeFromString(RetrieveAdditionalKycRequirementsResponse.serializer(), value)
+    private fun decode(value: String): RetrieveKycRequirementsResponse {
+        return json.decodeFromString(RetrieveKycRequirementsResponse.serializer(), value)
     }
 
-    private fun userRequirementJson(document: String, additionalRequirements: String = "null"): String {
+    private fun userRequirementJson(document: String, collectionRequirements: String = "null"): String {
         return """
             {
               "requirements": {
@@ -259,7 +306,7 @@ class RetrieveAdditionalKycRequirementsResponseTest {
                   "awaiting_action_from": "user",
                   "errors": [],
                   "document": $document,
-                  "additional_requirements": $additionalRequirements
+                  "additional_requirements": $collectionRequirements
                 }
               }
             }
