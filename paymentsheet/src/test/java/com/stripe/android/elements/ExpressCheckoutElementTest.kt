@@ -22,7 +22,6 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
-        assertThat(state.paymentMethodOrder).isEmpty()
         assertThat(state.appearance.buttonLayout.maxColumns).isNull()
         assertThat(state.appearance.buttonLayout.maxRows).isNull()
         assertThat(state.appearance.buttonTheme).isEqualTo(
@@ -57,34 +56,6 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Checkout
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).containsExactly("INTERAC")
-    }
-
-    @Test
-    fun `configuration builds payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(
-                listOf(
-                    "link",
-                    "google_pay",
-                )
-            )
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay,
-        ).inOrder()
-    }
-
-    @Test
-    fun `configuration ignores invalid payment methods in payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(listOf("invalid", "link"))
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-        )
     }
 
     @Test
