@@ -58,6 +58,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -152,6 +153,12 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @PaymentElementAnalytics
+        fun provideEventReporterAnalyticsRequestFactory(
+            factory: PaymentAnalyticsRequestFactory,
+        ): PaymentAnalyticsRequestFactory = factory
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(
