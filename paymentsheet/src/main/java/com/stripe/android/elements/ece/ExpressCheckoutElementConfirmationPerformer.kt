@@ -38,17 +38,24 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
                 )
-                return@tryBeginConfirmation null
+                return@tryBeginConfirmation Result.failure(
+                    IllegalStateException("Cannot confirm checkout before it is configured.")
+                )
             }
-            getConfirmationArgs(
+            val args = getConfirmationArgs(
                 state = state,
                 expressButton = expressButton,
             ) ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
                 )
-                null
+                return@tryBeginConfirmation Result.failure(
+                    IllegalStateException(
+                        "Cannot confirm checkout because the selected payment option cannot be confirmed."
+                    )
+                )
             }
+            Result.success(args)
         } ?: return
 
         analyticsPerformer.onExpressCheckoutElementConfirmationStarted(expressButton.toSelection())

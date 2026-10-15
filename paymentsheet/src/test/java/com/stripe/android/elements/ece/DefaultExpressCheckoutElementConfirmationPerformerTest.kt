@@ -1,6 +1,7 @@
 package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
@@ -55,6 +56,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM)
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
+        val result = results.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(error).isInstanceOf<IllegalStateException>()
+        assertThat(error).hasMessageThat().isEqualTo("Cannot confirm checkout before it is configured.")
     }
 
     @Test
@@ -73,6 +79,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
+        val result = results.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(error).isInstanceOf<IllegalStateException>()
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Cannot confirm checkout because the selected payment option cannot be confirmed."
+        )
     }
 
     @Test
@@ -246,12 +259,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val results = Turbine<CheckoutController.Result>()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = results::add,
             viewModelScope = backgroundScope,
         )
         val paymentSheetEventReporter = FakeEventReporter()
@@ -281,8 +295,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
+            results = results,
         ).block()
 
+        results.ensureAllEventsConsumed()
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
@@ -296,5 +312,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
+        val results: Turbine<CheckoutController.Result>,
     )
 }
