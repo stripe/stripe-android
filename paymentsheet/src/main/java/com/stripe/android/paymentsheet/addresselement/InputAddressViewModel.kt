@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -139,6 +140,15 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     init {
+
+        viewModelScope.launch {
+            resultStateHolder.state.first { it == State.Canceling }
+            eventReporter.onCanceled(
+                addressDetails = getCurrentAddress(),
+                autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
+            )
+            resultStateHolder.onCancelCompleted()
+        }
 
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(

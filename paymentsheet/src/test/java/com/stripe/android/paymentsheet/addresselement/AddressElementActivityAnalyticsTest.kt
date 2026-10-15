@@ -65,6 +65,100 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     @Test
+    fun `failed save reports failure and close reports cancellation`() = runTaxScenario(fails = true) { taxUpdate ->
+        val failedRequest = expectShippingAnalytics(
+            "elements.shipping_address.save_failed",
+            analyticsPayloadField("analytics_value", "apiError"),
+            analyticsPayloadField("status_code", "400"),
+            not(hasQueryParam("error_message")),
+        )
+        taxUpdate.releaseResponse.countDown()
+
+        addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
+        awaitAnalytics(failedRequest)
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.clickClose()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `root back reports cancellation`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `close reports cancellation`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.clickClose()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `scrim accessibility action reports cancellation`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.dismissViaScrimAccessibilityAction()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `back reports the current country once even when pressed twice`() = runScenario {
+        addressPage.assertReadyToSave()
+        addressPage.selectCountry("Canada")
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
+    fun `close after recreation reports the retained edited country`() = runScenario {
+        addressPage.assertReadyToSave()
+        addressPage.selectCountry("Canada")
+
+        val shownRequest = expectShippingAnalytics(
+            eventName = "elements.shipping_address.shown",
+            country = "CA",
+            autocompleteResultSelected = null,
+        )
+        activityScenario.recreate()
+        activityScenario.onActivity { activity = it }
+        composeTestRule.waitForIdle()
+        awaitAnalytics(shownRequest)
+
+        addressPage.assertVisible()
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
+        addressPage.clickClose()
+
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        awaitAnalytics(canceledRequest)
+    }
+
+    @Test
     fun `recreation during saving reports shown and save completion`() = runTaxScenario { taxUpdate ->
         val shownRequest = expectShippingAnalytics(
             eventName = "elements.shipping_address.shown",
@@ -77,6 +171,27 @@ internal class AddressElementActivityAnalyticsTest {
         awaitAnalytics(shownRequest)
 
         addressPage.assertVisible()
+        assertDismissalBlocked()
+
+        val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+        taxUpdate.releaseResponse.countDown()
+
+        val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
+        assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
+        awaitAnalytics(completedRequest)
+    }
+
+    @Test
+    fun `saving blocks cancellation analytics from close back and scrim dismissal`() = runTaxScenario { taxUpdate ->
+        addressPage.clickClose()
+        assertDismissalBlocked()
+
+        activityScenario.onActivity { activity ->
+            activity.onBackPressedDispatcher.onBackPressed()
+        }
+        assertDismissalBlocked()
+
+        addressPage.dismissViaScrimAccessibilityAction()
         assertDismissalBlocked()
 
         val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")

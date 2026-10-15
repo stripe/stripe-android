@@ -8,6 +8,11 @@ import com.stripe.android.paymentsheet.addresselement.editDistance
 internal interface AddressElementEventReporter {
     fun onShown(country: String?)
 
+    fun onCanceled(
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
+    )
+
     fun onSaveStarted(
         addressDetails: AddressDetails,
         autocompleteAddressDetails: AddressDetails?,
@@ -31,6 +36,11 @@ internal class StandaloneAddressElementEventReporter(
     override fun onShown(country: String?) {
         addressLauncherEventReporter.onShow(country.orEmpty())
     }
+
+    override fun onCanceled(
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
+    ) = Unit
 
     override fun onSaveStarted(
         addressDetails: AddressDetails,
@@ -69,6 +79,17 @@ internal class CheckoutShippingAddressElementEventReporter(
                     autocompleteResultSelected = null,
                     editDistance = null,
                 )
+            )
+        )
+    }
+
+    override fun onCanceled(
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
+    ) {
+        fireEvent(
+            ShippingAddressElementEvent.Canceled(
+                analyticsData(addressDetails, autocompleteAddressDetails)
             )
         )
     }
