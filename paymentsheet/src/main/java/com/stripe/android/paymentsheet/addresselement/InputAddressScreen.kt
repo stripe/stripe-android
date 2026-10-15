@@ -22,6 +22,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.paymentsheet.ui.ErrorMessage
@@ -137,6 +138,7 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val resultState by viewModel.resultStateHolder.state.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
@@ -144,7 +146,7 @@ internal fun InputAddressScreen(
     InputAddressScreen(
         appearance = viewModel.args.config?.appearance ?: PaymentSheet.Appearance(),
         primaryButtonEnabled = completeValues != null && formEnabled,
-        primaryButtonLoading = !formEnabled,
+        primaryButtonLoading = resultState == State.Saving,
         closeButtonEnabled = formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
