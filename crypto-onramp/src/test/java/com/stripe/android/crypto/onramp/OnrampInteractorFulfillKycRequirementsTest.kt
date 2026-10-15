@@ -148,7 +148,7 @@ class OnrampInteractorFulfillKycRequirementsTest {
         assertThat(error.code).isEqualTo("unexpected_error")
         assertThat(error.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(error.developerMessage).contains("Uploaded KYC document is missing a file ID")
-        assertThat(error.developerMessage).contains("operation: fulfill_kyc_requirement")
+        assertThat(error.developerMessage).contains("operation: fulfill_kyc_requirements")
         assertThat(error.docUrl).isNull()
         verifyFulfillmentWasNotRequested()
     }
