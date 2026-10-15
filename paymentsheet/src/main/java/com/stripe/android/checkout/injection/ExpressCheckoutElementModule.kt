@@ -1,23 +1,21 @@
-@file:OptIn(CheckoutSessionPreview::class)
-
 package com.stripe.android.checkout.injection
 
-import com.stripe.android.elements.ece.DefaultExpressCheckoutElementConfirmationPerformer
-import com.stripe.android.elements.ece.DefaultExpressCheckoutElementEventReporter
-import com.stripe.android.elements.ece.DefaultExpressCheckoutElementInteractor
+import com.stripe.android.checkout.CheckoutExpressCheckoutElementIntegration
+import com.stripe.android.checkout.DefaultExpressCheckoutElementConfirmationPerformer
+import com.stripe.android.checkout.DefaultExpressCheckoutElementEventReporter
 import com.stripe.android.elements.ece.ExpressCheckoutElementConfirmationPerformer
 import com.stripe.android.elements.ece.ExpressCheckoutElementEventReporter
-import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.elements.ece.ExpressCheckoutElementIntegration
+import com.stripe.android.elements.ece.injection.ExpressCheckoutElementInteractorModule
 import dagger.Binds
 import dagger.Module
 
-@Module
+@Module(includes = [ExpressCheckoutElementInteractorModule::class])
 internal interface ExpressCheckoutElementModule {
     @Binds
-    fun bindExpressCheckoutElementInteractor(
-        impl: DefaultExpressCheckoutElementInteractor
-    ): ExpressCheckoutElementInteractor
+    fun bindExpressCheckoutElementIntegration(
+        impl: CheckoutExpressCheckoutElementIntegration
+    ): ExpressCheckoutElementIntegration
 
     @Binds
     fun bindExpressCheckoutElementConfirmationPerformer(

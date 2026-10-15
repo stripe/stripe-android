@@ -28,7 +28,10 @@ data class PlaygroundConfigurationData(
         FlowControllerWithSpt,
 
         @SerialName("LinkController")
-        LinkController;
+        LinkController,
+
+        @SerialName("ExpressCheckoutElement")
+        ExpressCheckoutElement;
 
         fun isPaymentFlow(): Boolean {
             return this in paymentFlows()
@@ -44,7 +47,7 @@ data class PlaygroundConfigurationData(
 
         companion object {
             fun paymentFlows(): Set<IntegrationType> {
-                return setOf(PaymentSheet, FlowController, Embedded, LinkController)
+                return setOf(PaymentSheet, FlowController, Embedded, LinkController, ExpressCheckoutElement)
             }
 
             fun sptFlows(): Set<IntegrationType> {

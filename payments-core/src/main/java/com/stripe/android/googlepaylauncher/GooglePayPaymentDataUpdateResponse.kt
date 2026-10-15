@@ -11,7 +11,7 @@ class GooglePayPaymentDataUpdateResponse(
     val newTransactionInfo: GooglePayJsonFactory.TransactionInfo?,
     val error: GooglePayPaymentDataError?,
 ) {
-    fun toJson(googlePayJsonFactory: GooglePayJsonFactory): JSONObject {
+    internal fun toJson(googlePayJsonFactory: GooglePayJsonFactory): JSONObject {
         return JSONObject().apply {
             newTransactionInfo?.let { transactionInfo ->
                 put(
@@ -33,11 +33,11 @@ class GooglePayPaymentDataUpdateResponse(
     }
 
     private companion object {
-        const val FIELD_NEW_TRANSACTION_INFO = "newTransactionInfo"
-        const val FIELD_ERROR = "error"
-        const val FIELD_REASON = "reason"
-        const val FIELD_MESSAGE = "message"
-        const val FIELD_INTENT = "intent"
+        private const val FIELD_NEW_TRANSACTION_INFO = "newTransactionInfo"
+        private const val FIELD_ERROR = "error"
+        private const val FIELD_REASON = "reason"
+        private const val FIELD_MESSAGE = "message"
+        private const val FIELD_INTENT = "intent"
     }
 }
 

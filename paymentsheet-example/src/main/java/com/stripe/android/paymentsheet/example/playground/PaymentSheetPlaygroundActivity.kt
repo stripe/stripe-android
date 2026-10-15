@@ -39,6 +39,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.elements.StandaloneExpressCheckoutElement
+import com.stripe.android.elements.rememberStandaloneExpressCheckoutElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -59,6 +61,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
+import com.stripe.android.paymentsheet.example.playground.expresscheckout.ExpressCheckoutPlayground
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
@@ -185,6 +188,12 @@ internal class PaymentSheetPlaygroundActivity :
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
+            val standaloneExpressCheckoutElement = rememberStandaloneExpressCheckoutElement(
+                StandaloneExpressCheckoutElement.Builder(viewModel::onPaymentSheetResult)
+                    .createIntentCallback(viewModel::createIntentCallback)
+                    .googlePayPaymentDataUpdateCallback(viewModel::onExpressCheckoutGooglePayUpdate)
+            )
+
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
@@ -281,6 +290,7 @@ internal class PaymentSheetPlaygroundActivity :
                                 flowController = flowController,
                                 customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
+                                standaloneExpressCheckoutElement = standaloneExpressCheckoutElement,
                             )
                         }
                     }
@@ -428,7 +438,8 @@ internal class PaymentSheetPlaygroundActivity :
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
         customerSheet: CustomerSheet,
-        addressLauncher: AddressLauncher
+        addressLauncher: AddressLauncher,
+        standaloneExpressCheckoutElement: StandaloneExpressCheckoutElement,
     ) {
         if (playgroundState == null) {
             return
@@ -467,6 +478,15 @@ internal class PaymentSheetPlaygroundActivity :
 
                     PlaygroundConfigurationData.IntegrationType.LinkController -> {
                         LinkControllerButton(playgroundState = playgroundState)
+                    }
+
+                    PlaygroundConfigurationData.IntegrationType.ExpressCheckoutElement -> {
+                        val lastUpdate by viewModel.expressCheckoutGooglePayUpdate.collectAsState()
+                        ExpressCheckoutPlayground(
+                            standaloneElement = standaloneExpressCheckoutElement,
+                            playgroundState = playgroundState,
+                            lastGooglePayUpdate = lastUpdate,
+                        )
                     }
 
                     else -> Unit

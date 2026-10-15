@@ -19,9 +19,11 @@ internal object InitializationTypeSettingsDefinition :
             add(option("Normal", InitializationType.Normal))
         }
         add(option("Deferred CSC", InitializationType.DeferredClientSideConfirmation))
-        add(option("Deferred SSC", InitializationType.DeferredServerSideConfirmation))
-        add(option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation))
-        add(option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor))
+        if (configurationData.integrationType != PlaygroundConfigurationData.IntegrationType.ExpressCheckoutElement) {
+            add(option("Deferred SSC", InitializationType.DeferredServerSideConfirmation))
+            add(option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation))
+            add(option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor))
+        }
     }
 
     override fun applicable(

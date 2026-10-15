@@ -17,6 +17,8 @@ internal object PaymentElementCallbackReferences {
         instanceCallbackMap[key] = callbacks
     }
 
+    fun getExact(key: String): PaymentElementCallbacks? = instanceCallbackMap[key]
+
     fun remove(key: String) {
         instanceCallbackMap.remove(key)
     }

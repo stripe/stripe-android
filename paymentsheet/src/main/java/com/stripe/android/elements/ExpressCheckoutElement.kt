@@ -5,11 +5,9 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-@CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ExpressCheckoutElement @Inject internal constructor(
     private val interactor: ExpressCheckoutElementInteractor,
@@ -25,8 +23,8 @@ class ExpressCheckoutElement @Inject internal constructor(
         ExpressCheckoutElementContent(interactor = interactor)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /** Payment methods supported by the Express Checkout Element. */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class PaymentMethod private constructor() {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -44,13 +42,11 @@ class ExpressCheckoutElement @Inject internal constructor(
         }
     }
 
-    @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         /**
          * Configuration related to Link.
          */
-        @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class LinkConfiguration {
             private var display: Display = Display.Automatic
@@ -58,7 +54,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             /**
              * Display configuration for Link.
              */
-            @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class Display {
                 /**
@@ -91,7 +86,6 @@ class ExpressCheckoutElement @Inject internal constructor(
          * Configuration related to Google Pay.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @CheckoutSessionPreview
         class GooglePayConfiguration {
 
             /**
@@ -158,7 +152,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.additionalEnabledNetworks = additionalEnabledNetworks
             }
 
-            @CheckoutSessionPreview
             /**
              * Google Pay button type options
              *
@@ -219,14 +212,12 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         /** Appearance configuration for the Express Checkout Element. */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @CheckoutSessionPreview
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
             private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
 
             /** Themes for express buttons. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @CheckoutSessionPreview
             enum class ButtonTheme {
                 /** Light theme which contrasts with a dark background. */
                 Light,
@@ -240,7 +231,6 @@ class ExpressCheckoutElement @Inject internal constructor(
 
             /** Determines how express buttons are arranged. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @CheckoutSessionPreview
             class ButtonLayout {
                 private var maxColumns: Int? = null
                 private var maxRows: Int? = null
@@ -283,7 +273,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 )
 
                 private companion object {
-                    const val MAX_LAYOUT_DIMENSION = 10
+                    private const val MAX_LAYOUT_DIMENSION = 10
                 }
             }
 

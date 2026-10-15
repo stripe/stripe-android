@@ -14,7 +14,9 @@ object FeatureFlags {
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val allowNoExistingPaymentMethodForGooglePay = FeatureFlag(
         "Allow no existing payment method required to use Google Pay"
-    )
+    ).apply {
+        setEnabled(true)
+    }
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val forceOnelink = FeatureFlag("Link: Force Onelink brand")

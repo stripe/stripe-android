@@ -74,7 +74,7 @@ internal object GooglePaySettingsDefinition :
         )
     }
 
-    private fun createGooglePayConfiguration(
+    fun createGooglePayConfiguration(
         configOption: GooglePayMode,
         merchant: Merchant,
         currency: Currency,

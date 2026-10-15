@@ -30,6 +30,7 @@ internal object WalletButtonsSettingsDefinition :
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet,
+            PlaygroundConfigurationData.IntegrationType.ExpressCheckoutElement,
             PlaygroundConfigurationData.IntegrationType.LinkController -> false
         }
     }

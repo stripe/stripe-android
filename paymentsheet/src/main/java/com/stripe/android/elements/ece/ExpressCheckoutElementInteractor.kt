@@ -1,17 +1,10 @@
-@file:OptIn(CheckoutSessionPreview::class)
-
 package com.stripe.android.elements.ece
 
-import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.injection.CheckoutIsUpdating
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import kotlin.collections.emptyList
 
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
@@ -35,71 +28,46 @@ internal interface ExpressCheckoutElementInteractor {
 
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
-    stateHolder: CheckoutControllerStateHolder,
-    private val savedStateHandle: SavedStateHandle,
-    private val eventReporter: ExpressCheckoutElementEventReporter,
-    private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,
-    @CheckoutIsUpdating isUpdating: StateFlow<Boolean>,
+    private val integration: ExpressCheckoutElementIntegration,
 ) : ExpressCheckoutElementInteractor {
-
-    private var hasReportedDisplayed: Boolean
-        get() = savedStateHandle[KEY_ECE_DISPLAYED] ?: false
-        set(value) {
-            savedStateHandle[KEY_ECE_DISPLAYED] = value
-        }
-
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
-        stateHolder.stateFlow,
-        stateHolder.session,
-        isUpdating,
-    ) { linkAccountInfo, state, session, isUpdating ->
-        val configuration = state?.configuration?.expressCheckoutElementConfiguration
-        val paymentMethodMetadata = state?.expressCheckoutElementPaymentMethodMetadata
-        if (configuration == null || paymentMethodMetadata == null || session == null) {
-            return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
-                expressButtons = emptyList(),
-                buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
-                enabled = !isUpdating,
-            )
-        }
-
+        integration.state,
+    ) { linkAccountInfo, integrationState ->
+        val content = integrationState.content
         ExpressCheckoutElementInteractor.State(
-            expressButtons = session.availableExpressButtonTypes.map { expressButtonType ->
-                when (expressButtonType) {
-                    ExpressButtonType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        linkAccountInfo = linkAccountInfo,
-                        buttonTheme = configuration.appearance.buttonTheme,
-                    )
-                    is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        googlePayConfiguration = expressButtonType.googlePayConfiguration,
-                        shippingAddressRequired = state.checkoutSessionResponse.requiresShippingAddress,
-                        buttonTheme = configuration.appearance.buttonTheme,
-                    )
+            expressButtons = content?.let {
+                it.availableExpressButtonTypes.map { type ->
+                    when (type) {
+                        ExpressButtonType.Link -> ExpressButton.Link.create(
+                            paymentMethodMetadata = it.paymentMethodMetadata,
+                            linkAccountInfo = linkAccountInfo,
+                            buttonTheme = it.configuration.appearance.buttonTheme,
+                        )
+                        is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
+                            paymentMethodMetadata = it.paymentMethodMetadata,
+                            googlePayConfiguration = type.googlePayConfiguration,
+                            shippingAddressRequired = it.requiresShippingAddress,
+                            buttonTheme = it.configuration.appearance.buttonTheme,
+                        )
+                    }
                 }
-            },
-            buttonLayout = configuration.appearance.buttonLayout,
-            enabled = !isUpdating,
+            }.orEmpty(),
+            buttonLayout = content?.configuration?.appearance?.buttonLayout
+                ?: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            enabled = integrationState.enabled,
         )
     }
 
     override fun handleViewAction(viewAction: ExpressCheckoutElementInteractor.ViewAction) {
         when (viewAction) {
-            ExpressCheckoutElementInteractor.ViewAction.OnDisplayed -> {
-                if (!hasReportedDisplayed) {
-                    hasReportedDisplayed = true
-                    eventReporter.onEceDisplayed()
+            ExpressCheckoutElementInteractor.ViewAction.OnDisplayed -> integration.onDisplayed()
+            is ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> {
+                val currentState = state.value
+                if (currentState.enabled && viewAction.expressButton in currentState.expressButtons) {
+                    integration.confirm(viewAction.expressButton)
                 }
             }
-            is ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> {
-                expressCheckoutElementConfirmationPerformer.confirm(viewAction.expressButton)
-            }
         }
-    }
-
-    private companion object {
-        const val KEY_ECE_DISPLAYED = "express_checkout_element_displayed"
     }
 }

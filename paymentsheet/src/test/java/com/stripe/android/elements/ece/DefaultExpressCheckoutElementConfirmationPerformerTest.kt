@@ -10,6 +10,7 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
+import com.stripe.android.checkout.DefaultExpressCheckoutElementConfirmationPerformer
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.core.Logger
 import com.stripe.android.elements.ExpressCheckoutElement

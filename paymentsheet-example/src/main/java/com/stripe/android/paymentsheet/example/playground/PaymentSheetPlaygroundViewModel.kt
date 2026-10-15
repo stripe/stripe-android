@@ -21,6 +21,8 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
@@ -34,6 +36,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.expresscheckout.expressCheckoutGooglePayResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequestParams
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
@@ -49,6 +52,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomSecretK
 import com.stripe.android.paymentsheet.example.playground.settings.CustomStripeApiDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.ExpressCheckoutShippingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -81,6 +85,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
+    val expressCheckoutGooglePayUpdate = MutableStateFlow<String?>(null)
 
     private val baseUrl: String
         get() {
@@ -104,6 +109,7 @@ internal class PaymentSheetPlaygroundViewModel(
         setPlaygroundState(null)
         flowControllerState.value = null
         customerSheetState.value = null
+        expressCheckoutGooglePayUpdate.value = null
 
         if (
             playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
@@ -545,6 +551,16 @@ internal class PaymentSheetPlaygroundViewModel(
                 CreateIntentResult.Failure(IllegalStateException(exception))
             },
         )
+    }
+
+    suspend fun onExpressCheckoutGooglePayUpdate(
+        update: GooglePayPaymentDataUpdate,
+    ): GooglePayPaymentDataUpdateResponse {
+        val shipping = requireNotNull(state.value).snapshot[ExpressCheckoutShippingSettingsDefinition]
+        val response = expressCheckoutGooglePayResponse(shipping, update)
+        val outcome = if (response.error == null) "accepted" else "rejected"
+        expressCheckoutGooglePayUpdate.value = "Google Pay ${update.callbackTrigger}: $outcome"
+        return response
     }
 
     suspend fun createIntentCallback(

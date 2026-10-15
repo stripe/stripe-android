@@ -190,6 +190,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Link Controller",
                 value = PlaygroundConfigurationData.IntegrationType.LinkController
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Express Checkout Element",
+                value = PlaygroundConfigurationData.IntegrationType.ExpressCheckoutElement
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->

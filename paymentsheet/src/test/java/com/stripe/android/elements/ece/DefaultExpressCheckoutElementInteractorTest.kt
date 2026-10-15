@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutExpressCheckoutElementIntegration
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -271,11 +272,13 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
             DefaultExpressCheckoutElementInteractor(
                 linkAccountHolder = linkAccountHolder,
-                stateHolder = stateHolder,
-                savedStateHandle = savedStateHandle,
-                eventReporter = eventReporter,
-                expressCheckoutElementConfirmationPerformer = confirmationPerformer,
-                isUpdating = isUpdating,
+                integration = CheckoutExpressCheckoutElementIntegration(
+                    stateHolder = stateHolder,
+                    savedStateHandle = savedStateHandle,
+                    eventReporter = eventReporter,
+                    confirmationPerformer = confirmationPerformer,
+                    isUpdating = isUpdating,
+                ),
             )
         }
 

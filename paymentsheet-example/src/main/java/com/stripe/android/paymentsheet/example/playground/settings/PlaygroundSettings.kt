@@ -586,6 +586,8 @@ internal class PlaygroundSettings private constructor(
             ),
             LinkControllerAllowUserEmailEditsSettingsDefinition,
             LinkControllerCustomAppearanceSettingsDefinition,
+            ExpressCheckoutShippingSettingsDefinition,
+            ExpressCheckoutWalletOrderSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
             FeatureFlagSettingsDefinition(
                 FeatureFlags.forceEnableLinkPaymentSelectionHint,

@@ -11,7 +11,7 @@ import org.json.JSONObject
  * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
  *
  * @param callbackTrigger represents what change to the sheet caused a callback trigger
- * @param shippingAddress represents the shipping address selected in teh sheet
+ * @param shippingAddress represents the shipping address selected in the sheet
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
@@ -85,7 +85,7 @@ class GooglePayPaymentDataUpdate(
             }
 
         private companion object {
-            const val SEPARATOR = "-"
+            private const val SEPARATOR = "-"
         }
     }
 

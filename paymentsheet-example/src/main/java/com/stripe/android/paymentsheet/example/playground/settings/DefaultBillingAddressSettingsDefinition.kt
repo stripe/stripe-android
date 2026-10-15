@@ -143,34 +143,34 @@ internal object DefaultBillingAddressSettingsDefinition :
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
+}
 
-    private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
-        val email = when (value) {
-            DefaultBillingAddress.On -> "email@email.com"
-            DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
-            DefaultBillingAddress.Off -> null
-            is DefaultBillingAddress.WithEmail -> value.email
-        }
+internal fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
+    val email = when (value) {
+        DefaultBillingAddress.On -> "email@email.com"
+        DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
+        DefaultBillingAddress.Off -> null
+        is DefaultBillingAddress.WithEmail -> value.email
+    }
 
-        return email?.let {
-            PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
-                    line1 = "354 Oyster Point Blvd",
-                    line2 = null,
-                    city = "South San Francisco",
-                    state = "CA",
-                    postalCode = "94080",
-                    country = "US",
-                ),
-                email = email,
-                name = "Jenny Rosen",
-                phone = if (value is DefaultBillingAddress.WithEmail) {
-                    value.phone
-                } else {
-                    DEFAULT_BILLING_ADDRESS_PHONE
-                },
-            )
-        }
+    return email?.let {
+        PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(
+                line1 = "354 Oyster Point Blvd",
+                line2 = null,
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94080",
+                country = "US",
+            ),
+            email = email,
+            name = "Jenny Rosen",
+            phone = if (value is DefaultBillingAddress.WithEmail) {
+                value.phone
+            } else {
+                DEFAULT_BILLING_ADDRESS_PHONE
+            },
+        )
     }
 }
 
