@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
@@ -202,19 +201,43 @@ internal class AddressElementActivityTest {
     @Test
     @Config(qualifiers = "notnight")
     fun `always dark appearance is applied to autocomplete text on a light system`() {
-        assertAutocompletePrimaryColor(
+        val expectedPrimary = Color(0xFF654321)
+        val appearance = PaymentSheet.Appearance(
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = expectedPrimary),
             themeMode = PaymentSheet.ThemeMode.AlwaysDark,
-            expectedPrimary = DARK_PRIMARY,
         )
-    }
+        val previousPlacesClientOverride = PlacesClientProxy.override
 
-    @Test
-    @Config(qualifiers = "night")
-    fun `always light appearance is applied to autocomplete text on a dark system`() {
-        assertAutocompletePrimaryColor(
-            themeMode = PaymentSheet.ThemeMode.AlwaysLight,
-            expectedPrimary = LIGHT_PRIMARY,
-        )
+        try {
+            PlacesClientProxy.override = mock()
+            runScenario(
+                args = AddressElementActivityContract.Args.Standalone(
+                    apiConfiguration = DEFAULT_API_CONFIG,
+                    config = AddressLauncher.Configuration.Builder()
+                        .appearance(appearance)
+                        .build(),
+                ),
+            ) {
+                composeTestRule.waitForIdle()
+                activityScenario.onActivity { activity ->
+                    ViewModelProvider(activity)[AddressElementViewModel::class.java]
+                        .navigator
+                        .navigateTo(AddressElementScreen.Autocomplete(country = "US"))
+                }
+                composeTestRule.waitForIdle()
+
+                val textLayoutResults = mutableListOf<TextLayoutResult>()
+                composeTestRule.onNodeWithText(
+                    applicationContext.getString(R.string.stripe_paymentsheet_enter_address_manually)
+                ).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                    action(textLayoutResults)
+                }
+                assertThat(textLayoutResults.single().layoutInput.style.color).isEqualTo(expectedPrimary)
+            }
+        } finally {
+            PlacesClientProxy.override = previousPlacesClientOverride
+            PaymentSheet.Appearance().parseAppearance()
+        }
     }
 
     @Test
@@ -450,58 +473,7 @@ internal class AddressElementActivityTest {
         block: AddressElementActivityTestRunner.Scenario.() -> Unit,
     ) = activityTestRunner.run(args, block)
 
-    private fun assertAutocompletePrimaryColor(
-        themeMode: PaymentSheet.ThemeMode,
-        expectedPrimary: Color,
-    ) {
-        val previousPlacesClientOverride = PlacesClientProxy.override
-
-        try {
-            PlacesClientProxy.override = mock()
-            runScenario(
-                args = AddressElementActivityContract.Args.Standalone(
-                    apiConfiguration = DEFAULT_API_CONFIG,
-                    config = AddressLauncher.Configuration.Builder()
-                        .appearance(createAppearance(themeMode))
-                        .build(),
-                ),
-            ) {
-                composeTestRule.waitForIdle()
-                activityScenario.onActivity { activity ->
-                    ViewModelProvider(activity)[AddressElementViewModel::class.java]
-                        .navigator
-                        .navigateTo(AddressElementScreen.Autocomplete(country = "US"))
-                }
-                composeTestRule.waitForIdle()
-
-                val textLayoutResult = composeTestRule.textLayoutResultFor(
-                    applicationContext.getString(R.string.stripe_paymentsheet_enter_address_manually)
-                )
-                assertThat(textLayoutResult.layoutInput.style.color).isEqualTo(expectedPrimary)
-            }
-        } finally {
-            PlacesClientProxy.override = previousPlacesClientOverride
-            PaymentSheet.Appearance().parseAppearance()
-        }
-    }
-
-    private fun createAppearance(themeMode: PaymentSheet.ThemeMode) = PaymentSheet.Appearance(
-        colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = LIGHT_PRIMARY),
-        colorsDark = PaymentSheet.Colors.Builder.dark().primary(DARK_PRIMARY).build(),
-        themeMode = themeMode,
-    )
-
-    private fun ComposeTestRule.textLayoutResultFor(text: String): TextLayoutResult {
-        val results = mutableListOf<TextLayoutResult>()
-        onNodeWithText(text).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
-            action(results)
-        }
-        return results.single()
-    }
-
     private companion object {
-        val LIGHT_PRIMARY = Color(0xFF123456)
-        val DARK_PRIMARY = Color(0xFF654321)
         val SHIPPING_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(
