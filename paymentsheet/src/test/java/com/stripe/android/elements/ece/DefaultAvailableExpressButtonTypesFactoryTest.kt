@@ -88,6 +88,54 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
+    fun `create limits express button types to layout capacity`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = configurationWithLayout(maxColumns = 1, maxRows = 1),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        )
+    }
+
+    @Test
+    fun `create does not limit express button types when only max columns is configured`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = configurationWithLayout(maxColumns = 1, maxRows = null),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.Link,
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        ).inOrder()
+    }
+
+    @Test
+    fun `create does not limit express button types when only max rows is configured`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = configurationWithLayout(maxColumns = null, maxRows = 1),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.Link,
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        ).inOrder()
+    }
+
+    @Test
+    fun `create keeps link when it is the only available type within layout capacity`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link),
+            configuration = configurationWithLayout(maxColumns = 1, maxRows = 1),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(ExpressButtonType.Link)
+    }
+
+    @Test
     fun `create keeps google pay when shipping address is required`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.GooglePay),
@@ -130,6 +178,21 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
             expressCheckoutElementConfiguration = configurationState,
             requiresShippingAddress = requiresShippingAddress,
         )
+    }
+
+    private fun configurationWithLayout(
+        maxColumns: Int?,
+        maxRows: Int?,
+    ): ExpressCheckoutElement.Configuration {
+        return ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .buttonLayout(
+                        ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
+                            .maxColumns(maxColumns)
+                            .maxRows(maxRows)
+                    )
+            )
     }
 
     private companion object {

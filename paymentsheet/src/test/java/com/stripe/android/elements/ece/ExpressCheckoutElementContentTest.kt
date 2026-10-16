@@ -131,7 +131,7 @@ internal class ExpressCheckoutElementContentTest {
     }
 
     @Test
-    fun `hides second wallet button when max columns and rows are one`() {
+    fun `renders provided wallet buttons when max columns and rows are one`() {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
                 ExpressCheckoutElementInteractorStateFactory.create(
@@ -148,7 +148,7 @@ internal class ExpressCheckoutElementContentTest {
         }
 
         composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
-        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
     }
 
     @Test

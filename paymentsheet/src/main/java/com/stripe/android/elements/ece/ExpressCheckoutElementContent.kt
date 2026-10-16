@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.ui.GooglePayButtonTheme
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
-import kotlin.math.min
 
 @Composable
 internal fun ExpressCheckoutElementContent(
@@ -70,18 +69,10 @@ internal fun ExpressCheckoutElementContent(
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
-    val visibleButtonCount = calculateVisibleButtonCount(
-        buttonCount = state.expressButtons.size,
-        maxColumns = state.buttonLayout.maxColumns,
-        maxRows = state.buttonLayout.maxRows,
-    )
-
     val columnCount = calculateColumnCount(
-        buttonCount = visibleButtonCount,
+        buttonCount = state.expressButtons.size,
         maxRows = state.buttonLayout.maxRows,
     )
-
-    val visibleButtons = state.expressButtons.take(visibleButtonCount)
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
@@ -89,7 +80,7 @@ internal fun ExpressCheckoutElementContent(
         Column(
             verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
         ) {
-            visibleButtons.chunked(columnCount).forEach { rowButtons ->
+            state.expressButtons.chunked(columnCount).forEach { rowButtons ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -123,24 +114,6 @@ internal fun ExpressCheckoutElementContent(
 private val ButtonSpacing = 12.dp
 
 @VisibleForTesting
-internal fun calculateVisibleButtonCount(
-    buttonCount: Int,
-    maxColumns: Int?,
-    maxRows: Int?,
-): Int {
-    if (maxColumns == null || maxRows == null) {
-        return buttonCount
-    }
-
-    val displayableInGrid = maxRows * maxColumns
-
-    return min(
-        displayableInGrid,
-        buttonCount,
-    )
-}
-
-@VisibleForTesting
 internal fun calculateColumnCount(
     buttonCount: Int,
     maxRows: Int?,
@@ -151,8 +124,7 @@ internal fun calculateColumnCount(
 
     // We prefer to use one column but we are forced to have multiple columns if maxRows is less than buttonCount
     return if (maxRows != null && maxRows < buttonCount) {
-        // It's safe to do this without checking maxColumns, because we've already updated the total button count to
-        // ensure we won't overflow our bounds.
+        // The available button list is already limited to the configured grid capacity.
         (buttonCount + maxRows - 1) / maxRows
     } else {
         1

@@ -26,7 +26,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
         expressCheckoutElementConfiguration ?: return emptyList()
         paymentMethodMetadata ?: return emptyList()
 
-        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+        val availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {
                 WalletType.GooglePay -> ExpressButtonType.GooglePay(
                         googlePayConfiguration = expressCheckoutElementConfiguration.googlePayConfiguration,
@@ -39,6 +39,24 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                         !requiresShippingAddress
                 }
             }
+        }
+
+        val buttonLayout = expressCheckoutElementConfiguration.appearance.buttonLayout
+        val maxColumns = buttonLayout.maxColumns ?: return availableExpressButtonTypes
+        val maxRows = buttonLayout.maxRows ?: return availableExpressButtonTypes
+        val visibleButtonCount = maxColumns * maxRows
+
+        if (visibleButtonCount >= availableExpressButtonTypes.size) {
+            return availableExpressButtonTypes
+        }
+
+        return if (visibleButtonCount == 1) {
+            listOfNotNull(
+                availableExpressButtonTypes.firstOrNull { it is ExpressButtonType.GooglePay }
+                    ?: availableExpressButtonTypes.firstOrNull()
+            )
+        } else {
+            availableExpressButtonTypes.take(visibleButtonCount)
         }
     }
 }

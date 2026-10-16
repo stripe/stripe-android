@@ -14,6 +14,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14831](https://github.com/stripe/stripe-android/pull/14831) Added Naira Wallet API bindings and PaymentSheet support for PaymentIntents.
+* [Fixed] Express Checkout Element now reports only payment methods that fit its configured button layout and prefers Google Pay when only one button fits.
 
 ### Identity
 * [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
