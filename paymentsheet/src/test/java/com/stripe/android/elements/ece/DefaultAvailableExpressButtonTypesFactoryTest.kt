@@ -2,6 +2,9 @@
 package com.stripe.android.elements.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -12,8 +15,24 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import org.junit.Test
+import org.junit.runner.RunWith
 
-class DefaultAvailableExpressButtonTypesFactoryTest {
+@RunWith(TestParameterInjector::class)
+internal class DefaultAvailableExpressButtonTypesFactoryTest {
+    @Test
+    fun `calculates visible button count`(
+        @TestParameter(valuesProvider = VisibleButtonCountCaseProvider::class)
+        testCase: VisibleButtonCountCase,
+    ) {
+        val result = calculateVisibleButtonCount(
+            buttonCount = testCase.buttonCount,
+            maxColumns = testCase.maxColumns,
+            maxRows = testCase.maxRows,
+        )
+
+        assertThat(result).isEqualTo(testCase.expected)
+    }
+
     @Test
     fun `create returns no express button types when ECE configuration is absent`() {
         val availableExpressButtonTypes = create(
@@ -198,4 +217,63 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
     private companion object {
         val TEST_GOOGLE_PAY_CONFIGURATION = GooglePayConfiguration().build()
     }
+}
+
+internal object VisibleButtonCountCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(
+        context: Context?,
+    ): List<VisibleButtonCountCase> = listOf(
+        VisibleButtonCountCase(
+            name = "No buttons",
+            buttonCount = 0,
+            maxColumns = 2,
+            maxRows = 2,
+            expected = 0,
+        ),
+        VisibleButtonCountCase(
+            name = "No limits",
+            buttonCount = 5,
+            maxColumns = null,
+            maxRows = null,
+            expected = 5,
+        ),
+        VisibleButtonCountCase(
+            name = "Columns only",
+            buttonCount = 5,
+            maxColumns = 2,
+            maxRows = null,
+            expected = 5,
+        ),
+        VisibleButtonCountCase(
+            name = "Rows only",
+            buttonCount = 5,
+            maxColumns = null,
+            maxRows = 2,
+            expected = 5,
+        ),
+        VisibleButtonCountCase(
+            name = "Capacity below available buttons",
+            buttonCount = 5,
+            maxColumns = 2,
+            maxRows = 2,
+            expected = 4,
+        ),
+        VisibleButtonCountCase(
+            name = "Capacity above available buttons",
+            buttonCount = 3,
+            maxColumns = 2,
+            maxRows = 2,
+            expected = 3,
+        ),
+    )
+}
+
+internal data class VisibleButtonCountCase(
+    val name: String,
+    val buttonCount: Int,
+    val maxColumns: Int?,
+    val maxRows: Int?,
+    val expected: Int,
+) {
+    override fun toString(): String = name
 }

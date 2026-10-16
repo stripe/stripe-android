@@ -1,12 +1,14 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
+import kotlin.math.min
 
 internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
@@ -42,21 +44,39 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
         }
 
         val buttonLayout = expressCheckoutElementConfiguration.appearance.buttonLayout
-        val maxColumns = buttonLayout.maxColumns ?: return availableExpressButtonTypes
-        val maxRows = buttonLayout.maxRows ?: return availableExpressButtonTypes
-        val visibleButtonCount = maxColumns * maxRows
+        val visibleButtonCount = calculateVisibleButtonCount(
+            buttonCount = availableExpressButtonTypes.size,
+            maxColumns = buttonLayout.maxColumns,
+            maxRows = buttonLayout.maxRows,
+        )
 
         if (visibleButtonCount >= availableExpressButtonTypes.size) {
             return availableExpressButtonTypes
         }
 
-        return if (visibleButtonCount == 1) {
-            listOfNotNull(
-                availableExpressButtonTypes.firstOrNull { it is ExpressButtonType.GooglePay }
-                    ?: availableExpressButtonTypes.firstOrNull()
+        return availableExpressButtonTypes
+            .sortedWith(
+                compareBy<ExpressButtonType> { it is ExpressButtonType.Link }
+                    .thenBy { it !is ExpressButtonType.GooglePay }
             )
-        } else {
-            availableExpressButtonTypes.take(visibleButtonCount)
-        }
+            .take(visibleButtonCount)
     }
+}
+
+@VisibleForTesting
+internal fun calculateVisibleButtonCount(
+    buttonCount: Int,
+    maxColumns: Int?,
+    maxRows: Int?,
+): Int {
+    if (maxColumns == null || maxRows == null) {
+        return buttonCount
+    }
+
+    val displayableInGrid = maxRows * maxColumns
+
+    return min(
+        displayableInGrid,
+        buttonCount,
+    )
 }
