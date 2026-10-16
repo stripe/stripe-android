@@ -8,8 +8,8 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +44,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 import kotlin.test.Test
+import kotlin.time.TestTimeSource
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -63,6 +63,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<GooglePayConfirmationOption>()
+            awaitAnalyticsEvent("checkout_elements.confirm.started")
         }
 
     @Test
@@ -121,6 +122,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -133,6 +135,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -148,6 +151,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -188,6 +192,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(operationCoordinator.isUpdating.value).isFalse()
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -196,6 +201,7 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        val started = awaitAnalyticsEvent("checkout_elements.confirm.started")
         stateHolder.state = linkState()
 
         performer.confirm()
@@ -205,10 +211,15 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        val terminal = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
+        assertThat(started["event"]).isEqualTo("checkout_elements.confirm.started")
+        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.succeeded")
+        assertThat(terminal).containsEntry("selected_lpm", "google_pay")
+        assertThat(terminal).containsEntry("invocation_source", "merchant")
+        assertThat(terminal).containsEntry(
+            "checkout_session_id",
+            requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+        )
     }
 
     @Test
@@ -232,6 +243,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
@@ -246,6 +258,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
@@ -257,6 +270,7 @@ internal class CheckoutConfirmationPerformerTest {
 
         val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
             as PaymentMethodConfirmationOption.Saved
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(option.hasAcknowledgedSepaMandate).isFalse()
     }
 
@@ -268,6 +282,7 @@ internal class CheckoutConfirmationPerformerTest {
 
         val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
             as PaymentMethodConfirmationOption.Saved
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(option.hasAcknowledgedSepaMandate).isTrue()
     }
 
@@ -277,14 +292,22 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        val started = awaitAnalyticsEvent("checkout_elements.confirm.started")
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        val terminal = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
+        assertThat(listOf(started["event"], terminal["event"])).containsExactly(
+            "checkout_elements.confirm.started",
+            "checkout_elements.confirm.succeeded",
+        ).inOrder()
+        assertThat(terminal).containsEntry("selected_lpm", "google_pay")
+        assertThat(terminal).containsEntry("invocation_source", "merchant")
+        assertThat(terminal).containsEntry(
+            "checkout_session_id",
+            requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+        )
     }
 
     private fun googlePayState(
@@ -346,17 +369,16 @@ internal class CheckoutConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
-        val apiConfigurationProvider = Provider { apiConfiguration }
+        val apiConfigurationProvider = Provider { PaymentMethodMetadataFactory.create().apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+            linkAccountHolder = LinkAccountHolder(savedStateHandle),
             context = ApplicationProvider.getApplicationContext<Context>(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
             apiConfigurationProvider = apiConfigurationProvider,
+            timeSource = TestTimeSource(),
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -389,11 +411,12 @@ internal class CheckoutConfirmationPerformerTest {
             testScope = this,
         ).block()
 
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        analyticsRequestExecutor.validate()
         results.ensureAllEventsConsumed()
         resultThreads.ensureAllEventsConsumed()
         performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
-        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
     }
 
@@ -437,6 +460,12 @@ internal class CheckoutConfirmationPerformerTest {
     ) : CoroutineScope by testScope {
         val testScheduler = testScope.testScheduler
 
+        suspend fun awaitAnalyticsEvent(expectedEvent: String): Map<String, *> {
+            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
+            assertThat(params["event"]).isEqualTo(expectedEvent)
+            return params
+        }
+
         suspend fun assertRejection(message: String) {
             testScheduler.runCurrent()
             val result = results.awaitItem()
@@ -447,6 +476,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(resultThreads.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             results.expectNoEvents()
             confirmationHandler.startTurbine.expectNoEvents()
+            analyticsRequestExecutor.requestTurbine.expectNoEvents()
             sessionRefresher.calls.expectNoEvents()
         }
     }

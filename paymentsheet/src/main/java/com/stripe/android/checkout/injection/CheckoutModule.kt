@@ -12,11 +12,15 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import kotlin.time.TimeSource
 
 @Module(includes = [StripeNetworkClientModule::class])
 internal object CheckoutModule {
     @Provides
     fun provideContext(application: Application): Context = application.applicationContext
+
+    @Provides
+    fun provideTimeSource(): TimeSource = TimeSource.Monotonic
 
     @Provides
     @Named(ENABLE_LOGGING)
