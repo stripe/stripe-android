@@ -27,8 +27,8 @@ internal class CheckoutEventReporter internal constructor(
         return startedAt
     }
 
-    fun succeeded(params: Map<String, Any>, requestId: String?, duration: Duration?) {
-        reportEvent("succeeded", params + terminalParams(requestId, duration))
+    fun succeeded(params: Map<String, Any>, duration: Duration?) {
+        reportEvent("succeeded", params + terminalParams(requestId = null, duration = duration))
     }
 
     fun failed(params: Map<String, Any>, error: Throwable, duration: Duration?) {

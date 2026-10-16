@@ -62,8 +62,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
         CheckoutSessionResponse(
             id = id,
-            configId = json.optionalString("config_id"),
-            requestId = null,
             currency = currency,
             paymentStatus = paymentStatus,
             status = status,

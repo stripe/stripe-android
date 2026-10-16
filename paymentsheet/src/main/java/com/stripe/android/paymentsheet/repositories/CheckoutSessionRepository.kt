@@ -47,9 +47,6 @@ internal class CheckoutSessionRepository @Inject constructor(
                 params = params,
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
-            responseMapper = { parsedResponse, response ->
-                parsedResponse.copy(requestId = response.requestId?.value)
-            },
         )
     }
 

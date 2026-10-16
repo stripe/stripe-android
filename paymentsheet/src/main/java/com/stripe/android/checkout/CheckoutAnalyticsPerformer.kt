@@ -63,7 +63,6 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> checkoutEventReporter.succeeded(
                 params = params,
-                requestId = confirmationResponse?.requestId,
                 duration = duration,
             )
             is ConfirmationHandler.Result.Failed -> checkoutEventReporter.failed(

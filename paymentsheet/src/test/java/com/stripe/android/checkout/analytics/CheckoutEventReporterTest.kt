@@ -31,7 +31,6 @@ internal class CheckoutEventReporterTest {
         timeSource += 1250.milliseconds
         scenario.reporter.succeeded(
             params = params,
-            requestId = "req_confirmation",
             duration = startedAt.elapsedNow(),
         )
 
@@ -44,7 +43,7 @@ internal class CheckoutEventReporterTest {
         assertThat(events[0]).containsEntry("checkout_session_id", "cs_reporter_test")
         assertThat(events[0]).doesNotContainKey("duration")
         assertThat(events[1]).containsEntry("selected_lpm", "card")
-        assertThat(events[1]).containsEntry("request_id", "req_confirmation")
+        assertThat(events[1]).doesNotContainKey("request_id")
         assertThat(events[1]).containsEntry("duration", 1.25f)
     }
 

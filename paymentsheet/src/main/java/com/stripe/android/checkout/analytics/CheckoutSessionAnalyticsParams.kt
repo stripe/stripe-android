@@ -4,7 +4,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal fun CheckoutSessionResponse.checkoutAnalyticsParams(): Map<String, Any> = buildMap<String, Any> {
     put("checkout_session_id", id)
-    configId?.let { put("checkout_config_id", it) }
     put("currency", currency)
     put("session_status", status.name.lowercase())
     put("payment_status", paymentStatus.name.lowercase())

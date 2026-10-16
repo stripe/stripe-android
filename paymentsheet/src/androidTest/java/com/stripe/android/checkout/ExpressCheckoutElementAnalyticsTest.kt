@@ -57,14 +57,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
             ) { response ->
-                response.addHeader("Request-Id", "req_checkout_confirm")
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            validateConfirmationAnalyticsRequests(
-                selectedLpm = "google_pay",
-                requestId = "req_checkout_confirm",
-            )
+            validateConfirmationAnalyticsRequests(selectedLpm = "google_pay")
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
             repeat(2) {
@@ -333,7 +329,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
         terminalPhase: String = "succeeded",
         errorType: String? = null,
         errorCode: String? = null,
-        requestId: String? = null,
     ) {
         val context = buildList {
             add(analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID))
@@ -357,7 +352,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             query("error_type", errorType),
             query("error_code", errorCode),
             query("error_message", null),
-            query("request_id", requestId),
+            query("request_id", null),
         )
     }
 

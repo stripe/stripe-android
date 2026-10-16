@@ -150,47 +150,17 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `initial config id survives a terminal response without config id`() = runScenario {
-        val initialResponse = CheckoutSessionResponseFactory.create(
-            id = "cs_initial_confirmation",
-            configId = "cfg_initial_confirmation",
-        )
-        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
+    fun `confirmation response metadata wins over refreshed state`() = runScenario {
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         stateHolder.state = stateHolder.state!!.copy(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_refreshed_confirmation",
-                configId = null,
-            )
-        )
-        startReporting(performer)
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
-
-        val terminal = events().last()
-        assertThat(terminal).containsEntry("checkout_session_id", "cs_refreshed_confirmation")
-        assertThat(terminal).containsEntry("checkout_config_id", "cfg_initial_confirmation")
-    }
-
-    @Test
-    fun `confirmation response metadata wins over refreshed state and provides request id`() = runScenario {
-        val initialResponse = CheckoutSessionResponseFactory.create(
-            id = "cs_initial_confirmation",
-            configId = "cfg_initial_confirmation",
-        )
-        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_refreshed_confirmation",
-                configId = "cfg_refreshed_confirmation",
-                requestId = "req_refreshed_state",
+                currency = "eur",
             )
         )
         val confirmationResponse = CheckoutSessionResponseFactory.create(
             id = "cs_confirmed",
-            configId = "cfg_confirmed",
-            requestId = "req_confirmed",
+            currency = "cad",
         )
         val resultWithResponse = successResult.copy(
             metadata = MutableConfirmationMetadata().apply {
@@ -203,9 +173,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val terminal = events().last()
         assertThat(terminal).containsEntry("checkout_session_id", "cs_confirmed")
-        assertThat(terminal).containsEntry("checkout_config_id", "cfg_confirmed")
-        assertThat(terminal).containsEntry("request_id", "req_confirmed")
-        assertThat(terminal).doesNotContainValue("req_refreshed_state")
+        assertThat(terminal).containsEntry("currency", "cad")
     }
 
     private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =
@@ -223,11 +191,7 @@ internal class CheckoutAnalyticsPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
-            state = CheckoutControllerStateFactory.create(
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    requestId = "req_stale_state"
-                )
-            )
+            state = CheckoutControllerStateFactory.create()
         }
         val linkAccountHolder = LinkAccountHolder(savedStateHandle)
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()

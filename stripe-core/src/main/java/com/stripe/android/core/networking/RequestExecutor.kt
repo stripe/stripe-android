@@ -42,21 +42,6 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
     stripeErrorJsonParser: StripeErrorJsonParser,
     request: StripeRequest,
     responseJsonParser: ModelJsonParser<Response>,
-): Result<Response> = executeRequestWithResultParser(
-    stripeNetworkClient = stripeNetworkClient,
-    stripeErrorJsonParser = stripeErrorJsonParser,
-    request = request,
-    responseJsonParser = responseJsonParser,
-    responseMapper = { parsedResponse, _ -> parsedResponse },
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-suspend fun <Response : StripeModel> executeRequestWithResultParser(
-    stripeNetworkClient: StripeNetworkClient,
-    stripeErrorJsonParser: StripeErrorJsonParser,
-    request: StripeRequest,
-    responseJsonParser: ModelJsonParser<Response>,
-    responseMapper: (Response, StripeResponse<String>) -> Response,
 ): Result<Response> {
     return runCatching {
         stripeNetworkClient.executeRequest(request)
@@ -66,9 +51,7 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
                 Result.failure(apiException(stripeErrorJsonParser, response))
             } else {
                 val parsedResponse = runCatching {
-                    responseJsonParser.parse(response.responseJson())?.let { parsedModel ->
-                        responseMapper(parsedModel, response)
-                    }
+                    responseJsonParser.parse(response.responseJson())
                 }.getOrNull()
 
                 if (parsedResponse != null) {

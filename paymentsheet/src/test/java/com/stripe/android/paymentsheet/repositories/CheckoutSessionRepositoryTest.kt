@@ -3,17 +3,12 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.PaymentIntentCreationFlow
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -71,36 +66,6 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.isSuccess).isTrue()
-    }
-
-    @Test
-    fun `confirm attaches request id from successful response header`() = runTest {
-        val requestId = "req_checkout_confirm"
-        networkRule.checkoutConfirm { response ->
-            response.addHeader("Request-Id", requestId)
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        val result = repository.confirm(
-            id = DEFAULT_CHECKOUT_SESSION_ID,
-            params = ConfirmCheckoutSessionParams(
-                paymentMethodId = "pm_123",
-                expectedPaymentMethodType = PaymentMethod.Type.Card.code,
-                clientAttributionMetadata = ClientAttributionMetadata(
-                    elementsSessionConfigId = "test_session_id",
-                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                    checkoutSessionId = DEFAULT_CHECKOUT_SESSION_ID,
-                ),
-                returnUrl = "stripesdk://return_url",
-                expectedAmount = 1000L,
-                savePaymentMethod = null,
-                shipping = null,
-                collectedInformation = null,
-            ),
-        ).getOrThrow()
-
-        assertThat(result.requestId).isEqualTo(requestId)
     }
 
     @Test
