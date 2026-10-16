@@ -37,6 +37,7 @@ internal class FakePaymentElementLoader(
     private val shippingDetails: AddressDetails? = null,
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
+    private val shouldUseAutocompleteProxyEndpoints: Boolean = false,
 ) : PaymentElementLoader {
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
@@ -76,6 +77,7 @@ internal class FakePaymentElementLoader(
                 clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             shippingDetails = shippingDetails,
             experimentsData = experimentsData,
+            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             integrationMetadata = integrationMetadata
                 ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
             paymentMethodLayout = when (integrationConfiguration) {

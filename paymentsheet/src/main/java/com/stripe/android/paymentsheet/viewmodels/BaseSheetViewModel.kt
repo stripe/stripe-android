@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -69,7 +68,6 @@ internal abstract class BaseSheetViewModel(
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
-    val placesClient: PlacesClientProxy?,
     val linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
@@ -92,11 +90,12 @@ internal abstract class BaseSheetViewModel(
         launcher = autocompleteLauncher,
         apiConfigurationProvider = { requireNotNull(_paymentMethodMetadata.value).apiConfiguration },
         autocompleteConfig = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = config.googlePlacesApiKey,
+            googlePlacesApiKey = null,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+            isPlacesAvailable = false,
             isInlineAutocompleteEnabled = true,
         ),
-        placesClient = placesClient,
+        placesClient = null,
         stripeAutocompleteRepository = stripeAutocompleteRepository,
         coroutineScope = viewModelScope,
         shouldUseAutocompleteProxyEndpointsProvider = {
