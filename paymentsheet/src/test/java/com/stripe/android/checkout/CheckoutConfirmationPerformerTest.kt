@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -241,6 +242,10 @@ internal class CheckoutConfirmationPerformerTest {
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+        val option = args.confirmationOption as LinkConfirmationOption
+        assertThat(option.linkLaunchMode).isEqualTo(
+            LinkLaunchMode.Full(showSecondaryButton = true)
+        )
     }
 
     @Test

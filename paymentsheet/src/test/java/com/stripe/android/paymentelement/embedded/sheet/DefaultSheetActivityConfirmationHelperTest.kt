@@ -4,15 +4,22 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -66,6 +73,30 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     }
 
     @Test
+    fun `confirm hides Link secondary button`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            )
+        )
+    ) {
+        val selection = PaymentSelection.Link(brand = LinkBrand.Link)
+        selectionHolder.setSelection(selection)
+
+        confirmationHelper.confirm()
+
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+        val option = args.confirmationOption as LinkConfirmationOption
+        assertThat(option.linkLaunchMode).isEqualTo(
+            LinkLaunchMode.Full(showSecondaryButton = false)
+        )
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem()).isEqualTo(selection)
+    }
+
+    @Test
     fun `confirm does not start confirmation or report event when selection is null`() = testScenario {
         confirmationHelper.confirm()
 
@@ -88,6 +119,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     }
 
     private fun testScenario(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configurationModifier:
         EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = {
             this
@@ -101,7 +133,6 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             .configurationModifier()
             .build()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
