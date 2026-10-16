@@ -65,7 +65,7 @@ class AddressElement(
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
             showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
-            acceptAnyInput = addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
+            isOptional = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL
         )
     )
 

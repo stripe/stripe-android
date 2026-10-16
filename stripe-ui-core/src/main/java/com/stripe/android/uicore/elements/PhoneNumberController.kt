@@ -22,6 +22,7 @@ class PhoneNumberController private constructor(
     overrideCountryCodes: Set<String> = emptySet(),
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
+    private val isOptional: Boolean = false,
 ) : InputController, SectionFieldComposable {
     override val label = stateFlowOf(
         resolvableString(CoreR.string.stripe_address_label_phone_number)
@@ -75,7 +76,7 @@ class PhoneNumberController private constructor(
         fieldValue,
         phoneNumberMinimumLength
     ) { value, minLength ->
-        value to (value.length >= (minLength ?: 0) || acceptAnyInput)
+        value to ((isOptional && value.isBlank()) || value.length >= (minLength ?: 0) || acceptAnyInput)
     }
 
     /**
@@ -150,7 +151,8 @@ class PhoneNumberController private constructor(
             initiallySelectedCountryCode: String? = null,
             overrideCountryCodes: Set<String> = emptySet(),
             showOptionalLabel: Boolean = false,
-            acceptAnyInput: Boolean = false
+            acceptAnyInput: Boolean = false,
+            isOptional: Boolean = false
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -176,6 +178,7 @@ class PhoneNumberController private constructor(
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
                     acceptAnyInput = acceptAnyInput,
+                    isOptional = isOptional,
                     overrideCountryCodes = overrideCountryCodes,
                 )
             } else {
@@ -184,10 +187,18 @@ class PhoneNumberController private constructor(
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
                     acceptAnyInput = acceptAnyInput,
+                    isOptional = isOptional,
                     overrideCountryCodes = overrideCountryCodes,
                 )
             }
         }
+//        PhoneNumberController.createPhoneNumberController(
+//        initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
+//        showOptionalLabel =
+//        addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
+//        acceptAnyInput =
+//        addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
+//        )
     }
 
     @Composable
