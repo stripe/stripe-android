@@ -21,9 +21,6 @@ dependencies {
     implementation libs.androidx.lifecycle
     implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.liveDataKtx
-    implementation libs.androidx.legacySupport
-    implementation libs.androidx.navigationFragment
-    implementation libs.androidx.navigationUi
     implementation libs.androidx.viewModel
     implementation libs.compose.activity
     implementation libs.compose.liveData
@@ -83,7 +80,6 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
         compose true
     }
 }
