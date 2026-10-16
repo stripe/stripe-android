@@ -34,6 +34,17 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) {
+    private val workScope = CoroutineScope(workContext)
+    private val analyticsRequestFactory by lazy {
+        val publishableKey = paymentMethodMetadataProvider.get()?.apiConfiguration?.publishableKey
+            ?: apiConfigurationProvider.get().publishableKey
+        PaymentAnalyticsRequestFactory(
+            context = context,
+            publishableKey = publishableKey,
+            defaultProductUsageTokens = setOf("checkout_elements"),
+        )
+    }
+
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
     }
@@ -63,8 +74,8 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     ) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
-                phase = "succeeded",
-                event = PaymentSheetEvent.Payment(
+                event = ConfirmationEvent.Succeeded,
+                paymentEvent = PaymentSheetEvent.Payment(
                     mode = EventReporter.Mode.Embedded,
                     result = PaymentSheetEvent.Payment.Result.Success,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
@@ -75,8 +86,8 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             )
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
                 reportEvent(
-                    phase = "failed",
-                    event = PaymentSheetEvent.Payment(
+                    event = ConfirmationEvent.Failed,
+                    paymentEvent = PaymentSheetEvent.Payment(
                         mode = EventReporter.Mode.Embedded,
                         result = PaymentSheetEvent.Payment.Result.Failure(error),
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
@@ -90,22 +101,17 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         }
     }
 
-    private fun reportEvent(phase: String, event: PaymentSheetEvent.Payment) {
+    private fun reportEvent(event: ConfirmationEvent, paymentEvent: PaymentSheetEvent.Payment) {
         val metadata = paymentMethodMetadataProvider.get()
         val publishableKey = metadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
-        val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = context,
-            publishableKey = publishableKey,
-            defaultProductUsageTokens = setOf("checkout_elements"),
-        )
-        CoroutineScope(workContext).launch {
+        val requestFactory = analyticsRequestFactory
+        workScope.launch {
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(
-                    event = object : AnalyticsEvent {
-                        override val eventName = "checkout_elements.confirm.$phase"
-                    },
-                    additionalParams = metadata.defaultAnalyticsParams() + event.params,
+                requestFactory.createRequest(
+                    event = event,
+                    additionalParams = metadata.defaultAnalyticsParams() + paymentEvent.params,
+                    publishableKeyOverride = publishableKey,
                 )
             )
         }
@@ -122,6 +128,11 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private fun clearConfirmation() {
         savedStateHandle.remove<IntegrationType>(INTEGRATION_TYPE_KEY)
         savedStateHandle.remove<PaymentSelection>(PAYMENT_SELECTION_KEY)
+    }
+
+    private enum class ConfirmationEvent(override val eventName: String) : AnalyticsEvent {
+        Succeeded("checkout_elements.confirm.succeeded"),
+        Failed("checkout_elements.confirm.failed"),
     }
 
     private enum class IntegrationType {

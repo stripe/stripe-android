@@ -29,19 +29,19 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.FakeProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -273,22 +273,18 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val paymentMethodMetadataProviderCalls = Turbine<Unit>()
-        val apiConfigurationProviderCalls = Turbine<Unit>()
+        val paymentMethodMetadataProvider = FakeProvider<PaymentMethodMetadata?>(value = null)
+        val apiConfigurationProvider = FakeProvider(
+            PaymentMethodMetadataFactory.create().apiConfiguration
+        )
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             context = ApplicationProvider.getApplicationContext<Context>(),
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
-                paymentMethodMetadataProviderCalls.add(Unit)
-                null
-            },
-            apiConfigurationProvider = Provider {
-                apiConfigurationProviderCalls.add(Unit)
-                PaymentMethodMetadataFactory.create().apiConfiguration
-            },
+            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -316,10 +312,12 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         results.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
-        paymentMethodMetadataProviderCalls.ensureAllEventsConsumed()
-        apiConfigurationProviderCalls.ensureAllEventsConsumed()
+        paymentMethodMetadataProvider.ensureAllEventsConsumed()
+        apiConfigurationProvider.ensureAllEventsConsumed()
     }
 
     private class Scenario(
