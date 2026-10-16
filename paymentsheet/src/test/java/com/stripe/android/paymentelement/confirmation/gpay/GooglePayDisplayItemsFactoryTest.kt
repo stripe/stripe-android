@@ -36,7 +36,30 @@ class GooglePayDisplayItemsFactoryTest {
     }
 
     @Test
-    fun `uses unified aggregates for subtotal discounts taxes and final total`() {
+    fun `automatic tax enabled uses tax summary labels even without tax rows`() {
+        val response = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
+            ),
+            recurringDetails = null,
+        )
+
+        val items = GooglePayDisplayItemsFactory.create(response, context)
+
+        assertThat(items.map { it.label }).containsExactly(
+            "Widget", "Cost excluding tax", "Estimated total (final tax may vary)"
+        ).inOrder()
+        assertThat(items.map { it.price }).containsExactly(2000L, 2000L, 1950L).inOrder()
+        assertThat(items.map { it.type }).containsExactly(
+            GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+            GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+            GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+        ).inOrder()
+    }
+
+    @Test
+    fun `automatic tax disabled uses subtotal and total labels and preserves discounts and taxes`() {
         val tax = CheckoutSessionResponse.TaxAmount(
             amount = 150,
             inclusive = false,
@@ -53,6 +76,7 @@ class GooglePayDisplayItemsFactoryTest {
             promotionCode = null,
         )
         val response = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = false,
             checkoutItems = listOf(
                 CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
             ),
@@ -64,8 +88,17 @@ class GooglePayDisplayItemsFactoryTest {
 
         val items = GooglePayDisplayItemsFactory.create(response, context)
 
-        assertThat(items.map { it.price }).containsAtLeast(2000L, -200L, 150L, 1950L)
-        assertThat(items.map { it.label }).containsAtLeast("Summer", "Sales tax")
+        assertThat(items.map { it.label }).containsExactly(
+            "Widget", "Subtotal", "Summer", "Sales tax", "Total"
+        ).inOrder()
+        assertThat(items.map { it.price }).containsExactly(2000L, 2000L, -200L, 150L, 1950L).inOrder()
+        assertThat(items.map { it.type }).containsExactly(
+            GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+            GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+            GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
+            GooglePayJsonFactory.DisplayItem.Type.TAX,
+            GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+        ).inOrder()
     }
 
     @Test

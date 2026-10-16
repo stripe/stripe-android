@@ -4,6 +4,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -70,6 +71,15 @@ private fun PaymentOptionRow(paymentOption: PaymentOptionDisplayData?) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(painter = paymentOption.iconPainter, contentDescription = null, modifier = Modifier.size(32.dp))
-        Text(paymentOption.label)
+        Column {
+            Text(paymentOption.label)
+            paymentOption.sublabel?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                )
+            }
+        }
     }
 }

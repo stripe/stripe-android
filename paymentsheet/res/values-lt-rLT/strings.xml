@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Atsijungti nuo %s?</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Per %s naudodamiesi „MB WAY“ programėle patvirtinkite mokėjimą, kad užbaigtumėte pirkimą.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Daugiau mokėjimo būdų</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Įvyko klaida. Patikrinkite ryšį ir bandykite dar kartą.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

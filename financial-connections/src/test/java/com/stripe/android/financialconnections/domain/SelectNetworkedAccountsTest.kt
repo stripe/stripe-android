@@ -22,7 +22,7 @@ class SelectNetworkedAccountsTest {
 
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
     )
     private val successContentRepository: SuccessContentRepository =

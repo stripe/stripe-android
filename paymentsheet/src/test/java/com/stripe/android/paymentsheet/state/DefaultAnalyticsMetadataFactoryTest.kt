@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -74,6 +75,25 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
         assertThat(appearance).doesNotContainKey("embedded_payment_element")
+    }
+
+    @Test
+    fun `create returns false for api_configuration when API configuration is null`() = runScenario {
+        val resultMap = createAnalyticsMetadata()
+
+        assertThat(getMpeConfigValue(resultMap, "api_configuration")).isEqualTo(false)
+    }
+
+    @Test
+    fun `create returns true for api_configuration when API configuration is provided`() = runScenario {
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Test Merchant")
+            .apiConfiguration(ApiConfiguration("pk_test_123"))
+            .build()
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.PaymentSheet(configuration = configuration)
+        )
+
+        assertThat(getMpeConfigValue(resultMap, "api_configuration")).isEqualTo(true)
     }
 
     @Test

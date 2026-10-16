@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
@@ -14,7 +15,9 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -31,7 +34,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     fun `onPaymentDataChanged returns error when state is not loaded`() = runScenario(
         state = null,
     ) {
-        val response = callback.onPaymentDataChanged(
+        val response = onPaymentDataChanged(
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
                 shippingAddress = null,
@@ -60,7 +63,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             shippingAddress = null,
         )
 
-        val response = callback.onPaymentDataChanged(paymentDataUpdate)
+        val response = onPaymentDataChanged(paymentDataUpdate)
 
         assertThat(response).isEqualTo(providedMapperResponse)
         assertThat(addressBuilder.buildCalls.awaitItem()).isEqualTo(paymentDataUpdate)
@@ -102,7 +105,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             shippingAddress = SHIPPING_ADDRESS,
         )
 
-        val response = callback.onPaymentDataChanged(paymentDataUpdate)
+        val response = onPaymentDataChanged(paymentDataUpdate)
 
         assertThat(response.newTransactionInfo).isNull()
 
@@ -139,7 +142,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             shippingAddress = null,
         )
 
-        val response = callback.onPaymentDataChanged(paymentDataUpdate)
+        val response = onPaymentDataChanged(paymentDataUpdate)
 
         assertThat(response.newTransactionInfo).isNull()
         assertThat(response.error).isNull()
@@ -170,7 +173,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 shippingAddress = null,
             )
 
-            val response = callback.onPaymentDataChanged(paymentDataUpdate)
+            val response = onPaymentDataChanged(paymentDataUpdate)
 
             val buildCall = addressBuilder.buildCalls.awaitItem()
 
@@ -206,7 +209,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 shippingAddress = SHIPPING_ADDRESS,
             )
 
-            val response = callback.onPaymentDataChanged(paymentDataUpdate)
+            val response = onPaymentDataChanged(paymentDataUpdate)
 
             assertThat(response).isEqualTo(providedMapperResponse)
 
@@ -275,7 +278,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private class Scenario(
-        val callback: CheckoutGooglePayPaymentDataUpdateCallback,
+        private val callback: CheckoutGooglePayPaymentDataUpdateCallback,
         val addressBuilder: FakeCheckoutGooglePayPaymentDataUpdateAddressBuilder,
         val mapper: FakeCheckoutGooglePayPaymentDataUpdateMapper,
         val taxRegionUpdater: FakeCheckoutSessionTaxRegionUpdater,
@@ -283,7 +286,15 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val providedMapperResponse: GooglePayPaymentDataUpdateResponse,
         val providedState: CheckoutControllerState?,
         val providedUpdateResult: Result<CheckoutSessionResponse>,
-    )
+    ) {
+        // Match Google Pay's work scope: state reads must be safe on a real background thread.
+        suspend fun onPaymentDataChanged(
+            update: GooglePayPaymentDataUpdate,
+        ): GooglePayPaymentDataUpdateResponse = withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+            callback.onPaymentDataChanged(update)
+        }
+    }
 
     private class FakeCheckoutSessionTaxRegionUpdater(
         updateResult: Result<CheckoutSessionResponse>

@@ -157,7 +157,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
             ) {
                 EventReporterProvider(eventReporter) {
                     StripeTheme {
-                        screen.Content()
+                        screen.Content(showsWalletsHeader = false)
                     }
                 }
             }

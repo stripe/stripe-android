@@ -568,6 +568,7 @@ class GooglePayConfirmationDefinitionTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        collectedEmail = null,
                         id = checkoutSessionResponse.id,
                         instancesKey = "GooglePayConfirmationDefinitionTest",
                         checkoutSessionResponse = checkoutSessionResponse,

@@ -112,7 +112,8 @@ internal fun ErrorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag((ErrorTopButtonTag)),
-                text = buttonText.uppercase(),
+                text = buttonText,
+                uppercase = true,
                 state = topButtonState
             ) {
                 topButtonState = LoadingButtonState.Loading
@@ -125,7 +126,8 @@ internal fun ErrorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(ErrorBottomButtonTag),
-                text = buttonText.uppercase(),
+                text = buttonText,
+                uppercase = true,
                 state = bottomButtonState
             ) {
                 topButtonState = LoadingButtonState.Disabled

@@ -82,7 +82,7 @@ internal class AddressElementActivity : ComponentActivity() {
             BackHandler {
                 if (viewModel.resultStateHolder.state.value != State.Idle) return@BackHandler
 
-                if (!viewModel.navigator.onBack()) {
+                if (navController.previousBackStackEntry == null || !viewModel.navigator.onBack()) {
                     viewModel.resultStateHolder.onUserCancel()
                 }
             }

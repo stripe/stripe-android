@@ -106,6 +106,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Kijelentkezik a következőről: %s?</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">A vásárlás befejezéséhez erősítse meg a fizetést az MB WAY alkalmazásában %s belül.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">További fizetési módok</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Hiba történt, ellenőrizze az internetkapcsolatát és próbálja újra.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

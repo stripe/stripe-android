@@ -71,7 +71,7 @@ class PaymentMethodViewModelTest {
                 isValidating = false,
                 primaryButtonLabel = completePaymentButtonLabel(
                     TestFactory.LINK_CONFIGURATION.stripeIntent,
-                    LinkLaunchMode.Full
+                    LinkLaunchMode.Full(showSecondaryButton = true)
                 )
             )
         )
@@ -282,12 +282,12 @@ class PaymentMethodViewModelTest {
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
-                linkLaunchMode = LinkLaunchMode.Full
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
             ),
         ).also { viewModelStoreRule.track(it) }
     }

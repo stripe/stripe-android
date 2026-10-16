@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Message shown when Mondu is selected. -->
-  <string name="stripe_mondu_buyer_message">Invoice payment for business buyers.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Buy now or pay later with <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
@@ -75,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Phone</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">By confirming your payment with NICEPAY, you allow %s to charge this payment method for future payments in accordance with their terms.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Invoice payment for business buyers.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Name on card</string>
   <!-- Label for the Naver Pay funding source selector -->
@@ -91,6 +91,8 @@
   <string name="stripe_payment_method_bank">Bank</string>
   <!-- Label shown in the payment type picker describing a card payment -->
   <string name="stripe_payment_method_debit_or_credit_card">Debit or credit card</string>
+  <!-- Title shown above a card entry form when the customer has no saved cards. -->
+  <string name="stripe_paymentsheet_add_a_card">Add a card</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Add card</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

@@ -33,15 +33,19 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
 
     private val configuredCheckoutConfiguration = CheckoutController.Configuration()
         .shippingAddressElement(ShippingAddressElement.Configuration())
@@ -86,9 +90,14 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `present launches a blank address form with hosted autocomplete`() = runScenario {
-        shippingAddressElement.present()
+        val mainThread = Thread.currentThread()
+        withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(mainThread)
+            shippingAddressElement.present()
+        }
 
         val launch = activityLauncher.launchCalls.awaitItem()
+        assertThat(launch.thread).isSameInstanceAs(mainThread)
         assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(launch.input.checkoutSessionResponse)
             .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
@@ -193,6 +202,7 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
 
         activityLauncher.launchCalls.awaitItem()
+        testScheduler.runCurrent()
         activityLauncher.launchCalls.expectNoEvents()
         assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
@@ -205,6 +215,7 @@ internal class ShippingAddressElementTest {
 
         val recreated = createElement()
         recreated.shippingAddressElement.present()
+        testScheduler.runCurrent()
 
         recreated.activityLauncher.launchCalls.expectNoEvents()
         assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
@@ -306,6 +317,7 @@ internal class ShippingAddressElementTest {
             assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
 
             shippingAddressElement.present()
+            testScheduler.runCurrent()
             activityLauncher.launchCalls.expectNoEvents()
 
             commitResult.complete(Result.success(Unit))
@@ -358,12 +370,13 @@ internal class ShippingAddressElementTest {
         activityLauncher.launchCalls.awaitItem()
         assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED)
         activityLauncher.unregisterCalls.awaitItem()
         assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
 
         val recreated = createElement()
         recreated.shippingAddressElement.present()
+        testScheduler.runCurrent()
         recreated.activityLauncher.launchCalls.expectNoEvents()
 
         recreated.registration.dispatch(AddressElementActivityContract.Result.Canceled)
@@ -377,7 +390,7 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED)
 
         assertThat(activityLauncher.unregisterCalls.awaitItem()).isEqualTo(Unit)
     }
@@ -441,6 +454,7 @@ internal class ShippingAddressElementTest {
             errorReporter = errorReporter,
             registration = element.registration,
             createElement = ::createElement,
+            testScheduler = testScheduler,
         ).block()
 
         element.ensureAllEventsConsumed()
@@ -478,7 +492,7 @@ internal class ShippingAddressElementTest {
             input: AddressElementActivityContract.Args.CheckoutShipping,
             options: ActivityOptionsCompat?,
         ) {
-            launchCalls.add(LaunchCall(input))
+            launchCalls.add(LaunchCall(input, Thread.currentThread()))
         }
 
         override fun unregister() {
@@ -514,6 +528,7 @@ internal class ShippingAddressElementTest {
 
     private data class LaunchCall(
         val input: AddressElementActivityContract.Args.CheckoutShipping,
+        val thread: Thread,
     )
 
     private data class ElementScenario(
@@ -541,6 +556,7 @@ internal class ShippingAddressElementTest {
         val errorReporter: FakeErrorReporter,
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,
+        val testScheduler: TestCoroutineScheduler,
     )
 
     private fun assertAppearance(appearance: PaymentSheet.Appearance) {

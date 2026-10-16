@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.graphics.Color
-import android.graphics.drawable.ShapeDrawable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
@@ -87,6 +86,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
+import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
 import com.stripe.android.paymentsheet.model.FakePaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -2380,7 +2380,7 @@ internal class DefaultFlowControllerTest {
                 billingDetails = null,
                 _shippingDetails = null,
                 _labels = PaymentOption.Labels(label = "Payment option"),
-                imageLoader = { ShapeDrawable() },
+                paymentOptionResource = ErrorPaymentOptionResource,
             ),
         )
         val viewModel = createViewModel()

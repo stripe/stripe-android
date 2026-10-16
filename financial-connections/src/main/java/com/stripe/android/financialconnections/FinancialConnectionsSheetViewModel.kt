@@ -89,6 +89,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private val mutex = Mutex()
 
+    private var dismissed = false
+
     init {
         savedStateHandle.registerSavedStateProvider()
         if (initialState.initialArgs.isValid()) {
@@ -137,6 +139,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     )
                 }?.let(analyticsTracker::track)
                 syncResponse
+            }.also {
+                // The user may have dismissed the sheet while the session was syncing.
+                if (dismissed) return@launch
             }.onFailure {
                 finishWithResult(Failed(it))
             }.onSuccess {
@@ -248,6 +253,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     fun onDismissed() {
+        dismissed = true
         finishWithResult(Canceled)
     }
 

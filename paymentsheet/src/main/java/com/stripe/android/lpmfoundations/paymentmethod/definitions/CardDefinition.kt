@@ -108,7 +108,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         val displayName = if (customerHasSavedPaymentMethods) {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card
         } else {
-            PaymentsUiCoreR.string.stripe_paymentsheet_add_card
+            PaymentsUiCoreR.string.stripe_paymentsheet_add_a_card
         }
         return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive).copy(
             displayName = displayName.resolvableString,

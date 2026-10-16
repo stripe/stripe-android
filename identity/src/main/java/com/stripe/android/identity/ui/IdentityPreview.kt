@@ -13,6 +13,8 @@ internal fun IdentityPreview(
         hostingAppTypography = MaterialTheme.typography,
         hostingAppShapes = MaterialTheme.shapes,
         inspectionMode = LocalInspectionMode.current,
+        primaryButtonStyle = null,
+        secondaryButtonStyle = null,
         content = content
     )
 }

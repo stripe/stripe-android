@@ -104,7 +104,7 @@ internal class VerticalModeFormUITest {
     ) {
         formPage.headerIcon.assertDoesNotExist()
         formPage.title.assertExists()
-        formPage.title.assert(hasText("Add card"))
+        formPage.title.assert(hasText("Add a card"))
     }
 
     @Test

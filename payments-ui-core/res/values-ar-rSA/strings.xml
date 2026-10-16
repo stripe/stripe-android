@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">الهاتف</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">بتأكيدك لعملية الدفع مع NICEPAY، فإنك تسمح لـ %s بتحصيل رسوم من طريقة الدفع هذه للدفعات المستقبلية وفقًا لشروطهم.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">دفع الفاتورة للمشترين من الشركات.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">الاسم الموجود على البطاقة</string>
   <!-- Label for the Naver Pay funding source selector -->

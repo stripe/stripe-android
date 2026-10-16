@@ -132,10 +132,6 @@ internal interface PaymentElementLoader {
             }
         }
 
-        fun requiresEmailAddress(): Boolean {
-            return this is CheckoutSession && checkoutSessionResponse.customerEmail == null
-        }
-
         enum class WalletsDisabledReason {
             AutomaticTaxBillingAddress;
         }
@@ -230,6 +226,7 @@ internal interface PaymentElementLoader {
         data class CheckoutSession(
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
+            val collectedEmail: String?,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate — the response was already loaded successfully.
@@ -240,6 +237,7 @@ internal interface PaymentElementLoader {
                     id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
+                    collectedEmail = collectedEmail,
                 )
             }
         }
