@@ -218,6 +218,8 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = requestSurface,
             type = type,
             customEmailType = customEmailType,
+            accountPhoneNumber = null,
+            emailAddress = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)

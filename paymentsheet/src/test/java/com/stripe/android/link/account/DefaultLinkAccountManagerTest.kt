@@ -37,6 +37,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.VerificationType
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -76,6 +77,41 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
         assertThat(fakeLinkAuth.lookupCalls[0].email).isEqualTo(TestFactory.EMAIL)
+    }
+
+    @Test
+    fun `lookup declares only SMS when the MFA auth flow is disabled`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(linkAuth = fakeLinkAuth)
+
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        assertThat(fakeLinkAuth.lookupCalls.single().supportedVerificationTypes).containsExactly("SMS")
+    }
+
+    @Test
+    fun `lookup declares SMS and email when the MFA auth flow is enabled`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(
+            linkAuth = fakeLinkAuth,
+            flags = mapOf("link_mobile_enable_mfa_auth_flow" to true),
+        )
+
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        assertThat(fakeLinkAuth.lookupCalls.single().supportedVerificationTypes)
+            .containsExactly("SMS", "EMAIL")
+            .inOrder()
     }
 
     @Test
@@ -596,11 +632,21 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun startVerification(
                 consumerSessionClientSecret: String,
+                type: VerificationType,
+                accountPhoneNumber: String?,
+                emailAddress: String?,
                 isResendSmsCode: Boolean,
                 apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
                 callCount += 1
-                return super.startVerification(consumerSessionClientSecret, isResendSmsCode, apiConfiguration)
+                return super.startVerification(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    type = type,
+                    accountPhoneNumber = accountPhoneNumber,
+                    emailAddress = emailAddress,
+                    isResendSmsCode = isResendSmsCode,
+                    apiConfiguration = apiConfiguration,
+                )
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -620,14 +666,18 @@ class DefaultLinkAccountManagerTest {
     fun `startVerification updates account`() = runSuspendTest {
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAStart() {
+            override fun on2FAStart(verificationType: String) {
                 callCount += 1
             }
         }
         val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
         accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
-        accountManager.startVerification()
+        accountManager.startVerification(
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            isResend = false,
+        )
 
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -640,15 +690,19 @@ class DefaultLinkAccountManagerTest {
 
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAStartFailure() {
+            override fun on2FAStartFailure(verificationType: String) {
                 callCount += 1
-                super.on2FAStartFailure()
+                super.on2FAStartFailure(verificationType)
             }
         }
 
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
-        accountManager.startVerification()
+        accountManager.startVerification(
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            isResend = false,
+        )
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
@@ -661,7 +715,11 @@ class DefaultLinkAccountManagerTest {
         )
         accountManager.setTestAccount(null, null)
 
-        val result = accountManager.confirmVerification(code = "123", consentGranted = null)
+        val result = accountManager.confirmVerification(
+            code = "123",
+            type = VerificationType.SMS,
+            consentGranted = null,
+        )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
     }
@@ -673,6 +731,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
+                type: VerificationType,
                 consentGranted: Boolean?,
                 apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
@@ -680,6 +739,7 @@ class DefaultLinkAccountManagerTest {
                 return super.confirmVerification(
                     verificationCode = verificationCode,
                     consumerSessionClientSecret = consumerSessionClientSecret,
+                    type = type,
                     consentGranted = consentGranted,
                     apiConfiguration = apiConfiguration,
                 )
@@ -687,7 +747,7 @@ class DefaultLinkAccountManagerTest {
         }
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAComplete() {
+            override fun on2FAComplete(verificationType: String) {
                 callCount += 1
             }
         }
@@ -696,7 +756,11 @@ class DefaultLinkAccountManagerTest {
 
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
-        val result = accountManager.confirmVerification(code = "123", consentGranted = null)
+        val result = accountManager.confirmVerification(
+            code = "123",
+            type = VerificationType.SMS,
+            consentGranted = null,
+        )
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result.isSuccess).isTrue()
@@ -711,6 +775,7 @@ class DefaultLinkAccountManagerTest {
             override suspend fun confirmVerification(
                 verificationCode: String,
                 consumerSessionClientSecret: String,
+                type: VerificationType,
                 consentGranted: Boolean?,
                 apiConfiguration: ApiConfiguration.State,
             ): Result<ConsumerSession> {
@@ -720,14 +785,14 @@ class DefaultLinkAccountManagerTest {
         }
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAFailure() {
+            override fun on2FAFailure(verificationType: String) {
                 callCount += 1
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
-        val result = accountManager.confirmVerification("123", null)
+        val result = accountManager.confirmVerification("123", VerificationType.SMS, null)
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result).isEqualTo(Result.failure<LinkAccount>(error))
@@ -1392,6 +1457,88 @@ class DefaultLinkAccountManagerTest {
         assertThat(account.linkSessionKey).isNull()
     }
 
+    @Test
+    fun `recoverSession repeats the email lookup for the current account`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(linkAuth = fakeLinkAuth)
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        val result = accountManager.recoverSession()
+
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.EMAIL)
+        val recoveryCall = fakeLinkAuth.lookupCalls.last()
+        assertThat(fakeLinkAuth.lookupCalls).hasSize(2)
+        assertThat(recoveryCall.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(recoveryCall.emailSource).isEqualTo(EmailSource.USER_ACTION)
+        assertThat(recoveryCall.linkAuthIntentId).isNull()
+    }
+
+    @Test
+    fun `recoverSession fails without a lookup when the last email lookup was for another account`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.lookupByEmail(
+                email = "other@example.com",
+                emailSource = EmailSource.USER_ACTION,
+                startSession = true,
+                customerId = null,
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
+            assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
+        }
+
+    @Test
+    fun `recoverSession repeats the link auth intent lookup for an account from a link auth intent`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.setLinkAccountFromLookupResult(
+                lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+                startSession = true,
+                linkAuthIntentId = "lai_123",
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.getOrNull()?.linkAuthIntentInfo?.linkAuthIntentId).isEqualTo("lai_123")
+            val recoveryCall = fakeLinkAuth.lookupCalls.single()
+            assertThat(recoveryCall.linkAuthIntentId).isEqualTo("lai_123")
+            assertThat(recoveryCall.email).isNull()
+        }
+
+    @Test
+    fun `recoverSession does not switch accounts when the lookup returns a different account`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.lookupByEmail(
+                email = TestFactory.EMAIL,
+                emailSource = EmailSource.USER_ACTION,
+                startSession = true,
+                customerId = null,
+            )
+            val currentAccount = accountManager.linkAccountInfo.value.account
+            fakeLinkAuth.lookupResult = Result.success(
+                TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+                    consumerSession = TestFactory.CONSUMER_SESSION.copy(emailAddress = "other@example.com"),
+                )
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
+            assertThat(accountManager.linkAccountInfo.value.account).isEqualTo(currentAccount)
+        }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }
@@ -1404,6 +1551,7 @@ class DefaultLinkAccountManagerTest {
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
         allowUserEmailEdits: Boolean = true,
         linkAuth: LinkAuth = fakeLinkAuth(),
+        flags: Map<String, Boolean> = emptyMap(),
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -1415,6 +1563,7 @@ class DefaultLinkAccountManagerTest {
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo,
                 allowUserEmailEdits = allowUserEmailEdits,
+                flags = flags,
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,
@@ -1489,10 +1638,10 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
 
     override fun onAccountLookupComplete() = Unit
 
-    override fun on2FAStartFailure() = Unit
-    override fun on2FAStart() = Unit
-    override fun on2FAComplete() = Unit
-    override fun on2FAFailure() = Unit
+    override fun on2FAStartFailure(verificationType: String) = Unit
+    override fun on2FAStart(verificationType: String) = Unit
+    override fun on2FAComplete(verificationType: String) = Unit
+    override fun on2FAFailure(verificationType: String) = Unit
 
     suspend fun awaitLookupFailureCall(): Throwable {
         return lookupFailureTurbine.awaitItem()
