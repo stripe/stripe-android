@@ -70,6 +70,7 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +110,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    placesClient: PlacesClientProxy?,
     linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
@@ -124,6 +126,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
+    placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,

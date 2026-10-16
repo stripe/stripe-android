@@ -525,6 +525,7 @@ internal class PaymentOptionsActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                placesClient = null,
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
             )

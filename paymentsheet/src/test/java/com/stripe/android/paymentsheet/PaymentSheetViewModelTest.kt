@@ -40,6 +40,7 @@ import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -80,6 +81,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
+import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -126,11 +128,14 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.ResetMockRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.AddressTextFieldElement
 import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -158,6 +163,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mockConstruction
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -166,6 +172,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.IOException
@@ -3139,13 +3146,23 @@ internal class PaymentSheetViewModelTest {
     fun `manual billing address mode is used when proxy autocomplete is disabled`() =
         runTest(testDispatcher) {
             Dispatchers.setMain(testDispatcher)
+            val placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+                fetchPlaceResult = Result.success(Address()),
+            )
             val stripeAutocompleteRepository = FakeStripeAutocompleteRepository()
             val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
-            val viewModel = createViewModel(
-                args = ARGS_CUSTOMER_WITH_GOOGLEPAY.withMerchantGooglePlacesApiKey(),
-                stripeAutocompleteRepository = stripeAutocompleteRepository,
-                addressLauncherEventReporter = addressLauncherEventReporter,
-            )
+            val viewModel = mockConstruction(DefaultIsPlacesAvailable::class.java) { mock, _ ->
+                whenever(mock.invoke()).thenReturn(true)
+            }.use {
+                assertThat(DefaultIsPlacesAvailable().invoke()).isTrue()
+                createViewModel(
+                    args = ARGS_CUSTOMER_WITH_GOOGLEPAY.withMerchantGooglePlacesApiKey(),
+                    placesClient = placesClient,
+                    stripeAutocompleteRepository = stripeAutocompleteRepository,
+                    addressLauncherEventReporter = addressLauncherEventReporter,
+                )
+            }
 
             runCurrent()
 
@@ -3154,7 +3171,7 @@ internal class PaymentSheetViewModelTest {
                 .autocompleteConfig
             val paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value)
             assertThat(paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints).isFalse()
-            assertThat(autocompleteConfig.googlePlacesApiKey).isNull()
+            assertThat(autocompleteConfig.googlePlacesApiKey).isEqualTo("merchant-google-places-key")
             assertThat(autocompleteConfig.isPlacesAvailable).isFalse()
             assertThat(autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
 
@@ -3164,6 +3181,7 @@ internal class PaymentSheetViewModelTest {
 
             stripeAutocompleteRepository.findPredictionsCalls.expectNoEvents()
             stripeAutocompleteRepository.ensureAllEventsConsumed()
+            placesClient.ensureAllEventsConsumed()
             addressLauncherEventReporter.validate()
         }
 
@@ -3188,7 +3206,7 @@ internal class PaymentSheetViewModelTest {
             val autocompleteConfig = viewModel.autocompleteAddressInteractorFactory
                 .create()
                 .autocompleteConfig
-            assertThat(autocompleteConfig.googlePlacesApiKey).isNull()
+            assertThat(autocompleteConfig.googlePlacesApiKey).isEqualTo("merchant-google-places-key")
             assertThat(autocompleteConfig.isPlacesAvailable).isFalse()
             assertThat(autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
 
@@ -3590,6 +3608,7 @@ internal class PaymentSheetViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         experimentsData: ElementsSession.ExperimentsData? = null,
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
+        placesClient: PlacesClientProxy? = null,
         stripeAutocompleteRepository: StripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
@@ -3653,6 +3672,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = placesClient,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = stripeAutocompleteRepository,
                 addressLauncherEventReporter = addressLauncherEventReporter,
