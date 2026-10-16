@@ -1,62 +1,72 @@
 package com.stripe.android.checkout.analytics
 
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import javax.inject.Inject
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.TimeMark
-import kotlin.time.TimeSource
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.analytics.defaultAnalyticsParams
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
-internal class CheckoutEventReporter internal constructor(
+internal class CheckoutEventReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val timeSource: TimeSource,
+    private val durationProvider: DurationProvider,
+    private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
+    private val workContext: CoroutineContext,
 ) {
-    @Inject
-    constructor(
-        analyticsRequestExecutor: AnalyticsRequestExecutor,
-        @CheckoutAnalytics analyticsRequestFactory: AnalyticsRequestFactory,
-    ) : this(analyticsRequestExecutor, analyticsRequestFactory, TimeSource.Monotonic)
-
-    fun started(params: Map<String, Any>): TimeMark {
-        val startedAt = timeSource.markNow()
-        reportEvent("started", params)
-        return startedAt
-    }
-
-    fun succeeded(params: Map<String, Any>, duration: Duration?) {
-        reportEvent("succeeded", params + terminalParams(requestId = null, duration = duration))
-    }
-
-    fun failed(params: Map<String, Any>, error: Throwable, duration: Duration?) {
-        val stripeException = error as? StripeException
-        val errorParams = buildMap {
-            put("error_type", stripeException?.stripeError?.type ?: error.javaClass.simpleName)
-            stripeException?.stripeError?.code?.let { put("error_code", it) }
-        }
-        reportEvent("failed", params + errorParams + terminalParams(stripeException?.requestId, duration))
-    }
-
-    fun canceled(params: Map<String, Any>, duration: Duration?) {
-        reportEvent("canceled", params + terminalParams(requestId = null, duration = duration))
-    }
-
-    private fun terminalParams(requestId: String?, duration: Duration?): Map<String, Any> = buildMap {
-        requestId?.let { put("request_id", it) }
-        duration?.let { put("duration", it.toDouble(DurationUnit.SECONDS).toFloat()) }
-    }
-
-    private fun reportEvent(phase: String, params: Map<String, Any>) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(
-                event = object : AnalyticsEvent {
-                    override val eventName = "checkout_elements.confirm.$phase"
-                },
-                additionalParams = params,
-            )
+    fun succeeded(
+        paymentSelection: PaymentSelection,
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
+    ) {
+        reportEvent(
+            phase = "succeeded",
+            event = PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Embedded,
+                result = PaymentSheetEvent.Payment.Result.Success,
+                duration = durationProvider.end(DurationProvider.Key.Checkout),
+                paymentSelection = paymentSelection,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
+            ),
         )
+    }
+
+    fun failed(paymentSelection: PaymentSelection, error: PaymentSheetConfirmationError) {
+        reportEvent(
+            phase = "failed",
+            event = PaymentSheetEvent.Payment(
+                mode = EventReporter.Mode.Embedded,
+                result = PaymentSheetEvent.Payment.Result.Failure(error),
+                duration = durationProvider.end(DurationProvider.Key.Checkout),
+                paymentSelection = paymentSelection,
+                deferredIntentConfirmationType = null,
+                intentId = null,
+            ),
+        )
+    }
+
+    private fun reportEvent(phase: String, event: PaymentSheetEvent.Payment) {
+        val metadata = paymentMethodMetadataProvider.get()
+        CoroutineScope(workContext).launch {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(
+                    event = object : AnalyticsEvent {
+                        override val eventName = "checkout_elements.confirm.$phase"
+                    },
+                    additionalParams = metadata.defaultAnalyticsParams() + event.params,
+                    publishableKeyOverride = metadata?.apiConfiguration?.publishableKey,
+                )
+            )
+        }
     }
 }

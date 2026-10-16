@@ -1,28 +1,22 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
-
 package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutEventReporter
 import com.stripe.android.checkout.analytics.CheckoutEventReporterTestFactory
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.LinkBrand
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
-import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -31,41 +25,45 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TestTimeSource
 
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutAnalyticsPerformerTest {
     @Test
-    fun `payment element confirmation reports success once and clears saved context`() = runScenario {
-        startReporting(performer)
+    fun `success is reported once after restoration and clears saved context`() = runScenario {
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        timeSource += 2.seconds
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
+        assertThat(savedConfirmationKeys()).hasSize(2)
+        assertThat(events()).isEmpty()
+
+        val restoredPerformer = recreatePerformer()
+        startReporting(restoredPerformer)
+
+        val success = successfulResult()
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
         runCurrent()
 
-        val events = events()
-        assertThat(events.map { it["event"] }).containsExactly(
-            "checkout_elements.confirm.started",
-            "checkout_elements.confirm.succeeded",
-        ).inOrder()
-        assertThat(events[0]).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(events[1]).containsEntry("selected_lpm", "google_pay")
-        assertThat(events[1]).containsEntry("invocation_source", "merchant")
-        assertThat(events[1]).containsEntry("duration", 2f)
-        assertThat(events[1]).doesNotContainKey("request_id")
-        assertThat(savedStateHandle.keys().filter { it.startsWith("CheckoutAnalyticsPerformer.") }).isEmpty()
+        val terminalEvents = events()
+        assertThat(terminalEvents.map { it["event"] })
+            .containsExactly("checkout_elements.confirm.succeeded")
+        assertThat(terminalEvents.single()).containsEntry("selected_lpm", "google_pay")
+        assertThat(terminalEvents.single()).containsEntry("duration", 2f)
+        assertThat(terminalEvents.single()).containsEntry(
+            "intent_id",
+            PaymentIntentFixtures.PI_SUCCEEDED.id,
+        )
+        assertThat(terminalEvents.single()).containsEntry("deferred_intent_confirmation_type", "client")
+        assertThat(savedConfirmationKeys()).isEmpty()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
+            .isTrue()
     }
 
     @Test
-    fun `failed confirmation reports safe error fields`() = runScenario {
-        startReporting(performer)
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        timeSource += 2500.milliseconds
+    fun `payment failure reports safe fields`() = runScenario {
+        startReporting()
+        performer.onExpressCheckoutElementConfirmationStarted(PaymentSelection.GooglePay)
         val privateMessage = "private payment details"
         val error = APIException(
             stripeError = StripeError(
@@ -76,7 +74,6 @@ internal class CheckoutAnalyticsPerformerTest {
             requestId = "req_failed_confirmation",
             message = privateMessage,
         )
-
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = error,
@@ -84,125 +81,86 @@ internal class CheckoutAnalyticsPerformerTest {
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
+        runCurrent()
 
-        val params = events().last()
-        assertThat(params["event"]).isEqualTo("checkout_elements.confirm.failed")
-        assertThat(params).containsEntry("error_type", "card_error")
-        assertThat(params).containsEntry("error_code", "card_declined")
-        assertThat(params).containsEntry("request_id", "req_failed_confirmation")
-        assertThat(params).containsEntry("duration", 2.5f)
-        assertThat(params.toString()).doesNotContain(privateMessage)
+        val terminal = events().single()
+        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.failed")
+        assertThat(terminal).containsEntry("error_code", "card_declined")
+        assertThat(terminal).containsEntry("duration", 2f)
+        assertThat(terminal.toString()).doesNotContain(privateMessage)
+        assertThat(savedConfirmationKeys()).isEmpty()
     }
 
     @Test
-    fun `canceled confirmation reports canceled without error fields`() = runScenario {
-        startReporting(performer)
+    fun `canceled confirmation does not report a terminal event`() = runScenario {
+        startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        timeSource += 250.milliseconds
-
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
+        runCurrent()
 
-        val params = events().last()
-        assertThat(params["event"]).isEqualTo("checkout_elements.confirm.canceled")
-        assertThat(params).containsEntry("duration", 0.25f)
-        assertThat(params).doesNotContainKey("request_id")
-        assertThat(params).doesNotContainKey("error_type")
-        assertThat(params).doesNotContainKey("error_code")
+        assertThat(events()).isEmpty()
+        assertThat(savedConfirmationKeys()).isEmpty()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
+            .isFalse()
     }
 
     @Test
-    fun `express checkout context survives recreation without invented duration`() = runScenario {
-        val selection = PaymentSelection.Link(brand = LinkBrand.Link)
-        performer.onExpressCheckoutElementConfirmationStarted(selection)
-        val restoredPerformer = recreatePerformer()
-        startReporting(restoredPerformer)
-        timeSource += 2.seconds
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successResult)
-
-        val events = events()
-        assertThat(events).hasSize(2)
-        val terminal = events.last()
-        assertThat(terminal).containsEntry("event", "checkout_elements.confirm.succeeded")
-        assertThat(terminal).containsEntry("selected_lpm", "link")
-        assertThat(terminal).containsEntry("link_context", "wallet")
-        assertThat(terminal).containsEntry("invocation_source", "express_checkout_element")
-        assertThat(terminal).doesNotContainKey("duration")
-    }
+    fun `internal failure is filtered`() = assertFilteredFailure(
+        ConfirmationHandler.Result.Failed.ErrorType.Internal
+    )
 
     @Test
-    fun `express checkout uses its own Link session metadata`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
-            paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
-            expressCheckoutElementPaymentMethodMetadata = linkMetadata(LinkState.LoginState.NeedsVerification),
-        )
-
-        performer.onExpressCheckoutElementConfirmationStarted(PaymentSelection.Link(brand = LinkBrand.Link))
-
-        val params = events().single()
-        assertThat(params).containsEntry("active_link_session", false)
-        assertThat(params).containsEntry("link_context", "wallet")
-        assertThat(params).containsEntry("invocation_source", "express_checkout_element")
-    }
+    fun `merchant integration failure is filtered`() = assertFilteredFailure(
+        ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration
+    )
 
     @Test
-    fun `confirmation response metadata wins over refreshed state`() = runScenario {
+    fun `fatal failure is filtered`() = assertFilteredFailure(
+        ConfirmationHandler.Result.Failed.ErrorType.Fatal
+    )
+
+    private fun assertFilteredFailure(
+        type: ConfirmationHandler.Result.Failed.ErrorType,
+    ) = runScenario {
+        startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_refreshed_confirmation",
-                currency = "eur",
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("filtered failure"),
+                message = "Filtered failure".resolvableString,
+                type = type,
             )
         )
-        val confirmationResponse = CheckoutSessionResponseFactory.create(
-            id = "cs_confirmed",
-            currency = "cad",
-        )
-        val resultWithResponse = successResult.copy(
-            metadata = MutableConfirmationMetadata().apply {
-                set(CheckoutSessionResponseKey, confirmationResponse)
-            }
-        )
-        startReporting(performer)
+        runCurrent()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(resultWithResponse)
-
-        val terminal = events().last()
-        assertThat(terminal).containsEntry("checkout_session_id", "cs_confirmed")
-        assertThat(terminal).containsEntry("currency", "cad")
+        assertThat(events()).isEmpty()
+        assertThat(savedConfirmationKeys()).isEmpty()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
+            .isFalse()
     }
-
-    private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =
-        PaymentMethodMetadataFactory.create(
-            linkState = LinkState(
-                configuration = LinkTestUtils.createLinkConfiguration(),
-                loginState = loginState,
-                signupMode = null,
-            )
-        )
 
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
-            state = CheckoutControllerStateFactory.create()
-        }
-        val linkAccountHolder = LinkAccountHolder(savedStateHandle)
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val timeSource = TestTimeSource()
+        val durationProvider = FakeDurationProvider(duration = 2.seconds)
+        val reporter = CheckoutEventReporterTestFactory.create(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = durationProvider,
+            workContext = UnconfinedTestDispatcher(testScheduler),
+        )
         val scenario = Scenario(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            linkAccountHolder = linkAccountHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            timeSource = timeSource,
+            durationProvider = durationProvider,
+            checkoutEventReporter = reporter,
             backgroundScope = backgroundScope,
             testScheduler = testScheduler,
         )
@@ -215,23 +173,17 @@ internal class CheckoutAnalyticsPerformerTest {
     private class Scenario(
         val confirmationHandler: FakeConfirmationHandler,
         val savedStateHandle: SavedStateHandle,
-        val stateHolder: CheckoutControllerStateHolder,
-        private val linkAccountHolder: LinkAccountHolder,
-        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
-        val timeSource: TestTimeSource,
+        private val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+        val durationProvider: FakeDurationProvider,
+        private val checkoutEventReporter: CheckoutEventReporter,
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
     ) {
-        private val checkoutEventReporter = CheckoutEventReporterTestFactory.create(
-            analyticsRequestExecutor = analyticsRequestExecutor,
-            timeSource = timeSource,
-        )
-
-        val performer = createPerformer()
+        val performer: CheckoutAnalyticsPerformer = createPerformer()
 
         fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
 
-        fun startReporting(performer: CheckoutAnalyticsPerformer) {
+        fun startReporting(performer: CheckoutAnalyticsPerformer = this.performer) {
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
                 performer.reportConfirmationResults()
             }
@@ -244,16 +196,22 @@ internal class CheckoutAnalyticsPerformerTest {
         fun events(): List<Map<String, *>> =
             analyticsRequestExecutor.getExecutedRequests().map { it.params }
 
+        fun savedConfirmationKeys(): Set<String> =
+            savedStateHandle.keys().filter { it.startsWith("CheckoutAnalyticsPerformer.") }.toSet()
+
         private fun createPerformer(): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            linkAccountHolder = linkAccountHolder,
             checkoutEventReporter = checkoutEventReporter,
+            savedStateHandle = savedStateHandle,
         )
     }
 
     private companion object {
-        val successResult = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        fun successfulResult() = ConfirmationHandler.Result.Succeeded(
+            intent = PaymentIntentFixtures.PI_SUCCEEDED,
+            metadata = MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+            },
+        )
     }
 }

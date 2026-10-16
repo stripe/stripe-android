@@ -77,6 +77,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Inject
     constructor(
         context: Context,

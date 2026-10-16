@@ -19,7 +19,6 @@ import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearan
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -273,9 +272,10 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            linkAccountHolder = LinkAccountHolder(savedStateHandle),
-            checkoutEventReporter = CheckoutEventReporterTestFactory.create(analyticsRequestExecutor),
+            checkoutEventReporter = CheckoutEventReporterTestFactory.create(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                workContext = UnconfinedTestDispatcher(testScheduler),
+            ),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()

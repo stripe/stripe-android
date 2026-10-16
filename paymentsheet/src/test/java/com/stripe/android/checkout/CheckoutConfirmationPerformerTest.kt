@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.analytics.CheckoutEventReporterTestFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -205,15 +204,9 @@ internal class CheckoutConfirmationPerformerTest {
         )
         val events = analyticsRequestExecutor.getExecutedRequests().map { it.params }
         assertThat(events.map { it["event"] }).containsExactly(
-            "checkout_elements.confirm.started",
             "checkout_elements.confirm.succeeded",
         ).inOrder()
         assertThat(events.last()).containsEntry("selected_lpm", "google_pay")
-        assertThat(events.last()).containsEntry("invocation_source", "merchant")
-        assertThat(events.last()).containsEntry(
-            "checkout_session_id",
-            requireNotNull(stateHolder.state).checkoutSessionResponse.id,
-        )
     }
 
     @Test
@@ -288,15 +281,9 @@ internal class CheckoutConfirmationPerformerTest {
 
         val events = analyticsRequestExecutor.getExecutedRequests().map { it.params }
         assertThat(events.map { it["event"] }).containsExactly(
-            "checkout_elements.confirm.started",
             "checkout_elements.confirm.succeeded",
         ).inOrder()
         assertThat(events.last()).containsEntry("selected_lpm", "google_pay")
-        assertThat(events.last()).containsEntry("invocation_source", "merchant")
-        assertThat(events.last()).containsEntry(
-            "checkout_session_id",
-            requireNotNull(stateHolder.state).checkoutSessionResponse.id,
-        )
     }
 
     private fun googlePayState(
@@ -360,9 +347,10 @@ internal class CheckoutConfirmationPerformerTest {
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            linkAccountHolder = LinkAccountHolder(savedStateHandle),
-            checkoutEventReporter = CheckoutEventReporterTestFactory.create(analyticsRequestExecutor),
+            checkoutEventReporter = CheckoutEventReporterTestFactory.create(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                workContext = UnconfinedTestDispatcher(testScheduler),
+            ),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
