@@ -54,9 +54,13 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
             return availableExpressButtonTypes
         }
 
-        return availableExpressButtonTypes
-            .sortedByDescending { it is ExpressButtonType.GooglePay }
-            .take(visibleButtonCount)
+        val googlePayButton = availableExpressButtonTypes.find { it is ExpressButtonType.GooglePay }
+        val naivelyTruncatedAvailableButtons = availableExpressButtonTypes.take(visibleButtonCount)
+        return if (googlePayButton != null && !naivelyTruncatedAvailableButtons.contains(googlePayButton)) {
+            naivelyTruncatedAvailableButtons.subList(0, visibleButtonCount - 1).plus(googlePayButton)
+        } else {
+            naivelyTruncatedAvailableButtons
+        }
     }
 }
 

@@ -119,6 +119,19 @@ internal class DefaultAvailableExpressButtonTypesFactoryTest {
     }
 
     @Test
+    fun `create adds google pay to end of list when it would otherwise be removed`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.Link, WalletType.GooglePay),
+            configuration = configurationWithLayout(maxColumns = 1, maxRows = 2),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.Link,
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        ).inOrder()
+    }
+
+    @Test
     fun `create does not limit express button types when only max columns is configured`() {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
