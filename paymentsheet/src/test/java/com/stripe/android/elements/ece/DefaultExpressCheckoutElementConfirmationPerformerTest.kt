@@ -20,6 +20,7 @@ import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearan
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -34,7 +35,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -42,6 +42,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import kotlin.time.TestTimeSource
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -105,6 +106,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
@@ -129,6 +131,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isEqualTo(
                 GooglePayJsonFactory.ShippingAddressParameters(
@@ -152,6 +155,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             val billingDetails = option.config.billingDetailsCollectionConfiguration
             assertThat(billingDetails.name).isEqualTo(
@@ -183,6 +187,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.billingDetailsCollectionConfiguration.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
@@ -212,6 +217,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
             val option = args.confirmationOption as LinkConfirmationOption
             assertThat(option.linkLaunchMode).isEqualTo(
@@ -273,17 +279,16 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
-        val apiConfigurationProvider = Provider { apiConfiguration }
+        val apiConfigurationProvider = Provider { PaymentMethodMetadataFactory.create().apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+            linkAccountHolder = LinkAccountHolder(savedStateHandle),
             context = ApplicationProvider.getApplicationContext<Context>(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
             apiConfigurationProvider = apiConfigurationProvider,
+            timeSource = TestTimeSource(),
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -307,12 +312,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             stateHolder = stateHolder,
             expressButton = expressButton,
             results = results,
+            analyticsRequestExecutor = analyticsRequestExecutor,
         ).block()
 
-        results.ensureAllEventsConsumed()
-        confirmationHandler.validate()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
         analyticsRequestExecutor.validate()
+        results.ensureAllEventsConsumed()
+        confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
@@ -324,5 +330,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
         val results: Turbine<CheckoutController.Result>,
-    )
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+    ) {
+        suspend fun awaitAnalyticsEvent() {
+            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
+            assertThat(params["event"]).isEqualTo("checkout_elements.confirm.started")
+        }
+    }
 }
