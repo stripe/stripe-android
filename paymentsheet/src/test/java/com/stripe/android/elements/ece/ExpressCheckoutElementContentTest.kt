@@ -131,6 +131,31 @@ internal class ExpressCheckoutElementContentTest {
     }
 
     @Test
+    fun `renders wallet buttons in state order`() {
+        val defaultState = ExpressCheckoutElementInteractorStateFactory.create()
+        val googlePayButton = defaultState.expressButtons.filterIsInstance<ExpressButton.GooglePay>().single()
+        val linkButton = defaultState.expressButtons.filterIsInstance<ExpressButton.Link>().single()
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                defaultState.copy(
+                    expressButtons = listOf(googlePayButton, linkButton),
+                )
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        val googlePayPosition = composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+            .fetchSemanticsNode().positionInRoot
+        val linkPosition = composeRule.onNodeWithTag(LinkButtonTestTag)
+            .fetchSemanticsNode().positionInRoot
+
+        assertThat(googlePayPosition.y).isLessThan(linkPosition.y)
+    }
+
+    @Test
     fun `hides second wallet button when max columns and rows are one`() {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
