@@ -147,8 +147,8 @@ class AddressElementViewModelModuleTest {
     @Test
     fun `providePrimaryButtonAction returns failure and can retry after checkout shipping tax update fails`() =
         runCheckoutShippingScenario {
-            resultStateHolder.state.test {
-                assertThat(awaitItem()).isEqualTo(State.Idle)
+            viewModel.formEnabled.test {
+                assertThat(awaitItem()).isTrue()
 
                 networkRule.checkoutUpdate { response ->
                     response.setResponseCode(400)
@@ -159,11 +159,12 @@ class AddressElementViewModelModuleTest {
                     checkboxChecked = true,
                 )
 
-                assertThat(awaitItem()).isEqualTo(State.Saving)
-                assertThat(awaitItem()).isEqualTo(State.Idle)
+                assertThat(awaitItem()).isFalse()
+                assertThat(awaitItem()).isTrue()
             }
             assertThat(viewModel.saveError.value)
                 .isEqualTo(IllegalStateException("Invalid tax region").stripeErrorMessage())
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
 
             resultStateHolder.state.test {
                 assertThat(awaitItem()).isEqualTo(State.Idle)
@@ -186,6 +187,7 @@ class AddressElementViewModelModuleTest {
                 assertThat(result.address).isEqualTo(EXPECTED_ADDRESS)
                 assertThat(result.checkoutSessionResponse.amount).isEqualTo(5099L)
             }
+            assertThat(viewModel.formEnabled.value).isFalse()
         }
 
     @Test

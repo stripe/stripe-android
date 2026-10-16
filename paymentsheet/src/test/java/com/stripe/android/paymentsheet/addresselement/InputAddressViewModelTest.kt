@@ -258,6 +258,8 @@ class InputAddressViewModelTest {
                 )
             )
         )
+        assertThat(viewModel.formEnabled.value).isFalse()
+
         val addressCall = FakeAddressElementEventReporter.AddressCall(
             addressDetails = addressDetails,
             autocompleteAddressDetails = null,
@@ -484,6 +486,7 @@ class InputAddressViewModelTest {
             assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
                 FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
             )
+            assertThat(viewModel.formEnabled.value).isTrue()
             assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
             eventReporter.saveCompletedCalls.expectNoEvents()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
@@ -495,6 +498,7 @@ class InputAddressViewModelTest {
 
             assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
             assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            assertThat(viewModel.formEnabled.value).isFalse()
             assertThat(viewModel.saveError.value).isNull()
             assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedAddressCall)
             eventReporter.saveFailedCalls.expectNoEvents()
@@ -517,7 +521,7 @@ class InputAddressViewModelTest {
                 FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
             )
             assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
-            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
+            assertThat(viewModel.formEnabled.value).isTrue()
 
             primaryButtonAction.result = Result.failure(secondError)
             viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
@@ -528,6 +532,7 @@ class InputAddressViewModelTest {
                 FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, secondError)
             )
             assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
+            assertThat(viewModel.formEnabled.value).isTrue()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
             eventReporter.saveCompletedCalls.expectNoEvents()
         }
@@ -570,6 +575,8 @@ class InputAddressViewModelTest {
 
                 assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
                 assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+                assertThat(viewModel.formEnabled.value).isFalse()
+
                 viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
 
                 primaryButtonAction.calls.expectNoEvents()
@@ -1351,6 +1358,7 @@ class InputAddressViewModelTest {
             )
 
             assertThat(controller.validationMessage.value).isNotNull()
+            assertThat(viewModel.formEnabled.value).isTrue()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
         }
 
