@@ -508,8 +508,8 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public final fun getLambda$-391428647$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1556541497$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1594811933$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1744992555$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1814127193$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2083436101$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$480098714$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
