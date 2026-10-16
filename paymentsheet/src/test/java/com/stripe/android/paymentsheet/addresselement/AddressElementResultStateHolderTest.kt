@@ -27,7 +27,6 @@ internal class AddressElementResultStateHolderTest {
             assertThat(awaitItem()).isEqualTo(State.ConfirmingCancellation)
 
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
             assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
             resultStateHolder.onCancelCompleted()
             resultStateHolder.onSaveFailed()
@@ -129,7 +128,7 @@ internal class AddressElementResultStateHolderTest {
             assertThat(resultStateHolder.tryStartSaving()).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Saving)
 
-            resultStateHolder.assertCancellationRejected()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
             expectNoEvents()
         }
@@ -184,7 +183,7 @@ internal class AddressElementResultStateHolderTest {
             resultStateHolder.onSaveFailed()
             resultStateHolder.onCancelCompleted()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            resultStateHolder.assertCancellationRejected()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
             expectNoEvents()
         }
@@ -215,7 +214,7 @@ internal class AddressElementResultStateHolderTest {
             assertThat(awaitItem()).isEqualTo(State.Canceling)
 
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            resultStateHolder.assertCancellationRejected()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
             expectNoEvents()
         }
@@ -299,7 +298,7 @@ internal class AddressElementResultStateHolderTest {
             resultStateHolder.onSaveCompleted(result)
             resultStateHolder.onSaveFailed()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            resultStateHolder.assertCancellationRejected()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
             expectNoEvents()
         }
@@ -325,12 +324,5 @@ internal class AddressElementResultStateHolderTest {
                 State.Finished(AddressElementActivityContract.Result.Canceled)
             )
         }
-    }
-
-    private fun AddressElementResultStateHolder.assertCancellationRejected() {
-        assertThat(onUserCancel(shouldConfirmCancellation = false)).isFalse()
-        assertThat(onUserCancel(shouldConfirmCancellation = true)).isFalse()
-        onKeepEditing()
-        onDiscardChanges()
     }
 }
