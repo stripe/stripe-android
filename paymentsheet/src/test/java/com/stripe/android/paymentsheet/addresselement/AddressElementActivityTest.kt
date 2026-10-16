@@ -508,14 +508,14 @@ internal class AddressElementActivityTest {
     fun `standalone close immediately cancels edited input`() = runScenario(
         args = standaloneArgs(SHIPPING_ADDRESS),
     ) {
-        assertStandaloneDismissesImmediately { addressPage.clickClose() }
+        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) { addressPage.clickClose() }
     }
 
     @Test
     fun `standalone root back immediately cancels edited input`() = runScenario(
         args = standaloneArgs(SHIPPING_ADDRESS),
     ) {
-        assertStandaloneDismissesImmediately {
+        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) {
             activityScenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         }
     }
@@ -524,31 +524,9 @@ internal class AddressElementActivityTest {
     fun `standalone scrim immediately cancels edited input`() = runScenario(
         args = standaloneArgs(SHIPPING_ADDRESS),
     ) {
-        assertStandaloneDismissesImmediately { addressPage.dismissViaScrimAccessibilityAction() }
-    }
-
-    private fun AddressElementActivityTestRunner.Scenario.assertCheckoutDismissalRequestsConfirmation(
-        requestDismissal: () -> Unit,
-    ) {
-        addressPage.assertReadyToSave()
-        requestDismissal()
-
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        addressPage.discardChanges()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-    }
-
-    private fun AddressElementActivityTestRunner.Scenario.assertStandaloneDismissesImmediately(
-        requestDismissal: () -> Unit,
-    ) {
-        addressPage.assertReadyToSave()
-        addressPage.editName(EDITED_NAME)
-        requestDismissal()
-
-        addressPage.assertDiscardConfirmationNotDisplayed()
-        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) {
+            addressPage.dismissViaScrimAccessibilityAction()
+        }
     }
 
     private fun standaloneArgs(address: AddressDetails) = AddressElementActivityContract.Args.Standalone(

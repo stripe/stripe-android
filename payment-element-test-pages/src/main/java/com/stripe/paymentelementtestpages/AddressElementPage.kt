@@ -93,6 +93,8 @@ class AddressElementPage(
     }
 
     fun assertDiscardConfirmation(loadingIndicatorTestTag: String) {
+        primaryButton.assertIsNotEnabled()
+        closeButton.assertIsNotEnabled()
         composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertIsDisplayed()
         composeTestRule.onNodeWithTag(loadingIndicatorTestTag, useUnmergedTree = true)
             .assertDoesNotExist()

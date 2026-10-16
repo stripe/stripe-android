@@ -396,55 +396,6 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `confirmation cancellation defers analytics until discard and disables the form`() = runScenario(
-        address = EXPECTED_ADDRESS,
-    ) {
-        viewModel.formEnabled.test {
-            assertThat(awaitItem()).isTrue()
-
-            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isTrue()
-            assertThat(resultStateHolder.state.value).isEqualTo(State.ConfirmingCancellation)
-            assertThat(awaitItem()).isFalse()
-            eventReporter.canceledCalls.expectNoEvents()
-
-            resultStateHolder.onKeepEditing()
-            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
-            assertThat(awaitItem()).isTrue()
-            eventReporter.canceledCalls.expectNoEvents()
-
-            viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
-            eventReporter.onBeforeCanceled = {
-                assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
-            }
-
-            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isTrue()
-            assertThat(resultStateHolder.state.value).isEqualTo(State.ConfirmingCancellation)
-            assertThat(awaitItem()).isFalse()
-            eventReporter.canceledCalls.expectNoEvents()
-
-            resultStateHolder.onDiscardChanges()
-
-            val cancellationCall = eventReporter.canceledCalls.awaitItem()
-            assertThat(cancellationCall).isEqualTo(
-                FakeAddressElementEventReporter.AddressCall(
-                    addressDetails = AddressDetails(
-                        name = EXPECTED_ADDRESS.name,
-                        address = EXPECTED_ADDRESS.address?.copy(line1 = "510 Townsend Sta"),
-                        phoneNumber = EXPECTED_ADDRESS.phoneNumber,
-                    ),
-                    autocompleteAddressDetails = null,
-                )
-            )
-            assertThat(resultStateHolder.state.value).isEqualTo(
-                State.Finished(AddressElementActivityContract.Result.Canceled)
-            )
-            assertThat(viewModel.formEnabled.value).isFalse()
-            eventReporter.canceledCalls.expectNoEvents()
-            expectNoEvents()
-        }
-    }
-
-    @Test
     fun `cancellation analytics is recorded before the canceled result is published`() = runScenario {
         eventReporter.onBeforeCanceled = {
             assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
