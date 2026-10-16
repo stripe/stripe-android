@@ -27,23 +27,18 @@ import kotlin.coroutines.CoroutineContext
 internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val savedStateHandle: SavedStateHandle,
-    private val context: Context,
+    context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val durationProvider: DurationProvider,
     private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) {
-    private val workScope = CoroutineScope(workContext)
-    private val analyticsRequestFactory by lazy {
-        val publishableKey = paymentMethodMetadataProvider.get()?.apiConfiguration?.publishableKey
-            ?: apiConfigurationProvider.get().publishableKey
-        PaymentAnalyticsRequestFactory(
-            context = context,
-            publishableKey = publishableKey,
-            defaultProductUsageTokens = setOf("checkout_elements"),
-        )
-    }
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+        context = context,
+        defaultProductUsageTokens = setOf("checkout_elements"),
+        apiConfigurationProvider = apiConfigurationProvider,
+    )
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
@@ -105,10 +100,9 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         val metadata = paymentMethodMetadataProvider.get()
         val publishableKey = metadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
-        val requestFactory = analyticsRequestFactory
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
-                requestFactory.createRequest(
+                analyticsRequestFactory.createRequest(
                     event = event,
                     additionalParams = metadata.defaultAnalyticsParams() + paymentEvent.params,
                     publishableKeyOverride = publishableKey,

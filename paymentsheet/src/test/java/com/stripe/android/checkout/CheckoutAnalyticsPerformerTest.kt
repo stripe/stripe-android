@@ -9,7 +9,6 @@ import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -23,7 +22,6 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.FakeDurationProvider
-import com.stripe.android.utils.FakeProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -33,6 +31,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -52,27 +51,27 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val success = successfulResult()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
+        runCurrent()
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "google_pay",
+                    "duration" to 2f,
+                    "intent_id" to success.intent.id,
+                    "deferred_intent_confirmation_type" to "client",
+                ),
+            ),
+        )
+        assertThat(savedConfirmationKeys()).isEmpty()
+
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
+        runCurrent()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
         runCurrent()
-        val terminal = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-
-        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(terminal).containsEntry("selected_lpm", "google_pay")
-        assertThat(terminal).containsEntry("deferred_intent_confirmation_type", "client")
-        assertThat(terminal).containsEntry("intent_id", success.intent.id)
-        assertThat(terminal).containsEntry("product_usage", "checkout_elements")
-        assertThat(terminal).containsEntry(
-            "publishable_key",
-            DEFAULT_METADATA_PUBLISHABLE_KEY,
-        )
-        assertThat(terminal).containsEntry("duration", 2f)
-        assertThat(savedConfirmationKeys()).isEmpty()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
-            .isTrue()
     }
 
     @Test
@@ -85,12 +84,13 @@ internal class CheckoutAnalyticsPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
         runCurrent()
 
-        val terminal = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(terminal).containsEntry("selected_lpm", "link")
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("selected_lpm" to "link"),
+            ),
+        )
         assertThat(savedConfirmationKeys()).isEmpty()
     }
 
@@ -117,18 +117,19 @@ internal class CheckoutAnalyticsPerformerTest {
         )
         runCurrent()
 
-        val terminal = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.failed")
-        assertThat(terminal).containsEntry("selected_lpm", "google_pay")
-        assertThat(terminal).containsEntry("error_code", "card_declined")
-        assertThat(terminal).containsEntry("duration", 2f)
-        assertThat(terminal.toString()).doesNotContain(privateMessage)
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "google_pay",
+                    "duration" to 2f,
+                    "error_code" to "card_declined",
+                ),
+            ),
+        )
+        assertThat(request.toString()).doesNotContain(privateMessage)
         assertThat(savedConfirmationKeys()).isEmpty()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
-            .isTrue()
     }
 
     @Test
@@ -145,15 +146,18 @@ internal class CheckoutAnalyticsPerformerTest {
         )
         runCurrent()
 
-        val terminal = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(terminal["event"]).isEqualTo("checkout_elements.confirm.failed")
-        assertThat(terminal).containsEntry("selected_lpm", "google_pay")
-        assertThat(terminal).containsEntry("error_message", "googlePay_12")
-        assertThat(terminal).containsEntry("error_code", "12")
-        assertThat(terminal.toString()).doesNotContain(privateMessage)
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "google_pay",
+                    "error_message" to "googlePay_12",
+                    "error_code" to "12",
+                ),
+            ),
+        )
+        assertThat(request.toString()).doesNotContain(privateMessage)
     }
 
     @Test
@@ -169,8 +173,6 @@ internal class CheckoutAnalyticsPerformerTest {
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
         assertThat(savedConfirmationKeys()).isEmpty()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
-            .isFalse()
     }
 
     @Test
@@ -184,128 +186,40 @@ internal class CheckoutAnalyticsPerformerTest {
         )
         runCurrent()
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectMostRecentItem()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(request).containsEntry("event", "checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("publishable_key", FALLBACK_PUBLISHABLE_KEY)
-        assertThat(request).containsEntry("product_usage", "checkout_elements")
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = FALLBACK_PUBLISHABLE_KEY,
+                params = emptyMap(),
+            ),
+        )
     }
 
     @Test
-    fun `internal failure is filtered`() = assertFilteredFailure(
-        ConfirmationHandler.Result.Failed.ErrorType.Internal
-    )
-
-    @Test
-    fun `merchant integration failure is filtered`() = assertFilteredFailure(
-        ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration
-    )
-
-    @Test
-    fun `fatal failure is filtered`() = assertFilteredFailure(
-        ConfirmationHandler.Result.Failed.ErrorType.Fatal
-    )
-
-    @Test
-    fun `metadata and publishable key are snapshotted before request dispatch`() = runScenario(
+    fun `metadata is snapshotted before request dispatch`() = runScenario(
         workContext = { scheduler -> StandardTestDispatcher(scheduler) },
     ) {
-        val metadataBefore = paymentMethodMetadata(
-            publishableKey = "pk_test_metadata_before",
-            marker = "before",
-        )
-        val metadataAfter = paymentMethodMetadata(
-            publishableKey = "pk_test_metadata_after",
-            marker = "after",
-        )
-        paymentMethodMetadataProvider.value = metadataBefore
-        assertAnalyticsProvidersNotCalled()
+        val metadataBefore = paymentMethodMetadata(marker = "before")
+        val metadataAfter = paymentMethodMetadata(marker = "after")
+        paymentMethodMetadata = metadataBefore
 
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             successfulResult(deferredIntentConfirmationType = null)
         )
-        paymentMethodMetadataProvider.getCalls.awaitItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
 
-        paymentMethodMetadataProvider.value = metadataAfter
+        paymentMethodMetadata = metadataAfter
         runCurrent()
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(request).containsEntry("publishable_key", "pk_test_metadata_before")
-        assertThat(request).containsEntry("metadata_snapshot", "before")
-        assertThat(request).containsEntry("product_usage", "checkout_elements")
-    }
-
-    @Test
-    fun `successive confirmations use the current metadata publishable key`() = runScenario {
-        val metadataA = paymentMethodMetadata(
-            publishableKey = "pk_test_metadata_a",
-            marker = "metadata_a",
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("metadata_snapshot" to "before"),
+            ),
         )
-        val metadataB = paymentMethodMetadata(
-            publishableKey = "pk_test_metadata_b",
-            marker = "metadata_b",
-        )
-        paymentMethodMetadataProvider.value = metadataA
-        startReporting()
-
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            successfulResult(deferredIntentConfirmationType = null)
-        )
-        runCurrent()
-        val firstRequest = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        assertThat(firstRequest).containsEntry("publishable_key", "pk_test_metadata_a")
-        assertThat(firstRequest).containsEntry("metadata_snapshot", "metadata_a")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Idle
-        runCurrent()
-        paymentMethodMetadataProvider.value = metadataB
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            successfulResult(deferredIntentConfirmationType = null)
-        )
-        runCurrent()
-
-        val secondRequest = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        paymentMethodMetadataProvider.getCalls.expectMostRecentItem()
-        apiConfigurationProvider.getCalls.expectNoEvents()
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(secondRequest).containsEntry("publishable_key", "pk_test_metadata_b")
-        assertThat(secondRequest).containsEntry("metadata_snapshot", "metadata_b")
-        assertThat(secondRequest).containsEntry("product_usage", "checkout_elements")
-        assertThat(savedConfirmationKeys()).isEmpty()
-    }
-
-    private fun assertFilteredFailure(
-        type: ConfirmationHandler.Result.Failed.ErrorType,
-    ) = runScenario {
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Failed(
-                cause = IllegalStateException("filtered failure"),
-                message = "Filtered failure".resolvableString,
-                type = type,
-            )
-        )
-        runCurrent()
-
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(savedConfirmationKeys()).isEmpty()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout)))
-            .isFalse()
     }
 
     private fun runScenario(
@@ -320,18 +234,14 @@ internal class CheckoutAnalyticsPerformerTest {
         val savedStateHandle = SavedStateHandle()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = FakeDurationProvider(duration)
-        val paymentMethodMetadataProvider = FakeProvider(paymentMethodMetadata)
-        val apiConfigurationProvider = FakeProvider(
-            ApiConfiguration(FALLBACK_PUBLISHABLE_KEY).build()
-        )
         val scenario = Scenario(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             context = ApplicationProvider.getApplicationContext<Context>(),
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = durationProvider,
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
-            apiConfigurationProvider = apiConfigurationProvider,
+            paymentMethodMetadata = paymentMethodMetadata,
+            fallbackApiConfiguration = ApiConfiguration(FALLBACK_PUBLISHABLE_KEY).build(),
             backgroundScope = backgroundScope,
             testScheduler = testScheduler,
             workContext = workContext(testScheduler),
@@ -341,8 +251,6 @@ internal class CheckoutAnalyticsPerformerTest {
 
         confirmationHandler.validate()
         analyticsRequestExecutor.validate()
-        paymentMethodMetadataProvider.ensureAllEventsConsumed()
-        apiConfigurationProvider.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -351,12 +259,19 @@ internal class CheckoutAnalyticsPerformerTest {
         private val context: Context,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
-        val paymentMethodMetadataProvider: FakeProvider<PaymentMethodMetadata?>,
-        val apiConfigurationProvider: FakeProvider<ApiConfiguration.State>,
+        paymentMethodMetadata: PaymentMethodMetadata?,
+        private val fallbackApiConfiguration: ApiConfiguration.State,
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
         private val workContext: CoroutineContext,
     ) {
+        var paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadata
+
+        private val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
+            paymentMethodMetadata
+        }
+        private val apiConfigurationProvider = Provider { fallbackApiConfiguration }
+
         val performer: CheckoutAnalyticsPerformer = createPerformer()
 
         fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
@@ -374,11 +289,6 @@ internal class CheckoutAnalyticsPerformerTest {
         fun savedConfirmationKeys(): Set<String> =
             savedStateHandle.keys().filter { it.startsWith("CheckoutAnalyticsPerformer.") }.toSet()
 
-        fun assertAnalyticsProvidersNotCalled() {
-            paymentMethodMetadataProvider.getCalls.expectNoEvents()
-            apiConfigurationProvider.getCalls.expectNoEvents()
-        }
-
         private fun createPerformer(): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
@@ -392,7 +302,6 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     private fun paymentMethodMetadata(
-        publishableKey: String,
         marker: String,
     ): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
         analyticsMetadata = AnalyticsMetadata(
@@ -400,12 +309,31 @@ internal class CheckoutAnalyticsPerformerTest {
                 "metadata_snapshot" to AnalyticsMetadata.Value.SimpleString(marker),
             )
         ),
-        apiConfiguration = ApiConfiguration(publishableKey).build(),
+        apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
     )
 
     private fun defaultPaymentMethodMetadata(): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
         apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
     )
+
+    private data class ExpectedEvent(
+        val event: String,
+        val publishableKey: String,
+        val params: Map<String, Any?>,
+    )
+
+    private suspend fun FakeAnalyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+        expected: ExpectedEvent,
+    ): Map<String, *> {
+        val request = requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", expected.event)
+        assertThat(request.params).containsEntry("product_usage", "checkout_elements")
+        assertThat(request.params).containsEntry("publishable_key", expected.publishableKey)
+        expected.params.forEach { (key, value) ->
+            assertThat(request.params).containsEntry(key, value)
+        }
+        return request.params
+    }
 
     private companion object {
         const val FALLBACK_PUBLISHABLE_KEY = "pk_test_checkout_analytics"

@@ -35,13 +35,13 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeDurationProvider
-import com.stripe.android.utils.FakeProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -273,10 +273,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val paymentMethodMetadataProvider = FakeProvider<PaymentMethodMetadata?>(value = null)
-        val apiConfigurationProvider = FakeProvider(
-            PaymentMethodMetadataFactory.create().apiConfiguration
-        )
+        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
+        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
+        val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
@@ -316,8 +315,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
-        paymentMethodMetadataProvider.ensureAllEventsConsumed()
-        apiConfigurationProvider.ensureAllEventsConsumed()
     }
 
     private class Scenario(
