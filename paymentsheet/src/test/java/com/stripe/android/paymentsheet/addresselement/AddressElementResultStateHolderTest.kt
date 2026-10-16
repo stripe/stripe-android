@@ -17,6 +17,99 @@ internal class AddressElementResultStateHolderTest {
     }
 
     @Test
+    fun `confirmation waits for a decision and blocks other operations`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.ConfirmingCancellation)
+
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+            resultStateHolder.onCancelCompleted()
+            resultStateHolder.onSaveFailed()
+            resultStateHolder.onSaveCompleted(AddressElementActivityContract.Result.Canceled)
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `keeping editing returns to idle and permits saving`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            resultStateHolder.onUserCancel(shouldConfirmCancellation = true)
+            assertThat(awaitItem()).isEqualTo(State.ConfirmingCancellation)
+
+            resultStateHolder.onKeepEditing()
+
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            assertThat(resultStateHolder.tryStartSaving()).isTrue()
+            assertThat(awaitItem()).isEqualTo(State.Saving)
+        }
+    }
+
+    @Test
+    fun `dismissal after keeping editing uses the new confirmation decision`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            resultStateHolder.onUserCancel(shouldConfirmCancellation = true)
+            assertThat(awaitItem()).isEqualTo(State.ConfirmingCancellation)
+            resultStateHolder.onKeepEditing()
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
+        }
+    }
+
+    @Test
+    fun `discarding starts cancellation and waits for completion`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+            resultStateHolder.onUserCancel(shouldConfirmCancellation = true)
+            assertThat(awaitItem()).isEqualTo(State.ConfirmingCancellation)
+
+            resultStateHolder.onDiscardChanges()
+
+            assertThat(awaitItem()).isEqualTo(State.Canceling)
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
+            assertThat(resultStateHolder.tryStartSaving()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            expectNoEvents()
+
+            resultStateHolder.onCancelCompleted()
+
+            assertThat(awaitItem()).isEqualTo(State.Finished(AddressElementActivityContract.Result.Canceled))
+        }
+    }
+
+    @Test
+    fun `dialog actions without confirmation do not change idle state`() = runTest {
+        val resultStateHolder = AddressElementResultStateHolder()
+
+        resultStateHolder.state.test {
+            assertThat(awaitItem()).isEqualTo(State.Idle)
+
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `starting a save prevents another save`() = runTest {
         val resultStateHolder = AddressElementResultStateHolder()
 
@@ -40,7 +133,10 @@ internal class AddressElementResultStateHolderTest {
             assertThat(resultStateHolder.tryStartSaving()).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Saving)
 
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
 
             expectNoEvents()
         }
@@ -95,7 +191,10 @@ internal class AddressElementResultStateHolderTest {
             resultStateHolder.onSaveFailed()
             resultStateHolder.onCancelCompleted()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
 
             expectNoEvents()
         }
@@ -122,11 +221,14 @@ internal class AddressElementResultStateHolderTest {
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
 
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Canceling)
 
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
 
             expectNoEvents()
         }
@@ -166,7 +268,7 @@ internal class AddressElementResultStateHolderTest {
 
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Canceling)
 
             resultStateHolder.onSaveFailed()
@@ -182,7 +284,7 @@ internal class AddressElementResultStateHolderTest {
 
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Canceling)
 
             resultStateHolder.onCancelCompleted()
@@ -200,7 +302,7 @@ internal class AddressElementResultStateHolderTest {
 
         resultStateHolder.state.test {
             assertThat(awaitItem()).isEqualTo(State.Idle)
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Canceling)
             resultStateHolder.onCancelCompleted()
             assertThat(awaitItem()).isEqualTo(
@@ -210,7 +312,10 @@ internal class AddressElementResultStateHolderTest {
             resultStateHolder.onSaveCompleted(result)
             resultStateHolder.onSaveFailed()
             assertThat(resultStateHolder.tryStartSaving()).isFalse()
-            assertThat(resultStateHolder.onUserCancel()).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = true)).isFalse()
+            resultStateHolder.onKeepEditing()
+            resultStateHolder.onDiscardChanges()
 
             expectNoEvents()
         }
@@ -227,7 +332,7 @@ internal class AddressElementResultStateHolderTest {
             resultStateHolder.onSaveFailed()
             assertThat(awaitItem()).isEqualTo(State.Idle)
 
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(awaitItem()).isEqualTo(State.Canceling)
 
             resultStateHolder.onCancelCompleted()
