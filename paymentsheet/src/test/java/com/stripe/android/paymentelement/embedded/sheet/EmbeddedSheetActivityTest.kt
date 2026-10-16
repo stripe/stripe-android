@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -9,11 +10,16 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerSavedState
+import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -23,15 +29,18 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
@@ -42,11 +51,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.android.controller.ActivityController
 import java.util.concurrent.CountDownLatch
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
@@ -66,8 +78,40 @@ internal class EmbeddedSheetActivityTest {
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(composeTestRule)
+        .around(createComposeCleanupRule())
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `controller destroy dismisses sheet after host destruction`() = runControllerScenario {
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        host.pause().stop().destroy()
+        activityScenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        activityScenario.onActivity { activity ->
+            controller.destroy()
+            assertThat(activity.isFinishing).isTrue()
+        }
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `destroying unrelated controller leaves sheet open`() = runControllerScenario {
+        val unrelatedController = CheckoutController.Builder(applicationContext, SavedStateHandle())
+            .integrationName("unrelated_controller")
+            .build()
+
+        activityScenario.onActivity { unrelatedController.destroy() }
+
+        activityScenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
 
     @Test
     fun `when launched without args should finish with error result`() {
@@ -247,6 +291,7 @@ internal class EmbeddedSheetActivityTest {
     }
 
     private fun launch(
+        paymentElementCallbackIdentifier: String = "EmbeddedSheetActivityTestCallbackIdentifier",
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
             hasCustomerConfiguration = true,
@@ -268,7 +313,7 @@ internal class EmbeddedSheetActivityTest {
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
                     productUsage = setOf("EmbeddedPaymentElement"),
-                    paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     statusBarColor = null,
                     selection = selection,
                     previousNewSelections = Bundle(),
@@ -287,6 +332,39 @@ internal class EmbeddedSheetActivityTest {
             ).block()
         }
     }
+
+    private fun runControllerScenario(block: ControllerScenario.() -> Unit) {
+        val identifier = "checkout_sheet_cleanup"
+        val savedState = CheckoutControllerSavedState(SavedStateHandle(), identifier)
+        val controller = DaggerCheckoutControllerComponent.factory().create(
+            application = applicationContext,
+            paymentElementCallbackIdentifier = identifier,
+            resultCallback = CheckoutController.ResultCallback {},
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+            checkoutControllerSavedState = savedState,
+        ).checkoutController
+        val sheetStateHolder = SheetStateHolder(savedState.handle)
+        val host = Robolectric.buildActivity(ComponentActivity::class.java).setup()
+        try {
+            controller.createPresenter(host.get())
+            sheetStateHolder.sheetIsOpen = true
+            launch(paymentElementCallbackIdentifier = identifier) {
+                ControllerScenario(controller, sheetStateHolder, host, activityScenario).block()
+            }
+        } finally {
+            controller.destroy()
+            if (host.get().lifecycle.currentState != Lifecycle.State.DESTROYED) {
+                host.pause().stop().destroy()
+            }
+        }
+    }
+
+    private class ControllerScenario(
+        val controller: CheckoutController,
+        val sheetStateHolder: SheetStateHolder,
+        val host: ActivityController<ComponentActivity>,
+        val activityScenario: ActivityScenario<EmbeddedSheetActivity>,
+    )
 
     private fun defaultPaymentMethods(): List<PaymentMethod> {
         return listOf(
