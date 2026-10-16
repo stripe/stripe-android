@@ -10,7 +10,6 @@ NEXT_VERSION_BUMP: MINOR
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
 ### PaymentSheet
-* [Changed] Billing address autocomplete in PaymentSheet and FlowController now uses Stripe-hosted autocomplete only when enabled by the Elements Session. Otherwise, customers enter their address manually.
 * [CHANGED][15002](https://github.com/stripe/stripe-android/pull/15002) Moved `ApiConfigurationPreview` from the `paymentsheet` module to `stripe-core`. Update preview opt-in imports to `com.stripe.android.core.ApiConfigurationPreview`.
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
