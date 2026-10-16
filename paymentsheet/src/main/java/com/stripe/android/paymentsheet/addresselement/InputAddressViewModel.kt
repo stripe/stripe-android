@@ -15,7 +15,6 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -124,8 +123,6 @@ internal class InputAddressViewModel @Inject constructor(
         interactor = this,
         config = args.config,
     )
-
-    val formEnabled: StateFlow<Boolean> = resultStateHolder.state.mapAsStateFlow { it == State.Idle }
 
     private val _saveError = MutableStateFlow<ResolvableString?>(null)
     val saveError: StateFlow<ResolvableString?> = _saveError.asStateFlow()

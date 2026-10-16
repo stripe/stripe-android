@@ -11,7 +11,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -31,7 +30,6 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Provider
 
 @Composable
@@ -133,8 +131,9 @@ internal fun InputAddressScreen(
     val titleText = viewModel.args.config?.title ?: stringResource(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
-    val formEnabled by viewModel.formEnabled.collectAsState()
     val resultState by viewModel.resultStateHolder.state.collectAsState()
+    val formEnabled = resultState == State.Idle
+    val lastTextFieldIdentifier by formController.lastTextFieldIdentifier.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
@@ -177,14 +176,10 @@ internal fun InputAddressScreen(
         },
         formContent = {
             FormUI(
-                hiddenIdentifiersFlow = remember {
-                    stateFlowOf(emptySet())
-                },
-                enabledFlow = viewModel.formEnabled,
-                elementsFlow = remember(formController.elements) {
-                    stateFlowOf(formController.elements)
-                },
-                lastTextFieldIdentifierFlow = formController.lastTextFieldIdentifier,
+                hiddenIdentifiers = emptySet(),
+                enabled = formEnabled,
+                elements = formController.elements,
+                lastTextFieldIdentifier = lastTextFieldIdentifier,
             )
         },
         bottomContent = {
