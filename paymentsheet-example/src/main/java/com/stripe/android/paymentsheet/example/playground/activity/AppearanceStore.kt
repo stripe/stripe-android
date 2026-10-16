@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -23,6 +24,7 @@ internal object AppearanceStore {
     fun reset() {
         state = State()
         forceDarkMode = false
+        FeatureFlags.disableLuminanceBasedThemes.reset()
     }
 
     data class State(
