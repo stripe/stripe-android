@@ -43,9 +43,12 @@ internal class AffirmElementUIScreenshotTest {
     }
 
     @Test
-    fun testComponentColorOpposesTheme(@TestParameter disableLuminanceBasedThemes: Boolean) {
+    fun testLogoSelectionWhenComponentBrightnessDiffersFromTheme(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
+    ) {
         disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
         paparazziRule.snapshot {
+            // Use a black component in light mode and a white component in dark mode.
             val componentColor = if (MaterialTheme.stripeThemeIsDark) Color.White else Color.Black
             StripeTheme(
                 colors = MaterialTheme.stripeColors.copy(component = componentColor),
