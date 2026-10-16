@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
@@ -20,9 +17,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
@@ -86,14 +80,9 @@ internal class AddressElementActivityAnalyticsTest {
         addressPage.assertReadyToSave()
 
         addressPage.clickClose()
-        assertDiscardConfirmation()
-        keepEditing()
-        assertDiscardConfirmationNotDisplayed()
-
-        addressPage.clickClose()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -106,10 +95,10 @@ internal class AddressElementActivityAnalyticsTest {
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -120,18 +109,18 @@ internal class AddressElementActivityAnalyticsTest {
         addressPage.assertReadyToSave()
 
         addressPage.clickClose()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         networkRule.validate()
 
-        keepEditing()
-        assertDiscardConfirmationNotDisplayed()
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
         networkRule.validate()
 
         addressPage.selectCountry("Canada")
         addressPage.clickClose()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -142,10 +131,10 @@ internal class AddressElementActivityAnalyticsTest {
         addressPage.assertReadyToSave()
 
         addressPage.dismissViaScrimAccessibilityAction()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -160,10 +149,10 @@ internal class AddressElementActivityAnalyticsTest {
             activity.onBackPressedDispatcher.onBackPressed()
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -186,14 +175,9 @@ internal class AddressElementActivityAnalyticsTest {
 
         addressPage.assertVisible()
         addressPage.clickClose()
-        assertDiscardConfirmation()
-        keepEditing()
-        assertDiscardConfirmationNotDisplayed()
-
-        addressPage.clickClose()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -241,23 +225,6 @@ internal class AddressElementActivityAnalyticsTest {
         val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
         assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
         awaitAnalytics(completedRequest)
-    }
-
-    private fun assertDiscardConfirmation() {
-        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG).assertDoesNotExist()
-    }
-
-    private fun assertDiscardConfirmationNotDisplayed() {
-        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
-    }
-
-    private fun keepEditing() {
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
-    }
-
-    private fun discardChanges() {
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
     }
 
     private fun runTaxScenario(

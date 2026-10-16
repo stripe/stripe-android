@@ -6,15 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.lifecycle.Lifecycle
@@ -32,9 +25,6 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
-import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
@@ -327,8 +317,8 @@ internal class AddressElementActivityTest {
             addressPage.assertErrorNotDisplayed(expectedError)
             addressPage.assertReadyToSave()
             addressPage.clickClose()
-            assertDiscardConfirmation()
-            discardChanges()
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            addressPage.discardChanges()
 
             assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         } finally {
@@ -351,9 +341,9 @@ internal class AddressElementActivityTest {
                 .isSameInstanceAs(inputEntry)
         }
 
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
@@ -462,8 +452,8 @@ internal class AddressElementActivityTest {
             activity.onBackPressedDispatcher.onBackPressed()
         }
 
-        assertDiscardConfirmation()
-        discardChanges()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
@@ -478,15 +468,15 @@ internal class AddressElementActivityTest {
     @Test
     fun `checkout shipping close requests confirmation when input is unchanged`() = runScenario {
         addressPage.assertReadyToSave()
-        assertName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
 
         addressPage.clickClose()
 
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        keepEditing()
-        assertDiscardConfirmationNotDisplayed()
-        assertName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
         addressPage.assertReadyToSave()
     }
 
@@ -495,21 +485,21 @@ internal class AddressElementActivityTest {
         addressPage.assertReadyToSave()
         addressPage.editName(EDITED_NAME)
         addressPage.clickClose()
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
         activityScenario.recreate()
         activityScenario.onActivity { activity = it }
         composeTestRule.waitForIdle()
 
-        assertDiscardConfirmation()
-        keepEditing()
-        assertDiscardConfirmationNotDisplayed()
-        assertName(EDITED_NAME)
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        addressPage.assertName(EDITED_NAME)
         addressPage.assertReadyToSave()
 
         addressPage.clickClose()
-        assertDiscardConfirmation()
-        discardChanges()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
@@ -543,9 +533,9 @@ internal class AddressElementActivityTest {
         addressPage.assertReadyToSave()
         requestDismissal()
 
-        assertDiscardConfirmation()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        discardChanges()
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
@@ -557,32 +547,8 @@ internal class AddressElementActivityTest {
         addressPage.editName(EDITED_NAME)
         requestDismissal()
 
-        assertDiscardConfirmationNotDisplayed()
+        addressPage.assertDiscardConfirmationNotDisplayed()
         assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
-    }
-
-    private fun assertDiscardConfirmation() {
-        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG, useUnmergedTree = true)
-            .assertDoesNotExist()
-    }
-
-    private fun assertDiscardConfirmationNotDisplayed() {
-        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
-    }
-
-    private fun keepEditing() {
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
-    }
-
-    private fun discardChanges() {
-        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
-    }
-
-    private fun assertName(name: String) {
-        composeTestRule.onNode(hasText("Full name").and(hasSetTextAction()))
-            .performScrollTo()
-            .assertTextContains(name)
     }
 
     private fun standaloneArgs(address: AddressDetails) = AddressElementActivityContract.Args.Standalone(

@@ -28,6 +28,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import androidx.compose.ui.R as ComposeUiR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -87,6 +90,24 @@ class AddressElementPage(
 
     fun clickClose() {
         closeButton.performClick()
+    }
+
+    fun assertDiscardConfirmation(loadingIndicatorTestTag: String) {
+        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(loadingIndicatorTestTag, useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
+    fun assertDiscardConfirmationNotDisplayed() {
+        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+    }
+
+    fun keepEditing() {
+        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
+    }
+
+    fun discardChanges() {
+        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
     }
 
     fun dismissViaScrimAccessibilityAction() {
@@ -157,6 +178,10 @@ class AddressElementPage(
 
     fun editName(name: String) {
         replaceText("Full name", name)
+    }
+
+    fun assertName(name: String) {
+        assertTextFieldContains("Full name", name)
     }
 
     private fun replaceText(label: String, text: String) {
