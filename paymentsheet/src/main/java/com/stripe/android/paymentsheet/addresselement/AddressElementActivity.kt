@@ -22,14 +22,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -87,16 +88,21 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            AddressElementUi(
+                appearance = starterArgs.config?.appearance ?: ConfigurationDefaults.appearance,
+                bottomSheetState = bottomSheetState,
+                navController = navController,
+            )
         }
     }
 
     @Composable
     private fun AddressElementUi(
+        appearance: PaymentSheet.Appearance,
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
     ) {
-        StripeTheme {
+        PaymentElementTheme(appearance = appearance) {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = viewModel.resultStateHolder::onUserCancel,
