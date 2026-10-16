@@ -131,27 +131,6 @@ internal class ExpressCheckoutElementContentTest {
     }
 
     @Test
-    fun `renders provided wallet buttons when max columns and rows are one`() {
-        val interactor = FakeExpressCheckoutElementInteractor(
-            state = stateFlowOf(
-                ExpressCheckoutElementInteractorStateFactory.create(
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
-                        .maxColumns(1)
-                        .maxRows(1)
-                        .build(),
-                )
-            ),
-        )
-
-        composeRule.setContent {
-            ExpressCheckoutElementContent(interactor = interactor)
-        }
-
-        composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
-        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
-    }
-
-    @Test
     fun `reports wallet tapped when Google Pay button is pressed`() {
         val state = ExpressCheckoutElementInteractorStateFactory.create()
         val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()

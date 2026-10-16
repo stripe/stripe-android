@@ -55,10 +55,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
         }
 
         return availableExpressButtonTypes
-            .sortedWith(
-                compareBy<ExpressButtonType> { it is ExpressButtonType.Link }
-                    .thenBy { it !is ExpressButtonType.GooglePay }
-            )
+            .sortedByDescending { it is ExpressButtonType.GooglePay }
             .take(visibleButtonCount)
     }
 }
