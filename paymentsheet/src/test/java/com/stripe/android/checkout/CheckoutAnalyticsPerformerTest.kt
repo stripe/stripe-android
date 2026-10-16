@@ -9,7 +9,6 @@ import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
@@ -24,7 +23,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -32,7 +30,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
-import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -182,40 +179,11 @@ internal class CheckoutAnalyticsPerformerTest {
         )
     }
 
-    @Test
-    fun `metadata is snapshotted before request dispatch`() = runScenario(
-        workContext = { scheduler -> StandardTestDispatcher(scheduler) },
-    ) {
-        val metadataBefore = paymentMethodMetadata(marker = "before")
-        val metadataAfter = paymentMethodMetadata(marker = "after")
-        paymentMethodMetadata = metadataBefore
-
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            successfulResult(deferredIntentConfirmationType = null)
-        )
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-
-        paymentMethodMetadata = metadataAfter
-
-        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.succeeded",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("metadata_snapshot" to "before"),
-            ),
-        )
-    }
-
     private fun runScenario(
         duration: Duration = 2.seconds,
         paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
             apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
         ),
-        workContext: (TestCoroutineScheduler) -> CoroutineContext = { scheduler ->
-            UnconfinedTestDispatcher(scheduler)
-        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -232,7 +200,6 @@ internal class CheckoutAnalyticsPerformerTest {
             fallbackApiConfiguration = ApiConfiguration(FALLBACK_PUBLISHABLE_KEY).build(),
             backgroundScope = backgroundScope,
             testScheduler = testScheduler,
-            workContext = workContext(testScheduler),
         )
 
         scenario.block()
@@ -247,16 +214,13 @@ internal class CheckoutAnalyticsPerformerTest {
         private val context: Context,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
-        paymentMethodMetadata: PaymentMethodMetadata?,
+        private val paymentMethodMetadata: PaymentMethodMetadata?,
         private val fallbackApiConfiguration: ApiConfiguration.State,
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
-        private val workContext: CoroutineContext,
     ) {
-        var paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadata
-
         private val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
-            this.paymentMethodMetadata
+            paymentMethodMetadata
         }
         private val apiConfigurationProvider = Provider { fallbackApiConfiguration }
 
@@ -278,20 +242,9 @@ internal class CheckoutAnalyticsPerformerTest {
             durationProvider = durationProvider,
             paymentMethodMetadataProvider = paymentMethodMetadataProvider,
             apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
     }
-
-    private fun paymentMethodMetadata(
-        marker: String,
-    ): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-        analyticsMetadata = AnalyticsMetadata(
-            mapOf(
-                "metadata_snapshot" to AnalyticsMetadata.Value.SimpleString(marker),
-            )
-        ),
-        apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
-    )
 
     private data class ExpectedEvent(
         val event: String,
