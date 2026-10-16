@@ -1492,6 +1492,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createNgWallet(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NgWallet,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createGoPay(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
