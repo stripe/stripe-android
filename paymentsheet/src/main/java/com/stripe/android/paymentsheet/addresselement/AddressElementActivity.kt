@@ -157,8 +157,17 @@ internal class AddressElementActivity : ComponentActivity() {
     }
 
     private fun dismiss() {
+        if (viewModel.resultStateHolder.state.value != State.Idle) return
+
+        val navController = requireNotNull(viewModel.navigator.navigationController)
+        val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
+        val inputViewModel = ViewModelProvider(
+            inputEntry,
+            InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider),
+        )[InputAddressViewModel::class.java]
+
         viewModel.resultStateHolder.onUserCancel(
-            shouldConfirmCancellation = starterArgs is AddressElementActivityContract.Args.CheckoutShipping,
+            shouldConfirmCancellation = inputViewModel.hasChanges(),
         )
     }
 
