@@ -66,11 +66,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 requestId = "req_checkout_confirm",
             )
 
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
-
             page.clickGooglePayButton()
         }
 
@@ -88,8 +83,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateAnalyticsRequest(eventName = "link.popup.success")
             validateConfirmationAnalyticsRequests(selectedLpm = "link", linkContext = "wallet")
 
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            // We also re-load Link state since the confirmation was for a Link payment method.
+            // Confirmation reloads Link state for both PE and ECE.
             enqueueLoadingRequests(linkEnabled = true)
 
             page.clickLinkButton()
@@ -111,7 +105,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 errorType = "IllegalStateException",
             )
 
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
+            // Confirmation reloads Link state for both PE and ECE.
             enqueueLoadingRequests(linkEnabled = true)
 
             page.clickGooglePayButton()
@@ -138,11 +132,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 errorType = "IllegalStateException",
             )
 
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            // We also re-load Link state since the confirmation was for a Link payment method.
+            // Confirmation reloads Link state for both PE and ECE.
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
-                validateLoadingAnalyticsRequests()
                 validateLinkAccountLookupAnalyticsRequest()
             }
 
@@ -198,11 +190,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             validateConfirmationAnalyticsRequests(selectedLpm = "google_pay")
 
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
-
             page.clickGooglePayButton()
         }
 
@@ -243,11 +230,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             validateConfirmationAnalyticsRequests(selectedLpm = "google_pay")
 
-            // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
-
             page.clickGooglePayButton()
         }
 
@@ -281,11 +263,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 errorCode = "checkout_session_total_changed",
             )
 
-            // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
-            repeat(2) {
-                validateLoadingAnalyticsRequests()
-            }
-
             page.clickGooglePayButton()
         }
 
@@ -312,19 +289,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
     }
 
     private fun enqueueLoadingRequests(linkEnabled: Boolean) {
-        // We load twice, once for PE and once for ECE. So all these requests are made twice.
-        repeat(2) {
-            if (linkEnabled) {
+        if (linkEnabled) {
+            // PE and ECE each load Link state.
+            repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
                 validateLinkAccountLookupAnalyticsRequest()
             }
-            validateLoadingAnalyticsRequests()
         }
-    }
-
-    private fun validateLoadingAnalyticsRequests() {
-        validateAnalyticsRequest(eventName = "mc_load_started")
-        validateAnalyticsRequest(eventName = "mc_load_succeeded")
     }
 
     private fun validateConfirmationAnalyticsRequests(

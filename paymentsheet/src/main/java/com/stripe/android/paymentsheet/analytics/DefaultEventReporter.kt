@@ -39,7 +39,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    @PaymentElementAnalytics private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
@@ -497,11 +497,13 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        val paymentMethodMetadata = paymentMethodMetadataProvider.get()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams(),
+                    additionalParams = paymentMethodMetadata.defaultAnalyticsParams(),
+                    publishableKeyOverride = paymentMethodMetadata?.apiConfiguration?.publishableKey,
                 )
             )
         }

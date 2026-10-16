@@ -84,6 +84,9 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("is_decoupled", SimpleBoolean(integrationMetadata.isDeferred()))
         put("is_spt", SimpleBoolean(integrationMetadata.isSpt()))
         put("is_confirmation_tokens", SimpleBoolean(integrationMetadata.isConfirmationTokens()))
+        if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+            put("checkout_session_id", SimpleString(integrationMetadata.id))
+        }
     }
 
     private fun intent(
