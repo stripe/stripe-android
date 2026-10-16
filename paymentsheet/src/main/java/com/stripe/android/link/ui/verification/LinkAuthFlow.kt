@@ -7,8 +7,10 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationFactor.FactorType
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -98,7 +100,7 @@ internal class LinkAuthFlow(
     }
 
     fun sendToEmail() {
-        if (!didStart || isLoading || finished || LinkAuthFlowState.Action.Email !in actions()) return
+        if (!didStart || isLoading || finished || !canSendToEmail()) return
         val factor = factorFor(VerificationType.EMAIL) ?: return
         history.addLast(Route(screen, challenge))
         select(factor)
@@ -171,23 +173,7 @@ internal class LinkAuthFlow(
 
     private fun factorFor(type: VerificationType): ConsumerSession.VerificationFactor? {
         if (type !in capabilities) return null
-        val factors = account?.availableVerificationFactors
-        if (factors != null) {
-            return factors.firstOrNull {
-            !it.temporarilyDisabled && it.providesFurtherVerification && it.type.verificationType == type
-        }
-        }
-        // Legacy endpoints predate the factor list and only support SMS.
-        return if (type == VerificationType.SMS) {
-            ConsumerSession.VerificationFactor(
-                type = FactorType.Sms,
-                id = null,
-                providesFurtherVerification = true,
-                temporarilyDisabled = false,
-            )
-        } else {
-            null
-        }
+        return account?.usableVerificationFactor(type.factorType)
     }
 
     private fun advance(previous: VerificationType?) {
@@ -199,22 +185,18 @@ internal class LinkAuthFlow(
         }
         // Only the authentication level counts: a sign-up or auth-token session is "verified" but may
         // still need an OTP to reach the level required here.
-        if (account.meetsMinimumAuthenticationLevel) {
-            if (!didStart) {
-                screen = LinkAuthFlowState.Screen.Loading
-                publish()
-                return
-            }
-            finish(LinkAuthFlowResult.Completed)
-            return
+        val terminalResult = when {
+            account.meetsMinimumAuthenticationLevel -> LinkAuthFlowResult.Completed
+            account.webviewRequired -> LinkAuthFlowResult.RequiresWebAuth
+            else -> null
         }
-        if (account.webviewRequired) {
-            if (!didStart) {
+        if (terminalResult != null) {
+            if (didStart) {
+                finish(terminalResult)
+            } else {
                 screen = LinkAuthFlowState.Screen.Loading
                 publish()
-                return
             }
-            finish(LinkAuthFlowResult.RequiresWebAuth)
             return
         }
         val order = if (previous == VerificationType.SMS) {
@@ -242,7 +224,7 @@ internal class LinkAuthFlow(
             return
         }
         val isInitialSelection = step == 1 && history.isEmpty() && previousChallenges.isEmpty()
-        val alreadyStarted = didStart && isInitialSelection && account?.hasStartedSession(type) == true
+        val alreadyStarted = didStart && isInitialSelection && account?.hasStartedVerification(type.sessionType) == true
         challenge = Challenge(
             type = type,
             factorId = factor.id,
@@ -292,7 +274,7 @@ internal class LinkAuthFlow(
                         advance(previous = null)
                         return@fold
                     }
-                    if (!account.hasStartedSession(challenge.type)) {
+                    if (!account.hasStartedVerification(challenge.type.sessionType)) {
                         block()
                         return@fold
                     }
@@ -386,7 +368,7 @@ internal class LinkAuthFlow(
         val result = operation()
         if (isStale(requestGeneration)) return null
         val error = result.exceptionOrNull()
-        if (error == null || error.stripeErrorCode !in SESSION_ERROR_CODES) return result
+        if (error == null || !error.isLinkAuthorizationError()) return result
 
         val recovered = linkAccountManager.recoverSession()
         if (isStale(requestGeneration)) return null
@@ -397,7 +379,7 @@ internal class LinkAuthFlow(
         val replayed = operation()
         if (isStale(requestGeneration)) return null
         val replayedError = replayed.exceptionOrNull()
-        if (replayedError != null && replayedError.stripeErrorCode in SESSION_ERROR_CODES) {
+        if (replayedError?.isLinkAuthorizationError() == true) {
             finish(LinkAuthFlowResult.Failed(replayedError))
             return null
         }
@@ -420,15 +402,8 @@ internal class LinkAuthFlow(
         return max(0, ceil((deadline - now()) / MILLIS_PER_SECOND).toInt())
     }
 
-    private fun actions(): List<LinkAuthFlowState.Action> {
-        if (screen != LinkAuthFlowState.Screen.Otp) return emptyList()
-        return buildList {
-            add(LinkAuthFlowState.Action.Resend)
-            if (step == 1 && challenge?.type == VerificationType.SMS && factorFor(VerificationType.EMAIL) != null) {
-                add(LinkAuthFlowState.Action.Email)
-            }
-        }
-    }
+    private fun canSendToEmail() = screen == LinkAuthFlowState.Screen.Otp && step == 1 &&
+        challenge?.type == VerificationType.SMS && factorFor(VerificationType.EMAIL) != null
 
     private fun recipient(): String {
         val account = account ?: return ""
@@ -451,16 +426,22 @@ internal class LinkAuthFlow(
         canSubmitCode = canSubmitCode(),
         canResend = canResend(),
         resendSecondsRemaining = resendSecondsRemaining(),
-        actions = actions(),
+        canSendToEmail = canSendToEmail(),
         recipient = recipient(),
         phoneNumberLastTwoDigits = account?.phoneNumberLastTwoDigits,
-        phoneNumberCountry = account?.phoneNumberCountry,
     )
 
-    private fun LinkAccount.hasStartedSession(type: VerificationType) = verificationSessions.any {
-        it.type.value.equals(type.value, ignoreCase = true) &&
-            it.state == ConsumerSession.VerificationSession.SessionState.Started
-    }
+    private val VerificationType.factorType: FactorType
+        get() = when (this) {
+            VerificationType.SMS -> FactorType.Sms
+            VerificationType.EMAIL -> FactorType.Email
+        }
+
+    private val VerificationType.sessionType: SessionType
+        get() = when (this) {
+            VerificationType.SMS -> SessionType.Sms
+            VerificationType.EMAIL -> SessionType.Email
+        }
 
     private val FactorType.verificationType: VerificationType?
         get() = when (this) {
@@ -482,7 +463,6 @@ internal class LinkAuthFlow(
         const val ERROR_VERIFICATION_MAX_ATTEMPTS_EXCEEDED = "consumer_verification_max_attempts_exceeded"
 
         val PHONE_MATCH_ERROR_CODES = setOf("phone_number_missing", "phone_number_mismatch")
-        val SESSION_ERROR_CODES = setOf("consumer_session_expired", "consumer_session_credentials_invalid")
     }
 }
 
@@ -498,14 +478,11 @@ internal data class LinkAuthFlowState(
     val canSubmitCode: Boolean,
     val canResend: Boolean,
     val resendSecondsRemaining: Int,
-    val actions: List<Action>,
+    val canSendToEmail: Boolean,
     val recipient: String,
     val phoneNumberLastTwoDigits: String?,
-    val phoneNumberCountry: String?,
 ) {
     enum class Screen { Loading, Otp, PhoneMatch, Blocked }
-
-    enum class Action { Resend, Email }
 }
 
 internal sealed interface LinkAuthFlowResult {

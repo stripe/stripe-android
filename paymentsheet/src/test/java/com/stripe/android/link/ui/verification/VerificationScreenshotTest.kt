@@ -284,7 +284,7 @@ internal class VerificationScreenshotTest(
                 authFlowTestCase(
                     name = "VerificationScreenAuthFlowMoreOptions",
                     authFlow = authFlowState(
-                        actions = listOf(LinkAuthFlowState.Action.Resend, LinkAuthFlowState.Action.Email),
+                        canSendToEmail = true,
                     ),
                 ),
                 authFlowTestCase(
@@ -347,7 +347,7 @@ internal class VerificationScreenshotTest(
             screen: LinkAuthFlowState.Screen = LinkAuthFlowState.Screen.Otp,
             recipient: String = "(•••) ••• ••91",
             canGoBack: Boolean = false,
-            actions: List<LinkAuthFlowState.Action> = listOf(LinkAuthFlowState.Action.Resend),
+            canSendToEmail: Boolean = false,
             canResend: Boolean = true,
             resendSecondsRemaining: Int = 0,
         ) = VerificationViewState.AuthFlowViewState(
@@ -355,9 +355,8 @@ internal class VerificationScreenshotTest(
             recipient = recipient,
             canGoBack = canGoBack,
             codeEntryEnabled = true,
-            actions = actions,
+            canSendToEmail = canSendToEmail,
             canResend = canResend,
-            isResending = false,
             resendSecondsRemaining = resendSecondsRemaining,
             phoneNumberLastTwoDigits = "91",
         )

@@ -85,14 +85,13 @@ internal class LinkActivityViewModel @Inject constructor(
     private val _linkAppBarState = MutableStateFlow(
         LinkAppBarState.initial(linkConfiguration.effectiveLinkBrand(linkAccount))
     )
-    private var screenBackHandler: (() -> Unit)? = null
-    private val screenCanNavigateBack = MutableStateFlow(false)
+    private val screenBackHandler = MutableStateFlow<(() -> Unit)?>(null)
 
     val linkAppBarState: StateFlow<LinkAppBarState> = combineAsStateFlow(
         _linkAppBarState,
-        screenCanNavigateBack,
-    ) { appBarState, screenCanNavigateBack ->
-        if (screenCanNavigateBack) appBarState.copy(canNavigateBack = true) else appBarState
+        screenBackHandler,
+    ) { appBarState, screenBackHandler ->
+        if (screenBackHandler != null) appBarState.copy(canNavigateBack = true) else appBarState
     }
 
     init {
@@ -283,12 +282,11 @@ internal class LinkActivityViewModel @Inject constructor(
      * Pass null once the screen can no longer go back.
      */
     fun setScreenBackHandler(handler: (() -> Unit)?) {
-        screenBackHandler = handler
-        screenCanNavigateBack.value = handler != null
+        screenBackHandler.value = handler
     }
 
     fun goBack() {
-        screenBackHandler?.let {
+        screenBackHandler.value?.let {
             it()
             return
         }

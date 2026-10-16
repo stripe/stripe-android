@@ -690,6 +690,7 @@ class DefaultLinkInlineInteractorTest {
         val mockAccount = mock<LinkAccount>()
         whenever(mockAccount.accountStatus).thenReturn(accountStatus)
         whenever(mockAccount.availableVerificationFactors).thenReturn(availableVerificationFactors)
+        whenever(mockAccount.usableVerificationFactor(any())).thenCallRealMethod()
         whenever(mockAccount.redactedPhoneNumber).thenReturn(redactedPhoneNumber)
         whenever(mockAccount.email).thenReturn(email)
         return mockAccount

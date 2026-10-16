@@ -420,7 +420,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerSessionClientSecret = linkAccount.clientSecret,
             type = type,
             accountPhoneNumber = accountPhoneNumber,
-            emailAddress = lookupEmail?.takeIf { it.equals(linkAccount.email, ignoreCase = true) },
+            emailAddress = lookupEmailFor(linkAccount),
             isResendSmsCode = isResend,
             apiConfiguration = config.apiConfiguration,
         )
@@ -459,7 +459,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?: return Result.failure(NoLinkAccountFoundException())
         val linkAuthIntentId = currentAccount.linkAuthIntentInfo?.linkAuthIntentId
         // Only repeat a lookup that identifies the current account, so recovery never switches accounts.
-        val email = lookupEmail?.takeIf { it.equals(currentAccount.email, ignoreCase = true) }
+        val email = lookupEmailFor(currentAccount)
         if (linkAuthIntentId == null && email == null) {
             return Result.failure(NoLinkAccountFoundException())
         }
@@ -485,6 +485,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
             )
         }
     }
+
+    /**
+     * The last lookup email, only if it identifies [account].
+     */
+    private fun lookupEmailFor(account: LinkAccount): String? =
+        lookupEmail?.takeIf { it.equals(account.email, ignoreCase = true) }
 
     override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account

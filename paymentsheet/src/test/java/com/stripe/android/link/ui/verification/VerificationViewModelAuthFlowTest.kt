@@ -15,7 +15,6 @@ import com.stripe.android.link.account.FakeLinkAccountManager.StartVerificationC
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.verification.LinkAuthFlowState.Action
 import com.stripe.android.link.ui.verification.LinkAuthFlowState.Screen
 import com.stripe.android.model.ConsumerSession.AuthenticationLevel
 import com.stripe.android.model.ConsumerSession.VerificationFactor
@@ -52,7 +51,7 @@ internal class VerificationViewModelAuthFlowTest {
         assertThat(state.authFlow?.screen).isEqualTo(Screen.Otp)
         assertThat(state.authFlow?.recipient).isEqualTo("+1 (•••) •••-••42")
         assertThat(state.authFlow?.codeEntryEnabled).isTrue()
-        assertThat(state.authFlow?.actions).containsExactly(Action.Resend, Action.Email).inOrder()
+        assertThat(state.authFlow?.canSendToEmail).isTrue()
         assertThat(state.authFlow?.canGoBack).isFalse()
         assertThat(backHandlers.awaitItem()).isNull()
     }

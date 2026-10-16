@@ -12,7 +12,6 @@ import com.stripe.android.link.account.FakeLinkAccountManager.ConfirmVerificatio
 import com.stripe.android.link.account.FakeLinkAccountManager.StartVerificationCall
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.verification.LinkAuthFlowState.Action
 import com.stripe.android.link.ui.verification.LinkAuthFlowState.Screen
 import com.stripe.android.model.ConsumerSession.AuthenticationLevel
 import com.stripe.android.model.ConsumerSession.VerificationFactor
@@ -51,7 +50,7 @@ internal class LinkAuthFlowTest {
         assertThat(state.recipient).isEqualTo("+1 (•••) •••-••42")
         assertThat(state.canSubmitCode).isTrue()
         assertThat(state.canGoBack).isFalse()
-        assertThat(state.actions).containsExactly(Action.Resend, Action.Email).inOrder()
+        assertThat(state.canSendToEmail).isTrue()
     }
 
     @Test
@@ -110,7 +109,7 @@ internal class LinkAuthFlowTest {
         assertThat(state.screen).isEqualTo(Screen.Otp)
         assertThat(state.verificationType).isEqualTo(VerificationType.EMAIL)
         assertThat(state.recipient).isEqualTo(TestFactory.EMAIL)
-        assertThat(state.actions).containsExactly(Action.Resend)
+        assertThat(state.canSendToEmail).isFalse()
     }
 
     @Test
@@ -222,7 +221,7 @@ internal class LinkAuthFlowTest {
         assertThat(state.step).isEqualTo(2)
         assertThat(state.verificationType).isEqualTo(VerificationType.EMAIL)
         assertThat(state.canGoBack).isFalse()
-        assertThat(state.actions).containsExactly(Action.Resend)
+        assertThat(state.canSendToEmail).isFalse()
 
         flow.confirm(CODE)
 

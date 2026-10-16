@@ -14,7 +14,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButtonTag
-import com.stripe.android.link.ui.verification.LinkAuthFlowState.Action
 import com.stripe.android.link.ui.verification.LinkAuthFlowState.Screen
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.CoroutineTestRule
@@ -42,7 +41,7 @@ internal class VerificationBodyAuthFlowTest {
 
     @Test
     fun `email recipient is shown in the subtitle`() = runScenario(
-        authFlow = authFlowState(recipient = EMAIL, actions = listOf(Action.Resend)),
+        authFlow = authFlowState(recipient = EMAIL),
     ) {
         composeRule.onNodeWithTag(VERIFICATION_SUBTITLE_TAG)
             .assert(hasText(EMAIL, substring = true))
@@ -52,7 +51,7 @@ internal class VerificationBodyAuthFlowTest {
 
     @Test
     fun `more options menu offers resend and email code`() = runScenario(
-        authFlow = authFlowState(actions = listOf(Action.Resend, Action.Email)),
+        authFlow = authFlowState(canSendToEmail = true),
     ) {
         composeRule.onNodeWithTag(VERIFICATION_RESEND_CODE_BUTTON_TAG).assertDoesNotExist()
 
@@ -70,7 +69,6 @@ internal class VerificationBodyAuthFlowTest {
     @Test
     fun `resend cooldown is shown instead of the resend button`() = runScenario(
         authFlow = authFlowState(
-            actions = listOf(Action.Resend),
             canResend = false,
             resendSecondsRemaining = 7,
         ),
@@ -213,7 +211,7 @@ internal class VerificationBodyAuthFlowTest {
         recipient: String = "(•••) ••• ••42",
         canGoBack: Boolean = false,
         codeEntryEnabled: Boolean = true,
-        actions: List<Action> = listOf(Action.Resend),
+        canSendToEmail: Boolean = false,
         canResend: Boolean = true,
         resendSecondsRemaining: Int = 0,
     ) = VerificationViewState.AuthFlowViewState(
@@ -221,9 +219,8 @@ internal class VerificationBodyAuthFlowTest {
         recipient = recipient,
         canGoBack = canGoBack,
         codeEntryEnabled = codeEntryEnabled,
-        actions = actions,
+        canSendToEmail = canSendToEmail,
         canResend = canResend,
-        isResending = false,
         resendSecondsRemaining = resendSecondsRemaining,
         phoneNumberLastTwoDigits = "42",
     )

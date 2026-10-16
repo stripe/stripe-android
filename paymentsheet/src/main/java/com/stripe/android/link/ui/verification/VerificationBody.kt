@@ -230,6 +230,7 @@ private fun ColumnScope.OtpContent(
         AuthFlowActions(
             authFlow = state.authFlow,
             isProcessing = state.isProcessing,
+            isSendingNewCode = state.isSendingNewCode,
             onResendCodeClick = onResendCodeClick,
             onEmailCodeClick = onEmailCodeClick,
         )
@@ -253,6 +254,7 @@ private fun ColumnScope.OtpContent(
 private fun AuthFlowActions(
     authFlow: VerificationViewState.AuthFlowViewState,
     isProcessing: Boolean,
+    isSendingNewCode: Boolean,
     onResendCodeClick: () -> Unit,
     onEmailCodeClick: () -> Unit,
 ) {
@@ -262,7 +264,7 @@ private fun AuthFlowActions(
         stringResource(R.string.stripe_verification_resend)
     }
 
-    if (LinkAuthFlowState.Action.Email !in authFlow.actions) {
+    if (!authFlow.canSendToEmail) {
         if (authFlow.resendSecondsRemaining > 0) {
             Text(
                 text = resendLabel,
@@ -272,8 +274,8 @@ private fun AuthFlowActions(
             )
         } else {
             ResendCodeButton(
-                isProcessing = isProcessing || (!authFlow.canResend && !authFlow.isResending),
-                isSendingNewCode = authFlow.isResending,
+                isProcessing = isProcessing || (!authFlow.canResend && !isSendingNewCode),
+                isSendingNewCode = isSendingNewCode,
                 onClick = onResendCodeClick,
             )
         }
@@ -283,6 +285,7 @@ private fun AuthFlowActions(
     MoreOptionsMenu(
         authFlow = authFlow,
         isProcessing = isProcessing,
+        isSendingNewCode = isSendingNewCode,
         resendLabel = resendLabel,
         onResendCodeClick = onResendCodeClick,
         onEmailCodeClick = onEmailCodeClick,
@@ -324,16 +327,19 @@ private fun OtpCodeInput(
 private fun MoreOptionsMenu(
     authFlow: VerificationViewState.AuthFlowViewState,
     isProcessing: Boolean,
+    isSendingNewCode: Boolean,
     resendLabel: String,
     onResendCodeClick: () -> Unit,
     onEmailCodeClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        MoreOptionsButton(
+        TextButtonWithSpinner(
+            text = stringResource(R.string.stripe_link_auth_more_options),
             isProcessing = isProcessing,
-            isResending = authFlow.isResending,
+            isLoading = isSendingNewCode,
             onClick = { expanded = true },
+            modifier = Modifier.testTag(VERIFICATION_MORE_OPTIONS_TAG),
         )
 
         // The M2 menu has no shape parameter; its surface uses the theme's medium shape.
@@ -398,45 +404,6 @@ private fun MoreOptionsMenuItemContent(
         color = LinkTheme.colors.textPrimary,
         modifier = Modifier.alpha(alpha),
     )
-}
-
-@Composable
-private fun MoreOptionsButton(
-    isProcessing: Boolean,
-    isResending: Boolean,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .testTag(VERIFICATION_MORE_OPTIONS_TAG)
-            .clickable(
-                enabled = !isProcessing && !isResending,
-                onClick = onClick,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.stripe_link_auth_more_options),
-            style = LinkTheme.typography.bodyEmphasized,
-            color = LinkTheme.colors.textBrand,
-            modifier = Modifier.alpha(
-                when {
-                    isResending -> 0f
-                    isProcessing -> ContentAlpha.disabled
-                    else -> ContentAlpha.high
-                }
-            ),
-        )
-        AnimatedVisibility(visible = isResending) {
-            LinkSpinner(
-                filledColor = LinkTheme.colors.textPrimary,
-                strokeWidth = 3.dp,
-                modifier = Modifier
-                    .testTag(VERIFICATION_RESEND_LOADER_TAG)
-                    .size(18.dp)
-            )
-        }
-    }
 }
 
 @Composable
@@ -632,25 +599,41 @@ internal fun ResendCodeButton(
     isSendingNewCode: Boolean,
     onClick: () -> Unit,
 ) {
+    TextButtonWithSpinner(
+        text = stringResource(id = R.string.stripe_verification_resend),
+        isProcessing = isProcessing,
+        isLoading = isSendingNewCode,
+        onClick = onClick,
+        modifier = Modifier.testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG),
+    )
+}
+
+@Composable
+private fun TextButtonWithSpinner(
+    text: String,
+    isProcessing: Boolean,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
     Box(
-        modifier = Modifier
-            .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
+        modifier = modifier
             .clickable(
-                enabled = !isProcessing && !isSendingNewCode,
+                enabled = !isProcessing && !isLoading,
                 onClick = onClick,
             ),
         contentAlignment = Alignment.Companion.Center
     ) {
         val textAlpha = if (isProcessing) {
             ContentAlpha.disabled
-        } else if (isSendingNewCode) {
+        } else if (isLoading) {
             0f
         } else {
             ContentAlpha.high
         }
 
         Text(
-            text = stringResource(id = R.string.stripe_verification_resend),
+            text = text,
             style = LinkTheme.typography.bodyEmphasized,
             color = LinkTheme.colors.textBrand,
             modifier = Modifier
@@ -658,7 +641,7 @@ internal fun ResendCodeButton(
         )
 
         AnimatedVisibility(
-            visible = isSendingNewCode
+            visible = isLoading
         ) {
             LinkSpinner(
                 filledColor = LinkTheme.colors.textPrimary,

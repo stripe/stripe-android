@@ -3,6 +3,8 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSession.VerificationFactor.FactorType
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.MobileFallbackWebviewParams
@@ -63,6 +65,26 @@ internal data class LinkAccount(
     val availableVerificationFactors: List<ConsumerSession.VerificationFactor>?
         get() = consumerSession.availableVerificationFactors
 
+    /**
+     * The usable factor of [type], if any. Legacy sessions without a factor list only support SMS.
+     */
+    fun usableVerificationFactor(type: FactorType): ConsumerSession.VerificationFactor? {
+        val factors = availableVerificationFactors
+            ?: return ConsumerSession.VerificationFactor(
+                type = FactorType.Sms,
+                id = null,
+                providesFurtherVerification = true,
+                temporarilyDisabled = false,
+            ).takeIf { type == FactorType.Sms }
+        return factors.firstOrNull {
+            it.type == type && !it.temporarilyDisabled && it.providesFurtherVerification
+        }
+    }
+
+    fun hasStartedVerification(type: SessionType): Boolean = verificationSessions.any {
+        it.type == type && it.state == ConsumerSession.VerificationSession.SessionState.Started
+    }
+
     val emailOtpRequiresAdditionalInfo: Boolean?
         get() = consumerSession.emailOtpRequiresAdditionalInfo
 
@@ -104,29 +126,20 @@ internal data class LinkAccount(
                 meetsMinimumAuthenticationLevel = consumerSession.meetsMinimumAuthenticationLevel,
             )
         }
-        consumerSession.containsOtpSessionStarted() -> {
+        hasStartedVerification(SessionType.Sms) || hasStartedVerification(SessionType.Email) -> {
             AccountStatus.VerificationStarted
         }
         else -> {
-            val params = consumerSession.mobileFallbackWebviewParams
             AccountStatus.NeedsVerification(
-                webviewOpenUrl = params
+                webviewOpenUrl = consumerSession.mobileFallbackWebviewParams
                     ?.webviewOpenUrl
-                    ?.takeIf {
-                        params.webViewRequirementType == MobileFallbackWebviewParams.WebviewRequirementType.Required
-                    }
+                    ?.takeIf { webviewRequired }
             )
         }
     }
 
     @IgnoredOnParcel
     val webviewOpenUrl: String? = consumerSession.mobileFallbackWebviewParams?.webviewOpenUrl
-
-    private fun ConsumerSession.containsOtpSessionStarted() = verificationSessions.find {
-        val isOtp = it.type == ConsumerSession.VerificationSession.SessionType.Sms ||
-            it.type == ConsumerSession.VerificationSession.SessionType.Email
-        isOtp && it.state == ConsumerSession.VerificationSession.SessionState.Started
-    } != null
 
     private fun ConsumerSession.isVerifiedForSignup() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.SignUp &&

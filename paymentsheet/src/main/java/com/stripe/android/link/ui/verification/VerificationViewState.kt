@@ -37,9 +37,8 @@ internal data class VerificationViewState(
         val recipient: String,
         val canGoBack: Boolean,
         val codeEntryEnabled: Boolean,
-        val actions: List<LinkAuthFlowState.Action>,
+        val canSendToEmail: Boolean,
         val canResend: Boolean,
-        val isResending: Boolean,
         val resendSecondsRemaining: Int,
         val phoneNumberLastTwoDigits: String?,
     ) : Parcelable

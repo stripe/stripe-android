@@ -146,10 +146,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     private val LinkAccount.canStartSmsVerification: Boolean
-        // Legacy sessions without a factor list only support SMS.
-        get() = availableVerificationFactors?.any {
-            it.type == FactorType.Sms && !it.temporarilyDisabled && it.providesFurtherVerification
-        } ?: true
+        get() = usableVerificationFactor(FactorType.Sms) != null
 
     private fun LinkAccount.initial2FAState(
         linkConfiguration: LinkConfiguration,
