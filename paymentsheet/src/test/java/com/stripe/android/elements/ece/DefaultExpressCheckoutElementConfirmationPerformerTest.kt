@@ -1,6 +1,8 @@
 package com.stripe.android.elements.ece
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
@@ -12,7 +14,6 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
-import com.stripe.android.checkout.analytics.CheckoutEventReporterTestFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
@@ -33,12 +34,14 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -248,6 +251,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         expressButton: ExpressButton,
@@ -269,13 +273,23 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val paymentMethodMetadataProviderCalls = Turbine<Unit>()
+        val apiConfigurationProviderCalls = Turbine<Unit>()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            checkoutEventReporter = CheckoutEventReporterTestFactory.create(
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                workContext = UnconfinedTestDispatcher(testScheduler),
-            ),
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
+                paymentMethodMetadataProviderCalls.add(Unit)
+                null
+            },
+            apiConfigurationProvider = Provider {
+                apiConfigurationProviderCalls.add(Unit)
+                PaymentMethodMetadataFactory.create().apiConfiguration
+            },
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -304,6 +318,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        paymentMethodMetadataProviderCalls.ensureAllEventsConsumed()
+        apiConfigurationProviderCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(

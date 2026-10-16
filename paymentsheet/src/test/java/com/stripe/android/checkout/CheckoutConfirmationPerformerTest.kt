@@ -1,13 +1,15 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.analytics.CheckoutEventReporterTestFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -26,6 +28,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -202,6 +205,7 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
+        awaitAnalyticsProviderCalls()
         val events = analyticsRequestExecutor.getExecutedRequests().map { it.params }
         assertThat(events.map { it["event"] }).containsExactly(
             "checkout_elements.confirm.succeeded",
@@ -279,6 +283,7 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
+        awaitAnalyticsProviderCalls()
         val events = analyticsRequestExecutor.getExecutedRequests().map { it.params }
         assertThat(events.map { it["event"] }).containsExactly(
             "checkout_elements.confirm.succeeded",
@@ -319,6 +324,7 @@ internal class CheckoutConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
@@ -344,13 +350,23 @@ internal class CheckoutConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val paymentMethodMetadataProviderCalls = Turbine<Unit>()
+        val apiConfigurationProviderCalls = Turbine<Unit>()
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            checkoutEventReporter = CheckoutEventReporterTestFactory.create(
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                workContext = UnconfinedTestDispatcher(testScheduler),
-            ),
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
+                paymentMethodMetadataProviderCalls.add(Unit)
+                null
+            },
+            apiConfigurationProvider = Provider {
+                apiConfigurationProviderCalls.add(Unit)
+                PaymentMethodMetadataFactory.create().apiConfiguration
+            },
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -374,6 +390,8 @@ internal class CheckoutConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentMethodMetadataProviderCalls = paymentMethodMetadataProviderCalls,
+            apiConfigurationProviderCalls = apiConfigurationProviderCalls,
             stateHolder = stateHolder,
             operationCoordinator = operationCoordinator,
             results = results,
@@ -387,6 +405,8 @@ internal class CheckoutConfirmationPerformerTest {
         performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
+        paymentMethodMetadataProviderCalls.ensureAllEventsConsumed()
+        apiConfigurationProviderCalls.ensureAllEventsConsumed()
     }
 
     private fun createPresenter(
@@ -420,6 +440,8 @@ internal class CheckoutConfirmationPerformerTest {
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+        private val paymentMethodMetadataProviderCalls: Turbine<Unit>,
+        private val apiConfigurationProviderCalls: Turbine<Unit>,
         val stateHolder: CheckoutControllerStateHolder,
         val operationCoordinator: CheckoutOperationCoordinator,
         val results: Turbine<CheckoutController.Result>,
@@ -428,6 +450,11 @@ internal class CheckoutConfirmationPerformerTest {
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
         val testScheduler = testScope.testScheduler
+
+        suspend fun awaitAnalyticsProviderCalls() {
+            paymentMethodMetadataProviderCalls.awaitItem()
+            apiConfigurationProviderCalls.awaitItem()
+        }
 
         suspend fun assertRejection(message: String) {
             testScheduler.runCurrent()
