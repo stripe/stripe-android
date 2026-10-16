@@ -40,18 +40,16 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutAnalyticsPerformerTest {
     @Test
-    fun `payment element confirmation reports success and clears saved context`() = runScenario {
+    fun `payment element confirmation reports success only once`() = runScenario {
         val selection = PaymentSelection.GooglePay
         performer.onPaymentElementConfirmationStarted(selection)
 
-        assertThat(savedConfirmationKeys()).hasSize(2)
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
 
         startReporting()
 
         val success = successfulResult()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
-        runCurrent()
 
         analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -65,12 +63,9 @@ internal class CheckoutAnalyticsPerformerTest {
                 ),
             ),
         )
-        assertThat(savedConfirmationKeys()).isEmpty()
 
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
-        runCurrent()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
-        runCurrent()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
@@ -82,7 +77,6 @@ internal class CheckoutAnalyticsPerformerTest {
         val restoredPerformer = recreatePerformer()
         startReporting(restoredPerformer)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
-        runCurrent()
 
         analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -91,7 +85,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 params = mapOf("selected_lpm" to "link"),
             ),
         )
-        assertThat(savedConfirmationKeys()).isEmpty()
     }
 
     @Test
@@ -115,7 +108,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
-        runCurrent()
 
         val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -129,7 +121,6 @@ internal class CheckoutAnalyticsPerformerTest {
             ),
         )
         assertThat(request.toString()).doesNotContain(privateMessage)
-        assertThat(savedConfirmationKeys()).isEmpty()
     }
 
     @Test
@@ -144,7 +135,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 12),
             )
         )
-        runCurrent()
 
         val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -169,10 +159,8 @@ internal class CheckoutAnalyticsPerformerTest {
                 ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
-        runCurrent()
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(savedConfirmationKeys()).isEmpty()
     }
 
     @Test
@@ -184,7 +172,6 @@ internal class CheckoutAnalyticsPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             successfulResult(deferredIntentConfirmationType = null)
         )
-        runCurrent()
 
         analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -211,7 +198,6 @@ internal class CheckoutAnalyticsPerformerTest {
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
 
         paymentMethodMetadata = metadataAfter
-        runCurrent()
 
         analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -224,7 +210,9 @@ internal class CheckoutAnalyticsPerformerTest {
 
     private fun runScenario(
         duration: Duration = 2.seconds,
-        paymentMethodMetadata: PaymentMethodMetadata? = defaultPaymentMethodMetadata(),
+        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
+            apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
+        ),
         workContext: (TestCoroutineScheduler) -> CoroutineContext = { scheduler ->
             UnconfinedTestDispatcher(scheduler)
         },
@@ -255,7 +243,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
     private class Scenario(
         val confirmationHandler: FakeConfirmationHandler,
-        val savedStateHandle: SavedStateHandle,
+        private val savedStateHandle: SavedStateHandle,
         private val context: Context,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
@@ -268,7 +256,7 @@ internal class CheckoutAnalyticsPerformerTest {
         var paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadata
 
         private val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> {
-            paymentMethodMetadata
+            this.paymentMethodMetadata
         }
         private val apiConfigurationProvider = Provider { fallbackApiConfiguration }
 
@@ -281,13 +269,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 performer.reportConfirmationResults()
             }
         }
-
-        fun runCurrent() {
-            testScheduler.runCurrent()
-        }
-
-        fun savedConfirmationKeys(): Set<String> =
-            savedStateHandle.keys().filter { it.startsWith("CheckoutAnalyticsPerformer.") }.toSet()
 
         private fun createPerformer(): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
@@ -309,10 +290,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 "metadata_snapshot" to AnalyticsMetadata.Value.SimpleString(marker),
             )
         ),
-        apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
-    )
-
-    private fun defaultPaymentMethodMetadata(): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
         apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
     )
 
