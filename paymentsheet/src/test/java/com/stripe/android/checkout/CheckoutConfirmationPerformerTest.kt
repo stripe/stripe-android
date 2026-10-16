@@ -244,7 +244,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val option = args.confirmationOption as LinkConfirmationOption
         assertThat(option.linkLaunchMode).isEqualTo(
-            LinkLaunchMode.Full(showSecondaryButton = false)
+            LinkLaunchMode.Full(showSecondaryButton = true)
         )
     }
 
