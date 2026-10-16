@@ -75,6 +75,17 @@ internal class LinkAuthFlowTest {
     }
 
     @Test
+    fun `start sends an SMS code when a sign-up session is below the minimum authentication level`() = runScenario(
+        initial = AccountSpec(sessions = listOf(startedSession(VerificationSession.SessionType.SignUp))),
+    ) {
+        flow.start()
+
+        assertThat(accountManager.awaitStartVerificationCall()).isEqualTo(smsStart(isResend = false))
+        assertThat(flow.state.value.screen).isEqualTo(Screen.Otp)
+        assertThat(flow.state.value.canSubmitCode).isTrue()
+    }
+
+    @Test
     fun `start requires web auth when the session requires a webview`() = runScenario(
         initial = AccountSpec(webviewRequired = true),
     ) {
@@ -133,6 +144,33 @@ internal class LinkAuthFlowTest {
         flow.start()
 
         assertThat(accountManager.awaitStartVerificationCall().type).isEqualTo(VerificationType.EMAIL)
+    }
+
+    @Test
+    fun `clearError removes a code error`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+        accountManager.confirmVerificationResultProvider = {
+            Result.failure(stripeException(code = "consumer_verification_code_invalid", message = "Bad code"))
+        }
+        flow.confirm(CODE)
+        accountManager.awaitConfirmVerificationCall()
+        assertThat(flow.state.value.errorMessage).isEqualTo("Bad code".resolvableString)
+
+        flow.clearError()
+
+        assertThat(flow.state.value.errorMessage).isNull()
+    }
+
+    @Test
+    fun `clearError keeps the blocked message`() = runScenario(
+        initial = AccountSpec(factors = listOf(SMS_FACTOR.copy(type = FactorType.Unknown))),
+    ) {
+        flow.start()
+
+        flow.clearError()
+
+        assertThat(flow.state.value.errorMessage).isEqualTo(resolvableString(R.string.stripe_link_auth_blocked))
     }
 
     @Test
@@ -424,6 +462,28 @@ internal class LinkAuthFlowTest {
         accountManager.awaitRecoverSessionCall()
         assertThat(accountManager.awaitConfirmVerificationCall()).isEqualTo(smsConfirm())
         assertThat(results.awaitItem()).isEqualTo(LinkAuthFlowResult.Completed)
+    }
+
+    @Test
+    fun `replayed request failure is handled like a normal response`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+        var attempts = 0
+        accountManager.confirmVerificationResultProvider = {
+            attempts += 1
+            val code = if (attempts == 1) "consumer_session_expired" else "consumer_verification_not_found"
+            Result.failure(stripeException(code = code, message = "Error"))
+        }
+        accountManager.recoverSessionResult = Result.success(accountState.spec.toLinkAccount())
+
+        flow.confirm(CODE)
+
+        assertThat(accountManager.awaitConfirmVerificationCall()).isEqualTo(smsConfirm())
+        accountManager.awaitRecoverSessionCall()
+        assertThat(accountManager.awaitConfirmVerificationCall()).isEqualTo(smsConfirm())
+        assertThat(accountManager.awaitStartVerificationCall()).isEqualTo(smsStart(isResend = false))
+        assertThat(flow.state.value.screen).isEqualTo(Screen.Otp)
+        assertThat(flow.state.value.canSubmitCode).isTrue()
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import android.content.Context
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,6 +23,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -333,42 +336,68 @@ private fun MoreOptionsMenu(
             onClick = { expanded = true },
         )
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(LinkTheme.colors.surfacePrimary),
-        ) {
-            DropdownMenuItem(
-                modifier = Modifier.testTag(VERIFICATION_MENU_RESEND_TAG),
-                enabled = authFlow.canResend,
-                onClick = {
-                    expanded = false
-                    onResendCodeClick()
-                },
+        // The M2 menu has no shape parameter; its surface uses the theme's medium shape.
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = LinkTheme.shapes.default)) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(LinkTheme.colors.surfacePrimary),
             ) {
-                Text(
-                    text = resendLabel,
-                    style = LinkTheme.typography.body,
-                    color = LinkTheme.colors.textPrimary,
-                    modifier = Modifier.alpha(if (authFlow.canResend) ContentAlpha.high else ContentAlpha.disabled),
-                )
-            }
-            DropdownMenuItem(
-                modifier = Modifier.testTag(VERIFICATION_MENU_EMAIL_CODE_TAG),
-                enabled = !isProcessing,
-                onClick = {
-                    expanded = false
-                    onEmailCodeClick()
-                },
-            ) {
-                Text(
-                    text = stringResource(R.string.stripe_link_auth_email_code),
-                    style = LinkTheme.typography.body,
-                    color = LinkTheme.colors.textPrimary,
-                )
+                DropdownMenuItem(
+                    modifier = Modifier.testTag(VERIFICATION_MENU_RESEND_TAG),
+                    enabled = authFlow.canResend,
+                    onClick = {
+                        expanded = false
+                        onResendCodeClick()
+                    },
+                ) {
+                    MoreOptionsMenuItemContent(
+                        iconRes = R.drawable.stripe_link_refresh,
+                        text = resendLabel,
+                        enabled = authFlow.canResend,
+                    )
+                }
+                DropdownMenuItem(
+                    modifier = Modifier.testTag(VERIFICATION_MENU_EMAIL_CODE_TAG),
+                    enabled = !isProcessing,
+                    onClick = {
+                        expanded = false
+                        onEmailCodeClick()
+                    },
+                ) {
+                    MoreOptionsMenuItemContent(
+                        iconRes = R.drawable.stripe_link_email,
+                        text = stringResource(R.string.stripe_link_auth_email_code),
+                        enabled = true,
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+private fun MoreOptionsMenuItemContent(
+    @DrawableRes iconRes: Int,
+    text: String,
+    enabled: Boolean,
+) {
+    val alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    Icon(
+        painter = painterResource(iconRes),
+        contentDescription = null,
+        tint = LinkTheme.colors.iconPrimary,
+        modifier = Modifier
+            .size(16.dp)
+            .alpha(alpha),
+    )
+    Spacer(modifier = Modifier.width(12.dp))
+    Text(
+        text = text,
+        style = LinkTheme.typography.body,
+        color = LinkTheme.colors.textPrimary,
+        modifier = Modifier.alpha(alpha),
+    )
 }
 
 @Composable

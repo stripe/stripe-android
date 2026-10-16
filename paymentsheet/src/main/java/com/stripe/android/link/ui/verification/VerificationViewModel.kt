@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -126,7 +128,7 @@ internal class VerificationViewModel @Inject constructor(
             if (!isDialog) {
                 viewModelScope.launch {
                     authFlow.state.map { it.canGoBack }.distinctUntilChanged().collect { canGoBack ->
-                        setScreenBackHandler(if (canGoBack) ({ onNavigateBack() }) else null)
+                        setScreenBackHandler(if (canGoBack) ::onNavigateBack else null)
                     }
                 }
             }
@@ -143,6 +145,13 @@ internal class VerificationViewModel @Inject constructor(
                 otpCode.collect { code ->
                     code?.let { onVerificationCodeEntered(code) }
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            // Clear a stale error once the user starts typing a new code.
+            otpElement.controller.fieldValue.drop(1).filter { it.isNotEmpty() }.collect {
+                if (authFlow != null) authFlow.clearError() else clearError()
             }
         }
 
@@ -349,14 +358,9 @@ internal class VerificationViewModel @Inject constructor(
 
     /**
      * Returns to the previous verification step, if there is one.
-     *
-     * @return whether the back press was handled.
      */
-    fun onNavigateBack(): Boolean {
-        val authFlow = authFlow ?: return false
-        if (!authFlow.state.value.canGoBack) return false
-        authFlow.goBack()
-        return true
+    fun onNavigateBack() {
+        authFlow?.goBack()
     }
 
     fun onBack() {

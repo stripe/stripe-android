@@ -19,6 +19,7 @@ import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -140,6 +141,43 @@ class DefaultLinkInlineInteractorTest {
             assertThat(awaitItem().verificationState).isInstanceOf(Render2FA::class.java)
         }
     }
+
+    @Test
+    fun `when SMS is not a startable factor, should render button without starting verification`() =
+        runTest(testDispatcher) {
+            linkAccountManager.setLinkAccount(
+                LinkAccountUpdate.Value(
+                    createLinkAccount(
+                        accountStatus = AccountStatus.NeedsVerification(),
+                        availableVerificationFactors = listOf(
+                            ConsumerSession.VerificationFactor(
+                                type = ConsumerSession.VerificationFactor.FactorType.Sms,
+                                id = "sms_1",
+                                providesFurtherVerification = true,
+                                temporarilyDisabled = true,
+                            ),
+                            ConsumerSession.VerificationFactor(
+                                type = ConsumerSession.VerificationFactor.FactorType.Email,
+                                id = "email_1",
+                                providesFurtherVerification = true,
+                                temporarilyDisabled = false,
+                            ),
+                        ),
+                    )
+                )
+            )
+            val metadata = createPaymentMethodMetadata()
+            val interactor = createInteractor()
+
+            interactor.state.test {
+                assertThat(awaitItem().verificationState).isEqualTo(Loading)
+
+                interactor.setup(paymentMethodMetadata = metadata)
+
+                assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
+            }
+            linkAccountManager.ensureVerificationEventsConsumed()
+        }
 
     @Test
     fun `when account status is NeedsVerification with Onelink brand, view state uses Onelink`() =
@@ -646,10 +684,12 @@ class DefaultLinkInlineInteractorTest {
     private fun createLinkAccount(
         accountStatus: AccountStatus = AccountStatus.NeedsVerification(),
         redactedPhoneNumber: String = "",
-        email: String = ""
+        email: String = "",
+        availableVerificationFactors: List<ConsumerSession.VerificationFactor>? = null,
     ): LinkAccount {
         val mockAccount = mock<LinkAccount>()
         whenever(mockAccount.accountStatus).thenReturn(accountStatus)
+        whenever(mockAccount.availableVerificationFactors).thenReturn(availableVerificationFactors)
         whenever(mockAccount.redactedPhoneNumber).thenReturn(redactedPhoneNumber)
         whenever(mockAccount.email).thenReturn(email)
         return mockAccount

@@ -455,23 +455,34 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun recoverSession(): Result<LinkAccount> {
-        val email = lookupEmail ?: return Result.failure(NoLinkAccountFoundException())
+        val currentAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        val linkAuthIntentId = currentAccount.linkAuthIntentInfo?.linkAuthIntentId
+        // Only repeat a lookup that identifies the current account, so recovery never switches accounts.
+        val email = lookupEmail?.takeIf { it.equals(currentAccount.email, ignoreCase = true) }
+        if (linkAuthIntentId == null && email == null) {
+            return Result.failure(NoLinkAccountFoundException())
+        }
         return linkAuth.lookup(
-            email = email,
-            emailSource = lookupEmailSource,
+            email = email.takeIf { linkAuthIntentId == null },
+            emailSource = lookupEmailSource.takeIf { linkAuthIntentId == null },
             sessionId = config.elementsSessionId,
             customerId = null,
-            linkAuthIntentId = null,
+            linkAuthIntentId = linkAuthIntentId,
             supportedVerificationTypes = supportedVerificationTypes,
             linkAuthTokenClientSecret = null,
         ).mapCatching { consumerSessionLookup ->
+            val recoveredEmail = consumerSessionLookup.consumerSession?.emailAddress
+            if (!currentAccount.email.equals(recoveredEmail, ignoreCase = true)) {
+                throw NoLinkAccountFoundException()
+            }
             requireNotNull(
                 setLinkAccountFromLookupResult(
                     lookup = consumerSessionLookup,
                     startSession = true,
-                    linkAuthIntentId = null,
+                    linkAuthIntentId = linkAuthIntentId,
                 )
-            ) { "No Link account found" }
+            )
         }
     }
 

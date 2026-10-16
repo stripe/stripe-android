@@ -74,9 +74,6 @@ data class ConsumerSession(
         val temporarilyDisabled: Boolean,
     ) : StripeModel {
 
-        val isStartable: Boolean
-            get() = !temporarilyDisabled && providesFurtherVerification
-
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class FactorType(val value: String) : Parcelable {

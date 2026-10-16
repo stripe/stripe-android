@@ -116,6 +116,15 @@ internal class LinkAuthFlow(
         sendCode(isResend = true)
     }
 
+    /**
+     * Clears a code error once the user starts entering a new code.
+     */
+    fun clearError() {
+        if (screen != LinkAuthFlowState.Screen.Otp || errorMessage == null) return
+        errorMessage = null
+        publish()
+    }
+
     fun confirm(code: String) {
         if (!canSubmitCode()) return
         val challenge = challenge ?: return
@@ -164,7 +173,9 @@ internal class LinkAuthFlow(
         if (type !in capabilities) return null
         val factors = account?.availableVerificationFactors
         if (factors != null) {
-            return factors.firstOrNull { it.isStartable && it.type.verificationType == type }
+            return factors.firstOrNull {
+            !it.temporarilyDisabled && it.providesFurtherVerification && it.type.verificationType == type
+        }
         }
         // Legacy endpoints predate the factor list and only support SMS.
         return if (type == VerificationType.SMS) {
@@ -186,7 +197,9 @@ internal class LinkAuthFlow(
             block()
             return
         }
-        if (account.isVerified) {
+        // Only the authentication level counts: a sign-up or auth-token session is "verified" but may
+        // still need an OTP to reach the level required here.
+        if (account.meetsMinimumAuthenticationLevel) {
             if (!didStart) {
                 screen = LinkAuthFlowState.Screen.Loading
                 publish()
@@ -244,6 +257,7 @@ internal class LinkAuthFlow(
             challenge?.let { previousChallenges[type] = it }
             publish()
         } else if (type == VerificationType.EMAIL && account?.emailOtpRequiresAdditionalInfo != false) {
+            // An unknown requirement intentionally falls back to phone match, which works either way.
             screen = LinkAuthFlowState.Screen.PhoneMatch
             publish()
         } else {
@@ -274,7 +288,7 @@ internal class LinkAuthFlow(
             isResending = false
             result.fold(
                 onSuccess = { account ->
-                    if (account.isVerified || account.webviewRequired) {
+                    if (account.meetsMinimumAuthenticationLevel || account.webviewRequired) {
                         advance(previous = null)
                         return@fold
                     }
@@ -382,10 +396,12 @@ internal class LinkAuthFlow(
         }
         val replayed = operation()
         if (isStale(requestGeneration)) return null
-        if (replayed.isFailure) {
-            finish(LinkAuthFlowResult.Failed(error))
+        val replayedError = replayed.exceptionOrNull()
+        if (replayedError != null && replayedError.stripeErrorCode in SESSION_ERROR_CODES) {
+            finish(LinkAuthFlowResult.Failed(replayedError))
             return null
         }
+        // Other failures (e.g. a code unknown to the recovered session) are handled like any other response.
         return replayed
     }
 

@@ -21,16 +21,14 @@ internal fun VerificationScreen(
     val state by viewModel.viewState.collectAsState()
 
     // Takes precedence over the screen-level back handler in LinkContent while there's a previous step.
-    BackHandler(enabled = state.authFlow?.canGoBack == true) {
-        viewModel.onNavigateBack()
-    }
+    BackHandler(enabled = state.authFlow?.canGoBack == true, onBack = viewModel::onNavigateBack)
 
     VerificationBody(
         state = state,
         otpElement = viewModel.otpElement,
         phoneNumberController = viewModel.phoneNumberController,
         onBack = viewModel::onBack,
-        onNavigateBack = { viewModel.onNavigateBack() },
+        onNavigateBack = viewModel::onNavigateBack,
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
         onEmailCodeClick = viewModel::onEmailCodeClicked,

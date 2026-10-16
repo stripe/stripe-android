@@ -716,13 +716,9 @@ class DefaultLinkAccountManagerTest {
         accountManager.setTestAccount(null, null)
 
         val result = accountManager.confirmVerification(
-
             code = "123",
-
             type = VerificationType.SMS,
-
             consentGranted = null,
-
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
@@ -761,13 +757,9 @@ class DefaultLinkAccountManagerTest {
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
         val result = accountManager.confirmVerification(
-
             code = "123",
-
             type = VerificationType.SMS,
-
             consentGranted = null,
-
         )
 
         assertThat(linkRepository.callCount).isEqualTo(1)
@@ -1464,6 +1456,88 @@ class DefaultLinkAccountManagerTest {
         val account = requireNotNull(manager.linkAccountInfo.value.account)
         assertThat(account.linkSessionKey).isNull()
     }
+
+    @Test
+    fun `recoverSession repeats the email lookup for the current account`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(linkAuth = fakeLinkAuth)
+        accountManager.lookupByEmail(
+            email = TestFactory.EMAIL,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true,
+            customerId = null,
+        )
+
+        val result = accountManager.recoverSession()
+
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.EMAIL)
+        val recoveryCall = fakeLinkAuth.lookupCalls.last()
+        assertThat(fakeLinkAuth.lookupCalls).hasSize(2)
+        assertThat(recoveryCall.email).isEqualTo(TestFactory.EMAIL)
+        assertThat(recoveryCall.emailSource).isEqualTo(EmailSource.USER_ACTION)
+        assertThat(recoveryCall.linkAuthIntentId).isNull()
+    }
+
+    @Test
+    fun `recoverSession fails without a lookup when the last email lookup was for another account`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.lookupByEmail(
+                email = "other@example.com",
+                emailSource = EmailSource.USER_ACTION,
+                startSession = true,
+                customerId = null,
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
+            assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
+        }
+
+    @Test
+    fun `recoverSession repeats the link auth intent lookup for an account from a link auth intent`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.setLinkAccountFromLookupResult(
+                lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+                startSession = true,
+                linkAuthIntentId = "lai_123",
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.getOrNull()?.linkAuthIntentInfo?.linkAuthIntentId).isEqualTo("lai_123")
+            val recoveryCall = fakeLinkAuth.lookupCalls.single()
+            assertThat(recoveryCall.linkAuthIntentId).isEqualTo("lai_123")
+            assertThat(recoveryCall.email).isNull()
+        }
+
+    @Test
+    fun `recoverSession does not switch accounts when the lookup returns a different account`() =
+        runSuspendTest {
+            val fakeLinkAuth = fakeLinkAuth()
+            val accountManager = accountManager(linkAuth = fakeLinkAuth)
+            accountManager.lookupByEmail(
+                email = TestFactory.EMAIL,
+                emailSource = EmailSource.USER_ACTION,
+                startSession = true,
+                customerId = null,
+            )
+            val currentAccount = accountManager.linkAccountInfo.value.account
+            fakeLinkAuth.lookupResult = Result.success(
+                TestFactory.CONSUMER_SESSION_LOOKUP.copy(
+                    consumerSession = TestFactory.CONSUMER_SESSION.copy(emailAddress = "other@example.com"),
+                )
+            )
+
+            val result = accountManager.recoverSession()
+
+            assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
+            assertThat(accountManager.linkAccountInfo.value.account).isEqualTo(currentAccount)
+        }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()

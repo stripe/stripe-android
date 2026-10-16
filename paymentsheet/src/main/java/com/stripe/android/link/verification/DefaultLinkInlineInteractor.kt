@@ -17,6 +17,7 @@ import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ConsumerSession.VerificationFactor.FactorType
 import com.stripe.android.model.VerificationType
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.uicore.elements.OTPElementFactory
@@ -71,6 +72,11 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         val linkAccount = linkAccountManager.linkAccountInfo.value.account
         if (linkAccount == null || linkAccount.accountStatus !is AccountStatus.NeedsVerification) {
             // If there is no Link account or verification is not needed, don't start verification.
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
+            return
+        }
+        if (!linkAccount.canStartSmsVerification) {
+            // Inline 2FA only supports SMS, so let Link handle accounts that need another factor.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
@@ -138,6 +144,12 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 }
             }
     }
+
+    private val LinkAccount.canStartSmsVerification: Boolean
+        // Legacy sessions without a factor list only support SMS.
+        get() = availableVerificationFactors?.any {
+            it.type == FactorType.Sms && !it.temporarilyDisabled && it.providesFurtherVerification
+        } ?: true
 
     private fun LinkAccount.initial2FAState(
         linkConfiguration: LinkConfiguration,

@@ -58,7 +58,7 @@ internal fun VerificationDialog(
         otpElement = viewModel.otpElement,
         phoneNumberController = viewModel.phoneNumberController,
         onBack = viewModel::onBack,
-        onNavigateBack = { viewModel.onNavigateBack() },
+        onNavigateBack = viewModel::onNavigateBack,
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
         onEmailCodeClick = viewModel::onEmailCodeClicked,

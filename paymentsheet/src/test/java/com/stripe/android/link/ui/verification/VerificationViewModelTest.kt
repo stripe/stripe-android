@@ -107,6 +107,20 @@ internal class VerificationViewModelTest {
         }
 
     @Test
+    fun `When a new code is typed after confirmVerification fails then the error is cleared`() =
+        runTest(dispatcher) {
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.confirmVerificationResult = Result.failure(RuntimeException("Error message"))
+            val viewModel = createViewModel(linkAccountManager = linkAccountManager)
+            viewModel.onVerificationCodeEntered("code")
+            assertThat(viewModel.viewState.value.errorMessage).isEqualTo("Error message".resolvableString)
+
+            viewModel.otpElement.controller.onValueChanged(0, "1")
+
+            assertThat(viewModel.viewState.value.errorMessage).isNull()
+        }
+
+    @Test
     fun `When confirmVerification fails then code is cleared`() = runTest(dispatcher) {
         val linkEventsReporter = object : FakeLinkEventsReporter() {
             override fun on2FAFailure(verificationType: String) = Unit

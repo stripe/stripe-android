@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.verification
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
@@ -81,6 +82,21 @@ internal class VerificationViewModelAuthFlowTest {
     }
 
     @Test
+    fun `typing a new code clears the previous code error`() = runScenario {
+        accountManager.awaitStartVerificationCall()
+        backHandlers.awaitItem()
+        accountManager.confirmVerificationResultProvider = { Result.failure(RuntimeException("Bad code")) }
+        viewModel.otpElement.controller.onValueChanged(0, CODE)
+        accountManager.awaitConfirmVerificationCall()
+        assertThat(viewModel.viewState.value.errorMessage).isEqualTo("Bad code".resolvableString)
+
+        viewModel.otpElement.controller.onValueChanged(0, "1")
+
+        assertThat(viewModel.viewState.value.errorMessage).isNull()
+        assertThat(viewModel.viewState.value.authFlow?.codeEntryEnabled).isTrue()
+    }
+
+    @Test
     fun `email code shows phone match and sends the entered number`() = runScenario {
         accountManager.awaitStartVerificationCall()
         backHandlers.awaitItem()
@@ -116,7 +132,10 @@ internal class VerificationViewModelAuthFlowTest {
         assertThat(viewModel.viewState.value.authFlow?.screen).isEqualTo(Screen.Otp)
         assertThat(viewModel.viewState.value.authFlow?.canGoBack).isFalse()
         assertThat(backHandlers.awaitItem()).isNull()
-        assertThat(viewModel.onNavigateBack()).isFalse()
+
+        viewModel.onNavigateBack()
+
+        assertThat(viewModel.viewState.value.authFlow?.screen).isEqualTo(Screen.Otp)
     }
 
     @Test
