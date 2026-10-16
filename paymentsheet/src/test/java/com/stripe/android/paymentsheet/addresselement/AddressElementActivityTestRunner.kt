@@ -114,6 +114,31 @@ internal class AddressElementActivityTestRunner(
             awaitAnalytics(startedRequest)
         }
 
+        fun assertCheckoutDismissalRequestsConfirmation(
+            requestDismissal: () -> Unit,
+        ) {
+            addressPage.assertReadyToSave()
+            requestDismissal()
+
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
+            addressPage.discardChanges()
+
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        }
+
+        fun assertStandaloneDismissesImmediately(
+            editedName: String,
+            requestDismissal: () -> Unit,
+        ) {
+            addressPage.assertReadyToSave()
+            addressPage.editName(editedName)
+            requestDismissal()
+
+            addressPage.assertDiscardConfirmationNotDisplayed()
+            assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+        }
+
         fun assertDismissalBlocked() {
             assertSaving()
             addressPage.assertCloseDisabled()

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -78,65 +79,87 @@ internal class AddressElementActivityAnalyticsTest {
         awaitAnalytics(failedRequest)
         addressPage.assertReadyToSave()
 
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
         addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
     }
 
     @Test
-    fun `root back reports cancellation`() = runScenario {
+    fun `root back reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
 
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
     }
 
     @Test
-    fun `close reports cancellation`() = runScenario {
+    fun `close and keep editing do not report until discard uses current data`() = runScenario {
         addressPage.assertReadyToSave()
 
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
         addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        networkRule.validate()
+
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        networkRule.validate()
+
+        addressPage.selectCountry("Canada")
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
     }
 
     @Test
-    fun `scrim accessibility action reports cancellation`() = runScenario {
+    fun `scrim accessibility action reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
 
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
         addressPage.dismissViaScrimAccessibilityAction()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
     }
 
     @Test
-    fun `back reports the current country once even when pressed twice`() = runScenario {
+    fun `repeated root back reports current country once after discard`() = runScenario {
         addressPage.assertReadyToSave()
         addressPage.selectCountry("Canada")
 
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
             activity.onBackPressedDispatcher.onBackPressed()
         }
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
     }
 
     @Test
-    fun `close after recreation reports the retained edited country`() = runScenario {
+    fun `close after recreation reports the retained edited country after discard`() = runScenario {
         addressPage.assertReadyToSave()
         addressPage.selectCountry("Canada")
 
@@ -151,8 +174,10 @@ internal class AddressElementActivityAnalyticsTest {
         awaitAnalytics(shownRequest)
 
         addressPage.assertVisible()
-        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
         addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled", country = "CA")
+        addressPage.discardChanges()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
