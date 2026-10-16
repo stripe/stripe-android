@@ -1,12 +1,15 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -19,12 +22,13 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -157,7 +161,7 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
         testScheduler.runCurrent()
-        eventReporter.paymentSuccessCalls.expectNoEvents()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     @Test
@@ -201,8 +205,10 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
-        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
-            .isEqualTo(PaymentSelection.GooglePay)
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
+        assertThat(request).containsEntry("selected_lpm", "google_pay")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     @Test
@@ -275,8 +281,10 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
-            .isEqualTo(PaymentSelection.GooglePay)
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
+        assertThat(request).containsEntry("selected_lpm", "google_pay")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     private fun googlePayState(
@@ -312,6 +320,7 @@ internal class CheckoutConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
@@ -336,11 +345,19 @@ internal class CheckoutConfirmationPerformerTest {
             },
             viewModelScope = backgroundScope,
         )
-        val eventReporter = FakeEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
+        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
+        val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -363,7 +380,7 @@ internal class CheckoutConfirmationPerformerTest {
             performerProvider = performerProvider,
             performer = performer,
             confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
             stateHolder = stateHolder,
             operationCoordinator = operationCoordinator,
             results = results,
@@ -376,8 +393,8 @@ internal class CheckoutConfirmationPerformerTest {
         resultThreads.ensureAllEventsConsumed()
         performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
-        eventReporter.validate()
     }
 
     private fun createPresenter(
@@ -410,7 +427,7 @@ internal class CheckoutConfirmationPerformerTest {
         val performerProvider: FakeConfirmationPerformerProvider,
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
-        val eventReporter: FakeEventReporter,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val stateHolder: CheckoutControllerStateHolder,
         val operationCoordinator: CheckoutOperationCoordinator,
         val results: Turbine<CheckoutController.Result>,

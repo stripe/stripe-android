@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.defaultAnalyticsParams
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -500,7 +501,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadataProvider.get()),
+                    additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams(),
                 )
             )
         }
@@ -605,15 +606,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
-        return if (paymentMethodMetadata != null) {
-            paymentMethodMetadata.analyticsMetadata.paramsMap +
-                ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
-        } else {
-            emptyMap()
-        }
-    }
-
     private fun fireEvent(
         event: PaymentSheetEvent,
         paymentMethodMetadata: PaymentMethodMetadata? = paymentMethodMetadataProvider.get(),
@@ -624,7 +616,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = defaultParams(paymentMethodMetadata) + event.params,
+                    additionalParams = paymentMethodMetadata.defaultAnalyticsParams() + event.params,
                     publishableKeyOverride = publishableKeyOverride,
                 )
             )
@@ -635,7 +627,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
-            additionalParams = defaultParams(paymentMethodMetadataProvider.get()) + event.params,
+            additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams() + event.params,
         )
 
         CoroutineScope(workContext).launch {
