@@ -604,6 +604,35 @@ class AddressElementTest {
     }
 
     @Test
+    fun `when phone number is optional, partial input is incomplete`() = runTest {
+        // Construct AddressElement using the existing test setup,
+        // with phoneNumberConfig = AddressFieldConfiguration.OPTIONAL.
+
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            mapOf(
+                IdentifierSpec.Country to "CA"
+            ),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = AddressFieldConfiguration.REQUIRED
+            ),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val controller = addressElement.phoneNumberElement.controller
+
+        assertThat(controller.isComplete.value).isTrue()
+
+        controller.onRawValueChange("123")
+        assertThat(controller.isComplete.value).isFalse()
+
+        controller.onRawValueChange("1234567890")
+        assertThat(controller.isComplete.value).isTrue()
+    }
+
+    @Test
     fun `on validating, should update all internal fields of validation state`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
@@ -644,6 +673,48 @@ class AddressElementTest {
     }
 
     @Test
+    fun `when phone number is optional, empty value should be complete`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            mapOf(IdentifierSpec.Country to "CA"),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+            ),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val phoneNumberController = addressElement.phoneNumberElement.controller
+
+        assertThat(phoneNumberController.isComplete.value).isTrue()
+    }
+
+    @Test
+    fun `when phone number is optional, partial value should be incomplete`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            mapOf(IdentifierSpec.Country to "CA"),
+            countryElement = countryElement,
+            addressInputMode = AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL
+            ),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+
+        val phoneNumberController = addressElement.phoneNumberElement.controller
+
+        phoneNumberController.onRawValueChange("123")
+
+        assertThat(phoneNumberController.isComplete.value).isFalse()
+
+        phoneNumberController.onRawValueChange("1234567890")
+
+        assertThat(phoneNumberController.isComplete.value).isTrue()
+    }
+
+    private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {
     fun `name element filters out emojis`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),

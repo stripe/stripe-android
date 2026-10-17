@@ -21,6 +21,8 @@ class PhoneNumberController private constructor(
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
     override val showOptionalLabel: Boolean = false,
+    private val acceptAnyInput: Boolean = false,
+    private val isOptional: Boolean = false,
     private val acceptEmptyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
     override val enforceLeftToRightTextDirection: Boolean = true
@@ -78,6 +80,7 @@ class PhoneNumberController private constructor(
         fieldValue,
         phoneNumberMinimumLength
     ) { value, minLength ->
+        value to ((isOptional && value.isBlank()) || value.length >= (minLength ?: 0) || acceptAnyInput)
         value to (value.length >= (minLength ?: 0) || (acceptEmptyInput && value.isEmpty()))
     }
 
@@ -153,6 +156,8 @@ class PhoneNumberController private constructor(
             initiallySelectedCountryCode: String? = null,
             overrideCountryCodes: Set<String> = emptySet(),
             showOptionalLabel: Boolean = false,
+            acceptAnyInput: Boolean = false,
+            isOptional: Boolean = false
             acceptEmptyInput: Boolean = false
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
@@ -178,6 +183,8 @@ class PhoneNumberController private constructor(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput,
+                    isOptional = isOptional,
                     acceptEmptyInput = acceptEmptyInput,
                     overrideCountryCodes = overrideCountryCodes,
                 )
@@ -186,6 +193,8 @@ class PhoneNumberController private constructor(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput,
+                    isOptional = isOptional,
                     acceptEmptyInput = acceptEmptyInput,
                     overrideCountryCodes = overrideCountryCodes,
                 )
