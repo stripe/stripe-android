@@ -5,6 +5,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'dev.drewhamilton.poko'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     api project(":stripe-core")
@@ -15,9 +16,6 @@ dependencies {
     implementation project(':financial-connections-lite')
     implementation project(':3ds2sdk')
 
-    implementation libs.accompanist.appCompatThemeAdapter
-    implementation libs.accompanist.materialThemeAdapter
-    implementation libs.accompanist.material3ThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
@@ -31,7 +29,6 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.foundation
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.ui
     implementation libs.dagger
     implementation libs.kotlin.coroutines
@@ -68,11 +65,13 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
     androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation testLibs.androidx.junitKtx
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
@@ -109,18 +108,24 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += [
+    }
+
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+            freeCompilerArgs.addAll([
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                    "-Xcontext-receivers",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property",
                     "-Xconsistent-data-class-copy-visibility",
-            ]
+            ])
         }
     }
 
     buildFeatures {
         compose = true
         viewBinding true
+        buildConfig = true
     }
 
     packagingOptions {

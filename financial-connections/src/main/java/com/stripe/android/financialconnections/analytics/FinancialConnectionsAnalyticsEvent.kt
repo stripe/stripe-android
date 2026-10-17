@@ -5,8 +5,12 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPErr
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.genericErrorPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.attestation.AttestationError
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 
 /**
  * Event definitions for Financial Connections.
@@ -18,6 +22,26 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
 ) {
 
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
+
+    class ExternalOnEventEmitted(
+        event: FinancialConnectionsEvent,
+        pane: Pane?,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "external_on_event.emitted",
+        params = mapOf(
+            "event_payload" to buildJsonObject {
+                put("name", event.name.value)
+                put("financialConnectionsSessionId", event.financialConnectionsSessionId)
+                putJsonObject("metadata") {
+                    put("institutionName", event.metadata.institutionName)
+                    put("manualEntry", event.metadata.manualEntry)
+                    put("errorCode", event.metadata.errorCode?.value)
+                }
+            }.toString(),
+            "context_source" to "native_sdk",
+            "context_pane" to pane?.value,
+        ).filterNotNullValues()
+    )
 
     class PaneLaunched(
         pane: Pane,
@@ -291,33 +315,6 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         }
     }
 
-    class VerificationStepUpSuccess(
-        pane: Pane,
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "networking.verification.step_up.success",
-        mapOf(
-            "pane" to pane.analyticsValue,
-        ).filterNotNullValues()
-    )
-
-    class VerificationStepUpError(
-        pane: Pane,
-        error: Error
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "networking.verification.step_up.error",
-        mapOf(
-            "pane" to pane.analyticsValue,
-            "error" to error.value,
-        ).filterNotNullValues()
-    ) {
-        enum class Error(val value: String) {
-            ConsumerNotFoundError("ConsumerNotFoundError"),
-            LookupConsumerSession("LookupConsumerSession"),
-            StartVerificationError("StartVerificationSessionError"),
-            MarkLinkVerifiedError("MarkLinkStepUpAuthenticationVerifiedError"),
-        }
-    }
-
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsAnalyticsEvent(
@@ -325,6 +322,16 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         mapOf(
             "pane" to pane.analyticsValue,
         ).filterNotNullValues()
+    )
+
+    class PaneNotFound(paneName: String) : FinancialConnectionsAnalyticsEvent(
+        name = "error.unexpected",
+        params = mapOf(
+            "pane" to paneName,
+            "error" to "PaneNotFound",
+            "error_type" to "PaneNotFound",
+            "error_message" to "Pane not found: an unsupported pane was requested.",
+        )
     )
 
     class Error(
@@ -340,7 +347,13 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             else -> "error.unexpected"
         },
         params = (
-            mapOf("pane" to pane.analyticsValue)
+            mapOf(
+                "pane" to pane.analyticsValue,
+                // Lets a dashboard/alert isolate this error path, the same way iOS tags it via
+                // logExpectedError's errorName. Kept separate from error_type/code above, which
+                // describe the underlying API error rather than whether it opted into this pane.
+                "generic_error_pane" to (exception.genericErrorPane() != null).toString(),
+            )
                 .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
@@ -408,6 +421,21 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.prepane.choose_another_bank",
         mapOf("pane" to pane.analyticsValue)
+    )
+
+    /**
+     * The primary CTA of a server-driven error pane was tapped. [action] is the action the server
+     * asked for, or `unknown` when it's one this version of the SDK can't perform.
+     */
+    class GenericErrorClickPrimaryCta(
+        pane: Pane,
+        action: String?,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "click.primary_cta",
+        mapOf(
+            "pane" to pane.analyticsValue,
+            "action" to (action ?: "unknown"),
+        )
     )
 
     class AuthSessionOpened(

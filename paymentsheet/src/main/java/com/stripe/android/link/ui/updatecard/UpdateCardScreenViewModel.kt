@@ -102,7 +102,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
                         isDefault = state.value.isDefault,
-                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap()
+                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap(),
+                        clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
                     )
                     val result = linkAccountManager.updatePaymentDetails(
                         updateParams = updateParams,
@@ -224,7 +225,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             onBrandChoiceChanged = ::onBrandChoiceChanged,
             // We prefill in the billing details update flow, so the form might
             // already be complete on first render. The user can submit without modifying.
-            requiresModification = state.value.isBillingDetailsUpdateFlow.not()
+            requiresModification = state.value.isBillingDetailsUpdateFlow.not(),
+            autocompleteAddressInteractorFactory = null,
         )
     }
 

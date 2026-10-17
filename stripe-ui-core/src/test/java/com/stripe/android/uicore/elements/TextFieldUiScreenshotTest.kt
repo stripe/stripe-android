@@ -33,10 +33,11 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -50,10 +51,11 @@ class TextFieldUiScreenshotTest {
                 enabled = false,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -67,10 +69,31 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = true,
-                errorMessage = null,
+                shouldShowValidationMessage = true,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
+            )
+        }
+    }
+
+    @Test
+    fun testFilledWithWarning() {
+        paparazziRule.snapshot {
+            TextFieldUi(
+                label = "ZIP Code",
+                value = TextFieldValue("1234"),
+                enabled = true,
+                loading = false,
+                placeholder = null,
+                shouldShowValidationMessage = true,
+                validationMessage = FieldValidationMessage.Warning(
+                    message = R.string.stripe_address_zip_incomplete
+                ),
+                showOptionalLabel = false,
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -84,10 +107,11 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = true,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -101,13 +125,14 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
                     isTintable = true,
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -121,8 +146,8 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
                     title = "Select an option".resolvableString,
@@ -139,7 +164,8 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -153,8 +179,8 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
                     title = "Select an option".resolvableString,
@@ -171,7 +197,8 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -185,10 +212,11 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -202,10 +230,11 @@ class TextFieldUiScreenshotTest {
                 enabled = false,
                 loading = false,
                 placeholder = null,
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -219,10 +248,11 @@ class TextFieldUiScreenshotTest {
                 enabled = true,
                 loading = false,
                 placeholder = "Search for someone...",
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -236,10 +266,11 @@ class TextFieldUiScreenshotTest {
                 enabled = false,
                 loading = false,
                 placeholder = "Search for someone...",
-                shouldShowError = false,
-                errorMessage = null,
+                shouldShowValidationMessage = false,
+                validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }

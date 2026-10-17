@@ -7,23 +7,20 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.uicore.StripeTheme
@@ -41,15 +38,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
@@ -60,13 +52,15 @@ class FlowControllerConfigurationHandlerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val eventReporter = mock<EventReporter>()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var viewModel: FlowControllerViewModel
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Before
     fun setup() {
@@ -77,7 +71,7 @@ class FlowControllerConfigurationHandlerTest {
             handle = SavedStateHandle(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test
@@ -115,17 +109,10 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.state).isNotNull()
         assertThat(StripeTheme.primaryButtonStyle.shape.height).isEqualTo(80f)
 
-        verify(eventReporter).onInit(
-            commonConfiguration = configuration.asCommonConfiguration(),
-            appearance = configuration.appearance,
-            primaryButtonColor = configuration.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
-            isDeferred = false,
-        )
         // Configure should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
     }
@@ -160,16 +147,6 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
-        // We're running ONLY the second config run, so we don't expect any interactions.
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        verify(eventReporter, never()).onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            appearance = config.appearance,
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-            isDeferred = false,
-        )
-
         // Configure should not regenerate the analytics sessionId when using the same configuration.
         assertThat(beforeSessionId).isEqualTo(AnalyticsRequestFactory.sessionId)
     }
@@ -203,17 +180,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
-
-        // We're running a new config, so we DO expect an interaction.
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        verify(eventReporter).onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            appearance = config.appearance,
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-            isDeferred = false,
-        )
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -246,110 +213,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
-
-        // We're running a new config, so we DO expect an interaction.
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        verify(eventReporter).onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            appearance = config.appearance,
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
-            isDeferred = false,
-        )
-    }
-
-    @Test
-    fun `configure() with invalid paymentIntent`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(" "),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("The PaymentIntent client_secret cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid merchant`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .merchantDisplayName("")
-                .build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer id`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .customer(
-                    PaymentSheet.CustomerConfiguration(
-                        id = " ",
-                        ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
-                    )
-                ).build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string.")
-    }
-
-    @Test
-    fun `configure() with invalid customer ephemeral key`() = runTest {
-        val configureErrors = Turbine<Throwable?>()
-        val configurationHandler = createConfigurationHandler()
-
-        configurationHandler.configure(
-            scope = this,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
-                .customer(
-                    PaymentSheet.CustomerConfiguration(
-                        id = "customer_id",
-                        ephemeralKeySecret = " ",
-                        accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),
-                    )
-                ).build(),
-            initializedViaCompose = false,
-        ) { _, error ->
-            configureErrors.add(error)
-        }
-
-        assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType")
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -482,14 +346,6 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         configureTurbine.awaitComplete()
-
-        verify(eventReporter).onInit(
-            commonConfiguration = any(),
-            appearance = any(),
-            primaryButtonColor = any(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(false),
-        )
     }
 
     @Test
@@ -526,14 +382,6 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         configureTurbine.awaitComplete()
-
-        verify(eventReporter).onInit(
-            commonConfiguration = any(),
-            appearance = any(),
-            primaryButtonColor = any(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(true),
-        )
     }
 
     @Test
@@ -570,21 +418,43 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         configureTurbine.awaitComplete()
+    }
 
-        verify(eventReporter).onInit(
-            commonConfiguration = any(),
-            appearance = any(),
-            primaryButtonColor = any(),
-            configurationSpecificPayload = any(),
-            isDeferred = eq(true),
-        )
+    @Test
+    fun `confirmation handler is bootstrapped after successful configuration`() = runTest {
+        FakeFlowControllerConfirmationHandler.test(
+            initialState = ConfirmationHandler.State.Idle,
+        ) {
+            val configureErrors = Turbine<Throwable?>()
+            val configurationHandler = FlowControllerConfigurationHandler(
+                paymentElementLoader = defaultPaymentSheetLoader(),
+                uiContext = testDispatcher,
+                viewModel = viewModel,
+                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+                confirmationHandler = handler,
+            )
+
+            configurationHandler.configure(
+                scope = this@runTest,
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+                ),
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                initializedViaCompose = false,
+            ) { _, exception ->
+                configureErrors.add(exception)
+            }
+
+            assertThat(configureErrors.awaitItem()).isNull()
+            assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isNotNull()
+        }
     }
 
     private fun defaultPaymentSheetLoader(): PaymentElementLoader {
         return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Link(),
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
@@ -605,10 +475,8 @@ class FlowControllerConfigurationHandlerTest {
         return FlowControllerConfigurationHandler(
             paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
-            eventReporter = eventReporter,
             viewModel = viewModel,
             paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
-            isLiveModeProvider = { false },
             confirmationHandler = FakeFlowControllerConfirmationHandler(),
         )
     }

@@ -33,6 +33,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_PHONE_OTP
 import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.navigateOnVerificationPageData
 import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
@@ -73,6 +75,10 @@ internal fun OTPScreen(
         val viewState by otpViewModel.viewState.collectAsState()
         val otpStaticPage = requireNotNull(verificationPage.phoneOtp)
         val focusRequester = remember { FocusRequester() }
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = SCREEN_NAME_PHONE_OTP
+        )
 
         OTPViewStateEffect(
             viewState = viewState,
@@ -174,7 +180,8 @@ internal fun OTPScreen(
 
             LoadingTextButton(
                 modifier = Modifier.testTag(OTP_RESEND_BUTTON_TAG),
-                text = otpStaticPage.resendButtonText.uppercase(),
+                text = otpStaticPage.resendButtonText,
+                uppercase = true,
                 state = when (viewState) {
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Loading
@@ -189,7 +196,8 @@ internal fun OTPScreen(
             LoadingTextButton(
                 modifier = Modifier
                     .testTag(OTP_CANNOT_VERIFY_BUTTON_TAG),
-                text = otpStaticPage.cannotVerifyButtonText.uppercase(),
+                text = otpStaticPage.cannotVerifyButtonText,
+                uppercase = true,
                 state = when (viewState) {
                     is SubmittingOTP -> LoadingButtonState.Disabled
                     RequestingOTP -> LoadingButtonState.Disabled
@@ -234,6 +242,9 @@ private fun OTPViewStateEffect(
             }
 
             is RequestingError -> {
+                identityViewModel.screenTracker.screenTransitionStart(
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_PHONE_OTP
+                )
                 postErrorAndNavigateToFinalErrorScreen(
                     identityViewModel,
                     navController,
@@ -247,6 +258,9 @@ private fun OTPViewStateEffect(
                 // requirements.errors might contain Phone Verification declined
                 // requirements.missings might contain document related fields
                 // screen transition will happen for either case
+                identityViewModel.screenTracker.screenTransitionStart(
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_PHONE_OTP
+                )
                 identityViewModel.updateStatesWithVerificationPageData(
                     fromRoute = OTPDestination.ROUTE.route,
                     newVerificationPageData = verificationPageData,

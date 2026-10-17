@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Required by the Android autofill framework. The manifest meta-data must point to a valid
+     resource or the system won't list the service as an autofill provider. -->
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="" />

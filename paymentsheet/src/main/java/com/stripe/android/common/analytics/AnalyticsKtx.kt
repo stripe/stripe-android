@@ -1,9 +1,7 @@
 package com.stripe.android.common.analytics
 
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
 internal const val FIELD_APPEARANCE_USAGE = "usage"
@@ -19,6 +17,7 @@ internal const val FIELD_COLLECT_NAME = "name"
 internal const val FIELD_COLLECT_EMAIL = "email"
 internal const val FIELD_COLLECT_PHONE = "phone"
 internal const val FIELD_COLLECT_ADDRESS = "address"
+internal const val FIELD_MERCHANT_ALLOWED_COUNTRIES = "allowed_countries"
 internal const val FIELD_EMBEDDED_PAYMENT_ELEMENT = "embedded_payment_element"
 internal const val FIELD_STYLE = "style"
 internal const val FIELD_ROW_STYLE = "row_style"
@@ -74,13 +73,16 @@ internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): Strin
 }
 
 internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
-    return mapOf(
-        FIELD_ATTACH_DEFAULTS to attachDefaultsToPaymentMethod,
-        FIELD_COLLECT_NAME to name.name,
-        FIELD_COLLECT_EMAIL to email.name,
-        FIELD_COLLECT_PHONE to phone.name,
-        FIELD_COLLECT_ADDRESS to address.name,
-    )
+    return buildMap {
+        put("attach_defaults", attachDefaultsToPaymentMethod)
+        put("name", name.name)
+        put("email", email.name)
+        put("phone", phone.name)
+        put("address", address.name)
+        if (allowedBillingCountries.isNotEmpty()) {
+            put("allowed_countries", allowedBillingCountries.joinToString(","))
+        }
+    }
 }
 
 internal fun List<CardBrand>.toAnalyticsValue(): String? {
@@ -91,26 +93,6 @@ internal fun List<CardBrand>.toAnalyticsValue(): String? {
     }
 }
 
-internal fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
-    return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
-}
-
-internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String? {
-    return this.customPaymentMethods.takeIf { customPaymentMethods ->
-        customPaymentMethods.isNotEmpty()
-    }?.joinToString(",") { customPaymentMethod ->
-        customPaymentMethod.id
-    }
-}
-
 internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
-}
-
-internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
-    return when (this) {
-        PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
-        PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
-        PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
-    }
 }

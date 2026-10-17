@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AuBecsDebitDe
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BacsDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BancontactDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BillieDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BizumDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BlikDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.BoletoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -16,29 +17,46 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.GiroPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GCashDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KakaoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MbWayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgUssdDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgWalletDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PaycoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PixDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PromptPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.QrisDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SatispayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.ScalapayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
@@ -53,6 +71,7 @@ internal object PaymentMethodRegistry {
         BacsDebitDefinition,
         BancontactDefinition,
         BillieDefinition,
+        BizumDefinition,
         BlikDefinition,
         BoletoDefinition,
         CardDefinition,
@@ -60,29 +79,46 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
-        GiroPayDefinition,
+        GCashDefinition,
+        GoPayDefinition,
         GrabPayDefinition,
-        IdealDefinition,
+        IdealWeroDefinition,
         InstantDebitsDefinition,
+        KakaoPayDefinition,
         KlarnaDefinition,
         KonbiniDefinition,
+        KrCardDefinition,
+        MbWayDefinition,
+        MoMoDefinition,
         MobilePayDefinition,
         MultibancoDefinition,
+        NaverPayDefinition,
+        NgBankTransferDefinition,
+        NgCardDefinition,
+        NgUssdDefinition,
+        NgWalletDefinition,
         OxxoDefinition,
         P24Definition,
+        PayByBankDefinition,
         PayNowDefinition,
         PayPalDefinition,
+        PayPayDefinition,
+        PaycoDefinition,
+        PixDefinition,
         PromptPayDefinition,
+        QrisDefinition,
         RevolutPayDefinition,
         SatispayDefinition,
+        ScalapayDefinition,
         SepaDebitDefinition,
-        SofortDefinition,
+        SequraDefinition,
+        ShopeePayDefinition,
         SunbitDefinition,
         SwishDefinition,
         TwintDefinition,
-        UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
+        WeroDefinition,
         ZipDefinition,
     )
 

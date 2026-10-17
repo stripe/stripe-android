@@ -15,7 +15,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class ExternalPaymentMethodSpec(
-
     /**
      * The type of the external payment method, e.g. "external_foopay".
      *
@@ -23,18 +22,15 @@ data class ExternalPaymentMethodSpec(
      * */
     @SerialName("type")
     val type: String,
-
     /** Localized label for the payment method, e.g. "FooPay". */
     @SerialName("label")
     val label: String,
-
     /**
      * URL of a 48x pixel tall, variable width PNG representing the payment method suitable for display against a light
      * background color.
      * */
     @SerialName("light_image_url")
     val lightImageUrl: String,
-
     /**
      * URL of a 48x pixel tall, variable width PNG representing the payment method suitable for display against a dark
      * background color. If null, use [lightImageUrl] instead.

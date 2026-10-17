@@ -54,7 +54,7 @@ internal class PaymentAuthWebViewActivityViewModel(
             return PaymentFlowResult.Unvalidated(
                 clientSecret = args.clientSecret,
                 sourceId = Uri.parse(args.url).lastPathSegment.orEmpty(),
-                stripeAccountId = args.stripeAccountId
+                stripeAccountId = args.apiConfiguration.stripeAccountId
             )
         }
 
@@ -62,13 +62,18 @@ internal class PaymentAuthWebViewActivityViewModel(
         @JvmSynthetic
         get() {
             return Intent().putExtras(
-                paymentResult.copy(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = paymentResult.clientSecret,
                     flowOutcome = if (args.shouldCancelIntentOnUserNavigation) {
                         StripeIntentResult.Outcome.CANCELED
                     } else {
-                        StripeIntentResult.Outcome.SUCCEEDED
+                        StripeIntentResult.Outcome.UNKNOWN
                     },
-                    canCancelSource = args.shouldCancelSource
+                    exception = paymentResult.exception,
+                    canCancelSource = args.shouldCancelSource,
+                    sourceId = paymentResult.sourceId,
+                    source = paymentResult.source,
+                    stripeAccountId = paymentResult.stripeAccountId
                 ).toBundle()
             )
         }
@@ -128,8 +133,8 @@ internal class PaymentAuthWebViewActivityViewModel(
                 args,
                 DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 PaymentAnalyticsRequestFactory(
-                    application,
-                    args.publishableKey,
+                    context = application,
+                    publishableKeyProvider = { args.apiConfiguration.publishableKey },
                     defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
                 )
             ) as T

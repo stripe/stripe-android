@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidViewBinding
@@ -22,9 +23,8 @@ internal fun QrCodeWebView(
     clientSecret: String,
     onClose: () -> Unit,
 ) {
-    val isPageLoaded = MutableStateFlow(false)
+    val isPageLoaded = remember { MutableStateFlow(false) }
     val isPageLoadedState by isPageLoaded.collectAsState()
-    var binding: StripePaymentAuthWebViewActivityBinding? = null
 
     AndroidViewBinding(
         factory = { layoutInflater, _, _ ->
@@ -50,13 +50,16 @@ internal fun QrCodeWebView(
             localBinding.webView.webViewClient = webViewClient
             localBinding.webView.loadUrl(url)
 
-            binding = localBinding
             localBinding
         },
         modifier = Modifier.fillMaxSize().testTag(QR_CODE_WEB_VIEW_TEST_TAG),
+        onRelease = {
+            webViewContainer.removeAllViews()
+            webView.destroy()
+        },
         update = {
             if (isPageLoadedState) {
-                binding?.progressBar?.isGone = true
+                progressBar.isGone = true
             }
         }
     )

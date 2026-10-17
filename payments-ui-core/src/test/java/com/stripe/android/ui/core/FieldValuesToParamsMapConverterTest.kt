@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.addPath
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.getKeys
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
@@ -18,37 +18,45 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
-                    IdentifierSpec.Generic("ideal[bank]") to FormFieldEntry(
+                    FormFieldId.Generic("ideal[bank]") to FormFieldEntry(
                         "abn_amro",
                         true
                     )
                 ),
                 PaymentMethod.Type.Ideal.code,
                 PaymentMethod.Type.Ideal.requiresMandate,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro}}
-                """.trimIndent()
-            )
+        val paramMap = paymentMethodParams.toParamMap()
+        assertThat(paramMap).hasSize(3)
+        assertThat(paramMap).containsEntry(
+            "type",
+            "ideal"
+        )
+        assertThat(paramMap).containsEntry(
+            "ideal",
+            mapOf("bank" to "abn_amro")
+        )
+        assertThat(paramMap).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadata.toParamMap()
+        )
     }
 
     @Test
     fun `test function`() {
         val map: MutableMap<String, Any?> = mutableMapOf("type" to "card")
         mapOf(
-            IdentifierSpec.Name to FormFieldEntry(
+            FormFieldId.Name to FormFieldEntry(
                 "joe",
                 true
             ),
-            IdentifierSpec.Email to FormFieldEntry(
+            FormFieldId.Email to FormFieldEntry(
                 "joe@gmail.com",
                 true
             ),
-            IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+            FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                 "US",
                 true
             )
@@ -78,43 +86,37 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         name,
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         email,
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         country,
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         line1,
                         true
                     )
                 ),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
-                clientAttributionMetadata = null
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=sofort, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsEntry(
+            "type",
+            "paypal"
         )
+        assertThat(paramsMap).containsEntry("billing_details", paymentMethodParams.billingDetails!!.toParamMap())
+        assertThat(paramsMap).containsEntry("client_attribution_metadata", clientAttributionMetadata.toParamMap())
+
         assertThat(paymentMethodParams.billingDetails?.name).isEqualTo(name)
         assertThat(paymentMethodParams.billingDetails?.email).isEqualTo(email)
         assertThat(paymentMethodParams.billingDetails?.address?.country).isEqualTo(country)
@@ -127,12 +129,13 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
                 clientAttributionMetadata = ClientAttributionMetadata(
-                    elementsSessionConfigId = "elements_session_123",
+                    elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                    checkoutSessionId = null,
                 )
             )
 
@@ -144,9 +147,9 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
-                clientAttributionMetadata = null
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
         assertThat(paymentMethodParams.billingDetails).isNull()
@@ -157,47 +160,35 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         "joe@gmail.com",
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         "US",
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
                     ),
-                    IdentifierSpec.BlikCode to FormFieldEntry(
+                    FormFieldId.BlikCode to FormFieldEntry(
                         "example_blik_code",
                         true,
                     )
                 ),
                 PaymentMethod.Type.Blik.code,
                 PaymentMethod.Type.Blik.requiresMandate,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
         assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=blik, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
-        )
+            paymentMethodParams.toParamMap()
+        ).doesNotContainKey(FormFieldId.BlikCode)
     }
 
     @Test
@@ -205,51 +196,41 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         "joe@gmail.com",
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         "US",
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
                     ),
-                    IdentifierSpec.SaveForFutureUse to FormFieldEntry(
+                    FormFieldId.SaveForFutureUse to FormFieldEntry(
                         "true",
                         true,
                     ),
-                    IdentifierSpec.CardBrand to FormFieldEntry(
+                    FormFieldId.CardBrand to FormFieldEntry(
                         "visa",
                         true,
                     )
                 ),
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.Card.requiresMandate,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{" +
-                "type=card, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
-        )
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsKey("type")
+        assertThat(paramsMap).containsKey("billing_details")
+        assertThat(paramsMap).containsKey("client_attribution_metadata")
     }
 
     @Test
@@ -257,11 +238,11 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodExtraParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.BacsDebitConfirmed to FormFieldEntry(
+                    FormFieldId.BacsDebitConfirmed to FormFieldEntry(
                         "true",
                         true
                     )
@@ -279,25 +260,28 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.SameAsShipping to FormFieldEntry(
+                    FormFieldId.SameAsShipping to FormFieldEntry(
                         "true",
                         true
                     )
                 ),
                 "some code",
                 false,
-                clientAttributionMetadata = null
+                clientAttributionMetadata = clientAttributionMetadata
             )
 
-        assertThat(
-            paymentMethodParams.toParamMap().toString()
-        ).isEqualTo(
-            "{type=some code, billing_details={name=joe}}"
+        val paramsMap = paymentMethodParams.toParamMap()
+        assertThat(paramsMap).hasSize(3)
+        assertThat(paramsMap).containsEntry(
+            "type",
+            "some code"
         )
+        assertThat(paramsMap).containsEntry("billing_details", mapOf("name" to "joe"))
+        assertThat(paramsMap).containsEntry("client_attribution_metadata", clientAttributionMetadata.toParamMap())
     }
 
     @Test
@@ -335,23 +319,23 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodOptionsParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         "joe@gmail.com",
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         "US",
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
                     ),
-                    IdentifierSpec.BlikCode to FormFieldEntry(
+                    FormFieldId.BlikCode to FormFieldEntry(
                         "example_blik_code",
                         true,
                     )
@@ -372,19 +356,19 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodOptionsParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         "joe@gmail.com",
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         "US",
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
                     ),
@@ -403,23 +387,23 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodOptionsParams(
                 mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
+                    FormFieldId.Name to FormFieldEntry(
                         "joe",
                         true
                     ),
-                    IdentifierSpec.Email to FormFieldEntry(
+                    FormFieldId.Email to FormFieldEntry(
                         "joe@gmail.com",
                         true
                     ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
+                    FormFieldId.Generic("billing_details[address][country]") to FormFieldEntry(
                         "US",
                         true
                     ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
+                    FormFieldId.Line1 to FormFieldEntry(
                         "123 Main Street",
                         true
                     ),
-                    IdentifierSpec.KonbiniConfirmationNumber to FormFieldEntry(
+                    FormFieldId.KonbiniConfirmationNumber to FormFieldEntry(
                         "example_confirmation_number",
                         true,
                     )
@@ -468,7 +452,7 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodExtraParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodExtraParams(
                 mapOf(
-                    IdentifierSpec.SetAsDefaultPaymentMethod to FormFieldEntry(
+                    FormFieldId.SetAsDefaultPaymentMethod to FormFieldEntry(
                         "true",
                         true
                     ),
@@ -499,6 +483,52 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for Card with validated scan`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    FormFieldId.CardValidatedScan to FormFieldEntry(
+                        "true",
+                        true
+                    ),
+                ),
+                PaymentMethod.Type.Card.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "true"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for Card with np validated scan`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    FormFieldId.CardValidatedScan to FormFieldEntry(
+                        "false",
+                        true
+                    ),
+                ),
+                PaymentMethod.Type.Card.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "false"
+                )
+            )
+        )
+    }
+
+    @Test
     fun `allowRedisplay is set to UNSPECIFIED in param map`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
@@ -506,15 +536,13 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
-                clientAttributionMetadata = null,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=unspecified}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "unspecified"
+        )
     }
 
     @Test
@@ -525,15 +553,13 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 PaymentMethod.AllowRedisplay.LIMITED,
-                null,
+                clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=limited}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "limited"
+        )
     }
 
     @Test
@@ -544,23 +570,28 @@ class FieldValuesToParamsMapConverterTest {
                 code = PaymentMethod.Type.Ideal.code,
                 requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
                 PaymentMethod.AllowRedisplay.ALWAYS,
-                null,
+                clientAttributionMetadata,
             )
 
-        assertThat(paymentMethodParams.toParamMap().toString().replace("\\s".toRegex(), ""))
-            .isEqualTo(
-                """
-                    {type=ideal,ideal={bank=abn_amro},allow_redisplay=always}
-                """.trimIndent()
-            )
+        assertThat(paymentMethodParams.toParamMap()).containsEntry(
+            "allow_redisplay",
+            "always"
+        )
     }
 
     private companion object {
         val fieldValuePairs = mapOf(
-            IdentifierSpec.Generic("ideal[bank]") to FormFieldEntry(
+            FormFieldId.Generic("ideal[bank]") to FormFieldEntry(
                 "abn_amro",
                 true
             )
+        )
+
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "elements_session_123",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            checkoutSessionId = null,
         )
     }
 }

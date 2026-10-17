@@ -7,9 +7,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     label: ResolvableString,
-    onNavigation: (() -> Unit)? = null
+    addressInputMode: AddressInputMode,
+    inlineAutocompleteHandler: InlineAutocompleteHandler?,
+    reportsFormValue: Boolean,
+    initialQuery: String,
+    showEnterManually: Boolean,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
@@ -17,10 +21,16 @@ class AddressTextFieldElement(
     override val controller: AddressTextFieldController =
         AddressTextFieldController(
             label = label,
-            onNavigation = onNavigation
+            addressInputMode = addressInputMode,
+            inlineAutocompleteHandler = inlineAutocompleteHandler,
+            reportsFormValue = reportsFormValue,
+            initialQuery = initialQuery,
+            showEnterManually = showEnterManually,
         )
 
-    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {
+    val inlineQuery: StateFlow<String> get() = controller.inlineQuery
+
+    override fun getTextFieldIdentifiers(): StateFlow<List<FormFieldId>> {
         return MutableStateFlow(listOf(identifier))
     }
 }

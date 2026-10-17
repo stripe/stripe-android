@@ -19,7 +19,7 @@ internal class FlowControllerTestFactory(
             resultCallback = resultCallback,
             paymentOptionCallback = { paymentOption ->
                 configureCallbackTurbine.add(paymentOption)
-                if (callConfirmOnPaymentOptionCallback) {
+                if (callConfirmOnPaymentOptionCallback && paymentOption != null) {
                     flowController.confirm()
                 }
             },

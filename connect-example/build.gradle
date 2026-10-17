@@ -40,7 +40,6 @@ dependencies {
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.activity
     implementation libs.compose.navigation
     implementation libs.accompanist.systemUiController
@@ -49,27 +48,6 @@ dependencies {
     // DI
     implementation libs.hilt.android
     ksp libs.hilt.compiler
-
-    // Test
-    testImplementation testLibs.androidx.archCore
-    testImplementation testLibs.androidx.composeUi
-    testImplementation testLibs.androidx.core
-    testImplementation testLibs.androidx.fragment
-    testImplementation testLibs.androidx.junit
-    testImplementation testLibs.androidx.junitKtx
-    testImplementation testLibs.androidx.lifecycle
-    testImplementation testLibs.androidx.testRules
-    testImplementation testLibs.hamcrest
-    testImplementation testLibs.junit
-    testImplementation testLibs.json
-    testImplementation testLibs.kotlin.annotations
-    testImplementation testLibs.kotlin.coroutines
-    testImplementation testLibs.kotlin.junit
-    testImplementation testLibs.mockito.core
-    testImplementation testLibs.mockito.inline
-    testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.robolectric
-    testImplementation testLibs.truth
 
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
@@ -101,27 +79,17 @@ android {
         viewBinding true
     }
 
-    testOptions {
-        unitTests {
-            // Note: without this, all Robolectric tests using assets will fail.
-            includeAndroidResources = true
-            all {
-                maxHeapSize = "1024m"
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property"
+            ])
+            if (gradle.ext.isCi) {
+                allWarningsAsErrors = true
             }
-        }
-
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
-    }
-
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers"
-        ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
         }
     }
 }

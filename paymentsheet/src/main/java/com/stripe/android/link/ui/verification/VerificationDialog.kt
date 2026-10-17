@@ -21,8 +21,9 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementFactory
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -33,7 +34,7 @@ internal fun VerificationDialog(
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
-    val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->
+    val viewModel = linkViewModel<VerificationViewModel>(key = linkAccount.clientSecret) { parentComponent ->
         VerificationViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
@@ -134,8 +135,9 @@ fun VerificationDialogPreview() {
                     defaultPayment = null,
                     isDialog = true,
                     allowLogout = true,
+                    linkBrand = LinkBrand.Link,
                 ),
-                otpElement = OTPSpec.transform(),
+                otpElement = OTPElementFactory.create(),
                 onBack = {},
                 onChangeEmailClick = {},
                 onResendCodeClick = {},

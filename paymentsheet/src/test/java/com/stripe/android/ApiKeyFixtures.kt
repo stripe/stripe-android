@@ -2,6 +2,8 @@ package com.stripe.android
 
 internal object ApiKeyFixtures {
     const val FAKE_PUBLISHABLE_KEY = "pk_test_123"
+    const val FAKE_ACCOUNT_ID = "acct_123"
+    const val FAKE_LIVE_KEY = "pk_live_123"
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val CONNECTED_ACCOUNT_PUBLISHABLE_KEY = "pk_test_fdjfCYpGSwAX24KUEiuaAAWX"
     const val FAKE_EPHEMERAL_KEY = "ek_test_123"
@@ -10,10 +12,8 @@ internal object ApiKeyFixtures {
     const val AU_BECS_DEBIT_PUBLISHABLE_KEY = "pk_test_Bfx5IwoTeK7kUbfS15dcgTrs00beFpWwto"
     const val KLARNA_PUBLISHABLE_KEY = "pk_test_8JUGw3jTOFqWQOt5nr2pjzF9"
     const val BACS_PUBLISHABLE_KEY = "pk_test_z6Ct4bpx0NUjHii0rsi4XZBf00jmM8qA28"
-    const val SOFORT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val P24_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val BANCONTACT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
-    const val GIROPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val EPS_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val OXXO_PUBLISHABLE_KEY = "pk_test_bjqpeDIsfh4Bnwok0rtnrS7200PY7PLRfb"
     const val ALIPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
@@ -22,8 +22,6 @@ internal object ApiKeyFixtures {
     const val GRABPAY_PUBLISHABLE_KEY = "pk_test_TP0eh0buhedbg787icFUy83H00i9fh4Auj"
     const val PAYPAL_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val AFTERPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
-    const val UPI_PUBLISHABLE_KEY =
-        "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"
     const val NETBANKING_PUBLISHABLE_KEY =
         "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"
     const val BLIK_PUBLISHABLE_KEY = "pk_test_ErsyMEOTudSjQR8hh0VrQr5X008sBXGOu6"

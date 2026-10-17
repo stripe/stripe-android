@@ -88,7 +88,7 @@ class IbanConfig : TextFieldConfig {
         if (!Locale.getISOCountries().contains(countryCode)) {
             return TextFieldStateConstants.Error.Invalid(
                 R.string.stripe_iban_invalid_country,
-                arrayOf(countryCode)
+                listOf(countryCode)
             )
         }
 
@@ -100,7 +100,7 @@ class IbanConfig : TextFieldConfig {
 
         return if (isIbanValid(input)) {
             if (input.length == MAX_LENGTH) {
-                TextFieldStateConstants.Valid.Full
+                TextFieldStateConstants.Valid.Full()
             } else {
                 TextFieldStateConstants.Valid.Limitless
             }

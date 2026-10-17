@@ -2,14 +2,17 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -17,24 +20,22 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
     includes = [
         FlowControllerModule.Bindings::class,
-    ],
-    subcomponents = [
-        PaymentOptionsViewModelSubcomponent::class,
     ]
 )
 internal object FlowControllerModule {
@@ -44,18 +45,22 @@ internal object FlowControllerModule {
 
     @Provides
     @Singleton
+    fun provideResources(context: Context): Resources = context.resources
+
+    @Provides
+    @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
     @Provides
     @Singleton
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER)
     fun provideFlowControllerLinkLauncher(
-        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentBuilder,
+        linkAnalyticsComponentFactory,
         identifier,
         linkActivityContract,
         linkStore,
@@ -65,16 +70,32 @@ internal object FlowControllerModule {
     @Singleton
     @Named(WALLETS_BUTTON_LINK_LAUNCHER)
     fun provideWalletsButtonLinkLauncher(
-        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentBuilder,
+        linkAnalyticsComponentFactory,
         identifier,
         linkActivityContract,
         linkStore,
     )
+
+    @Provides
+    @Singleton
+    fun provideLinkPaymentMethodSelectionLauncher(
+        @Named(FLOW_CONTROLLER_LINK_LAUNCHER) launcher: LinkPaymentLauncher,
+        linkGateFactory: LinkGate.Factory,
+        linkAccountHolder: LinkAccountHolder,
+        viewModel: FlowControllerViewModel,
+    ): LinkPaymentMethodSelectionLauncher {
+        return LinkPaymentMethodSelectionLauncher(
+            launcher = launcher,
+            linkGateFactory = linkGateFactory,
+            linkAccountHolder = linkAccountHolder,
+            statusBarColor = viewModel.statusBarColor,
+        )
+    }
 
     @Provides
     @Singleton
@@ -118,7 +139,7 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     fun provideStripeImageLoader(context: Context): StripeImageLoader {
-        return StripeImageLoader(context)
+        return DefaultStripeImageLoader(context)
     }
 
     @Provides
@@ -127,14 +148,15 @@ internal object FlowControllerModule {
     fun provideAllowsManualConfirmation() = true
 
     @Provides
-    @Singleton
-    @Named(IS_LIVE_MODE)
-    fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
-        return { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+    fun providePaymentMethodMetadata(viewModel: FlowControllerViewModel): PaymentMethodMetadata? {
+        return viewModel.state?.paymentSheetState?.paymentMethodMetadata
     }
 
     @Module
     interface Bindings {
+        @Binds
+        fun bindsPaymentOptionFactory(factory: DefaultPaymentOptionFactory): PaymentOptionFactory
+
         @Binds
         @Singleton
         fun bindsFlowControllerConfirmationHandler(

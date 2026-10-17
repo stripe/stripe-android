@@ -10,14 +10,18 @@ class AddressTextFieldElementTest {
     @Test
     fun `Element should have a text field identifier`() = runTest {
         val element = AddressTextFieldElement(
-            identifier = IdentifierSpec.OneLineAddress,
+            identifier = FormFieldId.OneLineAddress,
             label = "Address".resolvableString,
-            onNavigation = null,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
+            inlineAutocompleteHandler = null,
+            reportsFormValue = false,
+            initialQuery = "",
+            showEnterManually = true,
         )
 
         element.getTextFieldIdentifiers().test {
             assertThat(awaitItem()).containsExactly(
-                IdentifierSpec.OneLineAddress
+                FormFieldId.OneLineAddress
             )
         }
     }

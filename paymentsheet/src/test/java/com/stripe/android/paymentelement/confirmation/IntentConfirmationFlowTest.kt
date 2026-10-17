@@ -4,7 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
-import com.stripe.android.model.Address
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -16,16 +19,15 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -42,31 +44,15 @@ internal class IntentConfirmationFlowTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
             ),
-            confirmationParameters = defaultConfirmationDefinitionParams(
-                initializationMode = defaultPaymentIntentInitializationMode,
+            confirmationArgs = defaultConfirmationDefinitionParams(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             ),
         )
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(
-            IntentConfirmationDefinition.Args.Confirm(
-                confirmNextParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret = "pi_123_secret_123",
-                    shipping = ConfirmPaymentIntentParams.Shipping(
-                        name = "John Doe",
-                        phone = "1234567890",
-                        address = Address(),
-                    ),
-                    savePaymentMethod = null,
-                    setupFutureUsage = null,
-                )
-            )
-        )
+        assertThat(launchAction.launcherArguments).isInstanceOf(IntentConfirmationDefinition.Args.Confirm::class.java)
     }
 
     @Test
@@ -79,23 +65,16 @@ internal class IntentConfirmationFlowTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = null
             ),
-            confirmationParameters = defaultConfirmationDefinitionParams(
-                initializationMode = defaultSetupIntentInitializationMode,
+            confirmationArgs = defaultConfirmationDefinitionParams(
                 intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             ),
         )
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(
-            IntentConfirmationDefinition.Args.Confirm(
-                confirmNextParams = ConfirmSetupIntentParams.create(
-                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret = "seti_123_secret_123",
-                )
-            )
+        assertThat(launchAction.launcherArguments).isInstanceOf(
+            IntentConfirmationDefinition.Args.Confirm::class.java
         )
     }
 
@@ -109,14 +88,18 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = CONFIRMATION_OPTION,
-            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+            confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS,
         )
 
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.intent)
+            .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -130,23 +113,29 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = CONFIRMATION_OPTION,
-            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS.copy(
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                            currency = "USD",
-                        ),
-                        sellerDetails = null,
+            confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
+                    integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                                currency = "USD",
+                            ),
+                            sellerDetails = null,
+                        )
                     )
-                )
+                ),
             ),
         )
 
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.intent).isEqualTo(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.intent)
+            .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
@@ -162,7 +151,7 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = CONFIRMATION_OPTION.copy(
                 shouldSave = true,
             ),
-            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+            confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS,
         )
 
         val launchAction = action.asLaunch()
@@ -170,7 +159,8 @@ internal class IntentConfirmationFlowTest {
         val setupIntentParams = confirmArguments.confirmNextParams.asSetup()
 
         assertThat(setupIntentParams.clientSecret).isEqualTo("seti_123_secret_123")
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(confirmArguments.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
@@ -185,7 +175,7 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = CONFIRMATION_OPTION,
-            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+            confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS,
         )
 
         val failAction = action.asFail()
@@ -208,7 +198,7 @@ internal class IntentConfirmationFlowTest {
 
         val action = intentConfirmationDefinition.action(
             confirmationOption = CONFIRMATION_OPTION,
-            confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS,
+            confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS,
         )
 
         val failAction = action.asFail()
@@ -231,10 +221,8 @@ internal class IntentConfirmationFlowTest {
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
-                passiveCaptchaParams = null
             ),
-            confirmationParameters = defaultConfirmationDefinitionParams(
-                initializationMode = defaultSetupIntentInitializationMode,
+            confirmationArgs = defaultConfirmationDefinitionParams(
                 intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             ),
         )
@@ -242,7 +230,8 @@ internal class IntentConfirmationFlowTest {
         val actualParams = action.asLaunch().launcherArguments.asConfirm().confirmNextParams
 
         assertThat(actualParams).isInstanceOf(ConfirmSetupIntentParams::class.java)
-        assertThat((actualParams as ConfirmSetupIntentParams).clientSecret).isEqualTo("seti_123_secret_123")
+        assertThat((actualParams as ConfirmSetupIntentParams).clientSecret)
+            .isEqualTo("seti_1GSmaFCRMbs6FrXfmjThcHan_secret_H0oC2iSB4FtW4d")
         assertThat(actualParams.toParamMap().get("set_as_default_payment_method")).isEqualTo(true)
     }
 
@@ -258,10 +247,8 @@ internal class IntentConfirmationFlowTest {
                 extraParams = PaymentMethodExtraParams.Card(
                     setAsDefault = true
                 ),
-                passiveCaptchaParams = null
             ),
-            confirmationParameters = defaultConfirmationDefinitionParams(
-                initializationMode = defaultPaymentIntentInitializationMode,
+            confirmationArgs = defaultConfirmationDefinitionParams(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             ),
         )
@@ -271,7 +258,8 @@ internal class IntentConfirmationFlowTest {
         assertThat(actualParams).isInstanceOf(ConfirmPaymentIntentParams::class.java)
         assertThat((actualParams as ConfirmPaymentIntentParams).paymentMethodCreateParams)
             .isEqualTo(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
-        assertThat(actualParams.clientSecret).isEqualTo("pi_123_secret_123")
+        assertThat(actualParams.clientSecret)
+            .isEqualTo("pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s")
         assertThat(actualParams.toParamMap().get("set_as_default_payment_method")).isEqualTo(true)
     }
 
@@ -283,52 +271,46 @@ internal class IntentConfirmationFlowTest {
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
-            intentConfirmationInterceptor = DefaultIntentConfirmationInterceptor(
-                allowsManualConfirmation = false,
-                publishableKeyProvider = {
-                    "pk_123"
-                },
-                stripeAccountIdProvider = {
-                    "acct_123"
-                },
-                stripeRepository = FakeStripeRepository(
-                    createPaymentMethodResult = createPaymentMethodResult,
-                    retrieveIntent = intentResult,
-                ),
-                errorReporter = FakeErrorReporter(),
-                intentCreationCallbackProvider = {
-                    createIntentCallback
-                },
-                preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
-            ),
-            paymentLauncherFactory = {
+            intentConfirmationInterceptorFactory =
+            object : IntentConfirmationInterceptor.Factory {
+                override suspend fun create(
+                    integrationMetadata: IntegrationMetadata,
+                    customerMetadata: CustomerMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
+                ): IntentConfirmationInterceptor {
+                    return createIntentConfirmationInterceptor(
+                        integrationMetadata = integrationMetadata,
+                        stripeRepository = FakeStripeRepository(
+                            createPaymentMethodResult = createPaymentMethodResult,
+                            retrieveIntent = intentResult,
+                        ),
+                        intentCreationCallbackProvider = {
+                            createIntentCallback
+                        },
+                        preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler }
+                    )
+                }
+            },
+            paymentLauncherFactory = { _, _, _ ->
                 FakePaymentLauncher()
             }
         )
     }
 
-    private val defaultSetupIntentInitializationMode =
-        PaymentElementLoader.InitializationMode.SetupIntent(
-            clientSecret = "seti_123_secret_123",
-        )
-
-    private val defaultPaymentIntentInitializationMode =
-        PaymentElementLoader.InitializationMode.PaymentIntent(
-            clientSecret = "pi_123_secret_123",
-        )
-
     private fun defaultConfirmationDefinitionParams(
-        initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-    ): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
-            initializationMode = initializationMode,
-            intent = intent,
-            shippingDetails = AddressDetails(
-                name = "John Doe",
-                phoneNumber = "1234567890"
+    ): ConfirmationHandler.Args {
+        return ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent,
+                shippingDetails = AddressDetails(
+                    name = "John Doe",
+                    phoneNumber = "1234567890"
+                ),
             ),
-            appearance = PaymentSheet.Appearance(),
+            statusBarColor = null,
         )
     }
 
@@ -361,23 +343,18 @@ internal class IntentConfirmationFlowTest {
             optionsParams = null,
             shouldSave = false,
             extraParams = null,
-            passiveCaptchaParams = null
         )
 
-        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                        currency = "USD",
-                    )
-                )
+        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(id = null, clientSecret = null),
+                shippingDetails = AddressDetails(
+                    name = "John Doe",
+                    phoneNumber = "1234567890"
+                ),
             ),
-            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            shippingDetails = AddressDetails(
-                name = "John Doe",
-                phoneNumber = "1234567890"
-            ),
-            appearance = PaymentSheet.Appearance(),
         )
     }
 }

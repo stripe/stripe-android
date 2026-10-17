@@ -8,17 +8,17 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class PhoneNumberElement(
-    override val identifier: IdentifierSpec,
+    override val identifier: FormFieldId,
     override val controller: PhoneNumberController
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
         return combineAsStateFlow(controller.formFieldValue, controller.phoneNumberFormatter) { phoneEntry, formatter ->
             listOf(
                 identifier to phoneEntry,
-                IdentifierSpec.PhoneNumberCountry to FormFieldEntry(
+                FormFieldId.PhoneNumberCountry to FormFieldEntry(
                     value = controller.getCountryCode(),
                     isComplete = true,
                 ),

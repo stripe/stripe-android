@@ -10,12 +10,15 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +26,25 @@ import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.mock
 
 internal class FakeLinkConfigurationCoordinator(
+    private val attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        LinkPaymentDetails.Saved(
+            paymentDetails = ConsumerPaymentDetails.Card(
+                id = "csmrpd_saved",
+                last4 = "4242",
+                isDefault = false,
+                nickname = null,
+                billingAddress = null,
+                billingEmailAddress = null,
+                expiryYear = 2024,
+                expiryMonth = 4,
+                brand = CardBrand.Visa,
+                networks = emptyList(),
+                cvcCheck = CvcCheck.Pass,
+                funding = ConsumerPaymentDetails.Card.Funding.Credit,
+            ),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+    ),
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(
@@ -34,7 +56,7 @@ internal class FakeLinkConfigurationCoordinator(
                 cvcCheck = CvcCheck.Fail,
                 isDefault = false,
                 networks = emptyList(),
-                funding = "CREDIT",
+                funding = ConsumerPaymentDetails.Card.Funding.Credit,
                 nickname = null,
                 billingAddress = ConsumerPaymentDetails.BillingAddress(
                     name = null,
@@ -46,7 +68,7 @@ internal class FakeLinkConfigurationCoordinator(
                     postalCode = "42424"
                 )
             ),
-            paymentMethodCreateParams = mock(),
+            confirmParams = mock(),
             originalParams = mock(),
         )
     ),
@@ -56,6 +78,9 @@ internal class FakeLinkConfigurationCoordinator(
     private val email: String? = null,
     private val component: LinkComponent = mock()
 ) : LinkConfigurationCoordinator {
+
+    override val accountFlow: StateFlow<LinkAccount?>
+        get() = stateFlowOf(null)
 
     override val emailFlow: StateFlow<String?>
         get() = stateFlowOf(email)
@@ -85,6 +110,14 @@ internal class FakeLinkConfigurationCoordinator(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         return attachNewCardToAccountResult
+    }
+
+    override suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved> {
+        return attachExistingCardToAccountResult
     }
 
     override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {

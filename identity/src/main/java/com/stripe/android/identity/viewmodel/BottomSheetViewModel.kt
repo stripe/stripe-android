@@ -1,6 +1,5 @@
 package com.stripe.android.identity.viewmodel
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.lifecycle.ViewModel
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.update
 /**
  * ViewModel to control if a bottomsheet should show.
  */
-@ExperimentalMaterialApi
 internal class BottomSheetViewModel : ViewModel() {
 
     data class BottomSheetState(
@@ -36,6 +34,11 @@ internal class BottomSheetViewModel : ViewModel() {
     }
 
     fun dismissBottomSheet() {
+        // Keep the content mounted until the sheet finishes its hide animation.
+        _bottomSheetState.update { it.copy(shouldShow = false) }
+    }
+
+    fun onBottomSheetHidden() {
         _bottomSheetState.update { INITIAL_STATE }
     }
 

@@ -1,6 +1,5 @@
 apply from: configs.androidApplication
 
-apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'io.sentry.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
@@ -16,27 +15,32 @@ def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
 }
 
+def getProxyIpAddress() {
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_PROXY_IP_ADDRESS') ?: ""
+}
+
 def getSentryDsn() {
-    if (gradle.ext.isCi || gradle.ext.isNightlyBuild || gradle.ext.isBrowserstackBuild) {
+    if (gradle.ext.isCi) {
         return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN') ?: ""
     } else {
         return ""
     }
 }
 
-emerge {
-    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
+def usesCleartextTraffic() {
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC') ?: "false"
+}
 
-    size {
-        tag.set(System.getenv("EMERGE_TAG"))
-    }
+def directlyToPlayground() {
+    return project.hasProperty("DIRECTLY_TO_PLAYGROUND") && project.DIRECTLY_TO_PLAYGROUND.contains("true")
+}
 
-    vcs {
-        gitHub {
-            repoOwner.set("stripe")
-            repoName.set("stripe-android")
-        }
-    }
+def runLatencyTestsInCi() {
+    return project.hasProperty("RUN_LATENCY_TESTS_IN_CI") && project.RUN_LATENCY_TESTS_IN_CI.contains("true")
+}
+
+def getLatencyExperimentIterations() {
+    return findProperty('LATENCY_EXPERIMENT_ITERATIONS') ?: "1"
 }
 
 sentry {
@@ -45,10 +49,69 @@ sentry {
     includeProguardMapping = false
 }
 
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.stripe.android.paymentsheet.example"
+        versionCode 11
+
+        testInstrumentationRunner "com.stripe.android.utils.PaymentSheetTestRunner"
+
+        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+        buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
+        buildConfigField "boolean", "RUN_LATENCY_TESTS_IN_CI", "${runLatencyTestsInCi()}"
+        buildConfigField "int", "LATENCY_EXPERIMENT_ITERATIONS", "${getLatencyExperimentIterations()}"
+        buildConfigField "String", "PROXY_IP_ADDRESS", "\"${getProxyIpAddress()}\""
+
+        manifestPlaceholders = [
+                BACKEND_URL: getBackendUrl(),
+                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
+                SENTRY_DSN: getSentryDsn(),
+                USES_CLEARTEXT_TRAFFIC: usesCleartextTraffic(),
+        ]
+    }
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+        compose true
+    }
+    buildTypes {
+        release {
+            firebaseAppDistribution {
+                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
+                groups = "elements-mobile"
+            }
+        }
+    }
+    flavorDimensions = ["base"]
+    productFlavors {
+        base {
+            isDefault true
+            dimension "base"
+        }
+
+        tapToAdd {
+            applicationIdSuffix ".tta"
+            minSdkVersion 26
+            dimension "base"
+        }
+
+        cardScan {
+            applicationIdSuffix ".cardscan"
+            dimension "base"
+        }
+    }
+}
+
 dependencies {
     implementation project(':payments')
-    implementation project(':stripecardscan')
     implementation project(':financial-connections')
+    cardScanImplementation project(':stripecardscan')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
@@ -63,8 +126,6 @@ dependencies {
     implementation libs.compose.foundation
     implementation libs.compose.liveData
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
-    implementation libs.compose.materialIconsExtended
     implementation libs.compose.ui
     implementation libs.compose.uiTooling
     implementation libs.compose.viewModels
@@ -78,9 +139,21 @@ dependencies {
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
+    tapToAddImplementation libs.terminal.core
+    tapToAddImplementation libs.terminal.tapToPay
+
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
+
+    testImplementation testLibs.junit
+    testImplementation testLibs.truth
+    testImplementation project(':payments-core-testing')
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.espresso.core
+    testImplementation testLibs.turbine
 
     androidTestImplementation project(':payments-ui-core')
     androidTestImplementation project(':payments-core-testing')
@@ -105,35 +178,4 @@ dependencies {
     androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
-}
-
-android {
-    defaultConfig {
-        applicationId "com.stripe.android.paymentsheet.example"
-        versionCode 11
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
-        buildConfigField "boolean", "IS_NIGHTLY_BUILD", "$gradle.ext.isNightlyBuild"
-        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
-
-        manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl(),
-                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
-                SENTRY_DSN: getSentryDsn(),
-        ]
-    }
-    buildFeatures {
-        viewBinding true
-        compose true
-    }
-    buildTypes {
-        release {
-            firebaseAppDistribution {
-                appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
-                groups = "elements-mobile"
-            }
-        }
-    }
 }

@@ -5,15 +5,20 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.uicore.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -21,7 +26,8 @@ import kotlinx.parcelize.Parcelize
  */
 class AddressLauncher internal constructor(
     private val application: Application,
-    private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
+    private val activityResultLauncher:
+        ActivityResultLauncher<AddressElementActivityContract.Args.Standalone>
 ) {
     /**
      * Constructor to be used when launching the address element from an Activity.
@@ -35,10 +41,25 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressLauncherResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: AddressLauncherResultCallback
+    ) : this(
+        application = activity.application,
+        activityResultLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     /**
@@ -53,10 +74,9 @@ class AddressLauncher internal constructor(
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
-            AddressElementActivityContract
-        ) {
-            callback.onAddressLauncherResult(it)
-        },
+            AddressElementActivityContract.Standalone,
+            callback::onAddressLauncherResult,
+        ),
     )
 
     @JvmOverloads
@@ -64,9 +84,12 @@ class AddressLauncher internal constructor(
         publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        val args = AddressElementActivityContract.Args(
-            publishableKey,
-            configuration,
+        val args = AddressElementActivityContract.Args.Standalone(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = null,
+            ),
+            config = configuration,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -80,16 +103,18 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration internal constructor(
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        val address: AddressDetails? = null,
-        val allowedCountries: Set<String> = emptySet(),
-        val buttonTitle: String? = null,
-        val additionalFields: AdditionalFieldsConfiguration? = null,
-        val title: String? = null,
-        val googlePlacesApiKey: String? = null,
-        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+    @Poko
+    class Configuration internal constructor(
+        internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        internal val address: AddressDetails? = null,
+        internal val allowedCountries: Set<String> = emptySet(),
+        internal val buttonTitle: String? = null,
+        internal val additionalFields: AdditionalFieldsConfiguration? = null,
+        internal val title: String? = null,
+        internal val googlePlacesApiKey: String? = null,
+        internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
+        internal val useStripeHostedAutocomplete: Boolean = true,
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -97,41 +122,29 @@ class AddressLauncher internal constructor(
              * Configuration for the look and feel of the UI
              */
             appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-
             /**
              * The values to pre-populate shipping address fields with.
              */
             address: AddressDetails? = null,
-
             /**
              * A list of two-letter country codes representing countries the customers can select.
              * If the list is empty (the default), we display all countries.
              */
             allowedCountries: Set<String> = emptySet(),
-
             /**
              * The title of the primary button displayed at the bottom of the screen.
              * Defaults to "Save address".
              */
             buttonTitle: String? = null,
-
             /**
              * Configuration for fields to collect in addition to the physical shipping address
              */
             additionalFields: AdditionalFieldsConfiguration? = null,
-
             /**
              * Configuration for the title displayed at the top of the screen.
              * Defaults to "Address"
              */
             title: String? = null,
-
-            /**
-             * Google Places api key used to provide autocomplete suggestions
-             * When null, autocomplete is disabled.
-             */
-            googlePlacesApiKey: String? = null,
-
             /**
              * A list of two-letter country codes that support autocomplete. Defaults to a list of
              * countries that Stripe has audited to ensure a good autocomplete experience.
@@ -144,8 +157,69 @@ class AddressLauncher internal constructor(
             buttonTitle = buttonTitle,
             additionalFields = additionalFields,
             title = title,
+            googlePlacesApiKey = null,
+            autocompleteCountries = autocompleteCountries,
+            billingAddress = null,
+        )
+
+        /**
+         * @param googlePlacesApiKey Google Places API key. This is no longer required for address
+         * autocomplete.
+         */
+        @Deprecated(
+            message = "Google Places API key is no longer required. " +
+                "This constructor will be removed in a future release.",
+            replaceWith = ReplaceWith(
+                "Configuration(appearance, address, allowedCountries, buttonTitle, " +
+                    "additionalFields, title, autocompleteCountries)",
+            ),
+        )
+        constructor(
+            appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+            address: AddressDetails? = null,
+            allowedCountries: Set<String> = emptySet(),
+            buttonTitle: String? = null,
+            additionalFields: AdditionalFieldsConfiguration? = null,
+            title: String? = null,
+            googlePlacesApiKey: String? = null,
+            autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+        ) : this(
+            appearance = appearance,
+            address = address,
+            allowedCountries = allowedCountries,
+            buttonTitle = buttonTitle,
+            additionalFields = additionalFields,
+            title = title,
             googlePlacesApiKey = googlePlacesApiKey,
             autocompleteCountries = autocompleteCountries,
+            billingAddress = null,
+        )
+
+        @Deprecated(
+            message = "Google Places API key is no longer required. " +
+                "This constructor will be removed in a future release.",
+            replaceWith = ReplaceWith(
+                "Configuration(appearance, address, allowedCountries, buttonTitle, " +
+                    "additionalFields, title)",
+            ),
+        )
+        constructor(
+            appearance: PaymentSheet.Appearance,
+            address: AddressDetails?,
+            allowedCountries: Set<String>,
+            buttonTitle: String?,
+            additionalFields: AdditionalFieldsConfiguration?,
+            title: String?,
+            googlePlacesApiKey: String?,
+        ) : this(
+            appearance = appearance,
+            address = address,
+            allowedCountries = allowedCountries,
+            buttonTitle = buttonTitle,
+            additionalFields = additionalFields,
+            title = title,
+            googlePlacesApiKey = googlePlacesApiKey,
+            autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             billingAddress = null,
         )
 
@@ -181,6 +255,7 @@ class AddressLauncher internal constructor(
             fun title(title: String?) =
                 apply { this.title = title }
 
+            @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
@@ -212,9 +287,10 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration(
-        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-        val checkboxLabel: String? = null,
+    @Poko
+    class AdditionalFieldsConfiguration(
+        internal val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        internal val checkboxLabel: String? = null,
     ) : Parcelable {
         @Parcelize
         enum class FieldConfiguration : Parcelable {
@@ -245,8 +321,8 @@ fun rememberAddressLauncher(
     callback: AddressLauncherResultCallback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = AddressElementActivityContract,
-        onResult = callback::onAddressLauncherResult
+        contract = AddressElementActivityContract.Standalone,
+        onResult = callback::onAddressLauncherResult,
     )
 
     val context = LocalContext.current

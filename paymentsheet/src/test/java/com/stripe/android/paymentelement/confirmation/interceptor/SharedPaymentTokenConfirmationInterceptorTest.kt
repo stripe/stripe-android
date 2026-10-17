@@ -1,0 +1,165 @@
+package com.stripe.android.paymentelement.confirmation.interceptor
+
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@OptIn(SharedPaymentTokenSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
+class SharedPaymentTokenConfirmationInterceptorTest {
+    @Test
+    fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with saved PM`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+
+            val providedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            val providedShippingAddress = SHIPPING_ADDRESS
+
+            val interceptor = createIntentConfirmationInterceptor(
+                integrationMetadata = DEFAULT_INTEGRATION_METADATA,
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                ),
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val intent = PaymentIntentFactory.create()
+            val nextStep = interceptor.intercept(
+                intent = intent,
+                confirmationOption = PaymentMethodConfirmationOption.Saved(
+                    shippingInformation = null,
+                    paymentMethod = providedPaymentMethod,
+                    optionsParams = null,
+                ),
+                shippingValues = providedShippingAddress,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = intent,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+            assertThat(paymentMethod).isEqualTo(providedPaymentMethod)
+
+            val shippingAddress = completableShippingAddress.await()
+            verifyShipping(providedShippingAddress, shippingAddress)
+        }
+
+    @Test
+    fun `If initialized with shared payment token, should call 'onPreparePaymentMethod' with new PM`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+
+            val interceptor = createIntentConfirmationInterceptor(
+                integrationMetadata = DEFAULT_INTEGRATION_METADATA,
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                ),
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val intent = PaymentIntentFactory.create()
+            val nextStep = interceptor.interceptDefaultNewPaymentMethod()
+
+            assertThat(nextStep).isEqualTo(
+                ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
+                    intent = intent,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+
+            assertThat(paymentMethod.id).isEqualTo("pm_1234")
+
+            val shippingAddress = completableShippingAddress.await()
+
+            assertThat(shippingAddress).isNull()
+        }
+
+    private fun verifyShipping(
+        expectedShippingAddress: ConfirmPaymentIntentParams.Shipping,
+        actualShippingAddress: AddressDetails?
+    ) {
+        assertThat(actualShippingAddress?.name).isEqualTo(expectedShippingAddress.getName())
+        assertThat(actualShippingAddress?.phoneNumber).isEqualTo(expectedShippingAddress.getPhone())
+        assertThat(actualShippingAddress?.address?.line1).isEqualTo(expectedShippingAddress.getAddress().line1)
+        assertThat(actualShippingAddress?.address?.line2).isEqualTo(expectedShippingAddress.getAddress().line2)
+        assertThat(actualShippingAddress?.address?.city).isEqualTo(expectedShippingAddress.getAddress().city)
+        assertThat(actualShippingAddress?.address?.state).isEqualTo(expectedShippingAddress.getAddress().state)
+        assertThat(actualShippingAddress?.address?.country)
+            .isEqualTo(expectedShippingAddress.getAddress().country)
+    }
+
+    private companion object {
+        val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1099L,
+                    currency = "usd",
+                ),
+                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    businessName = "My business, Inc.",
+                    networkId = "network_id",
+                    externalId = "external_id"
+                )
+            ),
+        )
+
+        val SHIPPING_ADDRESS = ConfirmPaymentIntentParams.Shipping(
+            address = Address(
+                city = "South San Francisc",
+                line1 = "123 Apple Street",
+                line2 = "Unit #2",
+                state = "CA",
+                postalCode = "99999",
+                country = "US"
+            ),
+            phone = "11234567890",
+            name = "John Doe"
+        )
+    }
+}

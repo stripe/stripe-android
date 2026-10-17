@@ -1,0 +1,41 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
+package com.stripe.android.checkout.injection
+
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistry
+import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.checkout.CheckoutPresenter
+import com.stripe.android.checkout.CheckoutPresenterInitializer
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import dagger.BindsInstance
+import dagger.Subcomponent
+import javax.inject.Named
+import javax.inject.Scope
+
+@CheckoutPresenterScope
+@Subcomponent(
+    modules = [
+        ExpressCheckoutElementModule::class,
+        PaymentElementModule::class,
+    ]
+)
+internal interface CheckoutPresenterSubcomponent {
+    val presenter: CheckoutPresenter
+    val initializer: CheckoutPresenterInitializer
+
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance activityResultCaller: ActivityResultCaller,
+            @BindsInstance lifecycleOwner: LifecycleOwner,
+            @BindsInstance activityResultRegistry: ActivityResultRegistry,
+            @BindsInstance @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
+        ): CheckoutPresenterSubcomponent
+    }
+}
+
+@Scope
+@Retention(AnnotationRetention.RUNTIME)
+internal annotation class CheckoutPresenterScope

@@ -10,8 +10,8 @@ fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement,
     modifier: Modifier = Modifier,
-    hiddenIdentifiers: Set<IdentifierSpec> = emptySet(),
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId> = emptySet(),
+    lastTextFieldIdentifier: FormFieldId?,
 ) {
     if (!hiddenIdentifiers.contains(field.identifier)) {
         (field.sectionFieldErrorController() as? SectionFieldComposable)?.ComposeUI(

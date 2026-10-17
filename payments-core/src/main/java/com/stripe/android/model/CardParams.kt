@@ -1,20 +1,20 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardUtils
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-data class CardParams internal constructor(
+@Poko
+class CardParams internal constructor(
     /**
      * The likely [CardBrand] based on the [number].
      */
     val brand: CardBrand,
-
     private val loggingTokens: Set<String> = emptySet(),
-
     /**
      * The card number, as a string without any separators.
      *
@@ -22,21 +22,18 @@ data class CardParams internal constructor(
      */
     @property:DelicateCardDetailsApi
     val number: String,
-
     /**
      * Two-digit number representing the card's expiration month.
      *
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
      */
     val expMonth: Int,
-
     /**
      * Two- or four-digit number representing the card's expiration year.
      *
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
      */
     val expYear: Int,
-
     /**
      * Card security code.
      *
@@ -44,7 +41,6 @@ data class CardParams internal constructor(
      */
     @property:DelicateCardDetailsApi
     val cvc: String? = null,
-
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
      *
@@ -53,9 +49,7 @@ data class CardParams internal constructor(
      * Cardholder's full name.
      */
     var name: String? = null,
-
     var address: Address? = null,
-
     /**
      * [card.currency](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-currency)
      *
@@ -67,7 +61,6 @@ data class CardParams internal constructor(
      * currency for debit card payouts is `usd`.
      */
     var currency: String? = null,
-
     /**
      * [card.networks](https://docs.stripe.com/api/tokens/create_card#create_card_token-card-networks)
      *
@@ -76,7 +69,6 @@ data class CardParams internal constructor(
      * Contains information about card networks used to process the payment.
      */
     val networks: Networks? = null,
-
     /**
      * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
      *
@@ -102,7 +94,6 @@ data class CardParams internal constructor(
          * The card number, as a string without any separators.
          */
         number: String,
-
         /**
          * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
          *
@@ -111,7 +102,6 @@ data class CardParams internal constructor(
          * Two-digit number representing the card's expiration month.
          */
         expMonth: Int,
-
         /**
          * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
          *
@@ -120,7 +110,6 @@ data class CardParams internal constructor(
          * Two- or four-digit number representing the card's expiration year.
          */
         expYear: Int,
-
         /**
          * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
          *
@@ -130,7 +119,6 @@ data class CardParams internal constructor(
          * for accounts based in European countries.
          */
         cvc: String? = null,
-
         /**
          * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
          *
@@ -139,9 +127,7 @@ data class CardParams internal constructor(
          * Cardholder's full name.
          */
         name: String? = null,
-
         address: Address? = null,
-
         /**
          * [card.currency](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-currency)
          *
@@ -153,7 +139,6 @@ data class CardParams internal constructor(
          * currency for debit card payouts is `usd`.
          */
         currency: String? = null,
-
         /**
          * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
          *

@@ -45,16 +45,8 @@ class LauncherActivity : AppCompatActivity() {
                 CardBrandChoiceExampleActivity::class.java
             ),
             Item(
-                activity.getString(R.string.create_card_token),
-                CreateCardTokenActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.create_card_payment_method),
                 CreateCardPaymentMethodActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.create_card_source),
-                CreateCardSourceActivity::class.java
             ),
             Item(
                 activity.getString(R.string.googlepaylauncher_example),
@@ -80,10 +72,6 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
                 ConfirmSepaDebitActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.klarna_source_example),
-                KlarnaSourceActivity::class.java
             ),
             Item(
                 activity.getString(R.string.confirm_with_klarna),
@@ -114,16 +102,8 @@ class LauncherActivity : AppCompatActivity() {
                 MultibancoActivity::class.java
             ),
             Item(
-                activity.getString(R.string.sofort_example),
-                SofortPaymentMethodActivity::class.java
-            ),
-            Item(
                 "iDEAL Payment Example",
                 IDEALPaymentMethodActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.upi_example),
-                UpiPaymentActivity::class.java
             ),
             Item(
                 activity.getString(R.string.netbanking_example),
@@ -176,6 +156,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.mobilepay_example),
                 MobilePayExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.twint_example),
+                TwintExampleActivity::class.java
             ),
             Item(
                 activity.getString(R.string.alma_example),

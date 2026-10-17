@@ -34,8 +34,10 @@
             android:exported="false" />
 
         <activity
-            android:name=".CardScanFragmentDemoActivity"
-            android:exported="false" />
+            android:name="com.stripe.android.stripecardscan.cardscan.CardScanActivity"
+            android:screenOrientation="fullSensor"
+            tools:ignore="Instantiatable"
+            tools:replace="android:screenOrientation" />
     </application>
 
 </manifest>

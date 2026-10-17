@@ -6,13 +6,18 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.GetDefaultFinancialConnectionsAvailability
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -29,11 +34,27 @@ interface CollectBankAccountLauncher {
         configuration: CollectBankAccountConfiguration
     )
 
+    fun presentWithPaymentIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    )
+
     fun presentWithSetupIntent(
         publishableKey: String,
         stripeAccountId: String? = null,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    )
+
+    fun presentWithSetupIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -87,7 +108,28 @@ interface CollectBankAccountLauncher {
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability(),
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            return CollectBankAccountForACHLauncher(
+                // L1 (public standalone) integration is not hosted by any Stripe surface.
+                hostedSurface = null,
+                hostActivityLauncher = registerForReactNativeActivityResult(
+                    activity,
+                    signal,
+                    CollectBankAccountContract()
+                ) {
+                    callback(it.toUSBankAccountResult())
+                },
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability(),
             )
         }
 
@@ -107,7 +149,7 @@ interface CollectBankAccountLauncher {
                 hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability()
             )
         }
 
@@ -128,7 +170,7 @@ interface CollectBankAccountLauncher {
                     CollectBankAccountContract(),
                     callback,
                 ),
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability()
             )
         }
     }
@@ -137,10 +179,11 @@ interface CollectBankAccountLauncher {
 sealed interface CollectBankAccountConfiguration : Parcelable {
 
     @Parcelize
-    data class USBankAccount(
+    @Poko
+    class USBankAccount(
         val name: String,
         val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration
+    ) : CollectBankAccountConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize

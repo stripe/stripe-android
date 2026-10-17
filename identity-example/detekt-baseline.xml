@@ -2,19 +2,18 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:IdentityExampleViewModel.kt$IdentityExampleViewModel$fun postForResult( submissionState: IdentitySubmissionState )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable internal fun ExampleScreen( configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun LoadVSView( viewModel: IdentityExampleViewModel, loadingState: LoadingState, identitySubmissionState: IdentitySubmissionState, onLoadingStateChanged: (LoadingState) -> Unit, onPostResult: (String, String, String) -> Unit )</ID>
-    <ID>LongMethod:ComposeExampleUI.kt$@Composable private fun SubmitView( submissionState: IdentitySubmissionState, scaffoldState: ScaffoldState, configuration: IdentityVerificationSheet.Configuration, viewModel: IdentityExampleViewModel, loadingState: LoadingState, onLoadingStateChanged: (LoadingState) -> Unit )</ID>
-    <ID>LongMethod:DocumentUI.kt$@Composable private fun AllowedDocumentTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
-    <ID>LongMethod:DocumentUI.kt$@Composable private fun RequireDocTypes( identitySubmissionState: IdentitySubmissionState, onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit )</ID>
-    <ID>LongMethod:IdentityExampleViewModel.kt$IdentityExampleViewModel$fun postForResult( submissionState: IdentitySubmissionState )</ID>
-    <ID>LongMethod:RequirePhoneVerificationUI.kt$@Composable internal fun RequirePhoneVerificationUI( scrollState: ScrollState, submissionState: IdentitySubmissionState, onSubmissionStateChanged: (IdentitySubmissionState) -> Unit )</ID>
-    <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt$IdentityExampleViewModel$t: Throwable</ID>
-    <ID>UnusedParameter:DocumentUI.kt$scrollState: ScrollState</ID>
-    <ID>UnusedParameter:DocumentUI.kt$shouldShowPhoneNumber: Boolean</ID>
-    <ID>UnusedParameter:IdNumberUI.kt$onSubmissionStateChanged: (IdentitySubmissionState) -> Unit</ID>
-    <ID>UnusedParameter:IdNumberUI.kt$scrollState: ScrollState</ID>
-    <ID>UnusedParameter:IdNumberUI.kt$submissionState: IdentitySubmissionState</ID>
+    <ID>CyclomaticComplexMethod:IdentityExampleViewModel.kt:IdentityExampleViewModel$fun postForResult</ID>
+    <ID>LongMethod:ComposeExampleUI.kt:@Composable internal fun ExampleScreen</ID>
+    <ID>LongMethod:ComposeExampleUI.kt:@Composable private fun SubmitView</ID>
+    <ID>LongMethod:DocumentUI.kt:@Composable private fun AllowedDocumentTypes</ID>
+    <ID>LongMethod:DocumentUI.kt:@Composable private fun RequireDocTypes</ID>
+    <ID>LongMethod:IdentityExampleViewModel.kt:IdentityExampleViewModel$fun postForResult</ID>
+    <ID>LongMethod:RequirePhoneVerificationUI.kt:@Composable internal fun RequirePhoneVerificationUI</ID>
+    <ID>TooGenericExceptionCaught:IdentityExampleViewModel.kt:IdentityExampleViewModel$t: Throwable</ID>
+    <ID>UnusedParameter:DocumentUI.kt:scrollState: ScrollState</ID>
+    <ID>UnusedParameter:DocumentUI.kt:shouldShowPhoneNumber: Boolean</ID>
+    <ID>UnusedParameter:IdNumberUI.kt:onSubmissionStateChanged: (IdentitySubmissionState) -> Unit</ID>
+    <ID>UnusedParameter:IdNumberUI.kt:scrollState: ScrollState</ID>
+    <ID>UnusedParameter:IdNumberUI.kt:submissionState: IdentitySubmissionState</ID>
   </CurrentIssues>
 </SmellBaseline>

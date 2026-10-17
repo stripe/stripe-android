@@ -56,6 +56,19 @@ fun MockResponse.testBodyFromFile(filename: String): MockResponse {
     return this
 }
 
+fun MockResponse.testBodyFromFile(
+    filename: String,
+    jsonModifier: (JSONObject) -> Unit,
+): MockResponse {
+    addHeader("request-id", filename)
+    val inputStream = getFileInputStream(filename)
+    val bodyString = inputStream.reader().buffered().readText()
+    val json = JSONObject(bodyString)
+    jsonModifier(json)
+    setBody(json.toString())
+    return this
+}
+
 /**
  * Validates JSON syntax and fails the test if the provided JSON string is not valid.
  *

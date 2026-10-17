@@ -8,34 +8,55 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.core.R as stripeCoreR
 import com.stripe.android.uicore.R as UiCoreR
 
-internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
+internal fun StripeError.withLocalizedMessage(
+    context: Context,
+    requestId: String?,
+    isLiveMode: Boolean
+): StripeError {
     return copy(
         message = getErrorMessage(
             originalMessage = message,
+            type = type,
             code = code,
             declineCode = declineCode,
+            isLiveMode = isLiveMode,
+            requestId = requestId,
             context = context,
         )
     )
 }
 
-internal fun PaymentIntent.Error.withLocalizedMessage(context: Context): PaymentIntent.Error {
+internal fun PaymentIntent.Error.withLocalizedMessage(
+    context: Context,
+    requestId: String?,
+    isLiveMode: Boolean
+): PaymentIntent.Error {
     return copy(
         message = getErrorMessage(
             originalMessage = message,
             code = code,
             declineCode = declineCode,
+            isLiveMode = isLiveMode,
+            type = type?.code,
+            requestId = requestId,
             context = context,
         )
     )
 }
 
-internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupIntent.Error {
+internal fun SetupIntent.Error.withLocalizedMessage(
+    context: Context,
+    requestId: String?,
+    isLiveMode: Boolean
+): SetupIntent.Error {
     return copy(
         message = getErrorMessage(
             originalMessage = message,
             code = code,
             declineCode = declineCode,
+            isLiveMode = isLiveMode,
+            type = type?.code,
+            requestId = requestId,
             context = context,
         )
     )
@@ -54,6 +75,7 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
         "processing_error" -> R.string.stripe_processing_error
         "invalid_owner_name" -> R.string.stripe_invalid_owner_name
         "invalid_bank_account_iban" -> R.string.stripe_invalid_bank_account_iban
+        "insufficient_funds" -> R.string.stripe_insufficient_funds
         "generic_decline" -> R.string.stripe_generic_decline
         else -> null
     }
@@ -62,21 +84,27 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
 
 private fun getErrorMessage(
     originalMessage: String?,
+    type: String?,
     code: String?,
     declineCode: String?,
+    isLiveMode: Boolean,
+    requestId: String?,
     context: Context,
 ): String {
     /**
-     * Defer to the error code first. For the error_codes that we localize:
+     * Defer to the decline code first.
+     *
+     * For the error_codes that we localize:
      * incorrect_number, invalid_number, invalid_expiry_month, invalid_expiry_year, invalid_cvc,
      * expired_card, incorrect_cvc, card_declined, processing_error, invalid_owner_name,
      * invalid_bank_account_iban, generic_decline.
      * there are no discrepancies between the payserver English translation and the local English translation
      */
-    // https://docs.stripe.com/error-codes
-    return context.mapErrorCodeToLocalizedMessage(code)
-        // https://docs.stripe.com/declines/codes
-        ?: context.mapErrorCodeToLocalizedMessage(declineCode)
-        ?: originalMessage
+    // https://docs.stripe.com/declines/codes
+    return context.mapErrorCodeToLocalizedMessage(declineCode)
+        // https://docs.stripe.com/error-codes
+        ?: context.mapErrorCodeToLocalizedMessage(code).takeIf { type == "card_error" }
+        ?: originalMessage.takeIf { !isLiveMode }
+        ?: requestId?.let { context.getString(R.string.stripe_request_error, requestId) }
         ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again)
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
 class ConfirmSetupIntentParamsTest {
@@ -74,7 +75,8 @@ class ConfirmSetupIntentParamsTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             ).toParamMap()
         ).isEqualTo(
             mapOf(
@@ -235,7 +237,9 @@ class ConfirmSetupIntentParamsTest {
 
     @Test
     fun toParamMap_withRadarOptions_shouldCreateExpectedMap() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val radarOptions = RadarOptionsFactory.create(
+            verificationObject = null
+        )
         val params = ConfirmSetupIntentParams(
             paymentMethodId = "pm_123",
             clientSecret = CLIENT_SECRET,
@@ -248,20 +252,52 @@ class ConfirmSetupIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withClientAttributionMetadata_shouldCreateExpectedMap() {
+        val clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+            checkoutSessionId = null,
+        )
+        val params = ConfirmSetupIntentParams(
+            paymentMethodId = "pm_123",
+            clientSecret = CLIENT_SECRET,
+            clientAttributionMetadata = clientAttributionMetadata,
+        ).toParamMap()
+
+        assertThat(params).containsKey("client_attribution_metadata")
+        assertThat(params["client_attribution_metadata"]).isEqualTo(clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
     fun toParamMap_withSetAsDefaultPaymentMethodAndRadarOptions_shouldCreateExpectedMap() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
+        val radarOptions = RadarOptionsFactory.create(
+            verificationObject = null
+        )
         val params = ConfirmSetupIntentParams
             .createWithSetAsDefaultPaymentMethod(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setAsDefaultPaymentMethod = true,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = null,
             )
             .toParamMap()
 
         val radarOptionsMap = params["radar_options"] as? Map<*, *>
         assertThat(radarOptionsMap).isNotNull()
         assertThat(radarOptionsMap?.get("hcaptcha_token")).isEqualTo("test_token")
+    }
+
+    @Test
+    fun toParamMap_withConfirmationTokenId_shouldCreateExpectedMap() {
+        val params = ConfirmSetupIntentParams(
+            confirmationTokenId = "ctoken_123",
+            clientSecret = CLIENT_SECRET
+        ).toParamMap()
+
+        assertThat(params).containsKey("confirmation_token")
+        assertThat(params["confirmation_token"]).isEqualTo("ctoken_123")
     }
 
     private companion object {

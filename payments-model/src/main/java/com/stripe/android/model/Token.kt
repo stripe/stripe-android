@@ -2,8 +2,8 @@ package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Token.Type
 import com.stripe.android.model.parsers.TokenJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Date
@@ -14,40 +14,34 @@ import java.util.Date
  * secure manner. A Token representing this information is returned to you to use.
  */
 @Parcelize
-data class Token
+@Poko
+class Token
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
-
     /**
      * The Token id
      */
     override val id: String,
-
     /**
      * The [Type] of this token.
      */
     val type: Type,
-
     /**
      * The [Date] this token was created
      */
     val created: Date,
-
     /**
      * `true` if this token is valid for a real payment, `false` if it is only usable for testing
      */
     val livemode: Boolean,
-
     /**
      * `true` if this token has been used, `false` otherwise
      */
     val used: Boolean,
-
     /**
      * If applicable, the [BankAccount] for this token
      */
     val bankAccount: BankAccount? = null,
-
     /**
      * If applicable, the [Card] for this token
      */

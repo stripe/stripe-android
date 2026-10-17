@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlin.Result
 import kotlin.time.Duration.Companion.milliseconds
 import com.github.kittinunf.result.Result as ApiResult
 
@@ -72,7 +71,7 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
         shouldSavePaymentMethod: Boolean,
     ): CreateIntentResult = withContext(Dispatchers.IO) {
         val request = state.value.cartState.toCreateIntentRequest(
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
             returnUrl = "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
         )

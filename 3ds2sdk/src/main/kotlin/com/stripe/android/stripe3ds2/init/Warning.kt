@@ -11,17 +11,14 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class Warning(
-
     /**
      * The warning ID.
      */
     val id: String,
-
     /**
      * The warning message.
      */
     val message: String,
-
     /**
      * The severity level of the warning.
      */

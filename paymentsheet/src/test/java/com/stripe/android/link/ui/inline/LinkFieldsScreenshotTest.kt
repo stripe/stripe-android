@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -38,6 +39,7 @@ class LinkFieldsScreenshotTest {
                 signUpState = SignUpState.InputtingPrimaryField,
                 requiresNameCollection = false,
                 allowsDefaultOptIn = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
@@ -62,6 +64,7 @@ class LinkFieldsScreenshotTest {
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = false,
                 allowsDefaultOptIn = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
@@ -87,6 +90,7 @@ class LinkFieldsScreenshotTest {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = false,
                 allowsDefaultOptIn = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
@@ -114,6 +118,7 @@ class LinkFieldsScreenshotTest {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
@@ -143,6 +148,7 @@ class LinkFieldsScreenshotTest {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = "Something went wrong",
                 sectionController = SectionController(null, listOf()),

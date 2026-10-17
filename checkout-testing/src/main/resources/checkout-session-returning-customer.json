@@ -1,0 +1,56 @@
+{
+  "customer_email": "email@example.com",
+  "customer": {
+    "id": "cus_VDrEHIySBXFE9z",
+    "can_detach_payment_method": true,
+    "payment_methods": [
+      {
+        "id": "pm_1UDPW3Lu5o3P18Zp5rGujYbm",
+        "object": "payment_method",
+        "allow_redisplay": "always",
+        "customer": "cus_VDrEHIySBXFE9z",
+        "livemode": false,
+        "type": "us_bank_account",
+        "us_bank_account": {
+          "account_holder_type": "individual",
+          "account_type": "checking",
+          "bank_name": "STRIPE TEST BANK",
+          "fingerprint": "FFDMA0xfhBjWSZLu",
+          "last4": "6789",
+          "routing_number": "110000000",
+          "networks": {
+            "preferred": "ach",
+            "supported": [
+              "ach"
+            ]
+          }
+        }
+      },
+      {
+        "id": "pm_1UDPW3Lu5o3P18ZpfZ3q9HVI",
+        "object": "payment_method",
+        "allow_redisplay": "always",
+        "customer": "cus_VDrEHIySBXFE9z",
+        "livemode": false,
+        "type": "card",
+        "card": {
+          "brand": "visa",
+          "country": "US",
+          "exp_month": 9,
+          "exp_year": 2027,
+          "funding": "credit",
+          "last4": "4242",
+          "networks": {
+            "available": [
+              "visa"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "customer_managed_saved_payment_methods_offer_save": {
+    "enabled": true,
+    "status": "not_accepted"
+  }
+}

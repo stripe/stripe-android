@@ -5,8 +5,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidedValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -41,6 +43,44 @@ class PaparazziRule(
     fun snapshot(
         content: @Composable () -> Unit,
     ) {
+        runTest(
+            paparazziFunction = { content ->
+                paparazzi.snapshot {
+                    content()
+                }
+            },
+            useLocalInspectionMode = true,
+            content = content,
+        )
+    }
+
+    fun gif(
+        start: Long = 0L,
+        end: Long = 500L,
+        content: @Composable () -> Unit,
+    ) {
+        runTest(
+            paparazziFunction = { content ->
+                paparazzi.gif(
+                    view = ComposeView(paparazzi.context).apply {
+                        setContent {
+                            content()
+                        }
+                    },
+                    start = start,
+                    end = end,
+                )
+            },
+            useLocalInspectionMode = false,
+            content = content,
+        )
+    }
+
+    private fun runTest(
+        paparazziFunction: (@Composable () -> Unit) -> Unit,
+        useLocalInspectionMode: Boolean,
+        content: @Composable () -> Unit
+    ) {
         val description = requireNotNull(description) {
             "Description in PaparazziRule can't be null"
         }
@@ -62,12 +102,13 @@ class PaparazziRule(
                     base = object : Statement() {
                         override fun evaluate() {
                             val deviceConfig = testCase.apply(defaultDeviceConfig)
-                            if (deviceConfig != defaultDeviceConfig) {
-                                paparazzi.unsafeUpdateConfig(deviceConfig)
-                            }
+                            paparazzi.unsafeUpdateConfig(deviceConfig)
 
-                            paparazzi.snapshot {
-                                CompositionLocalProvider(LocalInspectionMode provides true) {
+                            paparazziFunction {
+                                CompositionLocalProvider(
+                                    LocalInspectionMode provides useLocalInspectionMode,
+                                    *testCase.compositionLocalValues.toTypedArray(),
+                                ) {
                                     @Composable
                                     fun boxContent() {
                                         Box(
@@ -143,6 +184,9 @@ private fun createPermutations(
 private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
+
+    val compositionLocalValues: List<ProvidedValue<*>>
+        get() = configOptions.flatMap { it.compositionLocalValues() }
 
     val name: String
         get() {

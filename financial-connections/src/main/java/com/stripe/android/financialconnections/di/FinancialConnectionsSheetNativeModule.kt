@@ -9,12 +9,15 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.RealAttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.RealCreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.RealCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandler
 import com.stripe.android.financialconnections.features.networkinglinksignup.LinkSignupHandlerForInstantDebits
@@ -34,6 +37,7 @@ import com.stripe.android.financialconnections.repository.api.ProvideApiRequestO
 import com.stripe.android.financialconnections.repository.api.RealProvideApiRequestOptions
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
@@ -75,7 +79,19 @@ internal interface FinancialConnectionsSheetNativeModule {
         impl: RealCreateInstantDebitsResult,
     ): CreateInstantDebitsResult
 
+    @Binds
+    @ActivityRetainedScope
+    fun bindsCurrentLinkBrand(
+        impl: RealCurrentLinkBrand,
+    ): CurrentLinkBrand
+
     companion object {
+        @Provides
+        @ActivityRetainedScope
+        fun providesEventContext(
+            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
+        ): FinancialConnectionsEventContext = FinancialConnectionsEventContext(initialSyncResponse?.manifest)
+
         @Provides
         @ActivityRetainedScope
         fun provideConsumersApiService(
@@ -92,7 +108,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesImageLoader(
             context: Application
-        ) = StripeImageLoader(
+        ): StripeImageLoader = DefaultStripeImageLoader(
             context = context,
             diskCache = null,
         )
@@ -105,14 +121,16 @@ internal interface FinancialConnectionsSheetNativeModule {
             provideApiRequestOptions: ProvideApiRequestOptions,
             locale: Locale?,
             logger: Logger,
-            @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
+            @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?,
+            eventContext: FinancialConnectionsEventContext
         ) = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
             provideApiRequestOptions = provideApiRequestOptions,
             locale = locale ?: Locale.getDefault(),
             logger = logger,
-            initialSync = initialSynchronizeSessionResponse
+            initialSync = initialSynchronizeSessionResponse,
+            eventContext = eventContext
         )
 
         @ActivityRetainedScope

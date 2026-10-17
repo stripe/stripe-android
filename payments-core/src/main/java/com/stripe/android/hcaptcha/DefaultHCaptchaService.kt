@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha
 
+import android.os.SystemClock
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
@@ -24,7 +25,11 @@ internal class DefaultHCaptchaService(
 ) : HCaptchaService {
     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
 
-    override suspend fun warmUp(activity: FragmentActivity, siteKey: String, rqData: String?) {
+    override suspend fun warmUp(
+        activity: FragmentActivity,
+        siteKey: String,
+        rqData: String?
+    ) {
         if (cachedResult.value.canWarmUp.not()) return
         cachedResult.emit(CachedResult.Loading)
         val update = when (val result = performPassiveHCaptchaHelper(activity, siteKey, rqData)) {
@@ -32,7 +37,7 @@ internal class DefaultHCaptchaService(
                 CachedResult.Failure(result.error)
             }
             is HCaptchaService.Result.Success -> {
-                CachedResult.Success(result.token)
+                CachedResult.Success(result.token, createdAt = SystemClock.elapsedRealtime())
             }
         }
         cachedResult.emit(update)
@@ -41,13 +46,19 @@ internal class DefaultHCaptchaService(
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        tokenTimeoutSeconds: Int?
     ): HCaptchaService.Result {
         captchaEventsReporter.attachStart()
         val isReady = cachedResult.value.isReady
         val result = runCatching {
             withTimeout(TIMEOUT) {
-                transformCachedResult(activity, siteKey, rqData)
+                transformCachedResult(
+                    activity,
+                    siteKey,
+                    rqData,
+                    tokenTimeoutSeconds = tokenTimeoutSeconds ?: Int.MAX_VALUE
+                )
             }
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
@@ -97,7 +108,7 @@ internal class DefaultHCaptchaService(
     private suspend fun performPassiveHCaptchaHelper(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
     ): HCaptchaService.Result {
         val hCaptcha = hCaptchaProvider.get()
         captchaEventsReporter.init(siteKey)
@@ -106,7 +117,7 @@ internal class DefaultHCaptchaService(
                 activity = activity,
                 siteKey = siteKey,
                 rqData = rqData,
-                hCaptcha = hCaptcha
+                hCaptcha = hCaptcha,
             )
         }.getOrElse { e ->
             HCaptchaService.Result.Failure(e)
@@ -123,10 +134,12 @@ internal class DefaultHCaptchaService(
         return result
     }
 
+    @Suppress("MagicNumber")
     private suspend fun transformCachedResult(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        tokenTimeoutSeconds: Int
     ): HCaptchaService.Result {
         return cachedResult.mapNotNull { cachedResult ->
             when (cachedResult) {
@@ -136,7 +149,15 @@ internal class DefaultHCaptchaService(
                 CachedResult.Loading -> {
                     null
                 }
-                is CachedResult.Success -> HCaptchaService.Result.Success(cachedResult.token)
+                is CachedResult.Success -> {
+                    val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
+                    val isExpired = elapsedSeconds >= tokenTimeoutSeconds
+                    if (isExpired) {
+                        performPassiveHCaptchaHelper(activity, siteKey, rqData)
+                    } else {
+                        HCaptchaService.Result.Success(cachedResult.token)
+                    }
+                }
                 is CachedResult.Failure -> HCaptchaService.Result.Failure(cachedResult.error)
             }
         }.first()
@@ -145,7 +166,10 @@ internal class DefaultHCaptchaService(
     sealed interface CachedResult {
         data object Idle : CachedResult
         data object Loading : CachedResult
-        data class Success(val token: String) : CachedResult
+        data class Success(
+            val token: String,
+            val createdAt: Long
+        ) : CachedResult
         data class Failure(val error: Throwable) : CachedResult
 
         val canWarmUp: Boolean

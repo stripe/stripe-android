@@ -47,6 +47,7 @@ class CustomerSheetEventTest {
             ),
             "preferred_networks" to null,
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to false,
         )
 
         assertThat(event.additionalParams)
@@ -93,6 +94,7 @@ class CustomerSheetEventTest {
             ),
             "preferred_networks" to null,
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to false
         )
 
         assertThat(event.additionalParams)
@@ -138,6 +140,7 @@ class CustomerSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to "cartes_bancaires, visa",
             "card_brand_acceptance" to false,
+            "open_card_scan_automatically_enabled" to true,
         )
 
         val event = CustomerSheetEvent.Init(
@@ -174,6 +177,48 @@ class CustomerSheetEventTest {
                     "selected_lpm" to "card",
                 )
             )
+    }
+
+    @Test
+    fun `ConfirmPaymentMethodSucceeded event should include has_card_art false`() {
+        val event = CustomerSheetEvent.ConfirmPaymentMethodSucceeded(
+            type = "card",
+            syncDefaultEnabled = null,
+            hasCardArt = false,
+        )
+        assertThat(event.eventName).isEqualTo("cs_select_payment_method_screen_confirmed_savedpm_success")
+        assertThat(event.additionalParams["has_card_art"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `ConfirmPaymentMethodSucceeded event should include has_card_art true`() {
+        val event = CustomerSheetEvent.ConfirmPaymentMethodSucceeded(
+            type = "card",
+            syncDefaultEnabled = null,
+            hasCardArt = true,
+        )
+        assertThat(event.additionalParams["has_card_art"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `ConfirmPaymentMethodFailed event should include has_card_art false`() {
+        val event = CustomerSheetEvent.ConfirmPaymentMethodFailed(
+            type = "card",
+            syncDefaultEnabled = null,
+            hasCardArt = false,
+        )
+        assertThat(event.eventName).isEqualTo("cs_select_payment_method_screen_confirmed_savedpm_failure")
+        assertThat(event.additionalParams["has_card_art"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `ConfirmPaymentMethodFailed event should include has_card_art true`() {
+        val event = CustomerSheetEvent.ConfirmPaymentMethodFailed(
+            type = "card",
+            syncDefaultEnabled = null,
+            hasCardArt = true,
+        )
+        assertThat(event.additionalParams["has_card_art"]).isEqualTo(true)
     }
 
     @Test

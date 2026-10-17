@@ -17,45 +17,34 @@ import kotlinx.serialization.json.Json
 internal data class PopupPayload(
     @SerialName("publishableKey")
     val publishableKey: String,
-
     @SerialName("stripeAccount")
     val stripeAccount: String?,
-
     @SerialName("merchantInfo")
     val merchantInfo: MerchantInfo,
-
     @SerialName("customerInfo")
     val customerInfo: CustomerInfo,
-
     @SerialName("paymentInfo")
     val paymentInfo: PaymentInfo?,
-
     @SerialName("appId")
     val appId: String,
-
     @SerialName("locale")
     val locale: String,
-
     @SerialName("paymentUserAgent")
     val paymentUserAgent: String,
-
     @SerialName("paymentObject")
     val paymentObject: String,
-
     @SerialName("intentMode")
     val intentMode: String,
-
     @SerialName("setupFutureUsage")
     val setupFutureUsage: Boolean,
-
     @SerialName("cardBrandChoice")
     val cardBrandChoice: CardBrandChoice?,
-
     @SerialName("flags")
     val flags: Map<String, Boolean>,
-
     @SerialName("linkFundingSources")
     val linkFundingSources: List<String>,
+    @SerialName("clientAttributionMetadata")
+    val clientAttributionMetadata: Map<String, String>
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -75,7 +64,6 @@ internal data class PopupPayload(
     data class MerchantInfo(
         @SerialName("businessName")
         val businessName: String,
-
         @SerialName("country")
         val country: String?,
     )
@@ -84,7 +72,6 @@ internal data class PopupPayload(
     data class CustomerInfo(
         @SerialName("email")
         val email: String?,
-
         @SerialName("country")
         val country: String?,
     )
@@ -93,7 +80,6 @@ internal data class PopupPayload(
     data class PaymentInfo(
         @SerialName("currency")
         val currency: String,
-
         @SerialName("amount")
         val amount: Long,
     )
@@ -102,7 +88,6 @@ internal data class PopupPayload(
     data class CardBrandChoice(
         @SerialName("isMerchantEligibleForCBC")
         val eligible: Boolean,
-
         @SerialName("stripePreferredNetworks")
         val preferredNetworks: List<String>,
     )
@@ -172,6 +157,7 @@ internal data class PopupPayload(
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(passthroughModeEnabled),
                 flags = flags,
                 linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
+                clientAttributionMetadata = clientAttributionMetadata.toParamMap(),
             )
         }
 

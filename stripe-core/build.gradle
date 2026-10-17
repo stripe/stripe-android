@@ -12,10 +12,16 @@ ext {
 }
 
 android {
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-Xconsistent-data-class-copy-visibility"
-        ]
+    buildFeatures {
+        buildConfig = true
+    }
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+            freeCompilerArgs.addAll([
+                    "-Xconsistent-data-class-copy-visibility"
+            ])
+        }
     }
 }
 
@@ -25,6 +31,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+    implementation libs.androidx.activity
     implementation libs.androidx.viewModel
     implementation libs.androidx.savedState
 
@@ -32,7 +39,6 @@ dependencies {
 
     ksp libs.daggerCompiler
 
-    testImplementation project(':network-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
@@ -45,7 +51,6 @@ dependencies {
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.okhttpMockWebServer
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
 }

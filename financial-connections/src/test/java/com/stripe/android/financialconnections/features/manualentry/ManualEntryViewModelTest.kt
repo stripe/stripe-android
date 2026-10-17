@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.runTest
@@ -40,6 +41,9 @@ import org.mockito.kotlin.whenever
 class ManualEntryViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
@@ -58,7 +62,7 @@ class ManualEntryViewModelTest {
         navigationManager = navigationManager,
         updateCachedAccounts = updateCachedAccounts,
         logger = Logger.noop(),
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - when custom manual entry, Complete events is emitted`() = runTest {

@@ -6,8 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.challenge.PassiveChallengeActivityContract
-import com.stripe.android.challenge.warmer.activity.PassiveChallengeWarmerContract
+import com.stripe.android.attestation.AttestationActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract
@@ -15,8 +16,7 @@ import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodCo
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
-import com.stripe.android.shoppay.ShopPayActivityContract
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,17 +29,20 @@ class PaymentElementConfirmationOrderTest {
     @Test
     fun `on register, should register contracts in expected order`() = runTest {
         DummyActivityResultCaller.test {
-            val viewModel = DaggerPaymentElementConfirmationTestComponent.builder()
-                .application(application)
-                .allowsManualConfirmation(allowsManualConfirmation = false)
-                .statusBarColor(statusBarColor = null)
-                .savedStateHandle(SavedStateHandle())
-                .build().viewModel
+            val viewModel = DaggerPaymentElementConfirmationTestComponent.factory()
+                .create(
+                    application = application,
+                    savedStateHandle = SavedStateHandle(),
+                    allowsManualConfirmation = false,
+                ).viewModel
 
             viewModel.confirmationHandler.register(
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = TestLifecycleOwner()
             )
+
+            assertThat(awaitRegisterCall().contract).isInstanceOf<AttestationActivityContract>()
+            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
@@ -63,9 +66,6 @@ class PaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<LinkActivityContract>()
-            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
-
-            assertThat(awaitRegisterCall().contract).isInstanceOf<ShopPayActivityContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
         }
     }

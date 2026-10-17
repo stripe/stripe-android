@@ -1,0 +1,138 @@
+@file:OptIn(CheckoutSessionPreview::class)
+package com.stripe.android.elements.ece
+
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.asPaymentSheet
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
+import com.stripe.android.link.TestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.LinkState
+import org.junit.Test
+
+class DefaultAvailableExpressButtonTypesFactoryTest {
+    @Test
+    fun `create returns no express button types when ECE configuration is absent`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = null,
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
+    fun `create returns no express button types when ECE metadata is absent`() {
+        val availableExpressButtonTypes = DefaultAvailableExpressButtonTypesFactory().create(
+            paymentMethodMetadata = null,
+            expressCheckoutElementConfiguration = ExpressCheckoutElement.Configuration().build(),
+            requiresShippingAddress = false,
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
+    fun `create keeps only express button types returned by metadata`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.GooglePay),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        )
+    }
+
+    @Test
+    fun `create filters out Google Pay when ECE disables it`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.GooglePay),
+            configuration = ExpressCheckoutElement.Configuration()
+                .googlePayConfiguration(
+                    GooglePayConfiguration().display(GooglePayConfiguration.Display.Never)
+                ),
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    @Test
+    fun `create filters out Link when disabled by configuration`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+            configuration = ExpressCheckoutElement.Configuration()
+                .linkConfiguration(
+                    ExpressCheckoutElement.Configuration.LinkConfiguration()
+                        .display(ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never)
+                ),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        )
+    }
+
+    @Test
+    fun `create returns all available express button types`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.Link,
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        ).inOrder()
+    }
+
+    @Test
+    fun `create keeps google pay when shipping address is required`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.GooglePay),
+            requiresShippingAddress = true,
+        )
+
+        assertThat(availableExpressButtonTypes).containsExactly(
+            ExpressButtonType.GooglePay(TEST_GOOGLE_PAY_CONFIGURATION),
+        )
+    }
+
+    @Test
+    fun `create filters out link when shipping address is required`() {
+        val availableExpressButtonTypes = create(
+            availableWallets = listOf(WalletType.Link),
+            requiresShippingAddress = true,
+        )
+
+        assertThat(availableExpressButtonTypes).isEmpty()
+    }
+
+    private fun create(
+        availableWallets: List<WalletType>,
+        configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
+        requiresShippingAddress: Boolean = false,
+        linkLoginState: LinkState.LoginState = LinkState.LoginState.LoggedOut,
+    ): List<ExpressButtonType> {
+        val configurationState = configuration?.build()
+        return DefaultAvailableExpressButtonTypesFactory().create(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = availableWallets,
+                linkConfiguration = configurationState?.linkConfiguration?.asPaymentSheet()
+                    ?: PaymentSheet.LinkConfiguration(),
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = linkLoginState,
+                    signupMode = null,
+                ),
+            ),
+            expressCheckoutElementConfiguration = configurationState,
+            requiresShippingAddress = requiresShippingAddress,
+        )
+    }
+
+    private companion object {
+        val TEST_GOOGLE_PAY_CONFIGURATION = GooglePayConfiguration().build()
+    }
+}

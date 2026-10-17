@@ -28,7 +28,7 @@ internal fun RowButton(
 ) {
     Card(
         modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
+            .alpha(alpha = enabledStateAlpha(isEnabled)),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),

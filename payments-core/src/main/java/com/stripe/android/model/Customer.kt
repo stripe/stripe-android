@@ -1,13 +1,18 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model for a Stripe Customer object
  */
 @Parcelize
-data class Customer internal constructor(
+@Poko
+class Customer
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,

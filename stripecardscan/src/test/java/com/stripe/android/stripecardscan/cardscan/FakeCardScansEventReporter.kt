@@ -8,6 +8,10 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
     private val scanSucceededTurbine = Turbine<Unit>()
     private val scanFailedTurbine = Turbine<Throwable?>()
     private val scanCancelledTurbine = Turbine<Unit>()
+    private val scanMlKitFoundPanTurbine = Turbine<Unit>()
+    private val scanMlKitFoundExpTurbine = Turbine<Unit>()
+    private val scanDarkniteFoundPanTurbine = Turbine<Unit>()
+    private val scanModelsDisagreeTurbine = Turbine<Unit>()
 
     override fun scanStarted() {
         scanStartedTurbine.add(Unit)
@@ -25,11 +29,31 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
         scanCancelledTurbine.add(Unit)
     }
 
+    override fun scanMlKitFoundPan() {
+        scanMlKitFoundPanTurbine.add(Unit)
+    }
+
+    override fun scanMlKitFoundExp() {
+        scanMlKitFoundExpTurbine.add(Unit)
+    }
+
+    override fun scanDarkniteFoundPan() {
+        scanDarkniteFoundPanTurbine.add(Unit)
+    }
+
+    override fun scanModelsDisagree() {
+        scanModelsDisagreeTurbine.add(Unit)
+    }
+
     private fun ensureAllEventsConsumed() {
         scanStartedTurbine.ensureAllEventsConsumed()
         scanSucceededTurbine.ensureAllEventsConsumed()
         scanFailedTurbine.ensureAllEventsConsumed()
         scanCancelledTurbine.ensureAllEventsConsumed()
+        scanMlKitFoundPanTurbine.ensureAllEventsConsumed()
+        scanMlKitFoundExpTurbine.ensureAllEventsConsumed()
+        scanDarkniteFoundPanTurbine.ensureAllEventsConsumed()
+        scanModelsDisagreeTurbine.ensureAllEventsConsumed()
     }
 
     class Scenario(
@@ -49,6 +73,22 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
 
         suspend fun awaitScanCancelled() {
             return eventsReporter.scanCancelledTurbine.awaitItem()
+        }
+
+        suspend fun awaitMlKitFoundPan() {
+            return eventsReporter.scanMlKitFoundPanTurbine.awaitItem()
+        }
+
+        suspend fun awaitMlKitFoundExp() {
+            return eventsReporter.scanMlKitFoundExpTurbine.awaitItem()
+        }
+
+        suspend fun awaitDarkniteFoundPan() {
+            return eventsReporter.scanDarkniteFoundPanTurbine.awaitItem()
+        }
+
+        suspend fun awaitModelsDisagree() {
+            return eventsReporter.scanModelsDisagreeTurbine.awaitItem()
         }
     }
 

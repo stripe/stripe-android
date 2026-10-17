@@ -18,20 +18,11 @@ import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,17 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -58,10 +43,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -76,6 +60,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivit
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -94,7 +79,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 @OptIn(
-    ExperimentalCustomPaymentMethodsApi::class,
     WalletButtonsPreview::class,
 )
 internal class PaymentSheetPlaygroundActivity :
@@ -144,8 +128,8 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @OptIn(
-        ExperimentalCustomerSessionApi::class,
         ExperimentalAnalyticEventCallbackApi::class,
+        TapToAddPreview::class,
     )
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -157,30 +141,47 @@ internal class PaymentSheetPlaygroundActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
-            val paymentSheet = remember {
+
+            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
+            val localPlaygroundSettings = playgroundSettings ?: return@setContent
+
+            val playgroundState by viewModel.state.collectAsState()
+            val canUseTapToAdd = playgroundState?.asPaymentState()?.canUseTapToAdd == true
+
+            val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
+                    .also {
+                        if (canUseTapToAdd) {
+                            it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                        }
+
+                        if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                            it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
+                        } else {
+                            it.createIntentCallback(viewModel::createIntentCallback)
+                        }
+                    }
             }
                 .build()
-            val flowController = remember {
-                PaymentSheet.FlowController.Builder(
-                    viewModel::onPaymentSheetResult,
-                    viewModel::onPaymentOptionSelected
-                )
-                    .externalPaymentMethodConfirmHandler(this)
-                    .confirmCustomPaymentMethodCallback(this)
-                    .createIntentCallback(viewModel::createIntentCallback)
-                    .analyticEventCallback(viewModel::analyticCallback)
+            val flowController = remember(playgroundState) {
+                flowControllerBuilder(canUseTapToAdd, playgroundState)
             }
                 .build()
-            val embeddedPaymentElementBuilder = remember {
-                EmbeddedPaymentElement.Builder(
-                    viewModel::createIntentCallback,
-                    viewModel::onEmbeddedResult,
-                )
+            val embeddedPaymentElementBuilder = remember(playgroundState) {
+                if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                    EmbeddedPaymentElement.Builder(
+                        viewModel::createIntentWithConfirmationTokenCallback,
+                        viewModel::onEmbeddedResult,
+                    )
+                } else {
+                    EmbeddedPaymentElement.Builder(
+                        viewModel::createIntentCallback,
+                        viewModel::onEmbeddedResult,
+                    )
+                }
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
@@ -188,10 +189,6 @@ internal class PaymentSheetPlaygroundActivity :
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
-            val localPlaygroundSettings = playgroundSettings ?: return@setContent
-
-            val playgroundState by viewModel.state.collectAsState()
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
@@ -267,6 +264,8 @@ internal class PaymentSheetPlaygroundActivity :
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                     ClearLinkDataButton()
+
+                    ResetToDefaultsButton()
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -306,6 +305,29 @@ internal class PaymentSheetPlaygroundActivity :
             }
         }
     }
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class, TapToAddPreview::class)
+    private fun flowControllerBuilder(
+        canUseTapToAdd: Boolean,
+        playgroundState: PlaygroundState?
+    ): PaymentSheet.FlowController.Builder = PaymentSheet.FlowController.Builder(
+        viewModel::onPaymentSheetResult,
+        viewModel::onPaymentOptionSelected
+    )
+        .externalPaymentMethodConfirmHandler(this)
+        .confirmCustomPaymentMethodCallback(this)
+        .analyticEventCallback(viewModel::analyticCallback)
+        .also {
+            if (canUseTapToAdd) {
+                it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+            }
+
+            if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
+            } else {
+                it.createIntentCallback(viewModel::createIntentCallback)
+            }
+        }
 
     @Composable
     private fun AppearanceButton() {
@@ -371,6 +393,18 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
+    private fun ResetToDefaultsButton() {
+        Button(
+            onClick = {
+                viewModel.resetToDefaults()
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Reset to defaults")
+        }
+    }
+
+    @Composable
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         val keyboardController = LocalSoftwareKeyboardController.current
         Button(
@@ -406,7 +440,6 @@ internal class PaymentSheetPlaygroundActivity :
                 if (playgroundState.displaysShippingAddressButton()) {
                     ShippingAddressButton(
                         addressLauncher = addressLauncher,
-                        playgroundState = playgroundState,
                         address = { flowController.shippingDetails },
                     )
                 }
@@ -505,7 +538,6 @@ internal class PaymentSheetPlaygroundActivity :
             onClick = flowController::presentPaymentOptions
         )
         BuyButton(
-            modifier = Modifier.imePadding(),
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )
@@ -537,10 +569,7 @@ internal class PaymentSheetPlaygroundActivity :
 
         LaunchedEffect(playgroundState) {
             if (isTwoStep) {
-                val configureResult = embeddedPaymentElement.configure(
-                    intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
-                )
+                val configureResult = configure(playgroundState)
                 hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
             }
         }
@@ -572,7 +601,11 @@ internal class PaymentSheetPlaygroundActivity :
                 if (isTwoStep) {
                     embeddedPaymentElement.confirm()
                 } else {
-                    embeddedPlaygroundOneStepLauncher.launch(playgroundState)
+                    embeddedPlaygroundOneStepLauncher.launch(
+                        EmbeddedPlaygroundOneStepContract.Args(
+                            playgroundState = playgroundState,
+                        )
+                    )
                 }
             },
             enabled = if (isTwoStep) hasConfigured else true,
@@ -634,7 +667,6 @@ internal class PaymentSheetPlaygroundActivity :
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
-        playgroundState: PlaygroundState.Payment,
         address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
@@ -645,7 +677,7 @@ internal class PaymentSheetPlaygroundActivity :
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
-                addressLauncher.present(playgroundState.clientSecret, configuration)
+                addressLauncher.present(PaymentConfiguration.getInstance(context).publishableKey, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -653,7 +685,19 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
+    private suspend fun configure(
+        playgroundState: PlaygroundState.Payment,
+    ): EmbeddedPaymentElement.ConfigureResult {
+        return embeddedPaymentElement.configure(
+            intentConfiguration = playgroundState.intentConfiguration(),
+            configuration = playgroundState.embeddedConfiguration(),
+        )
+    }
+
+    private fun presentPaymentSheet(
+        paymentSheet: PaymentSheet,
+        playgroundState: PlaygroundState.Payment,
+    ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
@@ -738,74 +782,6 @@ internal class PaymentSheetPlaygroundActivity :
                 .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
-}
-
-@Composable
-private fun SearchSettingsField(
-    query: String,
-    onQueryChanged: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var hasFocus by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    TextField(
-        modifier = modifier
-            .onFocusChanged { hasFocus = it.isFocused }
-            .onKeyEvent {
-                if (it.key == Key.Enter) {
-                    keyboardController?.hide()
-                    true
-                } else {
-                    false
-                }
-            }
-            .fillMaxWidth(),
-        value = query,
-        placeholder = if (hasFocus) {
-            null
-        } else {
-            @Composable {
-                Text(text = "Search settings")
-            }
-        },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { keyboardController?.show() }
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-            )
-        },
-        trailingIcon = if (query.isEmpty()) {
-            null
-        } else {
-            @Composable {
-                IconButton(onClick = { onQueryChanged("") }) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                    )
-                }
-            }
-        },
-        onValueChange = onQueryChanged,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SearchSettingsFieldPreview() {
-    var query by remember { mutableStateOf("") }
-    SearchSettingsField(
-        query = query,
-        onQueryChanged = { query = it },
-    )
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"

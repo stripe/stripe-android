@@ -6,8 +6,8 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_ERROR_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -27,9 +27,8 @@ internal class TestCashApp : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = "cashapp",
-        executeInNightlyRun = true,
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
@@ -62,7 +61,7 @@ internal class TestCashApp : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = {
-                it.composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
+                it.composeTestRule.onNode(hasTestTag(SHEET_ERROR_TEST_TAG))
                     .assertDoesNotExist()
             }
         )
@@ -83,13 +82,6 @@ internal class TestCashApp : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             }
-        )
-    }
-
-    @Test
-    fun testCashAppPayInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
         )
     }
 

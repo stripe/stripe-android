@@ -27,7 +27,7 @@ data class ServerSideConfirmationCustomFlowViewState(
                 )
             )
             // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
-            // methods that complete payment after a delay, like SEPA Debit and Sofort.
+            // methods that complete payment after a delay, like SEPA Debit.
             .allowsDelayedPaymentMethods(true)
             .build()
 

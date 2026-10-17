@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -10,33 +10,32 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -55,7 +54,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -63,7 +62,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -78,7 +76,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -86,7 +84,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -101,7 +98,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -109,7 +106,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = true,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -135,13 +131,12 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             BacsConfirmationOption(
                 createParams = bacsDebitParams,
                 optionsParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -156,7 +151,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -164,7 +159,6 @@ class ConfirmationHandlerOptionKtxTest {
                 optionsParams = null,
                 shouldSave = false,
                 extraParams = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -182,15 +176,64 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     cvc = "505"
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            )
+        )
+    }
+
+    @Test
+    fun `On acknowledged saved selection, should propagate SEPA mandate state`() {
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+        ).also {
+            it.hasAcknowledgedSepaMandate = true
+        }
+
+        val confirmationOption = paymentSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        ) as PaymentMethodConfirmationOption.Saved
+
+        assertThat(confirmationOption.hasAcknowledgedSepaMandate).isTrue()
+    }
+
+    @Test
+    fun `On saved selection with link input and link configuration, should convert to saved link option`() {
+        val userInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            name = "John Doe",
+            country = "CA",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
+            linkInput = userInput,
+        )
+
+        assertThat(
+            paymentSelection.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = LINK_CONFIGURATION,
+                cardFundingFilter = DefaultCardFundingFilter
+            )
+        ).isEqualTo(
+            LinkInlineSignupConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
+                linkConfiguration = LINK_CONFIGURATION,
+                userInput = userInput,
             )
         )
     }
@@ -215,7 +258,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             ExternalPaymentMethodConfirmationOption(
@@ -236,7 +279,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isNull()
     }
@@ -258,7 +301,7 @@ class ConfirmationHandlerOptionKtxTest {
                     .build()
                     .asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isEqualTo(
             GooglePayConfirmationOption(
@@ -272,20 +315,146 @@ class ConfirmationHandlerOptionKtxTest {
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
-                    )
+                    ),
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    additionalEnabledNetworks = emptyList(),
                 ),
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
 
     @Test
+    fun `On Google Pay selection with additionalEnabledNetworks, should return expected option with networks`() {
+        val additionalNetworks = listOf("INTERAC")
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                        amount = 5000,
+                        label = "Merchant Payments",
+                        additionalEnabledNetworks = additionalNetworks
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.additionalEnabledNetworks
+        ).isEqualTo(additionalNetworks)
+    }
+
+    @Test
+    fun `On Google Pay selection, googlePayBillingEmailOverride flows through to the config`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").apply {
+            googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    countryCode = "US",
+                    currencyCode = "USD",
+                )
+            )
+        }.build().asCommonConfiguration()
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = configuration,
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+            googlePayBillingEmailOverride = "checkout@example.com",
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailOverride
+        ).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `On Google Pay selection, billingEmailOverride is null when none is provided`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").apply {
+            defaultBillingDetails(PaymentSheet.BillingDetails(email = "merchant@example.com"))
+            googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    countryCode = "US",
+                    currencyCode = "USD",
+                )
+            )
+        }.build().asCommonConfiguration()
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = configuration,
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailOverride
+        ).isNull()
+    }
+
+    @Test
+    fun `On Google Pay selection, should return expected option with email required`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+            googlePayIsEmailRequired = true,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.isEmailRequired
+        ).isTrue()
+    }
+
+    @Test
+    fun `On Google Pay selection, should use billing configuration for email required by default`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.isEmailRequired
+        ).isTrue()
+    }
+
+    @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isNull()
     }
@@ -293,16 +462,15 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection with configuration, should return Link confirmation option`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.DISABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -311,30 +479,39 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Link selection with express configuration, should return Link confirmation option with express enabled`() {
         assertThat(
             PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 linkExpressMode = LinkExpressMode.ENABLED
             ).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
                 linkExpressMode = LinkExpressMode.ENABLED,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
 
     @Test
-    fun `On new Link inline selection without config, should return null`() {
+    fun `On new Link inline selection without config, should return new payment method confirmation option`() {
+        val linkInlineSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
+
         assertThat(
-            PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.toConfirmationOption(
+            linkInlineSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter,
             )
-        ).isNull()
+        ).isEqualTo(
+            PaymentMethodConfirmationOption.New(
+                createParams = linkInlineSelection.paymentMethodCreateParams,
+                optionsParams = linkInlineSelection.paymentMethodOptionsParams,
+                extraParams = linkInlineSelection.paymentMethodExtraParams,
+                shouldSave = false,
+            )
+        )
     }
 
     @Test
@@ -368,13 +545,13 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -389,13 +566,13 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
                 optionsParams = null,
                 paymentMethod = expectedPaymentMethod,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
@@ -404,21 +581,20 @@ class ConfirmationHandlerOptionKtxTest {
     fun `Extra params are passed through from LinkInline payment selection to confirmation option`() {
         val paymentMethodExtraParams = PaymentMethodExtraParams.Card(setAsDefault = true)
 
-        val linkInlinePaymentSelection = createLinkInlinePaymentSelection(
+        val linkInlinePaymentSelection = createCardPaymentSelectionWithLink(
             paymentMethodExtraParams = paymentMethodExtraParams
         )
         val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             linkConfiguration = LINK_CONFIGURATION,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
-        assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
-        val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption
+        assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
+        val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption.New
         assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
         val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
@@ -435,13 +611,12 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(confirmationOption).isNull()
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with custom payment method of expected ID, should return option`() {
         val billingDetails = PaymentMethod.BillingDetails(name = "John Doe")
@@ -465,7 +640,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(confirmationOption).isInstanceOf<CustomPaymentMethodConfirmationOption>()
@@ -473,57 +648,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
-    }
-
-    @Test
-    fun `On ShopPay selection with config with null shopPay config, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-            )
-        ).isNull()
-    }
-
-    @Test
-    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
-                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                    customer = null
-                ),
-                linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-            )
-        ).isNull()
-    }
-
-    @OptIn(ExperimentalCustomerSessionApi::class)
-    @Test
-    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
-                    .asCommonConfiguration()
-                    .copy(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "",
-                            clientSecret = "css_test_123"
-                        ),
-                        shopPayConfiguration = SHOP_PAY_CONFIGURATION
-                    ),
-                linkConfiguration = null,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
-            )
-        ).isEqualTo(
-            ShopPayConfirmationOption(
-                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                customerSessionClientSecret = "css_test_123",
-                merchantDisplayName = "Merchant, Inc."
-            )
-        )
     }
 
     private fun testLinkInlineSignupConfirmationOption(
@@ -540,30 +664,29 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            createLinkInlinePaymentSelection(customerRequestedSave)
+            createCardPaymentSelectionWithLink(customerRequestedSave)
                 .toConfirmationOption(
                     configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     linkConfiguration = LINK_CONFIGURATION,
-                    passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                    cardFundingFilter = DefaultCardFundingFilter,
                 )
         ).isEqualTo(
-            LinkInlineSignupConfirmationOption(
+            LinkInlineSignupConfirmationOption.New(
                 createParams = paymentMethodCreateParams,
                 optionsParams = null,
                 extraParams = null,
                 saveOption = expectedSaveOption,
                 linkConfiguration = LINK_CONFIGURATION,
                 userInput = userInput,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
             )
         )
     }
 
-    private fun createLinkInlinePaymentSelection(
+    private fun createCardPaymentSelectionWithLink(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    ): PaymentSelection.New.LinkInline {
+    ): PaymentSelection.New.Card {
         val paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
         val userInput = UserInput.SignUp(
             email = "email@email.com",
@@ -573,13 +696,13 @@ class ConfirmationHandlerOptionKtxTest {
             consentAction = SignUpConsentAction.Checkbox,
         )
 
-        return PaymentSelection.New.LinkInline(
+        return PaymentSelection.New.Card(
             paymentMethodCreateParams = paymentMethodCreateParams,
             brand = CardBrand.Visa,
             customerRequestedSave = customerRequestedSave,
             paymentMethodOptionsParams = null,
             paymentMethodExtraParams = paymentMethodExtraParams,
-            input = userInput,
+            linkInput = userInput,
         )
     }
 
@@ -644,9 +767,6 @@ class ConfirmationHandlerOptionKtxTest {
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
@@ -657,7 +777,6 @@ class ConfirmationHandlerOptionKtxTest {
             allowUserEmailEdits = true,
             allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
-            skipWalletInFlowController = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
@@ -665,6 +784,11 @@ class ConfirmationHandlerOptionKtxTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkBrand = LinkBrand.Link,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.link.ui.wallet.DefaultPaymentUI
 import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
@@ -8,7 +7,6 @@ import com.stripe.android.model.DisplayablePaymentDetails
 /**
  * Represents different states of the Link wallet button
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal sealed class LinkButtonState {
 
     /**

@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyValidator
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class PaymentConfiguration
+@Poko
+class PaymentConfiguration
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     val publishableKey: String,
@@ -17,6 +20,11 @@ constructor(
 
     init {
         ApiKeyValidator.get().requireValid(publishableKey)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isLiveMode(): Boolean {
+        return !publishableKey.startsWith("pk_test")
     }
 
     /**
@@ -100,7 +108,15 @@ constructor(
                     stripeAccountId = stripeAccountId
                 )
 
-            DefaultFraudDetectionDataRepository(context).refresh()
+            DefaultFraudDetectionDataRepository(
+                context = context,
+                apiConfigurationProvider = {
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = stripeAccountId,
+                    )
+                },
+            ).refresh()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

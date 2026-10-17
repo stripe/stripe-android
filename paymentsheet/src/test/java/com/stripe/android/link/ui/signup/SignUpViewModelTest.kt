@@ -24,10 +24,12 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -42,6 +44,9 @@ internal class SignUpViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
@@ -439,7 +444,7 @@ internal class SignUpViewModelTest {
                 dismissResults.add(result)
             },
             verifyDuringSignUp = {},
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         authViewModel.emailController.onRawValueChange("test@example.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
@@ -713,7 +718,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(linkAccount)
@@ -755,7 +762,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAccountManager = linkAccountManager,
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 navigateAndClearStack = { screen -> screens.add(screen) }
             )
 
@@ -778,7 +785,7 @@ internal class SignUpViewModelTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             navigateAndClearStack = { screen -> screens.add(screen) }
         )
 
@@ -795,7 +802,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = emptyList()
+                    verificationSessions = emptyList(),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(null)
@@ -803,7 +812,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAccountManager = linkAccountManager,
-                linkLaunchMode = LinkLaunchMode.Full,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 navigateAndClearStack = { screen -> screens.add(screen) },
                 verifyDuringSignUp = {
                     verifyDuringSignUpCalled = true
@@ -830,7 +839,7 @@ internal class SignUpViewModelTest {
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: (Throwable) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         verifyDuringSignUp: () -> Unit = {},
     ): SignUpViewModel {
         return SignUpViewModel(
@@ -853,13 +862,27 @@ internal class SignUpViewModelTest {
             linkLaunchMode = linkLaunchMode,
             dismissWithResult = dismissWithResult,
             verifyDuringSignUp = verifyDuringSignUp,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
     ): ConsumerSession {
+        // Set auth levels based on verification state:
+        // - Verified sessions should meet minimum auth level
+        // - Started/unverified sessions should not meet minimum auth level
+        val (currentLevel, minimumLevel) = when (state) {
+            ConsumerSession.VerificationSession.SessionState.Verified -> {
+                ConsumerSession.AuthenticationLevel.OneFactorAuthentication to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+            else -> {
+                ConsumerSession.AuthenticationLevel.NotAuthenticated to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+        }
+
         return ConsumerSession(
             emailAddress = "",
             redactedPhoneNumber = "",
@@ -869,8 +892,80 @@ internal class SignUpViewModelTest {
                     state = state
                 )
             ),
-            redactedFormattedPhoneNumber = ""
+            redactedFormattedPhoneNumber = "",
+            currentAuthenticationLevel = currentLevel,
+            minimumAuthenticationLevel = minimumLevel,
         )
+    }
+
+    @Test
+    fun `When lookup returns suggested email then state is updated`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        // Simulate suggested email from LinkAccountManager
+        linkAccountManager._suggestedEmail.value = "user@example.com"
+        runCurrent()
+
+        assertThat(viewModel.state.value.suggestedEmail).isEqualTo("user@example.com")
+    }
+
+    @Test
+    fun `When onSuggestedEmailClick is called then email is updated and lookup triggered`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        viewModel.emailController.onRawValueChange("user@example.con")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Verify initial lookup was called
+        assertThat(linkAccountManager.lookupCalls).hasSize(1)
+        assertThat(linkAccountManager.lookupCalls[0].email).isEqualTo("user@example.con")
+
+        // Click suggested email
+        viewModel.onSuggestedEmailClick("user@example.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Verify email was updated and new lookup was triggered
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo("user@example.com")
+        assertThat(linkAccountManager.lookupCalls).hasSize(2)
+        assertThat(linkAccountManager.lookupCalls[1].email).isEqualTo("user@example.com")
+    }
+
+    @Test
+    fun `When email changes suggested email is cleared`() = runTest(dispatcher) {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.lookupResult = Result.success(null)
+
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            linkAccountManager = linkAccountManager
+        )
+
+        // Set suggested email
+        linkAccountManager._suggestedEmail.value = "user@example.com"
+        runCurrent()
+        assertThat(viewModel.state.value.suggestedEmail).isEqualTo("user@example.com")
+
+        // Change email to trigger new lookup
+        viewModel.emailController.onRawValueChange("different@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        // Simulate manager clearing suggestion after new lookup (like real implementation does)
+        linkAccountManager._suggestedEmail.value = null
+        runCurrent()
+
+        assertThat(viewModel.state.value.suggestedEmail).isNull()
     }
 
     private val SignUpViewModel.contentState: SignUpScreenState

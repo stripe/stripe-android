@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -115,6 +116,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
         val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
         assertThat(setDefaultRequest.paymentMethodId).isEqualTo(expectedNewDefaultPaymentMethodId)
+        assertThat(setDefaultRequest.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -241,6 +243,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             prefsRepositoryFactory = {
                 prefsRepository
             },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             workContext = coroutineContext
         )
     }

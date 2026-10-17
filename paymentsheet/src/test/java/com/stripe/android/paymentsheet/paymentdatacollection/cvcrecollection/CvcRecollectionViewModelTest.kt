@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -13,15 +14,17 @@ class CvcRecollectionViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private fun createViewModel(cvc: String = ""): CvcRecollectionViewModel {
         return CvcRecollectionViewModel(
             args = Args(
                 lastFour = "4242",
                 cardBrand = CardBrand.Visa,
                 cvc = cvc,
-                isTestMode = false
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test
@@ -35,7 +38,6 @@ class CvcRecollectionViewModelTest {
             )
         )
         assertThat(viewModel.viewState.value.lastFour).isEqualTo("4242")
-        assertThat(viewModel.viewState.value.isTestMode).isEqualTo(false)
     }
 
     @Test

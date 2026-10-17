@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'subprocess'
+require 'open3'
 
 require_relative 'common'
 
@@ -10,27 +10,37 @@ def update_pay_server_docs()
         return
     end
 
-    puts 'Ensuring pay-server repo is up-to-date.'
+    mint_repo = "../mint"
+    constants_file = "pay-server/docs/content/constants.yaml"
+
+    unless Dir.exist?(mint_repo)
+        puts 'Mint repo not found. Cloning mint (this may take a while)...'
+        execute_or_fail("cd .. && pay get mint")
+    end
+
+    mint_base_ref = "origin/green-pay-server"
+
+    puts 'Fetching latest pay-server...'
     begin
-        execute_or_fail("git -C ../pay-server checkout master")
-        execute_or_fail("git -C ../pay-server pull")
+        execute_or_fail("git -C #{mint_repo} fetch --depth=1 --no-tags origin green-pay-server")
+        execute_or_fail("git -C #{mint_repo} checkout #{mint_base_ref}")
 
         puts '> Updating android SDK version in pay-server for latest release.'
-        replace_in_file("../pay-server/docs/content/constants.yaml",
+        replace_in_file("#{mint_repo}/#{constants_file}",
           /sdk-version: [.\d]+/,
           "sdk-version: #{@version}",
         )
-        execute_or_fail("git -C ../pay-server add docs/content/constants.yaml")
-        switch_to_new_branch(pay_server_branch, "master", repo: "../pay-server")
-        execute_or_fail("git -C ../pay-server add docs/content/constants.yaml")
-        execute_or_fail("git -C ../pay-server commit -m \"Update Android Payments SDK version to #{@version}\"")
+        add_pay_server_constants(mint_repo, constants_file)
+        switch_to_new_branch(pay_server_branch, mint_base_ref, repo: mint_repo)
+        add_pay_server_constants(mint_repo, constants_file)
+        execute_or_fail("git -C #{mint_repo} commit -m \"Update Android Payments SDK version to #{@version}\"")
     rescue
-        execute("git -C ../pay-server restore docs")
+        execute("git -C #{mint_repo} restore #{constants_file}")
         raise
     end
 
     begin
-        execute_or_fail("git -C ../pay-server push -u origin")
+        execute_or_fail("git -C #{mint_repo} push -u origin #{pay_server_branch}")
     rescue
         delete_pay_server_branch
         raise
@@ -42,14 +52,30 @@ def update_pay_server_docs()
         rputs "Use the opened link to open a PR and request review. Ensure this gets merged, but continue with the next steps while waiting for review."
     end
 
-    open_url("https://git.corp.stripe.com/stripe-internal/pay-server/compare/#{pay_server_branch}")
+    open_url("https://git.corp.stripe.com/stripe-internal/mint/compare/#{pay_server_branch}")
     wait_for_user
 end
 
 def delete_pay_server_branch
-    delete_git_branch(pay_server_branch, "master", repo: "../pay-server")
+    delete_git_branch(pay_server_branch, "origin/green-pay-server", repo: "../mint")
 end
 
 private def pay_server_branch
     "release-android-payments-sdk-#{@version}"
+end
+
+private def add_pay_server_constants(mint_repo, constants_file)
+    command = ["git", "-C", mint_repo, "add", constants_file]
+    puts "Executing #{command.join(' ')}..."
+
+    stdout, stderr, status = Open3.capture3(*command)
+    $stdout.print(stdout)
+    $stderr.print(stderr)
+
+    unless status.success?
+        if stderr.include?("The following paths are ignored by one of your .gitignore files")
+            rputs "Tip: Run `cd ~/stripe/mint && pay gitfs add pay-server/docs`, then retry this step."
+        end
+        raise "Failed to execute #{command.join(' ')}"
+    end
 end

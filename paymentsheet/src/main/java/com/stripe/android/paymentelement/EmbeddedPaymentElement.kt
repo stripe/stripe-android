@@ -16,7 +16,9 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -31,14 +33,16 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
@@ -79,18 +83,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        return configurationCoordinator.configure(intentConfiguration, configuration)
-    }
-
-    /**
-     * A composable function that displays a vertical list of wallet payment methods that can be used for express
-     * checkout.
-     */
-    @WalletButtonsPreview
-    @Composable
-    fun WalletButtons() {
-        val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()
-        walletButtonsContent?.Content()
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        return configurationCoordinator.configure(configuration, initializationMode)
     }
 
     /**
@@ -114,10 +108,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
     }
 
     /**
-     * Sets the current [paymentOption] to `null`.
+     * Sets the current [paymentOption] to `null` and clears previously entered payment method details.
      */
     fun clearPaymentOption() {
-        selectionHolder.set(null)
+        selectionHolder.previousNewSelections.clear()
+        selectionHolder.setSelection(null)
     }
 
     /**
@@ -143,7 +138,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             resultCallback = resultCallback,
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
              * Called with the ConfirmationToken when the customer confirms the payment or setup.
@@ -177,12 +171,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
+            private set
+
+        @OptIn(TapToAddPreview::class)
+        internal var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
             private set
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
@@ -197,7 +194,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * Called when a user confirms payment for a custom payment method.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             this.confirmCustomPaymentMethodCallback = callback
         }
@@ -208,6 +204,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
+        }
+
+        /**
+         * @param callback called when the customer attempts to save their card by tapping it on their device.
+         */
+        @TapToAddPreview
+        fun createCardPresentSetupIntentCallback(
+            callback: CreateCardPresentSetupIntentCallback,
+        ) = apply {
+            this.createCardPresentSetupIntentCallback = callback
         }
 
         /**
@@ -253,12 +259,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
+        internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration.State?,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -285,6 +294,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
+            private var allowedCardFundingTypes: List<PaymentSheet.CardFundingType> =
+                ConfigurationDefaults.allowedCardFundingTypes
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -293,6 +304,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
+            private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -450,11 +463,27 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * By default, the embedded payment element will accept cards of all funding types
+             * (credit, debit, prepaid, unknown).
+             * You can specify which card funding types to allow.
+             *
+             * **Note**: This is only a client-side solution.
+             * **Note**: Card funding filtering is not currently supported in Link.
+             *
+             * @param cardFundingTypes The list of allowed card funding types.
+             */
+            @CardFundingFilteringPrivatePreview
+            fun allowedCardFundingTypes(
+                cardFundingTypes: List<PaymentSheet.CardFundingType>
+            ): Builder = apply {
+                this.allowedCardFundingTypes = cardFundingTypes
+            }
+
+            /**
              * Configuration related to custom payment methods.
              *
              * If set, Embedded Payment Element will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
             ) = apply {
@@ -503,11 +532,25 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * By default, the embedded payment element offers a card scan button within the new card entry form.
              * When opensCardScannerAutomatically is set to true,
              * the card entry form will initialize with the card scanner already open.
-             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun userOverrideCountry(userOverrideCountry: String?) = apply {
+                this.userOverrideCountry = userOverrideCountry
+            }
+
+            /**
+             * An optional [ApiConfiguration] for this payment session. When set, overrides the
+             * global [com.stripe.android.PaymentConfiguration] singleton for all network requests made by this
+             * [EmbeddedPaymentElement] instance. When not set, defaults to the value set in
+             * [com.stripe.android.PaymentConfiguration.init].
+             */
+            @ApiConfigurationPreview
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
             }
 
             fun build() = Configuration(
@@ -526,14 +569,52 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,
+                allowedCardFundingTypes = allowedCardFundingTypes,
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
+                userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            CardFundingFilteringPrivatePreview::class,
+        )
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
+            .customPaymentMethods(customPaymentMethods)
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .link(link)
+            .formSheetAction(formSheetAction)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
+            .userOverrideCountry(userOverrideCountry)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+                apiConfiguration?.let {
+                    apiConfiguration(
+                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                    )
+                }
+            }
     }
 
     /**
@@ -575,19 +656,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     @Poko
     class PaymentOptionDisplayData internal constructor(
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val imageLoader: suspend () -> Drawable,
-
+        private val paymentOptionResource: PaymentOptionResource,
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
          */
         val label: String,
-
         /**
          * The billing details associated with the customer's desired payment method.
          */
         val billingDetails: PaymentSheet.BillingDetails?,
-
         /**
          * A string representation of the customer's desired payment method:
          * - If this is a Stripe payment method, see
@@ -598,7 +675,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * - If this is Google Pay, the value is "google_pay".
          */
         val paymentMethodType: String,
-
         /**
          * If you set [Configuration.Builder.embeddedViewDisplaysMandateText] to `false`, this text must be displayed to
          * the customer near your "Buy" button to comply with regulations.
@@ -606,8 +682,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
         val mandateText: AnnotatedString?,
         private val _shippingDetails: AddressDetails?,
     ) {
-        private val iconDrawable: Drawable by lazy {
-            DelegateDrawable(imageLoader)
+        /**
+         * Loads the payment method image for the provided raw system theme. Appearance-based theme
+         * overrides are resolved internally.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        suspend fun loadIcon(isSystemDarkTheme: Boolean): Drawable {
+            return paymentOptionResource.load(isSystemDarkTheme)
         }
 
         /**
@@ -622,7 +704,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         val iconPainter: Painter
             @Composable
-            get() = rememberDrawablePainter(iconDrawable)
+            get() = paymentOptionResource.rememberPainter()
     }
 
     /**

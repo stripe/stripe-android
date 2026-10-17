@@ -1,20 +1,20 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.withContext
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -30,13 +30,13 @@ internal data class CustomerSessionElementsSession(
     val ephemeralKey: CachedCustomerEphemeralKey,
 )
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 @Singleton
 internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (String) -> PrefsRepository,
+    private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,
     private val errorReporter: ErrorReporter,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val timeProvider: () -> Long,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSessionElementsSessionManager {
@@ -70,7 +70,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
 
                 validateCustomerSessionClientSecret(customerSessionClientSecret.clientSecret)
 
-                val prefsRepository = prefsRepositoryFactory(customerSessionClientSecret.customerId)
+                val prefsRepository = prefsRepositoryFactory.create(customerSessionClientSecret.customerId)
 
                 val savedSelection = prefsRepository.getSavedSelection(
                     isGooglePayAvailable = false,
@@ -82,6 +82,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                             paymentMethodTypes = intentConfiguration.paymentMethodTypes,
+                            onBehalfOf = intentConfiguration.onBehalfOf,
                         )
                     ),
                     savedPaymentMethodSelectionId = savedSelection?.id,
@@ -91,6 +92,8 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     ),
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
+                    countryOverride = null,
+                    apiConfiguration = apiConfigurationProvider.get(),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

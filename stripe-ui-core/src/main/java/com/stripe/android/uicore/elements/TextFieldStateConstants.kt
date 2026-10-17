@@ -8,14 +8,21 @@ import com.stripe.android.uicore.R
 class TextFieldStateConstants {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Valid : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = false
+        override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean = false
         override fun isValid(): Boolean = true
-        override fun getError(): FieldError? = null
+        override fun getValidationMessage(): FieldValidationMessage? = null
         override fun isBlank(): Boolean = false
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object Full : Valid() {
+        data class Full(
+            private val validationMessage: FieldValidationMessage? = null
+        ) : Valid() {
             override fun isFull(): Boolean = true
+
+            override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean =
+                validationMessage != null
+
+            override fun getValidationMessage() = validationMessage
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -26,36 +33,56 @@ class TextFieldStateConstants {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Error(
-        @StringRes protected open val errorMessageResId: Int,
-        protected open val formatArgs: Array<out Any>? = null
+        private val validationMessage: FieldValidationMessage
     ) : TextFieldState {
+
+        constructor(
+            @StringRes errorMessageResId: Int,
+            formatArgs: List<Any>? = null
+        ) : this(FieldValidationMessage.Error(errorMessageResId, formatArgs))
+
         override fun isValid(): Boolean = false
         override fun isFull(): Boolean = false
-        override fun getError() = FieldError(errorMessageResId, formatArgs)
+        override fun getValidationMessage() = validationMessage
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Incomplete(
-            @StringRes override val errorMessageResId: Int
-        ) : Error(errorMessageResId) {
-            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean =
+            validationMessage: FieldValidationMessage
+        ) : Error(validationMessage) {
+
+            constructor(
+                @StringRes errorMessageResId: Int
+            ) : this(FieldValidationMessage.Error(errorMessageResId))
+
+            override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean =
                 !hasFocus || isValidating
+
             override fun isBlank(): Boolean = false
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Invalid(
-            @StringRes override val errorMessageResId: Int,
-            override val formatArgs: Array<out Any>? = null,
+            validationMessage: FieldValidationMessage,
             private val preventMoreInput: Boolean = false,
-        ) : Error(errorMessageResId, formatArgs) {
-            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = true
+        ) : Error(validationMessage) {
+
+            constructor(
+                @StringRes errorMessageResId: Int,
+                formatArgs: List<Any>? = null,
+                preventMoreInput: Boolean = false,
+            ) : this(
+                validationMessage = FieldValidationMessage.Error(errorMessageResId, formatArgs),
+                preventMoreInput = preventMoreInput
+            )
+
+            override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean = true
             override fun isBlank(): Boolean = false
             override fun isFull(): Boolean = preventMoreInput
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object Blank : Error(R.string.stripe_blank_and_required) {
-            override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean): Boolean = isValidating
+            override fun shouldShowValidationMessage(hasFocus: Boolean, isValidating: Boolean): Boolean = isValidating
             override fun isBlank(): Boolean = true
         }
     }

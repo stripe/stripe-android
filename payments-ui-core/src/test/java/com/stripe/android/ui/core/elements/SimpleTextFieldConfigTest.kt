@@ -39,7 +39,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         assertThat(state.isValid()).isTrue()
-        assertThat(state.getError()).isNull()
+        assertThat(state.getValidationMessage()).isNull()
     }
 
     @Test
@@ -53,7 +53,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("    ")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getValidationMessage()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test
@@ -67,7 +67,7 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         assertThat(state.isValid()).isFalse()
-        assertThat(state.getError()?.errorMessage).isEqualTo(R.string.stripe_blank_and_required)
+        assertThat(state.getValidationMessage()?.message).isEqualTo(R.string.stripe_blank_and_required)
     }
 
     @Test
@@ -80,8 +80,8 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isTrue()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isTrue()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isTrue()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isTrue()
     }
 
     @Test
@@ -94,8 +94,8 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
     }
 
     @Test
@@ -108,10 +108,10 @@ class SimpleTextFieldConfigTest {
 
         val state = textConfig.determineState("valid input")
 
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = false)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = false)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = false)).isFalse()
     }
 
     @Test
@@ -125,7 +125,37 @@ class SimpleTextFieldConfigTest {
         val state = textConfig.determineState("")
 
         // Optional field with empty input is valid -> no error should be shown
-        assertThat(state.shouldShowError(hasFocus = true, isValidating = true)).isFalse()
-        assertThat(state.shouldShowError(hasFocus = false, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = true, isValidating = true)).isFalse()
+        assertThat(state.shouldShowValidationMessage(hasFocus = false, isValidating = true)).isFalse()
+    }
+
+    @Test
+    fun `test allowEmojis as false handles various emoji types`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Address"),
+            keyboard = KeyboardType.Text,
+            allowsEmojis = false
+        )
+
+        // Test miscellaneous symbols
+        assertThat(textConfig.filter("Weather ☀️ ⛈ 1")).isEqualTo("Weather   1")
+
+        // Test emoticons
+        assertThat(textConfig.filter("Happy 😀 Face")).isEqualTo("Happy  Face")
+
+        // Test combined text and emojis
+        assertThat(textConfig.filter("Building 🏢 Floor 5")).isEqualTo("Building  Floor 5")
+    }
+
+    @Test
+    fun `test allowEmojis as true allows emojis`() {
+        val textConfig = SimpleTextFieldConfig(
+            label = resolvableString("Address"),
+            keyboard = KeyboardType.Text,
+            allowsEmojis = true
+        )
+
+        assertThat(textConfig.filter("123 Main St 🏠")).isEqualTo("123 Main St 🏠")
+        assertThat(textConfig.filter("Hello 😊 World 🌍")).isEqualTo("Hello 😊 World 🌍")
     }
 }

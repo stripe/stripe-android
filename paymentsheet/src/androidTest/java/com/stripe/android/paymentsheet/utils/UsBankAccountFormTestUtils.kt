@@ -7,6 +7,7 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -37,6 +38,35 @@ object UsBankAccountFormTestUtils {
         }
 
     fun setupSuccessfulCompletionOfUsBankAccountForm() {
+        setupSuccessfulCompletion(bankAccountCompletedResult)
+    }
+
+    fun setupSuccessfulCompletionOfInstantDebitsForm(
+        eligibleForIncentive: Boolean,
+    ) {
+        setupSuccessfulCompletion(
+            CollectBankAccountResultInternal.Completed(
+                CollectBankAccountResponseInternal(
+                    intent = null,
+                    usBankAccountData = null,
+                    instantDebitsData = CollectBankAccountResponseInternal.InstantDebitsData(
+                        paymentMethod = PaymentMethod(
+                            id = "pm_123",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Link.code,
+                            type = PaymentMethod.Type.Link,
+                        ),
+                        last4 = "6789",
+                        bankName = "Test Bank",
+                        eligibleForIncentive = eligibleForIncentive,
+                    ),
+                )
+            )
+        )
+    }
+
+    private fun setupSuccessfulCompletion(result: CollectBankAccountResultInternal.Completed) {
         intending(
             hasComponent(
                 CollectBankAccountActivity::class.java.name
@@ -46,7 +76,7 @@ object UsBankAccountFormTestUtils {
                 Activity.RESULT_OK,
                 Intent().putExtras(
                     CollectBankAccountContract.Result(
-                        bankAccountCompletedResult
+                        result
                     ).toBundle()
                 )
             )

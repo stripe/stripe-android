@@ -24,7 +24,10 @@ internal object CheckoutModeSettingsDefinition :
         option("Setup", CheckoutMode.SETUP),
     )
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow()
     }
 
@@ -50,7 +53,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = playgroundState.amount,
+                amount = requireNotNull(playgroundState.amount),
                 currency = playgroundState.currencyCode.value,
                 paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
@@ -61,7 +64,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = playgroundState.amount,
+                amount = requireNotNull(playgroundState.amount),
                 currency = playgroundState.currencyCode.value,
                 setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
                 paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage

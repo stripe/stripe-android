@@ -27,6 +27,7 @@ import com.stripe.android.core.R as stripeCoreR
 internal fun NavController.navigateToErrorScreenWithRequirementError(
     route: String,
     requirementError: VerificationPageDataRequirementError,
+    onError: (Throwable) -> Unit = {}
 ) {
     val requirement = requirementError.requirement
 
@@ -37,12 +38,15 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
     // Received a button with continue text, but with unsupported requirement.
     //  Don't show continue button text and log an error
     if (!requirementError.continueButtonText.isNullOrEmpty() && !requirement.supportsForceConfirm()) {
-        Log.e(NAV_CONTROLLER_TAG, "received unsupported requirement for forceConfirm: $requirement")
+        val error =
+            IllegalStateException("received unsupported requirement for forceConfirm: $requirement")
+        Log.e(NAV_CONTROLLER_TAG, error.message, error)
+        onError(error)
     }
 
     navigateTo(
         ErrorDestination(
-            errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
+            errorTitle = requirementError.title ?: context.getString(stripeCoreR.string.stripe_error),
             errorContent = requirementError.body
                 ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             continueButtonText =
@@ -72,7 +76,7 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Context) {
     navigateTo(
         ErrorDestination(
-            errorTitle = context.getString(R.string.stripe_error),
+            errorTitle = context.getString(stripeCoreR.string.stripe_error),
             errorContent = context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             backButtonDestination = ConsentDestination.ROUTE.route,
             backButtonText = context.getString(R.string.stripe_go_back),

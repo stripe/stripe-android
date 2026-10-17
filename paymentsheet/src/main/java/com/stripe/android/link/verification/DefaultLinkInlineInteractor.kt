@@ -8,6 +8,8 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -16,7 +18,7 @@ import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
-import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -33,16 +35,16 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val linkLauncher: LinkPaymentLauncher,
     private val logger: Logger,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val linkEventsReporter: LinkEventsReporter
 ) : LinkInlineInteractor {
 
-    override val otpElement = OTPSpec.transform()
+    override val otpElement = OTPElementFactory.create()
 
     override val state: StateFlow<LinkInlineState> = savedStateHandle.getStateFlow(
         key = LINK_EMBEDDED_STATE_KEY,
         initialValue = LinkInlineState(
             verificationState = VerificationState.Loading,
-            passiveCaptchaParams = null
         )
     )
 
@@ -50,7 +52,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
-        updateState { it.copy(passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams) }
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         if (linkConfiguration == null) {
             // If there is no Link account manager, we don't need to handle verification.
@@ -72,7 +73,14 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
-        updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
+        updateState {
+            it.copy(
+                verificationState = linkAccount.initial2FAState(
+                    linkConfiguration = linkConfiguration,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            )
+        }
         observeOtp(linkAccountManager)
         startVerification()
     }
@@ -107,10 +115,13 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 val accountManager = verificationState.linkAccountManager()
                 linkLauncher.present(
                     configuration = verificationState.linkConfiguration,
+                    paymentMethodMetadata = verificationState.paymentMethodMetadata,
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                     linkExpressMode = LinkExpressMode.ENABLED,
-                    passiveCaptchaParams = state.value.passiveCaptchaParams
+                    // Selection-only launch; Link returns a selection here and never confirms, so
+                    // there is no auth surface to color.
+                    statusBarColor = null,
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->
@@ -124,9 +135,11 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     private fun LinkAccount.initial2FAState(
-        linkConfiguration: LinkConfiguration
+        linkConfiguration: LinkConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ) = Render2FA(
         linkConfiguration = linkConfiguration,
+        paymentMethodMetadata = paymentMethodMetadata,
         viewState = VerificationViewState(
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
@@ -140,6 +153,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
             ),
             allowLogout = true,
+            linkBrand = linkConfiguration.effectiveLinkBrand(this@initial2FAState),
         )
     )
 
@@ -174,6 +188,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
+        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
         otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(
@@ -181,7 +196,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 errorMessage = null
             )
         }
-        startVerification()
+        startVerification(isResend = true)
     }
 
     override fun didShowCodeSentNotification() {
@@ -190,7 +205,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         }
     }
 
-    private fun startVerification() {
+    private fun startVerification(isResend: Boolean = false) {
         update2FAState { viewState ->
             viewState.copy(errorMessage = null)
         }
@@ -199,7 +214,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             val currentState = state.value.verificationState
             if (currentState is Render2FA) {
                 val linkAccountManager = currentState.linkAccountManager()
-                val result = linkAccountManager.startVerification()
+                val result = linkAccountManager.startVerification(isResendSmsCode = isResend)
                 val error = result.exceptionOrNull()
 
                 update2FAState { viewState ->

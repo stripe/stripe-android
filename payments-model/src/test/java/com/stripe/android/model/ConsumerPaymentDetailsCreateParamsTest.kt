@@ -5,6 +5,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import org.json.JSONObject
 import org.junit.Test
+import java.util.Locale
 
 class ConsumerPaymentDetailsCreateParamsTest {
 
@@ -46,6 +47,42 @@ class ConsumerPaymentDetailsCreateParamsTest {
                 ),
                 "active" to true,
             )
+        )
+    }
+
+    @Test
+    fun consumerPaymentDetailsCreateParams_Card_toParamMap_includesClientAttributionMetadata() {
+        val clientAttributionMetadataMap = mapOf(
+            "elements_session_config_id" to "e961790f-43ed-4fcc-a534-74eeca28d042",
+        )
+        val params = ConsumerPaymentDetailsCreateParams.Card(
+            cardPaymentMethodCreateParamsMap = mapOf(
+                "client_attribution_metadata" to clientAttributionMetadataMap,
+            ),
+            email = "email@stripe.com",
+        ).toParamMap()
+
+        assertThat(params).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadataMap,
+        )
+    }
+
+    @Test
+    fun consumerPaymentDetailsCreateParams_Bank_toParamMap_includesClientAttributionMetadata() {
+        val clientAttributionMetadataMap = mapOf(
+            "elements_session_config_id" to "e961790f-43ed-4fcc-a534-74eeca28d042",
+        )
+        val params = ConsumerPaymentDetailsCreateParams.BankAccount(
+            bankAccountId = "bank_123",
+            billingAddress = emptyMap(),
+            billingEmailAddress = null,
+            clientAttributionMetadata = mapOf("client_attribution_metadata" to clientAttributionMetadataMap),
+        ).toParamMap()
+
+        assertThat(params).containsEntry(
+            "client_attribution_metadata",
+            clientAttributionMetadataMap,
         )
     }
 
@@ -179,7 +216,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
     }
 
     @Test
-    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noAddress_returnsNull`() {
+    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noAddress_returnsDefault`() {
         val params = mapOf(
             "billing_details" to mapOf(
                 "name" to "John Doe"
@@ -187,12 +224,13 @@ class ConsumerPaymentDetailsCreateParamsTest {
         )
 
         val result = getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(params)
+        val expected = "billing_address" to mapOf("country_code" to Locale.getDefault().country)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
-    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noBillingDetails_returnsNull`() {
+    fun `getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams_noBillingDetails_returnsDefault`() {
         val params = mapOf(
             "card" to mapOf(
                 "number" to "4242424242424242",
@@ -202,12 +240,18 @@ class ConsumerPaymentDetailsCreateParamsTest {
         )
 
         val result = getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(params)
+        val expected = "billing_address" to mapOf("country_code" to Locale.getDefault().country)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test
     fun `ConsumerPaymentDetailsUpdateParams_toParamMap_withAllFields`() {
+        val clientAttributionMetadataParams = mapOf(
+            "merchant_integration_source" to "elements",
+            "merchant_integration_subtype" to "mobile",
+            "merchant_integration_version" to "stripe-android/21.28.2",
+        )
         val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = "card_123",
             isDefault = true,
@@ -229,7 +273,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                         "state" to "ON"
                     )
                 )
-            )
+            ),
+            clientAttributionMetadataParams = clientAttributionMetadataParams,
         )
 
         val result = updateParams.toParamMap()
@@ -239,6 +284,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).containsEntry("exp_year", 2026)
         assertThat(result).containsEntry("preferred_network", "visa")
         assertThat(result).containsKey("billing_address")
+        assertThat(result).containsEntry("client_attribution_metadata", clientAttributionMetadataParams)
 
         val billingAddress = result["billing_address"] as Map<*, *>
         assertThat(billingAddress).containsEntry("country_code", "CA")
@@ -254,7 +300,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
         val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = "card_123",
             isDefault = null,
-            cardPaymentMethodCreateParamsMap = null
+            cardPaymentMethodCreateParamsMap = null,
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()
@@ -272,7 +319,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "exp_month" to 3,
                     "exp_year" to 2027
                 )
-            )
+            ),
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()
@@ -280,7 +328,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).doesNotContainKey("is_default")
         assertThat(result).containsEntry("exp_month", 3)
         assertThat(result).containsEntry("exp_year", 2027)
-        assertThat(result).doesNotContainKey("billing_address")
+        assertThat(result).containsEntry("billing_address", mapOf("country_code" to Locale.getDefault().country))
         assertThat(result).doesNotContainKey("preferred_network")
     }
 
@@ -294,7 +342,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
                     "exp_month" to 3,
                     "exp_year" to 2027
                 )
-            )
+            ),
+            clientAttributionMetadataParams = emptyMap(),
         )
 
         val result = updateParams.toParamMap()
@@ -302,7 +351,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         assertThat(result).containsEntry("is_default", true)
         assertThat(result).containsEntry("exp_month", 3)
         assertThat(result).containsEntry("exp_year", 2027)
-        assertThat(result).doesNotContainKey("billing_address")
+        assertThat(result).containsEntry("billing_address", mapOf("country_code" to Locale.getDefault().country))
         assertThat(result).doesNotContainKey("preferred_network")
     }
 
@@ -370,7 +419,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
             brand = CardBrand.Visa,
             networks = listOf("visa"),
             cvcCheck = CvcCheck.Pass,
-            funding = "credit",
+            funding = ConsumerPaymentDetails.Card.Funding.Credit,
             billingAddress = billingAddress,
             billingEmailAddress = "john@example.com"
         )

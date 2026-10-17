@@ -8,7 +8,10 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Use Customer Session",
     key = "customer_session_enabled"
 ) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }
@@ -18,6 +21,13 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
             checkoutRequestBuilder.customerKeyType(CheckoutRequest.CustomerKeyType.CustomerSession)
         } else {
             checkoutRequestBuilder.customerKeyType(CheckoutRequest.CustomerKeyType.Legacy)
+        }
+    }
+
+    override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
+        if (!value) {
+            playgroundSettings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.NO_CONNECTED_ACCOUNT
         }
     }
 

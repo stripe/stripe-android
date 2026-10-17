@@ -89,9 +89,9 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["error_message"]).isEqualTo("test error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
 
-            // Verify unexpected error was reported
+            // Verify expected error was reported
             assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+                .contains(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
         }
 
     @Test
@@ -111,9 +111,9 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["error_message"]).isNull()
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
 
-            // Verify unexpected error was reported for null error
+            // Verify expected error was reported for null error
             assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+                .contains(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
         }
 
     @Test
@@ -130,9 +130,9 @@ internal class DefaultCaptchaEventsReporterTest {
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
             assertThat(loggedParams["duration"]).isEqualTo(0f)
 
-            // Verify unexpected error was reported
+            // Verify expected error was reported
             assertThat(fakeErrorReporter.getLoggedErrors())
-                .contains(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
+                .contains(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE.eventName)
         }
 
     @Test
@@ -166,7 +166,19 @@ internal class DefaultCaptchaEventsReporterTest {
                 startCalled = true
             }
 
+            override fun elapsed(key: DurationProvider.Key): Duration? {
+                throw NotImplementedError("this function should not be called")
+            }
+
             override fun end(key: DurationProvider.Key): Duration? {
+                throw NotImplementedError("this function should not be called")
+            }
+
+            override fun completedDuration(key: DurationProvider.Key): Duration? {
+                throw NotImplementedError("this function should not be called")
+            }
+
+            override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
                 throw NotImplementedError("this function should not be called")
             }
         }

@@ -15,10 +15,13 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -111,6 +114,14 @@ class LinkHandlerTest {
     }
 
     @Test
+    fun `setupLinkWithEagerLaunch returns false in NeedsWebVerification state`() {
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.NeedsWebVerification,
+            expectedResult = false
+        )
+    }
+
+    @Test
     fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() {
         setupLinkWithEagerLaunchTest(
             loginState = LinkState.LoginState.LoggedOut,
@@ -120,8 +131,18 @@ class LinkHandlerTest {
     }
 
     @Test
+    fun `setupLinkWithEagerLaunch returns false when customer has saved payment methods`() = runLinkTest {
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+            state = createLinkState(loginState = LoginState.NeedsVerification),
+            customerPaymentMethods = listOf(PaymentMethodFixtures.createCard()),
+        )
+
+        assertThat(shouldLaunchEagerly).isFalse()
+    }
+
+    @Test
     fun `setupLinkWithEagerLaunch returns false when state is null`() = runLinkTest {
-        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(state = null)
+        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(state = null, customerPaymentMethods = emptyList())
 
         assertThat(shouldLaunchEagerly).isFalse()
     }
@@ -146,7 +167,8 @@ class LinkHandlerTest {
                 state = createLinkState(
                     loginState = loginState,
                     signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-                )
+                ),
+                customerPaymentMethods = emptyList(),
             )
 
             assertThat(shouldLaunchEagerly).isEqualTo(expectedResult)
@@ -169,7 +191,7 @@ private fun runLinkTest(
         .thenReturn(linkAttestationCheck)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
-    val linkStore = mock<LinkStore>()
+    val linkStore = FakeLinkStore()
     val handler = LinkHandler(
         linkConfigurationCoordinator = linkConfigurationCoordinator,
     )

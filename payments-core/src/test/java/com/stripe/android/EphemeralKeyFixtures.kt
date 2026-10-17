@@ -49,3 +49,25 @@ internal object EphemeralKeyFixtures {
         )
     }
 }
+
+internal fun EphemeralKey.copy(
+    objectId: String = this.objectId,
+    created: Long = this.created,
+    expires: Long = this.expires,
+    id: String = this.id,
+    isLiveMode: Boolean = this.isLiveMode,
+    objectType: String = this.objectType,
+    secret: String = this.secret,
+    type: String = this.type
+): EphemeralKey {
+    return EphemeralKey(
+        objectId = objectId,
+        created = created,
+        expires = expires,
+        id = id,
+        isLiveMode = isLiveMode,
+        objectType = objectType,
+        secret = secret,
+        type = type
+    )
+}

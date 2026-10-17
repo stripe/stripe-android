@@ -1,7 +1,14 @@
 package com.stripe.android.paymentelement.confirmation
 
+import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -10,58 +17,99 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
+import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
 
 class IntentConfirmationDefinitionTest {
     @Test
-    fun `'createLauncher' should call factory when creating launcher`() {
-        val launcher = FakePaymentLauncher()
+    fun `key is IntentConfirmation`() {
+        val definition = createIntentConfirmationDefinition()
 
-        val definition = createIntentConfirmationDefinition(
-            paymentLauncher = launcher,
+        assertThat(definition.key).isEqualTo("IntentConfirmation")
+    }
+
+    @Test
+    fun `option returns new payment method confirmation option`() {
+        val definition = createIntentConfirmationDefinition()
+        val option = PaymentMethodConfirmationOption.New(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = null,
+            extraParams = null,
+            shouldSave = false,
         )
 
-        val createdLauncher = definition.createLauncher(
-            activityResultCaller = mock {
-                on {
-                    registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
-                } doReturn mock()
-            },
-            onResult = {}
-        )
+        assertThat(definition.option(option)).isEqualTo(option)
+    }
 
-        assertThat(createdLauncher).isEqualTo(launcher)
+    @Test
+    fun `option returns saved payment method confirmation option`() {
+        val definition = createIntentConfirmationDefinition()
+
+        assertThat(definition.option(SAVED_PAYMENT_CONFIRMATION_OPTION))
+            .isEqualTo(SAVED_PAYMENT_CONFIRMATION_OPTION)
+    }
+
+    @Test
+    fun `option returns null for an unrelated option`() {
+        val definition = createIntentConfirmationDefinition()
+
+        assertThat(definition.option(FakeConfirmationOption())).isNull()
+    }
+
+    @Test
+    fun `'createLauncher' should register and return the activity result launcher`() = runTest {
+        val definition = createIntentConfirmationDefinition()
+
+        DummyActivityResultCaller.test {
+            val createdLauncher = definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
+                onResult = {},
+            )
+
+            awaitRegisterCall()
+            val registeredLauncher = awaitNextRegisteredLauncher()
+
+            assertThat(createdLauncher).isEqualTo(registeredLauncher)
+        }
+    }
+
+    @Test
+    fun `unregister unregisters the activity result launcher`() = runTest {
+        val definition = createIntentConfirmationDefinition()
+        val launcher = FakeActivityResultLauncher<PaymentLauncherContract.Args>()
+
+        definition.unregister(launcher)
+
+        launcher.unregisterCalls.awaitItem()
     }
 
     @Test
     fun `On 'action' with new payment method, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep()
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
-            val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = "pi_123")
             val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
             val shippingDetails = AddressDetails(name = "John Doe")
 
@@ -71,15 +119,13 @@ class IntentConfirmationDefinitionTest {
                     optionsParams = null,
                     shouldSave = true,
                     extraParams = null,
-                    passiveCaptchaParams = null
                 ),
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
-            val result = intentConfirmationInterceptor
+            val result = intentConfirmationInterceptorFactory.interceptor
                 .await<FakeIntentConfirmationInterceptor.InterceptCall.WithNewPaymentMethod>()
 
-            assertThat(result.initializationMode).isEqualTo(initializationMode)
             assertThat(result.paymentMethodCreateParams).isEqualTo(createParams)
             assertThat(result.paymentMethodOptionsParams).isNull()
             assertThat(result.shippingValues).isEqualTo(shippingDetails.toConfirmPaymentIntentShipping())
@@ -89,78 +135,112 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On 'action' with saved payment method, should call 'IntentConfirmationInterceptor' with expected params`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep()
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
             val confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION
 
             definition.action(
                 confirmationOption = confirmationOption,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
-            val result = intentConfirmationInterceptor
+            val result = intentConfirmationInterceptorFactory.interceptor
                 .await<FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod>()
 
-            assertThat(result.initializationMode).isEqualTo(CONFIRMATION_PARAMETERS.initializationMode)
             assertThat(result.paymentMethod).isEqualTo(confirmationOption.paymentMethod)
             assertThat(result.paymentMethodOptionsParams).isEqualTo(confirmationOption.optionsParams)
             assertThat(result.shippingValues).isEqualTo(
-                CONFIRMATION_PARAMETERS.shippingDetails?.toConfirmPaymentIntentShipping()
+                CONFIRMATION_PARAMETERS.paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
             )
         }
 
     @Test
-    fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueCompleteStep(
-                intent = CONFIRMATION_PARAMETERS.intent,
-            )
-        }
-
+    fun `On interceptor factory callback error, action should return failure`() = runTest {
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
+                override suspend fun create(
+                    integrationMetadata: IntegrationMetadata,
+                    customerMetadata: CustomerMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
+                ): IntentConfirmationInterceptor {
+                    throw CallbackNotFoundException(
+                        message = "CreateIntentCallback must be implemented",
+                        resolvableError = "Callback is missing".resolvableString,
+                        analyticsValue = "callbackNotFound",
+                    )
+                }
+            }
         )
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+        ).asFail()
+
+        assertThat(action.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(action.cause.message).isEqualTo("CreateIntentCallback must be implemented")
+        assertThat(action.message).isEqualTo("Callback is missing".resolvableString)
+        assertThat(action.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+    }
+
+    @Test
+    fun `On 'IntentConfirmationInterceptor' complete, should return 'Complete' confirmation action`() = runTest {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
+            enqueueCompleteStep(
+                intent = CONFIRMATION_PARAMETERS.intent,
+            )
+        }
+        val definition = createIntentConfirmationDefinition(
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
+        )
+
+        val action = definition.action(
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+            }
+        )
     }
 
     @Test
     fun `On 'IntentConfirmationInterceptor' complete with uncompleted flow, should return expected action`() =
         runTest {
-            val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+            val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
                 enqueueCompleteStep(
                     intent = CONFIRMATION_PARAMETERS.intent,
                     completedFullPaymentFlow = false
                 )
             }
-
             val definition = createIntentConfirmationDefinition(
-                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
             )
 
             val action = definition.action(
                 confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-                confirmationParameters = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
             )
 
             val completeAction = action.asComplete()
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-            assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(completeAction.metadata).isEqualTo(
+                MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                }
+            )
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }
 
@@ -169,20 +249,19 @@ class IntentConfirmationDefinitionTest {
         val message = "Failed!"
         val cause = IllegalStateException("Failed with exception!")
 
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueFailureStep(
                 cause = cause,
                 message = message
             )
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val failAction = action.asFail()
@@ -194,27 +273,27 @@ class IntentConfirmationDefinitionTest {
 
     @Test
     fun `On 'IntentConfirmationInterceptor' next step, should return 'Launch' confirmation action`() = runTest {
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
-            enqueueNextActionStep(clientSecret = "pi_123")
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
+            enqueueNextActionStep(intent = paymentIntent)
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val launchAction = action.asLaunch()
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
-                clientSecret = "pi_123"
+                intent = paymentIntent,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
             )
         )
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
     @Test
@@ -224,17 +303,16 @@ class IntentConfirmationDefinitionTest {
             paymentMethodType = PaymentMethod.Type.Card
         )
 
-        val intentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
+        val intentConfirmationInterceptorFactory = FakeIntentConfirmationInterceptorFactory {
             enqueueConfirmStep(confirmParams = confirmParams)
         }
-
         val definition = createIntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
         )
 
         val action = definition.action(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
         )
 
         val launchAction = action.asLaunch()
@@ -242,9 +320,9 @@ class IntentConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
             )
         )
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -261,9 +339,12 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.Confirm(
+                confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -275,20 +356,24 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'SetupIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
         )
 
         definition.launch(
-            launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "si_123"),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = setupIntent,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.SetupIntent(clientSecret = "si_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
     }
 
@@ -306,9 +391,12 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
-            confirmationParameters = CONFIRMATION_PARAMETERS_WITH_SI,
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.Confirm(
+                confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
@@ -320,21 +408,102 @@ class IntentConfirmationDefinitionTest {
     @Test
     fun `On launch with next step action and 'PaymentIntent', should launch with expected params`() = runTest {
         val launcher = FakePaymentLauncher()
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val definition = createIntentConfirmationDefinition(
             paymentLauncher = launcher,
         )
 
         definition.launch(
-            launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.NextAction(clientSecret = "pi_123"),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = paymentIntent,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
 
         assertThat(launcher.calls.awaitItem()).isEqualTo(
-            FakePaymentLauncher.Call.HandleNextAction.PaymentIntent(clientSecret = "pi_123")
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
         )
+    }
+
+    @Test
+    fun `On launch with next step action and 'PaymentIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = paymentIntent,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(paymentIntent)
+        )
+    }
+
+    @Test
+    fun `On launch with next step action and 'SetupIntent' with intent, should use optimized path`() = runTest {
+        val launcher = FakePaymentLauncher()
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = launcher,
+        )
+
+        val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        definition.launch(
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = setupIntent,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(launcher.calls.awaitItem()).isEqualTo(
+            FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
+        )
+    }
+
+    @Test
+    fun `On 'launch', should build payment launcher using configuration and status bar color from confirmation args`() {
+        var capturedStatusBarColor: Int? = null
+        var capturedApiConfiguration: ApiConfiguration.State? = null
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncherFactory = { _, statusBarColor, apiConfiguration ->
+                capturedStatusBarColor = statusBarColor
+                capturedApiConfiguration = apiConfiguration
+                FakePaymentLauncher()
+            },
+        )
+
+        definition.launch(
+            launcher = FakeActivityResultLauncher(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(capturedStatusBarColor).isEqualTo(0x00FF00)
+        assertThat(capturedApiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
     }
 
     @Test
@@ -347,17 +516,22 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS.copy(
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             ),
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
 
         val succeededResult = result.asSucceeded()
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
-        assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(succeededResult.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+            }
+        )
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -373,8 +547,11 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            ),
             result = InternalPaymentResult.Failed(exception),
         )
 
@@ -395,8 +572,11 @@ class IntentConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            ),
             result = InternalPaymentResult.Canceled,
         )
 
@@ -406,12 +586,25 @@ class IntentConfirmationDefinitionTest {
     }
 
     private fun createIntentConfirmationDefinition(
-        intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor(),
-        paymentLauncher: PaymentLauncher = FakePaymentLauncher()
+        intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory =
+            object : IntentConfirmationInterceptor.Factory {
+                override suspend fun create(
+                    integrationMetadata: IntegrationMetadata,
+                    customerMetadata: CustomerMetadata?,
+                    clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
+                ): IntentConfirmationInterceptor {
+                    return FakeIntentConfirmationInterceptor()
+                }
+            },
+        paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
+        paymentLauncherFactory:
+        (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, ApiConfiguration.State) -> PaymentLauncher =
+            { _, _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
-            intentConfirmationInterceptor = intentConfirmationInterceptor,
-            paymentLauncherFactory = { paymentLauncher }
+            intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
+            paymentLauncherFactory = paymentLauncherFactory,
         )
     }
 
@@ -447,24 +640,26 @@ class IntentConfirmationDefinitionTest {
 
     private companion object {
         private val SAVED_PAYMENT_CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(
                 cvc = "505",
             ),
-            passiveCaptchaParams = null
         )
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123"
-            ),
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(name = "John Doe"),
-        )
+        private val CONFIRMATION_PARAMETERS =
+            com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    shippingDetails = AddressDetails(name = "John Doe")
+                ),
+            )
 
         private val CONFIRMATION_PARAMETERS_WITH_SI = CONFIRMATION_PARAMETERS.copy(
-            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+                shippingDetails = AddressDetails(name = "John Doe")
+            ),
         )
     }
 }

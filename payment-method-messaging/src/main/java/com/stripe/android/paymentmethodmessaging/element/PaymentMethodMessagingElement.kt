@@ -1,0 +1,282 @@
+package com.stripe.android.paymentmethodmessaging.element
+
+import android.app.Application
+import androidx.annotation.ColorInt
+import androidx.annotation.FontRes
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import com.stripe.android.uicore.utils.collectAsState
+import java.util.Locale
+import javax.inject.Inject
+
+@PaymentMethodMessagingElementPreview
+class PaymentMethodMessagingElement @Inject internal constructor(
+    private val messagingCoordinator: PaymentMethodMessagingCoordinator,
+    private val eventReporter: PaymentMethodMessagingEventReporter
+) {
+
+    init {
+        eventReporter.onInit()
+    }
+
+    /**
+     * Call this method to configure [PaymentMethodMessagingElement] or when the [Configuration] values
+     * (amount, currency, etc.) change.
+     */
+    suspend fun configure(
+        configuration: Configuration
+    ): ConfigureResult {
+        return messagingCoordinator.configure(configuration.build())
+    }
+
+    /**
+     * A composable function that displays BNPL promotional messaging.
+     */
+    @Composable
+    fun Content(appearance: Appearance = Appearance()) {
+        val content by messagingCoordinator.messagingContent.collectAsState()
+        val appearanceState = appearance.build()
+        eventReporter.onElementDisplayed(appearanceState)
+        content?.Content(appearanceState)
+    }
+
+    companion object {
+        fun create(application: Application): PaymentMethodMessagingElement {
+            return DaggerPaymentMethodMessagingComponent.factory()
+                .create(
+                    application = application,
+                ).element
+        }
+    }
+
+    /**
+     * The result of a [configure] call.
+     */
+    sealed interface ConfigureResult {
+
+        /**
+         * The configuration succeeded and [Content] will display a view.
+         */
+        class Succeeded internal constructor() : ConfigureResult
+
+        /**
+         * The configuration succeeded but no content is available to display. (e.g. the amount is less than the
+         * minimum for available payment methods).
+         */
+        class NoContent internal constructor() : ConfigureResult
+
+        /**
+         * The configure call failed e.g. due to network failure or because of an invalid [Configuration].
+         */
+        class Failed internal constructor(val error: Throwable) : ConfigureResult
+    }
+
+    /**
+     * Configuration for [PaymentMethodMessagingElement].
+     */
+    class Configuration {
+        private var amount: Long? = null
+        private var currency: String? = null
+        private var locale: String? = null
+        private var countryCode: String? = null
+        private var paymentMethodTypes: List<PaymentMethod.Type>? = null
+
+        /**
+         * Amount intended to be collected in the smallest currency unit (e.g. 100 cents to charge $1.00).
+         */
+        fun amount(amount: Long) = apply {
+            this.amount = amount
+        }
+
+        /**
+         * Three-letter ISO currency code.
+         */
+        fun currency(currency: String) = apply {
+            this.currency = currency
+        }
+
+        /**
+         * Language code used to localize message displayed in the element.
+         * See [the Stripe documentation](https://docs.stripe.com/js/appendix/supported_locales) for a list of
+         * supported values. Defaults to the current device locale language.
+         * **Note**: Not all device locales are supported by Stripe, and English will be used in the case of
+         * an unsupported locale. If you want to ensure a specific locale is used, pass it explicitly.
+         */
+        fun locale(locale: String) = apply {
+            this.locale = locale
+        }
+
+        /**
+         * Two letter country code of the customer's location. If not provided, country will be determined based
+         * on IP Address.
+         */
+        fun countryCode(countryCode: String?) = apply {
+            this.countryCode = countryCode
+        }
+
+        /**
+         * The payment methods to request messaging for. Supported values are [PaymentMethod.Type.Affirm],
+         * [PaymentMethod.Type.AfterpayClearpay], and [PaymentMethod.Type.Klarna]
+         * If null, uses your preferences from the
+         * [Stripe dashboard](https://dashboard.stripe.com/settings/payment_methods) to show the relevant payment
+         * methods.
+         * See [Dynamic payment methods])https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods)
+         * for more information.
+         */
+        fun paymentMethodTypes(paymentMethodTypes: List<PaymentMethod.Type>?) = apply {
+            this.paymentMethodTypes = paymentMethodTypes
+        }
+
+        internal class State(
+            val amount: Long,
+            val currency: String,
+            val locale: String,
+            val countryCode: String?,
+            val paymentMethodTypes: List<PaymentMethod.Type>?,
+        )
+
+        internal fun build(): State {
+            return State(
+                amount = requireNotNull(amount) { "Configuration.amount must not be null" },
+                currency = requireNotNull(currency) { "Configuration.currency must not be null" },
+                locale = locale ?: Locale.getDefault().language,
+                countryCode = countryCode,
+                paymentMethodTypes = paymentMethodTypes,
+            )
+        }
+    }
+
+    class Appearance {
+        private var theme: Theme = Theme.LIGHT
+        private var font: Font.State? = null
+        private var colors: Colors.State? = null
+
+        /**
+         * The theme of the payment method icons to display.
+         * See [our docs](https://docs.stripe.com/elements/payment-method-messaging#appearance) for more info.
+         */
+        fun theme(theme: Theme) = apply {
+            this.theme = theme
+        }
+
+        /**
+         * The font style of PaymentMethodMessagingElement text.
+         * - Note: If null, [MaterialTheme.typography.body1] will be used.
+         */
+        fun font(font: Font) = apply {
+            this.font = font.build()
+        }
+
+        /**
+         * The colors of the PaymentMethodMessagingElement.
+         */
+        fun colors(colors: Colors) = apply {
+            this.colors = colors.build()
+        }
+
+        internal data class State(
+            val theme: Theme,
+            val font: Font.State?,
+            val colors: Colors.State,
+        )
+
+        internal fun build() = State(
+            theme = theme,
+            font = font,
+            colors = colors ?: Colors().build(),
+        )
+
+        /**
+         * The theme of the payment method icons to display.
+         */
+        enum class Theme {
+            LIGHT,
+            DARK,
+            FLAT
+        }
+
+        class Font {
+            private var fontFamily: Int? = null
+            private var fontSizeSp: Float? = null
+            private var fontWeight: Int? = null
+            private var letterSpacingSp: Float? = null
+
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            fun fontFamily(@FontRes fontFamily: Int?) = apply {
+                this.fontFamily = fontFamily
+            }
+
+            /**
+             * The font size used for the text. This should represent an sp value.
+             */
+            fun fontSizeSp(fontSizeSp: Float?) = apply {
+                this.fontSizeSp = fontSizeSp
+            }
+
+            /**
+             * The font weight used for the text.
+             */
+            fun fontWeight(fontWeight: Int?) = apply {
+                this.fontWeight = fontWeight
+            }
+
+            /**
+             * The letter spacing used for the text. This should represent an sp value.
+             */
+            fun letterSpacingSp(letterSpacingSp: Float?) = apply {
+                this.letterSpacingSp = letterSpacingSp
+            }
+
+            internal data class State(
+                @FontRes
+                val fontFamily: Int? = null,
+                val fontSizeSp: Float? = null,
+                val fontWeight: Int? = null,
+                val letterSpacingSp: Float? = null,
+            )
+
+            internal fun build() = State(
+                fontFamily = fontFamily,
+                fontSizeSp = fontSizeSp,
+                fontWeight = fontWeight,
+                letterSpacingSp = letterSpacingSp,
+            )
+        }
+
+        class Colors {
+            private var textColor: Int? = null
+            private var linkTextColor: Int? = null
+
+            /**
+             * The color used for the message text.
+             */
+            fun textColor(@ColorInt textColor: Int) = apply {
+                this.textColor = textColor
+            }
+
+            /**
+             * The color used for the text that links to available BNPL plans.
+             */
+            fun linkTextColor(@ColorInt linkTextColor: Int) = apply {
+                this.linkTextColor = linkTextColor
+            }
+
+            internal data class State(
+                @ColorInt
+                val textColor: Int?,
+                @ColorInt
+                val linkTextColor: Int?
+            )
+
+            internal fun build() = State(
+                textColor = textColor,
+                linkTextColor = linkTextColor
+            )
+        }
+    }
+}

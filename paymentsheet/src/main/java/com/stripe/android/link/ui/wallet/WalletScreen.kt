@@ -28,8 +28,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,12 +68,13 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -120,11 +119,13 @@ internal fun WalletScreen(
 
     WalletBody(
         state = state,
+        linkBrand = state.linkBrand,
         expiryDateController = viewModel.expiryDateController,
         cvcController = viewModel.cvcController,
         onItemSelected = viewModel::onItemSelected,
         onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
+        onDisabledButtonClick = viewModel::handleDisabledButtonClick,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
@@ -140,12 +141,14 @@ internal fun WalletScreen(
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
+    linkBrand: LinkBrand,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
     onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -182,6 +185,7 @@ internal fun WalletBody(
                 PaymentDetailsSection(
                     modifier = Modifier,
                     state = state,
+                    linkBrand = linkBrand,
                     isExpanded = state.isExpanded,
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
@@ -218,6 +222,7 @@ internal fun WalletBody(
                 ActionSection(
                     state = state,
                     onPrimaryButtonClick = onPrimaryButtonClick,
+                    onDisabledButtonClick = onDisabledButtonClick,
                     onPayAnotherWayClicked = onPayAnotherWayClicked
                 )
             }
@@ -229,6 +234,7 @@ internal fun WalletBody(
 private fun PaymentDetailsSection(
     modifier: Modifier,
     state: WalletUiState,
+    linkBrand: LinkBrand,
     isExpanded: Boolean,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
@@ -247,6 +253,7 @@ private fun PaymentDetailsSection(
     ) {
         PaymentMethodSection(
             state = state,
+            linkBrand = linkBrand,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
             onExpandedChanged = onExpandedChanged,
@@ -268,7 +275,7 @@ private fun PaymentDetailsSection(
 
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
-                LinkMandate(mandate.resolve())
+                LinkMandate(mandate.resolve(), state.linkBrand)
             }
         }
 
@@ -282,7 +289,8 @@ private fun PaymentDetailsSection(
                         paymentDetails = selectedCard,
                         expiryDateController = expiryDateController,
                         cvcController = cvcController,
-                        isCardExpired = selectedCard.isExpired
+                        isCardExpired = selectedCard.isExpired,
+                        isValidating = state.isValidating,
                     )
                 }
             }
@@ -387,6 +395,7 @@ private fun ErrorSection(errorMessage: ResolvableString?) {
 private fun ActionSection(
     state: WalletUiState,
     onPrimaryButtonClick: () -> Unit,
+    onDisabledButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
     Column {
@@ -397,6 +406,8 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
+            allowedDisabledClicks = true,
+            onDisabledButtonClick = onDisabledButtonClick,
         )
         state.secondaryButtonLabel?.let { secondaryButtonLabel ->
             SecondaryButton(
@@ -413,6 +424,7 @@ private fun ActionSection(
 @Composable
 private fun PaymentMethodSection(
     state: WalletUiState,
+    linkBrand: LinkBrand,
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
@@ -440,7 +452,10 @@ private fun PaymentMethodSection(
         labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
-                LinkAppBarMenu(onLogoutClicked)
+                LinkAppBarMenu(
+                    linkBrand = linkBrand,
+                    onLogoutClicked = onLogoutClicked,
+                )
             }
         },
         expandedContent = {
@@ -646,7 +661,7 @@ private fun EmailDetails(
 
         if (showMenu) {
             Icon(
-                imageVector = Icons.Default.MoreVert,
+                painter = painterResource(R.drawable.stripe_ic_material_more_vert),
                 contentDescription = stringResource(R.string.stripe_show_menu),
                 tint = LinkTheme.colors.iconSecondary,
                 modifier = Modifier
@@ -761,9 +776,9 @@ private fun AddPaymentMethodRow(
 }
 
 @Composable
-private fun LinkMandate(text: String) {
+private fun LinkMandate(text: String, linkBrand: LinkBrand) {
     Html(
-        html = text.replaceHyperlinks(),
+        html = text.replaceHyperlinks(linkBrand),
         color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
@@ -783,15 +798,15 @@ internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     isCardExpired: Boolean,
+    isValidating: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val rowElement = remember(paymentDetails) {
         val rowFields = buildList {
             if (isCardExpired) {
                 add(
                     element = SimpleTextElement(
-                        identifier = IdentifierSpec.Generic("date"),
+                        identifier = FormFieldId.Generic("date"),
                         controller = expiryDateController
                     )
                 )
@@ -799,44 +814,37 @@ internal fun CardDetailsRecollectionForm(
 
             add(
                 element = CvcElement(
-                    _identifier = IdentifierSpec.CardCvc,
+                    _identifier = FormFieldId.CardCvc,
                     controller = cvcController
                 )
             )
         }
 
         RowElement(
-            _identifier = IdentifierSpec.Generic(paymentDetails.id),
+            _identifier = FormFieldId.Generic(paymentDetails.id),
             fields = rowFields,
             controller = RowController(rowFields)
         )
     }
 
-    val errorTextRes = if (isCardExpired) {
-        R.string.stripe_wallet_update_expired_card_error
-    } else {
-        R.string.stripe_wallet_recollect_cvc_error
-    }.resolvableString
-
-    Column(modifier) {
-        ErrorText(
-            text = errorTextRes.resolve(context),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_ERROR)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SectionElementUI(
-            modifier = Modifier
-                .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
-            enabled = true,
-            element = SectionElement.wrap(rowElement),
-            hiddenIdentifiers = emptySet(),
-            lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
+    val sectionElement = remember(rowElement) {
+        SectionElement.wrap(rowElement)
     }
+
+    LaunchedEffect(isValidating) {
+        sectionElement.fields.forEach {
+            it.onValidationStateChanged(isValidating)
+        }
+    }
+
+    SectionElementUI(
+        modifier = modifier
+            .testTag(WALLET_SCREEN_RECOLLECTION_FORM_FIELDS),
+        enabled = true,
+        element = sectionElement,
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = rowElement.fields.last().identifier
+    )
 }
 
 @Composable
@@ -894,9 +902,9 @@ private fun rememberFinancialConnectionsSheetInternal(
     }
 }
 
-private fun String.replaceHyperlinks() = this.replace(
+private fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
-    "<a href=\"https://link.com/terms/ach-authorization\">"
+    "<a href=\"${linkBrand.achAuthorizationTermsUrl()}\">"
 ).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f

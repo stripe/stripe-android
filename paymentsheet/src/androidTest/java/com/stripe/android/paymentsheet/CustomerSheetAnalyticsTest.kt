@@ -4,11 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
-import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class CustomerSheetAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-        validationTimeout = 1.seconds, // Analytics requests happen async.
+        validationTimeout = 5.seconds, // Analytics requests happen async.
     )
 
     @get:Rule
@@ -42,9 +43,7 @@ internal class CustomerSheetAnalyticsTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -68,6 +67,7 @@ internal class CustomerSheetAnalyticsTest {
         context.presentCustomerSheet()
 
         validateAnalyticsRequest(eventName = "cs_card_number_completed")
+        validateAnalyticsRequest(eventName = "cs_cardscan_api_check_failed")
 
         page.fillOutCardDetails()
 
@@ -86,16 +86,15 @@ internal class CustomerSheetAnalyticsTest {
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
-        validateAnalyticsRequest(eventName = "stripe_android.setup_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
-            query("intent_id", "seti_12345"),
+            analyticsPayloadField("intent_id", "seti_12345"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.setup_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
-            query("intent_id", "seti_12345"),
+            analyticsPayloadField("intent_id", "seti_12345"),
         )
         validateAnalyticsRequest(eventName = "cs_add_payment_method_via_setup_intent_success")
 

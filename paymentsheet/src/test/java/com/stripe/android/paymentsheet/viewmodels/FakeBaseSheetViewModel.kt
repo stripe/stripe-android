@@ -3,21 +3,31 @@ package com.stripe.android.paymentsheet.viewmodels
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,15 +45,23 @@ internal class FakeBaseSheetViewModel private constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     paymentMethodMetadata: PaymentMethodMetadata,
+    customViewModelScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
 ) : BaseSheetViewModel(
     config = PaymentSheet.Configuration.Builder("Example, Inc.").build(),
     eventReporter = FakeEventReporter(),
-    customerRepository = FakeCustomerRepository(),
+    savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
     workContext = Dispatchers.IO,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
+    mode = EventReporter.Mode.Complete,
+    customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+    customViewModelScope = customViewModelScope,
+    placesClient = null,
+    linkAccountHolder = LinkAccountHolder(savedStateHandle),
+    stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+    addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
 ) {
     companion object {
         fun create(
@@ -75,6 +93,11 @@ internal class FakeBaseSheetViewModel private constructor(
             }
         }
     }
+
+    override val tapToAddHelper: TapToAddHelper = FakeTapToAddHelper.noOp()
+
+    override val isNfcScanningAvailable: IsNfcScanningAvailable =
+        FakeIsNfcScanningAvailable(result = false)
 
     init {
         setPaymentMethodMetadata(paymentMethodMetadata)

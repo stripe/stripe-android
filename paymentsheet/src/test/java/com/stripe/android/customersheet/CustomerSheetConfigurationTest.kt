@@ -1,6 +1,8 @@
 package com.stripe.android.customersheet
 
+import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import junit.framework.TestCase.fail
@@ -68,6 +70,47 @@ class CustomerSheetConfigurationTest {
 
         assertThat(configuration2.googlePayEnabled)
             .isFalse()
+    }
+
+    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @Test
+    fun `newBuilder round-trips all properties`() {
+        val original = CustomerSheet.Configuration(
+            appearance = PaymentSheet.Appearance(
+                colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
+            ),
+            googlePayEnabled = true,
+            headerTextForSelectionScreen = "Header",
+            defaultBillingDetails = PaymentSheet.BillingDetails(name = "Jane"),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+            merchantDisplayName = "Test Merchant",
+            preferredNetworks = listOf(CardBrand.Visa),
+            allowsRemovalOfLastSavedPaymentMethod = false,
+            paymentMethodOrder = listOf("card"),
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex),
+            ),
+            opensCardScannerAutomatically = true,
+        )
+
+        val roundTripped = original.newBuilder().build()
+
+        assertThat(roundTripped).isEqualTo(original)
+    }
+
+    @Test
+    fun `Configuration property count matches expected - update newBuilder when this fails`() {
+        val propertyCount = CustomerSheet.Configuration::class.java.declaredFields
+            .filterNot { it.isSynthetic }
+            .filterNot { java.lang.reflect.Modifier.isStatic(it.modifiers) } // Companion, CREATOR
+            .filterNot { it.name.startsWith("$") } // Compose $stable
+            .size
+        // When a new property is added, this count will change, signaling that:
+        // 1. newBuilder() needs to propagate the new property
+        // 2. The round-trip test above needs a non-default value for it
+        assertThat(propertyCount).isEqualTo(11)
     }
 
     @Test

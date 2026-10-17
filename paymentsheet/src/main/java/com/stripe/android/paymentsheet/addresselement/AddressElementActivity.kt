@@ -9,9 +9,10 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -22,12 +23,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterIsInstance
 
 @OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
@@ -58,22 +62,29 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
-            val coroutineScope = rememberCoroutineScope()
-
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = { target ->
+                    target != ModalBottomSheetValue.Hidden || viewModel.resultStateHolder.state.value !is State.Saving
+                },
+            )
 
-            BackHandler {
-                viewModel.navigator.onBack()
+            LaunchedEffect(bottomSheetState) {
+                viewModel.resultStateHolder.state
+                    .filterIsInstance<State.Finished>()
+                    .collect { state ->
+                        bottomSheetState.hide()
+                        finishWithResult(state.result)
+                    }
             }
 
-            viewModel.navigator.onDismiss = { result ->
-                coroutineScope.launch {
-                    bottomSheetState.hide()
-                    setResult(result)
-                    finish()
+            BackHandler {
+                if (viewModel.resultStateHolder.state.value != State.Idle) return@BackHandler
+
+                if (navController.previousBackStackEntry == null || !viewModel.navigator.onBack()) {
+                    viewModel.resultStateHolder.onUserCancel()
                 }
             }
 
@@ -86,10 +97,10 @@ internal class AddressElementActivity : ComponentActivity() {
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
     ) {
-        StripeTheme {
+        PaymentElementTheme(appearance = starterArgs?.config?.appearance ?: PaymentSheet.Appearance()) {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
-                onDismissed = viewModel.navigator::dismiss,
+                onDismissed = viewModel.resultStateHolder::onUserCancel,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     NavHost(
@@ -97,7 +108,7 @@ internal class AddressElementActivity : ComponentActivity() {
                         startDestination = AddressElementScreen.InputAddress.route,
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
+                            InputAddressScreen(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
                         }
                         composable(
                             AddressElementScreen.Autocomplete.route,
@@ -113,7 +124,7 @@ internal class AddressElementActivity : ComponentActivity() {
                                     AddressElementScreen.Autocomplete.countryArg
                                 )
                             AutocompleteScreen(
-                                viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
+                                viewModel.autoCompleteViewModelSubcomponentFactoryProvider,
                                 viewModel.navigator,
                                 country
                             )
@@ -124,13 +135,14 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+    private fun finishWithResult(result: AddressElementActivityContract.Result) {
         setResult(
             result.resultCode,
             Intent().putExtras(
-                AddressElementActivityContract.Result(result).toBundle()
+                result.toBundle()
             )
         )
+        finish()
     }
 
     override fun finish() {

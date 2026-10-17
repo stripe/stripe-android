@@ -68,9 +68,13 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                                 PaymentMethodRemovePermission.None
                         },
                         // Should always be enabled when using `customer_session`
-                        canUpdateFullPaymentMethodDetails = true
+                        canUpdateCardExpiryAndBillingDetails = true
                     ),
                     defaultPaymentMethodId = customer.defaultPaymentMethod,
+                    customerId = customer.session.customerId,
+                    customerEphemeralKeySecret = customer.session.apiKey,
+                    customerSessionClientSecret = customerSessionElementsSession.ephemeralKey
+                        .customerSessionClientSecret,
                 )
             }.toCustomerSheetDataResult()
         }

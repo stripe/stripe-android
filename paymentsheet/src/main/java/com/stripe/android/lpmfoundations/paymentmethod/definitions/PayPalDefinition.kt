@@ -1,17 +1,14 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.FormItemSpec
-import com.stripe.android.ui.core.elements.MandateTextSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 
 internal object PayPalDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.PayPal
@@ -26,36 +23,31 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayPalUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayPalUiDefinitionFactory
 }
 
-private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object PayPalUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPalDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
-        iconResourceNight = null,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_paypal_night,
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements
-    ): List<FormElement> {
-        val localLayoutSpecs: List<FormItemSpec> = if (PayPalDefinition.requiresMandate(metadata)) {
-            listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
-        } else {
-            emptyList()
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        if (PayPalDefinition.requiresMandate(metadata)) {
+            builder.footer(
+                MandateTextElement(
+                    stringResId = R.string.stripe_paypal_mandate,
+                    args = listOf(arguments.merchantName)
+                )
+            )
         }
-
-        return transformSpecToElements.transform(
-            metadata = metadata,
-            specs = sharedDataSpec.fields + localLayoutSpecs,
-            termsDisplay = metadata.termsDisplayForType(PayPalDefinition.type),
-        )
     }
 }

@@ -10,6 +10,7 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -52,6 +53,34 @@ class IntegrityStandardRequestManagerTest {
 
         assert(result.isFailure)
         assert(result.exceptionOrNull() is AttestationError)
+    }
+
+    @Test
+    fun `prepare - concurrent calls only prepare once due to mutex`() = runTest {
+        var prepareCallCount = 0
+        val tokenProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
+        val countingFactory = object : StandardIntegrityManagerFactory {
+            override fun create(): StandardIntegrityManager = StandardIntegrityManager {
+                prepareCallCount++
+                Tasks.forResult(tokenProvider)
+            }
+        }
+
+        val integrityStandardRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 123456789L,
+            logError = { _, _ -> },
+            factory = countingFactory
+        )
+
+        // Launch 10 concurrent prepare calls
+        val results = List(10) {
+            async { integrityStandardRequestManager.prepare() }
+        }.map { it.await() }
+
+        // All should succeed
+        assert(results.all { it.isSuccess })
+        // But prepare should only be called once due to mutex synchronization
+        assertEquals(1, prepareCallCount)
     }
 
     @Test

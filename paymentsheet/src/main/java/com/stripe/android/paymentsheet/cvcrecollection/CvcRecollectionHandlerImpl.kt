@@ -5,9 +5,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
@@ -21,15 +19,10 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
 
     override fun cvcRecollectionEnabled(
         stripeIntent: StripeIntent,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean {
-        return when (initializationMode) {
-            is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-                initializationMode.intentConfiguration.requireCvcRecollection &&
-                    initializationMode.intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
-            }
-            is PaymentElementLoader.InitializationMode.PaymentIntent -> stripeIntent.supportsCvcRecollection()
-            is PaymentElementLoader.InitializationMode.SetupIntent -> false
+        return when (stripeIntent) {
+            is PaymentIntent -> stripeIntent.supportsCvcRecollection()
+            is SetupIntent -> false
         }
     }
 
@@ -37,10 +30,8 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         stripeIntent: StripeIntent,
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean {
-        return paymentMethod.isCard() &&
-            cvcRecollectionEnabled(stripeIntent, initializationMode)
+        return paymentMethod.isCard() && cvcRecollectionEnabled(stripeIntent)
     }
 
     private fun PaymentMethod.isCard(): Boolean {

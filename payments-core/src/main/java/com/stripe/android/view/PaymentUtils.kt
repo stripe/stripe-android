@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import com.stripe.android.uicore.format.CurrencyFormatter
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Currency
@@ -36,7 +37,7 @@ object PaymentUtils {
      */
     @JvmSynthetic
     internal fun formatPriceString(amount: Double, currency: Currency): String {
-        val majorUnitAmount = amount / 10.0.pow(currency.defaultFractionDigits.toDouble())
+        val majorUnitAmount = amount / 10.0.pow(CurrencyFormatter.getDefaultDecimalDigits(currency).toDouble())
         val currencyFormat = NumberFormat.getCurrencyInstance()
         return try {
             val decimalFormatSymbols = (currencyFormat as DecimalFormat)

@@ -11,6 +11,7 @@ import org.json.JSONArray
 fun NetworkRule.setupV1PaymentMethodsResponse(
     vararg paymentMethodDetails: PaymentMethodDetails,
     type: String = paymentMethodDetails.first().type,
+    applyDefaultAuthorization: Boolean = true,
 ) {
     for (paymentMethodDetail in paymentMethodDetails) {
         // All types must match.
@@ -22,6 +23,7 @@ fun NetworkRule.setupV1PaymentMethodsResponse(
         method("GET"),
         path("/v1/payment_methods"),
         query("type", type),
+        applyDefaultAuthorization = applyDefaultAuthorization,
     ) { response ->
         val paymentMethodsArray = JSONArray()
 

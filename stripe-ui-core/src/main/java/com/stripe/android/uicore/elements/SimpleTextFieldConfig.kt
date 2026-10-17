@@ -15,22 +15,26 @@ open class SimpleTextFieldConfig(
     override val keyboard: KeyboardType = KeyboardType.Text,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     override val optional: Boolean = false,
+    val allowsEmojis: Boolean = true,
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null
     override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean, isValidating: Boolean) = getError() != null && isValidating
+        override fun shouldShowValidationMessage(
+            hasFocus: Boolean,
+            isValidating: Boolean
+        ) = getValidationMessage() != null && isValidating
 
         override fun isValid(): Boolean {
             return optional && input.isEmpty() || input.isNotBlank()
         }
 
-        override fun getError(): FieldError? = if (isValid()) {
+        override fun getValidationMessage(): FieldValidationMessage? = if (isValid()) {
             null
         } else {
-            FieldError(R.string.stripe_blank_and_required)
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required)
         }
 
         override fun isFull(): Boolean = false
@@ -38,14 +42,21 @@ open class SimpleTextFieldConfig(
         override fun isBlank(): Boolean = input.isBlank()
     }
 
-    override fun filter(userTyped: String): String =
-        if (
+    override fun filter(userTyped: String): String {
+        var filtered = if (
             setOf(KeyboardType.Number, KeyboardType.NumberPassword).contains(keyboard)
         ) {
             userTyped.filter { it.isDigit() }
         } else {
             userTyped
         }
+
+        if (!allowsEmojis) {
+            filtered = EMOJI_REGEX.replace(filtered, "")
+        }
+
+        return filtered
+    }
 
     override fun convertToRaw(displayName: String) = displayName
 

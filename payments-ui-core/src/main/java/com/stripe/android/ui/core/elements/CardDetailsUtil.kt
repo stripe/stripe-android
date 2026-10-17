@@ -1,17 +1,17 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.convertTo4DigitDate
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object CardDetailsUtil {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun createExpiryDateFormFieldValues(entry: FormFieldEntry): Map<IdentifierSpec, FormFieldEntry> {
+    fun createExpiryDateFormFieldValues(entry: FormFieldEntry): Map<FormFieldId, FormFieldEntry> {
         return mapOf(
-            IdentifierSpec.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
-            IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(entry)
+            FormFieldId.CardExpMonth to getExpiryMonthFormFieldEntry(entry),
+            FormFieldId.CardExpYear to getExpiryYearFormFieldEntry(entry)
         )
     }
 

@@ -14,8 +14,8 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.link.utils.TestNavigationManager
-import com.stripe.android.model.PassiveCaptchaParams
-import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
@@ -31,6 +31,7 @@ internal class FakeNativeLinkComponent(
     override val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+    override val paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
     override val logger: Logger = FakeLogger(),
     override val linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory = LinkConfirmationHandler.Factory {
@@ -45,10 +46,9 @@ internal class FakeNativeLinkComponent(
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
     override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
     override val webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
-    override val passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
 ) : NativeLinkComponent

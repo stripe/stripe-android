@@ -109,8 +109,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
     private enum class DropdownItem(
         val country: String,
         @DrawableRes val icon: Int,
-        val createParams:
-        (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+        val createParams: (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
         val requiresName: Boolean = true,
         val requiresEmail: Boolean = false
     ) {
@@ -130,11 +129,6 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
             "at",
             R.drawable.ic_brandicon__eps,
             PaymentMethodCreateParams.Companion::createEps
-        ),
-        Giropay(
-            "de",
-            R.drawable.ic_brandicon__giropay,
-            PaymentMethodCreateParams.Companion::createGiropay
         ),
         GrabPay(
             "sg",

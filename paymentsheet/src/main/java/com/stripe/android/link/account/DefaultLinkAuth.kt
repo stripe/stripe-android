@@ -36,15 +36,17 @@ internal class DefaultLinkAuth @Inject constructor(
         linkAuthIntentId: String?,
         customerId: String?,
         sessionId: String,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?
     ): Result<ConsumerSessionLookup> {
         val hasEmailAndSource = email != null && emailSource != null
         val hasAuthIntent = linkAuthIntentId != null
+        val hasLinkAuthToken = linkAuthTokenClientSecret != null
 
-        if (!hasEmailAndSource && !hasAuthIntent) {
+        if (!hasEmailAndSource && !hasAuthIntent && !hasLinkAuthToken) {
             return Result.failure(
                 IllegalArgumentException(
-                    "Either email+emailSource or linkAuthIntentId must be provided"
+                    "Either email+emailSource, linkAuthIntentId, or linkAuthTokenClientSecret must be provided"
                 )
             )
         }
@@ -55,7 +57,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 sessionId = sessionId,
                 linkAuthIntentId = linkAuthIntentId,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret,
             )
         } else {
             linkRepository.lookupConsumer(
@@ -63,7 +66,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 linkAuthIntentId = linkAuthIntentId,
                 sessionId = sessionId,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -93,6 +97,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 countryInferringMethod = countryInferringMethod,
                 name = name,
                 consentAction = consentAction.consumerAction,
+                apiConfiguration = config.apiConfiguration,
             )
         }
     }
@@ -104,7 +109,8 @@ internal class DefaultLinkAuth @Inject constructor(
         return linkRepository.refreshConsumer(
             appId = applicationId,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            supportedVerificationTypes = supportedVerificationTypes
+            supportedVerificationTypes = supportedVerificationTypes,
+            apiConfiguration = config.apiConfiguration,
         )
     }
 
@@ -114,7 +120,8 @@ internal class DefaultLinkAuth @Inject constructor(
         linkAuthIntentId: String?,
         customerId: String?,
         sessionId: String,
-        supportedVerificationTypes: List<String>?
+        supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?,
     ): Result<ConsumerSessionLookup> {
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
@@ -126,7 +133,9 @@ internal class DefaultLinkAuth @Inject constructor(
                 sessionId = sessionId,
                 emailSource = emailSource,
                 customerId = customerId,
-                supportedVerificationTypes = supportedVerificationTypes
+                supportedVerificationTypes = supportedVerificationTypes,
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             val operation = if (email != null) "lookup" else "lookupByAuthIntent"
@@ -156,6 +165,7 @@ internal class DefaultLinkAuth @Inject constructor(
                 amount = config.stripeIntent.amount,
                 currency = config.stripeIntent.currency,
                 incentiveEligibilitySession = null,
+                apiConfiguration = config.apiConfiguration,
             ).getOrThrow()
         }.onFailure { error ->
             reportAttestationError(error, operation = "signup")

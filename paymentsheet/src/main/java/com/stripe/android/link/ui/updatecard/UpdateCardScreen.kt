@@ -126,7 +126,7 @@ internal fun UpdateCardScreenBodyPreview() {
                             isDefault = false,
                             networks = listOf("VISA"),
                             nickname = "Fancy Card",
-                            funding = "credit",
+                            funding = ConsumerPaymentDetails.Card.Funding.Credit,
                             billingAddress = ConsumerPaymentDetails.BillingAddress(
                                 name = null,
                                 line1 = null,
@@ -142,7 +142,8 @@ internal fun UpdateCardScreenBodyPreview() {
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-                    requiresModification = true
+                    requiresModification = true,
+                    autocompleteAddressInteractorFactory = null,
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",

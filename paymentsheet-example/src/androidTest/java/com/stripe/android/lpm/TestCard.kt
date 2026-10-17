@@ -13,19 +13,27 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
+import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.FieldPopulator
+import com.stripe.android.test.core.FieldPopulator.AddressEntryMode
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +43,6 @@ internal class TestCard : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copy(
         saveForFutureUseCheckboxVisible = true,
     )
@@ -64,6 +71,9 @@ internal class TestCard : BasePlaygroundTest() {
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
+            values = FieldPopulator.Values(
+                addressEntryMode = AddressEntryMode.InlineAutocomplete,
+            ),
             populateCustomLpmFields = {
                 populateCardDetails()
                 populateEmail()
@@ -94,19 +104,6 @@ internal class TestCard : BasePlaygroundTest() {
         )
     }
 
-    @Test
-    fun testCardInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters,
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-            verifyCustomLpmFields = {
-                verifyCard()
-            }
-        )
-    }
-
     /*
      * TODO(samer-stripe): Once we update `PaymentResult` to return a `StripeIntent`, update the test
      *  to check against the payment method IDs rather than the last 4 digits.
@@ -130,14 +127,14 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(cardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -168,7 +165,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmExistingComplete(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
@@ -179,14 +176,14 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText(secondCardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -216,13 +213,13 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
                         .and(hasText(cardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -252,7 +249,7 @@ internal class TestCard : BasePlaygroundTest() {
             },
         )
 
-        val customerId = state?.asPaymentState()?.customerConfig?.id
+        val customerId = state?.customerId()
 
         testDriver.confirmCustomAndBuy(
             customerId = customerId,
@@ -272,7 +269,7 @@ internal class TestCard : BasePlaygroundTest() {
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
                         .and(hasText(secondCardNumber.takeLast(4), substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -293,7 +290,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithSavePaymentMethodAndCvcRecollection(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters
         )
     }
@@ -313,7 +310,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithSavePaymentMethodAndCvcRecollection(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters
         )
     }
@@ -322,7 +319,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithCardBrandChoiceComplete() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             values = FieldPopulator.Values(
                 cardNumber = "4000002500001001"
@@ -338,7 +335,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithCardBrandChoiceCustom() {
         testDriver.confirmCustom(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             values = FieldPopulator.Values(
                 cardNumber = "4000002500001001"
@@ -383,14 +380,14 @@ internal class TestCard : BasePlaygroundTest() {
 
         // Verify card was save and re-displays
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("4242", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
             },
         )
@@ -413,15 +410,36 @@ internal class TestCard : BasePlaygroundTest() {
 
         // Verify card was save and re-displays
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.asPaymentState()?.customerConfig?.id,
+            customerId = state?.customerId(),
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
                     matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
                         .and(isSelected())
                         .and(hasText("4242", substring = true)),
-                    timeoutMillis = 5000L
+                    timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
                 )
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                settings[MerchantSettingsDefinition] = Merchant.US
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CurrencySettingsDefinition] = Currency.EUR
+
+                settings[SupportedPaymentMethodsSettingsDefinition] = "card"
+
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Cartes Bancaires")
             },
         )
     }

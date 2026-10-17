@@ -119,7 +119,7 @@ internal class ErrorDestination(
 
 internal fun Context.finalErrorDestination(): ErrorDestination =
     ErrorDestination(
-        errorTitle = getString(R.string.stripe_error),
+        errorTitle = getString(stripeCoreR.string.stripe_error),
         errorContent = getString(stripeCoreR.string.stripe_unexpected_error_try_again),
         backButtonText = getString(R.string.stripe_go_back),
         shouldFail = true

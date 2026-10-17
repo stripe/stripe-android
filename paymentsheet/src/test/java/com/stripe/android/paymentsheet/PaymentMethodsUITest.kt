@@ -3,19 +3,16 @@ package com.stripe.android.paymentsheet
 import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.NewPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
+import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -23,6 +20,9 @@ import kotlin.test.Test
 class PaymentMethodsUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val workingUrl = "working-url"
     private val brokenUrl = "broken-url"
@@ -64,15 +64,12 @@ class PaymentMethodsUITest {
         iconUrl: String?,
         expectedTestTag: String,
     ) {
-        val imageLoader = mock<StripeImageLoader>().also {
-            whenever(it.load(eq(workingUrl), any(), any())).thenReturn(
-                Result.success(
-                    simpleBitmap
-                )
-            )
-        }.also {
-            whenever(it.load(eq(brokenUrl), any(), any())).thenReturn(Result.failure(Throwable()))
-        }
+        val imageLoader = FakeStripeImageLoader(
+            loadResultByUrl = mapOf(
+                workingUrl to Result.success(simpleBitmap),
+                brokenUrl to Result.failure(Throwable()),
+            ),
+        )
 
         val paymentMethods = listOf(
             SupportedPaymentMethod(

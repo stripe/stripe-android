@@ -7,7 +7,8 @@ import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
 import org.junit.After
@@ -40,10 +41,11 @@ class NativeLinkActivityContractTest {
         )
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-            launchMode = LinkLaunchMode.Full,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            statusBarColor = 0x00FF00,
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -56,14 +58,14 @@ class NativeLinkActivityContractTest {
         assertThat(actualArg).isEqualTo(
             NativeLinkArgs(
                 configuration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 requestSurface = REQUEST_SURFACE,
-                publishableKey = "pk_test_abcdefg",
-                stripeAccountId = null,
+                apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-                launchMode = LinkLaunchMode.Full,
-                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+                statusBarColor = 0x00FF00,
             )
         )
     }

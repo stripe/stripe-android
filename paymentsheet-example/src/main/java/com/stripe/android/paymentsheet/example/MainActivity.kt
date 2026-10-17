@@ -20,20 +20,20 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
@@ -58,6 +58,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.playground_title,
                 subtitleResId = R.string.playground_subtitle,
                 klass = PaymentSheetPlaygroundActivity::class.java,
+                section = MenuItem.Section.Internal,
+            ),
+            MenuItem(
+                titleResId = R.string.checkout_controller_example_title,
+                subtitleResId = R.string.checkout_controller_example_subtitle,
+                klass = CheckoutControllerExampleActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(
@@ -118,6 +124,10 @@ class MainActivity : AppCompatActivity() {
                 MainScreen(items = items)
             }
         }
+
+        if (BuildConfig.DIRECTLY_TO_PLAYGROUND) {
+            startActivity(Intent(this, PaymentSheetPlaygroundActivity::class.java))
+        }
     }
 }
 
@@ -140,7 +150,6 @@ private data class MenuItem(
         CustomerSheet,
         Embedded,
         AddressElement,
-        Onramp,
     }
 }
 
@@ -179,11 +188,6 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Address Element",
             items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
-        )
-
-        Section(
-            title = "Onramp",
-            items = groupedItems.getOrElse(MenuItem.Section.Onramp) { emptyList() }
         )
 
         item {
@@ -257,7 +261,7 @@ private fun MenuItemRow(item: MenuItem) {
                 ),
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        painter = painterResource(R.drawable.ic_material_info),
                         contentDescription = null,
                     )
                 },

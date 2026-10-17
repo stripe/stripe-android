@@ -108,6 +108,8 @@ data class CreateSetupIntentRequest(
     val customerId: String,
     @SerialName("merchant_country_code")
     val merchantCountryCode: String,
+    @SerialName("on_behalf_of")
+    val onBehalfOf: String? = null,
 )
 
 @Serializable

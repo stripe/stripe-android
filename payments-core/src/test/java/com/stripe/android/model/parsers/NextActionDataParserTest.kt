@@ -1,0 +1,265 @@
+package com.stripe.android.model.parsers
+
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
+import com.stripe.android.model.StripeIntent
+import org.json.JSONObject
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+
+@RunWith(RobolectricTestRunner::class)
+internal class NextActionDataParserTest {
+
+    @Test
+    fun `parse with pix display qr code type should create DisplayPixDetails`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "data": "pix-copy-and-paste-data",
+                    "image_url_png": "https://qr.stripe.com/pix.png",
+                    "image_url_svg": "https://qr.stripe.com/pix.svg",
+                    "expires_at": 1700000000,
+                    "hosted_instructions_url": "https://payments.stripe.com/pix/instructions/test"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(
+            StripeIntent.NextActionData.DisplayPixDetails(
+                data = "pix-copy-and-paste-data",
+                imageUrlPng = "https://qr.stripe.com/pix.png",
+                imageUrlSvg = "https://qr.stripe.com/pix.svg",
+                expiresAt = 1_700_000_000,
+                hostedInstructionsUrl = "https://payments.stripe.com/pix/instructions/test",
+            )
+        )
+    }
+
+    @Test
+    fun `parse with pix display qr code missing hosted instructions should return null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "data": "pix-copy-and-paste-data"
+                }
+            }
+            """.trimIndent()
+        )
+
+        assertThat(NextActionDataParser().parse(nextActionJson)).isNull()
+    }
+
+    @Test
+    fun `parse with null Pix expiration should preserve null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "pix_display_qr_code",
+                "pix_display_qr_code": {
+                    "expires_at": null,
+                    "hosted_instructions_url": "https://payments.stripe.com/pix/instructions/test"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val details = NextActionDataParser().parse(nextActionJson)
+            as StripeIntent.NextActionData.DisplayPixDetails
+
+        assertThat(details.expiresAt).isNull()
+    }
+
+    @Test
+    fun `Pix display details redacts copy and paste data from toString`() {
+        val details = StripeIntent.NextActionData.DisplayPixDetails(
+            data = "sensitive-pix-data",
+            hostedInstructionsUrl = "https://payments.stripe.com/pix/instructions/test",
+        )
+
+        assertThat(details.toString()).contains("data=<redacted>")
+        assertThat(details.toString()).doesNotContain("sensitive-pix-data")
+    }
+
+    @Test
+    fun `parse with await_authorization type should create AwaitAuthorization`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "await_authorization",
+                "await_authorization": {}
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(StripeIntent.NextActionData.AwaitAuthorization)
+    }
+
+    @Test
+    fun `parse with mb_way_await_authorization creates MbWayAwaitAuthorization`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "mb_way_await_authorization",
+                "mb_way_await_authorization": {}
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isEqualTo(StripeIntent.NextActionData.MbWayAwaitAuthorization)
+    }
+
+    @Test
+    fun `parse with intent_confirmation_challenge type should create IntentConfirmationChallenge`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": "arkose"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                    stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                        captchaVendorName = "arkose"
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `parse with captcha_vendor_name null results in null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": null
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isNull()
+    }
+
+    @Test
+    fun `parse with stripe_js missing results in null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isNull()
+    }
+
+    @Test
+    fun `parse with unknown sdk type should return null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "unknown_type"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isNull()
+    }
+
+    @Test
+    fun `parse with missing type field should return null`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "unknown_action"
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        assertThat(nextActionData).isNull()
+    }
+
+    @Test
+    fun `parse with alipay_handle_redirect and native_data present should create AlipayRedirect with data`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "alipay_handle_redirect",
+                "alipay_handle_redirect": {
+                    "native_data": "native_data_value",
+                    "url": "https://example.com/alipay"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+        assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
+        val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
+        assertThat(alipayRedirect.type).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData>()
+        val type = alipayRedirect.type as StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData
+        assertThat(type.data).isEqualTo("native_data_value")
+    }
+
+    @Test
+    fun `parse with alipay_handle_redirect and native_data missing should create default AlipayRedirect`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "alipay_handle_redirect",
+                "alipay_handle_redirect": {
+                    "url": "https://example.com/alipay"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+        assertThat(nextActionData).isInstanceOf<StripeIntent.NextActionData.AlipayRedirect>()
+        val alipayRedirect = nextActionData as StripeIntent.NextActionData.AlipayRedirect
+        assertThat(alipayRedirect.type).isEqualTo(StripeIntent.NextActionData.AlipayRedirect.Type.Default)
+    }
+}

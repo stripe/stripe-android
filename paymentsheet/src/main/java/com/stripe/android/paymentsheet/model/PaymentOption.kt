@@ -9,13 +9,13 @@ import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
 /**
  * The customer's selected payment option.
  */
-data class PaymentOption internal constructor(
+@Poko
+class PaymentOption internal constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
@@ -37,15 +37,13 @@ data class PaymentOption internal constructor(
      * - If this is Google Pay, the value is "google_pay".
      */
     val paymentMethodType: String,
-
     /**
      * The billing details associated with the customer's desired payment method.
      */
     val billingDetails: PaymentSheet.BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
-
-    private val imageLoader: suspend () -> Drawable,
+    private val paymentOptionResource: PaymentOptionResource,
 ) {
 
     @Poko
@@ -89,7 +87,7 @@ data class PaymentOption internal constructor(
         _shippingDetails = null,
         billingDetails = null,
         _labels = Labels(label = label),
-        imageLoader = errorImageLoader,
+        paymentOptionResource = ErrorPaymentOptionResource,
     )
 
     /**
@@ -97,18 +95,16 @@ data class PaymentOption internal constructor(
      */
     val iconPainter: Painter
         @Composable
-        get() = rememberDrawablePainter(icon())
+        get() {
+            return paymentOptionResource.rememberPainter()
+        }
 
     /**
      * Fetches the icon associated with this [PaymentOption].
      */
     fun icon(): Drawable {
         return DelegateDrawable(
-            imageLoader = imageLoader,
+            imageLoader = { paymentOptionResource.load(isSystemDarkTheme = null) },
         )
     }
-}
-
-private val errorImageLoader: suspend () -> Drawable = {
-    throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
 }

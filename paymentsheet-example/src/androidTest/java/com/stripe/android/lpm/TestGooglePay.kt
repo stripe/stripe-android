@@ -2,57 +2,58 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import org.junit.Ignore
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@Ignore(
-    "Only testable on devices with a Google Play account & payment methods " +
-        "available. Run these before releasing or making changes to Google Pay flow"
-)
-internal class TestGooglePay : BasePlaygroundTest() {
+internal class TestGooglePay : BasePlaygroundTest(
+    block = {
+        around(FeatureFlagTestRule(FeatureFlags.allowNoExistingPaymentMethodForGooglePay, true))
+    }
+) {
     @Test
     fun testUnitedStates() {
-        testDriver.confirmWithGooglePay(Country.US)
+        testDriver.confirmWithGooglePay(Merchant.US)
     }
 
     @Test
     fun testFrance() {
-        testDriver.confirmWithGooglePay(Country.FR)
+        testDriver.confirmWithGooglePay(Merchant.FR)
     }
 
     @Test
     fun testGreatBritain() {
-        testDriver.confirmWithGooglePay(Country.GB)
+        testDriver.confirmWithGooglePay(Merchant.GB)
     }
 
     @Test
     fun testAustralia() {
-        testDriver.confirmWithGooglePay(Country.AU)
+        testDriver.confirmWithGooglePay(Merchant.AU)
     }
 
     @Test
     fun testBrazil() {
-        testDriver.confirmWithGooglePay(Country.BR)
+        testDriver.confirmWithGooglePay(Merchant.BR)
     }
 
     @Test
     fun testJapan() {
-        testDriver.confirmWithGooglePay(Country.JP)
+        testDriver.confirmWithGooglePay(Merchant.JP)
     }
 
     @Test
     fun testMexico() {
-        testDriver.confirmWithGooglePay(Country.MX)
+        testDriver.confirmWithGooglePay(Merchant.MX)
     }
 
     @Test
     fun testSetupIntentInEEA() {
         testDriver.confirmWithGooglePay(
-            country = Country.FR,
+            merchant = Merchant.FR,
             checkoutMode = CheckoutMode.SETUP
         )
     }
@@ -60,7 +61,7 @@ internal class TestGooglePay : BasePlaygroundTest() {
     @Test
     fun testSetupIntentInUS() {
         testDriver.confirmWithGooglePay(
-            country = Country.US,
+            merchant = Merchant.US,
             checkoutMode = CheckoutMode.SETUP
         )
     }

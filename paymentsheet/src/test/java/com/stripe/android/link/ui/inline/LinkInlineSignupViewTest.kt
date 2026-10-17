@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.inline
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -32,6 +34,7 @@ internal class LinkInlineSignupViewTest {
         var count = 0
         setContent(
             expanded = false,
+            linkBrand = LinkBrand.Link,
             toggleExpanded = {
                 count++
             }
@@ -48,7 +51,10 @@ internal class LinkInlineSignupViewTest {
 
     @Test
     fun status_inputting_email_shows_only_email_field() {
-        setContent(signUpState = SignUpState.InputtingPrimaryField)
+        setContent(
+            signUpState = SignUpState.InputtingPrimaryField,
+            linkBrand = LinkBrand.Link,
+        )
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -60,7 +66,8 @@ internal class LinkInlineSignupViewTest {
     fun status_inputting_phone_or_name_shows_all_fields_if_name_required() {
         setContent(
             signUpState = SignUpState.InputtingRemainingFields,
-            requiresNameCollection = true
+            requiresNameCollection = true,
+            linkBrand = LinkBrand.Link,
         )
 
         onEmailField().assertExists()
@@ -74,7 +81,10 @@ internal class LinkInlineSignupViewTest {
 
     @Test
     fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
-        setContent(signUpState = SignUpState.InputtingRemainingFields)
+        setContent(
+            signUpState = SignUpState.InputtingRemainingFields,
+            linkBrand = LinkBrand.Link,
+        )
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -89,7 +99,8 @@ internal class LinkInlineSignupViewTest {
         val errorMessage = "Error message"
         setContent(
             signUpState = SignUpState.InputtingRemainingFields,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            linkBrand = LinkBrand.Link,
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
@@ -99,25 +110,62 @@ internal class LinkInlineSignupViewTest {
         val errorMessage = "Error message"
         setContent(
             signUpState = SignUpState.InputtingPrimaryField,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            linkBrand = LinkBrand.Link,
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
     @Test
-    fun when_expanded_inline_logo_visible() {
+    fun checkbox_label_uses_link_brand_name_for_default_opt_in() {
         setContent(
-            expanded = true
+            expanded = false,
+            allowsDefaultOptIn = true,
+            linkBrand = LinkBrand.Link,
         )
-        onInlineLinkLogo().assertExists()
+
+        composeTestRule
+            .onNodeWithText("Save my info for faster checkout with Link")
+            .assertExists()
     }
 
     @Test
-    fun when_not_expanded_inline_logo_not_visible() {
+    fun checkbox_label_uses_onelink_brand_name_for_default_opt_in() {
         setContent(
-            expanded = false
+            expanded = false,
+            allowsDefaultOptIn = true,
+            linkBrand = LinkBrand.Onelink,
         )
-        onInlineLinkLogo().assertDoesNotExist()
+
+        composeTestRule
+            .onNodeWithText("Save my info for faster checkout with Onelink")
+            .assertExists()
+    }
+
+    @Test
+    fun terms_logo_content_description_uses_dynamic_brand_name() {
+        setContent(
+            expanded = true,
+            signUpState = SignUpState.InputtingRemainingFields,
+            linkBrand = LinkBrand.Onelink,
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Onelink", useUnmergedTree = true)
+            .assertExists()
+    }
+
+    @Test
+    fun checkbox_text_logo_content_description_uses_dynamic_brand_name() {
+        setContent(
+            expanded = false,
+            linkSignUpOptInFeatureEnabled = true,
+            linkBrand = LinkBrand.Onelink,
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Onelink", useUnmergedTree = true)
+            .assertExists()
     }
 
     private fun setContent(
@@ -130,6 +178,8 @@ internal class LinkInlineSignupViewTest {
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
         allowsDefaultOptIn: Boolean = false,
+        linkSignUpOptInFeatureEnabled: Boolean = false,
+        linkBrand: LinkBrand,
         didAskToChangeSignupDetails: Boolean = false,
         errorMessage: String? = null,
         toggleExpanded: () -> Unit = {},
@@ -137,7 +187,7 @@ internal class LinkInlineSignupViewTest {
     ) {
         val sectionController = SectionController(
             label = null,
-            sectionFieldErrorControllers = listOf(
+            sectionFieldValidationControllers = listOf(
                 emailController,
                 phoneController,
                 nameController,
@@ -156,7 +206,8 @@ internal class LinkInlineSignupViewTest {
                     expanded,
                     requiresNameCollection,
                     allowsDefaultOptIn,
-                    linkSignUpOptInFeatureEnabled = false,
+                    linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                    linkBrand = linkBrand,
                     didAskToChangeSignupDetails,
                     errorMessage,
                     toggleExpanded,
@@ -171,5 +222,4 @@ internal class LinkInlineSignupViewTest {
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
-    private fun onInlineLinkLogo() = composeTestRule.onNodeWithTag("LinkLogoIcon", useUnmergedTree = true)
 }

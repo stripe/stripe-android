@@ -17,6 +17,7 @@ internal interface LinkAuth {
         customerId: String?,
         sessionId: String,
         supportedVerificationTypes: List<String>?,
+        linkAuthTokenClientSecret: String?,
     ): Result<ConsumerSessionLookup>
 
     suspend fun signup(

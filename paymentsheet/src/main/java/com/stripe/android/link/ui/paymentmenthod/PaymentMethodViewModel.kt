@@ -22,15 +22,9 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
-import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -103,6 +97,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 ?.sharePaymentDetailsImmediatelyAfterCreation != false
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+                                .copy(createdFromNewPaymentMethod = true)
                         } else {
                             linkPaymentDetails
                         }
@@ -196,26 +191,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode
                         ),
-                        formHelper = DefaultFormHelper.create(
-                            coroutineScope = parentComponent.viewModel.viewModelScope,
-                            cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
-                            paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
-                                configuration = parentComponent.configuration.withLinkRequiredSettings(),
-                                linkAccount = linkAccount,
-                                passiveCaptchaParams = parentComponent.passiveCaptchaParams,
-                            ),
-                            eventReporter = parentComponent.eventReporter,
-                            savedStateHandle = parentComponent.viewModel.savedStateHandle,
-                            autocompleteAddressInteractorFactory =
-                            PaymentElementAutocompleteAddressInteractor.Factory(
-                                launcher = parentComponent.autocompleteLauncher,
-                                autocompleteConfig = AutocompleteAddressInteractor.Config(
-                                    googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
-                                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                )
-                            ),
-                            isLinkUI = true,
-                        ),
+                        formHelper = NativeLinkFormHelperFactory(parentComponent).create(),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkLaunchMode = parentComponent.linkLaunchMode,
@@ -224,26 +200,5 @@ internal class PaymentMethodViewModel @Inject constructor(
                 }
             }
         }
-
-        private fun LinkConfiguration.withLinkRequiredSettings() = copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = billingDetailsCollectionConfiguration.name,
-                email = billingDetailsCollectionConfiguration.email,
-                phone = billingDetailsCollectionConfiguration.phone,
-                // Should always collect ZIP/postal code at minimum
-                address = if (
-                    billingDetailsCollectionConfiguration.address == PaymentSheet
-                        .BillingDetailsCollectionConfiguration
-                        .AddressCollectionMode
-                        .Never
-                ) {
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-                } else {
-                    billingDetailsCollectionConfiguration.address
-                },
-                attachDefaultsToPaymentMethod = billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod,
-                allowedCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
-            )
-        )
     }
 }

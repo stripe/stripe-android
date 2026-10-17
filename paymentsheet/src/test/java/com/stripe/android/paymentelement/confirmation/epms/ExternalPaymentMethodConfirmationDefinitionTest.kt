@@ -7,27 +7,28 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asSucceeded
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -64,6 +65,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             val launcher = definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = onResult,
             )
 
@@ -94,8 +96,8 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Completed,
         )
 
@@ -104,7 +106,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val successResult = result.asSucceeded()
 
         assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isNull()
+        assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(successResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -115,8 +117,8 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val exception = IllegalStateException("Failed!")
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Failed(exception),
         )
 
@@ -135,8 +137,8 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Canceled,
         )
 
@@ -156,7 +158,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<Unit>>()
@@ -192,15 +194,15 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
+        assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 
     @Test
@@ -214,8 +216,8 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = EPM_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
-            arguments = Unit,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            arguments = EmptyConfirmationLauncherArgs,
             launcher = launcher,
         )
 
@@ -266,17 +268,6 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
                     country = "US",
                 ),
             )
-        )
-
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PAYMENT_INTENT,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
         )
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
@@ -32,10 +33,9 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +73,7 @@ internal enum class IntegrationType {
 }
 
 internal data class IdentitySubmissionState(
+    val useTestMode: Boolean,
     val integrationType: IntegrationType = NATIVE,
     val verificationType: VerificationType = VerificationType.DOCUMENT,
     val allowDrivingLicense: Boolean = true,
@@ -80,6 +82,7 @@ internal data class IdentitySubmissionState(
     val requireLiveCapture: Boolean = true,
     val requireId: Boolean = false,
     val requireSelfie: Boolean = false,
+    val threeDFaceCaptureEnabled: Boolean = true,
     val requireAddress: Boolean = false,
     val useDocumentFallback: Boolean? = null,
     val phoneOtpCheck: PhoneOTPCheck? = null,
@@ -101,7 +104,7 @@ internal fun ExampleScreen(
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
     val (submissionState, onSubmissionStateChanged) = remember {
-        mutableStateOf(IdentitySubmissionState())
+        mutableStateOf(IdentitySubmissionState(useTestMode = false))
     }
 
     val (loadingState, onLoadingStateChanged) = remember {
@@ -136,12 +139,20 @@ internal fun ExampleScreen(
         ) {
             IntegrationTypeUI(submissionState, onSubmissionStateChanged)
             Divider()
+            TestModeUI(submissionState, onSubmissionStateChanged)
+            Divider()
             TypeSelectUI(
                 submissionState.verificationType,
             ) { newVerificationType ->
                 onSubmissionStateChanged(
                     submissionState.copy(
-                        verificationType = newVerificationType
+                        verificationType = newVerificationType,
+                        useDocumentFallback = false,
+                        phoneOtpCheck = if (newVerificationType == VerificationType.PHONE) {
+                            PhoneOTPCheck.None
+                        } else {
+                            null
+                        }
                     )
                 )
                 onLoadingStateChanged(LoadingState.Idle)
@@ -151,6 +162,14 @@ internal fun ExampleScreen(
                     .verticalScroll(scrollState)
                     .weight(weight = 1f, fill = true)
             ) {
+                ThreeDFaceCaptureUI(
+                    enabled = submissionState.threeDFaceCaptureEnabled,
+                    onEnabledChanged = {
+                        onSubmissionStateChanged(
+                            submissionState.copy(threeDFaceCaptureEnabled = it)
+                        )
+                    }
+                )
                 when (submissionState.verificationType) {
                     VerificationType.DOCUMENT -> DocumentUI(
                         submissionState = submissionState,
@@ -183,6 +202,51 @@ internal fun ExampleScreen(
                 onLoadingStateChanged
             )
         }
+    }
+}
+
+@Composable
+private fun TestModeUI(
+    identitySubmissionState: IdentitySubmissionState,
+    onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = identitySubmissionState.useTestMode,
+            onCheckedChange = { useTestMode ->
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(useTestMode = useTestMode)
+                )
+            }
+        )
+        StyledClickableText(
+            text = AnnotatedString(stringResource(R.string.use_test_mode)),
+            onClick = {
+                onSubmissionStateChangedListener(
+                    identitySubmissionState.copy(useTestMode = !identitySubmissionState.useTestMode)
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun ThreeDFaceCaptureUI(
+    enabled: Boolean,
+    onEnabledChanged: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.padding(start = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Switch(
+            checked = enabled,
+            onCheckedChange = onEnabledChanged
+        )
+        StyledClickableText(
+            text = AnnotatedString(stringResource(R.string.three_d_face_capture_enabled)),
+            onClick = { onEnabledChanged(!enabled) }
+        )
     }
 }
 
@@ -268,7 +332,7 @@ private fun TypeSelectUI(
             enabled = false,
             trailingIcon = {
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    painter = painterResource(R.drawable.ic_material_arrow_drop_down),
                     contentDescription = null
                 )
             },

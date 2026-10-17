@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -30,13 +31,16 @@ import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
+import com.stripe.android.payments.SystemClock
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
+import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -60,19 +64,33 @@ constructor(
 ) : PaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
+    private val pollingAnalyticsEventReporter = DefaultPollingAnalyticsEventReporter(
+        analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory,
+    )
+    private val apiConfigProvider: Provider<ApiConfiguration.State> = Provider {
+        ApiConfiguration.State(
+            publishableKey = publishableKeyProvider(),
+            stripeAccountId = null,
+        )
+    }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfigProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext
+        workContext,
+        pollingAnalyticsEventReporter,
+        SystemClock,
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfigProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext
+        workContext,
+        pollingAnalyticsEventReporter,
+        SystemClock,
     )
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
@@ -90,12 +108,6 @@ constructor(
         } ?: PaymentRelayStarter.Legacy(host)
     }
 
-    /**
-     * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
-     * An entry will be removed once the [StripeIntent] is confirmed.
-     */
-    private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
-
     private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
         DefaultPaymentNextActionHandlerRegistry.createInstance(
             context = context,
@@ -103,8 +115,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfigurationState = apiConfigProvider.get(),
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
@@ -139,13 +150,7 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-        val returnUrl =
-            if (isInstantApp) {
-                confirmStripeIntentParams.returnUrl
-            } else {
-                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                    ?: defaultReturnUrl.value
-            }
+        val returnUrl = resolveReturnUrl(confirmStripeIntentParams.returnUrl)
 
         val result = when (confirmStripeIntentParams) {
             is ConfirmPaymentIntentParams -> {
@@ -168,13 +173,6 @@ constructor(
 
         result.fold(
             onSuccess = { intent ->
-                intent.nextActionData?.let {
-                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
-                        intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
-                        }
-                    }
-                }
                 handleNextAction(
                     host,
                     intent,
@@ -196,7 +194,12 @@ constructor(
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
     ): Result<PaymentIntentResult> {
-        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+        // Alipay+ redirects to return_url; use the SDK default so the app is reopened.
+        val params = confirmPaymentIntentParams.copy(
+            returnUrl = resolveReturnUrl(confirmPaymentIntentParams.returnUrl)
+        )
+
+        val paymentIntentResult = confirmPaymentIntent(params, requestOptions)
 
         return paymentIntentResult.mapResult { paymentIntent ->
             authenticateAlipay(
@@ -419,7 +422,7 @@ constructor(
             PaymentIntentResult(
                 refreshedPaymentIntent,
                 outcome,
-                failureMessageFactory.create(refreshedPaymentIntent, outcome)
+                failureMessageFactory.create(refreshedPaymentIntent, null, outcome)
             )
         }
     }
@@ -453,6 +456,14 @@ constructor(
             stripeIntent,
             requestOptions
         )
+    }
+
+    private fun resolveReturnUrl(returnUrl: String?): String? {
+        return if (isInstantApp) {
+            returnUrl
+        } else {
+            returnUrl.takeUnless { it.isNullOrBlank() } ?: defaultReturnUrl.value
+        }
     }
 
     private fun logReturnUrl(returnUrl: String?) {

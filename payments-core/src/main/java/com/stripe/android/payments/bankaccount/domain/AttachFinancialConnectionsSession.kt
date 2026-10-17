@@ -1,5 +1,6 @@
 package com.stripe.android.payments.bankaccount.domain
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,10 +18,9 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
      * @return [PaymentIntent] with attached linkedAccount.
      */
     suspend fun forPaymentIntent(
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         linkedAccountSessionId: String,
         clientSecret: String,
-        stripeAccountId: String?
     ): Result<PaymentIntent> {
         val paymentIntentClientSecretResult = runCatching {
             PaymentIntent.ClientSecret(clientSecret)
@@ -32,8 +32,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                 clientSecret = paymentIntentClientSecret.value,
                 paymentIntentId = paymentIntentClientSecret.paymentIntentId,
                 requestOptions = ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    apiKey = apiConfiguration.publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId
                 ),
                 expandFields = EXPAND_PAYMENT_METHOD
             ).getOrThrow()
@@ -47,10 +47,9 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
      * @return [SetupIntent] with attached linkedAccount.
      */
     suspend fun forSetupIntent(
-        publishableKey: String,
+        apiConfiguration: ApiConfiguration.State,
         linkedAccountSessionId: String,
         clientSecret: String,
-        stripeAccountId: String?
     ): Result<SetupIntent> {
         val setupIntentClientSecretResult = runCatching {
             SetupIntent.ClientSecret(clientSecret)
@@ -62,8 +61,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                 clientSecret = setupIntentClientSecret.value,
                 setupIntentId = setupIntentClientSecret.setupIntentId,
                 requestOptions = ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    apiKey = apiConfiguration.publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId
                 ),
                 expandFields = EXPAND_PAYMENT_METHOD
             ).getOrThrow()

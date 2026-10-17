@@ -7,13 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.IdRes
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
-import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -25,29 +22,27 @@ data class CardScanSheetParams(
     val cardScanConfiguration: CardScanConfiguration
 ) : Parcelable
 
-@Deprecated("This is deprecated and will be removed in a future release.")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CardScanSheetResult : Parcelable {
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
         val scannedCard: ScannedCard
     ) : CardScanSheetResult
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Canceled(
         val reason: CancellationReason
     ) : CardScanSheetResult
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(val error: Throwable) : CardScanSheetResult
 }
 
-private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
-
-@Deprecated("This is deprecated and will be removed in a future release.")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanSheet private constructor() {
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
@@ -55,12 +50,21 @@ class CardScanSheet private constructor() {
     /**
      * Callback to notify when scanning finishes and a result is available.
      */
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface CardScanResultCallback {
         fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isSupported(context: Context): Boolean {
+            return GoogleApiAvailability.getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        }
+
         /**
          * Create a [CardScanSheet] instance with [ComponentActivity].
          *
@@ -69,7 +73,6 @@ class CardScanSheet private constructor() {
          * called before the [ComponentActivity] is created (in the onCreate method).
          */
         @JvmStatic
-        @Deprecated("This is deprecated and will be removed in a future release.")
         fun create(
             from: ComponentActivity,
             cardScanSheetResultCallback: CardScanResultCallback,
@@ -91,7 +94,6 @@ class CardScanSheet private constructor() {
          * created (in the onCreate method).
          */
         @JvmStatic
-        @Deprecated("This is deprecated and will be removed in a future release.")
         fun create(
             from: Fragment,
             cardScanSheetResultCallback: CardScanResultCallback,
@@ -122,19 +124,6 @@ class CardScanSheet private constructor() {
                     UnknownScanException("No data in the result intent")
                 )
 
-        @Deprecated("This is deprecated and will be removed in a future release.")
-        fun removeCardScanFragment(
-            supportFragmentManager: FragmentManager
-        ) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                val fragment = supportFragmentManager.findFragmentByTag(CARD_SCAN_FRAGMENT_TAG)
-                if (fragment != null) {
-                    remove(fragment)
-                }
-            }
-        }
-
         private val activityResultContract = object : ActivityResultContract<
             CardScanSheetParams,
             CardScanSheetResult
@@ -158,7 +147,6 @@ class CardScanSheet private constructor() {
      * The ID and Secret are created from this server-server request:
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
-    @Deprecated("This is deprecated and will be removed in a future release.")
     fun present() {
         present(CardScanConfiguration(elementsSessionId = null))
     }
@@ -166,36 +154,5 @@ class CardScanSheet private constructor() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(configuration: CardScanConfiguration) {
         launcher.launch(CardScanSheetParams(configuration))
-    }
-
-    /**
-     * Attach the cardscan fragment to the specified container.
-     * Results will be returned in the callback function.
-     */
-    @Deprecated("This is deprecated and will be removed in a future release.")
-    fun attachCardScanFragment(
-        lifecycleOwner: LifecycleOwner,
-        supportFragmentManager: FragmentManager,
-        @IdRes fragmentContainer: Int,
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
-    ) {
-        supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            add<CardScanFragment>(
-                fragmentContainer,
-                tag = CARD_SCAN_FRAGMENT_TAG
-            )
-        }
-
-        supportFragmentManager
-            .setFragmentResultListener(
-                CARD_SCAN_FRAGMENT_REQUEST_KEY,
-                lifecycleOwner
-            ) { _, bundle ->
-                val result: CardScanSheetResult = bundle.getParcelable(
-                    CARD_SCAN_FRAGMENT_BUNDLE_KEY
-                ) ?: CardScanSheetResult.Failed(Throwable("Card scan params not provided"))
-                onFinished(result)
-            }
     }
 }

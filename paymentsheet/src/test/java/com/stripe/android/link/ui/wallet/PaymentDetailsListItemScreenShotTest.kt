@@ -38,7 +38,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -71,7 +71,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -104,7 +104,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = "My Personal Card",
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -137,7 +137,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -170,7 +170,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
-                    funding = "CREDIT",
+                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
                     nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
@@ -197,7 +197,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 details = ConsumerPaymentDetails.BankAccount(
                     id = "wAAACGA",
                     last4 = "6789",
-                    bankName = "STRIPE TEST BANK",
+                    bankAccountName = "STRIPE TEST BANK ACCOUNT",
                     bankIconCode = null,
                     isDefault = false,
                     nickname = null,
@@ -219,7 +219,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 details = ConsumerPaymentDetails.BankAccount(
                     id = "wAAACGA",
                     last4 = "6789",
-                    bankName = "Chase",
+                    bankAccountName = "Chase Checking Account",
                     bankIconCode = "morganchase",
                     isDefault = false,
                     nickname = null,
@@ -242,6 +242,60 @@ internal class PaymentDetailsListItemScreenShotTest {
                     id = "csmrpd_wAAACGA",
                     last4 = "6789",
                     paymentMethodId = "pm_123",
+                ),
+                enabled = true,
+                isSelected = false,
+                isAvailable = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testUnknownWithSublabelEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Generic(
+                    id = "csmrpd_126",
+                    last4 = "0x••••22Dd",
+                    isDefault = false,
+                    nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null,
+                    rawType = "CRYPTO",
+                    display = ConsumerPaymentDetails.Display(
+                        label = "Crypto",
+                        sublabel = "0x••••22Dd",
+                        icon = null
+                    ),
+                    nextActionTypes = emptyList()
+                ),
+                enabled = true,
+                isSelected = false,
+                isAvailable = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testUnknownWithoutSublabelEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Generic(
+                    id = "csmrpd_126",
+                    last4 = "0x••••22Dd",
+                    isDefault = false,
+                    nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null,
+                    rawType = "CRYPTO",
+                    display = ConsumerPaymentDetails.Display(
+                        label = "Crypto",
+                        sublabel = null,
+                        icon = null
+                    ),
+                    nextActionTypes = emptyList()
                 ),
                 enabled = true,
                 isSelected = false,

@@ -2,15 +2,15 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable,
     > private constructor(
     private val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>
@@ -22,7 +22,7 @@ internal class RecordingConfirmationDefinition<
     > {
     private val optionCalls = Turbine<OptionCall>()
     private val canConfirmCalls = Turbine<CanConfirmCall>()
-    private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherResult>>()
+    private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherArgs, TLauncherResult>>()
     private val createLauncherCalls = Turbine<CreateLauncherCall<TLauncherResult>>()
     private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
     private val launchCalls = Turbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>()
@@ -39,43 +39,44 @@ internal class RecordingConfirmationDefinition<
 
     override fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters
+        confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationParameters))
+        canConfirmCalls.add(CanConfirmCall(confirmationOption, confirmationArgs))
 
-        return definition.canConfirm(confirmationOption, confirmationParameters)
+        return definition.canConfirm(confirmationOption, confirmationArgs)
     }
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationArgs: ConfirmationHandler.Args,
+        launcherArgs: TLauncherArgs,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         toResultCalls.add(
             ToResultCall(
                 confirmationOption = confirmationOption,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
-                confirmationParameters = confirmationParameters,
+                launcherArgs = launcherArgs,
+                confirmationArgs = confirmationArgs,
                 result = result
             )
         )
 
         return definition.toResult(
             confirmationOption = confirmationOption,
-            deferredIntentConfirmationType = deferredIntentConfirmationType,
-            confirmationParameters = confirmationParameters,
+            confirmationArgs = confirmationArgs,
+            launcherArgs = launcherArgs,
             result = result
         )
     }
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (TLauncherResult) -> Unit
     ): TLauncher {
-        createLauncherCalls.add(CreateLauncherCall(activityResultCaller, onResult))
+        createLauncherCalls.add(CreateLauncherCall(activityResultCaller, lifecycleOwner, onResult))
 
-        return definition.createLauncher(activityResultCaller, onResult)
+        return definition.createLauncher(activityResultCaller, lifecycleOwner, onResult)
     }
 
     override fun unregister(launcher: TLauncher) {
@@ -86,20 +87,20 @@ internal class RecordingConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
-        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationParameters))
+        launchCalls.add(LaunchCall(launcher, arguments, confirmationOption, confirmationArgs))
 
-        definition.launch(launcher, arguments, confirmationOption, confirmationParameters)
+        definition.launch(launcher, arguments, confirmationOption, confirmationArgs)
     }
 
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
-        actionCalls.add(ActionCall(confirmationOption, confirmationParameters))
+        actionCalls.add(ActionCall(confirmationOption, confirmationArgs))
 
-        return definition.action(confirmationOption, confirmationParameters)
+        return definition.action(confirmationOption, confirmationArgs)
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
@@ -114,18 +115,19 @@ internal class RecordingConfirmationDefinition<
 
     class CanConfirmCall(
         val option: ConfirmationHandler.Option,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
     )
 
-    class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
+    class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherArgs : Parcelable, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val confirmationArgs: ConfirmationHandler.Args,
+        val launcherArgs: TLauncherArgs,
         val result: TLauncherResult,
     )
 
     class CreateLauncherCall<TLauncherResult>(
         val activityResultCaller: ActivityResultCaller,
+        val lifecycleOwner: LifecycleOwner,
         val onResult: (TLauncherResult) -> Unit
     )
 
@@ -137,12 +139,12 @@ internal class RecordingConfirmationDefinition<
         val launcher: TLauncher,
         val arguments: TLauncherArgs,
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
     )
 
     class ActionCall<TConfirmationOption : ConfirmationHandler.Option>(
         val confirmationOption: TConfirmationOption,
-        val confirmationParameters: ConfirmationDefinition.Parameters,
+        val confirmationArgs: ConfirmationHandler.Args,
     )
 
     class BootstrapCall(
@@ -152,13 +154,13 @@ internal class RecordingConfirmationDefinition<
     class Scenario<
         TConfirmationOption : ConfirmationHandler.Option,
         TLauncher,
-        TLauncherArgs,
+        TLauncherArgs : Parcelable,
         TLauncherResult : Parcelable,
         >(
         val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
         val optionCalls: ReceiveTurbine<OptionCall>,
         val canConfirmCalls: ReceiveTurbine<CanConfirmCall>,
-        val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherResult>>,
+        val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherArgs, TLauncherResult>>,
         val createLauncherCalls: ReceiveTurbine<CreateLauncherCall<TLauncherResult>>,
         val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
         val launchCalls: ReceiveTurbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>,
@@ -170,7 +172,7 @@ internal class RecordingConfirmationDefinition<
         suspend fun <
             TConfirmationOption : ConfirmationHandler.Option,
             TLauncher,
-            TLauncherArgs,
+            TLauncherArgs : Parcelable,
             TLauncherResult : Parcelable,
             > test(
             definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,

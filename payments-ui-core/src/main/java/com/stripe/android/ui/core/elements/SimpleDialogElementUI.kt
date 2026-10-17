@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.H6Text
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -32,51 +31,49 @@ fun SimpleDialogElementUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    StripeTheme {
-        AlertDialog(
-            modifier = Modifier.testTag(TEST_TAG_SIMPLE_DIALOG),
-            onDismissRequest = {
-                onDismissListener()
-            },
-            title = {
-                H4Text(text = titleText)
-            },
-            text = messageText?.let {
-                {
-                    H6Text(text = it)
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    modifier = Modifier.testTag(TEST_TAG_DIALOG_CONFIRM_BUTTON),
-                    onClick = {
-                        onConfirmListener()
-                    }
-                ) {
-                    Text(
-                        text = confirmText,
-                        color = if (destructive) {
-                            MaterialTheme.colors.error
-                        } else {
-                            Color.Unspecified
-                        },
-                        style = MaterialTheme.typography.body1
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    modifier = Modifier.testTag(TEST_TAG_DIALOG_DISMISS_BUTTON),
-                    onClick = {
-                        onDismissListener()
-                    }
-                ) {
-                    Text(
-                        text = dismissText,
-                        style = MaterialTheme.typography.body1
-                    )
-                }
+    AlertDialog(
+        modifier = Modifier.testTag(TEST_TAG_SIMPLE_DIALOG),
+        onDismissRequest = {
+            onDismissListener()
+        },
+        title = {
+            H4Text(text = titleText)
+        },
+        text = messageText?.let {
+            {
+                H6Text(text = it)
             }
-        )
-    }
+        },
+        confirmButton = {
+            TextButton(
+                modifier = Modifier.testTag(TEST_TAG_DIALOG_CONFIRM_BUTTON),
+                onClick = {
+                    onConfirmListener()
+                }
+            ) {
+                Text(
+                    text = confirmText,
+                    color = if (destructive) {
+                        MaterialTheme.colors.error
+                    } else {
+                        Color.Unspecified
+                    },
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                modifier = Modifier.testTag(TEST_TAG_DIALOG_DISMISS_BUTTON),
+                onClick = {
+                    onDismissListener()
+                }
+            ) {
+                Text(
+                    text = dismissText,
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        }
+    )
 }

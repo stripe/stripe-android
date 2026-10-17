@@ -1,5 +1,6 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
@@ -9,8 +10,8 @@ dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
-    compileOnly project(":stripecardscan")
     compileOnly libs.places
+    compileOnly project(":stripecardscan")
 
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
@@ -23,9 +24,7 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.compose.foundation
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.activity
-    implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
 
     implementation libs.kotlin.coroutines
@@ -38,8 +37,9 @@ dependencies {
 
     implementation libs.playServicesWallet
 
-    testImplementation project(':payments-core-testing')
     testImplementation project(':stripecardscan')
+    testImplementation project(':payments-core-testing')
+    testImplementation project(':screenshot-testing')
     testImplementation libs.places
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
@@ -48,7 +48,6 @@ dependencies {
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
-    testImplementation testLibs.json
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
@@ -56,6 +55,7 @@ dependencies {
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 }
@@ -64,6 +64,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     testOptions {
@@ -76,8 +77,11 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+            freeCompilerArgs.addAll(["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"])
+        }
     }
 }
 

@@ -1,10 +1,11 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
@@ -12,37 +13,36 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-@SuppressWarnings("UnusedParameter")
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    cardFundingFilter: CardFundingFilter,
+    googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
+    googlePayBillingEmailOverride: String? = null,
+    googlePayShippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
+    showSecondaryButtonForLink: Boolean = true,
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> toConfirmationOption(passiveCaptchaParams)
+        is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
-        is PaymentSelection.New.USBankAccount -> toConfirmationOption(passiveCaptchaParams)
-        is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
-        is PaymentSelection.New -> toConfirmationOption(passiveCaptchaParams)
-        is PaymentSelection.GooglePay -> toConfirmationOption(configuration, passiveCaptchaParams)
-        is PaymentSelection.Link -> toConfirmationOption(linkConfiguration, passiveCaptchaParams)
-        is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
+        is PaymentSelection.New.USBankAccount -> toConfirmationOption()
+        is PaymentSelection.New.Card -> toConfirmationOption(linkConfiguration)
+        is PaymentSelection.New -> toConfirmationOption()
+        is PaymentSelection.GooglePay -> toConfirmationOption(
+            configuration,
+            cardFundingFilter,
+            isEmailRequired = googlePayIsEmailRequired,
+            billingEmailOverride = googlePayBillingEmailOverride,
+            shippingAddressParameters = googlePayShippingAddressParameters,
+        )
+        is PaymentSelection.Link -> toConfirmationOption(
+            linkConfiguration = linkConfiguration,
+            showSecondaryButtonForLink = showSecondaryButtonForLink,
+        )
     }
-}
-
-private fun PaymentSelection.Saved.toConfirmationOption(
-    passiveCaptchaParams: PassiveCaptchaParams?
-): PaymentMethodConfirmationOption.Saved {
-    return PaymentMethodConfirmationOption.Saved(
-        paymentMethod = paymentMethod,
-        optionsParams = paymentMethodOptionsParams,
-        passiveCaptchaParams = passiveCaptchaParams
-    )
 }
 
 private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): ExternalPaymentMethodConfirmationOption {
@@ -52,16 +52,14 @@ private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): Exter
     )
 }
 
-private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
-    passiveCaptchaParams: PassiveCaptchaParams?
-): PaymentMethodConfirmationOption {
+private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMethodConfirmationOption {
     return if (instantDebits != null) {
         // For Instant Debits, we create the PaymentMethod inside the bank auth flow. Therefore,
         // we can just use the already created object here.
         PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = instantDebits.paymentMethod,
             optionsParams = paymentMethodOptionsParams,
-            passiveCaptchaParams = passiveCaptchaParams
         )
     } else {
         PaymentMethodConfirmationOption.New(
@@ -69,17 +67,35 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
-            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
 
-private fun PaymentSelection.New.LinkInline.toConfirmationOption(
+internal fun PaymentSelection.Saved.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
-): LinkInlineSignupConfirmationOption? {
-    return linkConfiguration?.let {
-        LinkInlineSignupConfirmationOption(
+): ConfirmationHandler.Option {
+    return if (linkInput != null && linkConfiguration != null) {
+        LinkInlineSignupConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+            linkConfiguration = linkConfiguration,
+            userInput = linkInput,
+        )
+    } else {
+        PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+            hasAcknowledgedSepaMandate = hasAcknowledgedSepaMandate,
+        )
+    }
+}
+
+private fun PaymentSelection.New.Card.toConfirmationOption(
+    linkConfiguration: LinkConfiguration?,
+): ConfirmationHandler.Option {
+    return if (linkInput != null && linkConfiguration != null) {
+        LinkInlineSignupConfirmationOption.New(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
@@ -92,20 +108,18 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
                     LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
             },
             linkConfiguration = linkConfiguration,
-            userInput = input,
-            passiveCaptchaParams = passiveCaptchaParams
+            userInput = linkInput,
         )
+    } else {
+        toConfirmationOption()
     }
 }
 
-private fun PaymentSelection.New.toConfirmationOption(
-    passiveCaptchaParams: PassiveCaptchaParams?
-): ConfirmationHandler.Option {
+private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Option {
     return if (paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
         BacsConfirmationOption(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
-            passiveCaptchaParams = passiveCaptchaParams
         )
     } else {
         PaymentMethodConfirmationOption.New(
@@ -113,14 +127,16 @@ private fun PaymentSelection.New.toConfirmationOption(
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
-            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    cardFundingFilter: CardFundingFilter,
+    isEmailRequired: Boolean,
+    billingEmailOverride: String?,
+    shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -132,16 +148,20 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customAmount = googlePay.amount,
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = cardFundingFilter,
+                isEmailRequired = isEmailRequired,
+                billingEmailOverride = billingEmailOverride,
+                shippingAddressParameters = shippingAddressParameters,
             ),
-            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
 
 private fun PaymentSelection.Link.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
-    passiveCaptchaParams: PassiveCaptchaParams?
+    showSecondaryButtonForLink: Boolean,
 ): LinkConfirmationOption? {
     return linkConfiguration?.let {
         LinkConfirmationOption(
@@ -151,9 +171,8 @@ private fun PaymentSelection.Link.toConfirmationOption(
                 // If a payment is included in the confirmation option, launch confirmation right away
                 selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
                 // If a payment is not included, launch the link flow regularly
-                else -> LinkLaunchMode.Full
+                else -> LinkLaunchMode.Full(showSecondaryButton = showSecondaryButtonForLink)
             },
-            passiveCaptchaParams = passiveCaptchaParams
         )
     }
 }
@@ -167,22 +186,6 @@ private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
         CustomPaymentMethodConfirmationOption(
             customPaymentMethodType = type,
             billingDetails = billingDetails
-        )
-    }
-}
-
-private fun PaymentSelection.ShopPay.toConfirmationOption(
-    configuration: CommonConfiguration
-): ShopPayConfirmationOption? {
-    val customerSessionClientSecret = when (val accessType = configuration.customer?.accessType) {
-        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
-        else -> return null
-    }
-    return configuration.shopPayConfiguration?.let { config ->
-        ShopPayConfirmationOption(
-            shopPayConfiguration = config,
-            customerSessionClientSecret = customerSessionClientSecret,
-            merchantDisplayName = configuration.merchantDisplayName
         )
     }
 }

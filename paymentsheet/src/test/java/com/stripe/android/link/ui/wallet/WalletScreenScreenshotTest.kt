@@ -9,10 +9,13 @@ import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.ui.LinkScreenshotSurface
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -27,8 +30,9 @@ import org.junit.Test
 internal class WalletScreenScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         Orientation.entries,
-        SystemAppearance.entries
+        SystemAppearance.entries,
     )
 
     @Test
@@ -137,6 +141,25 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCvcCheckFieldValidatedOnDisabledButtonPress() {
+        val paymentDetailsList = listOf(
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                cvcCheck = CvcCheck.Fail
+            ),
+            CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        )
+        snapshot(
+            state = walletUiState(
+                paymentDetailsList = paymentDetailsList,
+                selectedItem = paymentDetailsList.firstOrNull(),
+                userSetIsExpanded = false,
+                isValidating = true,
+            ),
+        )
+    }
+
+    @Test
     fun testBankAccountSelectedState() {
         snapshot(
             state = walletUiState(
@@ -145,6 +168,30 @@ internal class WalletScreenScreenshotTest {
                 },
                 userSetIsExpanded = true,
             ),
+        )
+    }
+
+    @Test
+    fun testCollapsedStateWithUnknownSelected() {
+        snapshot(
+            state = walletUiState(
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
+                    it is ConsumerPaymentDetails.Generic
+                },
+                userSetIsExpanded = false,
+            )
+        )
+    }
+
+    @Test
+    fun testUnknownPaymentOption() {
+        snapshot(
+            state = walletUiState(
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
+                    it is ConsumerPaymentDetails.Generic
+                },
+                userSetIsExpanded = true,
+            )
         )
     }
 
@@ -228,6 +275,7 @@ internal class WalletScreenScreenshotTest {
         userSetIsExpanded: Boolean = false,
         signupToggleEnabled: Boolean = false,
         paymentSelectionHint: ResolvableString? = null,
+        isValidating: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -251,6 +299,9 @@ internal class WalletScreenScreenshotTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            linkBrand = LinkBrand.Link,
+            isValidating = isValidating,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         )
     }
 
@@ -259,9 +310,11 @@ internal class WalletScreenScreenshotTest {
             LinkScreenshotSurface {
                 WalletBody(
                     state = state,
+                    linkBrand = LinkBrand.Link,
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
+                    onDisabledButtonClick = {},
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onUpdateClicked = {},

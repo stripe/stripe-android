@@ -17,6 +17,7 @@ import com.stripe.android.stripecardscan.framework.ml.ssd.overlapWith
  *
  * @return pickedIndices: a list of indexes of the kept boxes
  */
+@Suppress("MagicNumber")
 internal fun hardNonMaximumSuppression(
     boxes: Array<FloatArray>,
     probabilities: FloatArray,
@@ -56,6 +57,7 @@ internal fun hardNonMaximumSuppression(
  * eps: a small number to avoid 0 as denominator.
  * Returns: iou (N): IOU values
  */
+@Suppress("MagicNumber")
 private fun intersectionOverUnionOf(currentBox: RectForm, nextBox: RectForm): Float {
     val eps = 0.00001f
     val overlapArea = nextBox.overlapWith(currentBox).areaClamped()

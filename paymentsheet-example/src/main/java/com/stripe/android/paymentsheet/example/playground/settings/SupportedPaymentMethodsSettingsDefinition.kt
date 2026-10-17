@@ -7,9 +7,15 @@ internal object SupportedPaymentMethodsSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<String>,
     PlaygroundSettingDefinition.Saveable<String> {
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isCustomerFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isCustomerFlow()) {
+            return false
+        }
+
+        return settings[AutomaticPaymentMethodsSettingsDefinition] == false
     }
 
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {

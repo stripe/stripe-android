@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import android.content.Context
 import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.model.PaymentMethod
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -32,6 +34,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     private val timeProvider: () -> Long,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerAdapter {
 
@@ -67,13 +70,11 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 types = requestedTypes,
                 silentlyFail = false,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -88,12 +89,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
-                paymentMethodId = paymentMethodId
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                paymentMethodId = paymentMethodId,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -108,13 +107,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = false,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -130,13 +126,11 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.updatePaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
-                params = params
+                params = params,
+                apiConfiguration = apiConfigurationProvider.get(),
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

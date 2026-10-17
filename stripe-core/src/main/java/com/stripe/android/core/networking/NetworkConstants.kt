@@ -12,6 +12,9 @@ import androidx.annotation.RestrictTo
 const val HTTP_TOO_MANY_REQUESTS = 429
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val HTTP_INTERNAL_SERVER_ERROR = 500
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val DEFAULT_RETRY_CODES: Iterable<Int> = HTTP_TOO_MANY_REQUESTS..HTTP_TOO_MANY_REQUESTS
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

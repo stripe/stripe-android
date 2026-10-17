@@ -13,10 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.isSystemDarkTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -34,20 +38,30 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                 TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
                     .copy(brand = CardBrand.MasterCard),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Chase"),
+                    .copy(bankAccountName = "Chase Checking Account"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Bank of America"),
+                    .copy(bankAccountName = "Bank of America Checking Account"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = null, bankIconCode = "pnc"),
+                    .copy(bankAccountName = null, bankIconCode = "pnc"),
                 TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-                    .copy(bankName = "Foobar"),
+                    .copy(bankAccountName = "Foobar Savings Account"),
                 // Should never be passthrough.
                 TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
             )
             MaterialTheme {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     cases.forEach { details ->
-                        PaymentMethodPreview(details.toPreview(context))
+                        PaymentMethodPreview(
+                            details.toPreview(
+                                context,
+                                iconLoader = PaymentSelection.IconLoader(
+                                    resources = LocalResources.current,
+                                    imageLoader = DefaultStripeImageLoader(context),
+                                ),
+                                reduceLinkBranding = true,
+                                isDarkTheme = context.isSystemDarkTheme(),
+                            )
+                        )
                     }
                 }
             }

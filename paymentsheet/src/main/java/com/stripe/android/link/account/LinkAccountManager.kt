@@ -39,6 +39,11 @@ internal interface LinkAccountManager {
     var cachedShippingAddresses: ConsumerShippingAddresses?
 
     /**
+     * Suggested email from the last lookup, when the user may have made a typo.
+     */
+    val suggestedEmail: StateFlow<String?>
+
+    /**
      * Retrieves the Link account associated with the email if it exists.
      *
      * Optionally starts a user session, by storing the cookie for the account and starting a
@@ -63,6 +68,10 @@ internal interface LinkAccountManager {
     suspend fun lookupByLinkAuthIntent(
         linkAuthIntentId: String?,
         customerId: String?
+    ): Result<LinkAccount?>
+
+    suspend fun lookupByLinkAuthTokenClientSecret(
+        linkAuthTokenClientSecret: String
     ): Result<LinkAccount?>
 
     /**
@@ -99,6 +108,8 @@ internal interface LinkAccountManager {
 
     suspend fun logOut(): Result<ConsumerSession>
 
+    suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession>
+
     suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<PaymentMethod>
@@ -107,17 +118,22 @@ internal interface LinkAccountManager {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New>
 
+    suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved>
+
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,
@@ -129,7 +145,7 @@ internal interface LinkAccountManager {
     /**
      * Triggers sending a verification code to the user.
      */
-    suspend fun startVerification(): Result<LinkAccount>
+    suspend fun startVerification(isResendSmsCode: Boolean = false): Result<LinkAccount>
 
     /**
      * Confirms a verification code sent to the user.

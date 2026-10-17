@@ -231,7 +231,9 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -392,7 +394,9 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -560,6 +564,7 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         },
         "num_samples": 8,
         "sample_interval": 250,
+        "decline_and_continue_button_text": "Decline and continue",
         "training_consent_text": "Allow Stripe to use your images to improve our biometric verification technology. You can remove Stripe's permissions at any time by <a href='mailto:privacy@stripe.com'>contacting Stripe</a>. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn how Stripe uses data</a>"
       },
       "status": "requires_input",
@@ -581,7 +586,9 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -777,7 +784,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 
 """.trimIndent()
@@ -946,7 +955,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1115,7 +1126,9 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1282,7 +1295,9 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()
 
@@ -1449,6 +1464,8 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
                 "metadata2": "value2"
             }
         }
-      ]
+      ],
+      "is_stripe": false,
+      "skip_success_page": false
     }
 """.trimIndent()

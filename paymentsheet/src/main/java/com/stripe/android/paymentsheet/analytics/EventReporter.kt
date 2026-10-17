@@ -2,39 +2,21 @@ package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
 
-@Suppress("TooManyFunctions")
-internal interface EventReporter : CardScanEventsReporter {
-
-    /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit(
-        commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
-        primaryButtonColor: Boolean?,
-        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
-        isDeferred: Boolean,
-    )
-
+internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted(initializedViaCompose: Boolean)
+    fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
@@ -42,31 +24,22 @@ internal interface EventReporter : CardScanEventsReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
-        linkMode: LinkMode?,
-        googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
-        currency: String?,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean,
-        hasDefaultPaymentMethod: Boolean?,
-        setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
+        paymentMethodMetadata: PaymentMethodMetadata,
     )
 
     /**
      * PaymentSheet or FlowController have failed to load.
      */
-    fun onLoadFailed(error: Throwable)
+    fun onLoadFailed(error: Throwable, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
      */
     fun onElementsSessionLoadFailed(error: Throwable)
+}
+
+@Suppress("TooManyFunctions")
+internal interface EventReporter : CardScanEventsReporter {
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
@@ -131,6 +104,11 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onAnalyticsEvent(event: AnalyticsEvent)
 
     /**
+     * The customer has tapped a wallet button (e.g. Google Pay, Link).
+     */
+    fun onWalletButtonTapped(walletType: String)
+
+    /**
      * The customer has pressed the confirm button.
      */
     fun onPressConfirmButton(
@@ -143,6 +121,7 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     )
 
     /**
@@ -152,11 +131,6 @@ internal interface EventReporter : CardScanEventsReporter {
         paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError,
     )
-
-    /**
-     * The client was unable to parse the response from LUXE.
-     */
-    fun onLpmSpecFailure(errorMessage: String?)
 
     /**
      * The user has auto-filled a text field.
@@ -247,22 +221,53 @@ internal interface EventReporter : CardScanEventsReporter {
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
         walletsState: WalletsState?,
+        isVerticalLayout: Boolean,
+    )
+
+    fun onTapToAddButtonShown()
+
+    fun onNfcScanButtonShown()
+
+    fun onTapToAddStarted()
+
+    fun onCardAddedWithTapToAdd(
+        canCollectLinkInput: Boolean,
+    )
+
+    fun onTapToAddCanceled(source: TapToAddCancelSource)
+
+    fun onTapToAddContinueAfterCardAdded(
+        completedLinkInput: Boolean?,
+    )
+
+    fun onTapToAddConfirm(
+        recollectedCvc: Boolean,
+    )
+
+    fun onFailedToAddCardWithTapToAdd(
+        message: String
+    )
+
+    fun onTapToAddAttemptWithUnsupportedDevice()
+
+    /**
+     * The user confirms payment with a billing address filled.
+     */
+    fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
     )
 
     /**
-     * Shop Pay webView loading has been attempted.
+     * Promotions fetched from PMM API.
      */
-    fun onShopPayWebViewLoadAttempt()
+    fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String)
 
     /**
-     * Shop Pay webView payment confirmation has succeeded.
+     * Attempted to display promotions.
      */
-    fun onShopPayWebViewConfirmSuccess()
-
-    /**
-     * Shop Pay webView has been cancelled by the user.
-     */
-    fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
+    fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean)
 
     enum class Mode(val code: String) {
         Complete("complete"),
@@ -275,5 +280,9 @@ internal interface EventReporter : CardScanEventsReporter {
 
     enum class CardBrandChoiceEventSource {
         Edit, Add
+    }
+
+    enum class TapToAddCancelSource {
+        CardCollection, CardAdded, Confirmation
     }
 }

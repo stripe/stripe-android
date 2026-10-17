@@ -1,14 +1,16 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -24,6 +26,7 @@ internal class FlowControllerTestRunnerContext(
     val flowController: PaymentSheet.FlowController,
     val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val countDownLatch: CountDownLatch,
+    val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
 
     fun configureFlowController(
@@ -39,8 +42,16 @@ internal class FlowControllerTestRunnerContext(
 
     suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
         val paymentOption = configureCallbackTurbine.awaitItem()
-        assertThat(paymentOption?.label).endsWith(label)
+        val expectedLabel = when (paymentMethodType) {
+            "card", "us_bank_account" -> "···· $label".withLtrIsolate()
+            else -> label
+        }
+        assertThat(paymentOption?.label).isEqualTo(expectedLabel)
         assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
+    }
+
+    suspend fun consumeNullPaymentOptionEventForFlowController() {
+        assertThat(configureCallbackTurbine.awaitItem()).isNull()
     }
 
     /**
@@ -56,6 +67,7 @@ internal class FlowControllerTestRunnerContext(
 @OptIn(WalletButtonsPreview::class)
 internal fun runFlowControllerTest(
     networkRule: NetworkRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     showWalletButtons: Boolean = false,
@@ -80,8 +92,8 @@ internal fun runFlowControllerTest(
         scenario.moveToState(Lifecycle.State.CREATED)
 
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            apiConfigurationTestType.initializePaymentConfiguration(it)
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         var flowController: PaymentSheet.FlowController? = null
@@ -92,7 +104,11 @@ internal fun runFlowControllerTest(
                     flowController = factory.make()
 
                     if (showWalletButtons) {
-                        flowController?.WalletButtons()
+                        flowController?.WalletButtons(
+                            remember {
+                                WalletButtonsViewClickHandler { false }
+                            }
+                        )
                     }
                 }
                 IntegrationType.Activity -> {
@@ -110,6 +126,7 @@ internal fun runFlowControllerTest(
             ),
             configureCallbackTurbine = configureCallbackTurbine,
             countDownLatch = countDownLatch,
+            apiConfigurationTestType = apiConfigurationTestType,
         )
         runTest {
             block(testContext)
@@ -125,6 +142,7 @@ internal fun runFlowControllerTest(
 
 internal fun runMultipleFlowControllerInstancesTest(
     networkRule: NetworkRule,
+    apiConfigurationTestType: ApiConfigurationTestType,
     testType: MultipleInstancesTestType,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback,
@@ -188,8 +206,8 @@ internal fun runMultipleFlowControllerInstancesTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            apiConfigurationTestType.initializePaymentConfiguration(it)
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var firstFlowController: PaymentSheet.FlowController
@@ -215,6 +233,7 @@ internal fun runMultipleFlowControllerInstancesTest(
             flowController = flowController,
             configureCallbackTurbine = configureCallbackTurbine,
             countDownLatch = countDownLatch,
+            apiConfigurationTestType = apiConfigurationTestType,
         )
         runTest {
             block(testContext)

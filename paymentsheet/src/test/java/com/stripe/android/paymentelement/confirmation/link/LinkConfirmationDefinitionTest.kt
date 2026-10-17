@@ -11,9 +11,11 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.model.PassiveCaptchaParamsFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -21,19 +23,15 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -41,9 +39,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 internal class LinkConfirmationDefinitionTest {
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
-
     @Test
     fun `'key' should be 'Link'`() {
         val definition = createLinkConfirmationDefinition()
@@ -74,6 +69,7 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.createLauncher(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = onResult,
         )
 
@@ -98,16 +94,15 @@ internal class LinkConfirmationDefinitionTest {
 
         val action = definition.action(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
         assertThat(launchAction.receivesResultInProcess).isFalse()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -116,15 +111,29 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
         )
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
-        assertThat(presentCall.linkAccount).isNull()
+        assertThat(presentCall.linkAccountInfo.account).isNull()
+    }
+
+    @Test
+    fun `'launch' should forward statusBarColor from confirmation args`() = test {
+        val definition = createLinkConfirmationDefinition()
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
+            launcher = launcherScenario.launcher,
+            arguments = EmptyConfirmationLauncherArgs,
+        )
+
+        assertThat(launcherScenario.presentCalls.awaitItem().statusBarColor).isEqualTo(0x00FF00)
     }
 
     @Test
@@ -138,9 +147,9 @@ internal class LinkConfirmationDefinitionTest {
 
         definition.launch(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
         )
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
@@ -156,16 +165,34 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION.copy(
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcherScenario.launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
         )
 
         val presentCall = launcherScenario.presentCalls.awaitItem()
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
-        assertThat(presentCall.linkAccount).isNull()
+        assertThat(presentCall.linkAccountInfo.account).isNull()
         assertThat(presentCall.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
+    }
+
+    @Test
+    fun `'launch' should pass attestOnIntentConfirmation true when bootstrapped with true`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = true)
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isTrue()
+    }
+
+    @Test
+    fun `'launch' should pass attestOnIntentConfirmation false when bootstrapped with false`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = false)
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
+    }
+
+    @Test
+    fun `'launch' should default attestOnIntentConfirmation to false when not bootstrapped`() = test {
+        val presentCall = launchWithAttestationFlag(attestOnIntentConfirmation = null)
+        assertThat(presentCall.paymentMethodMetadata.attestOnIntentConfirmation).isFalse()
     }
 
     @Test
@@ -176,9 +203,9 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -186,7 +213,7 @@ internal class LinkConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
-        assertThat(nextStepResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
@@ -203,17 +230,16 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.Succeeded(
                 intent = CONFIRMATION_PARAMETERS.intent,
-                deferredIntentConfirmationType = null
             )
         )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
@@ -232,13 +258,12 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
-
-            ),
-            deferredIntentConfirmationType = null
+            )
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
@@ -264,12 +289,12 @@ internal class LinkConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
@@ -284,21 +309,20 @@ internal class LinkConfirmationDefinitionTest {
 
     @Test
     fun `'toResult' should be 'Canceled' when result is 'Canceled' with 'BackPressed' reason`() = test {
-        val linkStore = mock<LinkStore>()
         val linkAccountHolder = mock<LinkAccountHolder>()
         val definition = createLinkConfirmationDefinition(
-            linkStore = linkStore,
+            linkStore = FakeLinkStore(),
             linkAccountHolder = linkAccountHolder
         )
 
         val result = definition.toResult(
             confirmationOption = LINK_CONFIRMATION_OPTION,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
-            deferredIntentConfirmationType = null
+            )
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
@@ -328,7 +352,7 @@ internal class LinkConfirmationDefinitionTest {
 
     private fun createLinkConfirmationDefinition(
         linkPaymentLauncher: LinkPaymentLauncher = mock(),
-        linkStore: LinkStore = mock(),
+        linkStore: LinkStore = FakeLinkStore(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle())
     ): LinkConfirmationDefinition {
         return LinkConfirmationDefinition(
@@ -338,27 +362,41 @@ internal class LinkConfirmationDefinitionTest {
         )
     }
 
+    private fun createMetadata(attestOnIntentConfirmation: Boolean) = PaymentMethodMetadataFactory.create(
+        attestOnIntentConfirmation = attestOnIntentConfirmation
+    )
+
+    private suspend fun Scenario.launchWithAttestationFlag(
+        attestOnIntentConfirmation: Boolean?
+    ): RecordingLinkPaymentLauncher.PresentCall {
+        val definition = createLinkConfirmationDefinition()
+
+        val paymentMethodMetadata = createMetadata(attestOnIntentConfirmation = attestOnIntentConfirmation ?: false)
+        if (attestOnIntentConfirmation != null) {
+            definition.bootstrap(paymentMethodMetadata)
+        }
+
+        definition.launch(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
+            launcher = launcherScenario.launcher,
+            arguments = EmptyConfirmationLauncherArgs,
+        )
+
+        return launcherScenario.presentCalls.awaitItem()
+    }
+
     data class Scenario(
         val launcherScenario: RecordingLinkPaymentLauncher.Scenario,
         val storeScenario: RecordingLinkStore.Scenario,
     )
 
     private companion object {
-        private val PAYMENT_INTENT = PaymentIntentFactory.create()
-
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(),
-        )
-
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 }

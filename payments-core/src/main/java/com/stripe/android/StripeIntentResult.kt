@@ -3,6 +3,7 @@ package com.stripe.android
 import androidx.annotation.IntDef
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
+import dev.drewhamilton.poko.Poko
 
 /**
  * A model representing the result of a [StripeIntent] confirmation or authentication attempt
@@ -10,6 +11,7 @@ import com.stripe.android.model.StripeIntent
  *
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */
+@Poko
 abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     @Outcome private val outcomeFromFlow: Int
 ) : StripeModel {
@@ -82,8 +84,11 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.WeChatPayRedirect,
             StripeIntent.NextActionType.CashAppRedirect,
             StripeIntent.NextActionType.SwishRedirect,
+            StripeIntent.NextActionType.AwaitAuthorization,
+            StripeIntent.NextActionType.MbWayAwaitAuthorization,
             StripeIntent.NextActionType.DisplayPayNowDetails,
             StripeIntent.NextActionType.DisplayPromptPayDetails,
+            StripeIntent.NextActionType.DisplayPixDetails,
             null -> {
                 false
             }
@@ -92,7 +97,6 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             StripeIntent.NextActionType.DisplayBoletoDetails,
             StripeIntent.NextActionType.DisplayKonbiniDetails,
             StripeIntent.NextActionType.DisplayMultibancoDetails,
-            StripeIntent.NextActionType.UpiAwaitNotification,
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true
             }

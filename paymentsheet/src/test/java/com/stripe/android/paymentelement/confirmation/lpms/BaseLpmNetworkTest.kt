@@ -5,6 +5,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -65,7 +66,7 @@ internal open class BaseLpmNetworkTest(
                 this,
                 LpmAssertionParams(
                     intent = data.intent,
-                    initializationMode = data.initializationMode,
+                    integrationMetadata = data.integrationMetadata,
                     createParams = createParams,
                     optionsParams = optionsParams,
                     extraParams = extraParams,
@@ -93,7 +94,10 @@ internal open class BaseLpmNetworkTest(
             LpmNetworkTestActivity.createIntent(
                 context = application,
                 args = LpmNetworkTestActivity.Args(
-                    publishableKey = publishableKey,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = null,
+                    ),
                     paymentElementCallbackIdentifier = LPM_NETWORK_PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
                     allowsManualConfirmation = allowsManualConfirmation,
                 ),

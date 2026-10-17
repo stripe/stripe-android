@@ -7,20 +7,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class LinkAccountSessionPaymentAccount(
-
     @SerialName(value = "id")
     @Required
     val id: String,
-
     @SerialName(value = "microdeposit_verification_method")
     val microdepositVerificationMethod: MicrodepositVerificationMethod = UNKNOWN,
-
     @SerialName(value = "networking_successful")
     val networkingSuccessful: Boolean? = null,
-
     @SerialName(value = "next_pane")
     val nextPane: FinancialConnectionsSessionManifest.Pane? = null
-
 ) {
 
     @Serializable

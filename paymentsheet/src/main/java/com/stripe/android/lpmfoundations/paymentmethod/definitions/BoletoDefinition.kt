@@ -3,17 +3,16 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -32,38 +31,41 @@ internal object BoletoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BoletoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BoletoUiDefinitionFactory
 }
 
-private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BoletoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_boleto,
         iconResourceNight = null
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
-        val taxIdElementIdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder
+    ) {
+        val taxIdElementFormFieldId = FormFieldId.Generic("boleto[tax_id]")
         val taxIdElement = SimpleTextElement(
-            taxIdElementIdentifierSpec,
+            taxIdElementFormFieldId,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = resolvableString(R.string.stripe_boleto_tax_id_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Ascii,
                 ),
-                initialValue = arguments.initialValues[taxIdElementIdentifierSpec],
+                initialValue = arguments.initialValues[taxIdElementFormFieldId],
             )
         )
-        return FormElementsBuilder(arguments)
+
+        builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .element(SectionElement.wrap(taxIdElement))
             .requireBillingAddressIfAllowed(setOf("BR"))
-            .build()
     }
 }

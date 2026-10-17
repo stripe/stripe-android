@@ -13,11 +13,14 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
@@ -32,7 +35,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
@@ -76,10 +78,10 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -88,7 +90,7 @@ internal class GooglePayConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
             assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
@@ -150,10 +152,10 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -211,10 +213,10 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null,
                     )
                 )
 
@@ -260,9 +262,9 @@ internal class GooglePayConfirmationActivityTest {
         val PAYMENT_INTENT = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = """
                 {"card": {"require_cvc_recollection": true}}
-            """.trimIndent()
-        ).copy(
+            """.trimIndent(),
             id = "pm_1",
+            clientSecret = "pi_123_secret_123",
             amount = 5000,
             currency = "CAD",
         )
@@ -278,18 +280,17 @@ internal class GooglePayConfirmationActivityTest {
                 billingDetailsCollectionConfiguration = PaymentSheet
                     .BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
             ),
-            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
+            statusBarColor = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

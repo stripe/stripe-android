@@ -56,6 +56,7 @@ dependencies {
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
 
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.junit
@@ -87,6 +88,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     testOptions {
@@ -98,18 +100,19 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
-        ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property"
+            ])
+            if (gradle.ext.isCi) {
+                allWarningsAsErrors = true
+            }
         }
     }
 }

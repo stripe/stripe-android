@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:TerminalTestDelegate.kt:TerminalTestDelegate$3</ID>
+    <ID>TooManyFunctions:TerminalTestDelegate.kt:TerminalTestDelegate</ID>
+  </CurrentIssues>
+</SmellBaseline>

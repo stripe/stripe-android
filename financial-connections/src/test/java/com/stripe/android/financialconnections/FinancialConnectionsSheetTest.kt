@@ -9,7 +9,8 @@ class FinancialConnectionsSheetTest {
     private val financialConnectionsSheetLauncher = mock<FinancialConnectionsSheetLauncher>()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = ApiKeyFixtures.DEFAULT_STRIPE_ACCOUNT,
     )
     private val financialConnectionsSheet =
         FinancialConnectionsSheet(financialConnectionsSheetLauncher)
@@ -20,8 +21,28 @@ class FinancialConnectionsSheetTest {
         verify(financialConnectionsSheetLauncher).present(
             FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+                ApiKeyFixtures.DEFAULT_API_CONFIG,
+                preCollectedConsent = null,
             )
+        )
+    }
+
+    @Test
+    fun `present() with preCollectedConsent should launch with the given preCollectedConsent`() {
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+
+        financialConnectionsSheet.present(configuration, preCollectedConsent = preCollectedConsent)
+
+        verify(financialConnectionsSheetLauncher).present(
+            configuration = FinancialConnectionsSheetConfiguration(
+                financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+                apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
+                preCollectedConsent = preCollectedConsent,
+            ),
+            elementsSessionContext = null,
         )
     }
 }

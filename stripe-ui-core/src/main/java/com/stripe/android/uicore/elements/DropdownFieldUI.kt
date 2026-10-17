@@ -22,8 +22,6 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentDataType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -39,6 +39,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDataType
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.onAutofillText
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,14 +61,14 @@ private fun DropDownPreview() {
     Column {
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(mode = DropdownConfig.Mode.Condensed)
+                CountryConfig(mode = DropdownConfig.Mode.Condensed, autofillType = null)
             ),
             enabled = true
         )
         Spacer(modifier = Modifier.height(16.dp))
         DropDown(
             controller = DropdownFieldController(
-                CountryConfig(mode = DropdownConfig.Mode.Full())
+                CountryConfig(mode = DropdownConfig.Mode.Full(), autofillType = ContentType.AddressCountry)
             ),
             enabled = true
         )
@@ -101,7 +105,7 @@ fun DropDown(
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
-    val error by controller.error.collectAsState()
+    val error by controller.validationMessage.collectAsState()
     val selectedItemIndex by controller.selectedIndex.collectAsState()
     val selectedItemLabel = remember(selectedItemIndex) {
         controller.getSelectedItemLabel(selectedIndex)
@@ -118,6 +122,18 @@ fun DropDown(
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.stripeColors.component)
             .then(modifier)
+            .then(
+                controller.autofillType?.let { autofillType ->
+                    Modifier.semantics {
+                        contentType = autofillType
+                        contentDataType = ContentDataType.Text
+                        onAutofillText { text ->
+                            controller.onAutofillValue(text.text)
+                            true
+                        }
+                    }
+                } ?: Modifier
+            )
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -233,7 +249,10 @@ private fun LargeDropdownLabel(
         },
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            shouldShowError = isError,
+            fieldDisplayState = when (isError) {
+                true -> FieldDisplayState.ERROR
+                false -> FieldDisplayState.NORMAL
+            },
             disabledIndicatorColor = if (isError) {
                 MaterialTheme.colors.error
             } else {
@@ -311,7 +330,7 @@ internal fun DropdownMenuItem(
 
         if (isSelected) {
             Icon(
-                Icons.Filled.Check,
+                painter = painterResource(R.drawable.stripe_ic_checkmark),
                 contentDescription = null,
                 modifier = Modifier
                     .height(24.dp),

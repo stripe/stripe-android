@@ -51,8 +51,26 @@ internal class ExpiryDateStateTest {
     }
 
     @Test
+    fun `create should set text to empty when both expiry month and year are null`() {
+        val card = createCard(expiryMonth = null, expiryYear = null)
+
+        val state = ExpiryDateState.create(card, enabled = true)
+
+        assertThat(state.text).isEqualTo(CARD_EDIT_UI_MISSING_EXPIRY_DATE)
+        assertThat(state.expiryMonth).isNull()
+        assertThat(state.expiryYear).isNull()
+    }
+
+    @Test
     fun `shouldShowError should return false for valid expiry date`() {
         val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
+
+        assertThat(state.shouldShowError()).isFalse()
+    }
+
+    @Test
+    fun `shouldShowError should return false for missing expiry date`() {
+        val state = ExpiryDateState(text = CARD_EDIT_UI_MISSING_EXPIRY_DATE, enabled = true, validating = false)
 
         assertThat(state.shouldShowError()).isFalse()
     }
@@ -68,21 +86,21 @@ internal class ExpiryDateStateTest {
     fun `section should return non-null message for expired date`() {
         val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true, validating = false)
 
-        assertThat(state.sectionError()).isNotNull()
+        assertThat(state.sectionValidationMessage()).isNotNull()
     }
 
     @Test
     fun `sectionError should return null for valid date`() {
         val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true, validating = false)
 
-        assertThat(state.sectionError()).isNull()
+        assertThat(state.sectionValidationMessage()).isNull()
     }
 
     @Test
     fun `sectionError should return null when not enabled even if invalid`() {
         val state = ExpiryDateState(text = INVALID_FORMAT_EXPIRY_TEXT, enabled = false, validating = false)
 
-        assertThat(state.sectionError()).isNull()
+        assertThat(state.sectionValidationMessage()).isNull()
     }
 
     @Test
@@ -144,7 +162,7 @@ internal class ExpiryDateStateTest {
 
         assertThat(state.validating).isTrue()
         assertThat(state.shouldShowError()).isTrue()
-        assertThat(state.sectionError()).isNotNull()
+        assertThat(state.sectionValidationMessage()).isNotNull()
     }
 
     private fun createCard(expiryMonth: Int?, expiryYear: Int?): EditCardPayload {

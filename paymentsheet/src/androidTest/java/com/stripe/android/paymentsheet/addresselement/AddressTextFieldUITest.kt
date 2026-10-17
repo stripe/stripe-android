@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.AddressTextFieldController
 import com.stripe.android.uicore.elements.AddressTextFieldUI
 import org.junit.Rule
@@ -21,9 +22,9 @@ class AddressTextFieldUITest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun clicking_address_should_trigger_on_cick() {
+    fun clicking_address_should_trigger_on_click() {
         var count = 0
-        setContent {
+        setContent(enabled = true) {
             count++
         }
 
@@ -32,7 +33,20 @@ class AddressTextFieldUITest {
         Truth.assertThat(count).isEqualTo(1)
     }
 
+    @Test
+    fun clicking_disabled_address_should_not_trigger_on_click() {
+        var count = 0
+        setContent(enabled = false) {
+            count++
+        }
+
+        composeTestRule.onNodeWithText("Address").performClick()
+
+        Truth.assertThat(count).isEqualTo(0)
+    }
+
     private fun setContent(
+        enabled: Boolean = true,
         onClick: () -> Unit
     ) {
         composeTestRule.setContent {
@@ -40,7 +54,14 @@ class AddressTextFieldUITest {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
                         label = resolvableString(UiCoreR.string.stripe_address_label_address),
+                        addressInputMode = AddressInputMode.NoAutocomplete(),
+                        inlineAutocompleteHandler = null,
+                        reportsFormValue = false,
+                        initialQuery = "",
+                        showEnterManually = true,
                     ),
+                    enabled = enabled,
+                    onSearchActivated = null,
                     onClick = onClick
                 )
             }

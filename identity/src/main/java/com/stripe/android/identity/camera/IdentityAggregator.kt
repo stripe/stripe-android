@@ -5,6 +5,7 @@ import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -37,13 +38,13 @@ internal class IdentityAggregator(
                 requireNotNull(verificationPage.selfieCapture) {
                     "Failed to initialize FaceDetectorTransitioner - " +
                         "verificationPage.selfieCapture is null."
-                }
+                },
+                enable3DFaceCapture = verificationPage.enable3DFaceCapture()
             )
         } else {
             IDDetectorTransitioner(
                 timeout = verificationPage.documentCapture.autocaptureTimeout.milliseconds,
                 iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
-                timeRequired = verificationPage.documentCapture.motionBlurMinDuration,
                 blurThreshold = verificationPage.documentCapture.blurThreshold
                     ?: IDDetectorTransitioner.DEFAULT_BLUR_THRESHOLD
             )

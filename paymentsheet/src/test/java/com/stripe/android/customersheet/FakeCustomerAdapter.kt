@@ -32,12 +32,12 @@ internal class FakeCustomerAdapter(
 
     override suspend fun attachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onAttachPaymentMethod?.invoke(paymentMethodId)
-            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id == paymentMethodId }!!)
     }
 
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerAdapter.Result<PaymentMethod> {
         return onDetachPaymentMethod?.invoke(paymentMethodId)
-            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id!! == paymentMethodId }!!)
+            ?: CustomerAdapter.Result.success(paymentMethods.getOrNull()?.find { it.id == paymentMethodId }!!)
     }
 
     override suspend fun updatePaymentMethod(
@@ -47,7 +47,7 @@ internal class FakeCustomerAdapter(
         return onUpdatePaymentMethod?.invoke(paymentMethodId, params)
             ?: CustomerAdapter.Result.success(
                 paymentMethods.getOrNull()?.find {
-                    it.id!! == paymentMethodId
+                    it.id == paymentMethodId
                 }!!
             )
     }

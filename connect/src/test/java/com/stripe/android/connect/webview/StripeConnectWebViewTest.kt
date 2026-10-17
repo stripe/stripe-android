@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import android.webkit.JsResult
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.widget.FrameLayout
@@ -23,6 +24,7 @@ import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -36,7 +38,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
-import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -48,7 +49,8 @@ class StripeConnectWebViewTest {
 
     private lateinit var webView: StripeConnectWebView
 
-    private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
+    private val activityController = Robolectric.buildActivity(ComponentActivity::class.java).setup()
+    private val activity = activityController.get()
     private val containerView = FrameLayout(activity)
 
     @Before
@@ -57,7 +59,8 @@ class StripeConnectWebViewTest {
         webView = StripeConnectWebView(
             application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
-            logger = Logger.getInstance(enableLogging = true)
+            logger = Logger.getInstance(enableLogging = true),
+            coroutineScope = TestScope(),
         )
     }
 
@@ -109,6 +112,24 @@ class StripeConnectWebViewTest {
         )
 
         verifyBlocking(mockDelegate) { onChooseFile(activity, filePathCallback, intent) }
+    }
+
+    @Test
+    fun `WebChromeClient onJsAlert cancels result when activity is destroyed`() {
+        val result: JsResult = mock()
+
+        containerView.addView(webView)
+        activityController.destroy()
+
+        assertThat(
+            webView.stripeWebChromeClient.onJsAlert(
+                webView,
+                testUrl,
+                "message",
+                result
+            )
+        ).isTrue()
+        verify(result).cancel()
     }
 
     @Test
@@ -179,7 +200,7 @@ class StripeConnectWebViewTest {
     @Test
     fun `JS fetchClientSecret is handled`() = runTest {
         val clientSecret = "client-secret"
-        wheneverBlocking { mockDelegate.fetchClientSecret() }.doReturn(clientSecret)
+        whenever { mockDelegate.fetchClientSecret() }.doReturn(clientSecret)
         assertThat(webView.stripeJsInterface.fetchClientSecret())
             .isEqualTo(clientSecret)
     }

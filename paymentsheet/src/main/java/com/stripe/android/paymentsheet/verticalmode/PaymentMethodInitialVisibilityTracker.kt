@@ -1,12 +1,11 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -15,69 +14,62 @@ import kotlinx.coroutines.launch
  * Tracks stability of payment method positioning and dispatches analytics when stable
  *
  * This class monitors UI layout changes for payment methods and waits until:
- * 1. All expected payment methods have stable coordinates (no layout changes)
- * 2. All visibility states are stable (no visibility changes)
- * 3. A debounce period passes to ensure animations are complete
+ * 1. All expected payment methods have reported coordinates
+ * 2. A debounce period passes without a layout change
  *
  * Once stable, it dispatches a single analytics event.
  */
 internal class PaymentMethodInitialVisibilityTracker(
-    private val expectedItems: List<String>,
-    private val renderedLpmCallback: (Map<String, Boolean>) -> Unit,
+    private var expectedItems: List<String> = emptyList(),
+    private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
+    private val coroutineScope: CoroutineScope,
 ) {
+    private data class CoordinateSnapshot(
+        val size: IntSize,
+        val boundsInWindow: Rect
+    )
+
     private val visibilityMap = mutableMapOf<String, Boolean>()
-    private val previousCoordinates = mutableMapOf<String, LayoutCoordinates>()
-    private val coordinateStabilityMap = mutableMapOf<String, Boolean>()
     private var hasDispatched = false
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var dispatchEventJob: Job? = null
 
-    /**
-     * When this function is called from onGloballyPositioned
-     * it is guaranteed to be called twice on any given stable coordinate
-     *
-     * onGloballyPositioned is called
-     * when coordinates are first available
-     * when coordinates have moved
-     * and when the composition is finalized and stable.
-     */
+    fun updateExpectedItems(items: List<String>) {
+        if (this.expectedItems != items) {
+            // Reset to initial state with new items
+            this.expectedItems = items
+            reset()
+        }
+    }
+
+    fun getHasDispatched(): Boolean {
+        return this.hasDispatched
+    }
+
     fun updateVisibility(itemCode: String, coordinates: LayoutCoordinates) {
-        if (itemCode !in expectedItems) return
-        if (expectedItems.isEmpty()) return
+        if (itemCode !in expectedItems || expectedItems.isEmpty()) return
         if (hasDispatched) return // Only dispatch once per tracker instance
 
-        val newVisibility = calculateVisibility(coordinates)
-        val previousCoordinatesForItem = previousCoordinates[itemCode]
-
-        // Check if coordinates are stable (haven't changed)
-        // Compare position, size, and window bounds to detect any layout changes
-        // All three must match exactly to consider coordinates stable
-        val coordinatesAreStable = previousCoordinatesForItem?.let { prev ->
-            prev.positionInWindow() == coordinates.positionInWindow() &&
-                prev.size == coordinates.size &&
-                prev.boundsInWindow() == coordinates.boundsInWindow()
-        } ?: false // First time seeing this item, so not stable yet
-
-        // Update our tracking
-        this.previousCoordinates[itemCode] = coordinates
-        val wasVisibilityStable = visibilityMap[itemCode] == newVisibility
-        visibilityMap[itemCode] = newVisibility
-
-        if (coordinatesAreStable && wasVisibilityStable) {
-            coordinateStabilityMap[itemCode] = true
+        val coordinateSnapshot: CoordinateSnapshot
+        if (coordinates.isAttached) {
+            coordinateSnapshot = CoordinateSnapshot(
+                size = coordinates.size,
+                boundsInWindow = coordinates.boundsInWindow(),
+            )
         } else {
-            coordinateStabilityMap.remove(itemCode)
-            // Cancel any pending dispatch since coordinates changed
-            dispatchEventJob?.cancel()
+            return
         }
+
+        val newVisibility = calculateVisibility(coordinateSnapshot)
+        visibilityMap[itemCode] = newVisibility
+        dispatchEventJob?.cancel()
 
         checkStabilityAndDispatch()
     }
 
     @Suppress("MagicNumber")
-    private fun calculateVisibility(coordinates: LayoutCoordinates): Boolean {
-        val bounds = coordinates.boundsInWindow()
+    private fun calculateVisibility(coordinates: CoordinateSnapshot): Boolean {
+        val bounds = coordinates.boundsInWindow
 
         // Check if completely out of bounds (hidden)
         @Suppress("ComplexCondition")
@@ -102,13 +94,7 @@ internal class PaymentMethodInitialVisibilityTracker(
     }
 
     private fun checkStability(): Boolean {
-        if (expectedItems.size != coordinateStabilityMap.size || expectedItems.size != visibilityMap.size) {
-            return false
-        }
-
-        return expectedItems.all {
-            coordinateStabilityMap[it] == true && visibilityMap.containsKey(it)
-        }
+        return expectedItems.size == visibilityMap.size && expectedItems.all(visibilityMap::containsKey)
     }
 
     private fun checkStabilityAndDispatch() {
@@ -124,14 +110,22 @@ internal class PaymentMethodInitialVisibilityTracker(
                 delay(DEFAULT_DEBOUNCE_DELAY_MS)
                 if (!isActive) return@launch
                 hasDispatched = true
-                renderedLpmCallback(visibilityMap.toMap())
+                val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
+                val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
+
+                renderedLpmCallback(
+                    visiblePaymentMethods,
+                    hiddenPaymentMethods
+                )
             }
         }
     }
 
-    fun dispose() {
+    fun reset() {
+        visibilityMap.clear()
+        hasDispatched = false
         dispatchEventJob?.cancel()
-        coroutineScope.cancel() // Cancel the entire scope
+        dispatchEventJob = null
     }
 
     companion object {
@@ -144,9 +138,9 @@ internal class PaymentMethodInitialVisibilityTracker(
 
         /**
          * Debounce delay after UI stabilizes before dispatching analytics event.
-         * 800ms allows bottom sheet animations and layout settling to complete
+         * 50ms allows bottom sheet animations and layout settling to complete
          * before capturing final visibility state.
          */
-        private const val DEFAULT_DEBOUNCE_DELAY_MS = 800L
+        private const val DEFAULT_DEBOUNCE_DELAY_MS = 50L
     }
 }

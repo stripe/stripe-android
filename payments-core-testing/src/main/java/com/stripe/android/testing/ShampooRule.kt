@@ -16,6 +16,7 @@ class ShampooRule(private val iterations: Int) : TestRule {
             override fun evaluate() {
                 repeat(iterations) { iteration ->
                     try {
+                        println("Executing iteration: $iteration")
                         base.evaluate()
                     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
                         println("Failed on iteration: $iteration")

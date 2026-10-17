@@ -21,6 +21,7 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -56,8 +57,8 @@ internal class StripePaymentControllerTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
     private val testDispatcher = StandardTestDispatcher()
 
@@ -84,7 +85,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun getRequestCode_withIntents_correctCodeReturned() {
-        assertThat(StripePaymentController.getRequestCode(PaymentIntentFixtures.PI_REQUIRES_3DS1))
+        assertThat(StripePaymentController.getRequestCode(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD))
             .isEqualTo(StripePaymentController.PAYMENT_REQUEST_CODE)
         assertThat(StripePaymentController.getRequestCode(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT))
             .isEqualTo(StripePaymentController.SETUP_REQUEST_CODE)
@@ -106,7 +107,7 @@ internal class StripePaymentControllerTest {
     fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() =
         runTest {
             // use a PaymentIntent in `requires_action` state
-            val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
+            val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
 
             val clientSecret = paymentIntent.clientSecret.orEmpty()
             stripeRepository.retrievePaymentIntentResponse = paymentIntent
@@ -183,7 +184,7 @@ internal class StripePaymentControllerTest {
     }
 
     @Test
-    fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
+    fun `confirmAndAuthenticateAlipay() adds a return URL when one is not provided`() =
         runTest {
             whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
                 AlipayAuthResult(
@@ -203,6 +204,8 @@ internal class StripePaymentControllerTest {
             ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo(DefaultReturnUrl.create(context).value)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].second).isSameInstanceAs(
                 REQUEST_OPTIONS
@@ -212,6 +215,31 @@ internal class StripePaymentControllerTest {
             )
             assertThat(actualResponse.intent).isEqualTo(PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION)
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        }
+
+    @Test
+    fun `confirmAndAuthenticateAlipay() preserves a provided return URL`() =
+        runTest {
+            whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
+                AlipayAuthResult(
+                    StripeIntentResult.Outcome.SUCCEEDED
+                )
+            )
+            stripeRepository.retrievePaymentIntentResponse =
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+
+            controller.confirmAndAuthenticateAlipay(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    "pm_123",
+                    "client_secret"
+                ).copy(returnUrl = "example://return_url"),
+                mock(),
+                REQUEST_OPTIONS
+            ).getOrThrow()
+
+            assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
+            assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
+                .isEqualTo("example://return_url")
         }
 
     private fun createController(): StripePaymentController {

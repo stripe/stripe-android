@@ -15,25 +15,21 @@ data class AuthenticationRequestParameters(
      * The encrypted device data as a JWE string.
      */
     val deviceData: String,
-
     /**
      * The SDK Transaction ID. When called, the 3DS SDK uses a secure random function to generate
      * a Transaction ID in UUID format.
      */
     val sdkTransactionId: SdkTransactionId,
-
     /**
      * The SDK App ID. The 3DS SDK uses a secure random function to generate the App ID in UUID
      * format. This ID is unique and is generated during installation and update of the app on the
      * Cardholder’s device.
      */
     val sdkAppId: String,
-
     /**
      * The SDK Reference Number.
      */
     val sdkReferenceNumber: String,
-
     /**
      * The SDK Ephemeral Public Key. An ephemeral key pair is used to establish a secure session
      * between the 3DS SDK and the ACS.
@@ -43,7 +39,6 @@ data class AuthenticationRequestParameters(
      * same as a String representation of a JWK object.
      */
     val sdkEphemeralPublicKey: String,
-
     /**
      * The protocol version that is used for the transaction.
      * The SDK receives the protocol version as a parameter in the createTransaction method

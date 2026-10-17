@@ -11,10 +11,13 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
+import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +30,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Doesn't display a mandate for Link`() {
-        val link = PaymentSelection.Link()
+        val link = PaymentSelection.Link(brand = LinkBrand.Link)
         val result = link.mandateText(
             merchantName = "Merchant",
             isSetupFlow = false,
@@ -37,7 +40,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Link billingDetails returns null when selectedPayment is null`() {
-        val link = PaymentSelection.Link(selectedPayment = null)
+        val link = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = null)
 
         assertThat(link.billingDetails).isNull()
     }
@@ -66,7 +69,7 @@ class PaymentSelectionTest {
             brand = CardBrand.Visa,
             networks = listOf("visa"),
             cvcCheck = CvcCheck.Pass,
-            funding = "credit"
+            funding = ConsumerPaymentDetails.Card.Funding.Credit
         )
 
         val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
@@ -75,7 +78,7 @@ class PaymentSelectionTest {
             billingPhone = "+1-555-123-4567"
         )
 
-        val link = PaymentSelection.Link(selectedPayment = selectedPayment)
+        val link = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = selectedPayment)
 
         assertThat(link.billingDetails).isEqualTo(
             PaymentMethod.BillingDetails(
@@ -92,6 +95,39 @@ class PaymentSelectionTest {
                 name = "John Doe",
             )
         )
+    }
+
+    @Test
+    fun `Link label uses brand name`() {
+        val label = PaymentSelection.Link(
+            brand = LinkBrand.Onelink,
+        ).label(linkBrand = LinkBrand.Onelink).resolve(context)
+
+        assertThat(label).isEqualTo("Onelink")
+    }
+
+    @Test
+    fun `Saved Link passthrough card label uses linkBrand`() {
+        val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
+
+        assertThat(label).isEqualTo("Onelink")
+    }
+
+    @Test
+    fun `Saved Link passthrough card label without sublabel shows card last4`() {
+        val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
+        val label = pm.getLabel(linkBrand = LinkBrand.Onelink, canShowSublabel = false)?.resolve(context)
+
+        assertThat(label).isEqualTo("\u2066···· 4242\u2069")
+    }
+
+    @Test
+    fun `Saved Link passthrough US bank label uses linkBrand`() {
+        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT!!.copy(isLinkPassthroughMode = true)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
+
+        assertThat(label).isEqualTo("Onelink")
     }
 
     @Test

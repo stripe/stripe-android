@@ -1,15 +1,27 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+/**
+ * Result of an Onramp create payment token operation.
+ */
+@ExperimentalCryptoOnramp
 sealed interface OnrampCreateCryptoPaymentTokenResult {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
+    /**
+     * Creating the token was completed.
+     * @param cryptoPaymentToken The token that was created.
+     */
+    @ExperimentalCryptoOnramp
     class Completed internal constructor(
         val cryptoPaymentToken: String
     ) : OnrampCreateCryptoPaymentTokenResult
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    /**
+     * Creating the token failed.
+     * @param error The error that caused the failure
+     */
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampCreateCryptoPaymentTokenResult

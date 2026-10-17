@@ -7,9 +7,9 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -17,11 +17,11 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -31,10 +31,12 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val publishableKeyProvider: Provider<String>,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
+    private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    private val clock: Clock,
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -46,11 +48,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider.get(),
+            apiKey = apiConfigProvider.get().publishableKey,
             stripeAccount = result.stripeAccountId
         )
 
-        val initialRetrieveIntentStartTime = System.currentTimeMillis()
+        val initialRetrieveIntentStartTime = clock.currentTimeMillis()
+
+        val requestId = unvalidatedResult.exception?.requestId
 
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
@@ -59,25 +63,47 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         ).mapCatching { stripeIntent ->
             when {
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
-                    stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
+                    stripeIntent.status == StripeIntent.Status.RequiresCapture ||
+                    isOrchestrationPayment(stripeIntent, result) -> {
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
-                shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
-                    val intent = refreshStripeIntentUntilTerminalState(
-                        stripeIntent,
-                        result.clientSecret,
-                        requestOptions,
-                        initialRetrieveIntentStartTime
-                    ).getOrThrow()
+                shouldRefreshOrPollIntent(
+                    stripeIntent = stripeIntent,
+                    flowOutcome = result.flowOutcome,
+                    canCancelSource = result.canCancelSource
+                ) -> {
+                    val intent = if (shouldCallRefreshIntent(stripeIntent)) {
+                        refreshStripeIntent(
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            expandFields = EXPAND_PAYMENT_METHOD
+                        ).getOrThrow()
+                    } else {
+                        pollStripeIntentUntilTerminalState(
+                            originalIntent = stripeIntent,
+                            clientSecret = result.clientSecret,
+                            requestOptions = requestOptions,
+                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime
+                        ).getOrThrow()
+                    }
+
                     val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
                     createStripeIntentResult(
                         intent,
                         flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
@@ -102,19 +128,34 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         result.flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 else -> {
                     createStripeIntentResult(
                         stripeIntent,
                         result.flowOutcome,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
             }
         }
     }
+
+    private fun isOrchestrationPayment(
+        stripeIntent: StripeIntent,
+        result: PaymentFlowResult.Validated
+    ): Boolean = stripeIntent.status == StripeIntent.Status.Processing &&
+        stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+        result.flowOutcome != CANCELED
 
     private fun shouldCancelIntentSource(
         stripeIntent: StripeIntent,
@@ -127,10 +168,17 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         return shouldCancelSource && stripeIntent.requiresAction()
     }
 
-    private fun shouldRefreshIntent(
+    private fun shouldRefreshOrPollIntent(
         stripeIntent: StripeIntent,
-        @StripeIntentResult.Outcome flowOutcome: Int
+        @StripeIntentResult.Outcome flowOutcome: Int,
+        canCancelSource: Boolean
     ): Boolean {
+        // An explicit WebView dismissal must cancel the source instead of polling. Unlike Custom
+        // Tabs, the in-app WebView can distinguish user cancellation from an ambiguous return.
+        if (flowOutcome == CANCELED && shouldCancelIntentSource(stripeIntent, canCancelSource)) {
+            return false
+        }
+
         // For some payment methods, after user confirmation(resulting in flowOutCome == SUCCEEDED),
         // there is a delay when Stripe backend transfers its state out of "requires_action".
         // For a PaymentIntent with such payment method, we will need to poll the refresh endpoint
@@ -190,7 +238,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Result<T>
 
     /**
-     * Keeps polling refresh endpoint for this [StripeIntent] until its status is no longer
+     * Keeps polling retrieve endpoint for this [StripeIntent] until its status is no longer
      * "requires_action".
      *
      * @param clientSecret for the intent
@@ -199,57 +247,56 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      *
      * @return a [StripeIntent] object with a deterministic state.
      */
-    private suspend fun refreshStripeIntentUntilTerminalState(
+    private suspend fun pollStripeIntentUntilTerminalState(
         originalIntent: StripeIntent,
         clientSecret: String,
         requestOptions: ApiRequest.Options,
         initialRetrieveIntentStartTime: Long
     ): Result<T> {
-        var timeOfLastRequest = System.currentTimeMillis()
-        var stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+        var timeOfLastRequest = initialRetrieveIntentStartTime
+        var stripeIntentResult: Result<T>? = null
+        var lastObservedStatus: StripeIntent.Status? = null
+
+        suspend fun retrieveAndTrackStatus(): Result<T> {
+            val result = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            lastObservedStatus = result.getOrNull()?.status ?: lastObservedStatus
+            return result
+        }
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
-            (System.currentTimeMillis() - initialRetrieveIntentStartTime)
+            (clock.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
+            stripeIntentResult = retrieveAndTrackStatus()
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
-                delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
-                timeOfLastRequest = System.currentTimeMillis()
-                stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+                delay(POLLING_DELAY - (clock.currentTimeMillis() - timeOfLastRequest))
+                timeOfLastRequest = clock.currentTimeMillis()
+                stripeIntentResult = retrieveAndTrackStatus()
             }
         }
 
-        if (shouldRetry(stripeIntentResult)) {
-            stripeIntentResult = refreshOrRetrieveIntent(originalIntent, clientSecret, requestOptions)
+        // Retrieve final time if intent not in terminal state OR result is null which is possible if the initial
+        // request took longer than the polling duration for the payment method. Ensures we always call retrieve
+        // at least once after the polling duration
+        if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
+            stripeIntentResult = retrieveAndTrackStatus()
+
+            if (shouldRetry(stripeIntentResult)) {
+                pollingAnalyticsEventReporter.onPollingTimedOut(
+                    paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
+                    lastKnownStatus = lastObservedStatus?.name,
+                    timeLimitSeconds = getPollingDurationForPaymentMethod(originalIntent) / 1000,
+                )
+            }
         }
 
-        return stripeIntentResult
+        return stripeIntentResult as Result<T>
     }
 
     private fun getPollingDurationForPaymentMethod(stripeIntent: StripeIntent): Long {
         return stripeIntent.paymentMethod?.type?.afterRedirectAction?.pollingDuration ?: MAX_POLLING_DURATION
-    }
-
-    private suspend fun refreshOrRetrieveIntent(
-        originalIntent: StripeIntent,
-        clientSecret: String,
-        requestOptions: ApiRequest.Options,
-    ): Result<T> {
-        return if (shouldCallRefreshIntent(originalIntent)) {
-            refreshStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        } else {
-            retrieveStripeIntent(
-                clientSecret = clientSecret,
-                requestOptions = requestOptions,
-                expandFields = EXPAND_PAYMENT_METHOD
-            )
-        }
     }
 
     /**
@@ -268,15 +315,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         failureMessage: String?
     ): S
 
-    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>): Boolean {
-        val stripeIntent = stripeIntentResult.getOrNull() ?: return true
+    private fun shouldRetry(stripeIntentResult: Result<StripeIntent>?): Boolean {
+        val stripeIntent = stripeIntentResult?.getOrNull() ?: return true
         val requiresAction = stripeIntent.requiresAction()
         val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        // Payment methods with AfterRedirectAction.Refresh should only call refresh endpoint once
-        val isNotRefreshPm =
-            stripeIntent.paymentMethod?.type?.afterRedirectAction !is PaymentMethod.AfterRedirectAction.Refresh
-        return (requiresAction && isNotRefreshPm) || isCardPaymentProcessing
+        return requiresAction || isCardPaymentProcessing
     }
 
     internal companion object {
@@ -293,16 +337,20 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 @Singleton
 internal class PaymentIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    apiConfigProvider: Provider<ApiConfiguration.State>,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    clock: Clock,
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
-    publishableKeyProvider,
+    apiConfigProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
+    clock,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -357,16 +405,20 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 @Singleton
 internal class SetupIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    apiConfigProvider: Provider<ApiConfiguration.State>,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
+    clock: Clock,
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
-    publishableKeyProvider,
+    apiConfigProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
+    clock,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

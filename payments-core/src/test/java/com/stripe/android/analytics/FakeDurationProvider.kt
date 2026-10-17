@@ -13,9 +13,23 @@ internal class FakeDurationProvider(
         calls.add(Call.Start(key, reset))
     }
 
+    override fun elapsed(key: DurationProvider.Key): Duration {
+        calls.add(Call.Elapsed(key))
+        return duration
+    }
+
     override fun end(key: DurationProvider.Key): Duration {
         calls.add(Call.End(key))
         return duration
+    }
+
+    override fun completedDuration(key: DurationProvider.Key): Duration? {
+        throw NotImplementedError("completedDuration is not implemented in FakeDurationProvider")
+    }
+
+    override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
+        calls.add(Call.Measure(key))
+        return block()
     }
 
     fun has(call: Call): Boolean = calls.contains(call)
@@ -25,6 +39,10 @@ internal class FakeDurationProvider(
 
         data class Start(override val key: DurationProvider.Key, val reset: Boolean) : Call
 
+        data class Elapsed(override val key: DurationProvider.Key) : Call
+
         data class End(override val key: DurationProvider.Key) : Call
+
+        data class Measure(override val key: DurationProvider.Key) : Call
     }
 }

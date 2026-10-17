@@ -2,11 +2,13 @@ package com.stripe.android.link.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.parseAppearance
@@ -105,35 +107,65 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testNewUser() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { },
+            )
         }
     }
 
     @Test
     fun testNewUserInDifferentLocales() {
         localesPaparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { }
+            )
         }
     }
 
     @Test
     fun testNewUserDisabled() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Default, enabled = false, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = false,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { }
+            )
         }
     }
 
     @Test
     fun testExistingUser() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Email("jaynewstrom@test.com"), enabled = true, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { }
+            )
         }
     }
 
     @Test
     fun testExistingUserDisabled() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Email("jaynewstrom@test.com"), enabled = false, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = false,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { }
+            )
         }
     }
 
@@ -143,6 +175,8 @@ internal class LinkButtonScreenshotTest {
             LinkButton(
                 state = LinkButtonState.Email(email = "jaynewstrom12345678987654321@test.com"),
                 enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -154,6 +188,8 @@ internal class LinkButtonScreenshotTest {
             LinkButton(
                 state = LinkButtonState.Email("jaynewstrom12345678987654321@test.com"),
                 enabled = false,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -162,7 +198,13 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testRoundedCornerSurfaceColor() {
         surfacePaparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
+                onClick = { }
+            )
         }
     }
 
@@ -178,7 +220,76 @@ internal class LinkButtonScreenshotTest {
                     ).toDefaultPaymentUI(true)!!,
                 ),
                 enabled = true,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
+            )
+        }
+    }
+
+    @Test
+    fun testCompactNewUser() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactExistingUser() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.Email("jaynewstrom@test.com"),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactPaymentMethodDisplayed() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.DefaultPayment(
+                    paymentUI = DisplayablePaymentDetails(
+                        defaultPaymentType = "CARD",
+                        defaultCardBrand = "visa",
+                        last4 = "4242"
+                    ).toDefaultPaymentUI(true)!!,
+                ),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
+                onClick = { },
+            )
+        }
+    }
+
+    @Test
+    fun testCompactBankAccountDisplayed() {
+        paparazziRule.snapshot {
+            LinkButton(
+                state = LinkButtonState.DefaultPayment(
+                    paymentUI = DisplayablePaymentDetails(
+                        defaultPaymentType = "BANK_ACCOUNT",
+                        last4 = "6789"
+                    ).toDefaultPaymentUI(true)!!,
+                ),
+                enabled = true,
+                modifier = Modifier.width(179.dp),
+                linkBrand = LinkBrand.Link,
+                containerWidth = 179.dp,
+                onClick = { },
             )
         }
     }
@@ -190,6 +301,8 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Default,
                 enabled = true,
                 theme = LinkButtonThemes.currentTheme,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -202,6 +315,8 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email("jaynewstrom@test.com"),
                 enabled = true,
                 theme = LinkButtonThemes.currentTheme,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }
@@ -214,6 +329,8 @@ internal class LinkButtonScreenshotTest {
                 state = LinkButtonState.Email("jaynewstrom@test.com"),
                 enabled = false,
                 theme = LinkButtonThemes.currentTheme,
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
                 onClick = { }
             )
         }

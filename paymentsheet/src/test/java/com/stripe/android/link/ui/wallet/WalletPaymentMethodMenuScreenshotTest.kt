@@ -54,6 +54,16 @@ internal class WalletPaymentMethodMenuScreenshotTest {
     }
 
     @Test
+    fun testUnknown() {
+        snapshot(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
+                .copy(
+                    isDefault = false
+                )
+        )
+    }
+
+    @Test
     fun testBankAccountAsDefault() {
         snapshot(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT

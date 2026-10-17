@@ -4,25 +4,29 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
  */
 @Parcelize
-data class ConfirmPaymentIntentParams
+@Poko
+class ConfirmPaymentIntentParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-
     /**
      * ID of the payment method (a PaymentMethod, Card, or compatible Source object) to attach to
      * this PaymentIntent.
@@ -32,7 +36,6 @@ constructor(
     val paymentMethodId: String? = null,
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
-
     /**
      * The client secret of this PaymentIntent. Used for client-side retrieval using a
      * publishable key.
@@ -47,7 +50,6 @@ constructor(
      * See [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret).
      */
     override val clientSecret: String,
-
     /**
      * The URL to redirect your customer back to after they authenticate or cancel their payment on
      * the payment method’s app or site. If you’d prefer to redirect to a mobile application, you
@@ -57,7 +59,6 @@ constructor(
      * See [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url).
      */
     override var returnUrl: String? = null,
-
     /**
      * If the PaymentIntent has a `payment_method` and a `customer` or if you’re attaching a payment
      * method to the PaymentIntent in this request, you can pass `save_payment_method=true` to save
@@ -69,7 +70,6 @@ constructor(
      * See [save_payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method).
      */
     var savePaymentMethod: Boolean? = null,
-
     /**
      * Set to `true` only when using manual confirmation and the iOS or Android SDKs to handle
      * additional authentication steps.
@@ -77,28 +77,24 @@ constructor(
      * See [use_stripe_sdk](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-use_stripe_sdk).
      */
     private val useStripeSdk: Boolean = false,
-
     /**
      * Payment-method-specific configuration for this PaymentIntent.
      *
      * See [payment_method_options](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method_options).
      */
     var paymentMethodOptions: PaymentMethodOptionsParams? = null,
-
     /**
      * ID of the mandate to be used for this payment.
      *
      * See [mandate](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate).
      */
     var mandateId: String? = null,
-
     /**
      * This hash contains details about the Mandate to create.
      *
      * See [mandate_data](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null,
-
     /**
      * Indicates that you intend to make future payments with this PaymentIntent’s payment method.
      *
@@ -107,29 +103,34 @@ constructor(
      * See [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage).
      */
     var setupFutureUsage: SetupFutureUsage? = null,
-
     /**
      * Shipping information for this PaymentIntent.
      *
      * See [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping).
      */
     var shipping: Shipping? = null,
-
     /**
      * Email address that the receipt for the resulting payment will be sent to.
      *
      * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
      */
     var receiptEmail: String? = null,
-
     /**
      * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
-
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
-
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    /**
+     * ID of the ConfirmationToken used to confirm this PaymentIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See [confirmation_token](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -137,6 +138,51 @@ constructor(
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        paymentMethodCreateParams: PaymentMethodCreateParams? = this.paymentMethodCreateParams,
+        paymentMethodId: String? = this.paymentMethodId,
+        sourceParams: SourceParams? = this.sourceParams,
+        sourceId: String? = this.sourceId,
+        clientSecret: String = this.clientSecret,
+        returnUrl: String? = this.returnUrl,
+        savePaymentMethod: Boolean? = this.savePaymentMethod,
+        useStripeSdk: Boolean = this.useStripeSdk,
+        paymentMethodOptions: PaymentMethodOptionsParams? = this.paymentMethodOptions,
+        mandateId: String? = this.mandateId,
+        mandateData: MandateDataParams? = this.mandateData,
+        setupFutureUsage: SetupFutureUsage? = this.setupFutureUsage,
+        shipping: Shipping? = this.shipping,
+        receiptEmail: String? = this.receiptEmail,
+        setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
+        paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
+        radarOptions: RadarOptions? = this.radarOptions,
+        clientAttributionMetadata: ClientAttributionMetadata? = this.clientAttributionMetadata,
+        confirmationTokenId: String? = this.confirmationTokenId,
+    ): ConfirmPaymentIntentParams {
+        return ConfirmPaymentIntentParams(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            paymentMethodId = paymentMethodId,
+            sourceParams = sourceParams,
+            sourceId = sourceId,
+            clientSecret = clientSecret,
+            returnUrl = returnUrl,
+            savePaymentMethod = savePaymentMethod,
+            useStripeSdk = useStripeSdk,
+            paymentMethodOptions = paymentMethodOptions,
+            mandateId = mandateId,
+            mandateData = mandateData,
+            setupFutureUsage = setupFutureUsage,
+            shipping = shipping,
+            receiptEmail = receiptEmail,
+            setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+            paymentMethodCode = paymentMethodCode,
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
+            confirmationTokenId = confirmationTokenId,
+        )
     }
 
     override fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmPaymentIntentParams {
@@ -188,6 +234,10 @@ constructor(
             receiptEmail?.let {
                 mapOf(PARAM_RECEIPT_EMAIL to it)
             }.orEmpty()
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
+            }.orEmpty()
         )
     }
 
@@ -199,6 +249,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 sourceParams != null -> {
                     mapOf(PARAM_SOURCE_DATA to sourceParams.toParamMap())
@@ -277,35 +330,32 @@ constructor(
      * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
      */
     @Parcelize
-    data class Shipping @JvmOverloads constructor(
+    @Poko
+    class Shipping @JvmOverloads constructor(
         /**
          * [shipping.address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-address)
          *
          * Shipping address.
          */
         internal val address: Address,
-
         /**
          * [shipping.name](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-name)
          *
          * Recipient name.
          */
         internal val name: String,
-
         /**
          * [shipping.carrier](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-carrier)
          *
          * The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc.
          */
         internal val carrier: String? = null,
-
         /**
          * [shipping.phone](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-phone)
          *
          * Recipient phone (including extension).
          */
         internal val phone: String? = null,
-
         /**
          * [shipping.tracking_number](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-tracking_number)
          *
@@ -348,7 +398,6 @@ constructor(
     }
 
     companion object {
-        private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         private const val PARAM_RECEIPT_EMAIL = "receipt_email"
         private const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         private const val PARAM_SHIPPING = "shipping"
@@ -479,7 +528,8 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = null,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -561,9 +611,6 @@ constructor(
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                // return_url is no longer used by is still required by the backend
-                // TODO(smaskell): remove this when no longer required
-                returnUrl = "stripe://return_url",
                 paymentMethodCode = PaymentMethod.Type.Alipay.code,
             )
         }
@@ -578,7 +625,8 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean?,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -591,7 +639,8 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -606,7 +655,8 @@ constructor(
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -619,7 +669,8 @@ constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

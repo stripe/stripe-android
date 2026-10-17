@@ -14,16 +14,13 @@ import java.util.HashMap
 data class MessageExtension internal constructor(
     // The name of the extension data set as defined by the extension owner.
     val name: String,
-
     // A unique identifier for the extension.
     // Note: Payment System Registered Application Provider Identifier (RID) is required as prefix
     // of the ID.
     internal val id: String,
-
     // A boolean value indicating whether the recipient must understand the contents of the
     // extension to interpret the entire message.
     val criticalityIndicator: Boolean,
-
     // The data carried in the extension.
     private val data: Map<String, String?> = emptyMap()
 ) : Parcelable {

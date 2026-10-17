@@ -206,11 +206,10 @@ internal class DefaultErrorReporter(
         return listOf(
             "Sentry",
             listOf(
-                "sentry_key" to sentryConfig.key,
+                "sentry_key" to sentryConfig.publicKey,
                 "sentry_version" to sentryConfig.version,
                 "sentry_timestamp" to sentryConfig.getTimestamp(),
-                "sentry_client" to USER_AGENT,
-                "sentry_secret" to sentryConfig.secret
+                "sentry_client" to USER_AGENT
             ).joinToString(separator = ", ") { (key, value) ->
                 "$key=$value"
             }

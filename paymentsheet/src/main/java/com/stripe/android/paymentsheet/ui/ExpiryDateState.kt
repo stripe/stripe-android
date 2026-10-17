@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.elements.canAcceptInput
@@ -20,7 +19,7 @@ internal data class ExpiryDateState(
 ) {
 
     private val textFieldState: TextFieldState = run {
-        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE) {
+        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE || text == CARD_EDIT_UI_MISSING_EXPIRY_DATE) {
             TextFieldStateConstants.Error.Blank
         } else {
             dateConfig.determineState(text)
@@ -37,31 +36,25 @@ internal data class ExpiryDateState(
 
     val expiryMonth: Int?
         get() = formFieldValues?.toIntOrNull(
-            key = IdentifierSpec.CardExpMonth,
+            key = FormFieldId.CardExpMonth,
             min = JANUARY,
             max = DECEMBER,
         )
 
     val expiryYear: Int?
         get() = formFieldValues?.toIntOrNull(
-            key = IdentifierSpec.CardExpYear,
+            key = FormFieldId.CardExpYear,
             min = YEAR_2000,
             max = YEAR_2100,
         )
 
     fun shouldShowError(): Boolean {
-        return textFieldState.shouldShowError(hasFocus = true, isValidating = validating)
+        return textFieldState.shouldShowValidationMessage(hasFocus = true, isValidating = validating)
     }
 
-    @SuppressWarnings("SpreadOperator")
-    fun sectionError(): ResolvableString? {
-        return textFieldState.getError()?.takeIf {
+    fun sectionValidationMessage(): FieldValidationMessage? {
+        return textFieldState.getValidationMessage()?.takeIf {
             shouldShowError() && enabled
-        }?.let { error ->
-            resolvableString(
-                id = error.errorMessage,
-                formatArgs = error.formatArgs.orEmpty()
-            )
         }
     }
 
@@ -78,8 +71,8 @@ internal data class ExpiryDateState(
         return copy(text = proposedValue)
     }
 
-    private fun Map<IdentifierSpec, FormFieldEntry>.toIntOrNull(
-        key: IdentifierSpec,
+    private fun Map<FormFieldId, FormFieldEntry>.toIntOrNull(
+        key: FormFieldId,
         min: Int,
         max: Int
     ): Int? {
@@ -118,6 +111,10 @@ private fun formattedExpiryDate(
         (monthIsInvalid(expiryMonth) || yearIsInvalid(expiryYear))
     ) {
         return CARD_EDIT_UI_FALLBACK_EXPIRY_DATE
+    }
+
+    if (expiryMonth == null && expiryYear == null) {
+        return CARD_EDIT_UI_MISSING_EXPIRY_DATE
     }
 
     val formattedExpiryMonth = when {

@@ -32,6 +32,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -45,6 +46,10 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.LocalImageOptimizer
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import java.lang.Float.max
 import androidx.compose.ui.unit.max as maxDp
 
@@ -267,7 +272,7 @@ object StripeThemeDefaults {
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackground = Color.White
+            onSuccessBackground = Color.Black
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
@@ -483,6 +488,14 @@ val LocalSectionStyle = staticCompositionLocalOf { StripeTheme.sectionStyle }
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInsets }
 
+private val LocalPrimaryButtonStyle = staticCompositionLocalOf { StripeTheme.primaryButtonStyle }
+
+private val LocalFormInsets = staticCompositionLocalOf { StripeTheme.formInsets }
+
+private val LocalVerticalModeRowPadding = staticCompositionLocalOf { StripeTheme.verticalModeRowPadding }
+
+private val LocalStripeThemeIsDark = staticCompositionLocalOf<Boolean?> { null }
+
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
@@ -499,6 +512,41 @@ fun StripeTheme(
     textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
     iconStyle: IconStyle = StripeTheme.iconStyle,
     content: @Composable () -> Unit
+) {
+    StripeTheme(
+        isDark = isSystemInDarkTheme(),
+        colors = colors,
+        shapes = shapes,
+        typography = typography,
+        primaryButtonStyle = StripeTheme.primaryButtonStyle,
+        formInsets = StripeTheme.formInsets,
+        sectionSpacing = sectionSpacing,
+        sectionStyle = sectionStyle,
+        textFieldInsets = textFieldInsets,
+        iconStyle = iconStyle,
+        verticalModeRowPadding = StripeTheme.verticalModeRowPadding,
+        content = content,
+    )
+}
+
+/**
+ * Base Theme for Stripe Composables whose light or dark appearance is supplied by their integration.
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme(
+    isDark: Boolean,
+    colors: StripeColors,
+    shapes: StripeShapes,
+    typography: StripeTypography,
+    primaryButtonStyle: PrimaryButtonStyle,
+    formInsets: FormInsets,
+    sectionSpacing: Float?,
+    sectionStyle: SectionStyle,
+    textFieldInsets: FormInsets,
+    iconStyle: IconStyle,
+    verticalModeRowPadding: Float,
+    content: @Composable () -> Unit,
 ) {
     val isRobolectricTest = runCatching {
         BuildConfig.DEBUG && Build.FINGERPRINT.lowercase() == "robolectric"
@@ -520,12 +568,18 @@ fun StripeTheme(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
+        LocalPrimaryButtonStyle provides primaryButtonStyle,
+        LocalFormInsets provides formInsets,
         LocalSectionSpacing provides sectionSpacing,
         LocalSectionStyle provides sectionStyle,
         LocalTextFieldInsets provides textFieldInsets,
+        LocalStripeThemeIsDark provides isDark,
         LocalIconStyle provides iconStyle,
+        LocalVerticalModeRowPadding provides verticalModeRowPadding,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
+        LocalStripeImageLoader provides DefaultStripeImageLoader(LocalContext.current.applicationContext),
+        LocalImageOptimizer provides StripeCdnImageOptimizer
     ) {
         MaterialTheme(
             colors = colors.materialColors,
@@ -550,14 +604,16 @@ fun StripeTheme(
 fun DefaultStripeTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+    val isDark = isSystemInDarkTheme()
+    val colors = StripeThemeDefaults.colors(isDark)
     val shapes = StripeThemeDefaults.shapes
     val typography = StripeThemeDefaults.typography
 
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
-        LocalTypography provides typography
+        LocalTypography provides typography,
+        LocalStripeThemeIsDark provides isDark,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
@@ -586,6 +642,34 @@ val MaterialTheme.stripeTypography: StripeTypography
     @Composable
     @ReadOnlyComposable
     get() = LocalTypography.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.stripePrimaryButtonStyle: PrimaryButtonStyle
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalPrimaryButtonStyle.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.stripeFormInsets: FormInsets
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalFormInsets.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.stripeVerticalModeRowPadding: Float
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalVerticalModeRowPadding.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.stripeThemeIsDark: Boolean
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalStripeThemeIsDark.current ?: isSystemInDarkTheme()
 
 @Composable
 @ReadOnlyComposable
@@ -748,7 +832,7 @@ fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
     val baseStyle = MaterialTheme.typography.h5.copy(
-        color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
+        color = (if (MaterialTheme.stripeThemeIsDark) colorsDark else colorsLight).onBackground,
         fontSize = typography.fontSize
     )
     return if (typography.fontFamily != null) {
@@ -778,9 +862,12 @@ fun Color.darken(amount: Float): Color {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
-    start = formInsets.start.dp,
-    end = formInsets.end.dp
+fun StripeTheme.getOuterFormInsets(): PaddingValues = formInsets.getOuterFormInsets()
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun FormInsets.getOuterFormInsets(): PaddingValues = PaddingValues(
+    start = start.dp,
+    end = end.dp,
 )
 
 private fun TextStyle.toCompat(): TextStyle {

@@ -7,6 +7,8 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.unit.dp
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
@@ -24,12 +26,14 @@ class LinkButtonTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     @Test
-    fun signedInButton_hasUsefulContentDescription() {
+    fun signedInButton_hasUsefulContentDescription_forLink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Email("email@email.com"),
                 enabled = true,
-                onClick = {}
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
@@ -41,17 +45,87 @@ class LinkButtonTest {
     }
 
     @Test
-    fun signedOutButton_hasUsefulContentDescription() {
+    fun signedInButton_hasUsefulContentDescription_forOnelink() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Email("email@email.com"),
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
+            )
+        }
+
+        composeRule.onNodeWithTag(
+            LinkButtonTestTag
+        ).onChildren().assertAny(
+            hasContentDescription("Pay with Onelink")
+        )
+    }
+
+    @Test
+    fun signedOutButton_hasUsefulContentDescription_forLink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Default,
                 enabled = true,
-                onClick = {}
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = null,
             )
         }
 
         composeRule.onNodeWithTag(
             LinkButtonTestTag
         ).assertContentDescriptionContains("Pay with Link")
+    }
+
+    @Test
+    fun signedOutButton_hasUsefulContentDescription_forOnelink() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Onelink,
+                containerWidth = null,
+            )
+        }
+
+        composeRule.onNodeWithTag(
+            LinkButtonTestTag
+        ).assertContentDescriptionContains("Pay with Onelink")
+    }
+
+    @Test
+    fun signedOutButton_displaysCompactContent_belowCompactWidth() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 199.dp,
+            )
+        }
+
+        composeRule.onNodeWithTag(LinkButtonCompactContentTestTag, useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithTag(LinkButtonFullContentTestTag, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun signedOutButton_displaysFullContent_atCompactWidth() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Link,
+                containerWidth = 200.dp,
+            )
+        }
+
+        composeRule.onNodeWithTag(LinkButtonFullContentTestTag, useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithTag(LinkButtonCompactContentTestTag, useUnmergedTree = true).assertDoesNotExist()
     }
 }

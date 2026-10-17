@@ -1,6 +1,5 @@
 package com.stripe.android.common.configuration
 
-import android.content.res.ColorStateList
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
@@ -21,17 +20,17 @@ internal object ConfigurationDefaults {
     val headerTextForSelectionScreen: String? = null
     val paymentMethodOrder: List<String> = emptyList()
     val preferredNetworks: List<CardBrand> = emptyList()
-    val primaryButtonColor: ColorStateList? = null
     val primaryButtonLabel: String? = null
     val shippingDetails: AddressDetails? = null
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+    val allowedCardFundingTypes: List<PaymentSheet.CardFundingType> = PaymentSheet.CardFundingType.entries
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
     const val opensCardScannerAutomatically: Boolean = false
+    val userOverrideCountry: String? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

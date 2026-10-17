@@ -9,9 +9,9 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.consent.ConsentViewModel
 import com.stripe.android.financialconnections.features.error.ErrorViewModel
 import com.stripe.android.financialconnections.features.exit.ExitViewModel
+import com.stripe.android.financialconnections.features.genericerror.GenericErrorViewModel
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerViewModel
-import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationViewModel
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryViewModel
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessViewModel
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel
@@ -55,6 +55,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val attachPaymentViewModelFactory: AttachPaymentViewModel.Factory
     val resetViewModelFactory: ResetViewModel.Factory
     val errorViewModelFactory: ErrorViewModel.Factory
+    val genericErrorViewModelFactory: GenericErrorViewModel.Factory
     val exitViewModelFactory: ExitViewModel.Factory
     val noticeSheetViewModelFactory: NoticeSheetViewModel.Factory
     val networkingLinkSignupViewModelFactory: NetworkingLinkSignupViewModel.Factory
@@ -62,33 +63,17 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val networkingLinkVerificationViewModelFactory: NetworkingLinkVerificationViewModel.Factory
     val networkingSaveToLinkVerificationViewModelFactory: NetworkingSaveToLinkVerificationViewModel.Factory
     val linkAccountPickerViewModelFactory: LinkAccountPickerViewModel.Factory
-    val linkStepUpVerificationViewModelFactory: LinkStepUpVerificationViewModel.Factory
     val accountUpdateRequiredViewModelFactory: AccountUpdateRequiredViewModel.Factory
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialSyncResponse(
-            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
-        ): Builder
-
-        @BindsInstance
-        fun savedStateHandle(
-            savedStateHandle: SavedStateHandle
-        ): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun initialState(initialState: FinancialConnectionsSheetNativeState): Builder
-
-        @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheetConfiguration): Builder
-
-        fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
-
-        fun build(): FinancialConnectionsSheetNativeComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?,
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance application: Application,
+            @BindsInstance initialState: FinancialConnectionsSheetNativeState,
+            @BindsInstance configuration: FinancialConnectionsSheetConfiguration,
+            sharedComponent: FinancialConnectionsSingletonSharedComponent,
+        ): FinancialConnectionsSheetNativeComponent
     }
 }

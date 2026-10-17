@@ -24,10 +24,13 @@ import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import org.junit.Before
 import org.junit.Rule
@@ -45,8 +48,12 @@ internal class CardFormViewTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Before
     fun setup() {
+        CardFormViewTestActivity.viewModelStoreTestRule = viewModelStoreRule
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
 
@@ -107,6 +114,33 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when all fields are valid then paymentMethodCreateParams should return correctly and errors is empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.paymentMethodCreateParams)
+                .isEqualTo(
+                    PaymentMethodCreateParams.create(
+                        card = PaymentMethodCreateParams.Card(
+                            attribution = setOf(CardFormView.CARD_FORM_VIEW),
+                            number = CardNumberFixtures.VISA_NO_SPACES,
+                            expiryMonth = 12,
+                            expiryYear = 2050,
+                            cvc = VALID_CVC,
+                        ),
+                    )
+                )
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo("")
+                assertThat(it.errors.isVisible).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `when preferred network is set then cardParams should return contain preferred network`() {
         runCardFormViewTest {
             binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
@@ -118,11 +152,39 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when preferred network is set then paymentMethodCreateParams should return contain preferred network`() {
+        runCardFormViewTest {
+            binding.populate(CO_BRAND_CARTES_MASTERCARD_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            binding.cardMultilineWidget.setPreferredNetworks(listOf(CardBrand.CartesBancaires))
+
+            assertThat(cardFormView.paymentMethodCreateParams?.card?.networks?.preferred)
+                .isEqualTo(CardBrand.CartesBancaires.code)
+        }
+    }
+
+    @Test
     fun `when postal field is invalid then cardParams should return null and errors is not empty`() {
         runCardFormViewTest {
             binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, INVALID_US_ZIP)
 
             assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_address_zip_invalid))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when postal field is invalid then paymentMethodCreateParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, VALID_CVC, INVALID_US_ZIP)
+
+            assertThat(cardFormView.paymentMethodCreateParams).isNull()
 
             idleLooper()
 
@@ -150,6 +212,22 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when card number is invalid then paymentMethodCreateParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(INVALID_VISA, VALID_MONTH, VALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.paymentMethodCreateParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_card_number))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun `when expiration is invalid then cardParams should return null and errors is not empty`() {
         runCardFormViewTest {
             binding.populate(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
@@ -166,11 +244,43 @@ internal class CardFormViewTest {
     }
 
     @Test
+    fun `when expiration is invalid then paymentMethodCreateParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, INVALID_YEAR, VALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.paymentMethodCreateParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(UiCoreR.string.stripe_invalid_expiry_year))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun `when cvc is invalid then cardParams should return null and errors is not empty`() {
         runCardFormViewTest {
             binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC, VALID_US_ZIP)
 
             assertThat(cardFormView.cardParams).isNull()
+
+            idleLooper()
+
+            binding.let {
+                assertThat(it.errors.text).isEqualTo(context.getString(R.string.stripe_invalid_cvc))
+                assertThat(it.errors.isVisible).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when cvc is invalid then paymentMethodCreateParams should return null and errors is not empty`() {
+        runCardFormViewTest {
+            binding.populate(VISA_WITH_SPACES, VALID_MONTH, VALID_YEAR, INVALID_CVC, VALID_US_ZIP)
+
+            assertThat(cardFormView.paymentMethodCreateParams).isNull()
 
             idleLooper()
 
@@ -401,6 +511,91 @@ internal class CardFormViewTest {
         }
     }
 
+    @Test
+    fun `reportShown is called when card form attaches`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+        assertThat(analytics.awaitInteraction()).isNotNull()
+    }
+
+    @Test
+    fun `reportInteraction called when postal focus`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.postalCode.getParentOnFocusChangeListener()
+            .onFocusChange(binding.postalCode, true)
+
+        idleLooper()
+
+        repeat(2) { assertThat(analytics.awaitInteraction()).isNotNull() }
+    }
+
+    @Test
+    fun `reports form completed when form valid`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.populate(
+            VISA_WITH_SPACES,
+            VALID_MONTH,
+            VALID_YEAR,
+            VALID_CVC,
+            VALID_US_ZIP,
+        )
+
+        idleLooper()
+
+        repeat(9) { assertThat(analytics.awaitInteraction()).isNotNull() }
+        assertThat(analytics.awaitFormCompleted()).isNotNull()
+    }
+
+    private data class AnalyticsScenario(
+        val analytics: RecordingCardElementAnalytics,
+        val cardFormView: CardFormView,
+        val binding: StripeCardFormViewBinding,
+    )
+
+    private fun runCardFormViewAnalyticsTest(
+        locale: Locale = Locale.US,
+        block: suspend AnalyticsScenario.() -> Unit,
+    ) {
+        val originalLocale = Locale.getDefault()
+        Locale.setDefault(locale)
+
+        ActivityScenario.launch<CardFormViewTestActivity>(
+            Intent(context, CardFormViewTestActivity::class.java).apply {
+                putExtra(
+                    "args",
+                    CardFormViewTestActivity.Args(
+                        isCbcEligible = false,
+                        borderless = false,
+                        useRecordingCardElementAnalytics = true,
+                    ),
+                )
+            }
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                runBlocking {
+                    val cardFormView = activity.findViewById<CardFormView>(VIEW_ID)
+                    val binding = StripeCardFormViewBinding.bind(cardFormView)
+                    val analytics = activity.recordingCardElementAnalytics
+
+                    idleLooper()
+
+                    block(
+                        AnalyticsScenario(
+                            analytics = analytics,
+                            cardFormView = cardFormView,
+                            binding = binding,
+                        )
+                    )
+
+                    analytics.ensureAllEventsConsumed()
+                }
+            }
+        }
+
+        Locale.setDefault(originalLocale)
+    }
+
     private fun StripeCardFormViewBinding.populate(
         visa: String,
         month: String,
@@ -467,6 +662,7 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
     data class Args(
         val isCbcEligible: Boolean,
         val borderless: Boolean,
+        val useRecordingCardElementAnalytics: Boolean = false,
     ) : Parcelable
 
     private val args: Args by lazy {
@@ -474,16 +670,32 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
         intent.getParcelableExtra("args")!!
     }
 
+    val recordingCardElementAnalytics = RecordingCardElementAnalytics()
+
     private val cardFormView: CardFormView by lazy {
         val style = if (args.borderless) "1" else "0"
         val attributes = Robolectric.buildAttributeSet()
             .addAttribute(R.attr.cardFormStyle, style)
             .build()
 
-        CardFormView(this, attributes).apply {
+        val view = if (args.useRecordingCardElementAnalytics) {
+            CardFormView(
+                context = this,
+                attrs = attributes,
+                defStyleAttr = 0,
+                cardElementAnalytics = recordingCardElementAnalytics,
+            )
+        } else {
+            CardFormView(this, attributes)
+        }
+
+        view.apply {
             id = VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
         }
     }
@@ -500,5 +712,7 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
 
     companion object {
         const val VIEW_ID = 12345
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

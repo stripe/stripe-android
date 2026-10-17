@@ -16,5 +16,7 @@ internal class SelfieCameraManager(
         MINIMUM_RESOLUTION,
         DefaultCameraErrorListener(context, cameraErrorCallback),
         startWithBackCamera = false
-    )
+    ).apply {
+        useCompatiblePreview()
+    }
 }

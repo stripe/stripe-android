@@ -38,6 +38,8 @@ class DefaultAnalyticsRequestExecutor(
      * Make the request and ignore the response.
      */
     override fun executeAsync(request: AnalyticsRequest) {
+        if (!AnalyticsRequestExecutor.ENABLED) return
+
         logger.info("Event: ${request.params[FIELD_EVENT]}")
 
         CoroutineScope(workContext).launch {

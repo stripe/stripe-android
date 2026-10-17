@@ -30,6 +30,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
+import com.stripe.android.model.LinkBrand
 
 internal enum class Theme {
     DefaultLight,
@@ -42,11 +43,13 @@ internal enum class Theme {
             LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
-    val icon: Int
-        get() = when (this) {
-            DefaultLight -> R.drawable.stripe_logo
-            LinkLight -> R.drawable.stripe_link_logo
+    fun icon(linkBrand: LinkBrand): Int = when (this) {
+        DefaultLight -> R.drawable.stripe_logo
+        LinkLight -> when (linkBrand) {
+            LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
+            LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
         }
+    }
 
     companion object {
         val default: Theme = DefaultLight

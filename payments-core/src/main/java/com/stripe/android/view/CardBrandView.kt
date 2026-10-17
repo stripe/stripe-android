@@ -167,6 +167,7 @@ internal class CardBrandView @JvmOverloads constructor(
                 else -> state.brand.icon
             }
         )
+        iconView.contentDescription = state.brand.displayName
     }
 
     private fun determineCardBrandToDisplay() {
@@ -304,7 +305,10 @@ internal class BrandAdapter(
     private fun updateView(view: View, position: Int) {
         brands.getOrNull(position - 1)?.let { brand ->
             val isSelected = brand == selectedBrand
-            view.findViewById<ImageView>(R.id.brand_icon)?.setImageResource(brand.icon)
+            view.findViewById<ImageView>(R.id.brand_icon)?.apply {
+                setImageResource(brand.icon)
+                contentDescription = brand.displayName
+            }
             view.findViewById<ImageView>(R.id.brand_check).apply {
                 if (isSelected) {
                     visibility = View.VISIBLE

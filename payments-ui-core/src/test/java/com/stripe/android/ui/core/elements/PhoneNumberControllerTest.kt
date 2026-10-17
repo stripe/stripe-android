@@ -16,6 +16,13 @@ import org.robolectric.annotation.Config
 internal class PhoneNumberControllerTest {
 
     @Test
+    fun `Controller should enforce Ltr text direction`() {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController()
+
+        assertThat(phoneNumberController.enforceLeftToRightTextDirection).isTrue()
+    }
+
+    @Test
     fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
@@ -73,20 +80,63 @@ internal class PhoneNumberControllerTest {
     }
 
     @Test
-    fun `any input is marked complete if field is optional`() = runTest {
+    fun `optional label alone does not make a blank phone complete`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
             showOptionalLabel = true,
-            acceptAnyInput = true,
+        )
+
+        phoneNumberController.isComplete.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `optional phone is complete only when empty or fully entered`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+            showOptionalLabel = true,
+            acceptEmptyInput = true,
         )
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isTrue()
 
-            phoneNumberController.onValueChange("1")
+            phoneNumberController.onValueChange("123")
+            assertThat(awaitItem()).isFalse()
+
+            phoneNumberController.onValueChange("123456789")
             expectNoEvents()
 
+            phoneNumberController.onValueChange("1234567890")
+            assertThat(awaitItem()).isTrue()
+
+            phoneNumberController.onValueChange("123")
+            assertThat(awaitItem()).isFalse()
+
             phoneNumberController.onValueChange("")
-            expectNoEvents()
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `optional phone shows incomplete error but allows clearing the number`() = runTest {
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initiallySelectedCountryCode = "US",
+            showOptionalLabel = true,
+            acceptEmptyInput = true,
+        )
+
+        phoneNumberController.onValidationStateChanged(true)
+
+        phoneNumberController.validationMessage.test {
+            assertThat(awaitItem()).isNull()
+
+            phoneNumberController.onValueChange("123")
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
+
+            phoneNumberController.onValueChange("")
+            assertThat(awaitItem()).isNull()
         }
     }
 
@@ -139,7 +189,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("1")
@@ -214,17 +264,17 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("123")
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
 
             phoneNumberController.onFocusChange(true)
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
         }
     }
 
@@ -234,7 +284,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -250,7 +300,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -267,7 +317,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             // Set complete phone number
@@ -278,27 +328,6 @@ internal class PhoneNumberControllerTest {
             expectNoEvents()
 
             phoneNumberController.onFocusChange(false)
-            expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `test error behavior with acceptAnyInput enabled`() = runTest {
-        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-            initiallySelectedCountryCode = "US",
-            acceptAnyInput = true,
-        )
-
-        phoneNumberController.error.test {
-            assertThat(awaitItem()).isNull()
-
-            phoneNumberController.onValueChange("1")
-            expectNoEvents()
-
-            phoneNumberController.onFocusChange(false)
-            expectNoEvents()
-
-            phoneNumberController.onValidationStateChanged(true)
             expectNoEvents()
         }
     }

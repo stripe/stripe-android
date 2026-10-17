@@ -12,22 +12,28 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeVerticalModeRowPadding
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -50,7 +56,7 @@ internal fun PaymentMethodVerticalLayoutUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
 
     val state by interactor.state.collectAsState()
@@ -60,6 +66,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
+        linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -77,16 +84,17 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
         },
         imageLoader = imageLoader,
-        reportInitialPaymentMethodVisibilitySnapshot = { visibilityMap ->
-            val visiblePaymentMethods = visibilityMap.filter { it.value }.keys.toList()
-            val hiddenPaymentMethods = visibilityMap.filter { !it.value }.keys.toList()
-
-            interactor.reportInitialPaymentMethodVisibilitySnapshot(
-                visiblePaymentMethods = buildList {
-                    if (state.displayedSavedPaymentMethod != null) add("saved")
-                    addAll(visiblePaymentMethods)
-                },
-                hiddenPaymentMethods = hiddenPaymentMethods,
+        updatePaymentMethodVisibility = { itemCode, coordinates ->
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility(
+                    itemCode,
+                    coordinates,
+                )
+            )
+        },
+        cancelPaymentMethodVisibilityTracking = {
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
             )
         },
         modifier = modifier
@@ -94,6 +102,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     )
 }
 
+@Suppress("LongMethod")
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -101,14 +110,23 @@ internal fun PaymentMethodVerticalLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
-    reportInitialPaymentMethodVisibilitySnapshot: (Map<String, Boolean>) -> Unit = {},
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
+    cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
+    val paymentMethodCodes = remember(paymentMethods, displayedSavedPaymentMethod) {
+        val output = paymentMethods.map { it.code }
+        output.plus("saved_${displayedSavedPaymentMethod?.paymentMethod?.id}")
+            .takeIf { displayedSavedPaymentMethod != null } ?: output
+    }
+    DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
+
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
@@ -116,7 +134,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
                 .spacingDp(spacingDp)
-                .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
+                .additionalInsetsDp(MaterialTheme.stripeVerticalModeRowPadding)
                 .build()
         }
 
@@ -129,12 +147,18 @@ internal fun PaymentMethodVerticalLayoutUI(
             )
             Spacer(Modifier.size(16.dp))
             SavedPaymentMethodRowButton(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    updatePaymentMethodVisibility.invoke("saved", coordinates)
+                },
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+                linkBrand = linkBrand,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
+                        isEnabled = isEnabled,
+                        viewMoreShowChevron = true,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -162,14 +186,15 @@ internal fun PaymentMethodVerticalLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
-            reportInitialPaymentMethodVisibilitySnapshot = reportInitialPaymentMethodVisibilitySnapshot,
+            updatePaymentMethodVisibility = updatePaymentMethodVisibility,
         )
     }
 }
 
 @Composable
 internal fun SavedPaymentMethodTrailingContent(
-    viewMoreShowChevron: Boolean = true,
+    isEnabled: Boolean,
+    viewMoreShowChevron: Boolean,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
@@ -177,27 +202,35 @@ internal fun SavedPaymentMethodTrailingContent(
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                isEnabled = isEnabled,
+                onClick = onManageOneSavedPaymentMethod,
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
+                isEnabled = isEnabled,
                 showChevron = viewMoreShowChevron,
-                onViewMorePaymentMethods = onViewMorePaymentMethods
+                onViewMorePaymentMethods = onViewMorePaymentMethods,
             )
         }
     }
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
-        color = MaterialTheme.colors.primary,
+        color = color,
         style = MaterialTheme.typography.subtitle1,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
-            .clickable(onClick = onClick)
+            .clickable(enabled = isEnabled, onClick = onClick)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     )
@@ -205,20 +238,22 @@ private fun EditButton(onClick: () -> Unit) {
 
 @Composable
 private fun ViewMoreButton(
-    showChevron: Boolean = true,
+    isEnabled: Boolean,
+    showChevron: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
-            .clickable(onClick = onViewMorePaymentMethods)
+            .clickable(enabled = isEnabled, onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
-            color = MaterialTheme.colors.primary,
+            color = color,
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,
         )
@@ -226,7 +261,7 @@ private fun ViewMoreButton(
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = color,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }

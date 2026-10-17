@@ -1,0 +1,15 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":paymentsheet")
+    implementation project(":payments-core-testing")
+    implementation project(":network-testing")
+
+    implementation libs.terminal.core
+    implementation testLibs.espresso.intents
+    implementation testLibs.androidx.composeUi
+    implementation testLibs.mockito.core
+    implementation testLibs.mockito.kotlin
+    implementation testLibs.turbine
+    implementation testLibs.truth
+}

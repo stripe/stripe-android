@@ -40,10 +40,12 @@ import com.stripe.android.model.Networks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.hamcrest.Matchers
@@ -76,8 +78,13 @@ internal class CardMultilineWidgetTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<CardMultilineWidgetTestActivity>()
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @BeforeTest
     fun setup() {
+        CardMultilineWidgetTestActivity.viewModelStoreTestRule = viewModelStoreRule
+
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
@@ -200,6 +207,28 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
+    fun getPaymentMethodParams_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCardAndExpectedLogging() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append("1234")
+
+            assertThat(noZipCardMultilineWidget.paymentMethodCreateParams)
+                .isEqualTo(
+                    PaymentMethodCreateParams.create(
+                        PaymentMethodCreateParams.Card(
+                            number = AMEX_NO_SPACES,
+                            cvc = CVC_VALUE_AMEX,
+                            expiryMonth = 12,
+                            expiryYear = 2050,
+                            attribution = ATTRIBUTION
+                        )
+                    )
+                )
+        }
+
+    @Test
     fun getCard_whenInputIsValidVisaButInputHasNoZip_returnsValidCard() = runCardMultilineWidgetTest {
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
@@ -244,48 +273,72 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCardAndExpectedLogging() = runCardMultilineWidgetTest {
-        noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
-        noZipGroup.expiryDateEditText.append("12")
-        noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("1234")
+    fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCardAndExpectedLogging() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append("1234")
 
-        assertThat(noZipCardMultilineWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.AmericanExpress,
-                    loggingTokens = ATTRIBUTION,
-                    number = AMEX_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_AMEX,
-                    address = Address.Builder()
-                        .build()
+            assertThat(noZipCardMultilineWidget.cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_AMEX,
+                        address = Address.Builder()
+                            .build()
+                    )
                 )
-            )
-    }
+        }
 
     @Test
-    fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCardAndExpectedLogging() = runCardMultilineWidgetTest {
-        noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
-        noZipGroup.expiryDateEditText.append("12")
-        noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+    fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCardAndExpectedLogging() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(noZipCardMultilineWidget.cardParams)
-            .isEqualTo(
-                CardParams(
-                    brand = CardBrand.AmericanExpress,
-                    loggingTokens = ATTRIBUTION,
-                    number = AMEX_NO_SPACES,
-                    expMonth = 12,
-                    expYear = 2050,
-                    cvc = CVC_VALUE_COMMON,
-                    address = Address.Builder()
-                        .build()
+            assertThat(noZipCardMultilineWidget.cardParams)
+                .isEqualTo(
+                    CardParams(
+                        brand = CardBrand.AmericanExpress,
+                        loggingTokens = ATTRIBUTION,
+                        number = AMEX_NO_SPACES,
+                        expMonth = 12,
+                        expYear = 2050,
+                        cvc = CVC_VALUE_COMMON,
+                        address = Address.Builder()
+                            .build()
+                    )
                 )
-            )
-    }
+        }
+
+    @Test
+    fun getPaymentMethodParams_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCardAndExpectedLogging() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+
+            assertThat(noZipCardMultilineWidget.paymentMethodCreateParams)
+                .isEqualTo(
+                    PaymentMethodCreateParams.create(
+                        PaymentMethodCreateParams.Card(
+                            number = AMEX_NO_SPACES,
+                            cvc = CVC_VALUE_COMMON,
+                            expiryMonth = 12,
+                            expiryYear = 2050,
+                            attribution = ATTRIBUTION
+                        )
+                    )
+                )
+        }
 
     @Test
     fun getPaymentMethodCreateParams_shouldReturnExpectedObject() = runCardMultilineWidgetTest {
@@ -381,37 +434,39 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsNotBlank_returnsNotNull() = runCardMultilineWidgetTest {
-        cardMultilineWidget.setShouldShowPostalCode(true)
-        cardMultilineWidget.setCardInputListener(fullCardListener)
-        cardMultilineWidget.postalCodeRequired = true
+    fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsNotBlank_returnsNotNull() =
+        runCardMultilineWidgetTest {
+            cardMultilineWidget.setShouldShowPostalCode(true)
+            cardMultilineWidget.setCardInputListener(fullCardListener)
+            cardMultilineWidget.postalCodeRequired = true
 
-        fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
-        fullGroup.expiryDateEditText.append("12")
-        fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
-        fullGroup.postalCodeEditText.setText("1234")
+            fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+            fullGroup.expiryDateEditText.append("12")
+            fullGroup.expiryDateEditText.append("50")
+            fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+            fullGroup.postalCodeEditText.setText("1234")
 
-        assertThat(cardMultilineWidget.paymentMethodCreateParams)
-            .isNotNull()
-        verify(fullCardListener).onPostalCodeComplete()
-    }
+            assertThat(cardMultilineWidget.paymentMethodCreateParams)
+                .isNotNull()
+            verify(fullCardListener).onPostalCodeComplete()
+        }
 
     @Test
-    fun paymentMethodCreateParams_whenPostalCodeIsNotRequiredAndValueIsBlank_returnsNotNull() = runCardMultilineWidgetTest {
-        cardMultilineWidget.setShouldShowPostalCode(true)
-        cardMultilineWidget.postalCodeRequired = false
-        cardMultilineWidget.setCardInputListener(fullCardListener)
+    fun paymentMethodCreateParams_whenPostalCodeIsNotRequiredAndValueIsBlank_returnsNotNull() =
+        runCardMultilineWidgetTest {
+            cardMultilineWidget.setShouldShowPostalCode(true)
+            cardMultilineWidget.postalCodeRequired = false
+            cardMultilineWidget.setCardInputListener(fullCardListener)
 
-        fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
-        fullGroup.expiryDateEditText.append("12")
-        fullGroup.expiryDateEditText.append("50")
-        fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+            fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+            fullGroup.expiryDateEditText.append("12")
+            fullGroup.expiryDateEditText.append("50")
+            fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(cardMultilineWidget.paymentMethodCreateParams)
-            .isNotNull()
-        verify(fullCardListener, never()).onPostalCodeComplete()
-    }
+            assertThat(cardMultilineWidget.paymentMethodCreateParams)
+                .isNotNull()
+            verify(fullCardListener, never()).onPostalCodeComplete()
+        }
 
     @Test
     fun paymentMethodCard_whenInputIsValidVisaAndNoZipRequired_returnsFullCard() = runCardMultilineWidgetTest {
@@ -436,48 +491,50 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCard() = runCardMultilineWidgetTest {
-        noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
-        noZipGroup.expiryDateEditText.append("12")
-        noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append("1234")
+    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCard() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append("1234")
 
-        assertThat(noZipCardMultilineWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = AMEX_NO_SPACES,
-                    cvc = "1234",
-                    expiryMonth = 12,
-                    expiryYear = 2050,
-                    attribution = ATTRIBUTION
+            assertThat(noZipCardMultilineWidget.paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = "1234",
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
 
-        assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
-            .isNull()
-    }
+            assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
+                .isNull()
+        }
 
     @Test
-    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCard() = runCardMultilineWidgetTest {
-        noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
-        noZipGroup.expiryDateEditText.append("12")
-        noZipGroup.expiryDateEditText.append("50")
-        noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCard() =
+        runCardMultilineWidgetTest {
+            noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+            noZipGroup.expiryDateEditText.append("12")
+            noZipGroup.expiryDateEditText.append("50")
+            noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
 
-        assertThat(noZipCardMultilineWidget.paymentMethodCard)
-            .isEqualTo(
-                PaymentMethodCreateParams.Card(
-                    number = AMEX_NO_SPACES,
-                    cvc = CVC_VALUE_COMMON,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
-                    attribution = ATTRIBUTION
+            assertThat(noZipCardMultilineWidget.paymentMethodCard)
+                .isEqualTo(
+                    PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    )
                 )
-            )
 
-        assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
-            .isNull()
-    }
+            assertThat(noZipCardMultilineWidget.paymentMethodBillingDetails)
+                .isNull()
+        }
 
     @Test
     fun initView_whenZipRequired_secondRowContainsThreeVisibleElements() = runCardMultilineWidgetTest {
@@ -568,19 +625,20 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() = runCardMultilineWidgetTest {
-        assertThat(fullGroup.postalCodeInputLayout.visibility)
-            .isEqualTo(View.VISIBLE)
-        cardMultilineWidget.setShouldShowPostalCode(false)
-        assertThat(fullGroup.postalCodeInputLayout.visibility)
-            .isEqualTo(View.GONE)
+    fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() =
+        runCardMultilineWidgetTest {
+            assertThat(fullGroup.postalCodeInputLayout.visibility)
+                .isEqualTo(View.VISIBLE)
+            cardMultilineWidget.setShouldShowPostalCode(false)
+            assertThat(fullGroup.postalCodeInputLayout.visibility)
+                .isEqualTo(View.GONE)
 
-        val params = fullGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertThat(params.marginEnd)
-            .isEqualTo(0)
-        assertThat(params.marginEnd)
-            .isEqualTo(0)
-    }
+            val params = fullGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
+            assertThat(params.marginEnd)
+                .isEqualTo(0)
+            assertThat(params.marginEnd)
+                .isEqualTo(0)
+        }
 
     @Test
     fun initView_whenNoZipRequired_secondRowContainsTwoVisibleElements() = runCardMultilineWidgetTest {
@@ -1283,6 +1341,95 @@ internal class CardMultilineWidgetTest {
         }
     }
 
+    @Test
+    fun `reportShown is called on attach`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+            assertThat(cardAnalytics.awaitInteraction()).isNotNull()
+        }
+
+    @Test
+    fun `reportInteraction called on text focus`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cardNumberEditText, true)
+                expiryDateEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(expiryDateEditText, true)
+                cvcEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(cvcEditText, true)
+                postalCodeEditText.getParentOnFocusChangeListener()
+                    .onFocusChange(postalCodeEditText, true)
+            }
+
+            idleLooper()
+
+            repeat(5) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+        }
+
+    @Test
+    fun `reports form completed when multiline inputs valid`() =
+        runCardMultilineWidgetAnalyticsTest {
+            assertThat(cardAnalytics.awaitShown()).isNotNull()
+
+            with(widgetGroup) {
+                cardNumberEditText.setText(VISA_WITH_SPACES)
+                expiryDateEditText.append("12")
+                expiryDateEditText.append("50")
+                cvcEditText.append("123")
+                postalCodeEditText.append("94103")
+            }
+
+            idleLooper()
+
+            repeat(9) { assertThat(cardAnalytics.awaitInteraction()).isNotNull() }
+            repeat(2) { assertThat(cardAnalytics.awaitFormCompleted()).isNotNull() }
+        }
+
+    private data class AnalyticsScenario(
+        val activity: CardMultilineWidgetTestActivity,
+        val cardAnalytics: RecordingCardElementAnalytics,
+        val widgetGroup: WidgetControlGroup,
+    )
+
+    private fun runCardMultilineWidgetAnalyticsTest(
+        block: suspend AnalyticsScenario.() -> Unit,
+    ) {
+        ActivityScenario.launch<CardMultilineWidgetTestActivity>(
+            Intent(context, CardMultilineWidgetTestActivity::class.java).apply {
+                putExtra(
+                    "args",
+                    CardMultilineWidgetTestActivity.Args(
+                        isCbcEligible = false,
+                        useRecordingCardElementAnalytics = true,
+                    ),
+                )
+            }
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                runTest {
+                    activity.setWorkContext(coroutineContext)
+
+                    val cardElementAnalytics = activity.recordingFullCardElementAnalytics
+
+                    idleLooper()
+
+                    block(
+                        AnalyticsScenario(
+                            activity = activity,
+                            cardAnalytics = cardElementAnalytics,
+                            widgetGroup = activity.fullGroup,
+                        )
+                    )
+
+                    cardElementAnalytics.ensureAllEventsConsumed()
+                }
+            }
+        }
+    }
+
     private fun runCardMultilineWidgetTest(
         isCbcEligible: Boolean = false,
         block: TestContext.() -> Unit,
@@ -1296,7 +1443,8 @@ internal class CardMultilineWidgetTest {
         activityScenario.onActivity { activity ->
             activity.setWorkContext(testDispatcher)
 
-            val cardMultilineWidget = activity.findViewById<CardMultilineWidget>(CardMultilineWidgetTestActivity.VIEW_ID)
+            val cardMultilineWidget =
+                activity.findViewById<CardMultilineWidget>(CardMultilineWidgetTestActivity.VIEW_ID)
             cardMultilineWidget.setCardInputListener(fullCardListener)
 
             val noZipWidget = activity.findViewById<CardMultilineWidget>(CardMultilineWidgetTestActivity.NO_ZIP_VIEW_ID)
@@ -1348,6 +1496,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
     @Parcelize
     data class Args(
         val isCbcEligible: Boolean,
+        val useRecordingCardElementAnalytics: Boolean = false,
     ) : Parcelable
 
     private val args: Args by lazy {
@@ -1355,21 +1504,55 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
         intent.getParcelableExtra("args")!!
     }
 
+    val recordingFullCardElementAnalytics = RecordingCardElementAnalytics()
+
+    val recordingNoZipCardElementAnalytics = RecordingCardElementAnalytics()
+
     private val cardMultilineWidget: CardMultilineWidget by lazy {
-        CardMultilineWidget(this, shouldShowPostalCode = true).apply {
+        val widget = if (args.useRecordingCardElementAnalytics) {
+            CardMultilineWidget(
+                context = this,
+                attrs = null,
+                defStyleAttr = 0,
+                shouldShowPostalCode = true,
+                cardElementAnalytics = recordingFullCardElementAnalytics,
+            )
+        } else {
+            CardMultilineWidget(this, shouldShowPostalCode = true)
+        }
+
+        widget.apply {
             id = VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
     }
 
     private val noZipCardMultilineWidget: CardMultilineWidget by lazy {
-        CardMultilineWidget(this, shouldShowPostalCode = false).apply {
+        val widget = if (args.useRecordingCardElementAnalytics) {
+            CardMultilineWidget(
+                context = this,
+                attrs = null,
+                defStyleAttr = 0,
+                shouldShowPostalCode = false,
+                cardElementAnalytics = recordingNoZipCardElementAnalytics,
+            )
+        } else {
+            CardMultilineWidget(this, shouldShowPostalCode = false)
+        }
+
+        widget.apply {
             id = NO_ZIP_VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
             cardNumberEditText.viewModelStoreOwner = storeOwner
         }
@@ -1397,5 +1580,7 @@ internal class CardMultilineWidgetTestActivity : AppCompatActivity() {
     companion object {
         const val VIEW_ID = 12345
         const val NO_ZIP_VIEW_ID = 12346
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

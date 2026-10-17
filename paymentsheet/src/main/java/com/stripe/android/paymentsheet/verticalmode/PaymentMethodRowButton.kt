@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -23,8 +24,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,13 +32,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -47,12 +50,16 @@ import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
+import com.stripe.android.ui.core.elements.PaymentMethodMessagePromotionText
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
+import com.stripe.android.uicore.R as StripeUiCoreR
 
+@Suppress("LongMethod")
 @Composable
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
@@ -67,6 +74,8 @@ internal fun PaymentMethodRowButton(
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean = false,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val defaultPadding = if (subtitle != null) {
@@ -85,10 +94,23 @@ internal fun PaymentMethodRowButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .selectable(
-                selected = isSelected,
-                enabled = isClickable,
-                onClick = onClick
+            .then(
+                when (appearance.style) {
+                    is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
+                        selected = isSelected,
+                        enabled = isClickable,
+                        onClick = onClick,
+                    )
+                    is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
+                        enabled = isClickable,
+                        onClick = onClick
+                    ).semantics {
+                        role = Role.Button
+                        if (isSelected) {
+                            selected = true
+                        }
+                    }
+                }
             ),
         trailingContent = trailingContent,
         onClick = onClick
@@ -103,6 +125,9 @@ internal fun PaymentMethodRowButton(
                 iconContent = iconContent,
                 title = title,
                 subtitle = subtitle,
+                promotionProvider = promotionProvider,
+                shouldExpandOnClick = shouldExpandOnClick,
+                isSelected = isSelected,
                 contentDescription = contentDescription,
                 appearance = appearance,
                 modifier = if (appearance.style.shouldAddModifierWeight()) {
@@ -193,7 +218,7 @@ private fun RowButtonFloatingOuterContent(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .then(
-                modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+                modifier.alpha(alpha = enabledStateAlpha(isEnabled))
             ),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
@@ -219,7 +244,7 @@ private fun RowButtonRadioOuterContent(
     style: RowStyle.FlatWithRadio,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = style.getColors(isSystemInDarkTheme())
+    val colors = style.getColors(MaterialTheme.stripeThemeIsDark)
     Row(
         modifier = modifier.padding(contentPaddingValues)
     ) {
@@ -262,13 +287,13 @@ private fun RowButtonCheckmarkOuterContent(
         iconContent = {
             if (isSelected) {
                 Icon(
-                    imageVector = Icons.Filled.Check,
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(end = style.checkmarkInsetDp.dp)
                         .offset(3.dp),
-                    tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
+                    tint = Color(style.getColors(MaterialTheme.stripeThemeIsDark).checkmarkColor)
                 )
             }
         },
@@ -294,7 +319,7 @@ private fun RowButtonDisclosureOuterContent(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterVertically),
-                tint = Color(style.getColors(isSystemInDarkTheme()).disclosureColor)
+                tint = Color(style.getColors(MaterialTheme.stripeThemeIsDark).disclosureColor)
             )
         },
         content = content
@@ -314,17 +339,21 @@ private fun RowButtonWithEndIconOuterContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
+                    val width = UIConstants.iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp
+                    Spacer(
+                        modifier = Modifier
+                            .width(width)
+                    )
                     trailingContent()
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
         iconContent()
     }
 }
@@ -339,6 +368,9 @@ private fun RowButtonInnerContent(
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean,
+    isSelected: Boolean,
     contentDescription: String? = null,
     appearance: Appearance.Embedded,
     modifier: Modifier = Modifier
@@ -354,7 +386,10 @@ private fun RowButtonInnerContent(
         TitleContent(
             title = title,
             subtitle = subtitle,
+            promotionProvider = promotionProvider,
+            shouldExpandOnClick = shouldExpandOnClick,
             isEnabled = isEnabled,
+            isSelected = isSelected,
             contentDescription = contentDescription,
             appearance = appearance
         )
@@ -373,7 +408,10 @@ private fun RowButtonInnerContent(
 private fun TitleContent(
     title: String,
     subtitle: String?,
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean,
     isEnabled: Boolean,
+    isSelected: Boolean,
     contentDescription: String?,
     appearance: Appearance.Embedded,
 ) {
@@ -393,15 +431,47 @@ private fun TitleContent(
             }
         )
 
-        if (subtitle != null) {
-            val subtitleTextColor = appearance.style.getSubtitleTextColor()
-            Text(
-                text = subtitle,
-                style = appearance.subtitleFont?.toTextStyle()
-                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-                color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
-            )
+        if (promotionProvider == null) {
+            if (subtitle != null) {
+                Subtitle(
+                    appearance = appearance,
+                    subtitle = subtitle,
+                    isEnabled = isEnabled
+                )
+            }
+        } else {
+            AnimatedVisibility(isSelected && shouldExpandOnClick) {
+                val promotion = promotionProvider()
+                if (promotion != null) {
+                    PaymentMethodMessagePromotionText(promotion)
+                } else if (subtitle != null) {
+                    // Fallback to subtitle on click if promotion wasn't fetched successfully
+                    Subtitle(
+                        appearance = appearance,
+                        subtitle = subtitle,
+                        isEnabled = isEnabled
+                    )
+                }
+            }
         }
+    }
+}
+
+@OptIn(AppearanceAPIAdditionsPreview::class)
+@Composable
+private fun Subtitle(
+    appearance: Appearance.Embedded,
+    subtitle: String?,
+    isEnabled: Boolean
+) {
+    if (subtitle != null) {
+        val subtitleTextColor = appearance.style.getSubtitleTextColor()
+        Text(
+            text = subtitle,
+            style = appearance.subtitleFont?.toTextStyle()
+                ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+            color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
+        )
     }
 }
 
@@ -410,9 +480,7 @@ private fun TitleContent(
 @Preview
 private fun ButtonPreview() {
     DefaultStripeTheme {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             PaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = true,
@@ -421,11 +489,9 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = DefaultStripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier
-                            .height(22.dp)
-                            .width(22.dp),
+                        modifier = Modifier.height(22.dp).width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },
@@ -434,9 +500,9 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
-                trailingContent = {
-                    Text("Edit")
-                }
+                promotionProvider = { null },
+                trailingContent = { Text("Edit") },
+                shouldExpandOnClick = false
             )
             PaymentMethodRowButton(
                 isEnabled = false,
@@ -446,11 +512,9 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = DefaultStripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier
-                            .height(22.dp)
-                            .width(22.dp),
+                        modifier = Modifier.height(22.dp).width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },
@@ -459,9 +523,10 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
-                trailingContent = {
-                    Text("Edit")
-                }
+                promotionProvider = { null },
+                trailingContent = { Text("Edit") },
+                shouldExpandOnClick = false
+
             )
         }
     }

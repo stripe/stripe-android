@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,12 +16,12 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
-    linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+    linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
-) {
-    private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
+) : LinkPaymentPresenter {
+    private val analyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -74,21 +74,34 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      *
      * @param configuration The payment and customer settings
      */
-    fun present(
+    override fun present(
         configuration: LinkConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata,
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
         linkExpressMode: LinkExpressMode,
-        passiveCaptchaParams: PassiveCaptchaParams?
+        statusBarColor: Int?,
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
+            paymentMethodMetadata = paymentMethodMetadata,
             linkExpressMode = linkExpressMode,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
-            passiveCaptchaParams = passiveCaptchaParams
+            statusBarColor = statusBarColor,
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }
+}
+
+internal interface LinkPaymentPresenter {
+    fun present(
+        configuration: LinkConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        launchMode: LinkLaunchMode,
+        linkExpressMode: LinkExpressMode,
+        statusBarColor: Int?,
+    )
 }

@@ -2,6 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>TooGenericExceptionCaught:PaparazziRule.kt$PaparazziRule$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:PaparazziRule.kt:PaparazziRule$t: Throwable</ID>
   </CurrentIssues>
 </SmellBaseline>

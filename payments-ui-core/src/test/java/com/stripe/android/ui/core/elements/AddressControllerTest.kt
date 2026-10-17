@@ -5,7 +5,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.EmailElement
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -29,11 +29,11 @@ class AddressControllerTest {
     private val sectionFieldElementFlow = MutableStateFlow(
         listOf(
             EmailElement(
-                IdentifierSpec.Email,
+                FormFieldId.Email,
                 controller = emailController
             ),
             IbanElement(
-                IdentifierSpec.Generic("sepa_debit[iban]"),
+                FormFieldId.Generic("sepa_debit[iban]"),
                 ibanController
             )
         )
@@ -53,14 +53,14 @@ class AddressControllerTest {
 
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            assertThat(addressController.error.first()?.errorMessage)
+            assertThat(addressController.validationMessage.first()?.message)
                 .isEqualTo(UiCoreR.string.stripe_email_is_invalid)
 
             emailController.onValueChange("joe@email.com")
 
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            assertThat(addressController.error.first()?.errorMessage)
+            assertThat(addressController.validationMessage.first()?.message)
                 .isEqualTo(R.string.stripe_iban_invalid_start)
         }
     }

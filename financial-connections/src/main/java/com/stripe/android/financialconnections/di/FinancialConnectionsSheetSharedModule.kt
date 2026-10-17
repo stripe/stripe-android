@@ -3,12 +3,13 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -17,17 +18,19 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Storage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsAnalyticsEventSender
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEventSender
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventEmitter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -49,6 +52,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -66,7 +70,7 @@ import kotlin.coroutines.CoroutineContext
  * saving and restoring user-provided configuration dependencies.
  */
 @Module(
-    includes = [FinancialConnectionsSheetConfigurationModule::class]
+    includes = [FinancialConnectionsSheetConfigurationModule::class, StripeNetworkClientModule::class]
 )
 internal interface FinancialConnectionsSheetSharedModule {
 
@@ -120,12 +124,14 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesApiOptions(
-            @Named(PUBLISHABLE_KEY) publishableKey: String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
-        ): ApiRequest.Options = ApiRequest.Options(
-            apiKey = publishableKey,
-            stripeAccount = stripeAccountId
-        )
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
+        ): ApiRequest.Options {
+            val apiConfiguration = apiConfigurationProvider.get()
+            return ApiRequest.Options(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId
+            )
+        }
 
         @Provides
         @ActivityRetainedScope
@@ -138,28 +144,28 @@ internal interface FinancialConnectionsSheetSharedModule {
 
         @Provides
         @ActivityRetainedScope
-        fun provideStripeNetworkClient(
-            @IOContext context: CoroutineContext,
-            logger: Logger
-        ): StripeNetworkClient = DefaultStripeNetworkClient(
-            workContext = context,
-            logger = logger
+        fun providesAnalyticsTracker(
+            getOrFetchSync: GetOrFetchSync,
+            analyticsSender: FinancialConnectionsAnalyticsEventSender,
+            eventEmitter: FinancialConnectionsEventEmitter
+        ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
+            getOrFetchSync = getOrFetchSync,
+            analyticsSender = analyticsSender,
+            eventEmitter = eventEmitter
         )
 
         @Provides
         @ActivityRetainedScope
-        fun providesAnalyticsTracker(
+        fun providesAnalyticsEventSender(
             context: Application,
-            getOrFetchSync: GetOrFetchSync,
             locale: Locale?,
             configuration: FinancialConnectionsSheetConfiguration,
-            requestExecutor: AnalyticsRequestV2Executor,
-        ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
+            requestExecutor: AnalyticsRequestV2Executor
+        ): FinancialConnectionsAnalyticsEventSender = DefaultFinancialConnectionsAnalyticsEventSender(
             context = context,
             configuration = configuration,
-            getOrFetchSync = getOrFetchSync,
             locale = locale ?: Locale.getDefault(),
-            requestExecutor = requestExecutor,
+            requestExecutor = requestExecutor
         )
 
         @Provides
@@ -192,22 +198,24 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
-            @Named(PUBLISHABLE_KEY) publishableKey: String
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = application.packageManager,
-            packageName = application.packageName.orEmpty(),
-            packageInfo = application.packageInfo,
-            publishableKeyProvider = { publishableKey },
-            networkTypeProvider = NetworkTypeDetector(application)::invoke,
-        )
+            apiConfigurationProvider: Provider<ApiConfiguration.State>
+        ): AnalyticsRequestFactory {
+            return AnalyticsRequestFactory(
+                packageManager = application.packageManager,
+                packageName = application.packageName.orEmpty(),
+                packageInfo = application.packageInfo,
+                publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
+                networkTypeProvider = NetworkTypeDetector(application)::invoke,
+            )
+        }
 
         @Provides
         @ActivityRetainedScope
         internal fun providesIsWorkManagerAvailable(
-            getOrFetchSync: GetOrFetchSync,
+            eventContext: FinancialConnectionsEventContext,
         ): IsWorkManagerAvailable {
             return RealIsWorkManagerAvailable(
-                isEnabledForMerchant = { getOrFetchSync().manifest.enableWorkManager() },
+                isEnabledForMerchant = { eventContext.manifest?.enableWorkManager() == true },
             )
         }
 

@@ -10,25 +10,29 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.model.Address
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import java.util.Locale
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
 class AutocompleteScreenTest {
     val composeTestRule = createComposeRule()
+    private val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
+        .around(viewModelStoreRule)
         .around(createComposeCleanupRule())
         .around(composeTestRule)
         .around(CoroutineTestRule())
@@ -110,16 +114,18 @@ class AutocompleteScreenTest {
     private fun createViewModel() = AutocompleteViewModel(
         placesClient = TestPlacesClientProxy(),
         application = ApplicationProvider.getApplicationContext(),
-        eventReporter = TestAddressLauncherEventReporter,
+        eventReporter = FakeAddressLauncherEventReporter(),
         autocompleteArgs = AutocompleteViewModel.Args(country = "US")
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private class TestPlacesClientProxy(
         private val findAutocompletePredictionsResponse: Result<FindAutocompletePredictionsResponse> =
             Result.failure(IllegalStateException("Failed!")),
-        private val fetchPlaceResponse: Result<FetchPlaceResponse> =
+        private val fetchPlaceResponse: Result<Address> =
             Result.failure(IllegalStateException("Failed!")),
     ) : PlacesClientProxy {
+        override fun resetSession() = Unit
+
         override suspend fun findAutocompletePredictions(
             query: String?,
             country: String,
@@ -127,17 +133,8 @@ class AutocompleteScreenTest {
         ): Result<FindAutocompletePredictionsResponse> = findAutocompletePredictionsResponse
 
         override suspend fun fetchPlace(
-            placeId: String
-        ): Result<FetchPlaceResponse> = fetchPlaceResponse
-    }
-
-    private object TestAddressLauncherEventReporter : AddressLauncherEventReporter {
-        override fun onShow(country: String) {
-            // No-op
-        }
-
-        override fun onCompleted(country: String, autocompleteResultSelected: Boolean, editDistance: Int?) {
-            // No-op
-        }
+            placeId: String,
+            locale: Locale,
+        ): Result<Address> = fetchPlaceResponse
     }
 }

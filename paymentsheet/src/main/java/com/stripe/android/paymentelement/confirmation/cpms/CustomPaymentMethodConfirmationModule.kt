@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.cpms
 
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -10,7 +9,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @Module
 internal interface CustomPaymentMethodConfirmationModule {
     @JvmSuppressWildcards

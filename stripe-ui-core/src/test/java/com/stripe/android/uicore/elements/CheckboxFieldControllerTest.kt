@@ -36,7 +36,7 @@ class CheckboxFieldControllerTest {
     fun `on value change from true then back to false, error should be propagated`() = runTest {
         val controller = CheckboxFieldController()
 
-        controller.error.test {
+        controller.validationMessage.test {
             // Consume initial null event
             assertThat(awaitItem()).isNull()
 
@@ -46,7 +46,7 @@ class CheckboxFieldControllerTest {
 
             val value = awaitItem()
 
-            assertThat(value?.errorMessage).isEqualTo(R.string.stripe_field_required)
+            assertThat(value?.message).isEqualTo(R.string.stripe_field_required)
         }
     }
 }

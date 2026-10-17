@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -34,6 +35,7 @@ import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.LinkMode
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,6 +55,9 @@ class NetworkingLinkSignupViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -78,7 +83,7 @@ class NetworkingLinkSignupViewModelTest {
         linkSignupHandler = signupHandler,
         elementsSessionContext = elementsSessionContext,
         handleError = handleError,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - creates controllers with prefilled account holder email`() = runTest {
@@ -716,7 +721,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
+            on { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -726,16 +731,16 @@ class NetworkingLinkSignupViewModelTest {
         }
 
         val getCachedAccounts = mock<GetCachedAccounts> {
-            onBlocking { invoke() } doReturn cachedPartnerAccounts()
+            on { invoke() } doReturn cachedPartnerAccounts()
         }
 
         val saveAccountToLink = mock<SaveAccountToLink> {
             if (failOnSignup) {
-                onBlocking { new(any(), any(), any(), any(), any()) } doAnswer {
+                on { new(any(), any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                onBlocking { new(any(), any(), any(), any(), any()) } doReturn manifest
+                on { new(any(), any(), any(), any(), any(), any()) } doReturn manifest
             }
         }
 
@@ -747,6 +752,7 @@ class NetworkingLinkSignupViewModelTest {
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             requestIntegrityToken = mock(),
+            currentLinkBrand = FakeCurrentLinkBrand(),
             applicationId = "test",
             logger = Logger.noop(),
         )
@@ -762,7 +768,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
+            on { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -789,15 +795,15 @@ class NetworkingLinkSignupViewModelTest {
     private fun consumerSessionRepository(failOnSignup: Boolean): FinancialConnectionsConsumerSessionRepository {
         val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
             if (failOnSignup) {
-                onBlocking { signUp(any(), any(), any()) } doAnswer {
+                on { signUp(any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
-                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
+                on { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
-                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
+                on { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
+                on { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
             }
         }
         return consumerRepository

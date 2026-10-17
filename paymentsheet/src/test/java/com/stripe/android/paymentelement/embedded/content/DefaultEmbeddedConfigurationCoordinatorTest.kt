@@ -11,22 +11,34 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import kotlin.test.Test
 
 internal class DefaultEmbeddedConfigurationCoordinatorTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+    private val defaultInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+        PaymentSheet.IntentConfiguration(
+            PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+        )
+    )
 
     private fun createPaymentElementLoaderState(
         isGooglePayReady: Boolean = false,
@@ -59,10 +71,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -86,15 +96,13 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             )
         )
 
-        selectionHolder.set(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay)
         assertThat(confirmationStateHolder.state).isNull()
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -112,10 +120,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -125,10 +131,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         val secondConfigureResult = testScope.async {
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         }
 
@@ -147,10 +151,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
@@ -173,10 +175,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
             assertThat(
                 configurationCoordinator.configure(
-                    PaymentSheet.IntentConfiguration(
-                        PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                    ),
                     configuration = defaultConfiguration,
+                    initializationMode = defaultInitializationMode,
                 )
             ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         }
@@ -190,10 +190,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.failure(exception))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                initializationMode = defaultInitializationMode,
             )
         ).isEqualTo(EmbeddedPaymentElement.ConfigureResult.Failed(exception))
     }
@@ -205,11 +203,11 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         val confirmationHandler = FakeConfirmationHandler()
         val configurationHandler = FakeEmbeddedConfigurationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         )
         val stateHelper = FakeEmbeddedStateHelper()
 
@@ -221,7 +219,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 selectionChooser(newSelection)
             },
             stateHelper = stateHelper,
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
+            statusBarColor = null,
         )
 
         Scenario(
@@ -255,8 +254,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         }
 
         override suspend fun configure(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
-            configuration: EmbeddedPaymentElement.Configuration
+            configuration: EmbeddedPaymentElement.Configuration,
+            initializationMode: PaymentElementLoader.InitializationMode,
         ): Result<PaymentElementLoader.State> {
             return turbine.awaitItem()
         }

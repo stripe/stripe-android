@@ -8,8 +8,10 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -32,13 +34,12 @@ class PaymentLauncherContract :
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
-        open val stripeAccountId: String?,
         open val enableLogging: Boolean,
         open val productUsage: Set<String>,
         open val includePaymentSheetNextHandlers: Boolean,
         @ColorInt open var statusBarColor: Int? = null,
     ) : Parcelable {
-        abstract val publishableKey: String
+        abstract val apiConfiguration: ApiConfiguration.State
 
         abstract fun validate(): Result<Unit>
 
@@ -47,15 +48,13 @@ class PaymentLauncherContract :
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class IntentConfirmationArgs internal constructor(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
             val confirmStripeIntentParams: ConfirmStripeIntentParams,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -67,15 +66,13 @@ class PaymentLauncherContract :
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class PaymentIntentNextActionArgs internal constructor(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
             val paymentIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -87,15 +84,31 @@ class PaymentLauncherContract :
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class SetupIntentNextActionArgs internal constructor(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
             val setupIntentClientSecret: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            stripeAccountId = stripeAccountId,
+            enableLogging = enableLogging,
+            productUsage = productUsage,
+            includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
+            statusBarColor = statusBarColor,
+        ) {
+            override fun validate() = Result.success(Unit)
+        }
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class StripeIntentNextActionWithIntentArgs internal constructor(
+            override val apiConfiguration: ApiConfiguration.State,
+            override val enableLogging: Boolean,
+            override val productUsage: Set<String>,
+            override val includePaymentSheetNextHandlers: Boolean,
+            val stripeIntent: StripeIntent,
+            @ColorInt override var statusBarColor: Int?,
+        ) : Args(
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -107,14 +120,13 @@ class PaymentLauncherContract :
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class HashedPaymentIntentNextActionArgs internal constructor(
-            override val stripeAccountId: String?,
+            val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
             val hashedValue: String,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
-            stripeAccountId = stripeAccountId,
             enableLogging = enableLogging,
             productUsage = productUsage,
             includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -151,8 +163,13 @@ class PaymentLauncherContract :
                 Result.success(splitValue[0] to splitValue[1])
             }
 
-            override val publishableKey: String
-                get() = decodedValue.getOrNull()?.first ?: UNKNOWN_KEY
+            @IgnoredOnParcel
+            override val apiConfiguration: ApiConfiguration.State by lazy {
+                ApiConfiguration.State(
+                    publishableKey = decodedValue.getOrNull()?.first ?: UNKNOWN_KEY,
+                    stripeAccountId = stripeAccountId,
+                )
+            }
 
             val paymentIntentClientSecret: String
                 get() = decodedValue.getOrNull()?.second ?: UNKNOWN_KEY

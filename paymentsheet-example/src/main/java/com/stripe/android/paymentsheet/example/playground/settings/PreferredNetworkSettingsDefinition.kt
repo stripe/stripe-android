@@ -13,7 +13,10 @@ internal object PreferredNetworkSettingsDefinition : BooleanSettingsDefinition(
 ) {
     private val preferredNetworks = listOf(CardBrand.CartesBancaires)
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }

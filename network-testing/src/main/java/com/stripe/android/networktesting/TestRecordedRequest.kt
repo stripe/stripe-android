@@ -25,6 +25,15 @@ class TestRecordedRequest(private val recordedRequest: RecordedRequest) {
             return _bodyText.get()!!
         }
 
+    val bodyParams: Map<String, String> by lazy {
+        parseUrlEncodedParams(bodyText)
+    }
+
+    val queryParams: Map<String, String> by lazy {
+        val queryString = if (path.contains("?")) path.substringAfter("?") else ""
+        parseUrlEncodedParams(queryString)
+    }
+
     fun queryParameterValues(name: String): List<String?> {
         val url = HttpUrl.Builder()
             .scheme("https")

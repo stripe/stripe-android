@@ -7,7 +7,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
-    implementation project(":ml-core:cardscan")
+    implementation project(":ml-core:googleplay")
     implementation project(":payments-core")
 
     // DI
@@ -20,7 +20,9 @@ dependencies {
     implementation libs.androidx.fragment
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
     implementation libs.kotlin.serialization
+    implementation libs.mlKitTextRecognition
 
 
     testImplementation project(':payments-core-testing')
@@ -36,6 +38,7 @@ dependencies {
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner
@@ -47,6 +50,7 @@ dependencies {
 android {
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     testOptions {
@@ -67,6 +71,7 @@ android {
 
     kotlinOptions {
         freeCompilerArgs += [
+                "-opt-in=com.stripe.android.core.ApiConfigurationPreview",
                 "-Xconsistent-data-class-copy-visibility",
         ]
     }

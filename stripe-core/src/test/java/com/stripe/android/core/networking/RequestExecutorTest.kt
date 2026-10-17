@@ -44,6 +44,12 @@ internal class RequestExecutorTest {
         headers = mapOf("Request-Id" to listOf("req_error"))
     )
 
+    private val nonJsonErrorResponse = StripeResponse<String>(
+        code = HttpURLConnection.HTTP_UNAVAILABLE,
+        body = "Service api started successfully",
+        headers = mapOf("Request-Id" to listOf("req_nonjson"))
+    )
+
     private val testStripeError = StripeError(
         message = "Test error",
         type = "api_error"
@@ -333,6 +339,77 @@ internal class RequestExecutorTest {
         val exception = result.exceptionOrNull() as APIConnectionException
         assertTrue(exception.message!!.contains("Failed to execute"))
         assertEquals(networkException, exception.cause)
+    }
+
+    @Test
+    fun `executeRequestWithModelJsonParser should throw APIException on non-JSON error response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(nonJsonErrorResponse)
+
+        val exception = assertFailsWith<APIException> {
+            executeRequestWithModelJsonParser(
+                stripeNetworkClient = mockNetworkClient,
+                stripeErrorJsonParser = StripeErrorJsonParser(),
+                request = testRequest,
+                responseJsonParser = mockModelParser
+            )
+        }
+
+        assertEquals("req_nonjson", exception.requestId)
+        assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, exception.statusCode)
+        assertTrue(exception.message!!.contains("non-JSON error body"))
+    }
+
+    @Test
+    fun `executeRequestWithResultParser should return failure on non-JSON error response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(nonJsonErrorResponse)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = StripeErrorJsonParser(),
+            request = testRequest,
+            responseJsonParser = mockModelParser
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull() as APIException
+        assertEquals("req_nonjson", exception.requestId)
+        assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, exception.statusCode)
+        assertTrue(exception.message!!.contains("non-JSON error body"))
+    }
+
+    @Test
+    fun `executeRequestWithErrorParsing should return failure on non-JSON error response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(nonJsonErrorResponse)
+
+        val result = executeRequestWithErrorParsing(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = StripeErrorJsonParser(),
+            request = testRequest
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull() as APIException
+        assertEquals("req_nonjson", exception.requestId)
+        assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, exception.statusCode)
+        assertTrue(exception.message!!.contains("non-JSON error body"))
+    }
+
+    @Test
+    fun `executeRequestWithKSerializerParser should return failure on non-JSON error response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(nonJsonErrorResponse)
+
+        val result = executeRequestWithKSerializerParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = StripeErrorJsonParser(),
+            request = testRequest,
+            responseSerializer = TestModel.serializer()
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull() as APIException
+        assertEquals("req_nonjson", exception.requestId)
+        assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, exception.statusCode)
+        assertTrue(exception.message!!.contains("non-JSON error body"))
     }
 
     @Test

@@ -2,22 +2,23 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        PaymentSheetViewModelSubcomponent::class,
-    ]
-)
+@Module
 internal abstract class PaymentSheetLauncherModule {
     @Binds
     abstract fun bindsApplicationForContext(application: Application): Context
@@ -41,6 +42,27 @@ internal abstract class PaymentSheetLauncherModule {
         @Singleton
         fun provideCVCRecollectionHandler(): CvcRecollectionHandler {
             return CvcRecollectionHandlerImpl()
+        }
+
+        @Provides
+        @Singleton
+        fun providePaymentMethodMetadataFlow(
+            viewModel: PaymentSheetViewModel
+        ): StateFlow<PaymentMethodMetadata?> {
+            return viewModel.paymentMethodMetadata
+        }
+
+        @Provides
+        fun providePaymentMethodMetadata(
+            flow: StateFlow<PaymentMethodMetadata?>
+        ): PaymentMethodMetadata? {
+            return flow.value
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return DefaultStripeImageLoader(context)
         }
     }
 }

@@ -7,6 +7,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_POLLING_DURATION
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_POLLING_DURATION
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -25,7 +26,8 @@ typealias PaymentMethodCode = String
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
 @Parcelize
-data class PaymentMethod
+@Poko
+class PaymentMethod
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -33,22 +35,19 @@ constructor(
      *
      * [id](https://stripe.com/docs/api/payment_methods/object#payment_method_object-id)
      */
-    @JvmField val id: String?,
-
+    @JvmField val id: String,
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      *
      * [created](https://stripe.com/docs/api/payment_methods/object#payment_method_object-created)
      */
     @JvmField val created: Long?,
-
     /**
      * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
      *
      * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-livemode)
      */
     @JvmField val liveMode: Boolean,
-
     /**
      * The code of the PaymentMethod. This is useful when the PaymentMethodType is not
      * hard coded in the SDK.
@@ -56,7 +55,6 @@ constructor(
      * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
      */
     @JvmField internal val code: PaymentMethodCode?,
-
     /**
      * The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a
      * name matching this value. It contains additional information specific to the
@@ -65,14 +63,12 @@ constructor(
      * [type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
      */
     @JvmField val type: Type?,
-
     /**
      * Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods.
      *
      * [billing_details](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details)
      */
     @JvmField val billingDetails: BillingDetails? = null,
-
     /**
      * The ID of the Customer to which this PaymentMethod is saved. This will not be set when the
      * PaymentMethod has not been saved to a Customer.
@@ -80,80 +76,59 @@ constructor(
      * [customer](https://stripe.com/docs/api/payment_methods/object#payment_method_object-customer)
      */
     @JvmField val customerId: String? = null,
-
     /**
      * If this is a `card` PaymentMethod, this hash contains details about the card.
      *
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
      */
     @JvmField val card: Card? = null,
-
     /**
      * If this is a `card_present` PaymentMethod, this hash contains details about the Card Present payment method.
      *
      * [card_present](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card_present)
      */
     @JvmField val cardPresent: CardPresent? = null,
-
     /**
      * If this is a `fpx` PaymentMethod, this hash contains details about the FPX payment method.
      */
     @JvmField val fpx: Fpx? = null,
-
     /**
      * If this is an `ideal` PaymentMethod, this hash contains details about the iDEAL payment method.
      *
      * [ideal](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal)
      */
     @JvmField val ideal: Ideal? = null,
-
     /**
      * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
      *
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
      */
     @JvmField val sepaDebit: SepaDebit? = null,
-
     /**
      * If this is an `au_becs_debit` PaymentMethod, this hash contains details about the bank account.
      *
      * [au_becs_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-au_becs_debit)
      */
     @JvmField val auBecsDebit: AuBecsDebit? = null,
-
     /**
      * If this is a `bacs_debit` PaymentMethod, this hash contains details about the Bacs Direct Debit bank account.
      *
      * [bacs_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-bacs_debit)
      */
     @JvmField val bacsDebit: BacsDebit? = null,
-
-    /**
-     * If this is a `sofort` PaymentMethod, this hash contains details about the SOFORT payment method.
-     *
-     * [sofort](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sofort)
-     */
-    @JvmField val sofort: Sofort? = null,
-
-    @JvmField val upi: Upi? = null,
-
     @JvmField val netbanking: Netbanking? = null,
-
     /**
      * If this is an `us_bank_account` PaymentMethod, this hash contains details about the bank account.
      *
      * [us_bank_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account)
      */
     @JvmField val usBankAccount: USBankAccount? = null,
-
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val linkPaymentDetails: LinkPaymentDetails? = null,
-
     /**
      * Indicates whether this payment method was created in Link passthrough mode.
      * A payment method is in passthrough mode if it was created through Link but doesn't have link details.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val isLinkPassthroughMode: Boolean = false,
-
     /**
      * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
      * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved
@@ -162,6 +137,8 @@ constructor(
      * [allow_redisplay](https://docs.stripe.com/api/payment_methods/object#payment_method_object-allow_redisplay)
      */
     @JvmField val allowRedisplay: AllowRedisplay? = null,
+    /** Details returned for a Naira card payment method. */
+    @JvmField val ngCard: NgCard? = null,
 ) : StripeModel {
 
     val isLinkPaymentMethod: Boolean
@@ -178,7 +155,6 @@ constructor(
             Type.SepaDebit -> sepaDebit != null
             Type.AuBecsDebit -> auBecsDebit != null
             Type.BacsDebit -> bacsDebit != null
-            Type.Sofort -> sofort != null
             Type.USBankAccount -> usBankAccount != null
             else -> true
         }
@@ -200,6 +176,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION)
         ),
         Card(
             "card",
@@ -257,23 +234,6 @@ constructor(
             requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
         ),
-        Sofort(
-            "sofort",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = true,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = true,
-        ),
-        Upi(
-            "upi",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
-        ),
         P24(
             "p24",
             isReusable = false,
@@ -293,14 +253,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             requiresMandateForPaymentIntent = true,
-            hasDelayedSettlement = false,
-        ),
-        Giropay(
-            "giropay",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Eps(
@@ -323,7 +275,7 @@ constructor(
             "alipay",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
@@ -367,6 +319,22 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        Bizum(
+            "bizum",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        MbWay(
+            "mb_way",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         WeChatPay(
             "wechat_pay",
             isReusable = false,
@@ -374,7 +342,7 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(pollingDuration = MAX_POLLING_DURATION),
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = MAX_POLLING_DURATION),
         ),
         Klarna(
             "klarna",
@@ -383,7 +351,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Affirm(
             "affirm",
@@ -422,7 +390,7 @@ constructor(
             "satispay",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
@@ -490,7 +458,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh(),
+            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         Boleto(
             code = "boleto",
@@ -525,7 +493,7 @@ constructor(
             code = "twint",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             // We are intentionally polling for Twint even though it uses the redirect trampoline.
@@ -533,14 +501,6 @@ constructor(
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
             afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
-        ),
-        ShopPay(
-            code = "shop_pay",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
         ),
         PayNow(
             "paynow",
@@ -550,10 +510,163 @@ constructor(
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
         ),
+        PayPay(
+            "paypay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
+        ),
         PromptPay(
             "promptpay",
             isReusable = false,
             isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        Pix(
+            "pix",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        Wero(
+            "wero",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        Sequra(
+            "sequra",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        Scalapay(
+            "scalapay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
+        ),
+        PayByBank(
+            "pay_by_bank",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        GoPay(
+            "gopay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        MoMo(
+            "momo",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = true,
+        ),
+        ShopeePay(
+            "shopeepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        Qris(
+            "qris",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NgBankTransfer(
+            "ng_bank_transfer",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NgCard(
+            "ng_card",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NgUssd(
+            "ng_ussd",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NgWallet(
+            "ng_wallet",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        GCash(
+            "gcash",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        KakaoPay(
+            "kakao_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        KrCard(
+            "kr_card",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        NaverPay(
+            "naver_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
+        Payco(
+            "payco",
+            isReusable = false,
+            isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
@@ -581,7 +694,7 @@ constructor(
         val pollingDuration: Long
 
         @Parcelize
-        data object None : AfterRedirectAction {
+        object None : AfterRedirectAction {
 
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = false
@@ -591,15 +704,19 @@ constructor(
         }
 
         @Parcelize
-        data class Poll(override val pollingDuration: Long) : AfterRedirectAction {
+        @Poko
+        class Poll(override val pollingDuration: Long) : AfterRedirectAction {
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = true
         }
 
         @Parcelize
-        data class Refresh(override val pollingDuration: Long = 0L) : AfterRedirectAction {
+        data object Refresh : AfterRedirectAction {
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = true
+
+            @IgnoredOnParcel
+            override val pollingDuration: Long = 0L
         }
     }
 
@@ -620,11 +737,9 @@ constructor(
         private var sepaDebit: SepaDebit? = null
         private var auBecsDebit: AuBecsDebit? = null
         private var bacsDebit: BacsDebit? = null
-        private var sofort: Sofort? = null
         private var netbanking: Netbanking? = null
         private var usBankAccount: USBankAccount? = null
-        private var upi: Upi? = null
-
+        private var ngCard: NgCard? = null
         fun setId(id: String?): Builder = apply {
             this.id = id
         }
@@ -685,10 +800,6 @@ constructor(
             this.bacsDebit = bacsDebit
         }
 
-        fun setSofort(sofort: Sofort?): Builder = apply {
-            this.sofort = sofort
-        }
-
         fun setNetbanking(netbanking: Netbanking?): Builder = apply {
             this.netbanking = netbanking
         }
@@ -697,8 +808,8 @@ constructor(
             this.usBankAccount = usBankAccount
         }
 
-        fun setUpi(upi: Upi?): Builder = apply {
-            this.upi = upi
+        fun setNgCard(ngCard: NgCard?): Builder = apply {
+            this.ngCard = ngCard
         }
 
         fun setCode(code: String?): Builder = apply {
@@ -707,7 +818,7 @@ constructor(
 
         fun build(): PaymentMethod {
             return PaymentMethod(
-                id = id,
+                id = requireNotNull(id) { "PaymentMethod id was null" },
                 created = created,
                 liveMode = liveMode,
                 type = type,
@@ -722,9 +833,9 @@ constructor(
                 sepaDebit = sepaDebit,
                 auBecsDebit = auBecsDebit,
                 bacsDebit = bacsDebit,
-                sofort = sofort,
                 netbanking = netbanking,
-                usBankAccount = usBankAccount
+                usBankAccount = usBankAccount,
+                ngCard = ngCard,
             )
         }
     }
@@ -735,28 +846,26 @@ constructor(
      * [billing_details](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details)
      */
     @Parcelize
-    data class BillingDetails @JvmOverloads constructor(
+    @Poko
+    class BillingDetails @JvmOverloads constructor(
         /**
          * Billing address.
          *
          * [billing_details.address](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-address)
          */
         @JvmField val address: Address? = null,
-
         /**
          * Email address.
          *
          * [billing_details.email](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-email)
          */
         @JvmField val email: String? = null,
-
         /**
          * Full name.
          *
          * [billing_details.name](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-name)
          */
         @JvmField val name: String? = null,
-
         /**
          * Billing phone number (including extension).
          *
@@ -862,6 +971,29 @@ constructor(
         ALWAYS("always"),
     }
 
+    /** Card details returned by the Naira card redirect flow. */
+    @Parcelize
+    @Poko
+    class NgCard @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @JvmField val brand: Brand,
+        @JvmField val last4: String?,
+    ) : StripeModel {
+        /** The local card brand, or [Brand.Unknown] for an unrecognized or missing value. */
+        enum class Brand(val code: String?) {
+            Amex("amex"),
+            Mastercard("mastercard"),
+            Verve("verve"),
+            Visa("visa"),
+            Unknown(null);
+
+            internal companion object {
+                fun fromCode(code: String?): Brand = entries.firstOrNull {
+                    it.code?.equals(code, ignoreCase = true) == true
+                } ?: Unknown
+            }
+        }
+    }
+
     sealed class TypeData : StripeModel {
         abstract val type: Type
     }
@@ -872,7 +1004,8 @@ constructor(
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
      */
     @Parcelize
-    data class Card
+    @Poko
+    class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -882,78 +1015,103 @@ constructor(
          * [card.brand](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-brand)
          */
         @JvmField val brand: CardBrand = CardBrand.Unknown,
-
         /**
          * Checks on Card address and CVC if provided
          *
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @JvmField val checks: Checks? = null,
-
         /**
          * Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you’ve collected.
          *
          * [card.country](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-country)
          */
         @JvmField val country: String? = null,
-
         /**
          * Two-digit number representing the card’s expiration month.
          *
          * [card.exp_month](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_month)
          */
         @JvmField val expiryMonth: Int? = null,
-
         /**
          * Four-digit number representing the card’s expiration year.
          *
          * [card.exp_year](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_year)
          */
         @JvmField val expiryYear: Int? = null,
-
         /**
          * Uniquely identifies this particular card number. You can use this attribute to check whether two customers who’ve signed up with you are using the same card number, for example. For payment methods that tokenize card information (Apple Pay, Google Pay), the tokenized number might be provided instead of the underlying card number.
          *
          * [card.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-fingerprint)
          */
         @JvmField val fingerprint: String? = null,
-
         /**
          * Card funding type. Can be `credit`, `debit, `prepaid`, or `unknown`.
          *
          * [card.funding](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-funding)
          */
         @JvmField val funding: String? = null,
-
         /**
          * The last four digits of the card.
          *
          * [card.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-last4)
          */
         @JvmField val last4: String? = null,
-
         /**
          * Contains details on how this Card maybe be used for 3D Secure authentication.
          *
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @JvmField val threeDSecureUsage: ThreeDSecureUsage? = null,
-
         /**
          * If this Card is part of a card wallet, this contains the details of the card wallet.
          *
          * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
          */
         @JvmField val wallet: Wallet? = null,
-
         @JvmField
         val networks: Networks? = null,
-
         @JvmField
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val displayBrand: String? = null
+        val displayBrand: String? = null,
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cardArt: CardArt? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            brand: CardBrand = this.brand,
+            checks: Checks? = this.checks,
+            country: String? = this.country,
+            expiryMonth: Int? = this.expiryMonth,
+            expiryYear: Int? = this.expiryYear,
+            fingerprint: String? = this.fingerprint,
+            funding: String? = this.funding,
+            last4: String? = this.last4,
+            threeDSecureUsage: ThreeDSecureUsage? = this.threeDSecureUsage,
+            wallet: Wallet? = this.wallet,
+            networks: Networks? = this.networks,
+            displayBrand: String? = this.displayBrand,
+            cardArt: CardArt? = this.cardArt
+        ): Card {
+            return Card(
+                brand = brand,
+                checks = checks,
+                country = country,
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                fingerprint = fingerprint,
+                funding = funding,
+                last4 = last4,
+                threeDSecureUsage = threeDSecureUsage,
+                wallet = wallet,
+                networks = networks,
+                displayBrand = displayBrand,
+                cardArt = cardArt
+            )
+        }
 
         /**
          * Checks on Card address and CVC if provided
@@ -961,7 +1119,8 @@ constructor(
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @Parcelize
-        data class Checks
+        @Poko
+        class Checks
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
@@ -970,14 +1129,12 @@ constructor(
              * [payment_method.card.checks.address_line1_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-address_line1_check)
              */
             @JvmField val addressLine1Check: String?,
-
             /**
              * If a address postal code was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
              *
              * [payment_method.card.checks.address_postal_code_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-address_postal_code_check)
              */
             @JvmField val addressPostalCodeCheck: String?,
-
             /**
              * If a CVC was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
              *
@@ -992,7 +1149,8 @@ constructor(
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @Parcelize
-        data class ThreeDSecureUsage
+        @Poko
+        class ThreeDSecureUsage
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
@@ -1004,12 +1162,50 @@ constructor(
         ) : StripeModel
 
         @Parcelize
-        data class Networks(
+        @Poko
+        class Networks(
             val available: Set<String> = emptySet(),
             @Deprecated("This field is deprecated and will be removed in a future release.")
             val selectionMandatory: Boolean = false,
             val preferred: String? = null
-        ) : StripeModel
+        ) : StripeModel {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun copy(
+                available: Set<String> = this.available,
+                selectionMandatory: Boolean = this.selectionMandatory,
+                preferred: String? = this.preferred
+            ): Networks {
+                return Networks(
+                    available = available,
+                    selectionMandatory = selectionMandatory,
+                    preferred = preferred
+                )
+            }
+        }
+
+        /**
+         * Card art and program name details for this card, if available.
+         */
+        @Parcelize
+        @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class CardArt(
+            @JvmField val artImage: ArtImage?,
+            @JvmField val programName: String?
+        ) : StripeModel {
+
+            /**
+             * The card art image details.
+             */
+            @Parcelize
+            @Poko
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class ArtImage(
+                @JvmField val format: String,
+                @JvmField val url: String
+            ) : StripeModel
+        }
     }
 
     /**
@@ -1018,8 +1214,9 @@ constructor(
      * [card_present](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card_present)
      */
     @Parcelize
-    data class CardPresent internal constructor(
-        private val ignore: Boolean = true
+    @Poko
+    class CardPresent internal constructor(
+        @Suppress("unused") private val ignore: Boolean = true
     ) : TypeData() {
         override val type: Type get() = Type.CardPresent
 
@@ -1035,7 +1232,8 @@ constructor(
      * [ideal](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal)
      */
     @Parcelize
-    data class Ideal internal constructor(
+    @Poko
+    class Ideal internal constructor(
         /**
          * The customer’s bank, if provided. Can be one of `abn_amro`, `asn_bank`, `bunq`,
          * `handelsbanken`, `ing`, `knab`, `moneyou`, `rabobank`, `regiobank`, `sns_bank`,
@@ -1044,7 +1242,6 @@ constructor(
          * [ideal.bank](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal-bank)
          */
         @JvmField val bank: String?,
-
         /**
          * The Bank Identifier Code of the customer’s bank, if the bank was provided.
          *
@@ -1062,7 +1259,8 @@ constructor(
      * To obtain the FPX bank's display name, see [com.stripe.android.view.FpxBank].
      */
     @Parcelize
-    data class Fpx internal constructor(
+    @Poko
+    class Fpx internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
     ) : TypeData() {
@@ -1075,7 +1273,8 @@ constructor(
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
      */
     @Parcelize
-    data class SepaDebit
+    @Poko
+    class SepaDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -1084,28 +1283,24 @@ constructor(
          * [sepa_debit.bank_code](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-bank_code)
          */
         @JvmField val bankCode: String?,
-
         /**
          * Branch code of bank associated with the bank account.
          *
          * [sepa_debit.branch_code](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-branch_code)
          */
         @JvmField val branchCode: String?,
-
         /**
          * Two-letter ISO code representing the country the bank account is located in.
          *
          * [sepa_debit.country](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-country)
          */
         @JvmField val country: String?,
-
         /**
          * Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same.
          *
          * [sepa_debit.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-fingerprint)
          */
         @JvmField val fingerprint: String?,
-
         /**
          * Last four characters of the IBAN.
          *
@@ -1114,10 +1309,28 @@ constructor(
         @JvmField val last4: String?
     ) : TypeData() {
         override val type: Type get() = Type.SepaDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            bankCode: String? = this.bankCode,
+            branchCode: String? = this.branchCode,
+            country: String? = this.country,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4
+        ): SepaDebit {
+            return SepaDebit(
+                bankCode = bankCode,
+                branchCode = branchCode,
+                country = country,
+                fingerprint = fingerprint,
+                last4 = last4
+            )
+        }
     }
 
     @Parcelize
-    data class AuBecsDebit
+    @Poko
+    class AuBecsDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @JvmField val bsbNumber: String?,
@@ -1125,10 +1338,24 @@ constructor(
         @JvmField val last4: String?
     ) : TypeData() {
         override val type: Type get() = Type.AuBecsDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            bsbNumber: String? = this.bsbNumber,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4
+        ): AuBecsDebit {
+            return AuBecsDebit(
+                bsbNumber = bsbNumber,
+                fingerprint = fingerprint,
+                last4 = last4
+            )
+        }
     }
 
     @Parcelize
-    data class BacsDebit
+    @Poko
+    class BacsDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @JvmField val fingerprint: String?,
@@ -1136,24 +1363,24 @@ constructor(
         @JvmField val sortCode: String?
     ) : TypeData() {
         override val type: Type get() = Type.BacsDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4,
+            sortCode: String? = this.sortCode
+        ): BacsDebit {
+            return BacsDebit(
+                fingerprint = fingerprint,
+                last4 = last4,
+                sortCode = sortCode
+            )
+        }
     }
 
     @Parcelize
-    data class Sofort internal constructor(
-        @JvmField val country: String?
-    ) : TypeData() {
-        override val type: Type get() = Type.Sofort
-    }
-
-    @Parcelize
-    data class Upi internal constructor(
-        @JvmField val vpa: String?
-    ) : TypeData() {
-        override val type: Type get() = Type.Upi
-    }
-
-    @Parcelize
-    data class Netbanking internal constructor(
+    @Poko
+    class Netbanking internal constructor(
         /**
          * The customer’s bank.
          *
@@ -1165,7 +1392,8 @@ constructor(
     }
 
     @Parcelize
-    data class USBankAccount
+    @Poko
+    class USBankAccount
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -1174,21 +1402,18 @@ constructor(
          * [us_bank_account.account_holder_type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-account_holder_type)
          */
         @JvmField val accountHolderType: USBankAccountHolderType,
-
         /**
          * Account type
          *
          * [us_bank_account.account_type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-account_number)
          */
         @JvmField val accountType: USBankAccountType,
-
         /**
          * The name of the bank
          *
          * [us_bank_account.bank_name](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-bank_name)
          */
         @JvmField val bankName: String?,
-
         /**
          * Uniquely identifies this particular bank account. You can use this attribute to check
          * whether two bank accounts are the same
@@ -1196,28 +1421,24 @@ constructor(
          * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-fingerprint)
          */
         @JvmField val fingerprint: String?,
-
         /**
          * Last four digits of the bank account number
          *
          * [us_bank_account.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-last4)
          */
         @JvmField val last4: String?,
-
         /**
          * The ID of the Financial Connections Account used to create the payment method
          *
          * [us_bank_account.financial_connections_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-financial_connections_account)
          */
         @JvmField val financialConnectionsAccount: String?,
-
         /**
          * Contains information about US bank account networks that can be used
          *
          * [us_bank_account.networks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-networks)
          */
         @JvmField val networks: USBankNetworks?,
-
         /**
          * Routing number of the bank account
          *
@@ -1226,6 +1447,29 @@ constructor(
         @JvmField val routingNumber: String?,
     ) : TypeData() {
         override val type: Type get() = Type.USBankAccount
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            accountHolderType: USBankAccountHolderType = this.accountHolderType,
+            accountType: USBankAccountType = this.accountType,
+            bankName: String? = this.bankName,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4,
+            financialConnectionsAccount: String? = this.financialConnectionsAccount,
+            networks: USBankNetworks? = this.networks,
+            routingNumber: String? = this.routingNumber
+        ): USBankAccount {
+            return USBankAccount(
+                accountHolderType = accountHolderType,
+                accountType = accountType,
+                bankName = bankName,
+                fingerprint = fingerprint,
+                last4 = last4,
+                financialConnectionsAccount = financialConnectionsAccount,
+                networks = networks,
+                routingNumber = routingNumber
+            )
+        }
 
         @Parcelize
         enum class USBankAccountHolderType(val value: String) : StripeModel {
@@ -1250,10 +1494,58 @@ constructor(
         }
 
         @Parcelize
-        data class USBankNetworks(
+        @Poko
+        class USBankNetworks(
             val preferred: String?,
             val supported: List<String>
         ) : StripeModel
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        id: String = this.id,
+        created: Long? = this.created,
+        liveMode: Boolean = this.liveMode,
+        code: PaymentMethodCode? = this.code,
+        type: Type? = this.type,
+        billingDetails: BillingDetails? = this.billingDetails,
+        customerId: String? = this.customerId,
+        card: Card? = this.card,
+        cardPresent: CardPresent? = this.cardPresent,
+        fpx: Fpx? = this.fpx,
+        ideal: Ideal? = this.ideal,
+        sepaDebit: SepaDebit? = this.sepaDebit,
+        auBecsDebit: AuBecsDebit? = this.auBecsDebit,
+        bacsDebit: BacsDebit? = this.bacsDebit,
+        netbanking: Netbanking? = this.netbanking,
+        usBankAccount: USBankAccount? = this.usBankAccount,
+        linkPaymentDetails: LinkPaymentDetails? = this.linkPaymentDetails,
+        isLinkPassthroughMode: Boolean = this.isLinkPassthroughMode,
+        allowRedisplay: AllowRedisplay? = this.allowRedisplay,
+        ngCard: NgCard? = this.ngCard,
+    ): PaymentMethod {
+        return PaymentMethod(
+            id = id,
+            created = created,
+            liveMode = liveMode,
+            code = code,
+            type = type,
+            billingDetails = billingDetails,
+            customerId = customerId,
+            card = card,
+            cardPresent = cardPresent,
+            fpx = fpx,
+            ideal = ideal,
+            sepaDebit = sepaDebit,
+            auBecsDebit = auBecsDebit,
+            bacsDebit = bacsDebit,
+            netbanking = netbanking,
+            usBankAccount = usBankAccount,
+            linkPaymentDetails = linkPaymentDetails,
+            isLinkPassthroughMode = isLinkPassthroughMode,
+            allowRedisplay = allowRedisplay,
+            ngCard = ngCard,
+        )
     }
 
     companion object {

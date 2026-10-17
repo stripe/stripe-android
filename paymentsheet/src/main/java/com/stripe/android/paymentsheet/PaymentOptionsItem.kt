@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -19,7 +20,9 @@ sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = false
     }
 
-    internal object Link : PaymentOptionsItem() {
+    internal data class Link(
+        val linkBrand: LinkBrand,
+    ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.Link
         override val isEnabledDuringEditing: Boolean = false
     }
@@ -34,10 +37,6 @@ sealed class PaymentOptionsItem {
 
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
-
-        fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
-            return displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
-        }
 
         override val isEnabledDuringEditing: Boolean = true
     }

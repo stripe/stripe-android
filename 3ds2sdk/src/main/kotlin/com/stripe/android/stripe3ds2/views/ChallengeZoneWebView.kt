@@ -72,6 +72,13 @@ internal class ChallengeZoneWebView @JvmOverloads constructor(
         this.onClickListener = onClickListener
     }
 
+    internal fun dispose() {
+        onClickListener = null
+        webView.setOnHtmlSubmitListener(null)
+        removeAllViews()
+        webView.destroy()
+    }
+
     private companion object {
         private val PATTERN_METHOD_POST = Pattern.compile(
             "method=\"post\"",

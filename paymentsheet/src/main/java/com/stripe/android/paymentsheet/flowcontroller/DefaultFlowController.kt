@@ -8,37 +8,40 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
-import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkExpressMode
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
+import com.stripe.android.link.LinkPaymentMethodSelectionOutcome
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
-import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.effectiveLinkBrand
+import com.stripe.android.link.handleLinkPaymentMethodSelectionResult
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -52,21 +55,22 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.persistBillingAnalytics
+import com.stripe.android.paymentsheet.analytics.reportBillingAddressCompleted
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.LinkDisabledState
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.ui.SepaMandateContract
-import com.stripe.android.paymentsheet.ui.SepaMandateResult
-import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
@@ -75,16 +79,15 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
+@Suppress("LargeClass")
 @OptIn(WalletButtonsPreview::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
-    // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -92,7 +95,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: FlowControllerConfirmationHandler,
-    private val linkGateFactory: LinkGate.Factory,
+    private val linkPaymentMethodSelectionLauncher: LinkPaymentMethodSelectionLauncher,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
@@ -103,18 +106,15 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
-    private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
      * after [DefaultFlowController].
      */
     lateinit var flowControllerComponent: FlowControllerComponent
-
-    private val initializationMode: PaymentElementLoader.InitializationMode?
-        get() = viewModel.previousConfigureRequest?.initializationMode
 
     override var shippingDetails: AddressDetails?
         get() = viewModel.state?.config?.shippingDetails
@@ -137,11 +137,6 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onPaymentOptionResult
         )
 
-        sepaMandateActivityLauncher = activityResultCaller.registerForActivityResult(
-            SepaMandateContract(),
-            ::onSepaMandateResult,
-        )
-
         flowControllerLinkLauncher.register(
             key = FLOW_CONTROLLER_LINK_LAUNCHER,
             activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
@@ -158,7 +153,6 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentOptionActivityLauncher.unregister()
-                    sepaMandateActivityLauncher.unregister()
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
@@ -179,7 +173,16 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @Composable
     override fun WalletButtons() {
-        viewModel.flowControllerStateComponent.walletButtonsContent.Content()
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(
+            remember {
+                WalletButtonsViewClickHandler { false }
+            }
+        )
+    }
+
+    @Composable
+    override fun WalletButtons(clickHandler: WalletButtonsViewClickHandler) {
+        viewModel.flowControllerStateComponent.walletButtonsContent.Content(clickHandler)
     }
 
     override fun configureWithPaymentIntent(
@@ -234,8 +237,22 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun getPaymentOption(): PaymentOption? {
         return viewModel.paymentSelection?.let {
-            paymentOptionFactory.create(it)
+            val linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.effectiveLinkBrand(
+                linkAccountHolder.linkAccountInfo.value.account
+            )
+            createPaymentOption(it, linkBrand)
         }
+    }
+
+    private fun createPaymentOption(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+    ): PaymentOption {
+        return paymentOptionFactory.create(
+            selection = selection,
+            linkBrand = linkBrand,
+            appearance = viewModel.state?.config?.appearance ?: ConfigurationDefaults.appearance,
+        )
     }
 
     private fun withCurrentState(block: (State) -> Unit) {
@@ -267,43 +284,18 @@ internal class DefaultFlowController @Inject internal constructor(
         withCurrentState { state ->
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
-            val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLink = linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
-                paymentSelection = paymentSelection,
-                linkAccountInfo = linkAccountInfo,
-                linkConfiguration = linkConfiguration
+            val didPresentLink = linkPaymentMethodSelectionLauncher.launchIfEligible(
+                selection = paymentSelection,
+                configuration = linkConfiguration,
+                paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
+                hasUserDeclinedVerification = viewModel.state?.declinedLink2FA == true,
             )
 
-            if (shouldPresentLink) {
-                flowControllerLinkLauncher.present(
-                    configuration = linkConfiguration,
-                    linkAccountInfo = linkAccountInfo,
-                    linkExpressMode = LinkExpressMode.ENABLED,
-                    launchMode = LinkLaunchMode.PaymentMethodSelection(
-                        selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
-                    ),
-                    passiveCaptchaParams = state.paymentSheetState.paymentMethodMetadata.passiveCaptchaParams
-                )
-            } else {
+            if (!didPresentLink) {
                 showPaymentOptionList(state, paymentSelection)
             }
         }
-    }
-
-    private fun shouldPresentLinkInsteadOfPaymentOptions(
-        paymentSelection: PaymentSelection?,
-        linkAccountInfo: LinkAccountUpdate.Value,
-        linkConfiguration: LinkConfiguration
-    ): Boolean {
-        // If the user has declined to use Link in the past, do not show it again.
-        return viewModel.state?.declinedLink2FA != true &&
-            // The current payment selection is Link
-            paymentSelection is Link &&
-            // The current user has a Link account (not necessarily logged in)
-            linkAccountInfo.account != null &&
-            // feature flag and other conditions are met
-            linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
     private fun showPaymentOptionList(
@@ -317,7 +309,8 @@ internal class DefaultFlowController @Inject internal constructor(
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletButtonsRendered = viewModel.walletButtonsRendered,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions()
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -335,37 +328,53 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     fun onLinkResultFromFlowController(result: LinkActivityResult) {
-        result.linkAccountUpdate?.updateLinkAccount()
-        when (result) {
-            is LinkActivityResult.PaymentMethodObtained,
-            is LinkActivityResult.Failed -> Unit
-            is LinkActivityResult.Canceled -> when (result.reason) {
-                Reason.BackPressed -> withCurrentState {
-                    val accountStatus = linkAccountHolder.linkAccountInfo.value.account?.accountStatus
-                    // The user dismissed the Link 2FA -> prevent from showing it again
-                    if (accountStatus == AccountStatus.VerificationStarted) {
-                        viewModel.updateState { it?.copy(declinedLink2FA = true) }
-                    }
-                    // just show the payment option list if
-                    // the user didn't have any preselected Link payment details
-                    // (preselected Link payment means the user is attempting to change their Link payment method)
-                    if (viewModel.paymentSelection?.readyToPayWithLink() == false) {
-                        showPaymentOptionList(it, viewModel.paymentSelection)
-                    }
-                }
-                Reason.LoggedOut -> {
-                    updateLinkPaymentSelection(linkPaymentMethod = null, canceled = true)
-                    withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
-                }
-                Reason.PayAnotherWay -> {
-                    withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
+        val state = viewModel.state ?: return
+        handleLinkPaymentMethodSelectionResult(
+            result = result,
+            selection = viewModel.paymentSelection,
+            customerState = state.paymentSheetState.customer,
+            paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
+            currentLinkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+        ).forEach(::applyLinkPaymentMethodSelectionOutcome)
+    }
+
+    private fun applyLinkPaymentMethodSelectionOutcome(outcome: LinkPaymentMethodSelectionOutcome) {
+        when (outcome) {
+            LinkPaymentMethodSelectionOutcome.Dismiss -> Unit
+            LinkPaymentMethodSelectionOutcome.ShowPaymentOptions -> withCurrentState {
+                showPaymentOptionList(it, viewModel.paymentSelection)
+            }
+            LinkPaymentMethodSelectionOutcome.SuppressFutureEagerPresentation -> {
+                viewModel.updateState { it?.copy(declinedLink2FA = true) }
+            }
+            is LinkPaymentMethodSelectionOutcome.UpdatedLinkMetadata -> {
+                linkAccountHolder.set(outcome.linkAccountInfo)
+                viewModel.updateState {
+                    it?.copyPaymentSheetState(metadata = outcome.paymentMethodMetadata)
                 }
             }
-
-            is LinkActivityResult.Completed -> {
-                updateLinkPaymentSelection(linkPaymentMethod = result.selectedPayment, canceled = false)
+            is LinkPaymentMethodSelectionOutcome.UpdateSelection -> {
+                updatePaymentSelectionFromLinkResult(outcome.selection, outcome.isCanceled)
+                if (outcome.showPaymentOptions) {
+                    withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
+                }
             }
         }
+    }
+
+    private fun updatePaymentSelectionFromLinkResult(
+        selection: PaymentSelection?,
+        isCanceled: Boolean,
+    ) {
+        viewModel.paymentSelection = selection
+        val paymentOption = selection?.let {
+            val linkBrand = viewModel.state?.linkConfiguration
+                ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
+            createPaymentOption(it, linkBrand)
+        }
+        paymentOptionResultCallback.onPaymentOptionResult(
+            PaymentOptionResult(paymentOption = paymentOption, didCancel = isCanceled)
+        )
     }
 
     fun onLinkResultFromWalletsButton(result: LinkActivityResult) {
@@ -384,21 +393,25 @@ internal class DefaultFlowController @Inject internal constructor(
                     showPaymentOptionList(it, viewModel.paymentSelection)
                 }
             }
-            is LinkActivityResult.Completed -> with(Link(selectedPayment = result.selectedPayment)) {
-                viewModel.paymentSelection = this
+            is LinkActivityResult.Completed -> {
+                // Should always have Link configuration here.
+                val linkConfiguration = viewModel.state?.linkConfiguration
+                    ?: return
+                val effectiveBrand =
+                    linkConfiguration.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
+                val selection = Link(
+                    brand = effectiveBrand,
+                    selectedPayment = result.selectedPayment,
+                )
+                viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(this),
+                        paymentOption = createPaymentOption(selection, effectiveBrand),
                         didCancel = false,
                     )
                 )
             }
         }
-    }
-
-    fun PaymentSelection.readyToPayWithLink(): Boolean = when (this) {
-        is Link -> selectedPayment != null
-        else -> isLink
     }
 
     /**
@@ -414,10 +427,12 @@ internal class DefaultFlowController @Inject internal constructor(
                 val currentState = viewModel.state ?: return
                 val metadata = currentState.paymentSheetState.paymentMethodMetadata
                 val accountStatus = account?.accountStatus ?: AccountStatus.SignedOut
-                val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
-                viewModel.state = currentState.copyPaymentSheetState(
-                    metadata = metadata.copy(linkState = linkState),
-                )
+                val linkStateResult = when (val result = metadata.linkStateResult) {
+                    is LinkState -> result.copy(loginState = accountStatus.toLoginState())
+                    is LinkDisabledState, null -> result
+                }
+                val updatedMetadata = metadata.copy(linkStateResult = linkStateResult)
+                viewModel.state = currentState.copyPaymentSheetState(metadata = updatedMetadata)
             }
             LinkAccountUpdate.None -> Unit
         }
@@ -440,10 +455,19 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 // User logged out - determine best fallback payment method,
                 // or clear selection if there is no fallback
-                viewModel.state?.paymentSheetState?.determineFallbackPaymentSelectionAfterLinkLogout()
+                viewModel.state?.paymentSheetState?.let {
+                    determineFallbackPaymentSelectionAfterLinkLogout(
+                        customerState = it.customer,
+                        paymentMethodMetadata = it.paymentMethodMetadata,
+                    )
+                }
             }
             viewModel.paymentSelection = newSelection
-            val paymentOption = newSelection?.let { paymentOptionFactory.create(it) }
+            val paymentOption = newSelection?.let {
+                val linkBrand = viewModel.state?.linkConfiguration
+                    ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
+                createPaymentOption(it, linkBrand)
+            }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
                 didCancel = canceled,
@@ -453,11 +477,17 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling confirm()."
-        )
+        val state = viewModel.state
+
+        if (state == null) {
+            val error = IllegalStateException(
+                "FlowController must be successfully initialized " +
+                    "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                    "configureWithIntentConfiguration() before calling confirm()."
+            )
+            onPaymentResult(PaymentResult.Failed(error))
+            return
+        }
 
         if (!configurationHandler.isConfigured) {
             val error = IllegalStateException(
@@ -469,77 +499,31 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
-        val initializationMode = requireNotNull(initializationMode)
-
-        when (val paymentSelection = viewModel.paymentSelection) {
-            is Link,
-            is PaymentSelection.New.LinkInline,
-            is PaymentSelection.GooglePay,
-            is PaymentSelection.ExternalPaymentMethod,
-            is PaymentSelection.CustomPaymentMethod,
-            is PaymentSelection.New,
-            is PaymentSelection.ShopPay,
-            null -> confirmPaymentSelection(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-                appearance = state.config.appearance,
-                initializationMode = initializationMode,
-            )
-            is PaymentSelection.Saved -> confirmSavedPaymentMethod(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-                appearance = state.config.appearance,
-                initializationMode = initializationMode,
-            )
-        }
-    }
-
-    private fun confirmSavedPaymentMethod(
-        paymentSelection: PaymentSelection.Saved,
-        state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
-        initializationMode: PaymentElementLoader.InitializationMode,
-    ) {
-        if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
-            viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
-        ) {
-            // We're legally required to show the customer the SEPA mandate before every payment/setup.
-            // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
-            // we present the mandate directly.
-            sepaMandateActivityLauncher.launch(
-                SepaMandateContract.Args(
-                    merchantName = state.config.merchantDisplayName
-                )
-            )
-        } else {
-            confirmPaymentSelection(paymentSelection, state, appearance, initializationMode)
-        }
+        confirmPaymentSelection(
+            paymentSelection = viewModel.paymentSelection,
+            state = state.paymentSheetState,
+        )
     }
 
     @VisibleForTesting
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
         state: PaymentSheetState.Full,
-        appearance: PaymentSheet.Appearance,
-        initializationMode: PaymentElementLoader.InitializationMode,
     ) {
+        viewModel.handle.persistBillingAnalytics(paymentSelection, viewModel.autocompleteFilledAddress)
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
-                passiveCaptchaParams = state.paymentMethodMetadata.passiveCaptchaParams
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
             )
 
             confirmationOption?.let { option ->
-                val stripeIntent = requireNotNull(state.stripeIntent)
-
                 confirmationHandler.start(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
-                        intent = stripeIntent,
-                        initializationMode = initializationMode,
-                        appearance = appearance,
-                        shippingDetails = state.config.shippingDetails,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
+                        statusBarColor = viewModel.statusBarColor,
                     )
                 )
             } ?: run {
@@ -580,6 +564,7 @@ internal class DefaultFlowController @Inject internal constructor(
         when (result) {
             is PaymentOptionsActivityResult.Succeeded -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
+                viewModel.autocompleteFilledAddress = result.autocompleteFilledAddress
                 onPaymentSelection(canceled = false)
             }
             null,
@@ -592,7 +577,11 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun onPaymentSelection(canceled: Boolean) {
         val paymentSelection = viewModel.paymentSelection
-        val paymentOption = paymentSelection?.let { paymentOptionFactory.create(it) }
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+        val paymentOption = paymentSelection?.let {
+            val linkBrand = viewModel.state?.linkConfiguration?.effectiveLinkBrand(linkAccount)
+            createPaymentOption(it, linkBrand)
+        }
 
         paymentOptionResultCallback.onPaymentOptionResult(
             PaymentOptionResult(
@@ -605,20 +594,21 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun onIntentResult(result: ConfirmationHandler.Result) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> {
-                savePaymentSelectionIfEligible(result.intent)
-
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
-                        deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
+                        intentId = result.intent.id,
                     )
+                    viewModel.handle.reportBillingAddressCompleted(paymentSelection, eventReporter)
                 }
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
+                    intentId = result.intent.id,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
@@ -645,43 +635,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun savePaymentSelectionIfEligible(stripeIntent: StripeIntent) {
-        val currentSelection = viewModel.paymentSelection
-        val currentInitializationMode = initializationMode
-
-        /*
-         * Sets current selection as default payment method in future payment sheet usage. New payment
-         * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
-         * for usage, or the customer has requested the payment method be saved.
-         */
-        val selectionToSave = when (currentSelection) {
-            is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
-                val alwaysSave = viewModel.state?.paymentSheetState?.alwaysSaveForFutureUse == true
-                currentInitializationMode != null && (currentSelection.canSave(currentInitializationMode) || alwaysSave)
-            }?.let { method ->
-                PaymentSelection.Saved(method)
-            }
-            is PaymentSelection.Saved -> {
-                when (currentSelection.walletType) {
-                    PaymentSelection.Saved.WalletType.GooglePay -> {
-                        PaymentSelection.GooglePay
-                    }
-                    PaymentSelection.Saved.WalletType.Link -> {
-                        // Don't save as Link, but instead as the actual payment method. If the payment method isn't
-                        // attached to the customer, we will fallback to Link during load.
-                        currentSelection
-                    }
-                    null -> currentSelection
-                }
-            }
-            else -> currentSelection
-        }
-
-        selectionToSave?.let {
-            prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
-        }
-    }
-
     private fun handleCancellation(canceled: ConfirmationHandler.Result.Canceled) {
         when (canceled.action) {
             ConfirmationHandler.Result.Canceled.Action.InformCancellation -> {
@@ -701,9 +654,10 @@ internal class DefaultFlowController @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
         shouldLog: Boolean = true,
         shouldResetOnCompleted: Boolean = true,
+        intentId: String? = null,
     ) {
         if (shouldLog) {
-            logPaymentResult(paymentResult, deferredIntentConfirmationType)
+            logPaymentResult(paymentResult, deferredIntentConfirmationType, intentId)
         }
 
         val selection = viewModel.paymentSelection
@@ -714,7 +668,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
+            viewModel.autocompleteFilledAddress = null
             viewModel.state = null
+            viewModel.previousConfigureRequest = null
+            paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
         }
 
         viewModelScope.launch {
@@ -735,21 +692,10 @@ internal class DefaultFlowController @Inject internal constructor(
             verifiedMerchant.not()
     }
 
-    internal fun onSepaMandateResult(sepaMandateResult: SepaMandateResult) {
-        when (sepaMandateResult) {
-            SepaMandateResult.Acknowledged -> {
-                viewModel.paymentSelection?.hasAcknowledgedSepaMandate = true
-                confirm()
-            }
-            SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
-            }
-        }
-    }
-
     private fun logPaymentResult(
         paymentResult: PaymentResult?,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
@@ -757,7 +703,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = deferredIntentConfirmationType,
+                        intentId = intentId,
                     )
+                    viewModel.handle.reportBillingAddressCompleted(paymentSelection, eventReporter)
                 }
             }
             is PaymentResult.Failed -> {
@@ -775,8 +723,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
-        is PaymentResult.Completed -> PaymentSheetResult.Completed
-        is PaymentResult.Canceled -> PaymentSheetResult.Canceled
+        is PaymentResult.Completed -> PaymentSheetResult.Completed()
+        is PaymentResult.Canceled -> PaymentSheetResult.Canceled()
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
     }
 
@@ -834,14 +782,15 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 
             val flowControllerComponent: FlowControllerComponent =
-                flowControllerStateComponent.flowControllerComponentBuilder
-                    .lifeCycleOwner(lifecycleOwner)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
-                    .activityResultCaller(activityResultCaller)
-                    .paymentOptionResultCallback(paymentOptionResultCallback)
-                    .paymentResultCallback(paymentResultCallback)
-                    .initializedViaCompose(initializedViaCompose)
-                    .build()
+                flowControllerStateComponent.flowControllerComponentFactory
+                    .create(
+                        lifecycleOwner = lifecycleOwner,
+                        activityResultCaller = activityResultCaller,
+                        activityResultRegistryOwner = activityResultRegistryOwner,
+                        paymentOptionResultCallback = paymentOptionResultCallback,
+                        paymentResultCallback = paymentResultCallback,
+                        initializedViaCompose = initializedViaCompose,
+                    )
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
             return flowController

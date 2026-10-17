@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Launched
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
@@ -101,7 +100,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
 
     init {
         handleErrors()
-        launchBrowserIfNonOauth()
+        launchBrowserIfNeeded()
         initializeState()
     }
 
@@ -188,16 +187,28 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         copy(payload = it)
     }
 
-    private fun launchBrowserIfNonOauth() {
+    private fun launchBrowserIfNeeded() {
         onAsync(
             prop = SharedPartnerAuthState::payload,
-            onSuccess = {
-                // launch auth for non-OAuth (skip pre-pane).
-                if (!it.authSession.isOAuth) {
-                    launchAuthInBrowser(it.authSession)
+            onSuccess = { payload ->
+                when {
+                    // launch auth for non-OAuth (skip pre-pane).
+                    !payload.authSession.isOAuth -> launchAuthInBrowser(payload.authSession)
+
+                    // A previous pane already told the user what to do, so skip the prepane and
+                    // hand them straight to the institution.
+                    initialState.autoLaunchAuthSession -> autoLaunchAuthInBrowser(payload.authSession)
                 }
             }
         )
+    }
+
+    private fun autoLaunchAuthInBrowser(authSession: FinancialConnectionsAuthorizationSession) {
+        setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
+        // The OAuth flow is genuinely being launched, so the session still needs the event — but
+        // not the prepane click event, since the user never saw the prepane.
+        postAuthSessionEvent(authSession.id, AuthSessionEvent.OAuthLaunched(Date()))
+        launchAuthInBrowser(authSession)
     }
 
     private fun handleErrors() {
@@ -442,7 +453,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             } else {
                 AccountPicker(referrer = pane)
             }
-            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+            eventTracker.emitEvent(Name.INSTITUTION_AUTHORIZED)
             navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
@@ -532,7 +543,11 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     }
 
     @Parcelize
-    data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
+    data class Args(
+        val inModal: Boolean,
+        val pane: Pane,
+        val autoLaunchAuthSession: Boolean,
+    ) : Parcelable
 
     @AssistedFactory
     interface Factory {

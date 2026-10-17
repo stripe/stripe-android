@@ -1,8 +1,8 @@
 package com.stripe.android.link.verification
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -14,10 +14,9 @@ internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
     override val state: StateFlow<LinkInlineState> = MutableStateFlow(
         value = LinkInlineState(
             verificationState = VerificationState.RenderButton,
-            passiveCaptchaParams = null
         )
     )
-    override val otpElement: OTPElement = OTPSpec.transform()
+    override val otpElement: OTPElement = OTPElementFactory.create()
 
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
         // No-op implementation

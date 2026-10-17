@@ -225,11 +225,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 fallbackRedirectUrl,
                 returnUrl = null,
                 enableLogging = args.enableLogging,
-                stripeAccountId = args.requestOptions.stripeAccount,
+                apiConfiguration = args.apiConfiguration.copy(stripeAccountId = args.requestOptions.stripeAccount),
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
                 statusBarColor = args.statusBarColor,
-                publishableKey = threeDS2RequestOptions.apiKey,
                 isInstantApp = isInstantApp,
                 toolbarCustomization = StripeToolbarCustomization().apply {
                     setButtonText(context.getString(R.string.stripe_cancel))
@@ -314,19 +313,21 @@ internal class Stripe3ds2TransactionViewModelFactory(
         val application = extras.requireApplication()
         val savedStateHandle = extras.createSavedStateHandle()
 
-        val subcomponentBuilder = DaggerStripe3ds2TransactionViewModelFactoryComponent.builder()
-            .context(application)
-            .enableLogging(args.enableLogging)
-            .publishableKeyProvider { args.publishableKey }
-            .productUsage(args.productUsage)
-            .isInstantApp(InstantApps.isInstantApp(application))
-            .build()
-            .subcomponentBuilder
+        val subcomponentFactory = DaggerStripe3ds2TransactionViewModelFactoryComponent.factory()
+            .create(
+                context = application,
+                enableLogging = args.enableLogging,
+                apiConfiguration = args.apiConfiguration,
+                productUsage = args.productUsage,
+                isInstantApp = InstantApps.isInstantApp(application),
+            )
+            .subcomponentFactory
 
-        return subcomponentBuilder
-            .args(args)
-            .savedStateHandle(savedStateHandle)
-            .application(application)
-            .build().viewModel as T
+        return subcomponentFactory
+            .create(
+                args = args,
+                handle = savedStateHandle,
+                application = application,
+            ).viewModel as T
     }
 }

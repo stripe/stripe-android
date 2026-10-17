@@ -9,7 +9,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class BinRange(
     val low: String,
-    val high: String
+    val high: String,
+    val isStatic: Boolean = true
 ) : StripeModel {
     /**
      * Number matching strategy: Truncate the longer of the two numbers (theirs and our

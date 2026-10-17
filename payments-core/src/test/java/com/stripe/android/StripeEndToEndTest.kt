@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
+import com.stripe.android.model.copy
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -152,7 +153,6 @@ internal class StripeEndToEndTest {
                     expiryYear = 2045,
                     last4 = "4242",
                     funding = CardFunding.Credit,
-                    threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional
                 )
             )
     }

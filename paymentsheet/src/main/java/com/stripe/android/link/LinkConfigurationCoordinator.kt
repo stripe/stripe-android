@@ -4,8 +4,10 @@ import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -19,6 +21,7 @@ import javax.inject.Singleton
 @Singleton
 internal interface LinkConfigurationCoordinator {
     val emailFlow: StateFlow<String?>
+    val accountFlow: StateFlow<LinkAccount?>
 
     fun getComponent(configuration: LinkConfiguration): LinkComponent
 
@@ -38,6 +41,12 @@ internal interface LinkConfigurationCoordinator {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails>
 
+    suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved>
+
     suspend fun logOut(
         configuration: LinkConfiguration,
     ): Result<ConsumerSession>
@@ -45,11 +54,11 @@ internal interface LinkConfigurationCoordinator {
 
 @Singleton
 internal class RealLinkConfigurationCoordinator @Inject internal constructor(
-    private val linkComponentBuilder: LinkComponent.Builder,
+    private val linkComponentFactory: LinkComponent.Factory,
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
-    override val emailFlow: StateFlow<String?> = componentFlow
+    override val accountFlow: StateFlow<LinkAccount?> = componentFlow
         .flatMapLatestAsStateFlow { component ->
             if (component?.linkAccountManager?.linkAccountInfo != null) {
                 component.linkAccountManager.linkAccountInfo.mapAsStateFlow { it.account }
@@ -57,7 +66,8 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
                 stateFlowOf(null)
             }
         }
-        .mapAsStateFlow { it?.email }
+
+    override val emailFlow: StateFlow<String?> = accountFlow.mapAsStateFlow { it?.email }
 
     /**
      * Fetch the dependency injector Component for all injectable classes in Link while in an embedded
@@ -115,6 +125,15 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
         }
     }
 
+    override suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod
+    ): Result<LinkPaymentDetails.Saved> {
+        val accountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
+        return accountManager.createPaymentDetailsFromPaymentMethod(customerEphemeralKey, paymentMethod)
+    }
+
     override suspend fun logOut(
         configuration: LinkConfiguration,
     ): Result<ConsumerSession> {
@@ -129,9 +148,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
      */
     private fun getLinkPaymentLauncherComponent(configuration: LinkConfiguration) =
         componentFlow.value?.takeIf { it.configuration == configuration }
-            ?: linkComponentBuilder
-                .configuration(configuration)
-                .build()
+            ?: linkComponentFactory
+                .create(
+                    configuration = configuration,
+                )
                 .also {
                     componentFlow.value = it
                 }

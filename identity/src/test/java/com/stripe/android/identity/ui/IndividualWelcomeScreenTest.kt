@@ -14,6 +14,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL_WELCOME
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -21,6 +23,7 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +41,9 @@ import org.robolectric.annotation.Config
 class IndividualWelcomeScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val mockVerificationArgs = mock<IdentityVerificationSheetContract.Args> {
         on { brandLogo } doReturn mock()
@@ -68,9 +74,11 @@ class IndividualWelcomeScreenTest {
             )
         )
     private val mockNavController = mock<NavController>()
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageLiveData
         on { verificationArgs } doReturn mockVerificationArgs
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     @Test
@@ -91,6 +99,7 @@ class IndividualWelcomeScreenTest {
     fun whenButtonClickedNavigateToIndividual() {
         testIndividualWelcome {
             onNodeWithTag(INDIVIDUAL_WELCOME_GET_STARTED_BUTTON_TAG).performClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_INDIVIDUAL_WELCOME), any())
             verify(mockNavController).navigate(
                 eq(INDIVIDUAL),
                 any<NavOptionsBuilder.() -> Unit>()

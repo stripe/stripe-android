@@ -4,7 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.OnrampInteractor
+import com.stripe.android.crypto.onramp.samsungpay.DefaultSamsungPayLauncherFactory
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayLauncher
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
@@ -26,7 +28,6 @@ internal interface OnrampPresenterComponent {
             @BindsInstance activity: ComponentActivity,
             @BindsInstance lifecycleOwner: LifecycleOwner,
             @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
-            @BindsInstance onrampCallbacks: OnrampCallbacks,
         ): OnrampPresenterComponent
     }
 }
@@ -37,5 +38,13 @@ internal object OnrampPresenterModule {
     @OnrampPresenterScope
     fun provideCoroutineScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
+    @Provides
+    @OnrampPresenterScope
+    fun provideSamsungPayLauncherFactory(
+        interactor: OnrampInteractor,
+    ): SamsungPayLauncher.Factory {
+        return DefaultSamsungPayLauncherFactory(interactor::trackAnalyticsEvent)
     }
 }

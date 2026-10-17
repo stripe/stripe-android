@@ -43,6 +43,26 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
     }
 
+    private val PI_WITH_NULL_ID_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "object": "payment_intent",
+            "amount": 1099,
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "currency": "usd",
+            "livemode": false,
+            "payment_method_types": ["card"],
+            "status": "succeeded"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val PI_WITH_NULL_ID by lazy {
+        requireNotNull(PARSER.parse(PI_WITH_NULL_ID_JSON))
+    }
+
     val PI_VISA_3DS2_JSON by lazy {
         JSONObject(
             """
@@ -195,7 +215,6 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -332,64 +351,6 @@ internal object PaymentIntentFixtures {
             },
             "on_behalf_of": null,
             "payment_method": "pm_1EceOkCRMbs6FrXft9sFxCTG",
-            "payment_method_types": [
-                "card"
-            ],
-            "receipt_email": null,
-            "review": null,
-            "shipping": null,
-            "source": null,
-            "statement_descriptor": null,
-            "status": "requires_action",
-            "transfer_data": null,
-            "transfer_group": null
-        }
-                """.trimIndent()
-            )
-        )!!
-    }
-
-    val PI_REQUIRES_3DS1 by lazy {
-        PARSER.parse(
-            JSONObject(
-                """
-        {
-            "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
-            "object": "payment_intent",
-            "amount": 1000,
-            "amount_capturable": 0,
-            "amount_received": 0,
-            "application": null,
-            "application_fee_amount": null,
-            "canceled_at": null,
-            "cancellation_reason": null,
-            "capture_method": "automatic",
-            "charges": {
-                "object": "list",
-                "data": [],
-                "has_more": false,
-                "total_count": 0,
-                "url": "/v1/charges?payment_intent=pi_1EceMnCRMbs6FrXfCXdF8dnx"
-            },
-            "client_secret": "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
-            "confirmation_method": "automatic",
-            "created": 1558469721,
-            "currency": "usd",
-            "customer": null,
-            "description": null,
-            "invoice": null,
-            "last_payment_error": null,
-            "livemode": false,
-            "metadata": {},
-            "next_action": {
-                "type": "use_stripe_sdk",
-                "use_stripe_sdk": {
-                    "type": "three_d_secure_redirect",
-                    "stripe_js": "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
-                }
-            },
-            "on_behalf_of": null,
-            "payment_method": "pm_1Ecve6CRMbs6FrXf08xsGeHv",
             "payment_method_types": [
                 "card"
             ],
@@ -647,83 +608,6 @@ internal object PaymentIntentFixtures {
                 """.trimIndent()
             )
         )!!
-    }
-
-    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE by lazy {
-        PARSER.parse(
-            JSONObject(
-                """
-        {
-            "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",
-            "object": "payment_intent",
-            "amount": 1099,
-            "canceled_at": null,
-            "cancellation_reason": null,
-            "capture_method": "manual",
-            "client_secret": "pi_1FeqH9CRMbs6FrXfcqqpoC2H_secret_DHYkuHTGq",
-            "confirmation_method": "automatic",
-            "created": 1573768491,
-            "currency": "usd",
-            "description": "Example PaymentIntent",
-            "last_payment_error": {
-                "message": "The PaymentMethod on this PaymentIntent was previously used without being attached to a Customer or was detached from a Customer, and may not be used again. You can try confirming again with a new PaymentMethod.",
-                "payment_method": {
-                    "id": "pm_1FeqHBCRMbs6FrXfsDE5NFJH",
-                    "object": "payment_method",
-                    "billing_details": {
-                        "address": {
-                            "city": null,
-                            "country": null,
-                            "line1": null,
-                            "line2": null,
-                            "postal_code": null,
-                            "state": null
-                        },
-                        "email": null,
-                        "name": null,
-                        "phone": null
-                    },
-                    "card": {
-                        "brand": "visa",
-                        "checks": {
-                            "address_line1_check": null,
-                            "address_postal_code_check": null,
-                            "cvc_check": null
-                        },
-                        "country": "US",
-                        "exp_month": 1,
-                        "exp_year": 2045,
-                        "funding": "credit",
-                        "generated_from": null,
-                        "last4": "3063",
-                        "three_d_secure_usage": {
-                            "supported": true
-                        },
-                        "wallet": null
-                    },
-                    "created": 1573768493,
-                    "customer": null,
-                    "livemode": false,
-                    "metadata": {},
-                    "type": "card"
-                },
-                "type": "invalid_request_error"
-            },
-            "livemode": false,
-            "next_action": null,
-            "payment_method": null,
-            "payment_method_types": [
-                "card"
-            ],
-            "receipt_email": null,
-            "setup_future_usage": null,
-            "shipping": null,
-            "source": null,
-            "status": "requires_payment_method"
-        }
-                """.trimIndent()
-            )
-        )
     }
 
     val PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE by lazy {
@@ -1536,7 +1420,6 @@ internal object PaymentIntentFixtures {
 
     val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1594,7 +1477,6 @@ internal object PaymentIntentFixtures {
 
     val KONBINI_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1718,6 +1600,71 @@ internal object PaymentIntentFixtures {
 
     val ALIPAY_REQUIRES_ACTION by lazy {
         PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+    }
+
+    val ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA_JSON by lazy {
+        JSONObject(
+            """
+        {
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
+          "object": "payment_intent",
+          "amount": 100,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
+          "confirmation_method": "automatic",
+          "created": 1596740133,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "alipay_handle_redirect": {
+              "native_data": null,
+              "native_url": null,
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
+            },
+            "type": "alipay_handle_redirect"
+          },
+          "payment_method": {
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1596740133,
+            "customer": null,
+            "livemode": true,
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA by lazy {
+        PARSER.parse(ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA_JSON)!!
     }
 
     val ALIPAY_TEST_MODE_JSON by lazy {

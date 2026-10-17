@@ -20,7 +20,6 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
     private val _viewState = MutableStateFlow(
         CvcRecollectionViewState(
             lastFour = args.lastFour,
-            isTestMode = args.isTestMode,
             cvcState = CvcState(
                 cvc = args.cvc,
                 cardBrand = args.cardBrand
@@ -72,7 +71,6 @@ internal class CvcRecollectionViewModel(args: Args) : ViewModel() {
                     lastFour = args.lastFour,
                     cardBrand = args.cardBrand,
                     cvc = "",
-                    isTestMode = args.isTestMode,
                 )
             ) as T
         }

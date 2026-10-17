@@ -3,9 +3,11 @@ package com.stripe.android.view
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 private val paymentConfig = PaymentConfiguration(
@@ -14,6 +16,9 @@ private val paymentConfig = PaymentConfiguration(
 )
 
 class CardWidgetViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -26,7 +31,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
-            )
+            ).also { viewModelStoreRule.track(it) }
 
             viewModel.isCbcEligible.test {
                 assertThat(awaitItem()).isFalse()
@@ -44,7 +49,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher
-            )
+            ).also { viewModelStoreRule.track(it) }
 
             viewModel.isCbcEligible.test {
                 assertThat(awaitItem()).isFalse()
@@ -61,7 +66,7 @@ class CardWidgetViewModelTest {
             paymentConfigProvider = { paymentConfig },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModel.isCbcEligible.test {
             assertThat(awaitItem()).isFalse()
@@ -78,7 +83,7 @@ class CardWidgetViewModelTest {
             paymentConfigProvider = { paymentConfig },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModel.isCbcEligible.test {
             assertThat(awaitItem()).isFalse()
@@ -96,7 +101,7 @@ class CardWidgetViewModelTest {
             paymentConfigProvider = { paymentConfig },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         stripeRepository.enqueueEligible()
 

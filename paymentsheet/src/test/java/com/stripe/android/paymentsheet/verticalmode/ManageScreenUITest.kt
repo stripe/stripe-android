@@ -4,19 +4,28 @@ import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescriptionExactly
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
@@ -42,10 +51,15 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
@@ -66,6 +80,8 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -83,10 +99,15 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethodsWithDefault.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethodsWithDefault) {
@@ -112,6 +133,8 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -131,6 +154,8 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         ) {
             composeRule.onNodeWithTag(
@@ -147,10 +172,15 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     ) {
         assertThat(
-            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST).onChildren().fetchSemanticsNodes().size
+            composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST)
+                .onChildren()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size
         ).isEqualTo(displayableSavedPaymentMethods.size)
 
         for (savedPaymentMethod in displayableSavedPaymentMethods) {
@@ -168,6 +198,8 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             )
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -190,6 +222,8 @@ class ManageScreenUITest {
                 currentSelection = null,
                 isEditing = true,
                 canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Idle,
             ),
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -211,6 +245,8 @@ class ManageScreenUITest {
             currentSelection = displayableSavedPaymentMethods[1],
             isEditing = false,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -227,11 +263,74 @@ class ManageScreenUITest {
             currentSelection = null,
             isEditing = true,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         ),
     ) {
         getChevronIcon(displayableSavedPaymentMethods[0]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[1]).assertExists()
         getChevronIcon(displayableSavedPaymentMethods[2]).assertExists()
+    }
+
+    @Test
+    fun processingDisablesRowsAndShowsSpinnerOnPendingRow() {
+        val pendingPaymentMethods = displayableSavedPaymentMethods.mapIndexed { index, paymentMethod ->
+            DisplayableSavedPaymentMethod.create(
+                displayName = paymentMethod.displayName,
+                paymentMethod = paymentMethod.paymentMethod,
+                isSelectionPending = index == 1,
+            )
+        }
+
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = pendingPaymentMethods,
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Pending(
+                    pendingPaymentMethods[1].paymentMethod.id,
+                ),
+            )
+        ) {
+            pendingPaymentMethods.forEach {
+                val isPending = it.isSelectionPending
+                val row = composeRule.onNodeWithTag(
+                    "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${it.paymentMethod.id}",
+                    useUnmergedTree = true,
+                )
+                    .assertIsNotEnabled()
+                val hasLoadingIndicator = hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG))
+                val hasPaymentMethodIcon = hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES))
+
+                if (isPending) {
+                    row.assert(hasLoadingIndicator).assert(hasPaymentMethodIcon.not())
+                } else {
+                    row.assert(hasLoadingIndicator.not()).assert(hasPaymentMethodIcon)
+                }
+            }
+            composeRule.onAllNodesWithTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG, useUnmergedTree = true)
+                .assertCountEquals(1)
+        }
+    }
+
+    @Test
+    fun errorMessageComesFromSelectionState() {
+        val error = "Something went wrong".resolvableString
+
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = displayableSavedPaymentMethods,
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Link,
+                selectionState = SavedPaymentMethodSelectionState.Failed(error),
+            )
+        ) {
+            composeRule.onNodeWithText(error.resolve(ApplicationProvider.getApplicationContext())).assertExists()
+        }
     }
 
     private fun getChevronIcon(paymentMethod: DisplayableSavedPaymentMethod): SemanticsNodeInteraction {

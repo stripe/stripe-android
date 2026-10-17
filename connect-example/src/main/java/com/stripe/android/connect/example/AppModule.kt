@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example
 
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.Module

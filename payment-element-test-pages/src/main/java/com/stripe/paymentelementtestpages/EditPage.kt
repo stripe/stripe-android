@@ -6,32 +6,36 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
-import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
-import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
+import com.stripe.android.uicore.elements.SELECTOR_ITEM_TEST_TAG
 
 @SuppressWarnings("TooManyFunctions")
 class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun waitUntilVisible() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -45,51 +49,33 @@ class EditPage(
             .assertExists()
     }
 
-    fun setCardBrand(cardBrand: String) {
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
+    fun setCardBrandWithSelector(cardBrand: String) {
+        composeTestRule.onNodeWithContentDescription(cardBrand)
             .performClick()
     }
 
-    fun assertInDropdownButDisabled(cardBrand: String) {
-        // Click on the dropdown menu to expand it
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
+    fun assertInSelectorButDisabled(cardBrand: String) {
         // Attempt to find the node with the specified cardBrand,
         // assert that it is present (displayed) and disabled
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
+        composeTestRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_$cardBrand")
             .assertIsDisplayed()
             .assertIsNotEnabled()
-
-        // Optionally, close the dropdown menu if it's still open
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
     }
 
-    fun assertInDropdownAndEnabled(cardBrand: String) {
-        // Click on the dropdown menu to expand it
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
+    fun assertInSelectorAndEnabled(cardBrand: String) {
         // Attempt to find the node with the specified cardBrand,
         // assert that it is present (displayed) and enabled
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
+        composeTestRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_$cardBrand")
             .assertIsDisplayed()
             .assertIsEnabled()
-
-        // Optionally, close the dropdown menu if it's still open
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
     }
 
     fun update(waitUntilComplete: Boolean = true) {
         composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .performScrollTo()
             .performClick()
         if (waitUntilComplete) {
-            composeTestRule.waitUntil(timeoutMillis = 5_000L) {
+            composeTestRule.waitUntilWithIdle {
                 composeTestRule
                     .onAllNodes(
                         hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
@@ -98,7 +84,7 @@ class EditPage(
                             )
                         )
                     )
-                    .fetchSemanticsNodes()
+                    .fetchSemanticsNodes(atLeastOneRootRequired = false)
                     .isEmpty()
             }
         }
@@ -108,13 +94,24 @@ class EditPage(
         return composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
     }
 
+    fun assertSaveError(error: String) {
+        composeTestRule.waitUntilWithIdle(conditionDescription = "Save error to appear") {
+            composeTestRule.onAllNodesWithText(error)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithText(error).performScrollTo().assertIsDisplayed()
+        assertIsVisible()
+        composeTestRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsEnabled()
+    }
+
     fun clickRemove() {
         onRemoveButton().performClick()
         composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
-        composeTestRule.waitUntil(timeoutMillis = 5_000L) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule
                 .onAllNodes(hasTestTag(REMOVE_BUTTON_LOADING))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
     }

@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Context
@@ -7,13 +9,16 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @Suppress("LongMethod")
@@ -41,13 +46,20 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 ?: return@setContent
 
             PaymentSheetExampleTheme {
-                Scaffold { paddingValues ->
+                Scaffold(contentWindowInsets = WindowInsets.systemBars) { paddingValues ->
                     LinkControllerUi(
                         modifier = Modifier.padding(paddingValues),
                         controllerState = linkControllerState,
                         playgroundState = linkControllerPlaygroundState,
                         onPaymentMethodButtonClick = viewModel::onPaymentMethodClick,
                         onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
+                        onPresentClick = { email, phoneNumber, filter ->
+                            viewModel.onPresentClick(
+                                linkControllerConfig.email(email)
+                                    .phoneNumber(phoneNumber)
+                                    .supportedPaymentMethodTypes(filter)
+                            )
+                        },
                         onLookupClick = viewModel::onLookupClick,
                         onAuthenticationClick = viewModel::onAuthenticateClick,
                         onAuthorizeClick = viewModel::onAuthorizeClick,

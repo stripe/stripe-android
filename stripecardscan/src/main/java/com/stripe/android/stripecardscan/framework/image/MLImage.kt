@@ -12,6 +12,7 @@ internal data class ImageTransformValues(val red: Float, val green: Float, val b
 /**
  * An image in the required ML input format (array of floats, 3 floats per pixel in R, G, B format).
  */
+@Suppress("MagicNumber")
 internal class MLImage(val width: Int, val height: Int, private val imageData: ByteBuffer) {
 
     constructor(bitmap: Bitmap, mean: Float = 0F, std: Float = 255F) : this(

@@ -16,6 +16,10 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 	public static synthetic fun of$default (Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;Lcom/stripe/android/camera/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/camera/framework/util/TimeKt {
+	public static final field NANOS_PER_MILLI J
+}
+
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

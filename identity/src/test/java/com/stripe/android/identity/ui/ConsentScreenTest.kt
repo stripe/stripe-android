@@ -1,9 +1,13 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -12,6 +16,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
@@ -23,9 +29,13 @@ import com.stripe.android.identity.networking.models.VerificationPageRequirement
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,9 +52,16 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
+@OptIn(ExperimentalCoroutinesApi::class)
 class ConsentScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val verificationPageLiveData =
         MutableLiveData<Resource<VerificationPage>>(Resource.idle())
@@ -63,26 +80,26 @@ class ConsentScreenTest {
 
     private val mockNavController = mock<NavController>()
 
-    private val verificationPage = mock<VerificationPage>().also {
-        whenever(it.biometricConsent).thenReturn(
-            VerificationPageStaticContentConsentPage(
-                acceptButtonText = CONSENT_ACCEPT_TEXT,
-                title = CONSENT_TITLE,
-                privacyPolicy = CONSENT_PRIVACY_POLICY,
-                declineButtonText = CONSENT_DECLINE_TEXT,
-                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT,
-                lines = listOf(
-                    VerificationPageStaticConsentLineContent(
-                        icon = VerificationPageIconType.CAMERA,
-                        content = CONTENT_CAMERA_LINE
-                    ),
-                    VerificationPageStaticConsentLineContent(
-                        icon = VerificationPageIconType.CLOUD,
-                        content = CONTENT_CLOUD_LINE
-                    )
-                )
+    private val consentPage = VerificationPageStaticContentConsentPage(
+        acceptButtonText = CONSENT_ACCEPT_TEXT,
+        title = CONSENT_TITLE,
+        privacyPolicy = CONSENT_PRIVACY_POLICY,
+        declineButtonText = CONSENT_DECLINE_TEXT,
+        scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT,
+        lines = listOf(
+            VerificationPageStaticConsentLineContent(
+                icon = VerificationPageIconType.CAMERA,
+                content = CONTENT_CAMERA_LINE
+            ),
+            VerificationPageStaticConsentLineContent(
+                icon = VerificationPageIconType.CLOUD,
+                content = CONTENT_CLOUD_LINE
             )
         )
+    )
+
+    private val verificationPage = mock<VerificationPage>().also {
+        whenever(it.biometricConsent).thenReturn(consentPage)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf(Requirement.BIOMETRICCONSENT)
@@ -92,10 +109,13 @@ class ConsentScreenTest {
 
     @Test
     fun `when not visitedIndividualWelcomePage UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.success(verificationPage)) {
+        runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(SUBTITLE_TAG).assertDoesNotExist()
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
+            onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
             onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -108,9 +128,21 @@ class ConsentScreenTest {
     }
 
     @Test
+    fun `when biometric consent has subtitle it is shown below title`() {
+        whenever(verificationPage.biometricConsent).thenReturn(
+            consentPage.copy(subtitle = CONSENT_SUBTITLE)
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(SUBTITLE_TAG).assertTextEquals(CONSENT_SUBTITLE)
+        }
+    }
+
+    @Test
     fun `when visitedIndividualWelcomePage UI is bound correctly`() {
         visitedIndividualWelcome.update { true }
-        setComposeTestRuleWith(Resource.success(verificationPage)) {
+        runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
@@ -126,8 +158,107 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when agreed button is clicked correctly navigates`() {
-        setComposeTestRuleWith(Resource.success(verificationPage)) {
+    fun `when hideBrandingHeader is true consent header is hidden`() {
+        whenever(verificationPage.biometricConsent).thenReturn(
+            consentPage.copy(subtitle = CONSENT_SUBTITLE)
+        )
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = true,
+                hideDeclineButton = false
+            )
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
+            onNodeWithTag(SUBTITLE_TAG).assertTextEquals(CONSENT_SUBTITLE)
+        }
+    }
+
+    @Test
+    fun `when hideBrandingHeader is false consent header is shown`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false,
+                hideDeclineButton = false
+            )
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `when biometric consent configuration is null consent header is shown`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(CONSENT_HEADER_TAG).assertIsDisplayed()
+            onNodeWithTag(DECLINE_BUTTON_TAG).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `when hideDeclineButton is true decline is hidden and continue remains`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false,
+                hideDeclineButton = true
+            )
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(ACCEPT_BUTTON_TAG).assertIsDisplayed()
+            onNodeWithTag(DECLINE_BUTTON_TAG).assertDoesNotExist()
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertIsDisplayed()
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    onNodeWithTag(ACCEPT_BUTTON_TAG).fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
+        }
+    }
+
+    @Test
+    fun `when biometric consent configuration is null policy is below consent buttons`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
+
+        runScenario(Resource.success(verificationPage)) {
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertTextEquals(CONSENT_PRIVACY_POLICY)
+                .assertIsDisplayed()
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            val declineButton = onNodeWithTag(DECLINE_BUTTON_TAG)
+
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    declineButton.fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
+        }
+    }
+
+    @Test
+    fun `when hideDeclineButton is false decline and continue are shown`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false,
+                hideDeclineButton = false
+            )
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(ACCEPT_BUTTON_TAG).assertIsDisplayed()
+            onNodeWithTag(DECLINE_BUTTON_TAG).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun `when configuration is null decline submission is unchanged`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
+
+        runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
             runBlocking {
                 verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
@@ -151,13 +282,39 @@ class ConsentScreenTest {
     }
 
     @Test
+    fun `when hideDeclineButton is false decline submission is unchanged`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(
+            IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
+                hideBrandingHeader = false,
+                hideDeclineButton = false
+            )
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
+            runBlocking {
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    same(mockNavController),
+                    argThat {
+                        biometricConsent == false
+                    },
+                    eq(ConsentDestination.ROUTE.route),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
+        }
+    }
+
+    @Test
     fun `when VerificationPage is Loading UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.loading()) {
+        runScenario(Resource.loading()) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
         }
     }
 
-    private fun setComposeTestRuleWith(
+    private fun runScenario(
         verificationState: Resource<VerificationPage>,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
@@ -174,6 +331,7 @@ class ConsentScreenTest {
 
     private companion object {
         const val CONSENT_TITLE = "title"
+        const val CONSENT_SUBTITLE = "Complete a one-time identity check"
         const val CONSENT_PRIVACY_POLICY = "privacy policy"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"

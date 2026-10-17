@@ -2,24 +2,31 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
+import com.stripe.android.link.LinkControllerInteractor
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.ui.core.di.CardScanModule
-import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
+import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
+import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -27,16 +34,15 @@ import javax.inject.Singleton
     includes = [
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        NoOpTapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class,
-        ApplicationIdModule::class,
-        MobileSessionIdModule::class,
-        CardScanModule::class,
+        ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentsIntegrityModule::class,
+        NoOpPaymentMethodMessagingPromotionHelperModule::class,
     ],
     subcomponents = [
         LinkControllerPresenterComponent::class,
@@ -53,6 +59,12 @@ internal interface LinkControllerModule {
         @Singleton
         fun provideAppContext(application: Application): Context = application.applicationContext
 
+        @Provides
+        @Singleton
+        fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {
+            return interactor.paymentMethodMetadata
+        }
+
         // TODO
         @Provides
         @Singleton
@@ -62,5 +74,18 @@ internal interface LinkControllerModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("LinkPaymentMethodLauncher")
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return DefaultStripeImageLoader(context)
+        }
+
+        @Provides
+        @Singleton
+        @ViewModelScope
+        fun provideCoroutineScope(): CoroutineScope {
+            return CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        }
     }
 }

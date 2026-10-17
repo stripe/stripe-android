@@ -24,12 +24,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Suppress("unused")
 data class Balance(
-
     /* The time that the external institution calculated this balance.
      Measured in seconds since the Unix epoch. */
     @SerialName("as_of")
     val asOf: Int,
-
     /* The balances owed to (or by) the account holder.
      Each key is a three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html),
      in lowercase. Each value is a integer amount.
@@ -38,16 +36,12 @@ data class Balance(
      */
     @SerialName("current")
     val current: Map<String, Int>,
-
     @SerialName("type")
     val type: Type = Type.UNKNOWN,
-
     @SerialName("cash")
     val cash: CashBalance? = null,
-
     @SerialName("credit")
     val credit: CreditBalance? = null
-
 ) : StripeModel, Parcelable {
 
     @Serializable

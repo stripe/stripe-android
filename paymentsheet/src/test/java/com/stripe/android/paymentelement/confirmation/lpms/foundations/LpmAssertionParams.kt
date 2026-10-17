@@ -1,11 +1,11 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal data class LpmAssertionParams(
     val intent: StripeIntent,
@@ -14,5 +14,5 @@ internal data class LpmAssertionParams(
     val extraParams: PaymentMethodExtraParams? = null,
     val shippingDetails: AddressDetails? = null,
     val customerRequestedSave: Boolean = false,
-    val initializationMode: PaymentElementLoader.InitializationMode,
+    val integrationMetadata: IntegrationMetadata,
 )

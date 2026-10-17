@@ -6,7 +6,9 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -20,6 +22,9 @@ import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
@@ -30,6 +35,8 @@ import java.util.Locale
  * of the current flow.
  */
 internal interface FinancialConnectionsManifestRepository {
+
+    val syncFlow: StateFlow<SynchronizeSessionResponse?>
 
     /**
      * Retrieves the current cached [SynchronizeSessionResponse] instance, or fetches
@@ -45,7 +52,8 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse
 
     /**
@@ -172,19 +180,6 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
     ): FinancialConnectionsSessionManifest
 
-    /**
-     * Mark when the user has verified (logged in) via email OTP as a step up authentication
-     * of SMS OTP to their Link account in the networking auth flow
-     *
-     * When the user verifies via email OTP in the networking auth flow,
-     * mark it on the link account session.
-     *
-     * @return [FinancialConnectionsSessionManifest]
-     */
-    suspend fun postMarkLinkStepUpVerified(
-        clientSecret: String,
-    ): FinancialConnectionsSessionManifest
-
     fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     )
@@ -196,7 +191,8 @@ internal interface FinancialConnectionsManifestRepository {
             provideApiRequestOptions: ProvideApiRequestOptions,
             logger: Logger,
             locale: Locale,
-            initialSync: SynchronizeSessionResponse?
+            initialSync: SynchronizeSessionResponse?,
+            eventContext: FinancialConnectionsEventContext
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
@@ -204,7 +200,8 @@ internal interface FinancialConnectionsManifestRepository {
                 provideApiRequestOptions,
                 locale,
                 logger,
-                initialSync
+                initialSync,
+                eventContext
             )
     }
 }
@@ -215,7 +212,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val provideApiRequestOptions: ProvideApiRequestOptions,
     val locale: Locale,
     val logger: Logger,
-    initialSync: SynchronizeSessionResponse?
+    initialSync: SynchronizeSessionResponse?,
+    private val eventContext: FinancialConnectionsEventContext
 ) : FinancialConnectionsManifestRepository {
 
     /**
@@ -223,22 +221,44 @@ private class FinancialConnectionsManifestRepositoryImpl(
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse? = initialSync
+
+    private val cachedSynchronizeSessionResponseFlow = MutableStateFlow(initialSync)
+
+    init {
+        initialSync?.manifest?.let(eventContext::update)
+    }
+
+    private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse?
+        get() = cachedSynchronizeSessionResponseFlow.value
+        set(value) {
+            value?.manifest?.let(eventContext::update)
+            cachedSynchronizeSessionResponseFlow.value = value
+        }
+
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> =
+        cachedSynchronizeSessionResponseFlow.asStateFlow()
 
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
         supportsAppVerification: Boolean,
-        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ): SynchronizeSessionResponse = mutex.withLock {
         val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
-        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification)
+        return cachedSync ?: synchronize(
+            applicationId,
+            clientSecret,
+            supportsAppVerification,
+            preCollectedConsent,
+        )
     }
 
     private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
         supportsAppVerification: Boolean,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
@@ -254,11 +274,20 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     PARAMS_VERIFY_APP_ID to applicationId,
                     NetworkConstants.PARAMS_APPLICATION_ID to applicationId
                 ),
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                PARAMS_PRE_COLLECTED_CONSENT to preCollectedConsent?.let {
+                    mapOf(
+                        "consent" to it.consent,
+                        "collected_at" to it.collectedAt,
+                    )
+                }
+            ).filterNotNullValues()
         ),
         SynchronizeSessionResponse.serializer()
-    ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
+    ).also {
+        require(it.manifest.id.isNotBlank()) { "Financial Connections session ID is missing" }
+        updateCachedSynchronizeSessionResponse("get/fetch", it)
+    }
 
     override suspend fun markConsentAcquired(
         clientSecret: String
@@ -341,7 +370,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "frontend_events[$index]" to event.toMap()
             }
         )
-        return requestExecutor.execute(
+        return requestExecutor.executeWithoutUserFacingEvents(
             request,
             FinancialConnectionsAuthorizationSession.serializer()
         )
@@ -533,25 +562,6 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
-    override suspend fun postMarkLinkStepUpVerified(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest {
-        val request = apiRequestFactory.createPost(
-            url = linkStepUpVerifiedUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = mapOf(
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
-                "expand" to listOf("active_auth_session"),
-            )
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsSessionManifest.serializer()
-        ).also {
-            updateCachedManifest("postMarkLinkStepUpVerified", it)
-        }
-    }
-
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
@@ -614,41 +624,39 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
         internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
         internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
+        internal const val PARAMS_PRE_COLLECTED_CONSENT = "pre_collected_consent"
 
-        internal const val synchronizeSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
+        internal val synchronizeSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal const val cancelAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
+        internal val cancelAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal const val retrieveAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
+        internal val retrieveAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
 
-        internal const val eventsAuthSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
+        internal val eventsAuthSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal const val consentAcquiredUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
+        internal val consentAcquiredUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal const val linkMoreAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
+        internal val linkMoreAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal const val saveAccountToLinkUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
+        internal val saveAccountToLinkUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal const val linkVerifiedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
+        internal val linkVerifiedUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal const val linkStepUpVerifiedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
+        internal val disableNetworking: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
 
-        internal const val disableNetworking: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
+        internal val generateRepairUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
 
-        internal const val generateRepairUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
-
-        private const val institutionSelectedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
+        private val institutionSelectedUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -38,7 +39,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 brand = CardBrand.Visa,
                 last4 = "4242",
             )
-        )
+        ),
     )
 
     @Test
@@ -46,6 +47,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -57,6 +59,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
@@ -68,6 +71,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -81,6 +85,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -94,6 +99,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -107,8 +113,146 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArt() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArt,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArt_selected() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArt,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = true,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArtImageOnly() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArtImageOnly,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArtProgramNameOnly() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArtProgramNameOnly,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedLinkPassthroughCard() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedLinkPassthroughCard,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedOnelinkPassthroughCard() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedLinkPassthroughCard,
+                linkBrand = LinkBrand.Onelink,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    private companion object {
+        const val SAMPLE_CARD_ART_URL =
+            "https://b.stripecdn.com/cardart/assets/pfE0FkDGaiFhdoOj9to8po-ZLiJhetgfdKELIZCj3xA"
+
+        val cardArtImage = PaymentMethod.Card.CardArt.ArtImage(
+            format = "image/png",
+            url = SAMPLE_CARD_ART_URL,
+        )
+
+        val savedLinkPassthroughCard = DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "001",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                isLinkPassthroughMode = true,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Visa,
+                    last4 = "4242",
+                )
+            ),
+        )
+
+        val savedVisaWithCardArt = createSavedVisaWithCardArt(
+            artImage = cardArtImage,
+            programName = "Test Program",
+        )
+
+        val savedVisaWithCardArtImageOnly = createSavedVisaWithCardArt(
+            artImage = cardArtImage,
+            programName = null,
+        )
+
+        val savedVisaWithCardArtProgramNameOnly = createSavedVisaWithCardArt(
+            artImage = null,
+            programName = "Test Program",
+        )
+
+        private fun createSavedVisaWithCardArt(
+            artImage: PaymentMethod.Card.CardArt.ArtImage?,
+            programName: String?,
+        ): DisplayableSavedPaymentMethod {
+            return DisplayableSavedPaymentMethod.create(
+                displayName = "···· 4242".resolvableString,
+                paymentMethod = PaymentMethod(
+                    id = "001",
+                    created = null,
+                    liveMode = false,
+                    code = PaymentMethod.Type.Card.code,
+                    type = PaymentMethod.Type.Card,
+                    card = PaymentMethod.Card(
+                        brand = CardBrand.Visa,
+                        last4 = "4242",
+                        cardArt = PaymentMethod.Card.CardArt(
+                            artImage = artImage,
+                            programName = programName,
+                        )
+                    )
+                ),
             )
         }
     }

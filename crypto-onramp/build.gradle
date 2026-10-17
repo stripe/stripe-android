@@ -4,6 +4,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'dev.drewhamilton.poko'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     implementation project(':stripe-core')
@@ -17,11 +18,22 @@ dependencies {
     implementation libs.androidx.appCompat
     implementation libs.material
     implementation libs.kotlin.serialization
+    implementation libs.playServicesWallet
+
+    api libs.compose.ui
+    implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.material
 
     implementation libs.dagger
 
     ksp libs.daggerCompiler
 
+    debugImplementation libs.compose.uiTestManifest
+
+    testImplementation project(":payments-core-testing")
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.espresso.core
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
@@ -30,9 +42,42 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.espresso.core
+}
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 24
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+            freeCompilerArgs.addAll([
+                    "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
+                    "-opt-in=com.stripe.android.link.LinkControllerPreview",
+            ])
+        }
+    }
 }
 
 ext {

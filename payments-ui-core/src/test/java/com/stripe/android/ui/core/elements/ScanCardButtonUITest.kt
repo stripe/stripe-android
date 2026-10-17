@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -16,19 +17,20 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
+import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -37,70 +39,24 @@ internal class ScanCardButtonUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @Test
-    fun `ScanCardButtonUI should launch legacy launcher when stripe card scan is available`() = runScenario(
-        isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").performClick()
-        assertThat(cardScanCall.awaitItem()).isEqualTo("stripe")
-    }
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `ScanCardButtonUI should launch Google launcher when Google migration is enabled and available`() = runScenario(
-        isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = true,
-        isFetchClientSucceed = true,
-    ) {
+    fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario {
+        scanButtonShownCall.awaitItem()
         composeTestRule.onNodeWithText("Scan card").performClick()
         assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
     }
 
     @Test
-    fun `ScanCardButtonUI hidden when Google migration is enabled but not available`() = runScenario(
-        isStripeCardScanAvailable = true,
-        isCardScanGooglePayMigrationEnabled = true,
-        isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    @Test
-    fun `ScanCardButtonUI hidden when card scan is disabled`() = runScenario(
-        isStripeCardScanAvailable = false,
-        isCardScanGooglePayMigrationEnabled = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    // Create mock controller for visibility tests
-    private fun createMockController(
-        cardScanCall: Turbine<String>,
-        isStripeCardScanAvailable: Boolean
-    ): CardDetailsSectionController {
-        val controller = mock<CardDetailsSectionController>()
-        val mockIsStripeCardScanAvailable = mock<DefaultIsStripeCardScanAvailable>()
-        val mockCardDetailsElement = mock<CardDetailsElement>()
-        val mockCardDetailsController = mock<CardDetailsController>()
-        val mockNumberElement = mock<CardNumberElement>()
-        val mockNumberElementController = mock<CardNumberController>()
-
-        whenever(controller.isStripeCardScanAvailable).thenReturn(mockIsStripeCardScanAvailable)
-        whenever(mockIsStripeCardScanAvailable.invoke()).thenReturn(isStripeCardScanAvailable)
-
-        whenever(controller.elementsSessionId).thenReturn("test_session")
-
-        whenever(controller.cardDetailsElement).thenReturn(mockCardDetailsElement)
-        whenever(mockCardDetailsElement.controller).thenReturn(mockCardDetailsController)
-
-        whenever(mockCardDetailsController.numberElement).thenReturn(mockNumberElement)
-        whenever(mockNumberElement.controller).thenReturn(mockNumberElementController)
-
-        // Mock the onCardScanResult function that Google launcher needs
-        whenever(mockCardDetailsController.onCardScanResult).thenReturn { cardScanCall.add("google_pay") }
-        whenever(mockNumberElementController.onCardScanResult(any())).then { cardScanCall.add("stripe") }
-
-        return controller
+    fun `ScanCardButtonUI fires button shown event when visible`() = runScenario {
+        composeTestRule.onNodeWithText("Scan card").assertExists()
+        assertThat(scanButtonShownCall.awaitItem())
+            .isEqualTo(FakeCardScanEventsReporter.ScanButtonShownCall)
     }
 
     private fun createMockPaymentCardRecognitionResultIntent(): Intent {
@@ -121,17 +77,12 @@ internal class ScanCardButtonUITest {
     }
     private class Scenario(
         val cardScanCall: ReceiveTurbine<String>,
+        val scanButtonShownCall: ReceiveTurbine<FakeCardScanEventsReporter.ScanButtonShownCall>,
     )
 
-    private fun runScenario(
-        isStripeCardScanAvailable: Boolean = true,
-        isCardScanGooglePayMigrationEnabled: Boolean = true,
-        isFetchClientSucceed: Boolean = true,
-        block: suspend Scenario.() -> Unit
-    ) = runTest {
-        FeatureFlags.cardScanGooglePayMigration.setEnabled(isCardScanGooglePayMigrationEnabled)
-
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val cardScanCall = Turbine<String>()
+        val fakeEventsReporter = FakeCardScanEventsReporter()
         val registryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry: ActivityResultRegistry =
                 object : ActivityResultRegistry() {
@@ -152,20 +103,25 @@ internal class ScanCardButtonUITest {
 
         val scenario = Scenario(
             cardScanCall = cardScanCall,
+            scanButtonShownCall = fakeEventsReporter.scanButtonShownCalls,
         )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalActivityResultRegistryOwner provides registryOwner,
-                LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
-                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(isFetchClientSucceed)
+                LocalCardScanEventsReporter provides fakeEventsReporter,
+                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(shouldSucceed = true)
             ) {
+                val context = LocalContext.current
+                val eventsReporter = LocalCardScanEventsReporter.current
+                val cardScanLauncher: CardScanLauncher = rememberCardScanGoogleLauncher(
+                    context = context,
+                    eventsReporter = eventsReporter,
+                ) { cardScanCall.add("google_pay") }
+
                 ScanCardButtonUI(
                     enabled = true,
-                    controller = createMockController(
-                        cardScanCall = cardScanCall,
-                        isStripeCardScanAvailable = isStripeCardScanAvailable
-                    )
+                    cardScanLauncher = cardScanLauncher,
                 )
             }
         }

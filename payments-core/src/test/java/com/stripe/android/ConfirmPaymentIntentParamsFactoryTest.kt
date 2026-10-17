@@ -11,10 +11,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.RadarOptionsFactory
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
@@ -33,7 +33,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 ),
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -55,7 +56,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                 ),
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -75,7 +77,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(),
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -97,7 +100,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = true
             ),
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -112,7 +116,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = false
             ),
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -128,7 +133,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = true
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -144,7 +150,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = false
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -157,7 +164,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = true
             ),
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -170,7 +178,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             extraParams = PaymentMethodExtraParams.SepaDebit(
                 setAsDefault = false
             ),
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -184,7 +193,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = true
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
@@ -198,7 +208,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = false
             ),
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
@@ -225,7 +236,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
@@ -249,7 +261,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result.shipping).isEqualTo(shippingDetails)
@@ -270,7 +283,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -295,7 +309,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -323,7 +338,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ),
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -347,7 +363,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result.setupFutureUsage).isEqualTo(
@@ -385,6 +402,29 @@ class ConfirmPaymentIntentParamsFactoryTest {
         setupFutureUsage = StripeIntent.Usage.OffSession,
         expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
     )
+
+    @Test
+    fun `create() with 'OffSession' SFU should contain mandate data for satispay`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OffSession,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        paymentMethod = PaymentMethodFactory.satispay(),
+    )
+
+    @Test
+    fun `create() with 'OffSession' PMO SFU should contain mandate data for satispay`() {
+        mandateDataTest(
+            setupFutureUsage = null,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            paymentMethod = PaymentMethodFactory.satispay(),
+            paymentMethodOptionsJsonString = """
+                {
+                    "satispay": {
+                        "setup_future_usage": "off_session"
+                    }
+                }
+            """.trimIndent()
+        )
+    }
 
     @Test
     fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
@@ -443,7 +483,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = null
+            radarOptions = null,
+            clientAttributionMetadata = null,
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)
@@ -475,7 +516,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with radarOptions should include radarOptions in result`() {
-        val radarOptions = RadarOptions(hCaptchaToken = "test_token")
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
             intent = createPaymentIntent(),
@@ -487,14 +527,148 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = null,
             extraParams = null,
             intentConfigSetupFutureUsage = null,
-            radarOptions = radarOptions
+            radarOptions = RadarOptionsFactory.create(),
+            clientAttributionMetadata = null,
         )
 
-        assertThat(result.radarOptions).isEqualTo(radarOptions)
+        assertThat(result.radarOptions).isEqualTo(RadarOptionsFactory.create())
     }
 
     private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {
         return this as ConfirmPaymentIntentParams
+    }
+
+    // Tests for mandateDataForDeferredIntent
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when paymentMethodType is null`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = null,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when requiresMandateFromCreateParams is true`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when PM type requiresMandateForPaymentIntent`() {
+        // SepaDebit has requiresMandateForPaymentIntent = true
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.SepaDebit,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when optionsParams has SFU off_session`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Satispay,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when intentConfigSetupFutureUsage is off_session`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when PM type does not require mandate`() {
+        // Card does not require mandate even with SFU
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Card,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when no SFU conditions are met`() {
+        // Satispay requires mandate but no SFU is set
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns Korean cards mandate when intent is for future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.KrCard,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null for Korean cards without future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.KrCard,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns Naver Pay mandate when intent is for future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.NaverPay,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null for Naver Pay without future use`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.NaverPay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+
+        assertThat(result).isNull()
     }
 
     private companion object {

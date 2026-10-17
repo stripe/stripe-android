@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.utils.putNonEmptySfu
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -14,16 +15,22 @@ data class ConfirmationTokenParams(
     val shipping: ConfirmPaymentIntentParams.Shipping? = null,
     val mandateDataParams: MandateDataParams? = null,
     val setAsDefaultPaymentMethod: Boolean? = null,
+    val cvc: String? = null,
+    val clientContext: ConfirmationTokenClientContextParams? = null,
+    val clientAttributionMetadata: ClientAttributionMetadata? = null,
 ) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return buildMap {
             paymentMethodId?.let { put(PARAM_PAYMENT_METHOD, it) }
             paymentMethodData?.let { put(PARAM_PAYMENT_METHOD_DATA, it.toParamMap()) }
             returnUrl?.let { put(PARAM_RETURN_URL, it) }
-            setUpFutureUsage?.let { put(PARAM_SETUP_FUTURE_USAGE, it.code) }
+            putNonEmptySfu(setUpFutureUsage)
             shipping?.let { put(PARAM_SHIPPING, it.toParamMap()) }
             mandateDataParams?.let { put(PARAM_MANDATE_DATA, it.toParamMap()) }
             setAsDefaultPaymentMethod?.let { put(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD, it) }
+            cvc?.let { put(PARAM_PAYMENT_METHOD_OPTIONS, mapOf("card" to mapOf("cvc" to it))) }
+            clientContext?.let { put(PARAM_CLIENT_CONTEXT, it.toParamMap()) }
+            clientAttributionMetadata?.let { put(PARAM_CLIENT_ATTRIBUTION_METADATA, it.toParamMap()) }
         }
     }
 
@@ -31,9 +38,11 @@ data class ConfirmationTokenParams(
         const val PARAM_PAYMENT_METHOD = "payment_method"
         const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
         const val PARAM_RETURN_URL = "return_url"
-        const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         const val PARAM_SHIPPING = "shipping"
         const val PARAM_MANDATE_DATA = "mandate_data"
         const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
+        const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        const val PARAM_CLIENT_CONTEXT = "client_context"
+        const val PARAM_CLIENT_ATTRIBUTION_METADATA = "client_attribution_metadata"
     }
 }

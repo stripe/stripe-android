@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 internal interface PrefsRepository {
@@ -11,5 +10,7 @@ internal interface PrefsRepository {
 
     fun setSavedSelection(savedSelection: SavedSelection?): Boolean
 
-    fun savePaymentSelection(paymentSelection: PaymentSelection?)
+    fun interface Factory {
+        fun create(customerId: String?): PrefsRepository
+    }
 }

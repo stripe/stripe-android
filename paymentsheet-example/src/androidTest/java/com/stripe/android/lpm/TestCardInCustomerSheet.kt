@@ -7,13 +7,17 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
@@ -26,17 +30,17 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "card",
         authorizationAction = null,
-        executeInNightlyRun = true,
     ).copyPlaygroundSettings { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.NEW
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
+        settings[GooglePaySettingsDefinition] = GooglePayMode.Off
     }
 
     @Test
     fun testCard() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -48,7 +52,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     fun testCardWithNonUsMerchant() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
             },
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -61,7 +65,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
             populateCustomLpmFields = {
@@ -71,10 +75,63 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     }
 
     @Test
+    fun testCardWithOBO_DoNotSelectCardBrand() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[MerchantSettingsDefinition] = Merchant.US
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails(null)
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseCartesBancaires() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                settings[MerchantSettingsDefinition] = Merchant.US
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Cartes Bancaires")
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithOBO_UseVisa() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[MerchantSettingsDefinition] = Merchant.US
+                settings[CustomerSessionSettingsDefinition] = true
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+                settings[CustomerSessionOnBehalfOfSettingsDefinition] =
+                    CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+            },
+            populateCustomLpmFields = {
+                populateCardBrandChoiceCardDetails("Visa")
+            },
+        )
+    }
+
+    @Test
     fun testCardWith3ds2() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             }.copy(
                 authorizationAction = AuthorizeAction.Authorize3ds2,
@@ -91,7 +148,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.FR
+                settings[MerchantSettingsDefinition] = Merchant.FR
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
             populateCustomLpmFields = {
@@ -105,7 +162,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
@@ -131,7 +188,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CountrySettingsDefinition] = Country.US
+                settings[MerchantSettingsDefinition] = Merchant.US
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always

@@ -34,7 +34,7 @@ fun formatExpirationDateForAccessibility(input: String): ResolvableString {
             }
 
             return when (year) {
-                null -> return resolvableString(
+                null -> resolvableString(
                     R.string.stripe_expiration_date_month_complete_content_description,
                     monthName
                 )

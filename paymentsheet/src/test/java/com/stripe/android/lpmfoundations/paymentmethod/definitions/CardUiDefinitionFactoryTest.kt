@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -15,32 +16,51 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 class CardUiDefinitionFactoryTest {
-    @get:Rule
-    val paparazziRule = PaparazziRule()
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
-    @get:Rule
-    val rightToLeftPaparazziRule = PaparazziRule(
+    private val coroutineTestRule = CoroutineTestRule()
+
+    private val paparazziRule = PaparazziRule()
+
+    private val rightToLeftPaparazziRule = PaparazziRule(
         listOf(LayoutDirection.RightToLeft)
     )
 
-    @get:Rule
-    val customSpacingPaparazziRule = PaparazziRule(
+    private val customSpacingPaparazziRule = PaparazziRule(
         listOf(CustomSpacingAppearance)
     )
 
-    @get:Rule
-    val customTextFieldsPaparazziRule = PaparazziRule(
+    private val customTextFieldsPaparazziRule = PaparazziRule(
         listOf(CustomTextInsetsAppearance)
     )
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(paparazziRule)
+        .around(rightToLeftPaparazziRule)
+        .around(customSpacingPaparazziRule)
+        .around(customTextFieldsPaparazziRule)
+        .around(coroutineTestRule)
+        .around(coroutineScopeCleanupRule)
+
+    private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
 
     private val metadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -53,6 +73,53 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithScannedCardPill() {
+        val formElements = CardDefinition.formElements(coroutineScope = coroutineScope, metadata = metadata)
+
+        val cardDetailsSection = formElements.filterIsInstance<CardDetailsSectionElement>().first()
+
+        cardDetailsSection.controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        paparazziRule.snapshot {
+            FormUI(
+                hiddenIdentifiers = emptySet(),
+                enabled = true,
+                elements = formElements,
+                lastTextFieldIdentifier = null,
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithScannedCardPillAndCustomInsets() {
+        val formElements = CardDefinition.formElements(coroutineScope = coroutineScope, metadata = metadata)
+        val cardDetailsSection = formElements.filterIsInstance<CardDetailsSectionElement>().first()
+
+        cardDetailsSection.controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        customTextFieldsPaparazziRule.snapshot {
+            FormUI(
+                hiddenIdentifiers = emptySet(),
+                enabled = true,
+                elements = formElements,
+                lastTextFieldIdentifier = null,
             )
         }
     }
@@ -97,7 +164,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 )
             )
         }
@@ -152,6 +219,7 @@ class CardUiDefinitionFactoryTest {
     @Test
     fun testCardWithSaveForLaterAndSetAsDefaultShown() {
         val formElements = CardDefinition.formElements(
+            coroutineScope = coroutineScope,
             metadata = metadata.copy(
                 customerMetadata = getDefaultCustomerMetadata(
                     isPaymentMethodSetAsDefaultEnabled = true
@@ -160,7 +228,7 @@ class CardUiDefinitionFactoryTest {
         )
 
         val saveForFutureUseElement = formElements.first {
-            it.identifier == IdentifierSpec.SaveForFutureUse
+            it.identifier == FormFieldId.SaveForFutureUse
         } as SaveForFutureUseElement
 
         saveForFutureUseElement.controller.onValueChange(true)
@@ -216,9 +284,9 @@ class CardUiDefinitionFactoryTest {
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                         paymentMethodTypes = listOf("card"),
                     ),
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
                     customerMetadata = getDefaultCustomerMetadata(
                         isPaymentMethodSetAsDefaultEnabled = false,
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                     ),
                 ),
             )
@@ -235,8 +303,9 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    customerMetadata = getDefaultCustomerMetadata(),
+                    customerMetadata = getDefaultCustomerMetadata(
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+                    ),
                 ),
             )
         }
@@ -252,8 +321,9 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    customerMetadata = getDefaultCustomerMetadata(),
+                    customerMetadata = getDefaultCustomerMetadata(
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+                    ),
                 ),
             )
         }
@@ -270,7 +340,7 @@ class CardUiDefinitionFactoryTest {
                     overrideParamMap = mapOf(
                         "type" to "card",
                         "card" to mapOf(
-                            "number" to "4242424242424242",
+                            "number" to "4252325512413252",
                             "exp_month" to "07",
                             "exp_year" to "2050",
                             "cvc" to "123",
@@ -288,7 +358,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -318,10 +388,40 @@ class CardUiDefinitionFactoryTest {
                             "exp_year" to "2050",
                             "cvc" to "123",
                         ),
-                        "billing_details" to emptyMap<IdentifierSpec, String?>(),
+                        "billing_details" to emptyMap<FormFieldId, String?>(),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
+                ),
+                metadata = metadata.copy(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    ),
+                ),
+                autocompleteAddressInteractorFactory = {
+                    TestAutocompleteAddressInteractor.noOp(
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = "123",
+                            autocompleteCountries = setOf("US"),
+                            isPlacesAvailable = true,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    @Test
+    fun testCondensedAutocompleteFormWithInsets() {
+        customTextFieldsPaparazziRule.snapshot {
+            CardDefinition.CreateFormUi(
+                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
+                    code = "card",
+                    billingDetails = null,
+                    requiresMandate = false,
+                    overrideParamMap = mapOf(),
+                    productUsage = emptySet(),
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -351,7 +451,7 @@ class CardUiDefinitionFactoryTest {
                     requiresMandate = false,
                     overrideParamMap = emptyMap(),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -399,7 +499,7 @@ class CardUiDefinitionFactoryTest {
                         ),
                     ),
                     productUsage = emptySet(),
-                    clientAttributionMetadata = null,
+                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
                 ),
                 metadata = metadata.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

@@ -24,6 +24,9 @@ internal class PaymentMethodPreviewJsonParser : ModelJsonParser<ConfirmationToke
             billingDetails = json.optJSONObject(FIELD_BILLING_DETAILS)?.let {
                 PaymentMethodJsonParser.BillingDetails().parse(it)
             },
+            card = json.optJSONObject(FIELD_CARD)?.let {
+                PaymentMethodJsonParser.CardJsonParser().parse(it)
+            },
             customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER),
             type = type,
             allResponseFields = json.toString()
@@ -33,6 +36,7 @@ internal class PaymentMethodPreviewJsonParser : ModelJsonParser<ConfirmationToke
     private companion object {
         const val FIELD_ALLOW_REDISPLAY = "allow_redisplay"
         const val FIELD_BILLING_DETAILS = "billing_details"
+        const val FIELD_CARD = "card"
         const val FIELD_CUSTOMER = "customer"
         const val FIELD_TYPE = "type"
     }

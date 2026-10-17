@@ -8,7 +8,9 @@ internal interface LinkEventsReporter {
     fun onSignupStarted(isInline: Boolean = false)
     fun onSignupCompleted(isInline: Boolean = false)
     fun onSignupFailure(isInline: Boolean = false, error: Throwable)
+    fun onEmailSuggestionAccepted()
     fun onAccountLookupFailure(error: Throwable)
+    fun onAccountLookupComplete()
     fun onAccountRefreshFailure(error: Throwable)
 
     fun on2FAStart()
@@ -16,6 +18,7 @@ internal interface LinkEventsReporter {
     fun on2FAComplete()
     fun on2FAFailure()
     fun on2FACancel()
+    fun on2FAResendCode(verificationType: String)
 
     fun onPopupShow()
     fun onPopupSuccess()

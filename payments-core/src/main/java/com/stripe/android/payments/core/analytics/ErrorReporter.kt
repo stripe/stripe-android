@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -23,6 +23,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -32,6 +33,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         errorEvent: ErrorEvent,
         stripeException: StripeException? = null,
         additionalNonPiiParams: Map<String, String> = emptyMap(),
+        publishableKeyOverride: String? = null
     )
 
     override fun reportFraudDetectionError(error: StripeException) {
@@ -50,14 +52,41 @@ interface ErrorReporter : FraudDetectionErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
             productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
-                .builder()
-                .context(context.applicationContext)
-                .productUsage(productUsage)
-                .build()
+                .factory()
+                .create(
+                    context = context.applicationContext,
+                    apiConfigurationProvider = {
+                        apiConfigurationProvider.get()
+                    },
+                    productUsage = productUsage,
+                )
                 .errorReporter
+        }
+
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component and ApiConfiguration.
+         */
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String> = emptySet(),
+        ): ErrorReporter {
+            return createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = {
+                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
+                    ApiConfiguration.State(
+                        publishableKey = paymentConfiguration.publishableKey,
+                        stripeAccountId = paymentConfiguration.stripeAccountId,
+                    )
+                },
+                productUsage = productUsage,
+            )
         }
 
         fun getAdditionalParamsFromError(error: Throwable): Map<String, String> {
@@ -100,6 +129,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GOOGLE_PAY_IS_READY_API_CALL(
             eventName = "elements.google_pay_repository.is_ready_request_api_call_failure"
+        ),
+        GOOGLE_PAY_IS_READY_TIMEOUT(
+            eventName = "elements.google_pay_repository.is_ready_timeout"
         ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
             eventName = "elements.customer_sheet.elements_session.load_failure"
@@ -152,14 +184,14 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         BROWSER_LAUNCHER_NULL_ARGS(
             eventName = "payments.browserlauncher.null_args"
         ),
+        GOOGLE_PAY_SKIPPED_DURING_LOAD(
+            eventName = "google_pay.skipped_during_load"
+        ),
         GOOGLE_PAY_FAILED(
             eventName = "google_pay.confirm.error"
         ),
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
-        ),
-        SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE(
-            eventName = "stripe_android.saved_payment_method_radar_session_failure"
         ),
         EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
@@ -167,27 +199,48 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CUSTOM_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.custom_payment_method.confirm_handler_is_null"
         ),
-        EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
-            eventName = "paymentsheet.external_payment_method.launcher_is_null"
-        ),
         CREATE_INTENT_CALLBACK_NULL(
             eventName = "paymentsheet.create_intent_callback.is_null"
         ),
         PREPARE_PAYMENT_METHOD_HANDLER_NULL(
             eventName = "paymentsheet.prepare_payment_method_handler.is_null"
         ),
+        CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_NULL(
+            eventName = "elements.tap_to_add.create_card_present_setup_intent_callback.is_null"
+        ),
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        HCAPTCHA_UNEXPECTED_FAILURE(
+            eventName = "elements.captcha.passive.unexpected_failure"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
+            eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE(
+            eventName = "intent_confirmation_handler.attestation.failed_to_prepare"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED(
+            eventName = "intent_confirmation_handler.attestation.request_token_failed"
+        ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
+            eventName = "elements.tap_to_add.discover_readers_call.failure"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_FAILURE(
+            eventName = "elements.tap_to_add.connect_reader_call.failure"
+        ),
+        PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
+            eventName = "elements.payment_option.card_art.load_failure"
+        ),
+        CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
+            eventName = "checkout.shipping_address_element.present.not_configured"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
-        ),
-        MISSING_CARDSCAN_DEPENDENCY(
-            partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
@@ -203,6 +256,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
+        ),
+        GOOGLE_PAY_UNEXPECTED_STATUS_CODE(
+            partialEventName = "google_pay.confirm.unexpected_status_code"
         ),
         GOOGLE_PAY_MISSING_INTENT_DATA(
             partialEventName = "google_pay.on_result.missing_data"
@@ -221,9 +277,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
-        ),
-        LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
-            partialEventName = "link.native.signup.failed_to_attest_request"
         ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
@@ -249,9 +302,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
             partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
         ),
-        CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
-            partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
-        ),
         CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION(
             partialEventName = "customersheet.customer_session.attach_called"
         ),
@@ -261,19 +311,105 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL(
             partialEventName = "embedded.embedded_sheet_launcher.embedded_state_is_null"
         ),
+        EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED(
+            partialEventName = "embedded.present_payment_options.not_configured"
+        ),
+        EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER(
+            partialEventName = "embedded.present_payment_options.no_launcher"
+        ),
         WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM(
             partialEventName = "wallet_buttons.wallet_arguments.null_on_confirm"
         ),
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
         ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM(
+            partialEventName = "express_checkout_element.state.null_on_confirm"
+        ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
+            partialEventName = "express_checkout_element.confirmation_arguments.null_on_confirm"
+        ),
         INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
             partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
         ),
-        HCAPTCHA_UNEXPECTED_FAILURE(
-            partialEventName = "elements.captcha.passive.unexpected_failure"
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED(
+            partialEventName = "intent_confirmation_handler.attestation.invoked_when_disabled"
         ),
-        ;
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_CLOUD_PROJECT_NUMBER_IS_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.cloud_project_number_is_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_INTEGRITY_TOKEN_PROVIDER_INVALID(
+            partialEventName = "intent_confirmation_handler.attestation.integrity_token_provider_invalid"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_HASH_TOO_LONG(
+            partialEventName = "intent_confirmation_handler.attestation.request_hash_too_long"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_success_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
+            partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE(
+            partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT(
+            partialEventName = "intent_confirmation_challenge.attestation.no_attestation_result"
+        ),
+        PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE(
+            partialEventName = "paymentmethodmessaging.element.unable_to_parse_response"
+        ),
+        CUSTOMER_SHEET_METADATA_NULL_ON_CONFIRM(
+            partialEventName = "customersheet.confirmation.no_payment_method_metadata"
+        ),
+        TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
+            partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
+        ),
+        TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_discover_readers_call"
+        ),
+        TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_collect_setup_intent_call"
+        ),
+        TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_confirm_setup_intent_call"
+        ),
+        TAP_TO_ADD_NO_READER_FOUND(
+            partialEventName = "elements.tap_to_add.no_reader_found"
+        ),
+        TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT(
+            "elements.tap_to_add.flow_controller_received_complete_result"
+        ),
+        TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT(
+            "elements.tap_to_add.payment_sheet_received_continue_result"
+        ),
+        TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION(
+            partialEventName = "elements.tap_to_add.no_generated_card_after_successful_intent_confirmation"
+        ),
+        CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION(
+            partialEventName = "card_art_prefetch.invoked_for_confirmation"
+        ),
+        PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY(
+            partialEventName = "payment_methods_prefetch.null_for_ephemeral_key"
+        ),
+        CHECKOUT_SELECTION_SET_BEFORE_LOAD(
+            partialEventName = "checkout.selection_set_before_load"
+        ),
+        CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS(
+            partialEventName = "checkout.saved_payment_method.missing_billing_address"
+        ),
+        CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
+            partialEventName = "checkout.google_pay.unexpected_callback_trigger"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST(
+            partialEventName = "google_pay.dynamic_callbacks.missing_request"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_CALLBACK(
+            partialEventName = "google_pay.dynamic_callbacks.missing_callback"
+        ),
+        GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE(
+            partialEventName = "google_pay.dynamic_callbacks.parsing_failure"
+        );
 
         override val eventName: String
             get() = "unexpected_error.$partialEventName"
@@ -322,9 +458,21 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
         ),
+        FOUND_CREATE_INTENT_WITH_CONFIRMATION_TOKEN_CALLBACK_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_create_intent_with_confirmation_token_callback.found"
+        ),
         FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.discover_readers_call.success"
+        ),
+        TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS(
+            eventName = "elements.tap_to_add.connect_reader_call.success"
+        ),
+        FOUND_CREATE_CARD_PRESENT_SETUP_INTENT_CALLBACK_WHILE_POLLING(
+            eventName = "elements.tap_to_add.polling_for_create_card_present_setup_intent_callback.success"
+        )
     }
 }
 
@@ -332,15 +480,17 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 internal interface DefaultErrorReporterComponent {
     val errorReporter: ErrorReporter
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
-
-        fun build(): DefaultErrorReporterComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance
+            context: Context,
+            @BindsInstance
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+            @BindsInstance
+            @Named(PRODUCT_USAGE)
+            productUsage: Set<String>,
+        ): DefaultErrorReporterComponent
     }
 }
 
@@ -374,9 +524,8 @@ internal interface DefaultErrorReporterModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
-            return { PaymentConfiguration.getInstance(context).publishableKey }
-        }
+        fun provideApiConfiguration(
+            apiConfigurationProvider: () -> ApiConfiguration.State,
+        ): ApiConfiguration.State = apiConfigurationProvider()
     }
 }

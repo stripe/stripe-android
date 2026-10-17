@@ -1,0 +1,174 @@
+package com.stripe.android.paymentsheet.verticalmode
+
+import app.cash.turbine.Turbine
+import app.cash.turbine.test
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.uicore.elements.FormElement
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import org.junit.rules.RuleChain
+import kotlin.test.Test
+
+internal class DefaultSavedPaymentMethodConfirmInteractorTest {
+    private val closeInteractorRule = CleanupTestRule(DefaultSavedPaymentMethodConfirmInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(closeInteractorRule)
+
+    @Test
+    fun `form updates enabled state based on processing state`() = runTest {
+        val processing = MutableStateFlow(false)
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            processing = processing,
+            coroutineScope = backgroundScope,
+        )
+
+        advanceUntilIdle()
+
+        interactor.state.test {
+            assertThat(awaitItem().form.enabled).isTrue()
+            processing.value = true
+            advanceUntilIdle()
+            assertThat(awaitItem().form.enabled).isFalse()
+            processing.value = false
+            advanceUntilIdle()
+            assertThat(awaitItem().form.enabled).isTrue()
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `state uses link brand from account when logged in`() = runTest {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Onelink,
+        )
+        val linkAccount = LinkAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link),
+        )
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = linkAccount)),
+            paymentMethodMetadata = paymentMethodMetadata,
+            coroutineScope = backgroundScope,
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `when link form helper state is updated, selection is updated`() = runTest {
+        val linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
+            initialState = SavedPaymentMethodLinkFormHelper.State.Unused
+        )
+        val updateSelectionCalls = Turbine<PaymentSelection.Saved>()
+
+        getDefaultSavedPaymentMethodConfirmInteractor(
+            linkFormHelper = linkFormHelper,
+            processing = MutableStateFlow(false),
+            updateSelection = { updateSelectionCalls.add(it) },
+            coroutineScope = backgroundScope,
+        )
+
+        val userInput = UserInput.SignIn(email = "test@example.com")
+        linkFormHelper.updateState(
+            SavedPaymentMethodLinkFormHelper.State.Complete(
+                userInput = userInput
+            )
+        )
+
+        advanceUntilIdle()
+
+        val updatedSelection = updateSelectionCalls.awaitItem()
+        assertThat(updatedSelection.linkInput).isEqualTo(userInput)
+
+        updateSelectionCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `when closed, selection is no longer updated`() = runTest {
+        val linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
+            initialState = SavedPaymentMethodLinkFormHelper.State.Unused
+        )
+        val updateSelectionCalls = Turbine<PaymentSelection.Saved>()
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            linkFormHelper = linkFormHelper,
+            processing = MutableStateFlow(false),
+            updateSelection = { updateSelectionCalls.add(it) },
+            coroutineScope = backgroundScope,
+        )
+
+        val userInput = UserInput.SignIn(email = "test@example.com")
+        linkFormHelper.updateState(
+            SavedPaymentMethodLinkFormHelper.State.Complete(
+                userInput = userInput
+            )
+        )
+
+        advanceUntilIdle()
+
+        assertThat(updateSelectionCalls.awaitItem().linkInput).isEqualTo(userInput)
+
+        interactor.close()
+        linkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Unused)
+
+        advanceUntilIdle()
+
+        updateSelectionCalls.expectNoEvents()
+        updateSelectionCalls.ensureAllEventsConsumed()
+    }
+
+    private fun getDefaultSavedPaymentMethodConfirmInteractor(
+        linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
+        processing: StateFlow<Boolean> = MutableStateFlow(false),
+        linkAccount: StateFlow<LinkAccountUpdate.Value> = MutableStateFlow(LinkAccountUpdate.Value(account = null)),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        updateSelection: (PaymentSelection.Saved) -> Unit = {},
+        coroutineScope: CoroutineScope,
+    ): DefaultSavedPaymentMethodConfirmInteractor {
+        val paymentMethod = PaymentMethodFactory.card()
+        return closeInteractorRule.track(
+            DefaultSavedPaymentMethodConfirmInteractor(
+                initialSelection = PaymentSelection.Saved(paymentMethod),
+                displayName = "Card".resolvableString,
+                linkAccount = linkAccount,
+                savedPaymentMethodLinkFormHelper = linkFormHelper,
+                processing = processing,
+                updateSelection = updateSelection,
+                paymentMethodMetadata = paymentMethodMetadata,
+                coroutineScope = coroutineScope,
+            )
+        )
+    }
+
+    private class FakeSavedPaymentMethodLinkFormHelper(
+        initialState: SavedPaymentMethodLinkFormHelper.State = SavedPaymentMethodLinkFormHelper.State.Unused,
+        override val formElement: FormElement? = null,
+    ) : SavedPaymentMethodLinkFormHelper {
+        private val _state = MutableStateFlow(initialState)
+        override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
+
+        fun updateState(newState: SavedPaymentMethodLinkFormHelper.State) {
+            _state.value = newState
+        }
+    }
+}

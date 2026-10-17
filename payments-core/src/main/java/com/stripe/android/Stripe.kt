@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -35,8 +34,6 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -156,12 +153,6 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
-     *
-     * For confirmation attempts that require 3DS1 authentication, the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - Otherwise, use the device browser.
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
@@ -308,7 +299,7 @@ class Stripe internal constructor(
         activity.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(activity),
-                PaymentIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -340,7 +331,7 @@ class Stripe internal constructor(
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(fragment),
-                PaymentIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -569,7 +560,7 @@ class Stripe internal constructor(
         activity.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(activity),
-                SetupIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -599,7 +590,7 @@ class Stripe internal constructor(
         fragment.lifecycleScope.launch {
             paymentController.startAuth(
                 AuthActivityStarterHost.create(fragment),
-                SetupIntent.ClientSecret(clientSecret).value,
+                clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
@@ -1556,26 +1547,6 @@ class Stripe internal constructor(
         executeAsyncForResult(callback) {
             stripeRepository.createToken(
                 tokenParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
-                )
-            )
-        }
-    }
-
-    @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun createConfirmationToken(
-        confirmationTokenParams: ConfirmationTokenParams,
-        idempotencyKey: String? = null,
-        stripeAccountId: String? = this.stripeAccountId,
-        callback: ApiResultCallback<ConfirmationToken>
-    ) {
-        executeAsyncForResult(callback) {
-            stripeRepository.createConfirmationToken(
-                confirmationTokenParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,

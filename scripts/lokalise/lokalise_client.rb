@@ -30,6 +30,12 @@ class LokaliseClient
 
         set_request_x_api_token(request)
 
+        translation = key_object[:lokalise_value]
+
+        # Wrap placeholders in [] so that Lokalise creates the correct iOS strings
+        # Example: "Hi %s" becomes "Hi [%s]".
+        translation = translation.gsub(/%\d+$[sd]|%[sd]/) { |m| "[#{m}]" }
+
         request_body = {
             "keys": [
                 {
@@ -46,7 +52,7 @@ class LokaliseClient
                     "translations": [
                         {
                             "language_iso": "en",
-                            "translation": key_object[:lokalise_value],
+                            "translation": translation,
                             "is_reviewed": true,
                             "is_unverified": false,
                             "is_archived": false,

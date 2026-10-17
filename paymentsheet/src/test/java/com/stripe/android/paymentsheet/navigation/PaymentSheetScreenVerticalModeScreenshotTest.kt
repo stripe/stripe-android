@@ -3,12 +3,15 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -24,6 +27,7 @@ import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -37,6 +41,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
@@ -137,6 +142,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         }
     }
 
+    @Suppress("ThrowsCount")
     @Test
     fun displaysVerticalModeListWithLink() {
         val metadata = createMetadata()
@@ -147,17 +153,30 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
-            link = WalletsState.Link(state = LinkButtonState.Default),
+            link = WalletsState.Link(state = LinkButtonState.Default, linkBrand = LinkBrand.Link),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysBlankPageWhenContentNotVisible() {
+        val metadata = createMetadata()
+        val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete, contentVisible = false)
         }
     }
 

@@ -19,7 +19,7 @@ import com.github.kittinunf.result.Result as ApiResult
 
 class TestBackendRepository {
 
-    private val baseUrl = "https://crypto-onramp-example.stripedemos.com"
+    private val baseUrl = "https://crypto-onramp-example.stripedemos.com/v1"
 
     private val manager = FuelManager()
         .addRequestInterceptor(LogRequestInterceptor)
@@ -30,34 +30,29 @@ class TestBackendRepository {
         ignoreUnknownKeys = true
     }
 
-    suspend fun createAuthIntent(
-        email: String,
-        oauthScopes: String,
-    ): ApiResult<CreateAuthIntentResponse, FuelError> {
+    suspend fun fetchCustomerWallets(
+        authToken: String
+    ): ApiResult<CustomerWalletsResponse, FuelError> {
         return withContext(Dispatchers.IO) {
-            val request = CreateAuthIntentRequest(
-                email = email,
-                oauthScopes = oauthScopes,
-            )
-            val requestBody = json.encodeToString(CreateAuthIntentRequest.serializer(), request)
-
-            manager.post("$baseUrl/auth_intent/create")
-                .jsonBody(requestBody)
+            manager.get("$baseUrl/customer_wallets?limit=$CUSTOMER_WALLETS_LIMIT")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $authToken")
                 .suspendable()
-                .awaitModel(CreateAuthIntentResponse.serializer(), json)
+                .awaitModel(CustomerWalletsResponse.serializer(), json)
         }
     }
 
     suspend fun createOnrampSession(
         paymentToken: String,
         walletAddress: String,
-        cryptoCustomerId: String,
         authToken: String,
         destinationNetwork: String = "ethereum",
         sourceAmount: Double = 10.0,
         sourceCurrency: String = "usd",
         destinationCurrency: String = "eth",
-        customerIpAddress: String = "127.0.0.1"
+        customerIpAddress: String = "127.0.0.1",
+        settlementSpeed: SettlementSpeed,
     ): ApiResult<OnrampSessionResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CreateOnrampSessionRequest(
@@ -68,8 +63,8 @@ class TestBackendRepository {
                 destinationCurrency = destinationCurrency,
                 destinationNetwork = destinationNetwork,
                 walletAddress = walletAddress,
-                cryptoCustomerId = cryptoCustomerId,
-                customerIpAddress = customerIpAddress
+                customerIpAddress = customerIpAddress,
+                settlementSpeed = settlementSpeed
             )
 
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)
@@ -102,6 +97,107 @@ class TestBackendRepository {
                 .awaitModel(OnrampSessionResponse.serializer(), json)
         }
     }
+
+    suspend fun signUp(
+        email: String,
+        password: String,
+        livemode: Boolean
+    ): ApiResult<LoginSignUpResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = LoginSignUpRequest(
+                email = email,
+                password = password,
+                livemode = livemode
+            )
+
+            val requestBody = json.encodeToString(LoginSignUpRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/signup")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(LoginSignUpResponse.serializer(), json)
+        }
+    }
+
+    suspend fun logIn(
+        email: String,
+        password: String,
+        livemode: Boolean,
+    ): ApiResult<LoginSignUpResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = LoginSignUpRequest(
+                email = email,
+                password = password,
+                livemode = livemode
+            )
+
+            val requestBody = json.encodeToString(LoginSignUpRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/login")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(LoginSignUpResponse.serializer(), json)
+        }
+    }
+
+    suspend fun create(
+        oauthScopes: String,
+        tokenWithoutLAI: String
+    ): ApiResult<AuthCreateResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = AuthCreateRequest(
+                oauthScopes = oauthScopes
+            )
+
+            val requestBody = json.encodeToString(AuthCreateRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/create")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithoutLAI")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(AuthCreateResponse.serializer(), json)
+        }
+    }
+
+    suspend fun saveUser(
+        cryptoCustomerId: String,
+        tokenWithLAI: String
+    ): ApiResult<SaveUserResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            val request = SaveUserRequest(
+                cryptoCustomerId = cryptoCustomerId
+            )
+
+            val requestBody = json.encodeToString(SaveUserRequest.serializer(), request)
+
+            manager.post("$baseUrl/auth/save_user")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithLAI")
+                .jsonBody(requestBody)
+                .suspendable()
+                .awaitModel(SaveUserResponse.serializer(), json)
+        }
+    }
+
+    suspend fun createLinkAuthToken(
+        tokenWithLAI: String
+    ): ApiResult<CreateLinkAuthTokenResponse, FuelError> {
+        return withContext(Dispatchers.IO) {
+            manager.post("$baseUrl/auth/create_link_auth_token")
+                .timeout(SESSION_CREATION_TIMEOUT)
+                .timeoutRead(SESSION_CREATION_TIMEOUT)
+                .header("Authorization", "Bearer $tokenWithLAI")
+                .suspendable()
+                .awaitModel(CreateLinkAuthTokenResponse.serializer(), json)
+        }
+    }
 }
 
 /**
@@ -121,3 +217,4 @@ suspend fun <T : Any> Request.awaitModel(
 }
 
 private const val SESSION_CREATION_TIMEOUT = 60000 // 60 seconds
+private const val CUSTOMER_WALLETS_LIMIT = 50

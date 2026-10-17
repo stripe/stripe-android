@@ -28,15 +28,18 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
@@ -106,8 +109,8 @@ private fun LinkHeaderSection(
             modifier = Modifier
                 .width(48.dp)
                 .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-            painter = painterResource(R.drawable.stripe_link_logo),
-            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+            painter = painterResource(verificationState.linkBrand.logoRes(LinkLogoStyle.Primary)),
+            contentDescription = verificationState.linkBrand.brandName(),
         )
 
         verificationState.defaultPayment?.let { paymentUI ->
@@ -217,7 +220,7 @@ private fun Title(
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -232,6 +235,7 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -245,7 +249,7 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -264,6 +268,7 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
         ).toDefaultPaymentUI(true),
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -277,7 +282,7 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController()
     )
 
@@ -296,6 +301,7 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
         ).toDefaultPaymentUI(true),
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -309,7 +315,7 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionProcessingPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController().apply {
             onValueChanged(0, "123456")
         }
@@ -326,6 +332,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     Box(
@@ -343,7 +350,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
 @Composable
 private fun LinkEmbeddedOtpSectionErrorPreview() {
     val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
+        identifier = FormFieldId.Generic("otp"),
         controller = OTPController().apply {
             onValueChanged(0, "123")
         }
@@ -360,6 +367,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(

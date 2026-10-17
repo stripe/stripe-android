@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="stripe_iban">IBAN</string>
-    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
-    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL | Wero</string>
     <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_eps">EPS</string>
     <string name="stripe_paymentsheet_payment_method_p24">Przelewy24</string>
-    <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
     <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
     <string name="stripe_paymentsheet_payment_method_afterpay">Afterpay</string>
     <string name="stripe_paymentsheet_payment_method_clearpay">Clearpay</string>
     <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
     <string name="stripe_paymentsheet_payment_method_paynow">PayNow</string>
     <string name="stripe_paymentsheet_payment_method_promptpay">PromptPay</string>
+    <string name="stripe_paymentsheet_payment_method_paypay">PayPay</string>
     <string name="stripe_paymentsheet_payment_method_us_bank_account">US bank account</string>
     <string name="stripe_paymentsheet_payment_method_instant_debits">Bank</string>
-    <string name="stripe_paymentsheet_payment_method_upi">UPI</string>
     <string name="stripe_paymentsheet_payment_method_cashapp">Cash App Pay</string>
     <string name="stripe_paymentsheet_payment_method_grabpay">GrabPay</string>
     <string name="stripe_paymentsheet_payment_method_fpx">FPX Bank</string>
@@ -32,13 +30,33 @@
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>
+    <string name="stripe_paymentsheet_payment_method_bizum">Bizum</string>
+    <string name="stripe_paymentsheet_payment_method_mb_way">MB WAY</string>
     <string name="stripe_paymentsheet_payment_method_alipay">Alipay</string>
     <string name="stripe_paymentsheet_payment_method_oxxo">OXXO</string>
     <string name="stripe_paymentsheet_payment_method_twint">TWINT</string>
     <string name="stripe_paymentsheet_payment_method_wechat">WeChat Pay</string>
     <string name="stripe_paymentsheet_payment_method_multibanco">Multibanco</string>
+    <string name="stripe_paymentsheet_payment_method_wero">Wero</string>
+    <string name="stripe_paymentsheet_payment_method_sequra">SeQura</string>
+    <string name="stripe_paymentsheet_payment_method_pay_by_bank">Pay by Bank</string>
+    <string name="stripe_paymentsheet_payment_method_payco">PAYCO</string>
+    <string name="stripe_paymentsheet_payment_method_kakao_pay">Kakao Pay</string>
+    <string name="stripe_paymentsheet_payment_method_kr_card">Korean cards</string>
+    <string name="stripe_paymentsheet_payment_method_naver_pay">Naver Pay</string>
+    <string name="stripe_paymentsheet_payment_method_scalapay">Scalapay</string>
+    <string name="stripe_paymentsheet_payment_method_pix">Pix</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
-    <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
-    <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
+    <string name="stripe_scanned_card_masked_last4">\u2066•••• %1$s\u2069</string>
+
+    <string name="stripe_paymentsheet_payment_method_gopay">GoPay</string>
+    <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
+    <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
+    <string name="stripe_paymentsheet_payment_method_qris">QRIS</string>
+    <string name="stripe_paymentsheet_payment_method_ng_card">Naira card</string>
+    <string name="stripe_paymentsheet_payment_method_gcash">GCash</string>
+    <string name="stripe_paymentsheet_payment_method_ng_bank_transfer">Naira bank transfer</string>
+    <string name="stripe_paymentsheet_payment_method_ng_ussd">Naira USSD</string>
+    <string name="stripe_paymentsheet_payment_method_ng_wallet">Naira Wallet</string>
 </resources>

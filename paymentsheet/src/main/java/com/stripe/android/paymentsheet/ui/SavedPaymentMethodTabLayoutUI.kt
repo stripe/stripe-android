@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -58,14 +60,14 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.elements.SectionError
+import com.stripe.android.uicore.elements.SectionValidationMessage
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -82,6 +84,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     SavedPaymentMethodTabLayoutUI(
         paymentOptionsItems = state.paymentOptionsItems,
         selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        linkBrand = state.linkBrand,
         isEditing = state.isEditing,
         isProcessing = state.isProcessing,
         onAddCardPressed = {
@@ -121,6 +124,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
+    linkBrand: LinkBrand,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -163,6 +167,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     isEditing = isEditing,
                     isEnabled = isEnabled,
                     isSelected = isSelected,
+                    linkBrand = linkBrand,
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onModifyItem = onModifyItem,
@@ -178,7 +183,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 
 private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     PaymentOptionsItem.AddCard,
-    PaymentOptionsItem.Link,
+    PaymentOptionsItem.Link(LinkBrand.Link),
     PaymentOptionsItem.GooglePay,
     PaymentOptionsItem.SavedPaymentMethod(
         DisplayableSavedPaymentMethod.create(
@@ -194,7 +199,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
-            shouldShowDefaultBadge = true
+            shouldShowDefaultBadge = true,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -206,7 +211,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                 liveMode = false,
                 code = PaymentMethod.Type.SepaDebit.code,
                 type = PaymentMethod.Type.SepaDebit,
-            )
+            ),
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -222,7 +227,122 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     brand = CardBrand.MasterCard,
                     last4 = "4242",
                 )
-            )
+            ),
+        ),
+    ),
+)
+
+private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "004",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Link.code,
+                type = PaymentMethod.Type.Link,
+                linkPaymentDetails = LinkPaymentDetails.Card(
+                    nickname = null,
+                    expMonth = 1,
+                    expYear = 2030,
+                    last4 = "4242",
+                    brand = CardBrand.Visa,
+                    funding = "CREDIT",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "6789".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "005",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.USBankAccount.code,
+                type = PaymentMethod.Type.USBankAccount,
+                usBankAccount = PaymentMethod.USBankAccount(
+                    accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                    accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                    bankName = "Chase",
+                    fingerprint = null,
+                    last4 = "6789",
+                    financialConnectionsAccount = null,
+                    networks = null,
+                    routingNumber = null,
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "3456".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "006",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Discover,
+                    last4 = "3456",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "5678".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "007",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.AmericanExpress,
+                    last4 = "5678",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "9012".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "008",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.USBankAccount.code,
+                type = PaymentMethod.Type.USBankAccount,
+                usBankAccount = PaymentMethod.USBankAccount(
+                    accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                    accountType = PaymentMethod.USBankAccount.USBankAccountType.SAVINGS,
+                    bankName = "Bank of America",
+                    fingerprint = null,
+                    last4 = "9012",
+                    financialConnectionsAccount = null,
+                    networks = null,
+                    routingNumber = null,
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "7890".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "009",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.UnionPay,
+                    last4 = "7890",
+                ),
+            ),
         ),
     ),
 )
@@ -234,6 +354,24 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
+            isEditing = false,
+            isProcessing = false,
+            onAddCardPressed = { },
+            onItemSelected = { },
+            onModifyItem = { },
+        )
+    }
+}
+
+@Preview(widthDp = 700)
+@Composable
+private fun SavedPaymentMethodsTabLayout2Preview() {
+    DefaultStripeTheme {
+        SavedPaymentMethodTabLayoutUI(
+            paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS_2,
+            selectedPaymentOptionsItem = PREVIEW_PAYMENT_OPTION_ITEMS_2.first(),
+            linkBrand = LinkBrand.Onelink,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -250,6 +388,7 @@ private fun SavedPaymentMethodsTabLayoutWithDefaultPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
             isEditing = true,
             isProcessing = false,
             onAddCardPressed = { },
@@ -275,6 +414,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isSelected: Boolean,
+    linkBrand: LinkBrand,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
@@ -303,6 +443,7 @@ private fun SavedPaymentMethodTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
+                linkBrand = item.linkBrand,
                 onItemSelected = onItemSelected,
                 modifier = modifier,
             )
@@ -310,6 +451,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethodTab(
                 paymentMethod = item,
+                linkBrand = linkBrand,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -345,6 +487,7 @@ private fun AddCardTab(
         iconRes = iconRes,
         onItemSelectedListener = onAddCardPressed,
         description = stringResource(R.string.stripe_add_new_payment_method),
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -367,6 +510,7 @@ private fun GooglePayTab(
         labelText = stringResource(StripeR.string.stripe_google_pay),
         description = stringResource(StripeR.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -376,6 +520,7 @@ private fun LinkTab(
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
+    linkBrand: LinkBrand,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -385,11 +530,16 @@ private fun LinkTab(
         shouldShowDefaultBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
+        iconRes = getLinkIcon(
+            brand = linkBrand,
+            showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor(),
+            iconOnly = linkBrand != LinkBrand.Link,
+        ),
         iconTint = null,
-        labelText = stringResource(StripeR.string.stripe_link),
-        description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
+        labelText = linkBrand.brandName(),
+        description = linkBrand.brandName(),
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link(brand = linkBrand)) },
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -397,6 +547,7 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
+    linkBrand: LinkBrand,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -406,7 +557,10 @@ private fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel(
+        linkBrand = linkBrand,
+        canShowSublabel = false,
+    )?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {
@@ -427,8 +581,10 @@ private fun SavedPaymentMethodTab(
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
-                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
+                linkBrand = linkBrand,
+                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor(),
             ),
+            cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
             labelIcon = labelIcon,
             shouldTintLabelIcon = paymentMethod.paymentMethod.shouldTintLabelIcon,
             labelText = labelText,
@@ -460,9 +616,9 @@ internal fun CvcRecollectionField(
     animationDelay: Int = ANIMATION_DELAY
 ) {
     val controller by cvcControllerFlow.collectAsState()
-    val error by controller.error.collectAsState()
+    val validationMessage by controller.validationMessage.collectAsState()
     val element = CvcElement(
-        IdentifierSpec(),
+        FormFieldId(),
         controller
     )
     val focusRequester = remember { FocusRequester() }
@@ -486,7 +642,9 @@ internal fun CvcRecollectionField(
         }
     ) {
         Column(
-            Modifier.padding(top = 20.dp).padding(StripeTheme.getOuterFormInsets())
+            Modifier
+                .padding(top = 20.dp)
+                .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
@@ -508,18 +666,19 @@ internal fun CvcRecollectionField(
                     lastTextFieldIdentifier = null
                 )
             }
-            error?.errorMessage?.let {
+            validationMessage?.let {
                 Row {
-                    SectionError(error = stringResource(id = it))
+                    SectionValidationMessage(it)
                 }
             }
         }
     }
 }
 
+@Composable
 private fun getSavedPaymentMethodTabLayoutPaddingValues() = PaddingValues(
-    start = (StripeTheme.formInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
-    end = (StripeTheme.formInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
+    start = (MaterialTheme.stripeFormInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
+    end = (MaterialTheme.stripeFormInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

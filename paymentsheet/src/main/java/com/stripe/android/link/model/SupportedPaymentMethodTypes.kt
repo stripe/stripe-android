@@ -1,28 +1,24 @@
 package com.stripe.android.link.model
 
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.StripeIntent
 
 /**
  * Provides the supported payment method types for the given Link account.
  *
- * In test mode, accounts with email in the format {any_prefix}+multiple_funding_sources@{any_domain}
- * enable all payment method types supported by the SDK.
+ * Computes the intersection of [StripeIntent.linkFundingSources] (merchant-configured) and
+ * [consumerSupportedPaymentDetailsTypes] (consumer-level, from the /confirm_verification response).
+ * Comparison is case-insensitive since the two sources use different casing conventions.
  *
- * The supported payment methods are read from [StripeIntent.linkFundingSources], and fallback to
- * card only if the list is empty or none of them is valid.
+ * When [consumerSupportedPaymentDetailsTypes] is empty (not yet available), returns all
+ * [StripeIntent.linkFundingSources] to avoid restricting before the consumer session is known.
+ * Returns an empty set when no funding sources are available; callers should treat this as an error
+ * condition rather than falling back to card.
  */
-internal fun StripeIntent.supportedPaymentMethodTypes(linkAccount: LinkAccount): Set<String> {
-    if (!isLiveMode && linkAccount.email.contains("+multiple_funding_sources@")) {
-        return supportedPaymentMethodTypes
-    }
-
-    val allowedFundingSources = linkFundingSources.filter { it in supportedPaymentMethodTypes }
-    return allowedFundingSources.toSet().takeIf { it.isNotEmpty() } ?: setOf(ConsumerPaymentDetails.Card.TYPE)
+internal fun StripeIntent.supportedPaymentMethodTypes(
+    consumerSupportedPaymentDetailsTypes: List<String>,
+): Set<String> {
+    val fundingSources = linkFundingSources.toSet()
+    if (consumerSupportedPaymentDetailsTypes.isEmpty()) return fundingSources
+    val consumerTypesLower = consumerSupportedPaymentDetailsTypes.map { it.lowercase() }.toSet()
+    return fundingSources.filter { it.lowercase() in consumerTypesLower }.toSet()
 }
-
-private val supportedPaymentMethodTypes = setOf(
-    ConsumerPaymentDetails.Card.TYPE,
-    ConsumerPaymentDetails.BankAccount.TYPE,
-    ConsumerPaymentDetails.Passthrough.TYPE
-)

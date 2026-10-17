@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.addCallback
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -30,23 +31,23 @@ import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.camera.R as CameraR
 
-@Deprecated("This is deprecated and will be removed in a future release.")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CancellationReason : Parcelable {
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Closed : CancellationReason
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Back : CancellationReason
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object UserCannotScan : CancellationReason
 
     @Parcelize
-    @Deprecated("This is deprecated and will be removed in a future release.")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object CameraPermissionDenied : CancellationReason
 }
 
@@ -63,6 +64,7 @@ internal interface ScanResultListener {
     fun failed(cause: Throwable?)
 }
 
+@Suppress("TooManyFunctions")
 internal abstract class ScanActivity : CameraPermissionCheckingActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -104,6 +106,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         super.onResume()
         hideSystemUi()
 
+        @Suppress("MagicNumber")
         launch {
             delay(1500)
             hideSystemUi()
@@ -167,7 +170,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        // TODO: this should be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -175,7 +177,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -246,7 +247,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             onFlashSupported(it)
         }
 
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
             onSupportsMultipleCameras(it)
         }

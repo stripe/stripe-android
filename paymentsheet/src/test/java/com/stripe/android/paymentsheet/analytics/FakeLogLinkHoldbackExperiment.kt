@@ -26,6 +26,6 @@ internal class FakeLogLinkHoldbackExperiment : LogLinkHoldbackExperiment {
     }
 }
 
-data class ExperimentCall(
+internal data class ExperimentCall(
     val experiment: ElementsSession.ExperimentAssignment
 )

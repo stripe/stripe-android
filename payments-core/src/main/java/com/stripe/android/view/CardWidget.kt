@@ -10,6 +10,7 @@ internal interface CardWidget {
      * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use paymentMethodCreateParams instead")
     val cardParams: CardParams?
 
     /**

@@ -105,6 +105,23 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
+    val CONSUMER_VERIFIED_WITH_AUTH_LEVEL_JSON = JSONObject(
+        """
+            {
+              "auth_session_client_secret": null,
+              "consumer_session": {
+                "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
+                "email_address": "test@stripe.com",
+                "redacted_phone_number": "+1********56",
+                "redacted_formatted_phone_number": "(***) *** **56",
+                "verification_sessions": [],
+                "current_authentication_level": "1fa",
+                "minimum_authentication_level": "1fa"
+              }
+            }
+        """.trimIndent()
+    )
+
     val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON = JSONObject(
         """
             {

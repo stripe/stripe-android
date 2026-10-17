@@ -1,13 +1,13 @@
 package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -29,14 +29,22 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): T
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
         extraParams: PaymentMethodExtraParams? = null,
-        radarOptions: RadarOptions? = null
+        radarOptions: RadarOptions? = null,
+        clientAttributionMetadata: ClientAttributionMetadata?
+    ): T
+
+    abstract fun create(
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): T
 
     fun create(
@@ -44,15 +52,17 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): T {
         return create(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethod.id,
             paymentMethodType = requireNotNull(paymentMethod.type),
             optionsParams = optionsParams,
             extraParams = extraParams,
             intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -87,18 +97,25 @@ internal class ConfirmPaymentIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
-            mandateData = mandateData(intent, paymentMethodType, optionsParams, intentConfigSetupFutureUsage),
+            mandateData = mandateDataForDeferredIntent(
+                paymentMethodType = paymentMethodType,
+                requiresMandateFromCreateParams = intent.isSetupFutureUsageSet(paymentMethodType.code),
+                optionsParams = optionsParams,
+                intentConfigSetupFutureUsage = intentConfigSetupFutureUsage,
+            ),
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
             setupFutureUsage = intentConfigSetupFutureUsage,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -106,7 +123,8 @@ internal class ConfirmPaymentIntentParamsFactory(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
@@ -114,7 +132,21 @@ internal class ConfirmPaymentIntentParamsFactory(
             paymentMethodOptions = optionsParams,
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+    }
+
+    override fun create(
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
+    ): ConfirmPaymentIntentParams {
+        return ConfirmPaymentIntentParams(
+            confirmationTokenId = confirmationTokenId,
+            clientSecret = clientSecret,
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
@@ -130,15 +162,22 @@ internal class ConfirmSetupIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
         intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = mandateData(intent, paymentMethodType, null, null),
+            mandateData = mandateDataForDeferredIntent(
+                paymentMethodType = paymentMethodType,
+                requiresMandateFromCreateParams = true,
+                optionsParams = null,
+                intentConfigSetupFutureUsage = null,
+            ),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
             paymentMethodCode = paymentMethodType.code,
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 
@@ -146,41 +185,64 @@ internal class ConfirmSetupIntentParamsFactory(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
-        radarOptions: RadarOptions?
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
-            radarOptions = radarOptions
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
+    }
+
+    override fun create(
+        confirmationTokenId: String,
+        radarOptions: RadarOptions?,
+        clientAttributionMetadata: ClientAttributionMetadata?,
+    ): ConfirmSetupIntentParams {
+        return ConfirmSetupIntentParams(
+            confirmationTokenId = confirmationTokenId,
+            clientSecret = clientSecret,
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
         )
     }
 }
 
-private fun mandateData(
-    intent: StripeIntent,
+/**
+ * Determines if mandate data should be included for payment confirmation.
+ *
+ * @param paymentMethodType The payment method type
+ * @param requiresMandateFromCreateParams Whether the payment method requires a mandate based on intent
+ *     configuration (e.g., SFU set on intent, or always true for SetupIntent)
+ * @param optionsParams The payment method options params (for PMO SFU)
+ * @param intentConfigSetupFutureUsage The intent configuration level SFU
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun mandateDataForDeferredIntent(
     paymentMethodType: PaymentMethod.Type?,
+    requiresMandateFromCreateParams: Boolean,
     optionsParams: PaymentMethodOptionsParams?,
     intentConfigSetupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?
 ): MandateDataParams? {
     return paymentMethodType?.let { type ->
-        val supportsAddingMandateData = when (intent) {
-            is PaymentIntent ->
-                intent.canSetupFutureUsage(paymentMethodType.code) ||
-                    type.requiresMandateForPaymentIntent ||
-                    optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
-                    intentConfigSetupFutureUsage?.hasIntentToSetup() == true
-            is SetupIntent -> true
-        }
+        // We check multiple conditions for mandate requirement:
+        // 1. requiresMandateFromCreateParams - SFU set on intent, or true for SetupIntent
+        // 2. type.requiresMandateForPaymentIntent - PM types that always need mandate for PaymentIntent
+        // 3. optionsParams SFU - PMO setup future usage
+        // 4. intentConfigSetupFutureUsage - intent configuration level SFU
+        val supportsAddingMandateData =
+            requiresMandateFromCreateParams ||
+                type.requiresMandateForPaymentIntent ||
+                optionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
+                intentConfigSetupFutureUsage?.hasIntentToSetup() == true
 
         return MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
             supportsAddingMandateData && type.requiresMandate
         }
     }
-}
-
-private fun PaymentIntent.canSetupFutureUsage(paymentMethodCode: PaymentMethodCode): Boolean {
-    return isSetupFutureUsageSet(paymentMethodCode)
 }
 
 private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraParams(): Boolean? {

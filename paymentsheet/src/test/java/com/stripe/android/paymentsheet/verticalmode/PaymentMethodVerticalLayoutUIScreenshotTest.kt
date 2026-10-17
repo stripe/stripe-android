@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -38,6 +39,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
@@ -58,6 +60,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
@@ -82,6 +85,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},

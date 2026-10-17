@@ -18,7 +18,7 @@
     "customer_session": {
       "id": "cuss_654321",
       "livemode": false,
-      "api_key": "ek_12345",
+      "api_key": "ek_test_123",
       "api_key_expiry": 2147483647,
       "customer": "cus_12345",
       "components": {
@@ -45,13 +45,6 @@
     ],
     "type": "deferred_intent"
   },
-  "payment_method_specs": [
-    {
-      "async": false,
-      "fields": [],
-      "type": "card"
-    }
-  ],
   "paypal_express_config": {
     "client_id": null,
     "paypal_merchant_id": null

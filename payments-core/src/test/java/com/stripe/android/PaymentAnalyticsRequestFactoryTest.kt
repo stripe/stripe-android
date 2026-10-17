@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.HEADER_X_STRIPE_USER_AGENT
@@ -31,8 +32,8 @@ class PaymentAnalyticsRequestFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        API_KEY
+        context = context,
+        publishableKeyProvider = { API_KEY },
     )
 
     @Test
@@ -75,7 +76,7 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             ATTRIBUTION
         ).params
 
@@ -84,7 +85,7 @@ class PaymentAnalyticsRequestFactoryTest {
             .hasSize(VALID_PARAM_FIELDS.size - 2)
 
         assertEquals(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             loggingParams[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
         assertEquals(API_KEY, loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
@@ -100,13 +101,17 @@ class PaymentAnalyticsRequestFactoryTest {
 
     @Test
     fun getPaymentMethodCreationParams() {
-        assertThat(
-            analyticsRequestFactory
-                .createPaymentMethodCreation(
-                    PaymentMethod.Type.Card.code,
-                    ATTRIBUTION
-                ).params
-        ).isEqualTo(
+        val params = analyticsRequestFactory
+            .createPaymentMethodCreation(
+                PaymentMethod.Type.Card.code,
+                ATTRIBUTION
+            ).params
+
+        val timestamp = params["timestamp"] as? Double
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0.0)
+
+        assertThat(params).isEqualTo(
             mapOf(
                 "analytics_ua" to "analytics.stripe_android-1.0",
                 "event" to "stripe_android.payment_method_creation",
@@ -122,6 +127,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
+                "timestamp" to timestamp,
                 "network_type" to "2G",
                 "locale" to "en_US",
             )
@@ -130,13 +136,17 @@ class PaymentAnalyticsRequestFactoryTest {
 
     @Test
     fun getPaymentMethodUpdateParams() {
-        assertThat(
-            analyticsRequestFactory
-                .createPaymentMethodUpdate(
-                    PaymentMethod.Type.Card.code,
-                    ATTRIBUTION
-                ).params
-        ).isEqualTo(
+        val params = analyticsRequestFactory
+            .createPaymentMethodUpdate(
+                PaymentMethod.Type.Card.code,
+                ATTRIBUTION
+            ).params
+
+        val timestamp = params["timestamp"] as? Double
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0.0)
+
+        assertThat(params).isEqualTo(
             mapOf(
                 "analytics_ua" to "analytics.stripe_android-1.0",
                 "event" to "stripe_android.payment_method_update",
@@ -152,6 +162,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
+                "timestamp" to timestamp,
                 "network_type" to "2G",
                 "locale" to "en_US",
             )
@@ -297,14 +308,14 @@ class PaymentAnalyticsRequestFactoryTest {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
         val params = analyticsRequestFactory.createSourceCreation(
-            Source.SourceType.SEPA_DEBIT
+            Source.SourceType.CARD
         ).params
 
         assertThat(params)
             .hasSize(VALID_PARAM_FIELDS.size - 3)
         assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
-            Source.SourceType.SEPA_DEBIT,
+            Source.SourceType.CARD,
             params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
 
@@ -371,15 +382,39 @@ class PaymentAnalyticsRequestFactoryTest {
                         "\"model\":\"robolectric\"}"
                 )
             )
-        assertThat(analyticsRequest.url)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_abc123&app_version=0&bindings_version=$sdkVersion&os_version=30&session_id=${AnalyticsRequestFactory.sessionId}&os_release=11&device_type=robolectric_robolectric_robolectric&source_type=card&locale=en_US&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&network_type=2G&event=stripe_android.payment_method_creation&is_development=true")
+
+        // Verify URL contains all expected parameters including timestamp
+        val url = analyticsRequest.url
+        assertThat(url).contains("https://q.stripe.com?")
+        assertThat(url).contains("publishable_key=pk_abc123")
+        assertThat(url).contains("app_version=0")
+        assertThat(url).contains("bindings_version=$sdkVersion")
+        assertThat(url).contains("os_version=30")
+        assertThat(url).contains("session_id=${AnalyticsRequestFactory.sessionId}")
+        assertThat(url).contains("os_release=11")
+        assertThat(url).contains("device_type=robolectric_robolectric_robolectric")
+        assertThat(url).contains("source_type=card")
+        assertThat(url).contains("locale=en_US")
+        assertThat(url).contains("app_name=com.stripe.android.test")
+        assertThat(url).contains("analytics_ua=analytics.stripe_android-1.0")
+        assertThat(url).contains("os_name=REL")
+        assertThat(url).contains("network_type=2G")
+        assertThat(url).contains("event=stripe_android.payment_method_creation")
+        assertThat(url).contains("is_development=true")
+        assertThat(url).contains("timestamp=")
+
+        // Verify timestamp is a valid number
+        val timestampParam = url.substringAfter("timestamp=").substringBefore("&")
+        val timestamp = timestampParam.toDoubleOrNull()
+        assertThat(timestamp).isNotNull()
+        assertThat(timestamp).isGreaterThan(0.0)
     }
 
     @Test
     fun `product_usage param should include defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -396,8 +431,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun `product_usage param should de-dupe defaultProductUsageTokens and method argument`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -413,8 +448,8 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun `product_usage param should use defaultProductUsageTokens`() {
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context,
-            API_KEY,
+            context = context,
+            publishableKeyProvider = { API_KEY },
             defaultProductUsageTokens = setOf("Hello")
         )
 
@@ -424,6 +459,40 @@ class PaymentAnalyticsRequestFactoryTest {
 
         val productUsage = analyticsRequest.params["product_usage"]
         assertThat(productUsage).isEqualTo("Hello")
+    }
+
+    @Test
+    fun `createRequest includes Stripe app info library fields when available`() {
+        val originalAppInfo = Stripe.appInfo
+        Stripe.appInfo = AppInfo.create(
+            name = "MyAwesomePlugin",
+            version = "1.2.34",
+        )
+
+        try {
+            val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = context,
+                publishableKeyProvider = { API_KEY }
+            )
+
+            val params = analyticsRequestFactory.createSourceCreation(
+                Source.SourceType.CARD
+            ).params
+
+            assertThat(params[AnalyticsFields.LIBRARY_NAME]).isEqualTo("MyAwesomePlugin")
+            assertThat(params[AnalyticsFields.LIBRARY_VERSION]).isEqualTo("1.2.34")
+
+            Stripe.appInfo = null
+
+            val updatedParams = analyticsRequestFactory.createSourceCreation(
+                Source.SourceType.CARD
+            ).params
+
+            assertThat(updatedParams).doesNotContainKey(AnalyticsFields.LIBRARY_NAME)
+            assertThat(updatedParams).doesNotContainKey(AnalyticsFields.LIBRARY_VERSION)
+        } finally {
+            Stripe.appInfo = originalAppInfo
+        }
     }
 
     private companion object {
@@ -444,6 +513,7 @@ class PaymentAnalyticsRequestFactoryTest {
             AnalyticsFields.OS_RELEASE,
             AnalyticsFields.PUBLISHABLE_KEY,
             AnalyticsFields.SESSION_ID,
+            AnalyticsFields.TIMESTAMP,
             PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE,
             PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
             PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE,

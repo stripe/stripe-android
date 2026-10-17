@@ -264,6 +264,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
                 bankAccountId = bankAccountId,
                 billingAddress = billingDetails?.toConsumerBillingAddressParams(),
                 billingEmailAddress = billingDetails?.email,
+                clientAttributionMetadata = emptyMap(),
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
@@ -332,6 +333,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         customerId = null,
         supportedVerificationTypes = null,
+        linkAuthTokenClientSecret = null,
     ).also {
         updateCachedConsumerSessionFromLookup(it)
     }

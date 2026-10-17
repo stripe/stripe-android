@@ -7,40 +7,38 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class DefaultCvcRecollectionInteractorTest {
 
     private fun createInteractor(
-        processing: StateFlow<Boolean> = stateFlowOf(false)
+        scope: CoroutineScope,
+        processing: StateFlow<Boolean> = stateFlowOf(false),
     ): DefaultCvcRecollectionInteractor {
         return DefaultCvcRecollectionInteractor(
             lastFour = "4242",
             cardBrand = CardBrand.Visa,
             cvc = "",
-            isTestMode = true,
             processing = processing,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = scope,
         )
     }
 
     @Test
     fun `view state initialized properly on init`() = runTest {
-        val interactor = createInteractor()
+        val interactor = createInteractor(scope = backgroundScope)
 
         interactor.viewState.test {
             val viewState = awaitItem()
             assertThat(viewState.lastFour).isEqualTo("4242")
             assertThat(viewState.cvcState).isEqualTo(CvcState(cvc = "", cardBrand = CardBrand.Visa))
-            assertThat(viewState.isTestMode).isEqualTo(true)
         }
     }
 
     @Test
     fun `view state updated with CVC onCvcChanged`() = runTest {
-        val interactor = createInteractor()
+        val interactor = createInteractor(scope = backgroundScope)
 
         interactor.viewState.test {
             assertThat(awaitItem().cvcState.cvc).isEqualTo("")
@@ -52,7 +50,7 @@ class DefaultCvcRecollectionInteractorTest {
     @Test
     fun `view state updated with enabled when processing changes`() = runTest {
         val processingSource = MutableStateFlow(false)
-        val interactor = createInteractor(processing = processingSource)
+        val interactor = createInteractor(scope = backgroundScope, processing = processingSource)
 
         interactor.viewState.test {
             assertThat(awaitItem().isEnabled).isTrue()
@@ -65,7 +63,7 @@ class DefaultCvcRecollectionInteractorTest {
 
     @Test
     fun `on confirm pressed interactor emits confirmed result`() = runTest {
-        val interactor = createInteractor()
+        val interactor = createInteractor(scope = backgroundScope)
 
         interactor.cvcCompletionState.test {
             assertThat(awaitItem()).isEqualTo(CvcCompletionState.Incomplete)

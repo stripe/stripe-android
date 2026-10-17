@@ -8,11 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
 import org.junit.Test
@@ -40,13 +36,13 @@ class ConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = TestConfirmationDefinition.Option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val canConfirmCall = canConfirmCalls.awaitItem()
 
         assertThat(canConfirmCall.option).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(canConfirmCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(canConfirm).isTrue()
@@ -61,7 +57,7 @@ class ConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = InvalidTestConfirmationOption,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
@@ -77,13 +73,13 @@ class ConfirmationMediatorTest {
 
         val canConfirm = mediator.canConfirm(
             confirmationOption = TestConfirmationDefinition.Option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val canConfirmCall = canConfirmCalls.awaitItem()
 
         assertThat(canConfirmCall.option).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(canConfirmCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(canConfirmCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(canConfirm).isFalse()
@@ -97,15 +93,18 @@ class ConfirmationMediatorTest {
         )
 
         val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = fakeLifecycleOwner()
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
             onResult = {},
         )
 
         val createLauncherCall = createLauncherCalls.awaitItem()
 
         assertThat(createLauncherCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(createLauncherCall.lifecycleOwner).isEqualTo(lifecycleOwner)
     }
 
     @Test
@@ -119,6 +118,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {
                 throw NotImplementedError("'onResult' should not be called!")
             },
@@ -140,7 +140,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = InvalidTestConfirmationOption,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(InvalidTestConfirmationOption)
@@ -160,7 +160,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action, should return mediator complete action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -171,7 +170,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -179,12 +178,11 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -192,7 +190,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -203,7 +200,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -211,12 +208,11 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
@@ -235,7 +231,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -243,7 +239,7 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val failAction = action.asFail()
 
@@ -257,7 +253,6 @@ class ConfirmationMediatorTest {
     fun `On launch action, should call definition launch and persist parameters`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             receivesResultInProcess = false,
         ),
     ) {
@@ -269,6 +264,7 @@ class ConfirmationMediatorTest {
         ).apply {
             register(
                 activityResultCaller = mock(),
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = {}
             )
         }
@@ -277,7 +273,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -285,7 +281,7 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val launchAction = action.asLaunch()
 
@@ -297,17 +293,22 @@ class ConfirmationMediatorTest {
 
         assertThat(launchCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(TestConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(launchCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(launchCall.launcher).isEqualTo(TestConfirmationDefinition.Launcher)
 
         val parameters = savedStateHandle
-            .get<ConfirmationMediator.Parameters<TestConfirmationDefinition.Option>>(
+            .get<
+                ConfirmationMediator.Parameters<
+                    TestConfirmationDefinition.Option,
+                    TestConfirmationDefinition.LauncherArgs
+                    >
+                >(
                 "TestParameters"
             )
 
         assertThat(parameters?.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(parameters?.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
-        assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(parameters?.launcherArgs).isEqualTo(TestConfirmationDefinition.LauncherArgs)
     }
 
     @Test
@@ -315,7 +316,6 @@ class ConfirmationMediatorTest {
         test(
             action = ConfirmationDefinition.Action.Launch(
                 launcherArguments = TestConfirmationDefinition.LauncherArgs,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
                 receivesResultInProcess = true,
             ),
         ) {
@@ -325,6 +325,7 @@ class ConfirmationMediatorTest {
             ).apply {
                 register(
                     activityResultCaller = mock(),
+                    lifecycleOwner = fakeLifecycleOwner(),
                     onResult = {}
                 )
             }
@@ -333,7 +334,7 @@ class ConfirmationMediatorTest {
 
             val action = mediator.action(
                 option = TestConfirmationDefinition.Option,
-                parameters = CONFIRMATION_PARAMETERS,
+                arguments = CONFIRMATION_PARAMETERS,
             )
 
             assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -341,7 +342,7 @@ class ConfirmationMediatorTest {
             val actionCall = actionCalls.awaitItem()
 
             assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-            assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+            assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
             val launchAction = action.asLaunch()
 
@@ -352,7 +353,6 @@ class ConfirmationMediatorTest {
     fun `On confirmation action without registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = null,
             receivesResultInProcess = false,
         ),
     ) {
@@ -363,7 +363,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -371,7 +371,7 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val failAction = action.asFail()
 
@@ -387,7 +387,6 @@ class ConfirmationMediatorTest {
     fun `On confirmation action after un-registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = null,
             receivesResultInProcess = false,
         ),
     ) {
@@ -398,6 +397,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = mock(),
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = {}
         )
         mediator.unregister()
@@ -407,7 +407,7 @@ class ConfirmationMediatorTest {
 
         val action = mediator.action(
             option = TestConfirmationDefinition.Option,
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(optionCalls.awaitItem().option).isEqualTo(TestConfirmationDefinition.Option)
@@ -415,7 +415,7 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         val failAction = action.asFail()
 
@@ -431,12 +431,10 @@ class ConfirmationMediatorTest {
     fun `On result, should attempt to convert launcher result to confirmation result and return it`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             receivesResultInProcess = false,
         ),
         result = ConfirmationDefinition.Result.Succeeded(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
         ),
     ) {
         val waitForResultLatch = CountDownLatch(1)
@@ -452,6 +450,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = mock(),
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = { result ->
                 receivedResult = result
 
@@ -462,7 +461,7 @@ class ConfirmationMediatorTest {
         val createLauncherCall = createLauncherCalls.awaitItem()
 
         val action = mediator.action(
-            parameters = CONFIRMATION_PARAMETERS,
+            arguments = CONFIRMATION_PARAMETERS,
             option = TestConfirmationDefinition.Option,
         )
 
@@ -471,7 +470,7 @@ class ConfirmationMediatorTest {
         val actionCall = actionCalls.awaitItem()
 
         assertThat(actionCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(actionCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(actionCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
 
         assertThat(action).isInstanceOf<ConfirmationMediator.Action.Launch>()
 
@@ -483,7 +482,7 @@ class ConfirmationMediatorTest {
 
         assertThat(launchCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(launchCall.arguments).isEqualTo(TestConfirmationDefinition.LauncherArgs)
-        assertThat(launchCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(launchCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(launchCall.launcher).isEqualTo(TestConfirmationDefinition.Launcher)
 
         createLauncherCall.onResult(TestConfirmationDefinition.LauncherResult)
@@ -493,17 +492,16 @@ class ConfirmationMediatorTest {
         val toPaymentConfirmationResultCall = toResultCalls.awaitItem()
 
         assertThat(toPaymentConfirmationResultCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
-        assertThat(toPaymentConfirmationResultCall.confirmationParameters).isEqualTo(CONFIRMATION_PARAMETERS)
+        assertThat(toPaymentConfirmationResultCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(toPaymentConfirmationResultCall.result).isEqualTo(TestConfirmationDefinition.LauncherResult)
-        assertThat(toPaymentConfirmationResultCall.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(toPaymentConfirmationResultCall.launcherArgs)
+            .isEqualTo(TestConfirmationDefinition.LauncherArgs)
 
         assertThat(receivedResult).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
         val successResult = receivedResult.asSucceeded()
 
         assertThat(successResult.intent).isEqualTo(INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
 
         // The params should be cleared to avoid keeping the PAN around in memory longer than necessary.
         assertThat(savedStateHandle.get<Any>(mediator.key + ConfirmationMediator.PARAMETERS_POSTFIX_KEY)).isNull()
@@ -521,6 +519,7 @@ class ConfirmationMediatorTest {
 
         mediator.register(
             activityResultCaller = activityResultCaller,
+            lifecycleOwner = fakeLifecycleOwner(),
             onResult = { result ->
                 assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
 
@@ -611,7 +610,7 @@ class ConfirmationMediatorTest {
 
         override fun canConfirm(
             confirmationOption: Option,
-            confirmationParameters: ConfirmationDefinition.Parameters
+            confirmationArgs: ConfirmationHandler.Args
         ): Boolean {
             return isConfirmable
         }
@@ -625,7 +624,8 @@ class ConfirmationMediatorTest {
 
         object Launcher
 
-        data object LauncherArgs
+        @Parcelize
+        data object LauncherArgs : Parcelable
 
         @Parcelize
         data object LauncherResult : Parcelable
@@ -637,15 +637,10 @@ class ConfirmationMediatorTest {
     private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = INTENT,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
-            appearance = PaymentSheet.Appearance(),
-            shippingDetails = AddressDetails(
-                name = "John Doe",
-            )
+        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
     }
 }

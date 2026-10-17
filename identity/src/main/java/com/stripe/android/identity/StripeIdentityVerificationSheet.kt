@@ -84,9 +84,8 @@ internal class StripeIdentityVerificationSheet internal constructor(
     }
 
     private val identityVerificationSheetComponent: IdentityVerificationSheetComponent =
-        DaggerIdentityVerificationSheetComponent.builder()
-            .context(context.applicationContext)
-            .build()
+        DaggerIdentityVerificationSheetComponent.factory()
+            .create(context.applicationContext)
 
     override fun present(
         verificationSessionId: String,
@@ -94,11 +93,15 @@ internal class StripeIdentityVerificationSheet internal constructor(
     ) {
         activityResultLauncher.launch(
             IdentityVerificationSheetContract.Args(
-                verificationSessionId,
-                ephemeralKeySecret,
-                configuration.brandLogo,
-                injectorKey,
-                System.currentTimeMillis()
+                verificationSessionId = verificationSessionId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                brandLogo = configuration.brandLogo,
+                brandColor = configuration.brandColor,
+                biometricConsent = configuration.biometricConsent,
+                primaryButtonStyle = configuration.primaryButtonStyle,
+                secondaryButtonStyle = configuration.secondaryButtonStyle,
+                injectorKey = injectorKey,
+                presentTime = System.currentTimeMillis()
             )
         )
     }

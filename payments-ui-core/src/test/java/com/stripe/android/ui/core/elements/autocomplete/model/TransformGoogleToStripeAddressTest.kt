@@ -1,18 +1,15 @@
 package com.stripe.android.ui.core.elements.autocomplete.model
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 class TransformGoogleToStripeAddressTest {
-
-    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun `test US address without sublocality`() {
@@ -65,7 +62,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -130,7 +127,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -190,7 +187,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -250,7 +247,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -320,7 +317,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -385,7 +382,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val stripeAddress = place.transformGoogleToStripeAddress(Locale.getDefault())
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -450,7 +447,7 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        assertThat(place.transformGoogleToStripeAddress(context)).isEqualTo(
+        assertThat(place.transformGoogleToStripeAddress(Locale.getDefault())).isEqualTo(
             Address(
                 city = "New York",
                 country = "US",

@@ -17,12 +17,15 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.CountryNotListedDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,6 +35,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -44,6 +48,9 @@ class IndividualScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.individual).thenReturn(
@@ -60,10 +67,12 @@ class IndividualScreenTest {
     }
 
     private val missingRequirementsFlow = MutableStateFlow<Set<Requirement>>(setOf())
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
         on { missingRequirements } doReturn missingRequirementsFlow
+        on { screenTracker } doReturn mockScreenTracker
     }
     private val mockNavController = mock<NavController>()
 
@@ -81,6 +90,7 @@ class IndividualScreenTest {
                 ID_COUNTRY_NOT_LISTED_BUTTON_TEXT
             )
             onNodeWithTag(ID_NUMBER_COUNTRY_NOT_LISTED_BUTTON_TAG).performClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_INDIVIDUAL), any())
 
             verify(mockNavController).navigate(
                 argWhere {
@@ -107,6 +117,7 @@ class IndividualScreenTest {
             onNodeWithTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG)
                 .performScrollTo()
                 .performClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_INDIVIDUAL), any())
 
             verify(mockNavController).navigate(
                 argWhere {

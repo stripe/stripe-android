@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.common.ui.PrimaryButton
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.stripePrimaryButtonStyle
 
 @Composable
 internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onClick: () -> Unit) {
@@ -22,7 +22,7 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
         )
         BacsMandateButtonType.Secondary -> {
             // Use the same text style as the primary button but a different color.
-            val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle().copy(
+            val textStyle = MaterialTheme.stripePrimaryButtonStyle.getComposeTextStyle().copy(
                 color = MaterialTheme.colors.primary
             )
 

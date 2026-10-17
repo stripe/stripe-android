@@ -60,6 +60,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral900
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.delay
 
 private const val SHIMMER_SIZE_MULTIPLIER = 0.2f
@@ -251,7 +252,7 @@ internal fun LoadingSpinnerPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(hideStripeLogo = false),
+                    state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
                 )
             },
@@ -272,7 +273,7 @@ internal fun LoadingShimmerPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(hideStripeLogo = false),
+                    state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
                 )
             },
@@ -314,7 +315,7 @@ internal fun LoadingShimmerWithPillPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(hideStripeLogo = false),
+                    state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
                 )
             },

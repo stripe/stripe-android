@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -39,7 +39,7 @@ class SetAsDefaultPaymentMethodController(
 
     override val rawFieldValue: StateFlow<String?> = fieldValue
 
-    override val error: StateFlow<FieldError?> = stateFlowOf(null)
+    override val validationMessage: StateFlow<FieldValidationMessage?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false
     override val isComplete: StateFlow<Boolean> = stateFlowOf(true)
     override val formFieldValue: StateFlow<FormFieldEntry> =

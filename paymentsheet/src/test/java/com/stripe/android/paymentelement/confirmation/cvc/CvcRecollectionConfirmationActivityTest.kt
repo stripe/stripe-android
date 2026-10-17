@@ -12,22 +12,23 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.extendedPaymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.view.ActivityStarter
@@ -71,9 +72,9 @@ internal class CvcRecollectionConfirmationActivityTest {
             assertThat(confirmingWithSavedOptionWithCvc.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -82,7 +83,25 @@ internal class CvcRecollectionConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
+        }
+    }
+
+    @Test
+    fun `On CVC recollection canceled, should complete with cancellation`() = test {
+        intendingCvcRecollectionToBeLaunched(CvcRecollectionResult.Cancelled)
+
+        confirmationHandler.state.test {
+            awaitItem().assertIdle()
+
+            confirmationHandler.start(CONFIRMATION_ARGUMENTS)
+
+            assertThat(awaitItem().assertConfirming().option).isEqualTo(CONFIRMATION_OPTION)
+            intendedCvcRecollectionToBeLaunched()
+
+            val canceledResult = awaitItem().assertComplete().result.assertCanceled()
+            assertThat(canceledResult.action)
+                .isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
         }
     }
 
@@ -97,16 +116,22 @@ internal class CvcRecollectionConfirmationActivityTest {
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
-            confirmationHandler.start(CONFIRMATION_ARGUMENTS.copy(intent = paymentIntent))
+            confirmationHandler.start(
+                CONFIRMATION_ARGUMENTS.copy(
+                    paymentMethodMetadata = CONFIRMATION_ARGUMENTS.paymentMethodMetadata.copy(
+                        stripeIntent = paymentIntent
+                    )
+                )
+            )
 
             val confirmingWithSavedOption = awaitItem().assertConfirming()
 
             assertThat(confirmingWithSavedOption.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = PAYMENT_METHOD,
                         optionsParams = null,
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -115,7 +140,7 @@ internal class CvcRecollectionConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(paymentIntent.copy(paymentMethod = PAYMENT_METHOD))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         }
     }
 
@@ -156,7 +181,8 @@ internal class CvcRecollectionConfirmationActivityTest {
             currency = "CAD",
             paymentMethodOptionsJsonString = """
                 {"card": {"require_cvc_recollection": true}}
-            """.trimIndent()
+            """.trimIndent(),
+            clientSecret = "pi_123_secret_123",
         )
 
         val PAYMENT_INTENT_WITHOUT_CVC_RECOLLECTION = PaymentIntentFactory.create().copy(
@@ -168,19 +194,18 @@ internal class CvcRecollectionConfirmationActivityTest {
         val PAYMENT_METHOD = PaymentMethodFactory.card(random = true)
 
         val CONFIRMATION_OPTION = PaymentMethodConfirmationOption.Saved(
+            shippingInformation = null,
             paymentMethod = PAYMENT_METHOD,
             optionsParams = null,
-            passiveCaptchaParams = null
         )
 
         val CONFIRMATION_ARGUMENTS = ConfirmationHandler.Args(
             confirmationOption = CONFIRMATION_OPTION,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
+            statusBarColor = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                shippingDetails = AddressDetails(),
             ),
-            shippingDetails = AddressDetails(),
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val CVC_RECOLLECTION_ACTIVITY_NAME =

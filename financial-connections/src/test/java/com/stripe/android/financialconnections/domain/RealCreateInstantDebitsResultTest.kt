@@ -246,7 +246,7 @@ class RealCreateInstantDebitsResultTest {
             paymentDetails = listOf(
                 ConsumerPaymentDetails.BankAccount(
                     id = "ba_1234",
-                    bankName = "Stripe Bank",
+                    bankAccountName = "Stripe Bank Account",
                     last4 = "4242",
                     bankIconCode = null,
                     isDefault = false,
@@ -263,8 +263,8 @@ class RealCreateInstantDebitsResultTest {
         )
 
         return mock<FinancialConnectionsConsumerSessionRepository> {
-            onBlocking { createPaymentDetails(any(), any(), anyOrNull()) } doReturn consumerPaymentDetails
-            onBlocking { sharePaymentDetails(any(), any(), any(), anyOrNull()) } doReturn sharePaymentDetails
+            on { createPaymentDetails(any(), any(), anyOrNull()) } doReturn consumerPaymentDetails
+            on { sharePaymentDetails(any(), any(), any(), anyOrNull()) } doReturn sharePaymentDetails
         }
     }
 
@@ -272,7 +272,7 @@ class RealCreateInstantDebitsResultTest {
         val paymentMethod = "{\"id\": \"pm_1234\"}"
 
         return mock<FinancialConnectionsRepository> {
-            onBlocking { createPaymentMethod(any(), any(), anyOrNull()) } doReturn paymentMethod
+            on { createPaymentMethod(any(), any(), anyOrNull()) } doReturn paymentMethod
         }
     }
 
@@ -283,6 +283,7 @@ class RealCreateInstantDebitsResultTest {
             phoneNumber = "(***) *** **12",
             isVerified = true,
             publishableKey = "pk_123",
+            linkBrand = null,
         )
     }
 

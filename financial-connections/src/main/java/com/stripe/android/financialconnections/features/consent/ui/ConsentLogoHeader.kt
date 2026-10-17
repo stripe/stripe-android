@@ -77,15 +77,17 @@ internal fun ConsentLogoHeader(
         )
     }
 
-    LaunchedEffect(logos) {
-        bitmaps = logos.map {
-            async {
-                stripeImageLoader.load(it, bitmapLoadSize, bitmapLoadSize)
-                    .getOrNull()
-                    ?.asImageBitmap()
-                    ?: placeholderBitmap
-            }
-        }.awaitAll()
+    if (!isPreview) {
+        LaunchedEffect(logos) {
+            bitmaps = logos.map {
+                async {
+                    stripeImageLoader.load(it, bitmapLoadSize, bitmapLoadSize)
+                        .getOrNull()
+                        ?.asImageBitmap()
+                        ?: placeholderBitmap
+                }
+            }.awaitAll()
+        }
     }
 
     Box(

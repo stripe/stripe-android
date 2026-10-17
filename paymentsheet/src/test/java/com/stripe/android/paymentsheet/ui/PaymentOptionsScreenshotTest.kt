@@ -2,28 +2,44 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 class PaymentOptionsScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule()
+
+    @get:Rule
+    val scopedThemePaparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        includeStripeTheme = false,
+    )
 
     @Test
     fun testWidthLessThanScreen() {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link,
+                PaymentOptionsItem.Link(LinkBrand.Link),
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Link),
             isEditing = false,
         )
     }
@@ -112,7 +128,6 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234", addNetworks = true),
-                    isCbcEligible = true,
                 ),
             ),
         )
@@ -135,12 +150,69 @@ class PaymentOptionsScreenshotTest {
         )
     }
 
+    @Test
+    fun testAutomaticTheme() {
+        snapshotWithAppearance(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun testAlwaysLightTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysLight),
+        )
+    }
+
+    @Test
+    fun testAlwaysDarkTheme() {
+        snapshotWithAppearance(
+            PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+        )
+    }
+
+    @Test
+    fun testCustomAppearanceTheme() {
+        snapshotWithAppearance(PaymentSheetAppearance.CrazyAppearance.appearance)
+    }
+
+    @Test
+    fun testOnelink() {
+        createSavedPaymentMethodTabLayoutUiScreenshot(
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link(LinkBrand.Onelink),
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod.create(
+                        displayName = "4242".resolvableString,
+                        paymentMethod = PaymentMethod(
+                            id = "004",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Link.code,
+                            type = PaymentMethod.Type.Link,
+                            linkPaymentDetails = LinkPaymentDetails.Card(
+                                nickname = null,
+                                expMonth = 1,
+                                expYear = 2030,
+                                last4 = "4242",
+                                brand = CardBrand.Visa,
+                                funding = "CREDIT",
+                            ),
+                        ),
+                    ),
+                )
+            ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Onelink),
+            isEditing = false,
+            linkBrand = LinkBrand.Onelink,
+        )
+    }
+
     private val paymentOptionsItemsWithDefaultCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("8431"),
-                shouldShowDefaultBadge = true
+                shouldShowDefaultBadge = true,
             ),
         ),
         PaymentOptionsItem.SavedPaymentMethod(
@@ -153,21 +225,42 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("1234", addNetworks = true),
-                isCbcEligible = true,
             ),
         ),
     )
+
+    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance) {
+        scopedThemePaparazziRule.snapshot {
+            PaymentElementTheme(appearance = appearance) {
+                Surface(color = MaterialTheme.colors.surface) {
+                    SavedPaymentMethodTabLayoutUI(
+                        paymentOptionsItems = paymentOptionsItemsWithDefaultCard,
+                        selectedPaymentOptionsItem = paymentOptionsItemsWithDefaultCard.first(),
+                        linkBrand = LinkBrand.Link,
+                        isEditing = false,
+                        isProcessing = false,
+                        onAddCardPressed = {},
+                        onItemSelected = {},
+                        onModifyItem = {},
+                        scrollState = rememberLazyListState(),
+                    )
+                }
+            }
+        }
+    }
 
     private fun createSavedPaymentMethodTabLayoutUiScreenshot(
         paymentOptionsItems: List<PaymentOptionsItem>,
         selectedPaymentOptionsItem: PaymentOptionsItem?,
         isEditing: Boolean,
+        linkBrand: LinkBrand = LinkBrand.Link,
         scrollState: LazyListState? = null,
     ) {
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = selectedPaymentOptionsItem,
+                linkBrand = linkBrand,
                 isEditing = isEditing,
                 isProcessing = false,
                 onAddCardPressed = {},

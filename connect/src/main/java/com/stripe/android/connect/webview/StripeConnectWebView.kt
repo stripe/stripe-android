@@ -6,9 +6,12 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.MutableContextWrapper
+import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.net.Uri
-import android.os.Build
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.JsResult
 import android.webkit.PermissionRequest
@@ -44,6 +47,7 @@ import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
@@ -63,16 +67,19 @@ internal class StripeConnectWebView private constructor(
     private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
+    coroutineScope: CoroutineScope,
 ) : WebView(mutableContext), WebViewForPaparazzi {
 
     constructor(
         application: Application,
         delegate: Delegate,
         logger: Logger,
+        coroutineScope: CoroutineScope,
     ) : this(
         mutableContext = MutableContextWrapper(application),
         delegate = delegate,
         logger = logger,
+        coroutineScope = coroutineScope,
     )
 
     private val loggerTag = javaClass.simpleName
@@ -87,6 +94,11 @@ internal class StripeConnectWebView private constructor(
     internal val stripeJsInterface = StripeJsInterface()
 
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
+
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private var lastKeyboardHeight: Int = 0
+    private var originalHeight: Int = 0
+    private var baseBottomInset: Int = -1
 
     init {
         webViewClient = stripeWebViewClient
@@ -105,7 +117,12 @@ internal class StripeConnectWebView private constructor(
             mediaPlaybackRequiresUserGesture = false
         }
 
-        setDownloadListener(StripeDownloadListener(context))
+        setDownloadListener(
+            StripeDownloadListener(
+                context = context,
+                coroutineScope = coroutineScope,
+            )
+        )
         addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
@@ -150,12 +167,87 @@ internal class StripeConnectWebView private constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // We need the Activity context for some UI to work, like web-triggered dialogs
-        mutableContext.baseContext = requireNotNull(findActivity())
+        val activity = requireNotNull(findActivity())
+        mutableContext.baseContext = activity
+
+        // Set up keyboard detection to resize the webview according to keyboard heights
+        // This fixes input fields being covered by keyboard on Samsung devices.
+        setupKeyboardHandling(activity)
     }
 
     override fun onDetachedFromWindow() {
+        // Clean up the global layout listener
+        globalLayoutListener?.let { listener ->
+            findActivity()?.window?.decorView?.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+        }
+        globalLayoutListener = null
+
         mutableContext.baseContext = mutableContext.applicationContext
         super.onDetachedFromWindow()
+    }
+
+    /**
+     * Sets up keyboard visibility detection to dynamically resize the WebView when the
+     * soft keyboard appears or disappears. This fixes an issue on Samsung devices where
+     * input fields in popovers get covered by the keyboard.
+     *
+     * How it works:
+     * 1. Monitors layout changes via [ViewTreeObserver.OnGlobalLayoutListener]
+     * 2. Uses [getWindowVisibleDisplayFrame] to detect keyboard height
+     * 3. Resizes the WebView height to account for keyboard, triggering the web layer's
+     *    ResizeObserver to reposition popovers appropriately
+     */
+    private fun setupKeyboardHandling(activity: Activity) {
+        val decorView = activity.window.decorView
+
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val currentOrientation = resources.configuration.orientation
+            if (currentOrientation != Configuration.ORIENTATION_PORTRAIT) {
+                return@OnGlobalLayoutListener
+            }
+
+            val displayMetrics = activity.resources.displayMetrics
+            val rect = Rect()
+            decorView.getWindowVisibleDisplayFrame(rect)
+            val bottomInset = displayMetrics.heightPixels - rect.bottom
+
+            // Capture the base bottom inset (nav bar)
+            if (baseBottomInset < 0) {
+                baseBottomInset = bottomInset
+            }
+
+            val keyboardHeight = (bottomInset - baseBottomInset).coerceAtLeast(0)
+
+            // Only resize when keyboard height changes
+            if (lastKeyboardHeight != keyboardHeight) {
+                lastKeyboardHeight = keyboardHeight
+
+                // Store original height on first layout
+                if (originalHeight == 0 && height > 0) {
+                    originalHeight = height
+                }
+
+                // If keyboard is showing, resize webview to trigger ResizeObserver in web layer
+                // This positions popovers correctly on screen
+                if (keyboardHeight > 0 && originalHeight > 0) {
+                    val newHeight = originalHeight - keyboardHeight
+                    if (newHeight > 0) {
+                        layoutParams = layoutParams.apply {
+                            height = newHeight
+                        }
+                        requestLayout()
+                    }
+                } else if (keyboardHeight == 0 && originalHeight > 0) {
+                    // Keyboard hidden - restore original height
+                    layoutParams = layoutParams.apply {
+                        height = originalHeight
+                    }
+                    requestLayout()
+                }
+            }
+        }
+
+        decorView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 
     interface Delegate {
@@ -286,17 +378,10 @@ internal class StripeConnectWebView private constructor(
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-            // for some reason errorCode and description are only available in API 23+,
-            // so we simply ignore the description for older devices
-            val errorMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                error.description.toString()
-            } else {
-                null
-            }
             delegate.onReceivedError(
                 requestUrl = request.url.toString(),
                 httpStatusCode = null,
-                errorMessage = errorMessage,
+                errorMessage = error.description.toString(),
                 isMainPageLoad = request.isForMainFrame
             )
         }
@@ -348,8 +433,13 @@ internal class StripeConnectWebView private constructor(
                 }
             }
 
-            // Hook into the Activity lifecycle
             val activity = (view.findActivity() as? ComponentActivity)
+            if (activity == null || activity.isFinishing || activity.isDestroyed) {
+                result.cancel()
+                return true
+            }
+
+            // Hook into the Activity lifecycle
             val activityLifecycleObserver =
                 object : DefaultLifecycleObserver {
                     override fun onDestroy(owner: LifecycleOwner) {
@@ -358,7 +448,7 @@ internal class StripeConnectWebView private constructor(
                         returnResult()
                     }
                 }
-            activity?.lifecycle?.addObserver(activityLifecycleObserver)
+            activity.lifecycle.addObserver(activityLifecycleObserver)
 
             val okText = alert.buttons?.ok
                 ?: view.context.getString(android.R.string.ok)
@@ -366,30 +456,39 @@ internal class StripeConnectWebView private constructor(
                 ?: view.context.getString(android.R.string.cancel).takeIf { isConfirm }
 
             // Prepare and show the dialog.
-            AlertDialog.Builder(view.context)
-                .setCancelable(true)
-                .setOnCancelListener {
-                    didConfirm = false
-                }
-                .setOnDismissListener {
-                    // Invoked on dialog dismissals but not configuration changes.
-                    returnResult()
-                    // Clean up the observer.
-                    activity?.lifecycle?.removeObserver(activityLifecycleObserver)
-                }
-                .setMessage(alert.message)
-                .setPositiveButton(okText) { _, _ ->
-                    didConfirm = true
-                }
-                .apply {
-                    alert.title?.let { setTitle(it) }
-                    cancelText?.let {
-                        setNegativeButton(it) { _, _ ->
-                            didConfirm = false
+            // Use the two-arg Builder to enforce an AppCompat theme. On some devices/OEM WebView
+            // implementations, view.context may not carry AppCompat theme attributes, which causes
+            // AppCompatDelegateImpl.createSubDecor to throw an IllegalStateException.
+            try {
+                AlertDialog.Builder(view.context, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
+                    .setCancelable(true)
+                    .setOnCancelListener {
+                        didConfirm = false
+                    }
+                    .setOnDismissListener {
+                        // Invoked on dialog dismissals but not configuration changes.
+                        returnResult()
+                        // Clean up the observer.
+                        activity.lifecycle.removeObserver(activityLifecycleObserver)
+                    }
+                    .setMessage(alert.message)
+                    .setPositiveButton(okText) { _, _ ->
+                        didConfirm = true
+                    }
+                    .apply {
+                        alert.title?.let { setTitle(it) }
+                        cancelText?.let {
+                            setNegativeButton(it) { _, _ ->
+                                didConfirm = false
+                            }
                         }
                     }
-                }
-                .show()
+                    .show()
+            } catch (e: WindowManager.BadTokenException) {
+                logger.error("($loggerTag) Error showing alert dialog", e)
+                activity.lifecycle.removeObserver(activityLifecycleObserver)
+                result.cancel()
+            }
             return true
         }
 

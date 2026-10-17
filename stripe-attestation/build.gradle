@@ -1,6 +1,8 @@
 apply from: configs.androidLibrary
 
 dependencies {
+    implementation project(":stripe-core")
+
     // Kotlin
     implementation libs.kotlin.coroutines
 
@@ -13,6 +15,9 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+    testImplementation testLibs.testParameterInjector
 }
 
 android {
@@ -28,18 +33,19 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
-        ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property"
+            ])
+            if (gradle.ext.isCi) {
+                allWarningsAsErrors = true
+            }
         }
     }
 }

@@ -8,9 +8,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.R
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
+import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +34,20 @@ class PaymentLauncherConfirmationActivityTest {
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
     @Test
+    fun `payment intent args preserve API configuration through parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(PAYMENT_INTENT_NEXT_ACTION_ARGS)
+    }
+
+    @Test
+    fun `payment intent args preserve null account through parceling`() {
+        ParcelUtils.verifyParcelRoundtrip(
+            PAYMENT_INTENT_NEXT_ACTION_ARGS.copy(
+                apiConfiguration = API_CONFIGURATION.copy(stripeAccountId = null),
+            )
+        )
+    }
+
+    @Test
     fun `Ensure title is 'Confirming transaction'`() {
         mockViewModelActivityScenario().launch(
             Intent(
@@ -39,8 +55,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -65,8 +80,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -90,8 +104,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -117,8 +130,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -161,8 +173,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    apiConfiguration = API_CONFIGURATION,
                     enableLogging = false,
                     productUsage = PRODUCT_USAGE,
                     includePaymentSheetNextHandlers = false,
@@ -174,6 +185,60 @@ class PaymentLauncherConfirmationActivityTest {
             it.onActivity {
                 runTest {
                     verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
+                    verify(viewModel).register(any(), any())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `start with StripeIntentNextActionWithIntentArgs for PaymentIntent should handle with intent`() {
+        val testPaymentIntent = mock<com.stripe.android.model.PaymentIntent>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
+                    apiConfiguration = API_CONFIGURATION,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetNextHandlers = false,
+                    stripeIntent = testPaymentIntent,
+                    statusBarColor = Color.RED,
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(testPaymentIntent), any())
+                    verify(viewModel).register(any(), any())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `start with StripeIntentNextActionWithIntentArgs for SetupIntent should handle with intent`() {
+        val testSetupIntent = mock<com.stripe.android.model.SetupIntent>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
+                    apiConfiguration = API_CONFIGURATION,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetNextHandlers = false,
+                    stripeIntent = testSetupIntent,
+                    statusBarColor = Color.RED,
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(testSetupIntent), any())
                     verify(viewModel).register(any(), any())
                 }
             }
@@ -230,7 +295,7 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(args.toBundle())
         ).use { activityScenario ->
-            assertThat(args.publishableKey).isEqualTo(PUBLISHABLE_KEY)
+            assertThat(args.apiConfiguration.publishableKey).isEqualTo(PUBLISHABLE_KEY)
             assertThat(args.paymentIntentClientSecret).isEqualTo(CLIENT_SECRET)
 
             activityScenario.onActivity {
@@ -280,7 +345,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
 
             assertThat(args.paymentIntentClientSecret).isEqualTo("UNKNOWN")
-            assertThat(args.publishableKey).isEqualTo("UNKNOWN")
+            assertThat(args.apiConfiguration.publishableKey).isEqualTo("UNKNOWN")
         }
     }
 
@@ -297,10 +362,13 @@ class PaymentLauncherConfirmationActivityTest {
         const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+        )
         val PAYMENT_INTENT_NEXT_ACTION_ARGS =
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                apiConfiguration = API_CONFIGURATION,
                 enableLogging = false,
                 productUsage = PRODUCT_USAGE,
                 includePaymentSheetNextHandlers = false,

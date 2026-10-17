@@ -1,0 +1,12 @@
+{
+  "data": [
+    {
+      "account_range_high": "4242429999999999",
+      "account_range_low": "4242420000000000",
+      "pan_length": 16,
+      "brand": "VISA",
+      "country": "GB",
+      "funding": "CREDIT"
+    }
+  ]
+}

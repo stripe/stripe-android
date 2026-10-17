@@ -21,13 +21,14 @@ internal fun effectiveBillingDetails(
 ): PaymentSheet.BillingDetails {
     val billingConfig = configuration.billingDetailsCollectionConfiguration
     val defaultBillingDetails = configuration.defaultBillingDetails
-        ?: PaymentSheet.BillingDetails()
-    return defaultBillingDetails.copy(
-        email = defaultBillingDetails.email
+    return PaymentSheet.BillingDetails(
+        email = defaultBillingDetails?.email
             ?: linkAccount.email.takeIf { billingConfig.collectsEmail },
-        phone = defaultBillingDetails.phone
+        phone = defaultBillingDetails?.phone
             ?: linkAccount.unredactedPhoneNumber.takeIf { billingConfig.collectsPhone },
         // Name and address cannot be supplemented from Link account data
+        name = defaultBillingDetails?.name,
+        address = defaultBillingDetails?.address
     )
 }
 
@@ -39,7 +40,8 @@ internal fun PaymentDetails.supports(
     linkAccount: LinkAccount
 ): Boolean = when (this) {
     is ConsumerPaymentDetails.BankAccount,
-    is ConsumerPaymentDetails.Card -> when {
+    is ConsumerPaymentDetails.Card,
+    is ConsumerPaymentDetails.Generic -> when {
         // Check if full address is required but missing or incomplete
         billingDetailsConfig.address == AddressCollectionMode.Full && billingAddress.isIncomplete() -> false
         // Check if phone is required but missing from Link account
@@ -94,6 +96,10 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
             billingEmailAddress = effectiveEmailAddress
         )
         is ConsumerPaymentDetails.Passthrough -> this
+        is ConsumerPaymentDetails.Generic -> copy(
+            billingAddress = effectiveBillingAddress,
+            billingEmailAddress = effectiveEmailAddress
+        )
     }
 }
 

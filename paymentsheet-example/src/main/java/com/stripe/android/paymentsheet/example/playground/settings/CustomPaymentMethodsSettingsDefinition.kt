@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal object CustomPaymentMethodsSettingDefinition :
     PlaygroundSettingDefinition<CustomPaymentMethodPlaygroundType>,
     PlaygroundSettingDefinition.Saveable<CustomPaymentMethodPlaygroundType> by EnumSaveable(
@@ -16,8 +14,15 @@ internal object CustomPaymentMethodsSettingDefinition :
     PlaygroundSettingDefinition.Displayable<CustomPaymentMethodPlaygroundType> {
     override val displayName: String = "Custom payment methods"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return (settings[MerchantSettingsDefinition] as? Merchant) == Merchant.US
     }
 
     override fun createOptions(
@@ -69,7 +74,6 @@ enum class CustomPaymentMethodPlaygroundType(
 
 internal const val DEFAULT_CUSTOM_PAYMENT_METHOD_ID = "cpmt_1QpIMNLu5o3P18Zpwln1Sm6I"
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 private fun createCustomPaymentMethods(disableBillingDetails: Boolean): List<PaymentSheet.CustomPaymentMethod> {
     return listOf(
         PaymentSheet.CustomPaymentMethod(

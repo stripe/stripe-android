@@ -1,0 +1,90 @@
+@file:OptIn(PaymentMethodMessagingElementPreview::class)
+
+package com.stripe.android.paymentmethodmessaging.element
+
+import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import com.stripe.android.paymentmethodmessaging.element.analytics.paymentMethods
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
+import javax.inject.Provider
+
+internal interface PaymentMethodMessagingCoordinator {
+    val messagingContent: StateFlow<PaymentMethodMessagingContent?>
+    suspend fun configure(
+        configuration: PaymentMethodMessagingElement.Configuration.State
+    ): PaymentMethodMessagingElement.ConfigureResult
+}
+
+internal class DefaultPaymentMethodMessagingCoordinator @Inject constructor(
+    private val stripeRepository: StripeRepository,
+    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val eventReporter: PaymentMethodMessagingEventReporter,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val errorReporter: ErrorReporter
+) : PaymentMethodMessagingCoordinator {
+
+    private val _messagingContent = MutableStateFlow<PaymentMethodMessagingContent?>(null)
+    override val messagingContent: StateFlow<PaymentMethodMessagingContent?> = _messagingContent
+
+    override suspend fun configure(
+        configuration: PaymentMethodMessagingElement.Configuration.State
+    ): PaymentMethodMessagingElement.ConfigureResult = viewModelScope.async {
+        eventReporter.onLoadStarted(configuration)
+        stripeRepository.retrievePaymentMethodMessage(
+            paymentMethods = configuration.paymentMethodTypes?.map { it.code } ?: listOf(),
+            amount = configuration.amount.toInt(),
+            currency = configuration.currency,
+            locale = configuration.locale,
+            country = configuration.countryCode,
+            requestOptions = requestOptionsProvider.get(),
+        ).fold(
+            onSuccess = { paymentMethodMessage ->
+                val content = PaymentMethodMessagingContent.get(
+                    message = paymentMethodMessage,
+                    analyticsOnClick = eventReporter::onElementTapped
+                )
+
+                reportLoadResult(paymentMethodMessage, content)
+
+                _messagingContent.value = content
+                when (content) {
+                    is PaymentMethodMessagingContent.SinglePartner,
+                    is PaymentMethodMessagingContent.MultiPartner ->
+                        PaymentMethodMessagingElement.ConfigureResult.Succeeded()
+                    is PaymentMethodMessagingContent.NoContent ->
+                        PaymentMethodMessagingElement.ConfigureResult.NoContent()
+                }
+            },
+            onFailure = {
+                _messagingContent.value = null
+                eventReporter.onLoadFailed(it)
+                PaymentMethodMessagingElement.ConfigureResult.Failed(it)
+            }
+        )
+    }.await()
+
+    private fun reportLoadResult(message: PaymentMethodMessage, content: PaymentMethodMessagingContent) {
+        if (message is PaymentMethodMessage.UnexpectedError) {
+            errorReporter.report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent
+                    .PAYMENT_METHOD_MESSAGING_ELEMENT_UNABLE_TO_PARSE_RESPONSE,
+                additionalNonPiiParams = mapOf(
+                    "error_message" to message.message
+                )
+            )
+        } else {
+            eventReporter.onLoadSucceeded(
+                paymentMethods = message.paymentMethods(),
+                content = content
+            )
+        }
+    }
+}

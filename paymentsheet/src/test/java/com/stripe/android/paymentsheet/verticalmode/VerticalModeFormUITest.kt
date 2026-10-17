@@ -21,14 +21,20 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.NoOpCardScanEventsReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.assertHasErrorMessage
 import com.stripe.paymentelementtestpages.assertHasNoErrorMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -46,6 +52,9 @@ internal class VerticalModeFormUITest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     private val formPage = FormPage(composeRule)
 
@@ -81,16 +90,35 @@ internal class VerticalModeFormUITest {
     }
 
     @Test
+    fun testCardDoesNotShowHeaderWhenShowWalletIsTrue() = runScenario(
+        initialState = createCardState(customerHasSavedPaymentMethods = true),
+        showsWalletHeader = true
+    ) {
+        formPage.headerIcon.assertDoesNotExist()
+        formPage.title.assertDoesNotExist()
+    }
+
+    @Test
     fun testCardShowsAddCardHeader_whenCustomerHasNoSavedPMs() = runScenario(
         createCardState(customerHasSavedPaymentMethods = false)
     ) {
         formPage.headerIcon.assertDoesNotExist()
         formPage.title.assertExists()
-        formPage.title.assert(hasText("Add card"))
+        formPage.title.assert(hasText("Add a card"))
     }
 
     @Test
     fun testLpmShowsHeader() = runScenario(createKlarnaState()) {
+        formPage.headerIcon.assertExists()
+        formPage.title.assertExists()
+        formPage.title.assert(hasText("Klarna"))
+    }
+
+    @Test
+    fun testLpmShowsHeaderWhenShowsWalletHeaderIsTrue() = runScenario(
+        initialState = createKlarnaState(),
+        showsWalletHeader = true
+    ) {
         formPage.headerIcon.assertExists()
         formPage.title.assertExists()
         formPage.title.assert(hasText("Klarna"))
@@ -106,6 +134,13 @@ internal class VerticalModeFormUITest {
     }
 
     @Test
+    fun `currencySelector not visible when options null`() {
+        runScenario(createCardState(customerHasSavedPaymentMethods = false)) {
+            composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun testExpirationDateErrorMessage() = runScenario(createCardState(customerHasSavedPaymentMethods = true)) {
         formPage.expirationDate.assertHasNoErrorMessage()
         formPage.expirationDate.performTextReplacement("1111")
@@ -116,6 +151,7 @@ internal class VerticalModeFormUITest {
 
     private fun runScenario(
         initialState: VerticalModeFormInteractor.State,
+        showsWalletHeader: Boolean = false,
         block: Scenario.() -> Unit
     ) {
         val stateFlow = MutableStateFlow(initialState)
@@ -124,10 +160,11 @@ internal class VerticalModeFormUITest {
 
         composeRule.setContent {
             CompositionLocalProvider(
+                LocalCardScanEventsReporter provides NoOpCardScanEventsReporter,
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                VerticalModeFormUI(interactor)
+                VerticalModeFormUI(interactor, showsWalletHeader = showsWalletHeader)
             }
         }
 
@@ -141,7 +178,6 @@ internal class VerticalModeFormUITest {
         viewActionRecorder: ViewActionRecorder<VerticalModeFormInteractor.ViewAction>,
     ): VerticalModeFormInteractor {
         return object : VerticalModeFormInteractor {
-            override val isLiveMode: Boolean = true
             override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlow
 
             override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
@@ -153,11 +189,14 @@ internal class VerticalModeFormUITest {
     }
 
     private fun createCardState(customerHasSavedPaymentMethods: Boolean): VerticalModeFormInteractor.State {
-        val headerInformation =
-            (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
-                incentive = null,
-            )
+        val customUiDefinitionFactory = CardDefinition.uiDefinitionFactory(
+            metadata = PaymentMethodMetadataFactory.create()
+        ) as UiDefinitionFactory.Custom
+        val headerInformation = customUiDefinitionFactory.createFormHeaderInformation(
+            metadata = PaymentMethodMetadataFactory.create(),
+            customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+            incentive = null,
+        )
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code,
             isProcessing = false,
@@ -173,10 +212,10 @@ internal class VerticalModeFormUITest {
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
-            formElements = CardDefinition.formElements(),
+            formElements = CardDefinition.formElements(
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+            ),
             isValidating = false,
-            showsWalletHeader = false,
-            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }
@@ -207,8 +246,6 @@ internal class VerticalModeFormUITest {
             ),
             formElements = emptyList(),
             isValidating = false,
-            showsWalletHeader = false,
-            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }
@@ -243,8 +280,6 @@ internal class VerticalModeFormUITest {
             ),
             formElements = KlarnaDefinition.formElements(paymentMethodMetadata),
             isValidating = false,
-            showsWalletHeader = false,
-            paymentMethodIncentive = null,
             headerInformation = headerInformation,
         )
     }

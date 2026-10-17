@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
@@ -32,11 +33,14 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -46,6 +50,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -61,10 +66,14 @@ class FinancialConnectionsSheetViewModelTest {
     @get:Rule
     val rule: TestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ApiKeyFixtures.DEFAULT_API_CONFIG,
+        preCollectedConsent = null,
     )
 
     private val syncResponse = syncResponse()
@@ -155,6 +164,25 @@ class FinancialConnectionsSheetViewModelTest {
                         "error Launching the Auth Flow",
                 )
             )
+        }
+    }
+
+    @Test
+    fun `onDismissed - when sync completes after dismissal, finishes with Result#Cancel`() = runTest {
+        // Given
+        val syncResult = CompletableDeferred<SynchronizeSessionResponse>()
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any())).thenReturn(true)
+        whenever(getOrFetchSync(any(), any())).doSuspendableAnswer { syncResult.await() }
+        val viewModel = createViewModel(defaultInitialState)
+
+        // When
+        viewModel.onDismissed()
+        syncResult.complete(syncResponse)
+
+        // Then
+        withState(viewModel) {
+            assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
         }
     }
 
@@ -1032,13 +1060,13 @@ class FinancialConnectionsSheetViewModelTest {
             eventReporter = eventReporter,
             nativeRouter = nativeRouter,
             analyticsTracker = analyticsTracker,
+            eventContext = FinancialConnectionsEventContext(initialState.manifest ?: syncResponse.manifest),
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
             integrityVerdictManager = mock(),
             logger = Logger.noop(),
-            ioDispatcher = testDispatcher,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

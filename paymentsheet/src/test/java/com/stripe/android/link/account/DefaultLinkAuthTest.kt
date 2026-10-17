@@ -62,13 +62,14 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
         assertThat(result.exceptionOrNull()?.message).contains(
-            "Either email+emailSource or linkAuthIntentId must be provided"
+            "Either email+emailSource, linkAuthIntentId, or linkAuthTokenClientSecret must be provided"
         )
     }
 
@@ -83,7 +84,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -104,7 +106,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = "auth_intent_123",
             customerId = "customer_123",
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -128,7 +131,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -159,7 +163,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isFailure).isTrue()
@@ -186,7 +191,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isFailure).isTrue()
@@ -338,7 +344,8 @@ internal class DefaultLinkAuthTest {
             linkAuthIntentId = null,
             customerId = null,
             sessionId = "session_123",
-            supportedVerificationTypes = null
+            supportedVerificationTypes = null,
+            linkAuthTokenClientSecret = null
         )
 
         assertThat(result.isFailure).isTrue()

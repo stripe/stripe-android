@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
@@ -12,6 +13,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_PHONE_OTP
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.networking.Resource
@@ -24,7 +27,8 @@ import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.OTPViewModel
 import com.stripe.android.identity.viewmodel.OTPViewState
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +53,9 @@ import org.robolectric.annotation.Config
 class OTPScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val verificationPageOTP = mock<VerificationPage>().also {
         whenever(it.phoneOtp).thenReturn(
@@ -81,19 +88,21 @@ class OTPScreenTest {
     )
 
     private val mockErrorCause = mock<MutableLiveData<Throwable>>()
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val collectedDataFlow = MutableStateFlow(CollectedDataParam())
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageData
         on { collectedData } doReturn collectedDataFlow
         on { errorCause } doReturn mockErrorCause
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     private val otpViewState = MutableStateFlow<OTPViewState>(OTPViewState.InputtingOTP)
     private val mockOtpViewModel = mock<OTPViewModel> {
         on { viewState } doReturn otpViewState
         on { otpElement } doReturn OTPElement(
-            identifier = IdentifierSpec.Generic(OTPViewModel.OTP),
+            identifier = FormFieldId.Generic(OTPViewModel.OTP),
             controller = OTPController()
         )
     }
@@ -152,7 +161,7 @@ class OTPScreenTest {
         otpViewState.update { OTPViewState.InputtingOTP }
 
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -169,7 +178,7 @@ class OTPScreenTest {
                 navController = same(mockNavController),
                 onMissingOtp = any()
             )
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -180,7 +189,7 @@ class OTPScreenTest {
     fun verifyErrorOTPState() {
         otpViewState.update { OTPViewState.ErrorOTP }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertExists()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -191,7 +200,7 @@ class OTPScreenTest {
     fun verifyRequestingOTPState() {
         otpViewState.update { OTPViewState.RequestingOTP }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -202,7 +211,7 @@ class OTPScreenTest {
     fun verifyRequestingCannotVerifyState() {
         otpViewState.update { OTPViewState.RequestingCannotVerify }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -220,7 +229,8 @@ class OTPScreenTest {
                 same(mockNavController),
                 any()
             )
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_PHONE_OTP), any())
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -232,6 +242,7 @@ class OTPScreenTest {
         val cause = Throwable()
         otpViewState.update { OTPViewState.RequestingError(cause) }
         setComposeTestRuleWith {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_PHONE_OTP), any())
             verify(mockErrorCause).postValue(same(cause))
             verify(mockNavController).navigate(
                 argWhere {
@@ -241,6 +252,11 @@ class OTPScreenTest {
             )
         }
     }
+
+    private fun ComposeTestRule.otpInputBox() = onNodeWithTag(OTP_ELEMENT_TAG)
+        .onChildAt(0)
+        .onChildAt(0)
+        .onChildAt(0)
 
     private fun setComposeTestRuleWith(
         testBlock: suspend ComposeContentTestRule.() -> Unit = {}

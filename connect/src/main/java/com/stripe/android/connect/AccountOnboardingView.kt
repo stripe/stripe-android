@@ -76,25 +76,21 @@ class AccountOnboardingProps(
      * URL to your [full terms of service agreement](https://docs.stripe.com/connect/service-agreement-types#full).
      */
     val fullTermsOfServiceUrl: String? = null,
-
     /**
      * URL to your
      * [recipient terms of service](https://docs.stripe.com/connect/service-agreement-types#recipient) agreement.
      */
     val recipientTermsOfServiceUrl: String? = null,
-
     /**
      * Absolute URL to your privacy policy.
      */
     val privacyPolicyUrl: String? = null,
-
     /**
      * If true, embedded onboarding skips terms of service collection and you must
      * [collect terms acceptance yourself](https://docs.stripe.com/connect/updating-service-agreements#indicating-acceptance).
      */
     @Suppress("MaxLineLength")
     val skipTermsOfServiceCollection: Boolean? = null,
-
     /**
      * Customizes collecting `currently_due` or `eventually_due` requirements and controls whether to include
      * [future requirements](https://docs.stripe.com/api/accounts/object#account_object-future_requirements).

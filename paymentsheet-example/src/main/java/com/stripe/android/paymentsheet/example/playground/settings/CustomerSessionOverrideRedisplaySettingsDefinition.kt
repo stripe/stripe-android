@@ -14,8 +14,15 @@ internal object CustomerSessionOverrideRedisplaySettingsDefinition :
     PlaygroundSettingDefinition.Displayable<CustomerSessionOverrideRedisplaySettingsDefinition.OverrideAllowRedisplay> {
     override val displayName: String = "Customer Session Override Allow Redisplay"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return false
+        }
+
+        return settings[CustomerSessionSettingsDefinition] == true
     }
 
     override fun createOptions(

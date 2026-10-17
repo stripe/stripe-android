@@ -30,6 +30,13 @@ class ApiKeyValidatorTest {
     }
 
     @Test
+    fun testRestrictedKey_throwsException() {
+        assertFailsWith<IllegalArgumentException> {
+            ApiKeyValidator.get().requireValid(ApiKeyFixtures.FAKE_RESTRICTED_KEY)
+        }
+    }
+
+    @Test
     fun testEmpty_throwsException() {
         assertFailsWith<IllegalArgumentException> {
             ApiKeyValidator.get().requireValid("   ")

@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
@@ -76,7 +77,11 @@ internal open class FakeLinkAccountManager(
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
+    val _suggestedEmail = MutableStateFlow<String?>(null)
+    override val suggestedEmail: StateFlow<String?> = _suggestedEmail.asStateFlow()
+
     var lookupConsumerByAuthIntentResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
+    var lookupConsumerByLinkAuthTokenResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
@@ -85,8 +90,14 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
-    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
-        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+    var createPaymentDetailsFromPaymentMethodResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        LinkPaymentDetails.Saved(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+    )
+    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Passthrough> = Result.success(
+        value = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
     )
     var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
         value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -97,6 +108,10 @@ internal open class FakeLinkAccountManager(
     var createPaymentMethodResult: Result<com.stripe.android.model.PaymentMethod> = Result.success(
         value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     )
+    var createPaymentMethodResultProvider: suspend () -> Result<com.stripe.android.model.PaymentMethod> = {
+        createPaymentMethodResult
+    }
+    val createPaymentMethodCalls = Turbine<LinkPaymentMethod>()
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -115,13 +130,20 @@ internal open class FakeLinkAccountManager(
         }
 
     private val lookupByAuthIntentTurbine = Turbine<LookupCallByAuthIntent>()
+    private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
-    private val startVerificationTurbine = Turbine<Unit>()
+    private val startVerificationTurbine = Turbine<Boolean>()
+    private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<CreatePaymentDetailsFromPaymentMethodCall>()
+
+    internal data class CreatePaymentDetailsFromPaymentMethodCall(
+        val customerEphemeralKey: String,
+        val paymentMethod: PaymentMethod,
+    )
 
     val confirmVerificationTurbine = Turbine<String>()
 
-    private val logoutCall = Turbine<Unit>()
+    private val logoutCall = Turbine<LinkAccount?>()
 
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
         _consumerState.value = consumerPaymentDetails?.toLinkPaymentMethod()?.let {
@@ -172,6 +194,16 @@ internal open class FakeLinkAccountManager(
         return lookupConsumerByAuthIntentResult
     }
 
+    override suspend fun lookupByLinkAuthTokenClientSecret(linkAuthTokenClientSecret: String): Result<LinkAccount?> {
+        lookupByLinkAuthTokenTurbine.add(
+            item = LookupCallByLinkAuthToken(
+                linkAuthTokenClientSecret = linkAuthTokenClientSecret
+            )
+        )
+
+        return lookupConsumerByLinkAuthTokenResult
+    }
+
     override suspend fun refreshConsumer(): Result<ConsumerSessionRefresh> {
         return refreshConsumerResult
     }
@@ -181,7 +213,12 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun logOut(): Result<ConsumerSession> {
-        logoutCall.add(Unit)
+        logoutCall.add(linkAccountHolder.linkAccountInfo.value.account)
+        return logOutResult
+    }
+
+    override suspend fun logOut(linkAccount: LinkAccount): Result<ConsumerSession> {
+        logoutCall.add(linkAccount)
         return logOutResult
     }
 
@@ -191,9 +228,19 @@ internal open class FakeLinkAccountManager(
         return createCardPaymentDetailsResult
     }
 
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved> {
+        createPaymentDetailsFromPaymentMethodTurbine.add(
+            CreatePaymentDetailsFromPaymentMethodCall(customerEphemeralKey, paymentMethod)
+        )
+        return createPaymentDetailsFromPaymentMethodResult
+    }
+
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
-    ): Result<LinkPaymentDetails.Saved> {
+    ): Result<LinkPaymentDetails.Passthrough> {
         return shareCardPaymentDetailsResult
     }
 
@@ -206,7 +253,7 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,
@@ -223,11 +270,12 @@ internal open class FakeLinkAccountManager(
     override suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<com.stripe.android.model.PaymentMethod> {
-        return createPaymentMethodResult
+        createPaymentMethodCalls.add(linkPaymentMethod)
+        return createPaymentMethodResultProvider()
     }
 
-    override suspend fun startVerification(): Result<LinkAccount> {
-        startVerificationTurbine.add(Unit)
+    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
+        startVerificationTurbine.add(isResendSmsCode)
         return startVerificationResult
     }
 
@@ -252,7 +300,7 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
-        billingPhone: String?
+        phone: String?
     ): Result<ConsumerPaymentDetails> {
         updateCardDetailsTurbine.add(
             updateParams
@@ -272,7 +320,7 @@ internal open class FakeLinkAccountManager(
         return lookupByAuthIntentTurbine.awaitItem()
     }
 
-    suspend fun awaitStartVerificationCall() {
+    suspend fun awaitStartVerificationCall(): Boolean {
         return startVerificationTurbine.awaitItem()
     }
 
@@ -280,11 +328,20 @@ internal open class FakeLinkAccountManager(
         return confirmVerificationTurbine.awaitItem()
     }
 
+    suspend fun awaitCreatePaymentDetailsFromPaymentMethodTurbineCall(): CreatePaymentDetailsFromPaymentMethodCall {
+        return createPaymentDetailsFromPaymentMethodTurbine.awaitItem()
+    }
+
     suspend fun awaitLogoutCall() {
+        logoutCall.awaitItem()
+    }
+
+    suspend fun awaitLogoutCallAccount(): LinkAccount? {
         return logoutCall.awaitItem()
     }
 
     fun ensureAllEventsConsumed() {
+        createPaymentDetailsFromPaymentMethodTurbine.ensureAllEventsConsumed()
         lookupByAuthIntentTurbine.ensureAllEventsConsumed()
     }
 
@@ -299,5 +356,9 @@ internal open class FakeLinkAccountManager(
 
     data class LookupCallByAuthIntent(
         val linkAuthIntentId: String?,
+    )
+
+    data class LookupCallByLinkAuthToken(
+        val linkAuthTokenClientSecret: String?
     )
 }

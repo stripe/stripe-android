@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.utils.DateUtils
+import dev.drewhamilton.poko.Poko
 
 sealed class ExpirationDate {
     internal data class Unvalidated(
@@ -90,7 +91,8 @@ sealed class ExpirationDate {
         }
     }
 
-    data class Validated(
+    @Poko
+    class Validated(
         val month: Int,
         val year: Int
     ) : ExpirationDate()

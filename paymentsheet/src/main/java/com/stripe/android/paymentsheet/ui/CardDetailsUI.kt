@@ -2,11 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
@@ -19,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -29,15 +32,18 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
-import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.elements.Selector
+import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as CoreR
 
 @Composable
@@ -48,7 +54,7 @@ internal fun CardDetailsEditUI(
     val state by editCardDetailsInteractor.state.collectAsState()
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
-    val hiddenBillingDetailsFields: State<Set<IdentifierSpec>>? = state.billingDetailsForm
+    val hiddenBillingDetailsFields: State<Set<FormFieldId>>? = state.billingDetailsForm
         ?.hiddenElements
         ?.collectAsState()
 
@@ -95,17 +101,17 @@ private fun CardDetailsFormUI(
     paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     dividerHeight: MutableState<Dp>,
-    hiddenBillingDetailsFields: State<Set<IdentifierSpec>>?,
+    hiddenBillingDetailsFields: State<Set<FormFieldId>>?,
     onExpDateChanged: (String) -> Unit,
     nameElementForCardSection: SectionFieldElement?,
 ) {
-    val error = rememberError(cardDetailsState, billingDetailsForm)
+    val validationMessage = rememberValidationMessage(cardDetailsState, billingDetailsForm)
 
     Section(
         title = billingDetailsForm?.let {
             resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
         },
-        error = error,
+        validationMessage = validationMessage,
         modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
     ) {
         Column {
@@ -160,29 +166,25 @@ private fun CardDetailsFormUI(
 }
 
 @Composable
-private fun rememberError(
+private fun rememberValidationMessage(
     cardDetailsState: EditCardDetailsInteractor.CardDetailsState,
     billingDetailsForm: BillingDetailsForm?
-): String? {
+): FieldValidationMessage? {
     val nameErrorState = remember(billingDetailsForm?.nameElement) {
-        billingDetailsForm?.nameElement?.controller?.error ?: stateFlowOf(null)
+        billingDetailsForm?.nameElement?.controller?.validationMessage ?: stateFlowOf(null)
     }
 
     val nameError by nameErrorState.collectAsState()
 
-    val error = nameError?.let {
-        resolvableString(it.errorMessage, it.formatArgs)
-    } ?: cardDetailsState.expiryDateState.sectionError()
-
-    return error?.resolve()
+    return nameError ?: cardDetailsState.expiryDateState.sectionValidationMessage()
 }
 
 /**
  * Checks if the billing details form has any fields that are focusable.
  */
 @Composable
-private fun Set<IdentifierSpec>.hasFocusableFields(): Boolean = listOf(
-    IdentifierSpec.PostalCode
+private fun Set<FormFieldId>.hasFocusableFields(): Boolean = listOf(
+    FormFieldId.PostalCode
 ).none { contains(it) }
 
 @Composable
@@ -196,7 +198,10 @@ private fun CardNumberField(
     isFirstField: Boolean,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• ${last4 ?: "••••"}",
+        value = stringResource(
+            PaymentSheetR.string.stripe_paymentsheet_update_card_number,
+            last4 ?: "••••",
+        ),
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         shape = if (isFirstField) {
             MaterialTheme.shapes.small.copy(
@@ -213,10 +218,10 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                CardBrandDropdown(
+                CardBrandChoiceSelector(
                     selectedBrand = selectedBrand,
-                    availableBrands = availableNetworks,
-                    onBrandChoiceChanged = onBrandChoiceChanged,
+                    availableNetworks = availableNetworks,
+                    onBrandChoiceChanged = onBrandChoiceChanged
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -255,5 +260,49 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
     )
 }
 
+@Composable
+private fun CardBrandChoiceSelector(
+    selectedBrand: CardBrandChoice,
+    availableNetworks: List<CardBrandChoice>,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .focusProperties { canFocus = false }
+            .padding(10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Selector(
+            currentItem = selectedBrand.toItem(),
+            items = availableNetworks.map { it.toItem() },
+            onItemSelected = {
+                it?.let {
+                    onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+                }
+            },
+            hasFocus = true,
+            popupMessage = null,
+            hasMadeSelection = true
+        )
+    }
+}
+
+private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        brand = CardBrand.fromCode(this.id),
+        enabled = enabled
+    )
+}
+
+private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
+    return TextFieldIcon.Selector.Item(
+        id = brand.code,
+        label = brand.displayName.resolvableString,
+        icon = icon,
+        enabled = enabled
+    )
+}
+
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
 internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"
+internal const val CARD_EDIT_UI_MISSING_EXPIRY_DATE = ""

@@ -13,18 +13,22 @@ class RetryRule(private val attempts: Int) : TestRule {
         return object : Statement() {
             @Throws
             override fun evaluate() {
-                for (attempt in 1..attempts) {
-                    val isLast = attempts == attempt
-                    runCatching {
-                        base.evaluate()
-                    }.onSuccess {
-                        return
-                    }.onFailure { error ->
-                        if (isLast || error is AssumptionViolatedException || error is NoLeakAssertionFailedError) {
-                            throw error
+                if (BuildConfig.IS_RUNNING_IN_CI) {
+                    for (attempt in 1..attempts) {
+                        val isLast = attempts == attempt
+                        runCatching {
+                            base.evaluate()
+                        }.onSuccess {
+                            return
+                        }.onFailure { error ->
+                            if (isLast || error is AssumptionViolatedException || error is NoLeakAssertionFailedError) {
+                                throw error
+                            }
+                            Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
                         }
-                        Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
                     }
+                } else {
+                    base.evaluate()
                 }
             }
         }

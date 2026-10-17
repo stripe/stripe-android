@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
@@ -28,8 +25,8 @@ class SavedPaymentMethodsExtensionTest {
     }
 
     @Test
-    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null and paymentMethod id null`() {
-        val actual = testSetup(null, null)
+    fun `shouldShowDefaultBadge is false when defaultPaymentMethodId is null`() {
+        val actual = testSetup(paymentMethodId = "pm_123", null)
         assertEquals(actual.shouldShowDefaultBadge, false)
     }
 
@@ -39,17 +36,10 @@ class SavedPaymentMethodsExtensionTest {
         assertEquals(actual.shouldShowDefaultBadge, true)
     }
 
-    private fun testSetup(paymentMethodId: String?, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
-        val resolvableString = "acbde123".resolvableString
-
+    private fun testSetup(paymentMethodId: String, defaultPaymentMethodId: String?): DisplayableSavedPaymentMethod {
         val paymentMethod = PaymentMethodFactory.card(paymentMethodId)
 
-        val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString = { pmc ->
-            resolvableString
-        }
-
         return paymentMethod.toDisplayableSavedPaymentMethod(
-            providePaymentMethodName = providePaymentMethodName,
             paymentMethodMetadata = null,
             defaultPaymentMethodId = defaultPaymentMethodId
         )

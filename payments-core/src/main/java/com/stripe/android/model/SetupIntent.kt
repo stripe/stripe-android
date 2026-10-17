@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.regex.Pattern
@@ -16,30 +17,27 @@ import java.util.regex.Pattern
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
-data class SetupIntent
+@Poko
+class SetupIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
      * Unique identifier for the object.
      */
     override val id: String?,
-
     /**
      * Reason for cancellation of this [SetupIntent].
      */
     val cancellationReason: CancellationReason?,
-
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
-
     /**
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val countryCode: String?,
-
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
      * publishable key.
@@ -49,38 +47,31 @@ constructor(
      * sure that you have TLS enabled on any page that includes the client secret.
      */
     override val clientSecret: String?,
-
     /**
      * An arbitrary string attached to the object. Often useful for displaying to users.
      */
     override val description: String?,
-
     /**
      * Has the value `true` if the object exists in live mode or the value
      * `false` if the object exists in test mode.
      */
     override val isLiveMode: Boolean,
-
     /**
      * The expanded [PaymentMethod] represented by [paymentMethodId].
      */
     override val paymentMethod: PaymentMethod? = null,
-
     /**
      * ID of the payment method used with this [SetupIntent].
      */
     override val paymentMethodId: String?,
-
     /**
      * The list of payment method types (e.g. card) that this [SetupIntent] is allowed to set up.
      */
     override val paymentMethodTypes: List<String>,
-
     /**
      * [Status](https://stripe.com/docs/payments/intents#intent-statuses) of this [SetupIntent].
      */
     override val status: StripeIntent.Status?,
-
     /**
      * Indicates how the payment method is intended to be used in the future.
      *
@@ -90,26 +81,20 @@ constructor(
      * [StripeIntent.Usage.OffSession].
      */
     val usage: StripeIntent.Usage?,
-
     /**
      * The error encountered in the previous [SetupIntent] confirmation.
      */
     val lastSetupError: Error? = null,
-
     /**
      * Payment types that have not been activated in livemode, but have been activated in testmode.
      */
     override val unactivatedPaymentMethods: List<String>,
-
     /**
      * Payment types that are accepted when paying with Link.
      */
     override val linkFundingSources: List<String>,
-
     override val nextActionData: StripeIntent.NextActionData?,
-
     private val paymentMethodOptionsJsonString: String? = null,
-
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val automaticPaymentMethodsEnabled: Boolean = false,
 ) : StripeIntent {
@@ -139,6 +124,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -148,8 +136,9 @@ constructor(
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
-            is StripeIntent.NextActionData.UpiAwaitNotification,
             is StripeIntent.NextActionData.SwishRedirect,
+            is StripeIntent.NextActionData.AwaitAuthorization,
+            is StripeIntent.NextActionData.MbWayAwaitAuthorization,
             is StripeIntent.NextActionData.DisplayPayNowDetails,
             is StripeIntent.NextActionData.DisplayPromptPayDetails,
             null -> {
@@ -180,44 +169,38 @@ constructor(
      * See [last_setup_error](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-last_setup_error).
      */
     @Parcelize
-    data class Error internal constructor(
-
+    @Poko
+    class Error internal constructor(
         /**
          * For some errors that could be handled programmatically, a short string indicating the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val code: String?,
-
         /**
          * For card errors resulting from a card issuer decline, a short string indicating the
          * [card issuer’s reason for the decline](https://stripe.com/docs/declines#issuer-declines)
          * if they provide one.
          */
         val declineCode: String?,
-
         /**
          * A URL to more information about the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val docUrl: String?,
-
         /**
          * A human-readable message providing more details about the error. For card errors,
          * these messages can be shown to your users.
          */
         val message: String?,
-
         /**
          * If the error is parameter-specific, the parameter related to the error.
          * For example, you can use this to display a message near the correct form field.
          */
         val param: String?,
-
         /**
          * The PaymentMethod object for errors returned on a request involving a PaymentMethod.
          */
         val paymentMethod: PaymentMethod?,
-
         /**
          * The type of error returned.
          */
@@ -239,21 +222,42 @@ constructor(
             }
         }
 
+        internal fun copy(
+            code: String? = this.code,
+            declineCode: String? = this.declineCode,
+            docUrl: String? = this.docUrl,
+            message: String? = this.message,
+            param: String? = this.param,
+            paymentMethod: PaymentMethod? = this.paymentMethod,
+            type: Type? = this.type
+        ): Error {
+            return Error(
+                code = code,
+                declineCode = declineCode,
+                docUrl = docUrl,
+                message = message,
+                param = param,
+                paymentMethod = paymentMethod,
+                type = type
+            )
+        }
+
         internal companion object {
             internal const val CODE_AUTHENTICATION_ERROR = "setup_intent_authentication_failure"
         }
     }
 
     internal data class ClientSecret(internal val value: String) {
+        init {
+            require(isMatch(value)) {
+                "Invalid SetupIntent client secret. " +
+                    "Pass the client_secret from the SetupIntent returned by your server."
+            }
+        }
+
         internal val setupIntentId: String =
             value.split("_secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-
-        init {
-            require(isMatch(value)) {
-                "Invalid Setup Intent client secret: $value"
-            }
-        }
 
         internal companion object {
             private val PATTERN = Pattern.compile("^seti_[^_]+_secret_[^_]+$")
@@ -275,6 +279,49 @@ constructor(
                 return entries.firstOrNull { it.code == code }
             }
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        id: String? = this.id,
+        cancellationReason: CancellationReason? = this.cancellationReason,
+        created: Long = this.created,
+        countryCode: String? = this.countryCode,
+        clientSecret: String? = this.clientSecret,
+        description: String? = this.description,
+        isLiveMode: Boolean = this.isLiveMode,
+        paymentMethod: PaymentMethod? = this.paymentMethod,
+        paymentMethodId: String? = this.paymentMethodId,
+        paymentMethodTypes: List<String> = this.paymentMethodTypes,
+        status: StripeIntent.Status? = this.status,
+        usage: StripeIntent.Usage? = this.usage,
+        lastSetupError: Error? = this.lastSetupError,
+        unactivatedPaymentMethods: List<String> = this.unactivatedPaymentMethods,
+        linkFundingSources: List<String> = this.linkFundingSources,
+        nextActionData: StripeIntent.NextActionData? = this.nextActionData,
+        paymentMethodOptionsJsonString: String? = this.paymentMethodOptionsJsonString,
+        automaticPaymentMethodsEnabled: Boolean = this.automaticPaymentMethodsEnabled,
+    ): SetupIntent {
+        return SetupIntent(
+            id = id,
+            cancellationReason = cancellationReason,
+            created = created,
+            countryCode = countryCode,
+            clientSecret = clientSecret,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            paymentMethodTypes = paymentMethodTypes,
+            status = status,
+            usage = usage,
+            lastSetupError = lastSetupError,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+            automaticPaymentMethodsEnabled = automaticPaymentMethodsEnabled,
+        )
     }
 
     companion object {

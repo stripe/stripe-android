@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 
 internal data class LinkAppBarState(
@@ -12,6 +13,7 @@ internal data class LinkAppBarState(
     val canNavigateBack: Boolean,
     val title: ResolvableString?,
     val isElevated: Boolean,
+    val linkBrand: LinkBrand,
 ) {
 
     val canShowCloseIcon: Boolean
@@ -19,12 +21,13 @@ internal data class LinkAppBarState(
 
     internal companion object {
 
-        fun initial(): LinkAppBarState {
+        fun initial(linkBrand: LinkBrand): LinkAppBarState {
             return LinkAppBarState(
                 showHeader = true,
                 canNavigateBack = false,
                 title = null,
                 isElevated = false,
+                linkBrand = linkBrand,
             )
         }
 
@@ -32,6 +35,7 @@ internal data class LinkAppBarState(
             currentEntry: NavBackStackEntry?,
             previousEntryRoute: String?,
             consumerIsSigningUp: Boolean,
+            linkBrand: LinkBrand,
         ): LinkAppBarState {
             val route = currentEntry?.destination?.route
             val showHeaderRoutes = mutableSetOf(
@@ -68,6 +72,7 @@ internal data class LinkAppBarState(
                 canNavigateBack = previousEntryRoute != null,
                 title = title,
                 isElevated = false,
+                linkBrand = linkBrand,
             )
         }
 

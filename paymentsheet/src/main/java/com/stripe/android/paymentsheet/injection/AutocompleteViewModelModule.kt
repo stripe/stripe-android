@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -50,15 +50,14 @@ internal interface AutocompleteViewModelModule {
         ): AutocompleteViewModel.Args = AutocompleteViewModel.Args(args.country)
 
         @Provides
-        @Named(ENABLE_LOGGING)
-        fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+        @Singleton
+        fun provideApiConfiguration(
+            args: AutocompleteContract.Args
+        ) = args.apiConfiguration
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        @Singleton
-        fun providesPublishableKey(
-            context: Context
-        ): () -> String = { PaymentConfiguration.getInstance(context).publishableKey }
+        @Named(ENABLE_LOGGING)
+        fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
         @Singleton
@@ -68,7 +67,10 @@ internal interface AutocompleteViewModelModule {
         ): PlacesClientProxy = PlacesClientProxy.create(
             context = context,
             googlePlacesApiKey = args.googlePlacesApiKey,
-            errorReporter = ErrorReporter.createFallbackInstance(context),
+            errorReporter = ErrorReporter.createFallbackInstance(
+                context = context,
+                apiConfigurationProvider = { args.apiConfiguration },
+            ),
         )
 
         @Provides
@@ -76,5 +78,11 @@ internal interface AutocompleteViewModelModule {
         fun provideEventReporter(
             defaultAddressLauncherEventReporter: DefaultAddressLauncherEventReporter
         ): AddressLauncherEventReporter = defaultAddressLauncherEventReporter
+
+        @Provides
+        @Singleton
+        fun provideDurationProvider(): DurationProvider {
+            return DefaultDurationProvider.instance
+        }
     }
 }

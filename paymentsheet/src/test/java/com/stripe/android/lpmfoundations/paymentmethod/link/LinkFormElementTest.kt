@@ -19,21 +19,28 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.inline.LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +55,9 @@ class LinkFormElementTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `If initial user input is provided, should be displayed to the user when alongside SFU`() {
@@ -64,7 +74,11 @@ class LinkFormElementTest {
 
         composeTestRule.setContent {
             DefaultLinkTheme {
-                element.ComposeUI(enabled = true)
+                element.ComposeUI(
+                    enabled = true,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                )
             }
         }
 
@@ -90,7 +104,11 @@ class LinkFormElementTest {
 
         composeTestRule.setContent {
             DefaultLinkTheme {
-                element.ComposeUI(enabled = true)
+                element.ComposeUI(
+                    enabled = true,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                )
             }
         }
 
@@ -106,9 +124,9 @@ class LinkFormElementTest {
     }
 
     private fun ComposeTestRule.waitForRemainingLinkFields() {
-        waitUntil(timeoutMillis = 5000L) {
+        waitUntilWithIdle {
             onAllNodesWithTag(testTag = LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -148,9 +166,6 @@ class LinkFormElementTest {
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
-            ),
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
@@ -161,7 +176,6 @@ class LinkFormElementTest {
             allowUserEmailEdits = true,
             allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
-            skipWalletInFlowController = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
@@ -169,14 +183,24 @@ class LinkFormElementTest {
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkBrand = LinkBrand.Link,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 
     private fun createLinkConfigurationCoordinator(): LinkConfigurationCoordinator {
-        return FakeLinkConfigurationCoordinator
+        return FakeLinkConfigurationCoordinator(viewModelStoreRule)
     }
 
-    private object FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
+    private class FakeLinkConfigurationCoordinator(
+        private val viewModelStoreRule: ViewModelStoreTestRule,
+    ) : LinkConfigurationCoordinator {
+        override val accountFlow: StateFlow<LinkAccount?>
+            get() = stateFlowOf(null)
+
         override val emailFlow: StateFlow<String?>
             get() {
                 error("Not implemented!")
@@ -190,6 +214,7 @@ class LinkFormElementTest {
                 inlineSignupViewModelFactory = FakeLinkInlineSignupAssistedViewModelFactory(
                     linkAccountManager = linkAccountManager,
                     configuration = configuration,
+                    viewModelStoreRule = viewModelStoreRule,
                 )
             )
         }
@@ -220,6 +245,14 @@ class LinkFormElementTest {
             error("Not implemented!")
         }
 
+        override suspend fun attachExistingCardToAccount(
+            configuration: LinkConfiguration,
+            customerEphemeralKey: String,
+            paymentMethod: PaymentMethod,
+        ): Result<LinkPaymentDetails.Saved> {
+            error("Not implemented!")
+        }
+
         override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {
             error("Not implemented!")
         }
@@ -228,6 +261,7 @@ class LinkFormElementTest {
     private class FakeLinkInlineSignupAssistedViewModelFactory(
         private val linkAccountManager: LinkAccountManager,
         private val configuration: LinkConfiguration,
+        private val viewModelStoreRule: ViewModelStoreTestRule,
     ) : LinkInlineSignupAssistedViewModelFactory {
         override fun create(
             signupMode: LinkSignupMode,
@@ -243,7 +277,7 @@ class LinkFormElementTest {
                 logger = Logger.noop(),
                 lookupDelay = 0L,
                 previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
-            )
+            ).also { viewModelStoreRule.track(it) }
         }
     }
 

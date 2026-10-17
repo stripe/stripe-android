@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -257,6 +257,39 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun cardBrandIsOmittedFromUpdateParamsWhenCbcIsNotModifiable() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            // CARD_WITH_NETWORKS has a resolvable brand, but the brand isn't editable here.
+            isCbcModifiable = false,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged("1230"))
+
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+        assertThat(capturedCardUpdateParams?.cardBrand).isNull()
+    }
+
+    @Test
+    fun cardBrandIsIncludedInUpdateParamsWhenCbcIsModifiable() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            isCbcModifiable = true,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged("1230"))
+
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+        assertThat(capturedCardUpdateParams?.cardBrand).isEqualTo(CardBrand.CartesBancaires)
+    }
+
+    @Test
     fun cardUpdateParamsIsUpdatedForValidAddressUpdate() {
         var capturedCardUpdateParams: CardUpdateParams? = null
         val handler = handler(
@@ -274,6 +307,31 @@ internal class DefaultEditCardDetailsInteractorTest {
         )
 
         assertThat(capturedCardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("11111")
+    }
+
+    @Test
+    fun cardUpdateParamsHasNullCardBrandWhenDisplayBrandIsNull() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val cardWithNoDisplayBrand = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+            displayBrand = null,
+        )
+        val handler = handler(
+            card = cardWithNoDisplayBrand,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("90211", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("90211")
+        assertThat(capturedCardUpdateParams?.cardBrand).isNull()
     }
 
     @Test
@@ -549,9 +607,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             val addressSectionElement = requireNotNull(billingAddressForm).addressSectionElement
 
             assertThat(addressSectionElement.fields.size).isEqualTo(1)
-            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-            val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+            val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
             assertThat(cardBillingAddressElement.countryElement.controller.displayItems)
                 .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -574,9 +632,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             val addressSectionElement = requireNotNull(billingAddressForm).addressSectionElement
 
             assertThat(addressSectionElement.fields.size).isEqualTo(1)
-            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<CardBillingAddressElement>()
+            assertThat(addressSectionElement.fields.firstOrNull()).isInstanceOf<BillingAddressElement>()
 
-            val cardBillingAddressElement = addressSectionElement.fields[0] as CardBillingAddressElement
+            val cardBillingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
 
             assertThat(cardBillingAddressElement.countryElement.controller.displayItems).containsExactly(
                 "\uD83C\uDDFA\uD83C\uDDF8 United States",
@@ -602,11 +660,11 @@ internal class DefaultEditCardDetailsInteractorTest {
             val initialBillingForm = requireNotNull(initialState.billingDetailsForm)
 
             assertThat(initialCardState.expiryDateState.shouldShowError()).isFalse()
-            assertThat(initialCardState.expiryDateState.sectionError()).isNull()
+            assertThat(initialCardState.expiryDateState.sectionValidationMessage()).isNull()
 
             assertThat(initialBillingForm.nameElement).isNotNull()
-            assertThat(initialBillingForm.nameElement?.controller?.error?.value).isNull()
-            assertThat(initialBillingForm.addressSectionElement.controller.error.value).isNull()
+            assertThat(initialBillingForm.nameElement?.controller?.validationMessage?.value).isNull()
+            assertThat(initialBillingForm.addressSectionElement.controller.validationMessage.value).isNull()
 
             handler.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
 
@@ -616,11 +674,11 @@ internal class DefaultEditCardDetailsInteractorTest {
             val validatingBillingForm = requireNotNull(validatingState.billingDetailsForm)
 
             assertThat(validatingCardState.expiryDateState.shouldShowError()).isTrue()
-            assertThat(validatingCardState.expiryDateState.sectionError()).isNotNull()
+            assertThat(validatingCardState.expiryDateState.sectionValidationMessage()).isNotNull()
 
             assertThat(validatingBillingForm.nameElement).isNotNull()
-            assertThat(validatingBillingForm.nameElement?.controller?.error?.value).isNotNull()
-            assertThat(validatingBillingForm.addressSectionElement.controller.error.value).isNotNull()
+            assertThat(validatingBillingForm.nameElement?.controller?.validationMessage?.value).isNotNull()
+            assertThat(validatingBillingForm.addressSectionElement.controller.validationMessage.value).isNotNull()
         }
     }
 
@@ -659,6 +717,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             ),
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }

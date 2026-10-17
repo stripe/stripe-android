@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">Accepted forms of ID include</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">Keep ID level</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">Allow</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">App Settings</string>
   <!-- Description of back of driver's license image -->
@@ -18,11 +20,19 @@
   <string name="stripe_back_of_id">Back of identity card</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Back of identity document</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Back of ID not detected</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Back of ID is selected</string>
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">Camera permission</string>
   <string name="stripe_camera_permission_rationale">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Captured front</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Captured left</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Captured right</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Capturing…</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -41,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">You can either try again or upload an image from your device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Could not capture image</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">Decline</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Details not visible</string>
   <string name="stripe_decrease_lighting_2">Move to a darker area</string>
@@ -90,8 +102,6 @@
   <string name="stripe_doc_front_warmup_title">Get ready to scan your photo ID</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Driver\'s license</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Error</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">File Upload</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -122,6 +132,8 @@
   <string name="stripe_front_of_id">Front of identity card</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Front of identity document</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Front of ID not detected</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Front of ID is selected</string>
   <!-- Description of front of passport image -->
@@ -136,12 +148,16 @@
   <string name="stripe_grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Hold still, scanning</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">Hold still...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID Number</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">I\'m ready</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Image taken</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">The ID number you entered is incomplete.</string>
   <!-- Instructional text when environment is too dark -->
@@ -158,12 +174,18 @@
   <string name="stripe_last_4_of_ssn">Last 4 of Social Security number</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Last</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Auto</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Loading</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Move ID closer</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Move ID further back</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Centre ID in view</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->
@@ -198,6 +220,7 @@
   <string name="stripe_position_selfie">Position your face in the centre of the frame.</string>
   <!-- Instructional text when the document is too blurry -->
   <string name="stripe_reduce_blur">ID not in focus</string>
+  <string name="stripe_reduce_blur_2">Image is blurry. Hold your phone steady and try again.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details not visible</string>
   <string name="stripe_reduce_glare_2">Try to reduce glare and make ID visible</string>
@@ -213,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">Selfie captures are complete</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Selfie captures</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">Great! Checking your images....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">With your permission, Stripe may use your images to improve fraud detection. Declining doesn\'t affect your verification.</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">Verify with a selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">one selfie captured</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Turn head left</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Turn head right</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">Move closer</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Place your face within the frame</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">Selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">Help us improve verifications</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
   <!-- Title for selfie warmup page -->

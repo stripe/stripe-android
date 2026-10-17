@@ -3,8 +3,8 @@ package com.stripe.android.lpm
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
@@ -21,10 +21,9 @@ import org.junit.Test
 internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "us_bank_account",
-        executeInNightlyRun = true,
         authorizationAction = null
     ) { settings ->
-        settings[CountrySettingsDefinition] = Country.US
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
     }
 
@@ -50,7 +49,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
-                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
@@ -78,7 +76,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
-                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings { settings ->
                 settings[CustomerSessionSettingsDefinition] = true

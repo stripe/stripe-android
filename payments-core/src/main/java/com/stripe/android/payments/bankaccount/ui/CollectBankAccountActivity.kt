@@ -62,8 +62,8 @@ class CollectBankAccountActivity : AppCompatActivity() {
         financialConnectionsLauncher.present(
             FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
+                apiConfiguration = apiConfiguration,
+                preCollectedConsent = preCollectedConsent,
             ),
             elementsSessionContext = elementsSessionContext
         )

@@ -2,7 +2,8 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
@@ -10,7 +11,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class GooglePayConfirmationOption(
     val config: Config,
-    val passiveCaptchaParams: PassiveCaptchaParams?
 ) : ConfirmationHandler.Option {
     @Parcelize
     data class Config(
@@ -21,6 +21,11 @@ internal data class GooglePayConfirmationOption(
         val customAmount: Long?,
         val customLabel: String?,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        val cardBrandFilter: CardBrandFilter
+        val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
+        val additionalEnabledNetworks: List<String> = emptyList(),
+        val isEmailRequired: Boolean = billingDetailsCollectionConfiguration.collectsEmail,
+        val billingEmailOverride: String? = null,
+        val shippingAddressParameters: GooglePayJsonFactory.ShippingAddressParameters? = null,
     ) : Parcelable
 }

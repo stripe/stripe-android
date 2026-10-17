@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.MobileFallbackWebviewParams
 import org.json.JSONObject
 
@@ -24,8 +25,26 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             consumerSessionJson.optJSONObject(FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS)
                 ?.let { parseMobileFallbackWebviewParams(it) }
 
+        val currentAuthenticationLevel =
+            optString(consumerSessionJson, FIELD_CURRENT_AUTHENTICATION_LEVEL)
+                ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
+
+        val minimumAuthenticationLevel =
+            optString(consumerSessionJson, FIELD_MINIMUM_AUTHENTICATION_LEVEL)
+                ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
+
+        val linkBrand = optString(json, FIELD_LINK_BRAND)?.let { value ->
+            LinkBrand.entries.firstOrNull { it.value == value }
+        }
+
+        val supportedPaymentDetailsTypes =
+            consumerSessionJson.optJSONArray(FIELD_SUPPORT_PAYMENT_DETAILS_TYPES)
+                ?.let { array -> (0 until array.length()).map { array.getString(it) } }
+                ?: emptyList()
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
+            linkSessionKey = optString(consumerSessionJson, FIELD_LINK_SESSION_KEY),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
@@ -33,6 +52,10 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
             mobileFallbackWebviewParams = mobileFallbackWebviewParams,
+            currentAuthenticationLevel = currentAuthenticationLevel,
+            minimumAuthenticationLevel = minimumAuthenticationLevel,
+            linkBrand = linkBrand,
+            supportedPaymentDetailsTypes = supportedPaymentDetailsTypes,
         )
     }
 
@@ -58,6 +81,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION = "consumer_session"
 
         private const val FIELD_CONSUMER_SESSION_SECRET = "client_secret"
+        private const val FIELD_LINK_SESSION_KEY = "link_session_key"
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"
@@ -65,10 +89,14 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_UNREDACTED_PHONE = "unredacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_PHONE_COUNTRY = "phone_number_country"
         private const val FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS = "mobile_fallback_webview_params"
+        private const val FIELD_CURRENT_AUTHENTICATION_LEVEL = "current_authentication_level"
+        private const val FIELD_MINIMUM_AUTHENTICATION_LEVEL = "minimum_authentication_level"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"
 
+        private const val FIELD_LINK_BRAND = "link_brand"
+        private const val FIELD_SUPPORT_PAYMENT_DETAILS_TYPES = "support_payment_details_types"
         private const val FIELD_WEBVIEW_REQUIREMENT_TYPE = "webview_requirement_type"
         private const val FIELD_WEBVIEW_OPEN_URL = "webview_open_url"
     }

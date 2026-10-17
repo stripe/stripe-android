@@ -22,11 +22,13 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
         return combineAsStateFlow(
             linkHandler.isLinkEnabled,
             linkHandler.linkConfigurationCoordinator.emailFlow,
-        ) { isLinkAvailable, linkEmail ->
+            linkHandler.linkConfigurationCoordinator.accountFlow,
+        ) { isLinkAvailable, linkEmail, linkAccount ->
             WalletsState.create(
-                isLinkAvailable = isLinkAvailable,
+                isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata.shouldShowLinkButton,
                 linkEmail = linkEmail,
                 isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
+                apiConfiguration = paymentMethodMetadata.apiConfiguration,
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.
@@ -34,7 +36,10 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },
                 onLinkPressed = { throw IllegalStateException("Not possible.") },
                 isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
-                walletsAllowedInHeader = emptyList() // Embedded: all wallets inline, none in header
+                walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
+                cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
+                cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+                linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
             )
         }
     }

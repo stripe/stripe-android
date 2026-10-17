@@ -1,0 +1,130 @@
+package com.stripe.android.common.taptoadd.ui
+
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.FormFieldId
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+internal class FakeTapToAddConfirmationInteractor(
+    showCvcElement: Boolean = false,
+    cvcInitialValue: String? = null,
+    cardBrand: CardBrand = CardBrand.Visa,
+    last4: String? = "4242",
+    title: ResolvableString? = null,
+    locked: Boolean = true,
+    primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
+        TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
+    error: ResolvableString? = null,
+) : TapToAddConfirmationInteractor {
+    private val _state = MutableStateFlow(
+        TapToAddConfirmationInteractor.State(
+            cardBrand = cardBrand,
+            last4 = last4,
+            title = title,
+            primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
+                label = "Pay".resolvableString,
+                locked = locked,
+                state = primaryButtonState,
+                enabled = true,
+            ),
+            form = TapToAddConfirmationInteractor.State.Form(
+                elements = listOf(createCvcElement(cardBrand, cvcInitialValue)).takeIf {
+                    showCvcElement
+                } ?: emptyList(),
+                enabled = true,
+            ),
+            error = error,
+        )
+    )
+    override val state: StateFlow<TapToAddConfirmationInteractor.State> = _state.asStateFlow()
+
+    fun setPrimaryButtonState(buttonState: TapToAddConfirmationInteractor.State.PrimaryButton.State) {
+        _state.update { current ->
+            current.copy(primaryButton = current.primaryButton.copy(state = buttonState))
+        }
+    }
+
+    private val _onClose = Turbine<Unit>()
+    val onClose: ReceiveTurbine<Unit> = _onClose
+
+    private val _performActionCalls = Turbine<TapToAddConfirmationInteractor.Action>()
+    val performActionCalls: ReceiveTurbine<TapToAddConfirmationInteractor.Action> = _performActionCalls
+
+    override fun performAction(action: TapToAddConfirmationInteractor.Action) {
+        _performActionCalls.add(action)
+    }
+
+    override fun close() {
+        _onClose.add(Unit)
+    }
+
+    fun validate() {
+        _performActionCalls.ensureAllEventsConsumed()
+        _onClose.ensureAllEventsConsumed()
+    }
+
+    private fun createCvcElement(
+        cardBrand: CardBrand,
+        initialValue: String?,
+    ): FormElement {
+        val cvcController = CvcController(
+            cardBrandFlow = stateFlowOf(cardBrand),
+            initialValue = initialValue,
+        )
+        val cvcElement = CvcElement(
+            _identifier = FormFieldId.CardCvc,
+            controller = cvcController,
+        )
+
+        return SectionElement.wrap(
+            sectionFieldElement = cvcElement,
+            label = "Confirm your CVC".resolvableString,
+        )
+    }
+
+    class Factory(
+        val interactor: FakeTapToAddConfirmationInteractor = FakeTapToAddConfirmationInteractor()
+    ) : TapToAddConfirmationInteractor.Factory {
+        private val _createCalls = Turbine<CreateCall>()
+        val createCalls: ReceiveTurbine<CreateCall> = _createCalls
+
+        override fun create(
+            paymentMethod: PaymentMethod,
+            linkInput: UserInput?,
+            withTitle: Boolean,
+        ): TapToAddConfirmationInteractor {
+            _createCalls.add(
+                CreateCall(
+                    paymentMethod = paymentMethod,
+                    linkInput = linkInput,
+                    withTitle = withTitle,
+                )
+            )
+
+            return interactor
+        }
+
+        data class CreateCall(
+            val paymentMethod: PaymentMethod,
+            val linkInput: UserInput?,
+            val withTitle: Boolean,
+        )
+
+        fun validate() {
+            _createCalls.ensureAllEventsConsumed()
+        }
+    }
+}

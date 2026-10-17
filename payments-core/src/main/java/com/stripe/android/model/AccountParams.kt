@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -11,7 +12,8 @@ import kotlinx.parcelize.Parcelize
  * [account tokens documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
  */
 @Parcelize
-data class AccountParams internal constructor(
+@Poko
+class AccountParams internal constructor(
     /**
      * Whether the user described by the data in the token has been shown the
      * [Stripe Connected Account Agreement](https://stripe.com/docs/connect/account-tokens#stripe-connected-account-agreement).
@@ -20,7 +22,6 @@ data class AccountParams internal constructor(
      * [account.tos_shown_and_accepted](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted)
      */
     private val tosShownAndAccepted: Boolean,
-
     private val businessTypeParams: BusinessTypeParams? = null
 ) : TokenParams(Token.Type.Account) {
     override val typeDataParams: Map<String, Any>
@@ -64,28 +65,26 @@ data class AccountParams internal constructor(
          * [account.company](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company)
          */
         @Parcelize
-        data class Company(
+        @Poko
+        class Company(
             /**
              * The company’s primary address.
              *
              * [account.company.address](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address)
              */
             var address: Address? = null,
-
             /**
              * The Kana variation of the company’s primary address (Japan only).
              *
              * [account.company.address_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address_kana)
              */
             var addressKana: AddressJapanParams? = null,
-
             /**
              * The Kanji variation of the company’s primary address (Japan only).
              *
              * [account.company.address_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address_kanji)
              */
             var addressKanji: AddressJapanParams? = null,
-
             /**
              * Whether the company’s directors have been provided. Set this Boolean to `true` after
              * creating all the company’s directors with the
@@ -97,7 +96,6 @@ data class AccountParams internal constructor(
              * [account.company.directors_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-directors_provided)
              */
             var directorsProvided: Boolean? = null,
-
             /**
              * Whether the company’s executives have been provided. Set this Boolean to `true` after
              * creating all the company’s executives with the
@@ -107,28 +105,24 @@ data class AccountParams internal constructor(
              * [account.company.executives_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-executives_provided)
              */
             var executivesProvided: Boolean? = null,
-
             /**
              * The company’s legal name.
              *
              * [account.company.name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name)
              */
             var name: String? = null,
-
             /**
              * The Kana variation of the company’s legal name (Japan only).
              *
              * [account.company.name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name_kana)
              */
             var nameKana: String? = null,
-
             /**
              * The Kanji variation of the company’s legal name (Japan only).
              *
              * [account.company.name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name_kanji)
              */
             var nameKanji: String? = null,
-
             /**
              * Whether the company’s owners have been provided. Set this Boolean to `true` after
              * creating all the company’s owners with the
@@ -138,14 +132,12 @@ data class AccountParams internal constructor(
              * [account.company.owners_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-owners_provided)
              */
             var ownersProvided: Boolean? = false,
-
             /**
              * The company’s phone number (used for verification).
              *
              * [account.company.phone](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-phone)
              */
             var phone: String? = null,
-
             /**
              * The business ID number of the company, as appropriate for the company’s country.
              * (Examples are an Employer ID Number in the U.S., a Business Number in Canada, or a
@@ -154,21 +146,18 @@ data class AccountParams internal constructor(
              * [account.company.tax_id](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-tax_id)
              */
             var taxId: String? = null,
-
             /**
              * The jurisdiction in which the `tax_id` is registered (Germany-based companies only).
              *
              * [account.company.tax_id_registrar](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-tax_id_registrar)
              */
             var taxIdRegistrar: String? = null,
-
             /**
              * The VAT number of the company.
              *
              * [account.company.vat_id](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-vat_id)
              */
             var vatId: String? = null,
-
             /**
              * Information on the verification state of the company.
              *
@@ -196,7 +185,8 @@ data class AccountParams internal constructor(
                 )
 
             @Parcelize
-            data class Verification(
+            @Poko
+            class Verification(
                 /**
                  * A document verifying the business.
                  */
@@ -214,7 +204,8 @@ data class AccountParams internal constructor(
             }
 
             @Parcelize
-            data class Document @JvmOverloads constructor(
+            @Poko
+            class Document @JvmOverloads constructor(
                 /**
                  * The front of a document returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file)
@@ -225,7 +216,6 @@ data class AccountParams internal constructor(
                  * [account.company.verification.document.front](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-verification-document-front)
                  */
                 private val front: String? = null,
-
                 /**
                  * The back of a document returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file)
@@ -454,70 +444,62 @@ data class AccountParams internal constructor(
          * [account.individual](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual)
          */
         @Parcelize
-        data class Individual(
+        @Poko
+        class Individual(
             /**
              * The individual’s primary address.
              *
              * [account.individual.address](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address)
              */
             var address: Address? = null,
-
             /**
              * The Kana variation of the the individual’s primary address (Japan only).
              *
              * [account.individual.address_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address_kana)
              */
             var addressKana: AddressJapanParams? = null,
-
             /**
              * The Kanji variation of the the individual’s primary address (Japan only).
              *
              * [account.individual.address_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address_kanji)
              */
             var addressKanji: AddressJapanParams? = null,
-
             /**
              * The individual’s date of birth.
              *
              * [account.individual.dob](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-dob)
              */
             var dateOfBirth: DateOfBirth? = null,
-
             /**
              * The individual’s email.
              *
              * [account.individual.email](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-email)
              */
             var email: String? = null,
-
             /**
              * The individual’s first name.
              *
              * [account.individual.first_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name)
              */
             var firstName: String? = null,
-
             /**
              * The Kana variation of the the individual’s first name (Japan only).
              *
              * [account.individual.first_name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name_kana)
              */
             var firstNameKana: String? = null,
-
             /**
              * The Kanji variation of the individual’s first name (Japan only).
              *
              * [account.individual.first_name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name_kanji)
              */
             var firstNameKanji: String? = null,
-
             /**
              * The individual’s gender (International regulations require either “male” or “female”).
              *
              * [account.individual.gender](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-gender)
              */
             var gender: String? = null,
-
             /**
              * The government-issued ID number of the individual, as appropriate for the
              * representative’s country. (Examples are a Social Security Number in the U.S., or a
@@ -527,35 +509,30 @@ data class AccountParams internal constructor(
              * [account.individual.id_number](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-id_number)
              */
             var idNumber: String? = null,
-
             /**
              * The individual’s last name.
              *
              * [account.individual.last_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name)
              */
             var lastName: String? = null,
-
             /**
              * The Kana varation of the individual’s last name (Japan only).
              *
              * [account.individual.last_name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name_kana)
              */
             var lastNameKana: String? = null,
-
             /**
              * The Kanji varation of the individual’s last name (Japan only).
              *
              * [account.individual.last_name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name_kanji)
              */
             var lastNameKanji: String? = null,
-
             /**
              * The individual’s maiden name.
              *
              * [account.individual.maiden_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-maiden_name)
              */
             var maidenName: String? = null,
-
             /**
              * Set of key-value pairs that you can attach to an object. This can be useful for
              * storing additional information about the object in a structured format. Individual keys
@@ -565,21 +542,18 @@ data class AccountParams internal constructor(
              * [account.individual.metadata](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-metadata)
              */
             var metadata: Map<String, String>? = null,
-
             /**
              * The individual’s phone number.
              *
              * [account.individual.phone](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-phone)
              */
             var phone: String? = null,
-
             /**
              * The last four digits of the individual’s Social Security Number (U.S. only).
              *
              * [account.individual.ssn_last_4](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-ssn_last_4)
              */
             var ssnLast4: String? = null,
-
             /**
              * The individual’s verification document information.
              *
@@ -610,12 +584,12 @@ data class AccountParams internal constructor(
                 )
 
             @Parcelize
-            data class Verification @JvmOverloads constructor(
+            @Poko
+            class Verification @JvmOverloads constructor(
                 /**
                  * An identifying document, either a passport or local ID card.
                  */
                 var document: Document? = null,
-
                 /**
                  * A document showing address, either a passport, local ID card, or utility bill from
                  * a well-known utility company.
@@ -640,7 +614,8 @@ data class AccountParams internal constructor(
             }
 
             @Parcelize
-            data class Document @JvmOverloads constructor(
+            @Poko
+            class Document @JvmOverloads constructor(
                 /**
                  * The front of an ID returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file) with
@@ -649,7 +624,6 @@ data class AccountParams internal constructor(
                  * 10 MB in size.
                  */
                 private var front: String? = null,
-
                 /**
                  * The back of an ID returned by a
                  * [file upload](https://stripe.com/docs/api/tokens/create_account#create_file)

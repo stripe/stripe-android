@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.R as CoreR
 
@@ -8,11 +9,13 @@ import com.stripe.android.core.R as CoreR
 class AdministrativeAreaConfig(
     country: Country
 ) : DropdownConfig {
-    private val shortAdministrativeAreaNames = country.administrativeAreas.map { it.first }
-    private val fullAdministrativeAreaNames = country.administrativeAreas.map { it.second }
+    private val administrativeAreas = country.administrativeAreas
+    private val shortAdministrativeAreaNames = administrativeAreas.map { it.first }
+    private val fullAdministrativeAreaNames = administrativeAreas.map { it.second }
 
     override val mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false)
     override val debugLabel = "administrativeArea"
+    override val autofillType: ContentType = ContentType.AddressRegion
 
     override val label = resolvableString(country.label)
 
@@ -23,11 +26,9 @@ class AdministrativeAreaConfig(
     override fun getSelectedItemLabel(index: Int) = fullAdministrativeAreaNames[index]
 
     override fun convertFromRaw(rawValue: String): String {
-        return if (shortAdministrativeAreaNames.contains(rawValue)) {
-            fullAdministrativeAreaNames[shortAdministrativeAreaNames.indexOf(rawValue)]
-        } else {
-            fullAdministrativeAreaNames[0]
-        }
+        return administrativeAreas.firstOrNull { (code, name) ->
+            code.equals(rawValue, ignoreCase = true) || name.equals(rawValue, ignoreCase = true)
+        }?.second ?: fullAdministrativeAreaNames[0]
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -121,6 +122,40 @@ class AdministrativeAreaConfig(
                 Pair("WV", "West Virginia"),
                 Pair("WI", "Wisconsin"),
                 Pair("WY", "Wyoming")
+            )
+        ) : Country(label, administrativeAreas)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class Brazil(
+            override val label: Int = CoreR.string.stripe_address_label_state,
+            override val administrativeAreas: List<Pair<String, String>> = listOf(
+                Pair("AC", "Acre"),
+                Pair("AL", "Alagoas"),
+                Pair("AP", "Amapá"),
+                Pair("AM", "Amazonas"),
+                Pair("BA", "Bahia"),
+                Pair("CE", "Ceará"),
+                Pair("DF", "Distrito Federal"),
+                Pair("ES", "Espírito Santo"),
+                Pair("GO", "Goiás"),
+                Pair("MA", "Maranhão"),
+                Pair("MT", "Mato Grosso"),
+                Pair("MS", "Mato Grosso do Sul"),
+                Pair("MG", "Minas Gerais"),
+                Pair("PA", "Pará"),
+                Pair("PB", "Paraíba"),
+                Pair("PR", "Paraná"),
+                Pair("PE", "Pernambuco"),
+                Pair("PI", "Piauí"),
+                Pair("RJ", "Rio de Janeiro"),
+                Pair("RN", "Rio Grande do Norte"),
+                Pair("RS", "Rio Grande do Sul"),
+                Pair("RO", "Rondônia"),
+                Pair("RR", "Roraima"),
+                Pair("SC", "Santa Catarina"),
+                Pair("SP", "São Paulo"),
+                Pair("SE", "Sergipe"),
+                Pair("TO", "Tocantins"),
             )
         ) : Country(label, administrativeAreas)
     }

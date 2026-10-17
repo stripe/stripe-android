@@ -1,16 +1,18 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.FormElementsBuilder
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.BlikConfig
 import com.stripe.android.ui.core.elements.BlikElement
-import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 
 internal object BlikDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Blik
@@ -25,21 +27,30 @@ internal object BlikDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BlikUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BlikUiDefinitionFactory
 }
 
-private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,
         iconResourceNight = null
     )
 
-    override fun createFormElements(
+    override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
-        return FormElementsBuilder(arguments).element(SectionElement.wrap(BlikElement())).build()
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        val blikElement = BlikElement(
+            controller = SimpleTextFieldController(
+                textFieldConfig = BlikConfig(),
+                initialValue = arguments.initialValues[FormFieldId.BlikCode],
+            ),
+        )
+        builder.element(SectionElement.wrap(blikElement))
     }
 }

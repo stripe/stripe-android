@@ -22,7 +22,7 @@ tags:
 - tapOn:
     id: "consent_cta"
 # SELECT LEGACY INSTITUTION
-- tapOn: "Test Institution"
+- tapOn: "Test (Non-OAuth)"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
@@ -81,7 +81,7 @@ tags:
 - assertVisible:
     id: "OTP-0"
 - inputText: "111111"
-- assertVisible: "Your account was connected."
+- assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

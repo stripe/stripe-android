@@ -25,15 +25,20 @@ internal class ComposeCleanupRuleUsageVisitor(
         private var hasCleanupComposeCall: Boolean = false
 
         override fun visitImportStatement(node: UImportStatement): Boolean {
-            when (node.importReference?.asSourceString()) {
-                ROBOLECTRIC_TEST_RUNNER_FULL_NAME,
-                PARAMETERIZED_ROBOLECTRIC_TEST_RUNNER_FULL_NAME -> {
+            val importReference = node.importReference?.asSourceString()
+
+            when {
+                importReference == ROBOLECTRIC_TEST_RUNNER_FULL_NAME ||
+                    importReference == PARAMETERIZED_ROBOLECTRIC_TEST_RUNNER_FULL_NAME -> {
                     isRobolectricTest = true
                 }
-                COMPOSE_RULE_FULL_NAME -> {
+                importReference == COMPOSE_RULE_FULL_NAME -> {
                     createComposeCall = node
                 }
-                COMPOSE_CLEANUP_RULE_FULL_NAME -> {
+                // Match the cleanup rule by its simple function name rather than a fully-qualified
+                // name. Modules that can't depend on payments-core-testing keep a local
+                // createComposeCleanupRule, so any package satisfies the check.
+                importReference?.substringAfterLast('.') == COMPOSE_CLEANUP_RULE_SIMPLE_NAME -> {
                     hasCleanupComposeCall = true
                 }
                 else -> Unit
@@ -69,6 +74,6 @@ internal class ComposeCleanupRuleUsageVisitor(
             "org.robolectric.ParameterizedRobolectricTestRunner"
 
         private const val COMPOSE_RULE_FULL_NAME = "androidx.compose.ui.test.junit4.createComposeRule"
-        private const val COMPOSE_CLEANUP_RULE_FULL_NAME = "com.stripe.android.testing.createComposeCleanupRule"
+        private const val COMPOSE_CLEANUP_RULE_SIMPLE_NAME = "createComposeCleanupRule"
     }
 }

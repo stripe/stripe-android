@@ -4,8 +4,7 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
-import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -15,12 +14,20 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
+import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
 /**
@@ -30,10 +37,12 @@ import javax.inject.Inject
  * @param interactor The interactor that persists configuration state across process restarts.
  * @param presenterComponentFactory Factory for creating presenter components.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
+@Suppress("TooManyFunctions")
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
+    private val callbackStore: OnrampCallbackStore,
 ) {
 
     /**
@@ -44,7 +53,16 @@ class OnrampCoordinator @Inject internal constructor(
     suspend fun configure(
         configuration: OnrampConfiguration,
     ): OnrampConfigurationResult {
-        return interactor.configure(configuration)
+        return interactor.configure(configuration.build())
+    }
+
+    /**
+     * Authenticates a user given the provided token.
+     *
+     * @param linkAuthTokenClientSecret The auth token to authenticate a user with.
+     */
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        return interactor.authenticateUserWithToken(linkAuthTokenClientSecret)
     }
 
     /**
@@ -93,6 +111,47 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
+     * Deletes the given crypto wallet from the current Link account.
+     * Requires an authenticated Link user.
+     *
+     * @param walletId The ID of the crypto wallet to delete.
+     * @return [OnrampDeleteWalletAddressResult] indicating the result of deleting the wallet.
+     */
+    suspend fun deleteWalletAddress(walletId: String): OnrampDeleteWalletAddressResult {
+        return interactor.deleteWalletAddress(walletId)
+    }
+
+    /**
+     * Retrieves a short-lived Stripe-issued wallet ownership challenge for a registered wallet.
+     * Requires an authenticated Link user.
+     *
+     * @param walletAddress The registered wallet address to verify.
+     * @param network The crypto network for the wallet address.
+     * @return [OnrampGetWalletOwnershipChallengeResult] indicating the result.
+     */
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        return interactor.getWalletOwnershipChallenge(walletAddress, network)
+    }
+
+    /**
+     * Submits a signature for a previously retrieved wallet ownership challenge.
+     * Requires an authenticated Link user.
+     *
+     * @param challengeId The challenge identifier returned by [getWalletOwnershipChallenge].
+     * @param signature The signature produced over the exact challenge message.
+     * @return [OnrampSubmitWalletOwnershipSignatureResult] indicating the result.
+     */
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        return interactor.submitWalletOwnershipSignature(challengeId, signature)
+    }
+
+    /**
      * Attaches the specific KYC info to the current Link user. Requires an authenticated Link user.
      *
      * @param info The KYC info to attach to the Link user.
@@ -100,6 +159,26 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycInfoResult {
         return interactor.attachKycInfo(info)
+    }
+
+    /**
+     * Retrieves MiCA identifiers and whether a CRS/CARF TIN is still required.
+     * Requires an authenticated Link user.
+     */
+    suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
+        return interactor.retrieveMissingIdentifiers()
+    }
+
+    /**
+     * Submits compliance identifiers for MiCA and CRS/CARF compliance.
+     * Requires an authenticated Link user.
+     *
+     * @param identifiers The compliance identifiers to submit.
+     */
+    suspend fun submitIdentifiers(
+        identifiers: List<ComplianceIdentifier>
+    ): OnrampSubmitIdentifiersResult {
+        return interactor.submitIdentifiers(identifiers)
     }
 
     /**
@@ -125,19 +204,19 @@ class OnrampCoordinator @Inject internal constructor(
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.
-     * @param onrampCallbacks Callbacks for handling asynchronous responses from UI operations.
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(
-        activity: ComponentActivity,
-        onrampCallbacks: OnrampCallbacks
+        activity: ComponentActivity
     ): Presenter {
+        // A finished host removes the global registration. Restore it before
+        // constructing launchers, which can synchronously deliver pending results.
+        callbackStore.restore()
         return presenterComponentFactory
             .build(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbacks = onrampCallbacks,
             )
             .presenter
     }
@@ -145,18 +224,10 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Presenter for handling Link UI interactions without requiring direct activity references.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Presenter @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
-        /**
-         * Presents Link UI to authenticate an existing Link user.
-         * Requires successful lookup or registration of the user first.
-         */
-        fun authenticateUser() {
-            coordinator.authenticateUser()
-        }
-
         /**
          * Creates an identity verification session and launches the document verification flow.
          * Requires an authenticated Link user.
@@ -166,12 +237,25 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents UI to collect/select a payment method of the given type.
+         * Presents UI to verify KYC information for the current Link user.
+         * Requires an authenticated Link user with KYC info attached.
          *
-         * @param type The payment method type to collect.
+         * @param updatedAddress An optional updated address. Specify this parameter if the
+         * user has elected to change the address after a prior call to this API returned
+         * `OnrampVerifyKycInfoResult.UpdateAddress`. Otherwise, specify `nil` to show the user’s existing
+         * KYC information on the presented flow.
          */
-        fun collectPaymentMethod(type: PaymentMethodType) {
-            coordinator.collectPaymentMethod(type)
+        fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
+            coordinator.verifyKycInfo(updatedAddress)
+        }
+
+        /**
+         * Presents UI to collect/select a payment method.
+         *
+         * @param selection The payment method to collect.
+         */
+        fun collectPaymentMethod(selection: PaymentMethodSelection) {
+            coordinator.collectPaymentMethod(selection)
         }
 
         /**
@@ -188,27 +272,57 @@ class OnrampCoordinator @Inject internal constructor(
          * The result will be delivered through the checkoutCallback provided in OnrampCallbacks.
          *
          * @param onrampSessionId The onramp session identifier.
-         * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-         *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout`
-         *     endpoint with the onramp session ID. The closure should return the onramp session client secret
-         *     on success, or throw an Error on failure. This closure may be called twice: once initially,
-         *     and once more after handling any required authentication.
          */
         fun performCheckout(
             onrampSessionId: String,
-            checkoutHandler: suspend () -> String
         ) {
-            coordinator.performCheckout(
-                onrampSessionId = onrampSessionId,
-                checkoutHandler = checkoutHandler
-            )
+            coordinator.performCheckout(onrampSessionId = onrampSessionId)
+        }
+
+        /**
+         * Presents the user attestation screen and records acceptance when the user confirms.
+         * The result will be delivered through the user attestation callback provided in OnrampCallbacks.
+         */
+        fun presentUserAttestation() {
+            coordinator.presentUserAttestation()
+        }
+
+        /**
+         * Presents UI to collect and submit outstanding KYC requirements.
+         * The result will be delivered through the KYC callback provided in [OnrampCallbacks].
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun fulfillKycRequirements() {
+            coordinator.fulfillKycRequirements()
+        }
+
+        /**
+         * Presents the current terms and conditions when acceptance is required.
+         * Requires an authenticated Link user.
+         * Call this before checkout.
+         * The result will be delivered through the terms and conditions callback provided in
+         * [OnrampCallbacks].
+         */
+        fun presentTermsAndConditionsIfNeeded() {
+            coordinator.presentTermsAndConditionsIfNeeded()
+        }
+
+        /**
+         * Presents the current terms of service when acceptance is required.
+         * Requires an authenticated Link user.
+         * Call this during onboarding after Link authentication.
+         * The result will be delivered through the terms of service callback provided in
+         * [OnrampCallbacks].
+         */
+        fun presentTermsOfServiceIfNeeded() {
+            coordinator.presentTermsOfServiceIfNeeded()
         }
     }
 
     /**
      * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Builder {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
@@ -218,15 +332,20 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun build(
             application: Application,
-            savedStateHandle: SavedStateHandle
+            savedStateHandle: SavedStateHandle,
+            onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
-            val onrampComponent: OnrampComponent =
-                DaggerOnrampComponent.factory()
-                    .build(
-                        application = application,
-                        savedStateHandle = savedStateHandle
-                    )
-            return onrampComponent.onrampCoordinator
+            val onrampComponent = OnrampComponentHolder.getOrCreate(
+                application = application,
+                savedStateHandle = savedStateHandle,
+            )
+
+            // Register callbacks eagerly so they're available for activity result
+            // redelivery at onStart(), before Compose's first frame.
+            val callbacks = onrampCallbacks.build()
+            return onrampComponent.onrampCoordinator.also {
+                it.callbackStore.update(callbacks)
+            }
         }
     }
 }

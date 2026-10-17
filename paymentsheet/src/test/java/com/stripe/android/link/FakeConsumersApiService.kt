@@ -28,11 +28,19 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSession = TestFactory.CONSUMER_SESSION,
         linkAuthIntent = null
     )
+    var createPaymentDetailsResult = Result.success(
+        ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+    )
+    var createPaymentDetailsFromPaymentMethodResult = Result.success(
+        ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+    )
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
     val lookupCalls = arrayListOf<LookupCall>()
     val mobileLookupCalls = arrayListOf<MobileLookupCall>()
+    val sharePaymentDetailsCalls = arrayListOf<SharePaymentDetailsCall>()
+    val createPaymentDetailsFromPaymentMethodCalls = arrayListOf<CreatePaymentDetailsFromPaymentMethodCall>()
 
     override suspend fun signUp(
         params: SignUpParams,
@@ -92,7 +100,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup {
         mobileLookupCalls.add(
             MobileLookupCall(
@@ -116,7 +125,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean
     ): ConsumerSession {
         TODO("Not yet implemented")
     }
@@ -156,19 +166,39 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
-        TODO("Not yet implemented")
+        return createPaymentDetailsResult
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String,
+    ): Result<ConsumerPaymentDetails> {
+        createPaymentDetailsFromPaymentMethodCalls.add(
+            CreatePaymentDetailsFromPaymentMethodCall(
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                paymentMethodId = paymentMethodId,
+                requestSurface = requestSurface,
+                requestOptions = requestOptions,
+                customerEphemeralKey = customerEphemeralKey,
+            )
+        )
+        return createPaymentDetailsFromPaymentMethodResult
     }
 
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
         extraParams: Map<String, Any?>
     ): Result<SharePaymentDetails> {
-        TODO("Not yet implemented")
+        sharePaymentDetailsCalls.add(SharePaymentDetailsCall(extraParams, requestOptions))
+        return Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     }
 
     override suspend fun updateAvailableIncentives(
@@ -230,5 +260,18 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     data class SignUpCall(
         val params: SignUpParams,
         val requestOptions: ApiRequest.Options
+    )
+
+    data class SharePaymentDetailsCall(
+        val extraParams: Map<String, Any?>,
+        val requestOptions: ApiRequest.Options
+    )
+
+    data class CreatePaymentDetailsFromPaymentMethodCall(
+        val consumerSessionClientSecret: String,
+        val paymentMethodId: String,
+        val requestSurface: String,
+        val requestOptions: ApiRequest.Options,
+        val customerEphemeralKey: String,
     )
 }

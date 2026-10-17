@@ -6,7 +6,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,13 +39,14 @@ import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcompone
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeFormInsets
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.collectLatest
@@ -57,14 +57,14 @@ internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawa
 
 @Composable
 internal fun AutocompleteScreen(
-    autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
     navigator: AddressElementNavigator,
     country: String?
 ) {
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
-                autoCompleteViewModelSubcomponentBuilderProvider = autoCompleteViewModelSubcomponentBuilderProvider,
+                autoCompleteViewModelSubcomponentFactoryProvider = autoCompleteViewModelSubcomponentFactoryProvider,
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),
@@ -79,7 +79,7 @@ internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
     navigator: AddressElementNavigator,
     attributionDrawable: Int? =
-        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
+        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(MaterialTheme.stripeThemeIsDark)
 ) {
     LaunchedEffect(Unit) {
         viewModel.event.collectLatest { event ->
@@ -108,7 +108,7 @@ internal fun AutocompleteScreenUI(
         isRootScreen = false,
         backgroundColor = MaterialTheme.colors.surface,
         appBar = { isRoot, onBack ->
-            AddressOptionsAppBar(isRootScreen = isRoot) {
+            AddressOptionsAppBar(isRootScreen = isRoot, isEnabled = true) {
                 onBack()
             }
         },
@@ -250,7 +250,7 @@ internal fun AutocompleteScreenUI(
                 .padding(paddingValues)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(top = StripeTheme.formInsets.top.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = MaterialTheme.stripeFormInsets.top.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -259,7 +259,7 @@ internal fun AutocompleteScreenUI(
                 ) {
                     TextFieldSection(
                         textFieldController = queryController,
-                        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
+                        modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                     ) {
                         TextField(
                             modifier = Modifier
@@ -282,7 +282,9 @@ internal fun AutocompleteScreenUI(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                             Column(
-                                modifier = Modifier.fillMaxWidth().padding(StripeTheme.getOuterFormInsets())
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                             ) {
                                 it.forEach { prediction ->
                                     val primaryText = prediction.primaryText
@@ -332,7 +334,7 @@ internal fun AutocompleteScreenUI(
                                 contentDescription = null,
                                 modifier = Modifier
                                     .padding(vertical = 16.dp)
-                                    .padding(StripeTheme.getOuterFormInsets())
+                                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
                                     .testTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
                             )
                         }

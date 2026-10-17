@@ -1,6 +1,487 @@
 # CHANGELOG
 
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Crypto Onramp
+* [Changed] Google Pay and Samsung Pay card sublabels now include the funding type (Credit, Debit, or Prepaid), falling back to Card when unavailable, matching Link's formatting.
+
+### Payments
+* [Fixed] Address country dropdowns now support autofill from saved addresses.
+
+### PaymentSheet
+* [CHANGED][15002](https://github.com/stripe/stripe-android/pull/15002) Moved `ApiConfigurationPreview` from the `paymentsheet` module to `stripe-core`. Update preview opt-in imports to `com.stripe.android.core.ApiConfigurationPreview`.
+* [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14831](https://github.com/stripe/stripe-android/pull/14831) Added Naira Wallet API bindings and PaymentSheet support for PaymentIntents.
+
+### Identity
+* [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
+
+## 23.23.0 - 2026-10-12
+
+### Payments
+* [Security] Restricted intent URLs in payment authentication to browsable activity resolution.
+* [Fixed] Return helpful errors for invalid PaymentIntent and SetupIntent client secrets without including the supplied value.
+* [Fixed] Return errors for invalid client secrets in legacy Stripe next-action APIs instead of throwing uncaught exceptions.
+
+### PaymentSheet
+* [Fixed] Address forms now recognize country and state codes and names case-insensitively when prefilling default values.
+* [ADDED][14585](https://github.com/stripe/stripe-android/pull/14585) Added Naira card API bindings and PaymentSheet support for one-time payments.
+* [REMOVED] Removed the test mode header from PaymentSheet, CustomerSheet, and the Embedded Payment Element.
+* [ADDED][14620](https://github.com/stripe/stripe-android/pull/14620) Added GCash API bindings and PaymentSheet support.
+* [ADDED][14829](https://github.com/stripe/stripe-android/pull/14829) Added QRIS API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14828](https://github.com/stripe/stripe-android/pull/14828) Added ShopeePay API bindings and PaymentSheet support for PaymentIntents.
+
+### AddressElement
+* [Fixed] Address Element now rejects incomplete optional phone numbers.
+
+### Financial Connections
+* [REMOVED] Removed the test mode indicator from the header.
+
+## 23.22.0 - 2026-10-05
+
+### Crypto Onramp
+* [Added] Opt-in Samsung Pay contact collection for name, address, email, and phone prefill.
+* [Changed] Crypto Onramp wallet collection returns contact-only `KycInfo` when available, including email, validated E.164 phone, and the original phone string.
+* [Added] Optional `email`, `phone`, and `rawPhone` fields on Crypto Onramp `KycInfo` for contact prefill. These fields are not submitted with KYC.
+* [Added] Crypto Onramp country hints and a recoverable `PlatformPayAccountChangedException` when wallet collection must be repeated after an account change.
+* [Changed] Crypto Onramp supports Google Pay and Samsung Pay collection before Link authentication. Creating a crypto payment token still requires a crypto customer.
+* [FIXED] Fixed missing callbacks when reusing an `OnrampCoordinator` to create a new presenter after its previous host activity finishes.
+
+### Payments
+* [FIXED] Stopped installing a process-wide HTTP response cache that could affect other network requests in the app.
+
+### PaymentSheet
+* [ADDED][14584](https://github.com/stripe/stripe-android/pull/14584) Added GoPay API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14619](https://github.com/stripe/stripe-android/pull/14619) Added MoMo API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14756](https://github.com/stripe/stripe-android/pull/14756) Added Pix support for PaymentIntents and SetupIntents in PaymentSheet.
+* [FIXED][14759](https://github.com/stripe/stripe-android/pull/14759) Disabled the saved payment method View more and Edit actions during payment processing in the Embedded Payment Element.
+
+## 23.21.0 - 2026-09-28
+
+### Payments
+* [FIXED][14625](https://github.com/stripe/stripe-android/pull/14625) Fixed an issue where PaymentSheet and `CardNumberEditText` rejected valid card numbers for BINs whose account ranges have different PAN lengths, such as some 16-digit UnionPay cards.
+
+### PaymentSheet
+* [ADDED] `EmbeddedPaymentElement.Configuration.apiConfiguration` to set publishable key and stripe account ID is now available in public preview.
+* [ADDED] Added support for MB WAY payments.
+
+### Financial Connections
+* [FIXED] Preserved `no_eligible_accounts` in `onEvent` error callbacks instead of reporting it as `unexpected_error`.
+* [FIXED] Prevented background authorization-session telemetry failures from triggering `onEvent` error callbacks.
+* [ADDED] Added `financialConnectionsSessionId` to Financial Connections events. Events are emitted after the session ID is available.
+
+### Payments
+* [ADDED] Added API bindings for Pix.
+
+## 23.20.0 - 2026-09-21
+
+### Payments
+* [FIXED][14643](https://github.com/stripe/stripe-android/pull/14643) Fixed redirects with Alipay+ and the Alipay SDK
+
+### PaymentSheet
+* [ADDED] Added support for Bizum.
+
+### Identity
+* [FIXED][14617](https://github.com/stripe/stripe-android/pull/14617) Updated the top app bar to use the host app background color instead of its primary color.
+
+## 23.19.0 - 2026-09-15
+
+### All SDKs
+* [ADDED] Added Welsh (United Kingdom) localization.
+* [ADDED] Added Arabic (Saudi Arabia) localization.
+
+### PaymentSheet
+* [FIXED][14436](https://github.com/stripe/stripe-android/pull/14436) Fixed a rare race condition which could result in the payment sheet being half-visible on screen.
+
+### CryptoOnramp
+* [ADDED] Added `presentTermsAndConditionsIfNeeded()` to present and record terms acceptance only when required.
+* [ADDED] Added `presentTermsOfServiceIfNeeded()` to present and record terms of service acceptance during onboarding only when required.
+
+## 23.18.0 - 2026-09-08
+
+### PaymentSheet
+* [ADDED] Added support for SeQura.
+* [ADDED] Added support for PAYCO.
+* [ADDED] Added support for Korean cards.
+* [ADDED] Added support for Naver Pay.
+* [ADDED] Added support for Kakao Pay.
+* [ADDED] Added support for Scalapay.
+
+### AddressElement
+* [CHANGED] Use Stripe-hosted address autocomplete by default.
+
+### CryptoOnramp
+* [ADDED] Added Canada SIN, Colombia NIT, and Philippines TIN values to `IdType`, and added `idType` to `KycInfo`.
+
+## 23.17.1 - 2026-08-31
+
+### PaymentSheet
+* [FIXED] Fixed an issue where Klarna billing address fields did not update when the country changed.
+* [FIXED] Fixed an issue where Wero displayed duplicate country fields when collecting a full billing address.
+* [FIXED][13323](https://github.com/stripe/stripe-android/pull/13323) Fixed an issue where selecting "Not you?" during Link 2FA did not fully log out the previous account, preventing subsequent logins.
+
+## 23.17.0 - 2026-08-24
+
+### PaymentSheet
+* [DEPRECATED] Deprecated the `googlePlacesApiKey` builder methods and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key. Address autocomplete is now available to all merchants without providing a Google Places API key. Existing integrations can remove the key without losing autocomplete, and integrations that did not provide one receive autocomplete automatically.
+
+### Payments
+* [ADDED][14089](https://github.com/stripe/stripe-android/pull/14089) Support for Alipay when using `SetupIntent` through the direct APIs.
+
+### Identity
+* [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added guided 3D selfie capture for supported verification sessions, including left and right pose collection.
+* [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added optional `IdentityVerificationSheet.Configuration.brandColor` to customize the native verification flow's primary action button color.
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
+
+## 23.16.0 - 2026-08-18
+
+### PaymentSheet
+* [ADDED] Added `PaymentSheet.LinkConfiguration.Display.WalletButtonHidden`, which keeps Link enabled but hides its button from the payment element UI.
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED] Added `OnrampCoordinator.deleteWalletAddress(walletId:)` to delete a registered wallet address.
+
+## 23.15.0 - 2026-08-10
+
+### PaymentSheet
+* [FIXED] LinkController (private preview) now returns an error when no funding sources are available for a Link session, rather than silently falling back to card.
+* [ADDED] Added support for the Agrobank, MBSB Bank, and Bank of China FPX banks, and the FPX bank list is now displayed in alphabetical order.
+* [CHANGED] Inline address autocomplete is now enabled by default in PaymentSheet and FlowController.
+
+### AddressElement
+* [CHANGED] Inline address autocomplete is now enabled by default.
+
+### CryptoOnramp
+* [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
+
+## 23.14.0 - 2026-08-03
+
+### CryptoOnramp
+* [ADDED] Added Tempo as a supported wallet network and pinned Crypto Onramp internal API calls to the preview API version required by newer networks.
+
+### PaymentSheet
+* [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
+
+### Identity
+* [FIXED][13684](https://github.com/stripe/stripe-android/pull/13684) Enabled manual document capture when live capture is required.
+
+## 23.13.1 - 2026-07-23
+
+### Payments
+* [FIXED][13544](https://github.com/stripe/stripe-android/pull/13544) Fixed an issue where the SDK could fail to correctly reconcile and close out an Alipay payment in test mode.
+
+### PaymentSheet
+* [ADDED] Added `billingDetailsCollectionConfiguration` to `LinkController.Configuration` (private preview).
+
+## 23.13.0 - 2026-07-20
+
+### Payments
+* [FIXED][7581](https://github.com/stripe/stripe-android/issues/7581) Declined card error messages from 3DS2 payment flows are now localized instead of always displaying the raw English message from the server.
+* [CHANGED] `LinkController` now requires calling `confirmSetupIntent` to confirm a SetupIntent after presenting the Link sheet (private preview).
+
+## 23.12.0 - 2026-07-13
+
+### Connect
+* [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+
+### CryptoOnramp
+* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+
+### PaymentSheet
+* [ADDED] Standalone Link wallet APIs in private preview via `LinkController`.
+
+### CustomerSheet
+* [FIXED][13383](https://github.com/stripe/stripe-android/issues/13383) `CustomerSheet` no longer reports a failure when the sheet is torn down by the OS without returning a result (e.g. when a `singleTask` host activity is relaunched). The result callback is now a no-op in that case, leaving the merchant's state unchanged.
+
+## 23.11.1 - 2026-06-30
+
+### PaymentSheet
+* [FIXED][13311](https://github.com/stripe/stripe-android/pull/13311) Fixed HUF currency amounts displaying incorrectly on Android 17.
+
+## 23.11.0 - 2026-06-22
+
+### CryptoOnramp
+* [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, `crsCarfDeclarationCallback` to `userAttestationCallback`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
+
+## 23.10.1 - 2026-06-15
+
+### AddressElement
+* [ADDED] Added autofill support for Address Element text fields and the state/province dropdown.
+
+## 23.10.0 - 2026-06-08
+
+### Identity
+* [ADDED][12987](https://github.com/stripe/stripe-android/pull/12987) Added a manual capture mode for identity document verification, allowing users to tap "Take Photo" instead of relying on automatic capture.
+
+### CryptoOnramp
+* [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
+* [ADDED] Added known compliance identifier types for Spain NIF (`es_nif`) and France NIR (`fr_nir`).
+
+## 23.9.2 - 2026-06-01
+
+### Payments
+* [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
+
+### CryptoOnramp
+* [ADDED][13156](https://github.com/stripe/stripe-android/pull/13156) Added `SDKVersion`, `StripeCryptoOnrampError`, `CryptoOnrampApiException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
+* [CHANGED][13156](https://github.com/stripe/stripe-android/pull/13156) Improved Crypto Onramp API error handling with localized fallback user messaging and more consistent error mapping across attestation, payment collection, and checkout flows.
+
+
+## 23.9.1 - 2026-05-26
+
+### Payments
+* [FIXED][13146](https://github.com/stripe/stripe-android/pull/13146) Native 3ds2 no longer stops its host activity
+
+
+### CryptoOnramp
+* [FIXED][13074](https://github.com/stripe/stripe-android/pull/13074) Fixed an issue with 3DS and Out of Band checks during checkout that caused a hang.
+
+## 23.9.0 - 2026-05-18
+
+Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
+
+## 23.8.0 - 2026-05-11
+
+### PaymentSheet
+* [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
+
+### Payments
+* [FIXED][12983](https://github.com/stripe/stripe-android/pull/12983) Fixed an issue where `additionalEnabledNetworks` would not be respected for Google Pay payments.
+
+### CryptoOnramp
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.
+* [REMOVED][13019](https://github.com/stripe/stripe-android/pull/13019) Removed KycRetrieveResponse from the public API as it was not intended to be accessible.
+* [ADDED][13038](https://github.com/stripe/stripe-android/pull/13038) Added `OnrampCoordinator` APIs for EU support: `retrieveMissingIdentifiers()`, `submitIdentifiers(_:)`, and `presentCRSCARFDeclaration()`, as well as associated result types for those calls.
+* [ADDED][13038](https://github.com/stripe/stripe-android/pull/13038) Added new `OnrampCallbacks` API to support crsCarfDeclaration acceptance.
+
+## 23.7.0 - 2026-05-04
+
+### PaymentSheet
+* [FIXED][12965](https://github.com/stripe/stripe-android/issues/12965) Fixed an issue where a white screen would briefly appear during payment confirmation, hiding the bottom sheet.
+* [FIXED][12973](https://github.com/stripe/stripe-android/pull/12973) Fixed an issue where `FlowController` would bypass mandate display when `setupFutureUsage` was added via `configureWithIntentConfiguration()` after the user had already entered card details.
+* [CHANGED][12975](https://github.com/stripe/stripe-android/pull/12975) When `paymentMethodLayout` is set to `Automatic`, the layout is now horizontal when there are 2 or fewer payment methods available.
+
+### Identity
+* [FIXED][12753](https://github.com/stripe/stripe-android/pull/12753) Fixed crashes when preparing document or selfie images for upload.
+* [FIXED][12753](https://github.com/stripe/stripe-android/pull/12753) Fixed privacy policy links that open in-app bottom sheets on the consent and individual welcome screens.
+
+## 23.6.0 - 2026-04-27
+### PaymentSheet
+* [ADDED] Stripe card scanning is back in public preview. [Add `stripecardscan` to the `dependencies` block of your build.gradle](https://docs.stripe.com/payments/accept-a-payment?payment-ui=mobile&platform=android#android-card-scanning) to enable the Stripe card scanner.
+* [ADDED] Tap to add your card is in private preview. See documentation for [EmbeddedPaymentElement](https://docs.corp.stripe.com/payments/mobile/embedded-tap-to-add) and [PaymentSheet](https://docs.corp.stripe.com/payments/mobile/tap-to-add) for integration guide and to sign up for access.
+
+### PaymentSheet
+* [CHANGED] `PaymentOption.icon()` and `PaymentOption.iconPainter` may return card art instead of a network logo for card payment methods.
+* [FIXED][12950](https://github.com/stripe/stripe-android/pull/12950) Fixed an issue where raw API error messages (e.g. `invalid_request_error`) were displayed to end users instead of a generic fallback message. Only `card_error` messages are now shown directly.
+
+## 23.5.0 - 2026-04-20
+* [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
+
+### PaymentSheet
+* [ADDED][12880](https://github.com/stripe/stripe-android/pull/12880) Added support for Pay by Bank (GA in GB, private preview in EU).
+
+## 23.4.0 - 2026-04-14
+### Crypto Onramp (Private Preview)
+* [ADDED][12740](https://github.com/stripe/stripe-android/pull/12740) Ability to Receive L0 KYC Info From Google Pay
+
+### Identity
+* [CHANGED][12811](https://github.com/stripe/stripe-android/pull/12811) Updated the Identity example app to use the new example API endpoint.
+
+## 23.3.0 - 2026-04-06
+### AddressElement
+* [ADDED][12848](https://github.com/stripe/stripe-android/pull/12848) Added state dropdown support for BR.
+
+### Connect
+* [DEPRECATED][12695](https://github.com/stripe/stripe-android/pull/12695) Deprecated `Action` and `Form` parameters in `Colors` class. Now those parameters can be initialized within its own class.
+* [ADDED][12695](https://github.com/stripe/stripe-android/pull/12695) Added the types for new theming tokens in Connect Embedded Components and mapped them to the corresponding variable in ConnectJS
+
+## 23.2.0 - 2026-03-30
+
+Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785) and [12786](https://github.com/stripe/stripe-android/pull/12786):
+- Rolled back kotlin to 2.2.21 from 2.3.10.
+- Bumped Compose from 1.10.4 to 1.10.6.
+
+### Identity
+* [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
+* [FIXED] Fixed truncation of some floating-point parameters sent to the Identity API.
+* [CHANGED] Removed legacy ID detector references from the Identity document capture pipeline.
+
+### PaymentSheet
+* [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+* [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
+
+## 23.1.0 - 2026-03-23
+
+Added new card scanner in PaymentSheet (alpha).
+
+### Payments
+[Added][12728](https://github.com/stripe/stripe-android/pull/12728) - New `PaymentLauncher.create()` and `rememberPaymentLauncher()` methods that read configuration from `PaymentConfiguration` instead of requiring explicit publishable key parameters.
+
+## 23.0.2 - 2026-03-16
+
+### PaymentSheet
+[Changed][12667](https://github.com/stripe/stripe-android/pull/12667) CBC selector UI from a dropdown to a segmented selector following Mastercard requirements.
+
+## 23.0.1 - 2026-03-10
+
+### Payments
+[FIXED][12596](https://github.com/stripe/stripe-android/pull/12596) Correctly resolve project dependency artifactId when generating pom files to ensure accurate dependency metadata.
+
+## 23.0.0 - 2026-03-09
+
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), [12433](https://github.com/stripe/stripe-android/pull/12433), and [12486](https://github.com/stripe/stripe-android/pull/12486):
+- Bumped `minSdkVersion` to `23`.
+- Bumped `compileSdkVersion` and `targetSdkVersion` to `36`.
+- Bumped Kotlin from 2.1.10 to 2.3.10.
+- Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
+- Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
+- Bumped Android Gradle Plugin from 8.13.1 to 8.13.2.
+- Bumped Poko from 0.18.2 to 0.21.1.
+- Bumped App compat from 1.7.0 to 1.7.1.
+- Bumped nimbus-jose-jwt from 10.4.2 to 10.6.
+- Bumped constraintlayout from 2.2.0 to 2.2.1.
+- Bumped androidx.camera from 1.4.2 to 1.5.3.
+- Bumped recyclerview from 1.3.2 to 1.4.0.
+- Bumped Compose from 1.9.4 to 1.10.4.
+- Bumped androidx.activity from 1.9.3 to 1.12.4.
+- Bumped androidx.browser from 1.8.0 to 1.9.0.
+- Bumped androidx.core from 1.13.1 to 1.17.0.
+- Bumped androidx.fragment from 1.8.6 to 1.8.9.
+- Bumped androidx.hilt from 1.2.0 to 1.3.0.
+- Bumped androidx.lifecycle from 2.8.7 to 2.10.0.
+- Bumped androidx.navigation from 2.8.5 to 2.9.7.
+- Bumped androidx.webkit from 1.14.0 to 1.15.0.
+- Bumped Google Places from 5.0.0 to 5.1.1.
+- Bumped Play Services Wallet from 19.4.0 to 19.5.0.
+- Bumped LiteRT from 1.4.0 to 1.4.1.
+- Bumped WorkManager from 2.9.0 to 2.11.1.
+- Bumped Material from 1.12.0 to 1.13.0.
+
+### PaymentSheet
+* [Added] Added support for Wero payments (private preview).
+
+## 22.8.1 - 2026-02-17
+
+### Identity
+* [Added] More live feedback during document capture.
+* [Added] Added best frame detector to improve document capture quality.
+
+### PaymentSheet
+* [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
+
+## 22.8.0 - 2026-02-09
+
+Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
+- Bumped Dagger from 2.55 to 2.58.
+
+### PaymentMethodMessagingElement
+[BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `PaymentMethodMessagingElement` is in public preview. `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`. The info icon has been removed and replaced with a CTA to see available plans. The link text color is customizable through `linkTextColor`.
+
+### Identity
+* [CHANGED] Fail out of verification flow on analyzer failure.
+* [CHANGED] Removed ephemeral key from error log messages for security.
+
+### PaymentSheet
+* [FIXED][12315](https://github.com/stripe/stripe-android/pull/12315) Fixed extra loading spinner showing up under Google Pay.
+
+## 22.7.0 - 2026-01-26
+
+Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11877):
+- Bumped Compose from 1.7.8 to 1.9.4.
+
+### EmbeddedPaymentElement
+* [FIXED] Fixed an issue where `successBackground` and `onSuccessBackground` appearance customizations were not applied in EmbeddedPaymentElement.
+
+### Connect
+* [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
+* [Fixed] Fixed keyboard covering input fields in embedded Payments and Payout components on Samsung devices.
+
+### Payments
+* [Added][12253](https://github.com/stripe/stripe-android/pull/12253) Added support for Twint API bindings.
+
+## 22.6.1 - 2026-01-20
+
+### Payments
+* [FIXED][12232](https://github.com/stripe/stripe-android/pull/12232) Fixed an issue where Satispay was missing `mandate_data` when used with `setup_future_usage`.
+
+## 22.6.0 - 2026-01-12
+
+### PaymentSheet
+* [Added] Custom Payment Methods is now generally available, learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/custom-payment-methods).
+
+## 22.5.0 - 2025-12-15
+
+### Payments
+* [Added] Added support for [PayPay](https://docs.stripe.com/payments/paypay) payments.
+
+### PaymentSheet
+* [Added][12073](https://github.com/stripe/stripe-android/pull/12073) Added support for [PromptPay](https://docs.stripe.com/payments/promptpay) to PaymentSheet.
+
+## 22.4.0 - 2025-12-08
+
+### PaymentSheet
+* [CHANGED][12036](https://github.com/stripe/stripe-android/pull/12036) Updates the google places SDK from 3.5.0 to 5.0.0.
+
+### Identity
+* [FIXED] [12083](https://github.com/stripe/stripe-android/pull/12083) Improved exception handling for TFLite selfie models to prevent rare crashes in the Identity verification flow.
+
+## 22.3.0 - 2025-12-01
+
+### Payment Method Messaging
+* [Added] Payment Method Messaging Element is now available in public preview.
+
+### PaymentSheet
+* [Added][12011](https://github.com/stripe/stripe-android/pull/12011) Builder APIs for PaymentSheet appearance customization (Colors, Shapes, Typography, PrimaryButtonColors, and embedded row styles)
+* [Added] opensCardScannerAutomatically configuration is now available.
+
+### Payments
+* [Added][12014](https://github.com/stripe/stripe-android/pull/12014) `ConfirmationToken.PaymentMethodPreview` now includes structured `Card` field with detailed card information (brand, country, expiry, funding, last4, etc.)
+* [Changed][12027](https://github.com/stripe/stripe-android/pull/12027) Undo the removal of the cardParams API on card form UIs. This API is marked as deprecated; please use PaymentMethodCreateParams instead.
+## 22.2.0 - 2025-11-17
+
+### Financial Connections
+
+* [Added] `StripeFinancialConnections` SDK is now localized!
+
+## 22.1.1 - 2025-11-13
+
+* [UPDATED] Additional APIs and improvements to support the development of the React Native StripeCryptoOnramp SDK.
+
+## 22.1.0 - 2025-11-10
+
+* [UPDATED][11893](https://github.com/stripe/stripe-android/pull/11893) Update `compileSdkVersion` and `targetSdkVersion` to 35 following changes to [Target API level requirements for Google Play apps](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en).
+
+## 22.0.0 - 2025-11-03
+
+This major version introduces many small breaking changes. Please see [MIGRATING.md](MIGRATING.md) to help you migrate.
+
+### PaymentSheet
+
+* [Added] CustomerSessions is now generally available.
+* [Added] ConfirmationTokens is now generally available.
+
+### CardScan
+
+* [REMOVED][11785](https://github.com/stripe/stripe-android/pull/11785) CardScan has been removed. See [CardScan Module Removal](https://github.com/stripe/stripe-android/blob/f6bd19dd3543dfe474e97147989220b186242826/MIGRATING.md#3-cardscan-module-removal) to learn more. 
+
+
+## 21.29.0 - 2025-10-20
+* [Added] Added support for `onBehalfOf` to CustomerSheet.IntentConfiguration. This parameter makes CustomerSheet use a connected account to determine the payment method that users see and whether CardBrandChoice is enabled. For more information, see the [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of).
+
+## 21.28.2 - 2025-10-13
+
+Bug fixes and improvements.
+
+## 21.28.1 - 2025-10-06
+
+Bug fixes and improvements.
 
 ## 21.28.0 - 2025-09-29
 
@@ -22,32 +503,46 @@
 
 ## 21.26.0 - 2025-09-08
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][11539](https://github.com/stripe/stripe-android/pull/11539) Added support for [PayNow](https://stripe.com/payment-method/paynow) to PaymentSheet.
 
 ## 21.25.0 - 2025-09-02
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### Payments
 * [ADDED][11419](https://github.com/stripe/stripe-android/pull/11491) Added `declineCode` parameter to `StripeErrorLocalizations` to allow for handling decline code localizations.
 
 ## 21.24.4 - 2025-08-29
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### CryptoOnramp
 [Added] Additional APIs and improvements to support the development of the React Native CryptoOnramp SDK.
 
 ## 21.24.3 - 2025-08-27
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 Bug fixes and improvements.
 
 ## 21.24.2 - 2025-08-26
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 Bug fixes and improvements.
 
 ## 21.24.1 - 2025-08-25
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 Bug fixes and improvements.
 
 ## 21.24.0 - 2025-08-25
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### CardScan
 * [DEPRECATED][11419](https://github.com/stripe/stripe-android/pull/11419) Deprecated stripecardscan Module Public APIs.
@@ -58,27 +553,43 @@ Bug fixes and improvements.
 
 ## 21.23.1 - 2025-08-18
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [FIXED][11332](https://github.com/stripe/stripe-android/pull/11332) Added additional spacing between the section title and section content for payment form screens.
 
 ## 21.23.0 - 2025-08-12
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][11303](https://github.com/stripe/stripe-android/pull/11303) You no longer need to set the backend PaymentIntent setup_future_usage or payment_method_options setup_future_usage values to match the client's IntentConfiguration; the client will automatically configure this for you.
 * [CHANGED][11307](https://github.com/stripe/stripe-android/pull/11307) The value of `shouldSavePaymentMethod` passed to `CreateIntentCallback.onCreateIntent` is now `true` if `SetupFutureUse` is `OffSession` or `OnSession` in your `IntentConfiguration`.
 
 ## 21.22.2 - 2025-08-11
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][11179](https://github.com/stripe/stripe-android/pull/11179) More specific error messaging for postal codes
 * [FIXED][11280](https://github.com/stripe/stripe-android/pull/11280) Flows initiated with PaymentSheet.IntentConfiguration now show specific API error messages instead of generic fallback messages
 
 ## 21.22.1 - 2025-08-04
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ## 21.22.0 - 2025-07-28
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) PaymentSheet will now accurately show a success state when confirming Blik and UPI PaymentIntents using a Stripe Connect account ID.
 * [ADDED][11205](https://github.com/stripe/stripe-android/pull/11205) Added `subtitleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row subtitles.
 
 ## 21.21.0 - 2025-07-21
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
 * [FIXED][11111](https://github.com/stripe/stripe-android/pull/11083) EmbeddedPaymentElement now errors when `configuration.rowSelectionBehavior` is `.immediateAction` and `configuration.embeddedViewDisplaysMandateText` is `true` to ensure integrations display legal mandate text to the customer.
@@ -90,26 +601,36 @@ Bug fixes and improvements.
 
 ## 21.20.2 - 2025-07-09
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][11083](https://github.com/stripe/stripe-android/pull/11083) Updated translations.
 
 ## 21.20.1 - 2025-07-07
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10987](https://github.com/stripe/stripe-android/pull/10987) Added support for satispay with `setup_future_usage`.
 
 ## 21.20.0 - 2025-06-30
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][11007](https://github.com/stripe/stripe-android/pull/11007) Added support for bacs with `setup_future_usage`.
 
 ## 21.19.0 - 2025-06-23
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10947](https://github.com/stripe/stripe-android/pull/10947) Added `FlatWithChevron` Embedded RowStyle to Appearance API
 * [CHANGED][10705](https://github.com/stripe/stripe-android/pull/10705) `EmbeddedPaymentElement` is now GA.
 
 ## 21.18.0 - 2025-06-16
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10935](https://github.com/stripe/stripe-android/pull/10935) Add `formInsetValues` method to `PaymentSheet.Appearance.Builder`.
@@ -119,10 +640,14 @@ Bug fixes and improvements.
 
 ## 21.17.0 - 2025-06-09
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][10919](https://github.com/stripe/stripe-android/pull/10919) Add `formInsetValues` to `PaymentSheet.Appearance`.
 
 ## 21.16.0 - 2025-06-02
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10885](https://github.com/stripe/stripe-android/pull/10885) Add `heightDp` to `PrimaryButtonShape`.
@@ -133,10 +658,14 @@ Bug fixes and improvements.
 
 ## 21.15.1 - 2025-05-28
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [FIXED][10870](https://github.com/stripe/stripe-android/pull/10870) Fixed an issue with `EmbeddedPaymentElement` where `View more` and `Edit` buttons would completely fill the parent's height if `height` modifier is used by the parent composable.
 
 ## 21.15.0 - 2025-05-27
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
@@ -146,10 +675,14 @@ Bug fixes and improvements.
 
 ## 21.14.0 - 2025-05-19
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [ADDED][10827](https://github.com/stripe/stripe-android/pull/10827) PaymentMethodOptions SetupFutureUsage is now in public preview.
 
 ## 21.13.0 - 2025-05-06
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [FIXED][10778](https://github.com/stripe/stripe-android/pull/10778) Fixed an issue where CVC recollection did not trigger for cards saved using Link passthrough mode.
@@ -157,6 +690,8 @@ Bug fixes and improvements.
 * [CHANGED][10704](https://github.com/stripe/stripe-android/pull/10704) Embedded Payment Element now uses `FormSheetAction.Continue` by default.
 
 ## 21.12.0 - 2025-04-28
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10733](https://github.com/stripe/stripe-android/pull/10733) Added support for [custom payment methods](https://docs.stripe.com/payments/payment-methods/custom-payment-methods).
@@ -166,10 +701,14 @@ Bug fixes and improvements.
 
 ## 21.11.1 - 2025-04-22
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [FIXED][10693](https://github.com/stripe/stripe-android/pull/10693) Fix an issue with vertical where default provided billing details were not attached for LPMs that did not display a form.
 
 ## 21.11.0 - 2025-04-21
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
 * Bumped Accompanist from 0.34.0 to 0.36.0.
@@ -181,6 +720,8 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 
 ## 21.10.0 - 2025-04-11
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### Payments
 * [FIXED][10590](https://github.com/stripe/stripe-android/pull/10590) Fix 3DS2 Challenge Response parsing error.
 * [FIXED][10612](https://github.com/stripe/stripe-android/pull/10612) Fix JWS validation error in 3DS2 flow.
@@ -190,10 +731,14 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 
 ## 21.9.0 - 2025-04-07
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### Connect (Private Preview)
 * [CHANGED][10548](https://github.com/stripe/stripe-android/pull/10548) Replaced `ClientSecretProvider` with `FetchClientSecret`
 
 ## 21.8.0 - 2025-04-01
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
@@ -206,6 +751,8 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 
 ## 21.7.1 - 2025-03-24
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [CHANGED][https://github.com/stripe/stripe-android/pull/10421] Afterpay no longer requires a shipping address to be shown.
 * [CHANGED][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents in US and CA.
@@ -213,11 +760,15 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 
 ## 21.7.0 - 2025-03-17
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### PaymentSheet
 * [FIXED][10327](https://github.com/stripe/stripe-android/pull/10327) Improve accessibility for postal code.
 * [ADDED] Support for default payment methods in private beta.
 
 ## 21.6.0 - 2025-03-03
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
 
 ### PaymentSheet
 * [ADDED][10202](https://github.com/stripe/stripe-android/pull/10202) Added card brand filtering to specify allowed or blocked card brands. Learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/filter-card-brands?platform=android).
@@ -242,10 +793,15 @@ Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/951
 
 ## 21.5.1 - 2025-02-19
 
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### Payments
 * [FIXED][10211](https://github.com/stripe/stripe-android/pull/10211) Fixed an issue where some LPMs couldn't be confirmed.
 
 ## 21.5.0 - 2025-02-18
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 ### CardScan
 * [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
 
@@ -256,6 +812,9 @@ Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/951
 - [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
 
 ## 21.4.2 - 2025-02-10
+
+⚠️ Warning: This version contains a bug affecting Connect platforms where users may encounter errors when adding US bank accounts via the Mobile Payment Element. For Connect platform integrations, please upgrade to version v21.26.1 or newer.
+
 Bug fixes and improvements.
 
 ## 21.4.1 - 2025-01-28

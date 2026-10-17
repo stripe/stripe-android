@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
@@ -30,7 +29,6 @@ import androidx.core.view.doOnPreDraw
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
@@ -38,7 +36,6 @@ import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -56,10 +53,11 @@ import kotlin.properties.Delegates
  * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
  * code layout direction will be set according to the locale.
  */
-class CardInputWidget @JvmOverloads constructor(
+class CardInputWidget internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private var customCvcLabel: String? = null
     private val viewBinding = StripeCardInputWidgetBinding.inflate(
@@ -93,12 +91,17 @@ class CardInputWidget @JvmOverloads constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
+
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
+
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
 
     private val invalidFields: Set<CardValidCallback.Fields>
         get() {
@@ -181,50 +184,10 @@ class CardInputWidget @JvmOverloads constructor(
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
     /**
-     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
-     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
-     */
-    override val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
-        get() {
-            return cardParams?.let { params ->
-                PaymentMethodCreateParams.Card(
-                    number = params.number,
-                    cvc = params.cvc,
-                    expiryMonth = params.expMonth,
-                    expiryYear = params.expYear,
-                    attribution = params.attribution,
-                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
-            }
-        }
-
-    private val billingDetails: PaymentMethod.BillingDetails?
-        get() {
-            return postalCodeValue?.let {
-                PaymentMethod.BillingDetails(
-                    address = Address(
-                        postalCode = it
-                    )
-                )
-            }
-        }
-
-    /**
-     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
-     * are valid; otherwise `null`. If a field is invalid focus will shift to the invalid field
-     */
-    override val paymentMethodCreateParams: PaymentMethodCreateParams?
-        get() {
-            return paymentMethodCard?.let { card ->
-                PaymentMethodCreateParams.create(card, billingDetails)
-            }
-        }
-
-    /**
      * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
+    @Deprecated("Use paymentMethodCreateParams instead")
     override val cardParams: CardParams?
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
@@ -282,6 +245,85 @@ class CardInputWidget @JvmOverloads constructor(
             return null
         }
 
+    /**
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
+     */
+    override val paymentMethodCard: PaymentMethodCreateParams.Card?
+        get() {
+            val cardNumber = cardNumberEditText.validatedCardNumber
+            val expirationDate = expiryDateEditText.validatedDate
+            val cvc = this.cvc
+
+            cardNumberEditText.shouldShowError = cardNumber == null
+            expiryDateEditText.shouldShowError = expirationDate == null
+            cvcEditText.shouldShowError = cvc == null
+            postalCodeEditText.shouldShowError =
+                (postalCodeRequired || usZipCodeRequired) &&
+                postalCodeEditText.postalCode.isNullOrBlank()
+
+            // Announce error messages for accessibility
+            currentFields
+                .filter { it.shouldShowError }
+                .forEach { editText ->
+                    editText.errorMessage?.let { errorMessage ->
+                        editText.announceForAccessibility(errorMessage)
+                    }
+                }
+
+            when {
+                cardNumber == null -> {
+                    cardNumberEditText.requestFocus()
+                }
+                expirationDate == null -> {
+                    expiryDateEditText.requestFocus()
+                }
+                cvc == null -> {
+                    cvcEditText.requestFocus()
+                }
+                postalCodeEditText.shouldShowError -> {
+                    postalCodeEditText.requestFocus()
+                }
+                else -> {
+                    shouldShowErrorIcon = false
+                    return PaymentMethodCreateParams.Card(
+                        attribution = setOf(LOGGING_TOKEN),
+                        number = cardNumber.value,
+                        expiryMonth = expirationDate.month,
+                        expiryYear = expirationDate.year,
+                        cvc = cvc.value,
+                        networks = cardBrandView.paymentMethodCreateParamsNetworks()
+                    )
+                }
+            }
+
+            shouldShowErrorIcon = true
+
+            return null
+        }
+
+    private val billingDetails: PaymentMethod.BillingDetails?
+        get() {
+            return postalCodeValue?.let {
+                PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = it
+                    )
+                )
+            }
+        }
+
+    /**
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`. If a field is invalid focus will shift to the invalid field
+     */
+    override val paymentMethodCreateParams: PaymentMethodCreateParams?
+        get() {
+            return paymentMethodCard?.let { card ->
+                PaymentMethodCreateParams.create(card, billingDetails)
+            }
+        }
+
     private val frameWidth: Int
         get() = frameWidthSupplier()
 
@@ -303,15 +345,18 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
 
             // First remove if it's already added, to make sure it's not added multiple times.
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
-            postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
+            postalCodeEditText.addTextChangedListener(textInputWatcher)
+            postalCodeEditText.internalFocusChangeListeners.add(textFocusWatcher)
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
 
-            postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            postalCodeEditText.internalFocusChangeListeners.remove(textFocusWatcher)
+            postalCodeEditText.removeTextChangedListener(textInputWatcher)
         }
         updatePostalRequired()
     }
@@ -389,6 +434,19 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardInputWidget,
+        ),
+    )
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -413,6 +471,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context = context)
         lifecycleDelegate.initLifecycle(this)
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
@@ -439,12 +498,6 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        requiredFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            requiredFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
@@ -604,11 +657,14 @@ class CardInputWidget @JvmOverloads constructor(
             STATE_CARD_VIEWED to isShowingFullCard,
             STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
             STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
+            cardElementAnalytics.restoreState(state)
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
@@ -759,6 +815,13 @@ class CardInputWidget @JvmOverloads constructor(
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
+
+        requiredFields.forEach {
+            it.internalFocusChangeListeners.remove(textFocusWatcher)
+            it.removeTextChangedListener(textInputWatcher)
+            it.addTextChangedListener(textInputWatcher)
+            it.internalFocusChangeListeners.add(textFocusWatcher)
+        }
 
         cvcEditText.internalFocusChangeListeners.add { _, hasFocus ->
             cardBrandView.shouldShowCvc = hasFocus

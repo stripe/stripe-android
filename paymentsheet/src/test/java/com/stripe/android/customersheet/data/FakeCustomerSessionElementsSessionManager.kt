@@ -27,6 +27,7 @@ internal class FakeCustomerSessionElementsSessionManager(
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         ),
     private val customer: ElementsSession.Customer = ElementsSession.Customer(
+        email = null,
         session = ElementsSession.Customer.Session(
             id = "cuss_1",
             customerId = "cus_1",
@@ -45,7 +46,6 @@ internal class FakeCustomerSessionElementsSessionManager(
         CustomerSessionElementsSession(
             elementsSession = ElementsSession(
                 linkSettings = null,
-                paymentMethodSpecs = null,
                 stripeIntent = intent,
                 orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
                 merchantCountry = null,
@@ -59,7 +59,10 @@ internal class FakeCustomerSessionElementsSessionManager(
                 flags = emptyMap(),
                 experimentsData = null,
                 passiveCaptcha = null,
-                merchantLogoUrl = null
+                merchantLogoUrl = null,
+                elementsSessionConfigId = null,
+                accountId = "acct_1SGP1sPvdtoA7EjP",
+                merchantId = "acct_1SGP1sPvdtoA7EjP",
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

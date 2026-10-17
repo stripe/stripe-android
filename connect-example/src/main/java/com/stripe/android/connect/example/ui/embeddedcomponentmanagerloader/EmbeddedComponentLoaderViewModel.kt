@@ -57,9 +57,11 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
             val managerFlow = _state
                 .map { it.embeddedComponentManagerAsync() }
                 .filterNotNull()
-            val appearanceFlow = settingsService.getAppearanceIdFlow()
-                .filterNotNull()
-                .map { id -> AppearanceInfo.getAppearance(id, activity).appearance }
+            val appearanceIdFlow = settingsService.getAppearanceIdFlow().filterNotNull()
+            val overridesFlow = settingsService.getCustomThemeOverridesFlow()
+            val appearanceFlow = combine(appearanceIdFlow, overridesFlow) { id, overrides ->
+                AppearanceInfo.getAppearance(id, activity, overrides).appearance
+            }
             combine(managerFlow, appearanceFlow, ::Pair).collectLatest { (manager, appearance) ->
                 logger.debug("($loggingTag) Updating appearance in $activity")
                 manager.update(appearance)

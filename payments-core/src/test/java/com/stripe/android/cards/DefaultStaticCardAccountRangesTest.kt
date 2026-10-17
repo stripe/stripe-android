@@ -3,6 +3,7 @@ package com.stripe.android.cards
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardFunding
 import kotlin.test.Test
 
 class DefaultStaticCardAccountRangesTest {
@@ -27,6 +28,7 @@ class DefaultStaticCardAccountRangesTest {
                 binRange = BinRange(low = "6000000000000000", high = "6099999999999999"),
                 panLength = 16,
                 brandInfo = AccountRange.BrandInfo.Discover,
+                funding = CardFunding.Unknown,
                 country = null
             )
         )

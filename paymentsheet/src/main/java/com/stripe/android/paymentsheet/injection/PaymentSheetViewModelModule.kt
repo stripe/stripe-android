@@ -1,37 +1,31 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.IS_LIVE_MODE
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheetContractV2
+import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
-import javax.inject.Provider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContractV2.Args) {
-
-    @Provides
-    fun provideArgs(): PaymentSheetContractV2.Args {
-        return starterArgs
-    }
-
-    @Provides
-    @Named(STATUS_BAR_COLOR)
-    fun providesStatusBarColor(): Int? {
-        return starterArgs.statusBarColor
-    }
+internal class PaymentSheetViewModelModule {
 
     @Provides
     fun providePrefsRepository(
         appContext: Context,
-        @IOContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext,
+        starterArgs: PaymentSheetContract.Args,
     ): PrefsRepository {
         return DefaultPrefsRepository(
             appContext,
@@ -41,8 +35,25 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     }
 
     @Provides
-    @Named(IS_LIVE_MODE)
-    fun isLiveMode(
-        paymentConfiguration: Provider<PaymentConfiguration>
-    ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+    @PaymentElementCallbackIdentifier
+    fun provideCallbackIdentifier(args: PaymentSheetContract.Args): String = args.paymentElementCallbackIdentifier
+
+    @Provides
+    @Singleton
+    @ViewModelScope
+    fun provideViewModelScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    }
+
+    @Provides
+    fun providePlacesClient(
+        appContext: Context,
+        starterArgs: PaymentSheetContract.Args,
+        errorReporter: ErrorReporter,
+    ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
+        context = appContext,
+        googlePlacesApiKey = starterArgs.config.googlePlacesApiKey,
+        errorReporter = errorReporter,
+        isPlacesAvailable = DefaultIsPlacesAvailable()(),
+    )
 }

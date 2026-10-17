@@ -5,10 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -22,7 +22,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     fun `null confirmationState emits null paymentOption`() = testScenario {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.set(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay)
         }
     }
 
@@ -32,7 +32,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     ) {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.set(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
     }
@@ -43,12 +43,14 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     ) = runTest {
         val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
             iconLoader = mock(),
+            cardArtDrawableLoader = { null },
             context = ApplicationProvider.getApplicationContext(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
         Scenario(
             paymentOptionDisplayDataHolder = DefaultPaymentOptionDisplayDataHolder(
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = backgroundScope,
                 selectionHolder = selectionHolder,
                 confirmationStateSupplier = confirmationStateSupplier,
                 paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,

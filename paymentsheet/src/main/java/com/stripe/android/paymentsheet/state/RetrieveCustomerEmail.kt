@@ -1,37 +1,70 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import javax.inject.Inject
 
 /**
  * Retrieves the customer email from any of the available sources.
  *
- * This function first checks the [CommonConfiguration] for a default email.
- * If not found, it attempts to retrieve the email from the [CustomerRepository].
- *
- * @param customerRepository The repository to fetch customer information.
- * @param configuration The common configuration containing default billing details.
- * @param customer The customer information to retrieve the email from.
- * @return The customer's email if available, otherwise null.
+ * For [CustomerMetadata.CustomerSession] and [CustomerMetadata.LegacyEphemeralKey], checks the
+ * default billing email first, then fetches from the [CustomerRepository].
+ * For [CustomerMetadata.CheckoutSession] and null, returns the default billing email only.
  */
 internal interface RetrieveCustomerEmail {
 
     suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): String?
 }
 
 internal class DefaultRetrieveCustomerEmail @Inject constructor(
     private val customerRepository: CustomerRepository,
+    private val durationProvider: DurationProvider,
 ) : RetrieveCustomerEmail {
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): String? {
-        return configuration.defaultBillingDetails?.email
-            ?: customer?.let { customerRepository.retrieveCustomer(it) }?.email
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadRetrieveCustomer,
+        ) {
+            val defaultEmail = configuration.defaultBillingDetails?.email
+            when (customerMetadata) {
+                is CustomerMetadata.CustomerSession -> {
+                    defaultEmail ?: customerEmail
+                }
+                is CustomerMetadata.LegacyEphemeralKey -> {
+                    defaultEmail ?: retrieveEmailFromApi(
+                        customerId = customerMetadata.id,
+                        ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                        apiConfiguration = apiConfiguration,
+                    )
+                }
+                is CustomerMetadata.CheckoutSession,
+                null -> defaultEmail
+            }
+        }
+    }
+
+    private suspend fun retrieveEmailFromApi(
+        customerId: String,
+        ephemeralKeySecret: String,
+        apiConfiguration: ApiConfiguration.State,
+    ): String? {
+        return customerRepository.retrieveCustomer(
+            customerId = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            apiConfiguration = apiConfiguration,
+        )?.email
     }
 }

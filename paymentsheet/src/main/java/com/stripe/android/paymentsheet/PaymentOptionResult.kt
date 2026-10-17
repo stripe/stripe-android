@@ -13,7 +13,6 @@ class PaymentOptionResult internal constructor(
      * it is received from.
      */
     val paymentOption: PaymentOption?,
-
     /**
      * Indicates the updated payment option was received when the user canceled selecting an option in the
      * sheet. Updated payment options can occur in this manner if the user updated details of their selected

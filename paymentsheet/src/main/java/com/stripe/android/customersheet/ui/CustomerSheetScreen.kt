@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.nfcscan.LocalNfcScanEventShownReporter
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.PrimaryButton
@@ -21,11 +23,13 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
@@ -46,9 +50,9 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
 
@@ -62,6 +66,7 @@ internal fun CustomerSheetScreen(
         viewState = viewState,
         viewActionHandler = viewModel::handleViewAction,
         paymentMethodNameProvider = viewModel::providePaymentMethodName,
+        userFacingLogger = viewModel.userFacingLogger,
     )
 }
 
@@ -72,6 +77,7 @@ internal fun CustomerSheetScreen(
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
+    userFacingLogger: UserFacingLogger,
 ) {
     BottomSheetScaffold(
         topBar = {
@@ -106,6 +112,7 @@ internal fun CustomerSheetScreen(
                         AddPaymentMethod(
                             viewState = viewState,
                             viewActionHandler = viewActionHandler,
+                            userFacingLogger = userFacingLogger,
                             displayForm = displayAddForm,
                         )
                         PaymentSheetContentPadding()
@@ -130,7 +137,7 @@ internal fun SelectPaymentMethod(
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(
         modifier = modifier
@@ -148,15 +155,16 @@ internal fun SelectPaymentMethod(
             paymentMethods = viewState.savedPaymentMethods,
             showGooglePay = viewState.showGooglePay,
             showLink = false,
+            linkBrand = LinkBrand.Link,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
-            isCbcEligible = viewState.isCbcEligible,
             defaultPaymentMethodId = null
         )
 
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = paymentOptionsState.items,
             selectedPaymentOptionsItem = paymentOptionsState.selectedItem,
+            linkBrand = LinkBrand.Link, // Link is unsupported in CustomerSheet
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
@@ -204,9 +212,10 @@ internal fun SelectPaymentMethod(
 internal fun AddPaymentMethod(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
+    userFacingLogger: UserFacingLogger,
     displayForm: Boolean,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -244,8 +253,8 @@ internal fun AddPaymentMethod(
         DefaultAnalyticsEventReporter(viewActionHandler)
     }
 
-    val cardScanEventReporter = remember(viewActionHandler) {
-        DefaultCardScanEventReporter(viewActionHandler)
+    val cardScanEventReporter = remember(viewActionHandler, userFacingLogger) {
+        DefaultCardScanEventReporter(viewActionHandler, userFacingLogger)
     }
 
     if (displayForm) {
@@ -254,6 +263,9 @@ internal fun AddPaymentMethod(
             LocalCardBrandDisallowedReporter provides disallowedReporter,
             LocalAnalyticsEventReporter provides analyticsEventReporter,
             LocalCardScanEventsReporter provides cardScanEventReporter,
+            LocalNfcScanEventShownReporter provides {
+                viewActionHandler(CustomerSheetViewAction.OnNfcScanButtonShown)
+            },
         ) {
             PaymentElement(
                 enabled = viewState.enabled,
@@ -327,7 +339,7 @@ private fun UpdatePaymentMethod(
     viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getOuterFormInsets()
+    val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
 
     Column(modifier) {
         viewState.updatePaymentMethodInteractor.screenTitle?.let {
@@ -377,7 +389,8 @@ private class DefaultCardBrandDisallowedReporter(
 }
 
 private class DefaultCardScanEventReporter(
-    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
+    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit,
+    private val userFacingLogger: UserFacingLogger,
 ) : CardScanEventsReporter {
     val durationProvider = DefaultDurationProvider.instance
     override fun onCardScanStarted(implementation: String) {
@@ -412,6 +425,9 @@ private class DefaultCardScanEventReporter(
                 )
             )
         )
+        error?.message?.let {
+            userFacingLogger.logWarningWithoutPii("Card scan check failed: $it")
+        }
     }
 
     override fun onCardScanCancelled(implementation: String) {
@@ -443,6 +459,14 @@ private class DefaultCardScanEventReporter(
                     implementation = implementation,
                     error = error,
                 )
+            )
+        )
+    }
+
+    override fun onCardScanButtonShown() {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanButtonShown()
             )
         )
     }

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTok
 import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTokenCreateIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTokenCreateSessionRequest
 import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTokenCreateSessionResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CustomCustomerIdSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -33,6 +34,7 @@ internal class SharedPaymentTokenPlaygroundRequester(
         val customerId = playgroundSnapshot[CustomerSettingsDefinition].run {
             when (this) {
                 is CustomerType.Existing -> customerId
+                CustomerType.CUSTOM -> playgroundSnapshot[CustomCustomerIdSettingsDefinition]
                 else -> null
             }
         }
@@ -89,15 +91,14 @@ internal class SharedPaymentTokenPlaygroundRequester(
         val customerId = playgroundSnapshot[CustomerSettingsDefinition].run {
             when (this) {
                 is CustomerType.Existing -> customerId
+                CustomerType.CUSTOM -> playgroundSnapshot[CustomCustomerIdSettingsDefinition]
                 else -> throw IllegalStateException("Cannot create SPT without en existing customer!")
             }
         }
 
         val request = SharedPaymentTokenCreateIntentRequest(
             customerId = customerId,
-            paymentMethod = paymentMethod.id ?: throw IllegalStateException(
-                "No payment method ID was found when creating SPT!"
-            ),
+            paymentMethod = paymentMethod.id,
             shipping = null,
         )
 

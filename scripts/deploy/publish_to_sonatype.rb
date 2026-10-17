@@ -6,11 +6,6 @@ require_relative 'common'
 require_relative 'gnupg_utils'
 
 def publish_to_sonatype
-    # Must be run on the deploy branch, because it depends on changes made in
-    # create_version_bump_pr (updating the VERSION file)
-    execute_or_fail("git checkout #{@deploy_branch}")
-    execute_or_fail("git pull")
-
     set_gpg_location()
 
     begin
@@ -48,9 +43,9 @@ def publish_to_sonatype
 
             # See https://github.com/gradle-nexus/publish-plugin for info on these gradle commands.
             if (@is_dry_run)
-                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeSonatypeStagingRepository', '--stacktrace']
+                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeSonatypeStagingRepository', '--stacktrace', '--no-configuration-cache']
             else
-                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace']
+                publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace', '--no-configuration-cache']
             end
 
             Subprocess.check_call(
@@ -81,7 +76,7 @@ private def set_gpg_location
 end
 
 private def reset_gradle_properties
-    execute_or_fail("git checkout origin/master gradle.properties")
+    execute_or_fail("git checkout -- gradle.properties")
 end
 
 # Gets the contents of the PATH environment variable, but before it does

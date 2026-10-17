@@ -15,16 +15,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneNotFound
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
@@ -32,6 +33,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -66,11 +68,13 @@ import com.stripe.android.financialconnections.ui.toLocalTheme
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -91,10 +95,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val createInstantDebitsResult: CreateInstantDebitsResult,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val eventContext: FinancialConnectionsEventContext,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     @Named(APPLICATION_ID) private val applicationId: String,
-    initialState: FinancialConnectionsSheetNativeState,
+    private val initialState: FinancialConnectionsSheetNativeState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
     initialState,
     nativeAuthFlowCoordinator
@@ -104,11 +110,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
 
-    private val defaultTopAppBarState: TopAppBarState by lazy {
+    private val defaultTopAppBarState: TopAppBarState
         // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
         // on the first pane.
-        initialState.toTopAppBarState(forceHideStripeLogo = true)
-    }
+        get() = initialState.toTopAppBarState(
+            linkBrand = currentLinkBrand(),
+            forceHideStripeLogo = true
+        )
 
     private val currentPane = MutableStateFlow(initialState.initialPane)
     private val topAppBarStateUpdatesByPane = MutableStateFlow(
@@ -143,6 +151,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                     is Message.UpdateTopAppBar -> {
                         updateTopAppBarState(message.update)
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
+            currentLinkBrand.stateFlow.collect { linkBrand ->
+                setState { copy(linkBrand = linkBrand) }
+                topAppBarStateUpdatesByPane.update { paneToTopAppBarState ->
+                    paneToTopAppBarState.mapValues { (_, topAppBarState) ->
+                        topAppBarState.copy(linkBrand = linkBrand)
                     }
                 }
             }
@@ -334,7 +352,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                 when {
                     session.isCustomManualEntryError() -> {
-                        FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
+                        eventTracker.emitEvent(Name.MANUAL_ENTRY_INITIATED)
                         finishWithResult(
                             Failed(error = CustomManualEntryRequiredError())
                         )
@@ -353,7 +371,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     )
 
                     else -> {
-                        FinancialConnections.emitEvent(Name.CANCEL)
+                        eventTracker.emitEvent(Name.CANCEL)
                         finishWithResult(Canceled)
                     }
                 }
@@ -375,7 +393,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     private fun handleFinancialConnectionsCompletion(session: FinancialConnectionsSession) {
-        FinancialConnections.emitEvent(
+        eventTracker.emitEvent(
             name = Name.SUCCESS,
             metadata = Metadata(
                 manualEntry = session.paymentAccount is BankAccount,
@@ -426,14 +444,17 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        if (pane.destination.logPaneLaunched) {
+        val event = when {
+            pane == Pane.UNKNOWN -> PaneNotFound(paneName = Pane.Serializer.consumeUnknownValue())
+            pane.destination.logPaneLaunched -> PaneLaunched(
+                referrer = referrer,
+                pane = pane
+            )
+            else -> null
+        }
+        event?.let {
             viewModelScope.launch {
-                eventTracker.track(
-                    PaneLaunched(
-                        referrer = referrer,
-                        pane = pane
-                    )
-                )
+                eventTracker.track(it)
             }
         }
     }
@@ -471,6 +492,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun handlePaneChanged(pane: Pane) {
         currentPane.value = pane
+        eventContext.updateCurrentPane(pane)
     }
 
     companion object {
@@ -498,14 +520,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     savedState = savedState
                 )
                 DaggerFinancialConnectionsSheetNativeComponent
-                    .builder()
-                    .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
-                    .application(app)
-                    .configuration(state.configuration)
-                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
-                    .savedStateHandle(savedStateHandle)
-                    .initialState(state)
-                    .build()
+                    .factory()
+                    .build(
+                        initialSyncResponse = args.initialSyncResponse.takeIf { state.firstInit },
+                        application = app,
+                        initialState = state,
+                        configuration = state.configuration,
+                        sharedComponent = FinancialConnectionsSingletonSharedComponentHolder.getComponent(app),
+                        savedStateHandle = savedStateHandle,
+                    )
                     .viewModel
             }
         }
@@ -531,6 +554,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val completed: Boolean,
     val initialPane: Pane,
     val theme: Theme,
+    val linkBrand: LinkBrand,
     val isLinkWithStripe: Boolean,
     val manualEntryUsesMicrodeposits: Boolean,
     val elementsSessionContext: ElementsSessionContext?,
@@ -553,6 +577,7 @@ internal data class FinancialConnectionsSheetNativeState(
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
+        linkBrand = args.initialSyncResponse.manifest.linkBrand,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
         manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
@@ -635,11 +660,12 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
 
 private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     forceHideStripeLogo: Boolean,
+    linkBrand: LinkBrand,
 ): TopAppBarState {
     return TopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
-        isTestMode = testMode,
         theme = theme,
+        linkBrand = linkBrand,
     )
 }

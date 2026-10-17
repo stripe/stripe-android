@@ -11,8 +11,9 @@ import javax.inject.Provider
 
 internal class AddressElementViewModel @Inject internal constructor(
     val navigator: NavHostAddressElementNavigator,
-    val inputAddressViewModelSubcomponentBuilderProvider: Provider<InputAddressViewModelSubcomponent.Builder>,
-    val autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    val resultStateHolder: AddressElementResultStateHolder,
+    val inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>,
+    val autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
 ) : ViewModel() {
 
     internal class Factory(
@@ -22,10 +23,11 @@ internal class AddressElementViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return DaggerAddressElementViewModelFactoryComponent.builder()
-                .context(applicationSupplier())
-                .starterArgs(starterArgsSupplier())
-                .build()
+            return DaggerAddressElementViewModelFactoryComponent.factory()
+                .create(
+                    context = applicationSupplier(),
+                    starterArgs = starterArgsSupplier(),
+                )
                 .addressElementViewModel as T
         }
     }

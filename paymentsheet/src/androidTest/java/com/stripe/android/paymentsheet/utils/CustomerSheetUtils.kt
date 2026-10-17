@@ -10,8 +10,6 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.confirmSetupIntentParams
 import com.stripe.android.paymentsheet.confirmSetupIntentRequest
-import com.stripe.android.paymentsheet.retrieveSetupIntentParams
-import com.stripe.android.paymentsheet.retrieveSetupIntentRequest
 
 internal object CustomerSheetUtils {
     fun enqueueFetchRequests(
@@ -53,13 +51,6 @@ internal object CustomerSheetUtils {
             }
             CustomerSheetTestType.AttachToSetupIntent -> {
                 enqueue(
-                    retrieveSetupIntentRequest(),
-                    retrieveSetupIntentParams(),
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-get.json")
-                }
-
-                enqueue(
                     confirmSetupIntentRequest(),
                     confirmSetupIntentParams()
                 ) { response ->
@@ -68,14 +59,6 @@ internal object CustomerSheetUtils {
             }
             CustomerSheetTestType.CustomerSession -> Unit
         }
-    }
-
-    internal fun retrieveElementsSessionRequest(): RequestMatcher {
-        return RequestMatchers.composite(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        )
     }
 
     internal fun detachRequest(): RequestMatcher {

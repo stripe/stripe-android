@@ -9,6 +9,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.Source
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
@@ -23,7 +24,8 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentFlowResult {
     @Parcelize
-    data class Unvalidated constructor(
+    @Poko
+    class Unvalidated(
         val clientSecret: String? = null,
         @StripeIntentResult.Outcome val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
         val exception: StripeException? = null,
@@ -93,13 +95,11 @@ sealed class PaymentFlowResult {
     internal data class Validated internal constructor(
         val clientSecret: String,
         @StripeIntentResult.Outcome internal val flowOutcome: Int,
-
         /**
          * The Source is eligible for cancellation.
          * See [PaymentFlowResultProcessor.shouldCancelIntent] for usage.
          */
         internal val canCancelSource: Boolean = false,
-
         internal val sourceId: String? = null,
         internal val source: Source? = null,
         val stripeAccountId: String? = null

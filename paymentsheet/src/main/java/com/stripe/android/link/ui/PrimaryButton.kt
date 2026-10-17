@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,8 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R as uiCoreR
 
 @Composable
-internal fun PrimaryButton(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun PrimaryButton(
     modifier: Modifier = Modifier,
     label: String,
     state: PrimaryButtonState,
@@ -180,7 +182,8 @@ private fun PrimaryButtonIcon(
  * @property isBlocking Whether being in this state should block user interaction with all other
  *                      UI elements.
  */
-internal enum class PrimaryButtonState(val isBlocking: Boolean) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+enum class PrimaryButtonState(val isBlocking: Boolean) {
     Enabled(false),
     Disabled(false),
     Processing(true),
@@ -213,6 +216,7 @@ private val PrimaryButtonIconHeight = 16.dp
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 internal const val CompletedIconTestTag = "CompletedIcon"
 internal const val PrimaryButtonTag = "PrimaryButtonTag"
+private const val PreviewButtonHeight = 64f
 
 @Composable
 @PreviewLightDark
@@ -222,20 +226,21 @@ private fun PrimaryButtonPreview() {
     ) {
         listOf(
             null,
-            LinkAppearance(
-                darkColors = LinkAppearance.Colors(
-                    primary = Color.Yellow,
-                    contentOnPrimary = Color.DarkGray,
-                    borderSelected = Color.Yellow,
-                ),
-                style = LinkAppearance.Style.ALWAYS_DARK,
-                primaryButton = LinkAppearance.PrimaryButton(
-                    cornerRadiusDp = 0f,
-                    heightDp = 64f,
+            LinkAppearance()
+                .darkColors(
+                    LinkAppearance.Colors()
+                        .primary(Color.Yellow)
+                        .contentOnPrimary(Color.DarkGray)
+                        .borderSelected(Color.Yellow)
                 )
-            )
+                .style(LinkAppearance.Style.ALWAYS_DARK)
+                .primaryButton(
+                    LinkAppearance.PrimaryButton()
+                        .cornerRadiusDp(0f)
+                        .heightDp(PreviewButtonHeight)
+                )
         ).forEach { appearance ->
-            DefaultLinkTheme(appearance = appearance) {
+            DefaultLinkTheme(appearance = appearance?.build()) {
                 PrimaryButton(
                     label = "Testing",
                     state = PrimaryButtonState.Enabled,

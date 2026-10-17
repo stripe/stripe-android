@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -11,7 +12,8 @@ import com.stripe.android.model.ConfirmationToken
  * Handles parsing of confirmation token data including payment method previews,
  * mandate data, and shipping information.
  */
-internal class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ConfirmationTokenJsonParser : ModelJsonParser<ConfirmationToken> {
     override fun parse(json: org.json.JSONObject): ConfirmationToken? {
         val id = StripeJsonUtils.optString(json, FIELD_ID)
             ?: return null

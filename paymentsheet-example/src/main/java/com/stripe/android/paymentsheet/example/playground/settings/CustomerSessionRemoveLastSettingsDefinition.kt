@@ -4,36 +4,43 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
-internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDefinition(
-    defaultValue = true,
-    displayName = "Customer Session Remove Last Payment Method",
-    key = "customer_session_payment_method_remove"
-) {
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType.isPaymentFlow() ||
-            configurationData.integrationType.isCustomerFlow()
-    }
+internal object CustomerSessionRemoveLastSettingsDefinition :
+    PlaygroundSettingDefinition<FeatureState>,
+    PlaygroundSettingDefinition.Saveable<FeatureState> by EnumSaveable(
+        key = "customer_session_payment_method_remove_last",
+        values = FeatureState.entries.toTypedArray(),
+        defaultValue = FeatureState.Enabled,
+    ),
+    PlaygroundSettingDefinition.Displayable<FeatureState> {
+    override val displayName: String = "Customer Session Remove Last Payment Method"
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
-    override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        if (value) {
-            checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
-        } else {
-            checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
+    ): List<PlaygroundSettingDefinition.Displayable.Option<FeatureState>> {
+        return FeatureState.entries.map { featureState ->
+            option(name = featureState.name, value = featureState)
         }
     }
 
-    override fun configure(value: Boolean, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
-        if (value) {
-            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
-        } else {
-            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>,
+    ): Boolean {
+        if (!configurationData.integrationType.isPaymentFlow() && !configurationData.integrationType.isCustomerFlow()) {
+            return false
         }
+
+        return settings[CustomerSessionSettingsDefinition] == true
+    }
+
+    override fun configure(value: FeatureState, checkoutRequestBuilder: CheckoutRequest.Builder) {
+        checkoutRequestBuilder.paymentMethodRemoveLastFeature(value)
+    }
+
+    override fun configure(
+        value: FeatureState,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(value)
     }
 }

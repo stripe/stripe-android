@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -28,9 +27,7 @@ import com.stripe.android.databinding.StripeVerticalDividerBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
 import com.stripe.android.uicore.R as UiCoreR
 import com.stripe.payments.model.R as PaymentsModelR
@@ -45,10 +42,11 @@ import com.stripe.payments.model.R as PaymentsModelR
  * To access the [CardParams], see details in [cardParams] property.
  * To get notified if the current card params are valid, set a [CardValidCallback] object with [setCardValidCallback].
  */
-class CardFormView @JvmOverloads constructor(
+class CardFormView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr) {
     private val layoutInflater = LayoutInflater.from(context)
     private val viewBinding = StripeCardFormViewBinding.inflate(layoutInflater, this)
@@ -95,12 +93,16 @@ class CardFormView @JvmOverloads constructor(
                 ).toSet()
         }
 
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
+
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
+
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
 
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
@@ -124,6 +126,7 @@ class CardFormView @JvmOverloads constructor(
      * card number, expiration date, CVC, postal, country.
      * Returns null otherwise and display corresponding errors.
      */
+    @Deprecated("Use paymentMethodCreateParams instead")
     val cardParams: CardParams?
         get() {
             // first validate card fields
@@ -165,18 +168,34 @@ class CardFormView @JvmOverloads constructor(
      * otherwise `null`
      */
     private val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
-                PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution,
-                    networks = cardMultilineWidget.cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
+            // first validate card fields
+            if (!cardMultilineWidget.validateAllFields()) {
+                cardMultilineWidget.shouldShowErrorIcon = true
+                return null
             }
+            cardMultilineWidget.shouldShowErrorIcon = false
+
+            // then validate postal and country
+            if (!isPostalValid()) {
+                showPostalError()
+                return null
+            }
+
+            // validation OK, clear any error view
+            updateErrorsView(null)
+
+            val expirationDate =
+                requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
+
+            return PaymentMethodCreateParams.Card(
+                number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
+                cvc = cardMultilineWidget.cvcEditText.text?.toString(),
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
+                attribution = setOf(CARD_FORM_VIEW),
+                networks = cardMultilineWidget.cardBrandView.paymentMethodCreateParamsNetworks(),
+            )
         }
 
     /**
@@ -206,6 +225,19 @@ class CardFormView @JvmOverloads constructor(
             }
         }
 
+    @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cardElementAnalytics = DefaultCardElementAnalytics(
+            widgetType = CardElementWidgetType.CardFormView,
+        ),
+    )
+
     init {
         orientation = VERTICAL
 
@@ -230,6 +262,13 @@ class CardFormView @JvmOverloads constructor(
             postalCodeContainer.setBackgroundColor(Color.TRANSPARENT)
         }
 
+        allEditTextFields.forEach {
+            it.internalFocusChangeListeners.remove(textFocusWatcher)
+            it.removeTextChangedListener(textInputWatcher)
+            it.addTextChangedListener(textInputWatcher)
+            it.internalFocusChangeListeners.add(textFocusWatcher)
+        }
+
         when (style) {
             Style.Standard -> applyStandardStyle()
             Style.Borderless -> applyBorderlessStyle()
@@ -238,12 +277,6 @@ class CardFormView @JvmOverloads constructor(
 
     fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        allEditTextFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            allEditTextFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
     }
@@ -423,11 +456,14 @@ class CardFormView @JvmOverloads constructor(
             STATE_SUPER_STATE to super.onSaveInstanceState(),
             STATE_ENABLED to isEnabled,
             STATE_ON_BEHALF_OF to onBehalfOf,
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
+            cardElementAnalytics.restoreState(state)
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
             isEnabled = state.getBoolean(STATE_ENABLED)
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
@@ -438,6 +474,7 @@ class CardFormView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context = context)
         lifecycleOwnerDelegate.initLifecycle(this)
         // Merchant could set onBehalfOf before view is attached to window.
         // Check and set if needed.

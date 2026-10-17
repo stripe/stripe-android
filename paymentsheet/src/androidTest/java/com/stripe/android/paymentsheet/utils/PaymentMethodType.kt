@@ -38,7 +38,7 @@ internal sealed class PaymentMethodType(
             formPage.fillOutName()
             formPage.fillOutEmail()
 
-            paymentSheetPage.clickPrimaryButton()
+            paymentSheetPage.clickPrimaryButtonWithoutWaitingForDismissal()
         }
     }
 }

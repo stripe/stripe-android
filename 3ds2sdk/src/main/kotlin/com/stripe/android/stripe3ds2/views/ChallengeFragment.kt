@@ -75,9 +75,8 @@ internal class ChallengeFragment(
             )
     }
 
-    val challengeZoneWebView: ChallengeZoneWebView by lazy {
-        challengeEntryViewFactory.createChallengeEntryWebView(cresData)
-    }
+    private var _challengeZoneWebView: ChallengeZoneWebView? = null
+    internal val challengeZoneWebView get() = requireNotNull(_challengeZoneWebView)
 
     val informationZoneView: InformationZoneView by lazy {
         viewBinding.caInformationZone
@@ -146,11 +145,7 @@ internal class ChallengeFragment(
 
         updateBrandZoneImages()
 
-        configure(
-            challengeZoneTextView,
-            challengeZoneSelectView,
-            challengeZoneWebView
-        )
+        configure()
         configureInformationZoneView()
     }
 
@@ -171,15 +166,13 @@ internal class ChallengeFragment(
     }
 
     override fun onDestroyView() {
+        _challengeZoneWebView?.dispose()
+        _challengeZoneWebView = null
         super.onDestroyView()
         _viewBinding = null
     }
 
-    private fun configure(
-        challengeZoneTextView: ChallengeZoneTextView,
-        challengeZoneSelectView: ChallengeZoneSelectView,
-        challengeZoneWebView: ChallengeZoneWebView
-    ) {
+    private fun configure() {
         when (cresData.uiType) {
             UiType.Text -> {
                 challengeZoneView.setChallengeEntryView(challengeZoneTextView)
@@ -200,6 +193,9 @@ internal class ChallengeFragment(
                 )
             }
             UiType.Html -> {
+                val challengeZoneWebView =
+                    challengeEntryViewFactory.createChallengeEntryWebView(cresData)
+                _challengeZoneWebView = challengeZoneWebView
                 challengeZoneView.setChallengeEntryView(challengeZoneWebView)
                 challengeZoneView.setInfoHeaderText(null, null)
                 challengeZoneView.setInfoText(null, null)

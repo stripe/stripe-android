@@ -109,6 +109,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 phoneNumber = "(•••) ••• ••12",
                 publishableKey = "pk_123",
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }
@@ -205,6 +206,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 phoneNumber = "(•••) ••• ••12",
                 publishableKey = null,
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
@@ -226,7 +228,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 type = eq(type),
                 connectionsMerchantName = anyOrNull(),
                 customEmailType = anyOrNull(),
-                requestOptions = eq(apiOptions)
+                requestOptions = eq(apiOptions),
+                isResendSmsCode = any()
             )
         ).thenReturn(consumerSession)
 
@@ -260,6 +263,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 phoneNumber = "(•••) ••• ••12",
                 publishableKey = null,
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
@@ -311,6 +315,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 phoneNumber = "(•••) ••• ••12",
                 publishableKey = null,
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }

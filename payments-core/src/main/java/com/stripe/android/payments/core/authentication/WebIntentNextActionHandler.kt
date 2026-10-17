@@ -3,8 +3,8 @@ package com.stripe.android.payments.core.authentication
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -18,6 +18,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -32,8 +33,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val redirectResolver: RedirectResolver,
@@ -45,10 +45,6 @@ internal class WebIntentNextActionHandler @Inject constructor(
         requestOptions: ApiRequest.Options
     ) {
         val webAuthParams = when (val nextActionData = actionable.nextActionData) {
-            // can only triggered when `use_stripe_sdk=true`
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
-                nextActionData.webAuthParams(actionable)
-            }
             // can only triggered when `use_stripe_sdk=false`
             is StripeIntent.NextActionData.RedirectToUrl -> {
                 nextActionData.webAuthParams(actionable)
@@ -107,31 +103,14 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 authUrl,
                 returnUrl,
                 enableLogging,
-                stripeAccountId = stripeAccount,
+                apiConfiguration = apiConfigProvider.get().copy(stripeAccountId = stripeAccount),
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,
-                publishableKey = publishableKeyProvider(),
                 isInstantApp = isInstantApp,
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,
             )
-        )
-    }
-
-    private fun StripeIntent.NextActionData.SdkData.Use3DS1.webAuthParams(actionable: StripeIntent): WebAuthParams {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                PaymentAnalyticsEvent.Auth3ds1Sdk
-            )
-        )
-        return WebAuthParams(
-            authUrl = url,
-            returnUrl = actionable.id?.let {
-                threeDs1IntentReturnUrlMap.remove(it)
-            },
-            // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-            shouldCancelSource = true
         )
     }
 
@@ -170,7 +149,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
 
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = returnUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false,
         )
     }
 

@@ -23,7 +23,10 @@ class PhoneNumberController private constructor(
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
     private val isOptional: Boolean = false,
+    private val acceptEmptyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
+    override val enforceLeftToRightTextDirection: Boolean = true
+
     override val label = stateFlowOf(
         resolvableString(CoreR.string.stripe_address_label_phone_number)
     )
@@ -53,7 +56,8 @@ class PhoneNumberController private constructor(
                 CountryConfig.countryCodeToEmoji(country.code.value),
                 PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " }
             ).joinToString("")
-        }
+        },
+        autofillType = null,
     )
     val countryDropdownController = DropdownFieldController(
         countryConfig,
@@ -77,6 +81,7 @@ class PhoneNumberController private constructor(
         phoneNumberMinimumLength
     ) { value, minLength ->
         value to ((isOptional && value.isBlank()) || value.length >= (minLength ?: 0) || acceptAnyInput)
+        value to (value.length >= (minLength ?: 0) || (acceptEmptyInput && value.isEmpty()))
     }
 
     /**
@@ -90,7 +95,7 @@ class PhoneNumberController private constructor(
         FormFieldEntry(rawFieldValue, isComplete)
     }
 
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         fieldValueAndComplete,
         _hasFocus,
         _validating,
@@ -99,7 +104,7 @@ class PhoneNumberController private constructor(
         val canShowWhenNotValidating = value.isNotBlank() && !complete && !hasFocus
 
         if (canShowWhenNotValidating || canShowWhenValidating) {
-            FieldError(R.string.stripe_incomplete_phone_number)
+            FieldValidationMessage.Error(R.string.stripe_incomplete_phone_number)
         } else {
             null
         }
@@ -153,6 +158,7 @@ class PhoneNumberController private constructor(
             showOptionalLabel: Boolean = false,
             acceptAnyInput: Boolean = false,
             isOptional: Boolean = false
+            acceptEmptyInput: Boolean = false
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -179,6 +185,7 @@ class PhoneNumberController private constructor(
                     showOptionalLabel = showOptionalLabel,
                     acceptAnyInput = acceptAnyInput,
                     isOptional = isOptional,
+                    acceptEmptyInput = acceptEmptyInput,
                     overrideCountryCodes = overrideCountryCodes,
                 )
             } else {
@@ -188,17 +195,11 @@ class PhoneNumberController private constructor(
                     showOptionalLabel = showOptionalLabel,
                     acceptAnyInput = acceptAnyInput,
                     isOptional = isOptional,
+                    acceptEmptyInput = acceptEmptyInput,
                     overrideCountryCodes = overrideCountryCodes,
                 )
             }
         }
-//        PhoneNumberController.createPhoneNumberController(
-//        initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
-//        showOptionalLabel =
-//        addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
-//        acceptAnyInput =
-//        addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
-//        )
     }
 
     @Composable
@@ -206,8 +207,8 @@ class PhoneNumberController private constructor(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         PhoneNumberElementUI(
             enabled,

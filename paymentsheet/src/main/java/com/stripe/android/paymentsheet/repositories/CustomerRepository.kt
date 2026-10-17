@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -11,7 +12,11 @@ internal interface CustomerRepository {
     /**
      * Retrieve a Customer by ID using an ephemeral key.
      */
-    suspend fun retrieveCustomer(customerInfo: CustomerInfo): Customer?
+    suspend fun retrieveCustomer(
+        customerId: String,
+        ephemeralKeySecret: String,
+        apiConfiguration: ApiConfiguration.State,
+    ): Customer?
 
     /**
      * Retrieve a Customer's payment methods of all types requested.
@@ -19,42 +24,66 @@ internal interface CustomerRepository {
      * types that failed.
      */
     suspend fun getPaymentMethods(
-        customerInfo: CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<List<PaymentMethod>>
 
     /**
-     * Detach a payment method from the Customer and return the modified [PaymentMethod].
+     * Detach a payment method from the Customer using a legacy ephemeral key.
+     * Only detaches the specified payment method — no duplicate removal is needed because
+     * legacy ephemeral keys don't filter out duplicates at display time.
      */
     suspend fun detachPaymentMethod(
-        customerInfo: CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod>
+
+    /**
+     * Detach a payment method from the Customer using a customer session.
+     * Also removes any duplicate payment methods with the same card fingerprint.
+     */
+    suspend fun detachPaymentMethodAndDuplicates(
+        customerId: String,
+        ephemeralKeySecret: String,
+        customerSessionClientSecret: String,
+        paymentMethodId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     /**
      * Attach a payment method to the Customer and return the modified [PaymentMethod].
      */
     suspend fun attachPaymentMethod(
-        customerInfo: CustomerInfo,
-        paymentMethodId: String
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
-        customerInfo: CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         paymentMethodId: String,
-        params: PaymentMethodUpdateParams
+        params: PaymentMethodUpdateParams,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
-        customerInfo: CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         paymentMethodId: String?,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<Customer>
 
-    data class CustomerInfo(
-        val id: String,
-        val ephemeralKeySecret: String,
-        val customerSessionClientSecret: String?,
-    )
+    suspend fun retrievePaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod>
 }

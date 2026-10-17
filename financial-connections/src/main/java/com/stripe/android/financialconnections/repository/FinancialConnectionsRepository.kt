@@ -167,25 +167,25 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
     internal companion object {
 
-        private const val listAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
+        private val listAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/list_accounts"
 
-        private const val sessionReceiptUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
+        private val sessionReceiptUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
 
-        internal const val authorizationSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
+        internal val authorizationSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
 
-        private const val completeUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
+        private val completeUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
-        private const val authorizationSessionOAuthResultsUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
+        private val authorizationSessionOAuthResultsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
-        internal const val authorizeSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
+        internal val authorizeSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
 
-        private const val paymentMethodsUrl: String =
-            "${ApiRequest.API_HOST}/v1/payment_methods"
+        private val paymentMethodsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/payment_methods"
     }
 }

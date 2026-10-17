@@ -2,7 +2,9 @@ package com.stripe.android.link.ui.signup
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.EmailConfig
@@ -19,8 +21,9 @@ internal class SignUpScreenshotTest(
 ) {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        LayoutDirection.entries,
         listOf(SystemAppearance.DarkTheme),
-        listOf(FontSize.DefaultFont)
+        listOf(FontSize.DefaultFont),
     )
 
     @Test
@@ -32,7 +35,8 @@ internal class SignUpScreenshotTest(
                     phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                     nameController = NameConfig.createController("Jane Doe"),
                     signUpScreenState = testCase.state,
-                    onSignUpClick = {}
+                    onSignUpClick = {},
+                    onSuggestedEmailClick = {}
                 )
             }
         }
@@ -45,40 +49,60 @@ internal class SignUpScreenshotTest(
             val signUpStates = SignUpState.entries
             val requiresNameCollectionStates = listOf(true to "RequiresNameCollection", false to "")
             val errorMessages = listOf("Something went wrong".resolvableString to "ErrorMessage", null to "")
+            val suggestedEmails = listOf(
+                "suggested@example.com" to "WithSuggestion",
+                "very.long.email.address.for.testing.overflow@subdomain.example.com" to "WithLongSuggestion",
+                null to ""
+            )
 
             return signUpStates.flatMap { signUpState ->
                 val signUpEnabled = signUpState == SignUpState.InputtingRemainingFields
                 val signUpEnabledName = if (signUpEnabled) "SignUpEnabled" else ""
                 requiresNameCollectionStates.flatMap { (requiresNameCollection, requiresNameCollectionName) ->
                     errorMessages.flatMap { (errorMessage, errorMessageName) ->
-                        // Submitting is only applicable for InputtingRemainingFields.
-                        val submittingStates = if (signUpState == SignUpState.InputtingRemainingFields) {
-                            listOf(true to "Submitting", false to "Idle")
-                        } else {
-                            listOf(false to "Idle")
-                        }
-
-                        submittingStates.map { (isSubmitting, submittingStateName) ->
-                            val name = buildString {
-                                append("SignUpScreen")
-                                append(signUpEnabledName)
-                                append(signUpState.name)
-                                append(requiresNameCollectionName)
-                                append(submittingStateName)
-                                append(errorMessageName)
+                        suggestedEmails.flatMap { (suggestedEmail, suggestedEmailName) ->
+                            // Submitting is only applicable for InputtingRemainingFields.
+                            val submittingStates = if (signUpState == SignUpState.InputtingRemainingFields) {
+                                listOf(true to "Submitting", false to "Idle")
+                            } else {
+                                listOf(false to "Idle")
                             }
-                            TestCase(
-                                name = name,
-                                state = SignUpScreenState(
-                                    merchantName = "Example Inc.",
-                                    signUpEnabled = signUpEnabled,
-                                    requiresNameCollection = requiresNameCollection,
-                                    canEditEmail = true,
-                                    signUpState = signUpState,
-                                    isSubmitting = isSubmitting,
-                                    errorMessage = errorMessage,
-                                )
-                            )
+
+                            submittingStates.mapNotNull { (isSubmitting, submittingStateName) ->
+                                val includeSuggestion = suggestedEmail != null &&
+                                    signUpState == SignUpState.InputtingRemainingFields &&
+                                    errorMessage == null &&
+                                    !requiresNameCollection &&
+                                    !isSubmitting
+
+                                if (suggestedEmail != null && !includeSuggestion) {
+                                    null
+                                } else {
+                                    val name = buildString {
+                                        append("SignUpScreen")
+                                        append(signUpEnabledName)
+                                        append(signUpState.name)
+                                        append(requiresNameCollectionName)
+                                        append(submittingStateName)
+                                        append(errorMessageName)
+                                        append(suggestedEmailName)
+                                    }
+                                    TestCase(
+                                        name = name,
+                                        state = SignUpScreenState(
+                                            merchantName = "Example Inc.",
+                                            signUpEnabled = signUpEnabled,
+                                            requiresNameCollection = requiresNameCollection,
+                                            canEditEmail = true,
+                                            linkBrand = LinkBrand.Link,
+                                            signUpState = signUpState,
+                                            isSubmitting = isSubmitting,
+                                            errorMessage = errorMessage,
+                                            suggestedEmail = suggestedEmail,
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
                 }

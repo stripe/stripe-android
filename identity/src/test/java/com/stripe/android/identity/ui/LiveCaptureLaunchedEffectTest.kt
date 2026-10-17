@@ -9,6 +9,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.analytics.AnalyticsState
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
@@ -16,10 +19,13 @@ import com.stripe.android.identity.navigation.CouldNotCaptureDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +35,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -40,24 +47,32 @@ class LiveCaptureLaunchedEffectTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
     private val mockDocumentCapture = mock<VerificationPageStaticContentDocumentCapturePage> {
         on { requireLiveCapture } doReturn true
     }
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture } doReturn mockDocumentCapture
+        on { experiments } doReturn emptyList()
     }
     private val pageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn pageAndModel
         on { workContext } doReturn UnconfinedTestDispatcher()
+        on { screenTracker } doReturn mockScreenTracker
+        on { selfieTrainingConsent } doReturn false
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>()
     private val mockNavController = mock<NavController>()
 
     @Test
     fun verifyFaceDetectorFinishedResult() {
+        val faceDetectorTransitioner = mock<FaceDetectorTransitioner>()
         val faceScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
@@ -67,7 +82,7 @@ class LiveCaptureLaunchedEffectTest {
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.SELFIE,
-                    transitioner = mock()
+                    transitioner = faceDetectorTransitioner
                 )
             )
         )
@@ -75,11 +90,20 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = faceScannedState
         ) {
+            verify(mockIdentityViewModel).clearSelfieUploadedState()
             verify(mockIdentityViewModel).updateAnalyticsState(
                 argWhere { block ->
                     block(AnalyticsState()).selfieModelScore == FACE_SCORE
                 }
             )
+            runBlocking {
+                verify(mockIdentityViewModel).collectDataForSelfieScreen(
+                    same(mockNavController),
+                    same(faceDetectorTransitioner),
+                    same(mockVerificationPage),
+                    eq(false)
+                )
+            }
         }
     }
 
@@ -90,6 +114,7 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = faceTimeoutState
         ) {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_SELFIE), any())
             verify(mockNavController).navigate(
                 eq(
                     "${CouldNotCaptureDestination.COULD_NOT_CAPTURE}?${CouldNotCaptureDestination.ARG_FROM_SELFIE}=true"
@@ -104,12 +129,13 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput.Legacy(
+                result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_FRONT_MODEL_SCORE,
                     allScores = mock(),
-                    blurScore = ID_FRONT_BLUR_SCORE
+                    blurScore = ID_FRONT_BLUR_SCORE,
+                    croppedImage = mock()
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_FRONT,
@@ -138,6 +164,7 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = idTimeoutState
         ) {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_LIVE_CAPTURE), any())
             verify(mockNavController).navigate(
                 eq(
                     "${CouldNotCaptureDestination.COULD_NOT_CAPTURE}?" +
@@ -153,12 +180,13 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput.Legacy(
+                result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_BACK_MODEL_SCORE,
                     allScores = mock(),
-                    blurScore = ID_BACK_BLUR_SCORE
+                    blurScore = ID_BACK_BLUR_SCORE,
+                    croppedImage = mock()
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_BACK,

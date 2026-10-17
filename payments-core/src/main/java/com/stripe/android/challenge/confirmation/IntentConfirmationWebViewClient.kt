@@ -1,0 +1,101 @@
+package com.stripe.android.challenge.confirmation
+
+import android.net.Uri
+import android.net.http.SslError
+import android.webkit.RenderProcessGoneDetail
+import android.webkit.SslErrorHandler
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import com.stripe.android.core.Logger
+
+internal class IntentConfirmationWebViewClient(
+    private val hostUrl: String,
+    private val errorHandler: WebViewErrorHandler,
+    private val logger: Logger,
+    private val openUri: (Uri) -> Unit,
+) : WebViewClient() {
+
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val host = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
+        openUri(host)
+        return true
+    }
+
+    override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+        super.onReceivedError(view, request, error)
+        if (!urlsMatch(request?.url?.toString(), hostUrl)) return
+        errorHandler(
+            WebViewError(
+                message = error?.description?.toString(),
+                errorCode = error?.errorCode,
+                url = request?.url?.toString(),
+                webViewErrorType = "generic_resource_error"
+            )
+        )
+    }
+
+    override fun onReceivedHttpError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        errorResponse: WebResourceResponse?
+    ) {
+        super.onReceivedHttpError(view, request, errorResponse)
+        if (!urlsMatch(request?.url?.toString(), hostUrl)) return
+        errorHandler(
+            WebViewError(
+                message = errorResponse?.reasonPhrase,
+                errorCode = errorResponse?.statusCode,
+                url = request?.url?.toString(),
+                webViewErrorType = "http_error"
+            )
+        )
+    }
+
+    override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+        super.onReceivedSslError(view, handler, error)
+        handler?.cancel()
+        errorHandler(
+            WebViewError(
+                message = "received ssl error",
+                errorCode = error?.primaryError,
+                url = error?.url,
+                webViewErrorType = "ssl_error"
+            )
+        )
+    }
+
+    override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+        logger.error("IntentConfirmationWebViewClient: render process gone, url=${view?.url}")
+        errorHandler(
+            WebViewError(
+                message = "render process gone",
+                errorCode = null,
+                url = view?.url,
+                webViewErrorType = "render_process_gone"
+            )
+        )
+        // Return true to indicate we handled the crash. Returning false (the super default)
+        // causes Android to kill the entire app process.
+        return true
+    }
+
+    private fun urlsMatch(url1: String?, url2: String): Boolean {
+        if (url1 == null) return false
+        val uri1 = Uri.parse(url1).normalizeTrailingSlash()
+        val uri2 = Uri.parse(url2).normalizeTrailingSlash()
+        return uri1 == uri2
+    }
+
+    private fun Uri.normalizeTrailingSlash(): Uri {
+        val path = this.path ?: return this
+        val normalizedPath = path.trimEnd('/')
+        return if (normalizedPath != path) {
+            this.buildUpon().path(normalizedPath).build()
+        } else {
+            this
+        }
+    }
+}

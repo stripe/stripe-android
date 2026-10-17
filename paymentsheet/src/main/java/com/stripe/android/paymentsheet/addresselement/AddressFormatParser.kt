@@ -4,14 +4,14 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AddressInputMode
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal class AddressFormatParser(
     private val config: AddressLauncher.Configuration?
 ) {
     fun parse(
         values: AddressDetails,
-    ): Map<IdentifierSpec, String?> {
+    ): Map<FormFieldId, String?> {
         val addressElement = createAddressElement(values)
 
         return addressElement.getFormFieldValueFlow().value.toMap().mapValues {
@@ -23,7 +23,7 @@ internal class AddressFormatParser(
         values: AddressDetails,
     ): AddressElement {
         return AddressElement(
-            _identifier = IdentifierSpec.Generic("address"),
+            _identifier = FormFieldId.Generic("address"),
             rawValuesMap = values.toIdentifierMap(),
             countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
             addressInputMode = AddressInputMode.NoAutocomplete(

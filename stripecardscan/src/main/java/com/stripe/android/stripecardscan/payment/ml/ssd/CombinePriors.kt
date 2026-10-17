@@ -8,6 +8,7 @@ import kotlin.math.sqrt
 
 private const val NUMBER_OF_PRIORS = 3
 
+@Suppress("MagicNumber")
 internal fun combinePriors(trainedImageSize: Size): Array<SizeAndCenter> {
     val priorsOne: Array<SizeAndCenter> =
         generatePriors(
@@ -32,6 +33,7 @@ internal fun combinePriors(trainedImageSize: Size): Array<SizeAndCenter> {
     return (priorsOne + priorsTwo).apply { forEach { it.clampAll(0F, 1F) } }
 }
 
+@Suppress("MagicNumber")
 private fun generatePriors(
     trainedImageSize: Size,
     featureMapSize: Size,

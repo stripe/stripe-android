@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">接受的身份证件包括</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">保持证件水平</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">允许</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">应用设置</string>
   <!-- Description of back of driver's license image -->
@@ -18,11 +20,19 @@
   <string name="stripe_back_of_id">身份证背面</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">身份证件背面</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">未检测到证件的背面</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">已选择身份证背面</string>
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">相机许可</string>
   <string name="stripe_camera_permission_rationale">该应用将使用相机来扫描您的身份证件并拍照来验证您的身份。</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">已拍摄正面</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">已拍摄左侧</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">已拍摄右侧</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">正在拍摄...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -41,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">您可以重试或从设备上传一张照片。</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">无法拍摄图片</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">拒绝</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">细节不可见</string>
   <string name="stripe_decrease_lighting_2">移动到较暗区域</string>
@@ -90,8 +102,6 @@
   <string name="stripe_doc_front_warmup_title">准备好扫描您带照片的身份证件</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">驾驶证</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">错误</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">文件上传</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -122,6 +132,8 @@
   <string name="stripe_front_of_id">身份证正面</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">身份证件正面</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">未检测到证件的正面</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">已选择身份证正面</string>
   <!-- Description of front of passport image -->
@@ -136,12 +148,16 @@
   <string name="stripe_grant_camera_permission_text">我们需要使用您的相机的许可。请在应用设置中允许使用相机。</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">保持不动，正在扫描</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">保持静止...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">身份证件</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">证件号码</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">我准备好了</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">图片拍摄</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">您输入的证件号码不完整。</string>
   <!-- Instructional text when environment is too dark -->
@@ -158,12 +174,18 @@
   <string name="stripe_last_4_of_ssn">社会保障号码后 4 位</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">姓氏</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">自动</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">正在加载</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">手动</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">请将证件靠近一些</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">将证件后移</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">将证件放在取景框正中央</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC 或 FIN</string>
   <!-- No comment provided by engineer. -->
@@ -198,6 +220,7 @@
   <string name="stripe_position_selfie">将脸放在画面正中间。</string>
   <!-- Instructional text when the document is too blurry -->
   <string name="stripe_reduce_blur">证件未对焦</string>
+  <string name="stripe_reduce_blur_2">画面模糊。请稳住手机并重新尝试。</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">细节不可见</string>
   <string name="stripe_reduce_glare_2">尝试减少眩光并使身份证件可见</string>
@@ -213,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">已完成自拍照拍摄</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">自拍照拍摄</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">太棒了！正在检查您的图片....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">如果您允许，Stripe 可能会使用您的图片来改进欺诈检测。如果不允许，也不会影响您的验证。</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">通过自拍照验证</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">拍摄了一张自拍照</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">向左转头</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">向右转头</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">请靠近一点</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">尚未保存您的自拍照。想要离开吗？</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">请将脸部置于框内</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">人脸自拍</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">帮助我们改进验证</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">下一步将自动拍摄一些照片来验证是否是您本人</string>
   <!-- Title for selfie warmup page -->

@@ -14,14 +14,12 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.injection.DaggerCustomerAdapterDataSourceComponent
 import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionDataSourceComponent
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * This objects holds references to objects that need to be shared across Activity boundaries
  * but can't be serialized, or objects that can't be injected where they are used.
  */
-@OptIn(ExperimentalCustomerSessionApi::class)
 internal object CustomerSheetHacks {
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
     val initializationDataSource: Single<CustomerSheetInitializationDataSource>
@@ -47,10 +45,11 @@ internal object CustomerSheetHacks {
         when (integration) {
             is CustomerSheetIntegration.Adapter -> {
                 val adapterDataSourceComponent = DaggerCustomerAdapterDataSourceComponent
-                    .builder()
-                    .application(application)
-                    .adapter(integration.adapter)
-                    .build()
+                    .factory()
+                    .create(
+                        application = application,
+                        adapter = integration.adapter,
+                    )
 
                 _initializationDataSource.value = adapterDataSourceComponent.customerSheetInitializationDataSource
                 _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
@@ -59,10 +58,11 @@ internal object CustomerSheetHacks {
             }
             is CustomerSheetIntegration.CustomerSession -> {
                 val customerSessionDataSourceComponent = DaggerCustomerSessionDataSourceComponent
-                    .builder()
-                    .application(application)
-                    .customerSessionProvider(integration.customerSessionProvider)
-                    .build()
+                    .factory()
+                    .create(
+                        application = application,
+                        customerSessionProvider = integration.customerSessionProvider,
+                    )
 
                 _initializationDataSource.value =
                     customerSessionDataSourceComponent.customerSheetInitializationDataSource

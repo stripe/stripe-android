@@ -46,7 +46,7 @@ internal class CompleteLinkFlowTest {
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
         )
 
         val result = completeLinkFlow(
@@ -137,7 +137,7 @@ internal class CompleteLinkFlowTest {
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
         )
 
         val result = completeLinkFlow(
@@ -164,7 +164,7 @@ internal class CompleteLinkFlowTest {
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
         )
 
         val result = completeLinkFlow(
@@ -189,7 +189,7 @@ internal class CompleteLinkFlowTest {
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
         )
 
         val result = completeLinkFlow(
@@ -249,7 +249,7 @@ internal class CompleteLinkFlowTest {
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
         )
 
         val result = completeLinkFlow(

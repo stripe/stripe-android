@@ -1,0 +1,68 @@
+package com.stripe.android.crypto.onramp.model
+
+import com.stripe.android.model.DateOfBirth
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * Internal API request model for KYC refreshing.
+ * This represents the exact structure expected by the Stripe API.
+ */
+@Serializable
+internal data class KycRefreshRequest(
+    @SerialName("first_name")
+    val firstName: String,
+    @SerialName("last_name")
+    val lastName: String,
+    @SerialName("id_number_last4")
+    val idNumberLastFour: String?,
+    @SerialName("id_type")
+    val idType: String?,
+    @SerialName("dob")
+    @Serializable(with = DateOfBirthSerializer::class)
+    val dateOfBirth: DateOfBirth,
+    @SerialName("city")
+    val city: String?,
+    @SerialName("state")
+    val state: String?,
+    @SerialName("country")
+    val country: String?,
+    @SerialName("line1")
+    val line1: String?,
+    @SerialName("line2")
+    val line2: String?,
+    @SerialName("zip")
+    val postalCode: String?,
+    @SerialName("credentials")
+    val credentials: CryptoCustomerRequestParams.Credentials
+) {
+    companion object Companion {
+        /**
+         * Converts SDK KycInfo model to an internal API refresh request model.
+         *
+         * Clearing behavior:
+         * - Any nullable property provided as `null` that is part of `address` is treated
+         *   as an explicit request to clear its previously stored value. Internally `null`
+         *   is normalized to an empty string (`""`) when encoded so the backend clears the field.
+         */
+        fun fromRefreshKycInfo(
+            kycInfo: RefreshKycInfo,
+            credentials: CryptoCustomerRequestParams.Credentials
+        ): KycRefreshRequest {
+            return KycRefreshRequest(
+                firstName = kycInfo.firstName,
+                lastName = kycInfo.lastName,
+                idNumberLastFour = kycInfo.idNumberLastFour,
+                idType = kycInfo.idType,
+                dateOfBirth = kycInfo.dateOfBirth,
+                city = kycInfo.address.city ?: "",
+                country = kycInfo.address.country ?: "",
+                line1 = kycInfo.address.line1 ?: "",
+                line2 = kycInfo.address.line2 ?: "",
+                postalCode = kycInfo.address.postalCode ?: "",
+                state = kycInfo.address.state ?: "",
+                credentials = credentials
+            )
+        }
+    }
+}

@@ -10,7 +10,10 @@ internal object CustomerSheetPaymentMethodModeDefinition :
     PlaygroundSettingDefinition.Displayable<PaymentMethodMode> {
     override val displayName: String = "Payment Method Mode"
 
-    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+    override fun applicable(
+        configurationData: PlaygroundConfigurationData,
+        settings: Map<PlaygroundSettingDefinition<*>, Any?>
+    ): Boolean {
         return configurationData.integrationType.isCustomerFlow()
     }
 

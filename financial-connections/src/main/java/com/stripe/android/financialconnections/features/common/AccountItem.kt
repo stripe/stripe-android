@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
 import FinancialConnectionsGenericInfoScreen
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
 import android.view.HapticFeedbackConstants.CONTEXT_CLICK
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +45,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 /**
  * A single account item in an account picker list.
@@ -82,7 +80,7 @@ internal fun AccountItem(
                 shape = shape
             )
             .clickableSingle(enabled = viewState != Disabled) {
-                if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
+                view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
             .alpha(viewState.alpha)
@@ -113,7 +111,7 @@ internal fun AccountItem(
                 modifier = Modifier
                     .size(24.dp)
                     .alpha(if (selected) 1f else 0f),
-                imageVector = Icons.Default.Check,
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
                 tint = colors.primary,
                 contentDescription = "Selected"
             )
@@ -172,7 +170,6 @@ private fun AccountSubtitle(
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)
-
                 )
             }
     }

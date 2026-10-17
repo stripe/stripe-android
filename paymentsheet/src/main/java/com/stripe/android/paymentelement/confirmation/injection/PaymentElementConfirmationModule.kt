@@ -4,21 +4,21 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationModul
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationModule
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationModule
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationModule
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationModule
 import dagger.Module
 
 @Module(
     includes = [
         DefaultConfirmationModule::class,
+        DefaultIntentConfirmationModule::class,
         BacsConfirmationModule::class,
         ExternalPaymentMethodConfirmationModule::class,
         CustomPaymentMethodConfirmationModule::class,
         GooglePayConfirmationModule::class,
         LinkConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
-        ShopPayConfirmationModule::class
     ]
 )
 internal interface PaymentElementConfirmationModule

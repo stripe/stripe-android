@@ -11,11 +11,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
-import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
-import com.stripe.android.isInstanceOf
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -29,12 +31,18 @@ import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-internal class CustomerSheetActivityTest {
+internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    override val viewModelStoreTestRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = CustomerSheetContract()
@@ -65,13 +73,16 @@ internal class CustomerSheetActivityTest {
             assertThat(
                 InternalCustomerSheetResult.fromIntent(scenario.getResult().resultData)
             ).isEqualTo(
-                InternalCustomerSheetResult.Canceled(null)
+                InternalCustomerSheetResult.Canceled(
+                    paymentSelection = null,
+                    appearance = PaymentSheet.Appearance(),
+                )
             )
         }
     }
 
     @Test
-    fun `Finish without result emits null result and contract parses error`() {
+    fun `Finish without result emits null result and contract parses null`() {
         runActivityScenario {
             activity.finish()
             assertThat(
@@ -83,7 +94,7 @@ internal class CustomerSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData,
             )
-            assertThat(result).isInstanceOf<InternalCustomerSheetResult.Error>()
+            assertThat(result).isNull()
         }
     }
 
@@ -106,7 +117,8 @@ internal class CustomerSheetActivityTest {
                 InternalCustomerSheetResult.Canceled(
                     paymentSelection = PaymentSelection.Saved(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                    )
+                    ),
+                    appearance = PaymentSheet.Appearance(),
                 )
             )
         }
@@ -126,7 +138,7 @@ internal class CustomerSheetActivityTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             ),
         ) {
-            page.waitForText("···· 4242")
+            page.waitForText("\u2066···· 4242\u2069")
         }
     }
 

@@ -10,7 +10,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
@@ -21,8 +20,8 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -32,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage.Companion.assertHasModifyBadge
@@ -45,7 +45,6 @@ import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSessionCustomerSheetActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
@@ -362,7 +361,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onEditButton().performClick()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
 
-            editPage.setCardBrand("Visa")
+            editPage.setCardBrandWithSelector("Visa")
             editPage.update(waitUntilComplete = false)
 
             enqueueUpdatePaymentMethod(id = "pm_1")
@@ -371,10 +370,20 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "1001").assertExists()
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `OnBehalfOf correctly passed to elementsSession request`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242"),
+            ),
+            onBehalfOf = "acct_connected_account_a",
+            test = {}
+        )
+
     private fun runTest(
         cards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean = true,
+        onBehalfOf: String? = null,
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
@@ -401,6 +410,7 @@ class CustomerSessionCustomerSheetActivityTest {
                         return Result.success(
                             CustomerSheet.IntentConfiguration(
                                 paymentMethodTypes = listOf("card", "us_bank_account"),
+                                onBehalfOf = onBehalfOf,
                             )
                         )
                     }
@@ -418,6 +428,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedCards = cards,
             isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
             paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
+            onBehalfOf = onBehalfOf,
         )
 
         ActivityScenario.launch<CustomerSheetActivity>(
@@ -438,7 +449,7 @@ class CustomerSessionCustomerSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.waitUntilWithIdle {
                     composeTestRule
                         .onAllNodes(
                             hasTestTag(FORM_ELEMENT_TEST_TAG)
@@ -462,16 +473,15 @@ class CustomerSessionCustomerSheetActivityTest {
         savedCards: List<PaymentMethod> = listOf(),
         isPaymentMethodRemoveEnabled: Boolean,
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
+        onBehalfOf: String?,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query("type", "deferred_intent"),
-            query(urlEncode("deferred_intent[setup_future_usage]"), "off_session"),
-            query(urlEncode("deferred_intent[mode]"), "setup"),
-            query(urlEncode("deferred_intent[payment_method_types][0]"), "card"),
-            query(urlEncode("deferred_intent[payment_method_types][1]"), "us_bank_account"),
+            query("deferred_intent[setup_future_usage]", "off_session"),
+            query("deferred_intent[mode]", "setup"),
+            query("deferred_intent[payment_method_types][0]", "card"),
+            query("deferred_intent[payment_method_types][1]", "us_bank_account"),
+            query("deferred_intent[on_behalf_of]", onBehalfOf),
             query("customer_session_client_secret", "cuss_123"),
         ) { response ->
             response.createElementsSessionResponse(

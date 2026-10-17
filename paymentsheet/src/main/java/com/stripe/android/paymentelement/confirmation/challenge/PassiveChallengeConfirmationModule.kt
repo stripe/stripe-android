@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
-import com.stripe.android.challenge.warmer.PassiveChallengeWarmerModule
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmerModule
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import dagger.Binds
 import dagger.Module

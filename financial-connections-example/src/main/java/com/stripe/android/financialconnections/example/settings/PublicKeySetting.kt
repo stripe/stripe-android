@@ -13,7 +13,6 @@ internal data class PublicKeySetting(
     displayName = "Publishable Key",
     options = emptyList(),
     selectedOption = selectedOption
-
 ) {
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(
         publishableKey = selectedOption

@@ -1,5 +1,6 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -9,6 +10,11 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
+import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.core.utils.StatusBarCompat
 
 /**
@@ -27,6 +33,22 @@ class PaymentLauncherFactory(
         callback: PaymentLauncher.InternalPaymentResultCallback
     ) : this(
         hostActivityLauncher = activity.registerForActivityResult(
+            PaymentLauncherContract(),
+            callback::onPaymentResult
+        ),
+        statusBarColor = StatusBarCompat.color(activity),
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ReactNativeSdkInternal
+    constructor(
+        activity: ComponentActivity,
+        signal: UnregisterSignal,
+        callback: PaymentLauncher.InternalPaymentResultCallback
+    ) : this(
+        hostActivityLauncher = registerForReactNativeActivityResult(
+            activity,
+            signal,
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
@@ -74,13 +96,35 @@ class PaymentLauncherFactory(
     ): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
         return StripePaymentLauncher(
-            publishableKeyProvider = { publishableKey },
-            stripeAccountIdProvider = { stripeAccountId },
+            apiConfigurationProvider = {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                )
+            },
             hostActivityLauncher = hostActivityLauncher,
             statusBarColor = statusBarColor,
+            includePaymentSheetNextHandlers = false,
             enableLogging = BuildConfig.DEBUG,
             productUsage = productUsage,
+        )
+    }
+
+    fun create(applicationContext: Context): PaymentLauncher {
+        val productUsage = setOf("PaymentLauncher")
+        return StripePaymentLauncher(
+            apiConfigurationProvider = {
+                val config = PaymentConfiguration.getInstance(applicationContext)
+                ApiConfiguration.State(
+                    publishableKey = config.publishableKey,
+                    stripeAccountId = config.stripeAccountId,
+                )
+            },
+            hostActivityLauncher = hostActivityLauncher,
+            statusBarColor = statusBarColor,
             includePaymentSheetNextHandlers = false,
+            enableLogging = BuildConfig.DEBUG,
+            productUsage = productUsage,
         )
     }
 }

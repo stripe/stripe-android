@@ -11,11 +11,14 @@ import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.material.createMdcTheme
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
@@ -31,7 +34,12 @@ import java.lang.reflect.Method
  * CompositionLocalProviders required by StripeTheme.
  */
 @Composable
-internal fun IdentityTheme(content: @Composable () -> Unit) {
+internal fun IdentityTheme(
+    brandColor: Int?,
+    primaryButtonStyle: IdentityVerificationSheet.Configuration.PrimaryButtonStyle?,
+    secondaryButtonStyle: IdentityVerificationSheet.Configuration.SecondaryButtonStyle?,
+    content: @Composable () -> Unit
+) {
     val context = LocalContext.current
     val key = context.theme.key ?: context.theme
 
@@ -54,7 +62,9 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
-    val hostingAppColors = themeParams.colors ?: MaterialTheme.colors
+    val hostingAppColors = (themeParams.colors ?: MaterialTheme.colors).let { colors ->
+        brandColor?.let { colors.copy(primary = Color(it)) } ?: colors
+    }
     val hostingAppTypography = themeParams.typography ?: MaterialTheme.typography
     val hostingAppShapes = themeParams.shapes ?: MaterialTheme.shapes
 
@@ -63,6 +73,8 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
         hostingAppTypography = hostingAppTypography,
         hostingAppShapes = hostingAppShapes,
         inspectionMode = inspectionMode,
+        primaryButtonStyle = primaryButtonStyle,
+        secondaryButtonStyle = secondaryButtonStyle,
         content = content
     )
 }
@@ -73,9 +85,12 @@ internal fun AdoptForStripeTheme(
     hostingAppTypography: Typography,
     hostingAppShapes: Shapes,
     inspectionMode: Boolean,
+    primaryButtonStyle: IdentityVerificationSheet.Configuration.PrimaryButtonStyle?,
+    secondaryButtonStyle: IdentityVerificationSheet.Configuration.SecondaryButtonStyle?,
     content: @Composable () -> Unit
 ) {
     val stripeTypography: StripeTypography = StripeThemeDefaults.typography.copy(
+        mediumFontSize = 16.sp,
         body1FontFamily = hostingAppTypography.body1.fontFamily,
         body2FontFamily = hostingAppTypography.body2.fontFamily,
         h4 = TextStyle(
@@ -101,6 +116,8 @@ internal fun AdoptForStripeTheme(
         LocalInspectionMode provides inspectionMode,
         LocalSectionStyle provides StripeThemeDefaults.sectionStyle,
         LocalTextFieldInsets provides StripeThemeDefaults.textFieldInsets,
+        LocalIdentityPrimaryButtonStyle provides primaryButtonStyle,
+        LocalIdentitySecondaryButtonStyle provides secondaryButtonStyle,
     ) {
         MaterialTheme(
             colors = hostingAppColors,

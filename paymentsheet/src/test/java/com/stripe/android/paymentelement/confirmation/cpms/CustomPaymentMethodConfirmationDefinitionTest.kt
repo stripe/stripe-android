@@ -4,30 +4,31 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asSucceeded
+import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class CustomPaymentMethodConfirmationDefinitionTest {
     @Test
     fun `'key' should be 'CustomPaymentMethod'`() = test {
@@ -54,6 +55,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         DummyActivityResultCaller.test {
             definition.createLauncher(
                 activityResultCaller = activityResultCaller,
+                lifecycleOwner = fakeLifecycleOwner(),
                 onResult = onResult,
             )
 
@@ -78,7 +80,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = createCustomPaymentMethodConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Fail<CustomPaymentMethodInput>>()
@@ -111,15 +113,15 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     ) {
         val action = definition.action(
             confirmationOption = createCustomPaymentMethodConfirmationOption(),
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<CustomPaymentMethodInput>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
+        assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 
     @Test
@@ -130,9 +132,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
         val input = launcher.calls.awaitItem().input
@@ -154,16 +156,16 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Completed,
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
-        assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -174,9 +176,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Failed(exception),
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
@@ -194,9 +196,9 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val result = definition.toResult(
             confirmationOption = option,
-            confirmationParameters = CONFIRMATION_PARAMETERS,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Canceled,
-            deferredIntentConfirmationType = null,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
@@ -239,15 +241,12 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     )
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            intent = PaymentIntentFactory.create(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123",
+        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+            confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(),
             ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
-                .build(),
-            shippingDetails = null,
         )
 
         private val CUSTOM_PAYMENT_METHOD_TYPE = PaymentSheet.CustomPaymentMethod(

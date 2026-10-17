@@ -31,7 +31,7 @@ internal class TestBrowsers : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("On browserstack's Google Pixel, the connection to stripe.com is deemed insecure and the page does not load.")
+    @Ignore("On Google Pixel, the connection to stripe.com is deemed insecure and the page does not load.")
     fun testAuthorizeFirefox() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(

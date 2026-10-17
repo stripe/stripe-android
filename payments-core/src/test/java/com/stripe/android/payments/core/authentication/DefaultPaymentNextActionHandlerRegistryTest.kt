@@ -8,8 +8,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.PaymentFlowResult
@@ -27,8 +27,6 @@ import kotlin.test.assertNull
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentNextActionHandlerRegistryTest {
     private val noOpIntentAuthenticator = mock<NoOpIntentNextActionHandler>()
-    private val sourceAuthenticator = mock<SourceNextActionHandler>()
-    private val threeDs1lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val threeDs2lAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val redirectToUrlAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
     private val alipayRedirectAuthenticator = mock<PaymentNextActionHandler<StripeIntent>>()
@@ -36,9 +34,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
 
     private val registry = DefaultPaymentNextActionHandlerRegistry(
         noOpIntentNextActionHandler = noOpIntentAuthenticator,
-        sourceNextActionHandler = sourceAuthenticator,
         paymentNextActionHandlers = mapOf(
-            NextActionData.SdkData.Use3DS1::class.java to threeDs1lAuthenticator,
             NextActionData.SdkData.Use3DS2::class.java to threeDs2lAuthenticator,
             NextActionData.RedirectToUrl::class.java to redirectToUrlAuthenticator,
             NextActionData.AlipayRedirect::class.java to alipayRedirectAuthenticator,
@@ -46,12 +42,11 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         ),
         includePaymentSheetNextActionHandlers = false,
         applicationContext = ApplicationProvider.getApplicationContext(),
+        apiConfigurationProvider = { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
     )
 
     private val allAuthenticators = setOf(
         noOpIntentAuthenticator,
-        sourceAuthenticator,
-        threeDs1lAuthenticator,
         threeDs2lAuthenticator,
         redirectToUrlAuthenticator,
         alipayRedirectAuthenticator,
@@ -59,17 +54,7 @@ class DefaultPaymentNextActionHandlerRegistryTest {
     )
 
     @Test
-    fun `verify Source gets a SourceAuthenticator`() {
-        assertThat(registry.getNextActionHandler(mock<Source>())).isEqualTo(sourceAuthenticator)
-    }
-
-    @Test
     fun `verify StripeIntent with nextAction gets the correct PaymentAuthenticator`() {
-        verifyIntentWithType(
-            mock<NextActionData.SdkData.Use3DS1>(),
-            threeDs1lAuthenticator
-        )
-
         verifyIntentWithType(
             mock<NextActionData.SdkData.Use3DS2>(),
             threeDs2lAuthenticator

@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -17,12 +16,15 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
@@ -38,7 +40,7 @@ class CustomerSheet internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val integrationType: CustomerSheetIntegration.Type,
-    private val paymentOptionFactory: PaymentOptionFactory,
+    private val paymentOptionSelectionFactory: PaymentOptionSelectionFactory,
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
 ) {
@@ -147,11 +149,16 @@ class CustomerSheet internal constructor(
             val selection = savedSelection.map { selection ->
                 selection?.toPaymentOption()
             }.mapCatching { paymentOption ->
-                paymentOption?.toPaymentSelection {
+                val paymentSelection = paymentOption?.toPaymentSelection {
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }
-                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+                }
+                paymentOptionSelectionFactory.create(
+                    selection = paymentSelection,
+                    canUseGooglePay = request.configuration.googlePayEnabled,
+                    appearance = request.configuration.appearance,
+                )
             }
 
             selection.fold(
@@ -165,10 +172,14 @@ class CustomerSheet internal constructor(
         }
     }
 
-    private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
-        callback.onCustomerSheetResult(
-            result.toPublicResult(paymentOptionFactory)
-        )
+    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
+        // A null result means the sheet was torn down by the OS without returning a result (e.g.
+        // when a `singleTask` host is relaunched). Leave the caller's state untouched in that case.
+        result?.let {
+            callback.onCustomerSheetResult(
+                it.toPublicResult(paymentOptionSelectionFactory)
+            )
+        }
     }
 
     /**
@@ -182,17 +193,14 @@ class CustomerSheet internal constructor(
          * Describes the appearance of [CustomerSheet].
          */
         val appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance,
-
         /**
          * Whether [CustomerSheet] displays Google Pay as a payment option.
          */
         val googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled,
-
         /**
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen,
-
         /**
          * [CustomerSheet] pre-populates fields with the values provided. If
          * [PaymentSheet.BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
@@ -200,7 +208,6 @@ class CustomerSheet internal constructor(
          * collected by the [CustomerSheet] UI.
          */
         val defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails,
-
         /**
          * Describes how billing details should be collected. All values default to
          * [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
@@ -210,12 +217,10 @@ class CustomerSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
-
         /**
          * Your customer-facing business name. The default value is the name of your app.
          */
         val merchantDisplayName: String,
-
         /**
          * A list of preferred networks that should be used to process payments made with a co-branded card if your user
          * hasn't selected a network themselves.
@@ -224,14 +229,10 @@ class CustomerSheet internal constructor(
          * applicable, Stripe will select the network.
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
-
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
-
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 
@@ -254,8 +255,11 @@ class CustomerSheet internal constructor(
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .preferredNetworks(preferredNetworks)
                 .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
                 .paymentMethodOrder(paymentMethodOrder)
+                .cardBrandAcceptance(cardBrandAcceptance)
+                .opensCardScannerAutomatically(opensCardScannerAutomatically)
         }
 
         @Suppress("TooManyFunctions")
@@ -339,9 +343,7 @@ class CustomerSheet internal constructor(
              * By default, the customer sheet offers a card scan button within the new card entry form.
              * When opensCardScannerAutomatically is set to true,
              * the card entry form will initialize with the card scanner already open.
-             * **Note**: The stripecardscan dependency must be added to set `opensCardScannerAutomatically` to true
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun opensCardScannerAutomatically(opensCardScannerAutomatically: Boolean) = apply {
                 this.opensCardScannerAutomatically = opensCardScannerAutomatically
             }
@@ -374,16 +376,16 @@ class CustomerSheet internal constructor(
      * [IntentConfiguration] contains the details necessary for configuring and creating an intent
      * to attach payment methods with.
      */
-    @ExperimentalCustomerSessionApi
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
+        internal val onBehalfOf: String?,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
          */
-        @ExperimentalCustomerSessionApi
         class Builder {
             private var paymentMethodTypes = listOf<String>()
+            private var onBehalfOf: String? = null
 
             /**
              * The payment methods types to display. If empty, we dynamically determine the
@@ -395,11 +397,23 @@ class CustomerSheet internal constructor(
             }
 
             /**
+             * The connected account whose payment method configurations will apply to the CustomerSheet session.
+             * Affects the allowed payment methods and whether card brand choice is enabled.
+             * When provided, the payment method will be saved to your platform account. See our
+             * [SetupIntent docs](https://docs.stripe.com/api/setup_intents/object#setup_intent_object-on_behalf_of)
+             * for more information.
+             */
+            fun onBehalfOf(onBehalfOf: String) = apply {
+                this.onBehalfOf = onBehalfOf
+            }
+
+            /**
              * Creates the [IntentConfiguration] instance.
              */
             fun build(): IntentConfiguration {
                 return IntentConfiguration(
                     paymentMethodTypes = paymentMethodTypes,
+                    onBehalfOf = onBehalfOf,
                 )
             }
         }
@@ -410,12 +424,10 @@ class CustomerSheet internal constructor(
      * customer session. This will be used to securely access a customer's saved payment methods.
      */
     @Poko
-    @ExperimentalCustomerSessionApi
     class CustomerSessionClientSecret internal constructor(
         internal val customerId: String,
         internal val clientSecret: String
     ) {
-        @ExperimentalCustomerSessionApi
         companion object {
             /**
              * Creates an instance of a [CustomerSessionClientSecret]
@@ -439,7 +451,6 @@ class CustomerSheet internal constructor(
     /**
      * [CustomerSessionProvider] provides the necessary functions
      */
-    @ExperimentalCustomerSessionApi
     abstract class CustomerSessionProvider {
         /**
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
@@ -498,7 +509,6 @@ class CustomerSheet internal constructor(
          * @param customerSessionProvider provider for providing customer session elements
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @ExperimentalCustomerSessionApi
         @JvmStatic
         fun create(
             activity: ComponentActivity,
@@ -548,7 +558,6 @@ class CustomerSheet internal constructor(
          * @param customerSessionProvider provider for providing customer session elements
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @ExperimentalCustomerSessionApi
         @JvmStatic
         fun create(
             fragment: Fragment,
@@ -588,38 +597,29 @@ class CustomerSheet internal constructor(
                 lifecycleOwner = lifecycleOwner,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 integrationType = integration.type,
-                paymentOptionFactory = PaymentOptionFactory(
-                    iconLoader = PaymentSelection.IconLoader(
-                        resources = application.resources,
-                        imageLoader = StripeImageLoader(application),
+                paymentOptionSelectionFactory = DefaultPaymentOptionSelectionFactory(
+                    paymentOptionFactory = DefaultPaymentOptionFactory(
+                        iconLoader = PaymentSelection.IconLoader(
+                            resources = application.resources,
+                            imageLoader = DefaultStripeImageLoader(application),
+                        ),
+                        cardArtDrawableLoader = DefaultPaymentOptionCardArtDrawableLoader(
+                            paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
+                                imageOptimizer = StripeCdnImageOptimizer,
+                            ),
+                            imageLoader = DefaultStripeImageLoader(application),
+                            errorReporter = ErrorReporter.createFallbackInstance(
+                                context = application,
+                                productUsage = setOf("CustomerSheet"),
+                            ),
+                            context = application,
+                        ),
+                        context = application,
                     ),
-                    context = application,
                 ),
                 callback = callback,
                 statusBarColor = statusBarColor,
             )
-        }
-
-        internal fun PaymentSelection?.toPaymentOptionSelection(
-            paymentOptionFactory: PaymentOptionFactory,
-            canUseGooglePay: Boolean,
-        ): PaymentOptionSelection? {
-            return when (this) {
-                is PaymentSelection.GooglePay -> {
-                    PaymentOptionSelection.GooglePay(
-                        paymentOption = paymentOptionFactory.create(this),
-                    ).takeIf {
-                        canUseGooglePay
-                    }
-                }
-                is PaymentSelection.Saved -> {
-                    PaymentOptionSelection.PaymentMethod(
-                        paymentMethod = this.paymentMethod,
-                        paymentOption = paymentOptionFactory.create(this)
-                    )
-                }
-                else -> null
-            }
         }
     }
 }

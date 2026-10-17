@@ -3,17 +3,17 @@ package com.stripe.android.paymentsheet.ui
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -23,13 +23,17 @@ import androidx.core.view.children
 import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.uicore.stripeThemeIsDark
 import org.json.JSONArray
 
 @Composable
 internal fun GooglePayButton(
+    apiConfiguration: ApiConfiguration.State,
     state: PrimaryButton.State?,
     allowCreditCards: Boolean,
     buttonType: GooglePayButtonType,
@@ -37,22 +41,29 @@ internal fun GooglePayButton(
     isEnabled: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter
+    cardBrandFilter: CardBrandFilter,
+    cardFundingFilter: CardFundingFilter,
+    additionalEnabledNetworks: List<String>,
+    theme: GooglePayButtonTheme? = null,
 ) {
-    val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
 
     val allowedPaymentMethods = remember(
-        context,
         isInspectionMode,
+        apiConfiguration,
         billingAddressParameters,
-        allowCreditCards
+        allowCreditCards,
     ) {
         if (isInspectionMode) {
             ""
         } else {
             JSONArray().put(
-                GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter).createCardPaymentMethod(
+                GooglePayJsonFactory(
+                    apiConfiguration = apiConfiguration,
+                    cardBrandFilter = cardBrandFilter,
+                    cardFundingFilter = cardFundingFilter,
+                    additionalEnabledNetworks = additionalEnabledNetworks
+                ).createCardPaymentMethod(
                     billingAddressParameters = billingAddressParameters,
                     allowCreditCards = allowCreditCards
                 )
@@ -60,10 +71,10 @@ internal fun GooglePayButton(
         }
     }
 
-    val buttonTheme = if (isSystemInDarkTheme()) {
-        ButtonTheme.Light
+    val buttonTheme = theme ?: if (MaterialTheme.stripeThemeIsDark) {
+        GooglePayButtonTheme.Light
     } else {
-        ButtonTheme.Dark
+        GooglePayButtonTheme.Dark
     }
 
     when (state) {
@@ -71,13 +82,7 @@ internal fun GooglePayButton(
         is PrimaryButton.State.Ready -> PayButton(
             modifier = modifier
                 .fillMaxWidth()
-                .semantics {
-                    onClick {
-                        onPressed()
-
-                        true
-                    }
-                }
+                .googlePayButtonSemantics(isEnabled, onPressed)
                 .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
             allowedPaymentMethods = allowedPaymentMethods,
             type = buttonType.toComposeButtonType(),
@@ -92,6 +97,20 @@ internal fun GooglePayButton(
             modifier = modifier,
             state = state,
         )
+    }
+}
+
+private fun Modifier.googlePayButtonSemantics(
+    enabled: Boolean,
+    onPressed: () -> Unit,
+): Modifier = semantics {
+    if (enabled) {
+        onClick {
+            onPressed()
+            true
+        }
+    } else {
+        disabled()
     }
 }
 
@@ -156,7 +175,7 @@ const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
 
 internal const val GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG = "google-pay-primary-button"
 
-private enum class ButtonTheme(val value: Int) {
+internal enum class GooglePayButtonTheme(val value: Int) {
     Dark(ButtonConstants.ButtonTheme.DARK),
     Light(ButtonConstants.ButtonTheme.LIGHT),
 }
@@ -180,7 +199,7 @@ private fun PayButton(
     onClick: () -> Unit,
     allowedPaymentMethods: String,
     modifier: Modifier = Modifier,
-    theme: ButtonTheme = ButtonTheme.Dark,
+    theme: GooglePayButtonTheme = GooglePayButtonTheme.Dark,
     type: ButtonType = ButtonType.Buy,
     height: Dp? = null,
     radius: Dp = 100.dp,

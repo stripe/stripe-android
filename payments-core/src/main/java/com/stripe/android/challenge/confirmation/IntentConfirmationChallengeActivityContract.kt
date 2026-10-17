@@ -1,0 +1,56 @@
+package com.stripe.android.challenge.confirmation
+
+import android.content.Context
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.os.BundleCompat
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.model.StripeIntent
+
+internal class IntentConfirmationChallengeActivityContract :
+    ActivityResultContract<
+        IntentConfirmationChallengeActivityContract.Args,
+        IntentConfirmationChallengeActivityResult
+        >() {
+
+    override fun createIntent(context: Context, input: Args): Intent {
+        val nextActionData = input.intent.nextActionData
+            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        val captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
+
+        return IntentConfirmationChallengeActivity.createIntent(
+            context,
+            IntentConfirmationChallengeArgs(
+                input.apiConfiguration,
+                input.productUsage.toList(),
+                input.intent,
+                captchaVendorName
+            )
+        )
+    }
+
+    override fun parseResult(resultCode: Int, intent: Intent?): IntentConfirmationChallengeActivityResult {
+        val result = intent?.extras?.let {
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_RESULT,
+                IntentConfirmationChallengeActivityResult::class.java
+            )
+        }
+        return result ?: IntentConfirmationChallengeActivityResult.Failed(
+            clientSecret = null,
+            error = Throwable("No result")
+        )
+    }
+
+    data class Args(
+        val apiConfiguration: ApiConfiguration.State,
+        val productUsage: Set<String>,
+        val intent: StripeIntent
+    )
+
+    companion object {
+        const val EXTRA_RESULT =
+            "com.stripe.android.challenge.confirmation.IntentConfirmationChallengeActivityContract.extra_result"
+    }
+}

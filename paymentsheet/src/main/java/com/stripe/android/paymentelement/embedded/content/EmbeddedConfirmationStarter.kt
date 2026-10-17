@@ -22,6 +22,7 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
                 when (state) {
                     is ConfirmationHandler.State.Confirming,
                     is ConfirmationHandler.State.Idle -> Unit
+
                     is ConfirmationHandler.State.Complete -> {
                         _result.send(state.result)
                     }

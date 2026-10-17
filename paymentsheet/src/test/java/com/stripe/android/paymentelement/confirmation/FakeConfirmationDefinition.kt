@@ -2,14 +2,14 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 
 internal abstract class FakeConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable,
     >(
     private val launcher: TLauncher,
@@ -29,7 +29,7 @@ internal abstract class FakeConfirmationDefinition<
     > {
     override suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<TLauncherArgs> {
         return action
     }
@@ -38,13 +38,14 @@ internal abstract class FakeConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         // Do nothing
     }
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (TLauncherResult) -> Unit
     ): TLauncher {
         return launcher
@@ -52,8 +53,8 @@ internal abstract class FakeConfirmationDefinition<
 
     override fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationArgs: ConfirmationHandler.Args,
+        launcherArgs: TLauncherArgs,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         return this.result

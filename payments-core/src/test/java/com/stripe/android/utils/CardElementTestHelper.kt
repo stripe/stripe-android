@@ -7,12 +7,14 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.view.CardWidgetViewModel
 
 internal object CardElementTestHelper {
 
     fun createViewModelStoreOwner(
         isCbcEligible: Boolean,
+        viewModelStoreTestRule: ViewModelStoreTestRule,
     ): ViewModelStoreOwner {
         val cardWidgetViewModel = CardWidgetViewModel(
             paymentConfigProvider = {
@@ -35,7 +37,7 @@ internal object CardElementTestHelper {
                     )
                 }
             }
-        )
+        ).also { viewModelStoreTestRule.track(it) }
 
         val viewModelStore = ViewModelStore().apply {
             val className = CardWidgetViewModel::class.java.canonicalName

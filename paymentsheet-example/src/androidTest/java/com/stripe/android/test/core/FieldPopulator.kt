@@ -7,19 +7,24 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.countryCode
 import com.stripe.android.test.core.ui.Selectors
-import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
 import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 internal class FieldPopulator(
     private val selectors: Selectors,
@@ -85,6 +90,20 @@ internal class FieldPopulator(
         }
     }
 
+    enum class AddressEntryMode(
+        val lineOneLabelResourceId: Int,
+        val requiresManualEntry: Boolean,
+    ) {
+        Regular(
+            lineOneLabelResourceId = CoreR.string.stripe_address_label_address_line1,
+            requiresManualEntry = false,
+        ),
+        InlineAutocomplete(
+            lineOneLabelResourceId = UiCoreR.string.stripe_address_label_address,
+            requiresManualEntry = true,
+        ),
+    }
+
     data class Values(
         val name: String = "Jenny Rosen",
         val email: String = "jrosen@email.com",
@@ -94,13 +113,15 @@ internal class FieldPopulator(
         val state: String = "California",
         val phoneNumber: String = "4021234567",
         val cardNumber: String = "4242424242424242",
+        val cbcCardNumber: String = "4000002500001001",
         val cardExpiration: String = "1230",
         val cardCvc: String = "321",
         val auBecsBsbNumber: String = "000000",
         val auBecsAccountNumber: String = "000123456",
         val bacsSortCode: String = "108800",
         val bacsAccountNumber: String = "00012345",
-        val boletoTaxId: String = "00000000000",
+        val brazilianTaxId: String = "00000000000",
+        val addressEntryMode: AddressEntryMode = AddressEntryMode.Regular,
     )
 
     private fun verifyPlatformLpmFields() {
@@ -108,10 +129,12 @@ internal class FieldPopulator(
             selectors.getEmail()
                 .ifExistsAssertContentDescriptionEquals(values.email)
 
-            selectors.getName(selectors.getResourceString(TranslationId.AddressName.resourceId))
+            selectors.getName(selectors.getResourceString(CoreR.string.stripe_address_label_full_name))
                 .ifExistsAssertContentDescriptionEquals(values.name)
 
-            selectors.getLine1()
+            selectors.composeTestRule.onNodeWithText(
+                selectors.getResourceString(values.addressEntryMode.lineOneLabelResourceId)
+            )
                 .ifExistsAssertContentDescriptionEquals(values.line1)
             selectors.getCity()
                 .ifExistsAssertContentDescriptionEquals(values.city)
@@ -154,10 +177,14 @@ internal class FieldPopulator(
         get() = testParameters.playgroundSettingsSnapshot[DefaultBillingAddressSettingsDefinition] != DefaultBillingAddress.Off
 
     private val merchantCountryCode: String
-        get() = testParameters.playgroundSettingsSnapshot[CountrySettingsDefinition].value
+        get() = testParameters.playgroundSettingsSnapshot[MerchantSettingsDefinition].countryCode
+
+    private val collectsFullAddress: Boolean
+        get() = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition] ==
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 
     private fun usesStateDropdown(): Boolean {
-        return merchantCountryCode in setOf("US", "GB")
+        return merchantCountryCode in setOf("BR", "US", "GB")
     }
 
     private fun usesZip(): Boolean {
@@ -173,13 +200,33 @@ internal class FieldPopulator(
             performTextInput(values.cardCvc)
         }
 
+        if (!defaultBillingAddress && !collectsFullAddress) {
+            populateZip()
+        }
+    }
+
+    fun populateCardBrandChoiceCardDetails(cardBrandDisplayName: String?) {
+        selectors.getCardNumber().performTextInput(values.cbcCardNumber)
+        selectors.composeTestRule.waitForIdle()
+        selectors.getCardExpiration()
+            .performTextInput(values.cardExpiration)
+        selectors.getCardCvc().apply {
+            performTextInput(values.cardCvc)
+        }
+
+        selectors.assertCardBrandSelectorExists()
+
+        cardBrandDisplayName?.let {
+            selectCardBrand(displayName = cardBrandDisplayName)
+        }
+
         if (!defaultBillingAddress) {
             populateZip()
         }
     }
 
     fun populateName(
-        labelText: String = selectors.getResourceString(TranslationId.AddressName.resourceId)
+        labelText: String = selectors.getResourceString(CoreR.string.stripe_address_label_full_name)
     ) {
         selectors.getName(labelText).apply {
             performTextInput(values.name)
@@ -199,11 +246,20 @@ internal class FieldPopulator(
 
     fun populateAddress() {
         selectors
-            .getLine1()
+            .composeTestRule
+            .onNodeWithText(selectors.getResourceString(values.addressEntryMode.lineOneLabelResourceId))
             .performScrollTo()
             .performClick()
             .performTextInput(values.line1)
 
+        if (values.addressEntryMode.requiresManualEntry) {
+            selectors.enterAddressManually()
+        }
+
+        populateAddressDetails()
+    }
+
+    private fun populateAddressDetails() {
         selectors
             .getCity()
             .performScrollTo()
@@ -235,10 +291,18 @@ internal class FieldPopulator(
             .performTextInput(values.phoneNumber)
     }
 
-    fun populateBoletoTaxId() {
-        selectors.getBoletoTaxId().apply {
+    fun populateCountryCodeSelector(country: String) {
+        selectors.getCountryCode().performClick()
+        selectors.composeTestRule
+            .onNode(hasText(country, substring = true))
+            .performScrollTo()
+            .performClick()
+    }
+
+    fun populateBrazilianTaxId() {
+        selectors.getBrazilianTaxId().apply {
             performScrollTo()
-            performTextInput(values.boletoTaxId)
+            performTextInput(values.brazilianTaxId)
         }
     }
 

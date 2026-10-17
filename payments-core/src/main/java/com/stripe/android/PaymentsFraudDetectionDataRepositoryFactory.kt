@@ -4,25 +4,32 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataStore
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @JvmOverloads
 fun DefaultFraudDetectionDataRepository(
     context: Context,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
         localStore = DefaultFraudDetectionDataStore(context, workContext),
         fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
-        errorReporter = ErrorReporter.createFallbackInstance(context, emptySet()),
+        errorReporter = ErrorReporter.createFallbackInstance(
+            context = context,
+            apiConfigurationProvider = apiConfigurationProvider,
+            productUsage = emptySet(),
+        ),
         workContext = workContext,
         fraudDetectionEnabledProvider = { Stripe.advancedFraudSignalsEnabled },
     )

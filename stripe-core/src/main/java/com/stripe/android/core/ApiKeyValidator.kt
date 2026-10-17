@@ -18,6 +18,12 @@ class ApiKeyValidator {
                 "For more info, see https://stripe.com/docs/keys"
         }
 
+        require(!apiKey.startsWith("rk_")) {
+            "Invalid Publishable Key: " +
+                "You are using a restricted key instead of a publishable one. " +
+                "For more info, see https://stripe.com/docs/keys"
+        }
+
         return apiKey
     }
 

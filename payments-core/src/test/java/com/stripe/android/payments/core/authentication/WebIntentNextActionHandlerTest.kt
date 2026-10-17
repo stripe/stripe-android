@@ -11,6 +11,7 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -43,8 +44,8 @@ class WebIntentNextActionHandlerTest {
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context,
-        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        context = context,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -58,36 +59,9 @@ class WebIntentNextActionHandlerTest {
         argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
-    private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
-
     @Before
     fun setUp() {
-        threeDs1IntentReturnUrlMap[PAYMENT_INTENT_ID_FOR_3DS1] = RETURN_URL_FOR_3DS1
         whenever(paymentBrowserAuthStarterFactory(any())).thenReturn(paymentBrowserWebStarter)
-    }
-
-    @Test
-    fun authenticate_whenSdk3ds1() {
-        threeDs1IntentReturnUrlMap.remove(PAYMENT_INTENT_ID_FOR_3DS1)
-        verifyAuthenticate(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1,
-            expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-            expectedReturnUrl = null,
-            expectedRequestCode = PAYMENT_REQUEST_CODE,
-            expectedAnalyticsEvent = PaymentAnalyticsEvent.Auth3ds1Sdk
-        )
-    }
-
-    @Test
-    fun authenticate_whenSdk3ds1_withReturnUrl() {
-        verifyAuthenticate(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1,
-            expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-            expectedReturnUrl = RETURN_URL_FOR_3DS1,
-            expectedRequestCode = PAYMENT_REQUEST_CODE,
-            expectedAnalyticsEvent = PaymentAnalyticsEvent.Auth3ds1Sdk
-        )
-        assertThat(threeDs1IntentReturnUrlMap).doesNotContainKey(PAYMENT_INTENT_ID_FOR_3DS1)
     }
 
     @Test
@@ -129,6 +103,21 @@ class WebIntentNextActionHandlerTest {
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION,
             expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
+        )
+    }
+
+    @Test
+    fun authenticate_whenRedirectingToAlipay() {
+        // The fixture's next_action.return_url is "example://return_url"; asserting the SDK default
+        // instead proves the handler no longer trusts next_action.return_url (the EVO trampoline).
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T" +
+                "?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
             expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
             expectedRequestCode = PAYMENT_REQUEST_CODE,
             expectedAnalyticsEvent = null,
@@ -194,8 +183,9 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
-            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            apiConfigProvider = {
+                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            },
             isInstantApp = false,
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,
@@ -223,6 +213,9 @@ class WebIntentNextActionHandlerTest {
         assertThat(args.url).isEqualTo(expectedUrl)
         assertThat(args.referrer).isEqualTo(expectedReferrer)
         assertThat(args.returnUrl).isEqualTo(expectedReturnUrl)
+        assertThat(args.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID)
+        )
         assertThat(args.shouldCancelIntentOnUserNavigation).isEqualTo(
             expectedShouldCancelIntentOnUserNavigation
         )
@@ -246,8 +239,6 @@ class WebIntentNextActionHandlerTest {
     private companion object {
         private const val ACCOUNT_ID = "acct_123"
 
-        private const val PAYMENT_INTENT_ID_FOR_3DS1 = "pi_1EceMnCRMbs6FrXfCXdF8dnx"
-        private const val RETURN_URL_FOR_3DS1 = "stripesdk://payment_return_url"
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID

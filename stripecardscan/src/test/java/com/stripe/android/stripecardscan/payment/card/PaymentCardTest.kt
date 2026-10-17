@@ -18,7 +18,7 @@ private const val SAMPLE_UNIONPAY_16_PAN = "6212345678901232"
 private const val SAMPLE_UNIONPAY_17_PAN = "62123456789000003"
 private const val SAMPLE_UNIONPAY_18_PAN = "621234567890000002"
 private const val SAMPLE_UNIONPAY_19_PAN = "6212345678900000003"
-private const val SAMPLE_VISA_PAN = "4847186095118770"
+private const val SAMPLE_VISA_PAN = "4242424242424242"
 
 private const val SAMPLE_AMEX_IIN = "340000"
 private const val SAMPLE_DINERS_CLUB_IIN = "300000"
@@ -159,7 +159,7 @@ class PaymentCardTest {
         assertEquals("6212 3456 7890 00003", formatPan(SAMPLE_UNIONPAY_17_PAN))
         assertEquals("6212 3456 7890 000002", formatPan(SAMPLE_UNIONPAY_18_PAN))
         assertEquals("621234 5678900000003", formatPan(SAMPLE_UNIONPAY_19_PAN))
-        assertEquals("4847 1860 9511 8770", formatPan(SAMPLE_VISA_PAN))
+        assertEquals("4242 4242 4242 4242", formatPan(SAMPLE_VISA_PAN))
         assertEquals("9900 000 00000 0101", formatPan(SAMPLE_CUSTOM_16_PAN))
         assertEquals("9900 0000 00000 0002", formatPan(SAMPLE_CUSTOM_17_PAN))
         assertEquals("9900 00000 00000 0903", formatPan(SAMPLE_CUSTOM_18_PAN))

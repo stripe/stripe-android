@@ -6,37 +6,31 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener.Companion.PREVIOUSLY_SENT_DEEP_LINK_EVENT
+import com.stripe.android.paymentsheet.analytics.previouslySentDeepLinkEvent
 import javax.inject.Inject
 
 @EmbeddedPaymentElementScope
 internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val sheetLauncher: EmbeddedSheetLauncher,
-    private val contentHelper: EmbeddedContentHelper,
+    private val sheetStateHolder: SheetStateHolder,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
-    private var previouslySentDeepLinkEvent: Boolean
-        get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
-        set(value) {
-            savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] = value
-        }
-
     fun initialize(applicationIsTaskOwner: Boolean) {
-        if (!applicationIsTaskOwner && !previouslySentDeepLinkEvent) {
+        if (!applicationIsTaskOwner && !savedStateHandle.previouslySentDeepLinkEvent) {
             eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
-            previouslySentDeepLinkEvent = true
+            savedStateHandle.previouslySentDeepLinkEvent = true
         }
 
-        contentHelper.setSheetLauncher(sheetLauncher)
+        sheetStateHolder.sheetLauncher = sheetLauncher
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
-                    contentHelper.clearSheetLauncher()
+                    sheetStateHolder.sheetLauncher = null
                 }
             }
         )

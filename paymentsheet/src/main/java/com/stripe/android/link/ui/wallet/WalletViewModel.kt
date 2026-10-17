@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -24,6 +25,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
@@ -31,6 +33,7 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.supports
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntent
@@ -81,6 +84,7 @@ internal class WalletViewModel(
             sellerBusinessName = configuration.sellerBusinessName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
+            cardFundingFilter = configuration.cardFundingFilter,
             collectMissingBillingDetailsForExistingPaymentMethods = configuration
                 .collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,
@@ -91,9 +95,9 @@ internal class WalletViewModel(
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = addPaymentMethodOptions.values,
             paymentSelectionHint = paymentSelectionHint,
-            isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            linkBrand = configuration.effectiveLinkBrand(linkAccount),
         )
     )
 
@@ -106,8 +110,8 @@ internal class WalletViewModel(
             is LinkLaunchMode.Authorization -> null
         }
 
-    private val paymentMethodFilter
-        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+    private val paymentMethodFilters
+        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilters
 
     private val paymentSelectionHint: ResolvableString?
         get() = R.string.stripe_wallet_prefer_debit_card_hint
@@ -143,9 +147,16 @@ internal class WalletViewModel(
         }
 
         viewModelScope.launch {
+            linkAccountManager.linkAccountInfo.collect { accountUpdate ->
+                val linkBrand = configuration.effectiveLinkBrand(accountUpdate.account)
+                _uiState.update { it.copy(linkBrand = linkBrand) }
+            }
+        }
+
+        viewModelScope.launch {
             linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
                 val filteredPaymentDetails = paymentDetailsState.paymentDetails
-                    .filter { paymentMethodFilter?.invoke(it.details) != false }
+                    .filter { paymentMethodFilters?.any { filter -> filter(it.details) } != false }
                     .toList()
                 val currentState = _uiState.updateAndGet {
                     it.updateWithResponse(filteredPaymentDetails)
@@ -166,11 +177,6 @@ internal class WalletViewModel(
                                 )
                             )
                         }
-                    }
-                } else {
-                    // Auto-select default payment method only on first load
-                    if (shouldAutoSelectDefaultPaymentMethod() && !currentState.hasAttemptedAutoSelection) {
-                        handleAutoSelection(filteredPaymentDetails)
                     }
                 }
             }
@@ -198,7 +204,7 @@ internal class WalletViewModel(
         isAfterAdding: Boolean = false
     ) {
         linkAccountManager.listPaymentDetails(
-            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount.supportedPaymentDetailsTypes)
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
@@ -223,46 +229,6 @@ internal class WalletViewModel(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
-    }
-
-    private fun shouldAutoSelectDefaultPaymentMethod(): Boolean {
-        return linkLaunchMode is LinkLaunchMode.PaymentMethodSelection &&
-            linkLaunchMode.selectedPayment == null &&
-            configuration.skipWalletInFlowController
-    }
-
-    private suspend fun handleAutoSelection(paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>) {
-        val autoSelectedPaymentMethod =
-            (paymentDetails.firstOrNull { it.details.isDefault } ?: paymentDetails.singleOrNull())?.details
-
-        _uiState.update { it.copy(hasAttemptedAutoSelection = true) }
-
-        if (autoSelectedPaymentMethod?.isReadyForUse() == true) {
-            // Set the default as selected and proceed with payment selection
-            _uiState.update {
-                it.copy(selectedItemId = autoSelectedPaymentMethod.id)
-            }
-            performPaymentConfirmation(autoSelectedPaymentMethod)
-        } else {
-            // Auto-selection not supported, show the wallet UI
-            _uiState.update {
-                it.copy(isAutoSelecting = false)
-            }
-        }
-    }
-
-    private fun ConsumerPaymentDetails.PaymentDetails.isReadyForUse(): Boolean {
-        // Check if card requires details recollection (includes both expiry and CVC checks)
-        val requiresCardDetailsRecollection = (this as? ConsumerPaymentDetails.Card)
-            ?.requiresCardDetailsRecollection == true
-
-        // Check if billing details collection is needed
-        val needsBillingDetails = supports(
-            billingDetailsConfig = configuration.billingDetailsCollectionConfiguration,
-            linkAccount = linkAccount
-        ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
-
-        return !requiresCardDetailsRecollection && !needsBillingDetails
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
@@ -301,6 +267,12 @@ internal class WalletViewModel(
         }
     }
 
+    fun handleDisabledButtonClick() {
+        _uiState.update {
+            it.copy(isValidating = true)
+        }
+    }
+
     private fun setProcessingState(isProcessing: Boolean, errorMessage: ResolvableString? = null) {
         _uiState.update {
             it.copy(
@@ -311,12 +283,15 @@ internal class WalletViewModel(
     }
 
     private suspend fun handleExpiredCard(paymentDetail: ConsumerPaymentDetails.PaymentDetails) {
-        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams(
+            configuration.clientAttributionMetadata
+        )
         dismissalCoordinator.withDismissalDisabled {
             val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = paymentDetail.id,
                 isDefault = paymentDetail.isDefault,
-                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
+                clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
             )
             linkAccountManager.updatePaymentDetails(updateParams)
         }.fold(
@@ -443,7 +418,8 @@ internal class WalletViewModel(
             val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = item.id,
                 isDefault = true,
-                cardPaymentMethodCreateParamsMap = null
+                cardPaymentMethodCreateParamsMap = null,
+                clientAttributionMetadataParams = configuration.clientAttributionMetadata.toParamMap(),
             )
             linkAccountManager.updatePaymentDetails(updateParams)
                 .fold(
@@ -459,6 +435,7 @@ internal class WalletViewModel(
                                             details.copy(isDefault = item.id == details.id)
                                         }
                                         is ConsumerPaymentDetails.Passthrough -> details
+                                        is ConsumerPaymentDetails.Generic -> details
                                     }
                                 },
                                 cardBeingUpdated = null
@@ -495,7 +472,11 @@ internal class WalletViewModel(
                 .mapCatching { session ->
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
-                        publishableKey = linkAccount.consumerPublishableKey!!,
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = linkAccount.consumerPublishableKey!!,
+                            stripeAccountId = null,
+                        ),
+                        preCollectedConsent = null,
                     )
                 }
                 .fold(
@@ -650,13 +631,15 @@ internal class WalletViewModel(
     }
 }
 
-private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreateParams {
+private fun WalletUiState.toPaymentMethodCreateParams(
+    clientAttributionMetadata: ClientAttributionMetadata,
+): PaymentMethodCreateParams {
     val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = expiryDateValues,
         code = Card.code,
         requiresMandate = false,
-        clientAttributionMetadata = null
+        clientAttributionMetadata = clientAttributionMetadata,
     )
 }
 
@@ -675,13 +658,10 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
 
 private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
     return when (linkLaunchMode) {
-        is LinkLaunchMode.Full,
-        is LinkLaunchMode.Confirmation -> when (this) {
-            is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
-            is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
-        }
+        is LinkLaunchMode.Full -> payAnotherWayLabel().takeIf { linkLaunchMode.showSecondaryButton }
+        is LinkLaunchMode.Confirmation -> payAnotherWayLabel()
         is LinkLaunchMode.PaymentMethodSelection -> {
-            if (linkLaunchMode.shouldShowSecondaryCta) {
+            if (linkLaunchMode.canContinueWithoutLink) {
                 R.string.stripe_wallet_continue_another_way.resolvableString
             } else {
                 null
@@ -690,5 +670,12 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
         is LinkLaunchMode.Authentication,
         is LinkLaunchMode.Authorization ->
             R.string.stripe_wallet_continue_another_way.resolvableString
+    }
+}
+
+private fun StripeIntent.payAnotherWayLabel(): ResolvableString {
+    return when (this) {
+        is PaymentIntent -> R.string.stripe_wallet_pay_another_way.resolvableString
+        is SetupIntent -> R.string.stripe_wallet_continue_another_way.resolvableString
     }
 }

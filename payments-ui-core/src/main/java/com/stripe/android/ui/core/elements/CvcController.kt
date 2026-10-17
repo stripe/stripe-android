@@ -1,18 +1,23 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
+import com.stripe.android.uicore.elements.FormFieldId
+import com.stripe.android.uicore.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.rememberTextFocusRequester
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -25,7 +30,7 @@ import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
-    private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
+    private val cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
 ) : TextFieldController {
@@ -45,12 +50,11 @@ class CvcController constructor(
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
-    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val enforceLeftToRightTextDirection: Boolean = true
 
     override val showOptionalLabel: Boolean = false
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
+    override val autofillType: ContentType = ContentType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
@@ -68,24 +72,31 @@ class CvcController constructor(
     }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
+        cvcTextFieldConfig.determineState(
+            brand = brand,
+            accountRanges = emptyList(),
+            number = fieldValue,
+            numberAllowedDigits = brand.maxCvcLength
+        )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: StateFlow<Boolean> =
+    private val focusAsk = MutableStateFlow(false)
+
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> =
-        combineAsStateFlow(visibleError, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+    override val validationMessage: StateFlow<FieldValidationMessage?> =
+        combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
@@ -127,5 +138,32 @@ class CvcController constructor(
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         _isValidating.value = isValidating
+    }
+
+    fun requestFocus() {
+        focusAsk.value = true
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
+    ) {
+        val focusRequester = rememberTextFocusRequester(focusAsk)
+
+        TextField(
+            textFieldController = this,
+            enabled = enabled,
+            imeAction = if (lastTextFieldIdentifier == field.identifier) {
+                ImeAction.Done
+            } else {
+                ImeAction.Next
+            },
+            modifier = modifier,
+            focusRequester = focusRequester,
+        )
     }
 }

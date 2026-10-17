@@ -1,12 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
-import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -16,7 +11,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -24,11 +18,9 @@ import kotlin.coroutines.CoroutineContext
 internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     @UIContext private val uiContext: CoroutineContext,
-    private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentSelectionUpdater: PaymentSelectionUpdater,
     private val confirmationHandler: FlowControllerConfirmationHandler,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean
 ) {
 
     private val job: AtomicReference<Job?> = AtomicReference(null)
@@ -75,14 +67,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             }
         }
 
-        try {
-            initializationMode.validate()
-            configuration.asCommonConfiguration().validate(isLiveModeProvider())
-            configuration.appearance.parseAppearance()
-        } catch (e: IllegalArgumentException) {
-            onConfigured(error = e)
-            return
-        }
+        configuration.appearance.parseAppearance()
 
         val configureRequest = ConfigureRequest(initializationMode, configuration)
         val canSkip = viewModel.previousConfigureRequest == configureRequest
@@ -96,7 +81,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         paymentElementLoader.load(
             initializationMode = initializationMode,
-            configuration = configuration.asCommonConfiguration(),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(configuration),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = initializedViaCompose,
@@ -107,7 +92,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                     onConfigured(state.validationError)
                 } else {
                     viewModel.previousConfigureRequest = configureRequest
-                    onInitSuccess(PaymentSheetState.Full(state), configuration, configureRequest)
+                    onInitSuccess(PaymentSheetState.Full(state), configuration)
                     onConfigured()
                 }
             },
@@ -120,18 +105,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configuration: PaymentSheet.Configuration,
-        configureRequest: ConfigureRequest,
     ) {
-        val isDecoupling = configureRequest.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
-
-        eventReporter.onInit(
-            commonConfiguration = configuration.asCommonConfiguration(),
-            primaryButtonColor = configuration.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
-            isDeferred = isDecoupling,
-            appearance = configuration.appearance
-        )
-
         viewModel.paymentSelection = paymentSelectionUpdater(
             selection = viewModel.paymentSelection,
             previousConfig = viewModel.state?.config,

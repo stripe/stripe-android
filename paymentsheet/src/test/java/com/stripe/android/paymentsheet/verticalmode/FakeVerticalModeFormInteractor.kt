@@ -6,12 +6,13 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.Mockito.mock
 
 internal class FakeVerticalModeFormInteractor private constructor(
     initialState: VerticalModeFormInteractor.State,
-    override val isLiveMode: Boolean = true,
 ) : VerticalModeFormInteractor {
     override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(initialState)
 
@@ -29,13 +30,13 @@ internal class FakeVerticalModeFormInteractor private constructor(
             metadata: PaymentMethodMetadata,
             isProcessing: Boolean = false,
             isValidating: Boolean = false,
-            showsWalletHeader: Boolean = false,
         ): VerticalModeFormInteractor {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
                 metadata = metadata,
             )
             val uiDefinitionArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
                 linkInlineHandler = null,
@@ -54,8 +55,6 @@ internal class FakeVerticalModeFormInteractor private constructor(
                         uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
                     )!!,
                     isValidating = isValidating,
-                    showsWalletHeader = showsWalletHeader,
-                    paymentMethodIncentive = null,
                     headerInformation = metadata.formHeaderInformationForCode(
                         code = paymentMethodCode,
                         customerHasSavedPaymentMethods = false,

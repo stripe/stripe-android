@@ -2,6 +2,19 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+
+internal val PaymentMethodMetadata.checkoutSessionResponse: CheckoutSessionResponse?
+    get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)?.checkoutSessionResponse
+
+internal fun CheckoutSessionResponse.SavedPaymentMethodsOfferSave.toSaveConsentBehavior():
+    PaymentMethodSaveConsentBehavior {
+    return if (enabled) {
+        PaymentMethodSaveConsentBehavior.Enabled
+    } else {
+        PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
+    }
+}
 
 internal fun ElementsSession.toPaymentSheetSaveConsentBehavior(): PaymentMethodSaveConsentBehavior {
     return when (val mobilePaymentElementComponent = customer?.session?.components?.mobilePaymentElement) {

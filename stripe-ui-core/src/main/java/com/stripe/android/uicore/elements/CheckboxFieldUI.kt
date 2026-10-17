@@ -11,8 +11,6 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -20,18 +18,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import androidx.compose.ui.R as ComposeR
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,7 +42,7 @@ fun CheckboxFieldUI(
     enabled: Boolean = true
 ) {
     val isChecked by controller.isChecked.collectAsState()
-    val error by controller.error.collectAsState()
+    val validationMessage by controller.validationMessage.collectAsState()
 
     CheckboxFieldUIView(
         modifier = modifier,
@@ -54,12 +55,8 @@ fun CheckboxFieldUI(
                 stringResource(id = resource.labelId, formatArgs = resource.formatArgs)
             } ?: ""
         },
-        error = error?.let { fieldError ->
-            @ReadOnlyComposable {
-                fieldError.formatArgs?.let { args ->
-                    stringResource(id = fieldError.errorMessage, formatArgs = args)
-                } ?: stringResource(id = fieldError.errorMessage)
-            }
+        error = @ReadOnlyComposable {
+            validationMessage?.resolvable?.resolve()
         }
     )
 }
@@ -72,16 +69,17 @@ internal fun CheckboxFieldUIView(
     debugTag: String,
     onValueChange: (value: Boolean) -> Unit,
     label: @Composable () -> String,
-    error: (@Composable () -> String)?,
+    error: (@Composable () -> String?)?,
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
-            R.string.selected
+            ComposeR.string.selected
         } else {
-            R.string.not_selected
+            ComposeR.string.not_selected
         }
     )
 
+    val errorMessage = error?.invoke()
     val errorColor = MaterialTheme.stripeColors.materialColors.error
 
     val checkboxColors = error?.run {
@@ -128,7 +126,7 @@ internal fun CheckboxFieldUIView(
                 color = MaterialTheme.stripeColors.placeholderText
             )
         }
-        error?.let { error ->
+        errorMessage?.let { error ->
             Error(error = error, color = errorColor)
         }
     }
@@ -136,7 +134,7 @@ internal fun CheckboxFieldUIView(
 
 @Composable
 private fun Error(
-    error: @Composable () -> String,
+    error: String,
     color: Color
 ) {
     Row(
@@ -146,13 +144,13 @@ private fun Error(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Outlined.Info,
+            painter = painterResource(R.drawable.stripe_ic_material_info),
             contentDescription = null,
             modifier = Modifier.padding(end = 8.dp),
             tint = color
         )
         Text(
-            text = error(),
+            text = error,
             color = color
         )
     }

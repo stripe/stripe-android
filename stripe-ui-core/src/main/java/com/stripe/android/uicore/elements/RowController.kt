@@ -8,10 +8,10 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RowController(
     val fields: List<SectionSingleFieldElement>
-) : SectionFieldErrorController, SectionFieldComposable {
+) : SectionFieldValidationController, SectionFieldComposable {
 
-    override val error = combineAsStateFlow(
-        fields.map { it.sectionFieldErrorController().error }
+    override val validationMessage = combineAsStateFlow(
+        fields.map { it.sectionFieldErrorController().validationMessage }
     ) {
         it.filterNotNull().firstOrNull()
     }
@@ -21,8 +21,8 @@ class RowController(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?
     ) {
         RowElementUI(
             enabled,

@@ -5,6 +5,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.wallets.Wallet
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -40,6 +41,15 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         CardJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.NgCard ->
+                builder.setNgCard(
+                    json.optJSONObject(type.code)?.let {
+                        PaymentMethod.NgCard(
+                            brand = PaymentMethod.NgCard.Brand.fromCode(StripeJsonUtils.optString(it, "brand")),
+                            last4 = StripeJsonUtils.optString(it, "last4"),
+                        )
+                    }
+                )
             PaymentMethod.Type.CardPresent ->
                 builder.setCardPresent(PaymentMethod.CardPresent.EMPTY)
             PaymentMethod.Type.Ideal ->
@@ -72,18 +82,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         BacsDebitJsonParser().parse(it)
                     }
                 )
-            PaymentMethod.Type.Sofort ->
-                builder.setSofort(
-                    json.optJSONObject(type.code)?.let {
-                        SofortJsonParser().parse(it)
-                    }
-                )
-            PaymentMethod.Type.Upi ->
-                builder.setUpi(
-                    json.optJSONObject(type.code)?.let {
-                        UpiJsonParser().parse(it)
-                    }
-                )
             PaymentMethod.Type.Netbanking ->
                 builder.setNetbanking(
                     json.optJSONObject(type.code)?.let {
@@ -101,7 +99,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
-        return builder.build()
+        val paymentMethod = builder.build()
+        return paymentMethod.copy(
+            isLinkPassthroughMode = paymentMethod.card?.wallet?.walletType == Wallet.Type.Link,
+        )
     }
 
     internal class BillingDetails : ModelJsonParser<PaymentMethod.BillingDetails> {
@@ -146,7 +147,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
                 },
-                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
+                cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
+                    CardArtJsonParser().parse(it)
+                }
             )
         }
 
@@ -218,6 +222,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_WALLET = "wallet"
             private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
+            private const val FIELD_CARD_ART = "card_art"
         }
     }
 
@@ -351,30 +356,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_SORT_CODE = "sort_code"
-        }
-    }
-
-    internal class SofortJsonParser : ModelJsonParser<PaymentMethod.Sofort> {
-        override fun parse(json: JSONObject): PaymentMethod.Sofort {
-            return PaymentMethod.Sofort(
-                country = StripeJsonUtils.optString(json, FIELD_COUNTRY)
-            )
-        }
-
-        private companion object {
-            private const val FIELD_COUNTRY = "country"
-        }
-    }
-
-    internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
-        override fun parse(json: JSONObject): PaymentMethod.Upi {
-            return PaymentMethod.Upi(
-                vpa = StripeJsonUtils.optString(json, FIELD_VPA)
-            )
-        }
-
-        private companion object {
-            private const val FIELD_VPA = "vpa"
         }
     }
 

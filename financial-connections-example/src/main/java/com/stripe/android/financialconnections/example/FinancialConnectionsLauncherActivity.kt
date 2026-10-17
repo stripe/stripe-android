@@ -26,9 +26,6 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons.Default
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateMap
@@ -36,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,35 +49,30 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 klass = FinancialConnectionsDataExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_data_compose_title,
                 subtitleResId = R.string.financial_connections_data_subtitle,
                 klass = FinancialConnectionsComposeExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_data_java_title,
                 subtitleResId = R.string.financial_connections_data_subtitle,
                 klass = FinancialConnectionsDataExampleActivityJava::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_payouts_title,
                 subtitleResId = R.string.financial_connections_payouts_subtitle,
                 klass = FinancialConnectionsBankAccountTokenExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_webview_title,
                 subtitleResId = R.string.financial_connections_webview_subtitle,
                 klass = FinancialConnectionsWebviewExampleActivity::class.java,
                 section = MenuItem.Section.Alternative,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_playground_title,
                 subtitleResId = R.string.financial_connections_playground_subtitle,
@@ -170,7 +163,9 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 badge()
                 collapsed?.let {
                     Icon(
-                        imageVector = if (it) Default.KeyboardArrowUp else Default.KeyboardArrowDown,
+                        painter = painterResource(
+                            if (it) R.drawable.ic_keyboard_arrow_up else R.drawable.ic_keyboard_arrow_down
+                        ),
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.size(16.dp))

@@ -1,7 +1,5 @@
 package com.stripe.android.customersheet.data.injection
 
-import android.content.Context
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.data.CustomerSessionElementsSessionManager
 import com.stripe.android.customersheet.data.CustomerSessionInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSessionIntentDataSource
@@ -16,8 +14,6 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface CustomerSessionDataSourceModule {
@@ -46,17 +42,8 @@ internal interface CustomerSessionDataSourceModule {
         impl: DefaultCustomerSessionElementsSessionManager
     ): CustomerSessionElementsSessionManager
 
-    companion object {
-        @Provides
-        fun providePrefsRepositoryFactory(
-            appContext: Context,
-            @IOContext workContext: CoroutineContext
-        ): (String) -> PrefsRepository = { customerId ->
-            DefaultPrefsRepository(
-                appContext,
-                customerId,
-                workContext
-            )
-        }
-    }
+    @Binds
+    fun bindsPrefsRepositoryFactory(
+        factory: DefaultPrefsRepository.Factory
+    ): PrefsRepository.Factory
 }

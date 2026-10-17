@@ -4,6 +4,8 @@ import android.app.DownloadManager
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -50,13 +52,13 @@ class StripeDownloadListenerTest {
         context: Context = this.context,
         stripeDownloadManager: StripeDownloadManager = this.stripeDownloadManager,
         stripeToastManager: StripeToastManager = this.stripeToastManager,
-        ioScope: CoroutineScope = testScope,
+        coroutineScope: CoroutineScope = testScope,
     ) {
         stripeDownloadListener = StripeDownloadListener(
             context = context,
             stripeDownloadManager = stripeDownloadManager,
             stripeToastManager = stripeToastManager,
-            ioScope = ioScope,
+            coroutineScope = coroutineScope,
         )
     }
 
@@ -69,7 +71,7 @@ class StripeDownloadListenerTest {
         val contentLength = 1024L
 
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
-        testScope.testScheduler.advanceUntilIdle()
+        testScope.coroutineContext.job.children.toList().joinAll()
 
         verify(stripeDownloadManager).enqueueDownload(url, contentDisposition, mimeType)
         verify(stripeToastManager).showToast(any(), any())
@@ -78,7 +80,7 @@ class StripeDownloadListenerTest {
     @Test
     fun `onDownloadStart does nothing when URL is null`() = runTest {
         stripeDownloadListener.onDownloadStart(null, "", "", "", 0)
-        testScope.testScheduler.advanceUntilIdle()
+        testScope.coroutineContext.job.children.toList().joinAll()
 
         verifyNoInteractions(stripeDownloadManager)
         verify(stripeToastManager).showToast(any(), any())
@@ -95,7 +97,7 @@ class StripeDownloadListenerTest {
         val contentLength = 1024L
 
         stripeDownloadListener.onDownloadStart(url, userAgent, contentDisposition, mimeType, contentLength)
-        testScope.testScheduler.advanceUntilIdle()
+        testScope.coroutineContext.job.children.toList().joinAll()
 
         verify(stripeToastManager).showToast(any(), any())
     }

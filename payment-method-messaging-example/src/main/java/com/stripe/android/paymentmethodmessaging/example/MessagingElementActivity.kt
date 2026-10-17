@@ -1,0 +1,281 @@
+package com.stripe.android.paymentmethodmessaging.example
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
+import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
+import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
+
+@OptIn(PaymentMethodMessagingElementPreview::class)
+internal class MessagingElementActivity : AppCompatActivity() {
+
+    private val viewModel by viewModels<MessagingElementViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            Column(
+                Modifier.padding(8.dp).verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = "PaymentMethodMessagingElement",
+                    style = MaterialTheme.typography.h6
+                )
+
+                val appearanceSettings by viewModel.appearanceSetting.collectAsState()
+                val appearance = appearanceSettings.toAppearance()
+
+                Box(
+                    Modifier
+                        .padding(vertical = 8.dp)
+                        .background(getBackgroundColor(appearanceSettings.themeSettings))
+                ) {
+                    viewModel.paymentMethodMessagingElement.Content(appearance)
+                }
+
+                val config by viewModel.config.collectAsState()
+                ConfigurationSettings(config)
+                Appearance(appearanceSettings)
+
+                Button(
+                    onClick = {
+                        viewModel.configurePaymentMethodMessagingElement()
+                    },
+                    Modifier.fillMaxWidth()
+                ) {
+                    Text("Configure")
+                }
+
+                val result by viewModel.configureResult.collectAsState()
+                ResultToast(result)
+            }
+        }
+    }
+
+    @Composable
+    fun ConfigurationSettings(config: MessagingElementViewModel.Config) {
+        TextField(
+            value = config.amount.toString(),
+            onValueChange = {
+                if (it.isDigitsOnly() && it.isNotEmpty()) {
+                    viewModel.updateConfigState(config.copy(amount = it.toLong()))
+                }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = { Text("amount") },
+        )
+
+        TextField(
+            value = config.currency,
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(currency = it))
+            },
+            label = { Text("currency") }
+        )
+
+        TextField(
+            value = config.countryCode,
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(countryCode = it))
+            },
+            label = { Text("countryCode") }
+        )
+
+        TextField(
+            value = config.locale,
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(locale = it))
+            },
+            label = { Text("locale") }
+        )
+
+        TextField(
+            value = config.paymentMethods.joinToString(","),
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(paymentMethods = it.split(",")))
+            },
+            label = { Text("paymentMethods") }
+        )
+
+        TextField(
+            value = config.stripeAccountId ?: "",
+            onValueChange = {
+                viewModel.updateConfigState(config.copy(stripeAccountId = it))
+            },
+            label = { Text("stripeAccountID") }
+        )
+
+        SettingsDropDown(
+            items = PublishableKeySetting.pkList,
+            selectedItem = config.publishableKey,
+            label = "Publishable Key",
+            itemToString = { it.label }
+        ) {
+            viewModel.updateConfigState(config.copy(publishableKey = it))
+        }
+    }
+
+    @Composable
+    private fun Appearance(appearanceSettings: AppearanceSettings) {
+        SettingsDropDown(
+            items = fontList(),
+            selectedItem = appearanceSettings.fontSettings,
+            label = "Font",
+            itemToString = { it.label }
+        ) {
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    fontSettings = it
+                )
+            )
+        }
+
+        SettingsDropDown(
+            items = colorList(),
+            selectedItem = appearanceSettings.colorsSettings.textColor,
+            label = "Text Color",
+            itemToString = { it.name }
+        ) {
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    colorsSettings = appearanceSettings.colorsSettings.copy(textColor = it)
+                )
+            )
+        }
+
+        SettingsDropDown(
+            items = colorList(),
+            selectedItem = appearanceSettings.colorsSettings.linkTextColor,
+            label = "Link Text Color",
+            itemToString = { it.name }
+        ) {
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    colorsSettings = appearanceSettings.colorsSettings.copy(linkTextColor = it)
+                )
+            )
+        }
+
+        SettingsDropDown(
+            items = listOf(
+                PaymentMethodMessagingElement.Appearance.Theme.LIGHT,
+                PaymentMethodMessagingElement.Appearance.Theme.DARK,
+                PaymentMethodMessagingElement.Appearance.Theme.FLAT,
+            ),
+            selectedItem = appearanceSettings.themeSettings,
+            label = "Theme",
+            itemToString = { it.toString() }
+        ) {
+            viewModel.updateAppearance(appearanceSettings.copy(themeSettings = it))
+        }
+    }
+
+    @Composable
+    private fun <T> SettingsDropDown(
+        items: List<T>,
+        selectedItem: T,
+        label: String,
+        itemToString: (T) -> String,
+        onItemSelected: (T) -> Unit,
+    ) {
+        var expanded by remember { mutableStateOf(false) }
+
+        Text(
+            text = "$label: " + itemToString(selectedItem),
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.padding(4.dp).clickable { expanded = true }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            items.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onItemSelected(it)
+                    }
+                ) {
+                    Text(itemToString(it))
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ResultToast(configureResult: PaymentMethodMessagingElement.ConfigureResult?) {
+        val context = LocalContext.current
+        val message = when (configureResult) {
+            is PaymentMethodMessagingElement.ConfigureResult.Failed -> "Failed ${configureResult.error}"
+            is PaymentMethodMessagingElement.ConfigureResult.NoContent -> "NoContent"
+            is PaymentMethodMessagingElement.ConfigureResult.Succeeded -> "Succeeded"
+            null -> null
+        }
+        message?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+    }
+
+    private fun fontList() = listOf(
+        FontSettings(
+            fontFamily = R.font.cursive,
+            fontSize = 20f,
+            letterSpacing = 4f,
+            fontWeight = 200,
+            label = "Cursive"
+        ),
+        FontSettings(
+            fontFamily = R.font.opensans,
+            fontSize = 32f,
+            letterSpacing = 8f,
+            fontWeight = 400,
+            label = "Open Sans big"
+        ),
+        FontSettings(),
+    )
+
+    private fun colorList() = listOf(
+        ColorInfo(null, "Default"),
+        ColorInfo(Color.Red, "Red"),
+        ColorInfo(Color.Blue, "Blue"),
+        ColorInfo(Color.Black, "Black"),
+        ColorInfo(Color.White, "White")
+    )
+
+    private fun getBackgroundColor(theme: PaymentMethodMessagingElement.Appearance.Theme): Color {
+        return if (theme == PaymentMethodMessagingElement.Appearance.Theme.DARK) {
+            Color.Black
+        } else {
+            Color.White
+        }
+    }
+}

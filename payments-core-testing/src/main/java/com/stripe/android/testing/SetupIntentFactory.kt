@@ -6,6 +6,11 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 
 object SetupIntentFactory {
+    fun createDeferredIntent(): SetupIntent = create(
+        clientSecret = null,
+        id = null,
+    )
+
     fun create(
         paymentMethod: PaymentMethod? = createCardPaymentMethod(),
         paymentMethodTypes: List<String> = listOf("card"),
@@ -15,12 +20,14 @@ object SetupIntentFactory {
         countryCode: String? = null,
         cancellationReason: SetupIntent.CancellationReason? = null,
         usage: StripeIntent.Usage? = null,
+        clientSecret: String? = "secret",
+        id: String? = "pi_12345",
     ): SetupIntent = SetupIntent(
         created = 500L,
-        clientSecret = "secret",
+        clientSecret = clientSecret,
         paymentMethod = paymentMethod,
         isLiveMode = false,
-        id = "pi_12345",
+        id = id,
         countryCode = countryCode,
         paymentMethodTypes = paymentMethodTypes,
         status = status,

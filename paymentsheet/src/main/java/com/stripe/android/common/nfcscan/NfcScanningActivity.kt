@@ -1,0 +1,115 @@
+package com.stripe.android.common.nfcscan
+
+import android.content.Intent
+import android.os.Bundle
+import android.provider.Settings
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.nfcscan.ui.NfcScanningScreen
+import com.stripe.android.common.nfcscan.ui.NfcScanningTheme
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.isSystemDarkTheme
+import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import android.graphics.Color as AndroidColor
+
+internal class NfcScanningActivity : AppCompatActivity() {
+    private lateinit var args: NfcScanningContract.Args
+    private var isOpeningDeveloperOptions = false
+
+    private val viewModel by viewModels<NfcScanningViewModel> {
+        NfcScanningViewModel.factory { args }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        args = runCatching {
+            requireNotNull(NfcScanningContract.Args.fromIntent(intent)) {
+                "NfcScanningActivity was started without arguments."
+            }
+        }.getOrElse {
+            finishWithResult(NfcScanningContract.Result.Canceled)
+            return
+        }
+
+        lifecycleScope.launch {
+            viewModel.event.collectLatest { event ->
+                when (event) {
+                    is NfcScanningEvent.CloseWithResult -> finishWithResult(event.result)
+                    is NfcScanningEvent.OpenDeveloperOptions -> openDeveloperOptions()
+                    is NfcScanningEvent.TriggerHapticFeedback -> {
+                        NfcScanningHapticFeedback.trigger(this@NfcScanningActivity, event.type)
+                    }
+                }
+            }
+        }
+
+        val appearance = args.paymentMethodMetadata.appearance
+        val isDark = appearance.themeMode.isDarkTheme(isSystemDarkTheme())
+        val systemBarStyle = if (isDark) {
+            SystemBarStyle.dark(
+                scrim = AndroidColor.TRANSPARENT,
+            )
+        } else {
+            SystemBarStyle.light(
+                scrim = AndroidColor.TRANSPARENT,
+                darkScrim = AndroidColor.TRANSPARENT,
+            )
+        }
+        enableEdgeToEdge(
+            statusBarStyle = systemBarStyle,
+            navigationBarStyle = systemBarStyle,
+        )
+
+        setContent {
+            NfcScanningTheme(appearance = appearance) {
+                val viewState by viewModel.viewState.collectAsState()
+
+                NfcScanningScreen(
+                    state = viewState,
+                    viewActionHandler = viewModel::handleViewAction,
+                )
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.register(this)
+        isOpeningDeveloperOptions = false
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isFinishing && !isChangingConfigurations && !isOpeningDeveloperOptions) {
+            finishWithResult(NfcScanningContract.Result.Canceled)
+        }
+    }
+
+    internal fun openDeveloperOptions() {
+        isOpeningDeveloperOptions = true
+        startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))
+    }
+
+    private fun finishWithResult(result: NfcScanningContract.Result) {
+        setResult(
+            RESULT_OK,
+            Intent().putExtras(result.toBundle()),
+        )
+        finish()
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut(fadeOut = R.anim.stripe_nfc_screen_fade_out)
+    }
+}

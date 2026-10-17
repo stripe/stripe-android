@@ -6,6 +6,8 @@
   <string name="stripe_accepted_forms_of_id_include">身分証明書として受け付けられる書式は次のとおりです</string>
   <!-- Instructional text when user needs to align the edge with camera -->
   <string name="stripe_align_document">身分証明書を水平に保持してください</string>
+  <!-- Button text to allow optional training consent -->
+  <string name="stripe_allow">許可</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">アプリの設定</string>
   <!-- Description of back of driver's license image -->
@@ -18,11 +20,19 @@
   <string name="stripe_back_of_id">身分証明書の裏面</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">本人確認書類の裏面</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">身分証明書の裏面が検出されません</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">ID の裏面が選択されました</string>
   <!-- Title displayed when requesting camera permissions -->
   <string name="stripe_camera_permission">カメラの使用許可</string>
   <string name="stripe_camera_permission_rationale">このアプリはカメラを使用して身分証明書をスキャンし、写真を撮影してお客様の身元を確認します。</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">正面を撮影</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">左側を撮影</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">右側を撮影</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">キャプチャーしています...</string>
   <!-- Description of the check mark, used for A11Y -->
@@ -41,6 +51,8 @@
   <string name="stripe_could_not_capture_body2">もう一度お試しいただくか、デバイスから画像をアプロードしてください。</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">画像をキャプチャーできませんでした</string>
+  <!-- Button text to decline optional training consent -->
+  <string name="stripe_decline">拒否</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">詳細が見えません</string>
   <string name="stripe_decrease_lighting_2">もっと暗い場所に移動してください</string>
@@ -90,8 +102,6 @@
   <string name="stripe_doc_front_warmup_title">写真付き身分証明書の直接撮影を準備する</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">運転免許証</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">エラー</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">ファイルをアップロード</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -122,6 +132,8 @@
   <string name="stripe_front_of_id">身分証明書の表面</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">本人確認書類の表面</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">身分証明書の表面が検出されません</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">ID の表面が選択されました</string>
   <!-- Description of front of passport image -->
@@ -136,12 +148,16 @@
   <string name="stripe_grant_camera_permission_text">カメラへのアクセス許可が必要です。アプリの設定でカメラへのアクセスを許可してください。</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">動かさないでください、スキャンしています</string>
+  <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
+  <string name="stripe_hold_still_selfie">動かないでください...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID 番号</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">準備完了</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">撮影された画像</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">入力した ID 番号に不備があります。</string>
   <!-- Instructional text when environment is too dark -->
@@ -158,12 +174,18 @@
   <string name="stripe_last_4_of_ssn">社会保障番号の末尾 4 桁</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">姓</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">自動</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">読み込み中</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">手動</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">身分証明書を少し近づけてください</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">身分証明書を少し遠ざけてください</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">身分証明書を画面中央に配置してください</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC または FIN</string>
   <!-- No comment provided by engineer. -->
@@ -198,6 +220,7 @@
   <string name="stripe_position_selfie">フレームの中央に顔を置いてください。</string>
   <!-- Instructional text when the document is too blurry -->
   <string name="stripe_reduce_blur">身分証明書に焦点が合っていません</string>
+  <string name="stripe_reduce_blur_2">画像がぼやけています。スマホをしっかり持って、もう一度お試しください。</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">詳細が見えません</string>
   <string name="stripe_reduce_glare_2">光の反射を抑えて、身分証明書が見えるようにしてください</string>
@@ -213,10 +236,28 @@
   <string name="stripe_selfie_capture_complete">顔写真の記録が完了しました</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">顔写真の記録</string>
+  <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
+  <string name="stripe_selfie_checking_images">画像を確認しています....</string>
+  <!-- Body for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_body">許可をいただいた場合、Stripe は不正利用の検出を改善するために画像を使用する場合があります。拒否しても、本人確認には影響しません。</string>
+  <!-- Title for the redesigned selfie consent page -->
+  <string name="stripe_selfie_consent_title">顔写真による確認</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">1 件の顔写真が記録されました</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">頭を左に向けてください</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">頭を右に向けてください</string>
+  <!-- Status text displayed when the user's face is too far from the camera -->
+  <string name="stripe_selfie_move_closer">近付いてください</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">顔写真の画像が保存されていません。終了しますか？</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">顔をフレーム内に収めてください</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_title">顔写真</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_training_consent_title">本人確認プロセスの改善にご協力ください</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">次のステップで写真が数枚撮影され、本人確認が行われます。</string>
   <!-- Title for selfie warmup page -->

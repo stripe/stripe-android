@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -66,7 +65,6 @@ class BacsMandateDataTest {
         return BacsConfirmationOption(
             createParams = createParams,
             optionsParams = null,
-            passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams()
         )
     }
 }

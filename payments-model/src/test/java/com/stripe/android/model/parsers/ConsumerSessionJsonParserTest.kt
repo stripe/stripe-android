@@ -3,6 +3,8 @@ package com.stripe.android.model.parsers
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ConsumerFixtures
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
+import org.json.JSONObject
 import org.junit.Test
 
 class ConsumerSessionJsonParserTest {
@@ -25,6 +27,7 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
             )
         )
     }
@@ -47,6 +50,26 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Verified
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
+            )
+        )
+    }
+
+    @Test
+    fun `Parse consumer with authentication levels`() {
+        assertThat(
+            ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_WITH_AUTH_LEVEL_JSON)
+        ).isEqualTo(
+            ConsumerSession(
+                clientSecret = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
+                emailAddress = "test@stripe.com",
+                redactedPhoneNumber = "+1********56",
+                redactedFormattedPhoneNumber = "(***) *** **56",
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null,
+                verificationSessions = emptyList(),
+                currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+                minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
             )
         )
     }
@@ -69,7 +92,145 @@ class ConsumerSessionJsonParserTest {
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
                 ),
+                supportedPaymentDetailsTypes = listOf("CARD"),
             )
         )
+    }
+
+    @Test
+    fun `Parse consumer with link_brand onelink`() {
+        val json = JSONObject(
+            """
+                {
+                  "auth_session_client_secret": null,
+                  "link_brand": "onelink",
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `Parse consumer with link_brand link`() {
+        val json = JSONObject(
+            """
+                {
+                  "auth_session_client_secret": null,
+                  "link_brand": "link",
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `Parse consumer without link_brand field returns null linkBrand`() {
+        val result = ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_JSON)
+        assertThat(result?.linkBrand).isNull()
+    }
+
+    @Test
+    fun `Parse consumer with unknown link_brand value returns null linkBrand`() {
+        val json = JSONObject(
+            """
+                {
+                  "auth_session_client_secret": null,
+                  "link_brand": "unknown_brand",
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.linkBrand).isNull()
+    }
+
+    @Test
+    fun `Parse consumer with support_payment_details_types`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": [],
+                    "support_payment_details_types": ["CARD", "BANK_ACCOUNT"]
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.supportedPaymentDetailsTypes).containsExactly("CARD", "BANK_ACCOUNT")
+    }
+
+    @Test
+    fun `Parse consumer without support_payment_details_types returns empty list`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+        val result = ConsumerSessionJsonParser().parse(json)
+        assertThat(result?.supportedPaymentDetailsTypes).isEmpty()
+    }
+
+    @Test
+    fun `Parse consumer with link_session_key`() {
+        val json = JSONObject(
+            """
+                {
+                  "consumer_session": {
+                    "client_secret": "secret_123",
+                    "link_session_key": "lsk_123",
+                    "email_address": "test@stripe.com",
+                    "redacted_phone_number": "+1********56",
+                    "redacted_formatted_phone_number": "(***) *** **56",
+                    "verification_sessions": []
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = ConsumerSessionJsonParser().parse(json)
+
+        assertThat(result?.linkSessionKey).isEqualTo("lsk_123")
+    }
+
+    @Test
+    fun `Parse consumer without link_session_key returns null`() {
+        val result = ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_JSON)
+
+        assertThat(result?.linkSessionKey).isNull()
     }
 }

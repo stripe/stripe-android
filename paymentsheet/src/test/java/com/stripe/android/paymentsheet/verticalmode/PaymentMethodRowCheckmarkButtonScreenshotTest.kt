@@ -67,6 +67,15 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
     }
 
     @Test
+    fun testMultilineTextTruncationWhenSelected() {
+        testPaymentMethodRowButton_Checkmark(
+            subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
+                "forever.",
+            isSelected = true
+        )
+    }
+
+    @Test
     fun testTrailingContent() {
         testPaymentMethodRowButton_Checkmark(
             trailingContent = {

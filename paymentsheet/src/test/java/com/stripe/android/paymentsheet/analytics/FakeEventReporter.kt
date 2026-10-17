@@ -3,18 +3,12 @@ package com.stripe.android.paymentsheet.analytics
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 
 @Suppress("EmptyFunctionBlock")
@@ -54,6 +48,9 @@ internal class FakeEventReporter : EventReporter {
     private val _showNewPaymentOptionsCalls = Turbine<Unit>()
     val showNewPaymentOptionsCalls: ReceiveTurbine<Unit> = _showNewPaymentOptionsCalls
 
+    private val _showExistingPaymentOptionsCalls = Turbine<Unit>()
+    val showExistingPaymentOptionsCalls: ReceiveTurbine<Unit> = _showExistingPaymentOptionsCalls
+
     private val _showManageSavedPaymentMethods = Turbine<Unit>()
     val showManageSavedPaymentMethods: ReceiveTurbine<Unit> = _showManageSavedPaymentMethods
 
@@ -66,12 +63,54 @@ internal class FakeEventReporter : EventReporter {
     private val _formCompletedCalls = Turbine<FormCompletedCall>()
     val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
 
+    private val _walletButtonTappedCalls = Turbine<String>()
+    val walletButtonTappedCalls: ReceiveTurbine<String> = _walletButtonTappedCalls
+
     private val _pressConfirmButtonCalls = Turbine<PaymentSelection>()
     val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection> = _pressConfirmButtonCalls
 
     private val _usBankAccountFormEventCalls = Turbine<USBankAccountFormViewModel.AnalyticsEvent>()
     val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
         _usBankAccountFormEventCalls
+
+    private val _tapToAddButtonShownCalls = Turbine<Unit>()
+    val tapToAddButtonShownCalls: ReceiveTurbine<Unit> = _tapToAddButtonShownCalls
+
+    private val _tapToAddStartedCalls = Turbine<Unit>()
+    val tapToAddStartedCalls: ReceiveTurbine<Unit> = _tapToAddStartedCalls
+
+    private val _tapToAddCardAddedCalls = Turbine<Boolean>()
+    val tapToAddCardAddedCalls: ReceiveTurbine<Boolean> = _tapToAddCardAddedCalls
+
+    private val _tapToAddCanceledCalls = Turbine<EventReporter.TapToAddCancelSource>()
+    val tapToAddCanceledCalls: ReceiveTurbine<EventReporter.TapToAddCancelSource> =
+        _tapToAddCanceledCalls
+
+    private val _tapToAddContinueAfterCardAddedCalls = Turbine<Boolean?>()
+    val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Boolean?> =
+        _tapToAddContinueAfterCardAddedCalls
+
+    private val _tapToAddConfirmCalls = Turbine<Boolean>()
+    val tapToAddConfirmCalls: ReceiveTurbine<Boolean> = _tapToAddConfirmCalls
+
+    private val _failedToAddCardWithTapToAddCalls = Turbine<String>()
+    val failedToAddCardWithTapToAddCalls: ReceiveTurbine<String> = _failedToAddCardWithTapToAddCalls
+
+    private val _tapToAddAttemptWithUnsupportedDeviceCalls = Turbine<Unit>()
+    val tapToAddAttemptWithUnsupportedDeviceCalls: ReceiveTurbine<Unit> =
+        _tapToAddAttemptWithUnsupportedDeviceCalls
+
+    private val _billingAddressCompletedCalls = Turbine<BillingAddressCompletedCall>()
+    val billingAddressCompletedCalls: ReceiveTurbine<BillingAddressCompletedCall> =
+        _billingAddressCompletedCalls
+
+    private val _pmmPromotionsFetched = Turbine<String>()
+    val pmmPromotionsFetched: ReceiveTurbine<String> =
+        _pmmPromotionsFetched
+
+    private val _pmmPromotionsDisplayed = Turbine<Boolean>()
+    val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
+        _pmmPromotionsDisplayed
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
@@ -82,57 +121,34 @@ internal class FakeEventReporter : EventReporter {
         _setAsDefaultPaymentMethodSucceededCalls.ensureAllEventsConsumed()
         _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
         _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _showExistingPaymentOptionsCalls.ensureAllEventsConsumed()
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
         _experimentExposureCalls.ensureAllEventsConsumed()
         _removePaymentMethodCalls.ensureAllEventsConsumed()
         _formCompletedCalls.ensureAllEventsConsumed()
+        _walletButtonTappedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
-    }
-
-    override fun onInit(
-        commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
-        primaryButtonColor: Boolean?,
-        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
-        isDeferred: Boolean
-    ) {
-    }
-
-    override fun onLoadStarted(initializedViaCompose: Boolean) {
-    }
-
-    override fun onLoadSucceeded(
-        paymentSelection: PaymentSelection?,
-        linkEnabled: Boolean,
-        linkMode: LinkMode?,
-        googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
-        currency: String?,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        orderedLpms: List<String>,
-        requireCvcRecollection: Boolean,
-        hasDefaultPaymentMethod: Boolean?,
-        setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean,
-        setupFutureUsage: StripeIntent.Usage?,
-        openCardScanAutomatically: Boolean,
-    ) {
-    }
-
-    override fun onLoadFailed(error: Throwable) {
-    }
-
-    override fun onElementsSessionLoadFailed(error: Throwable) {
+        _tapToAddButtonShownCalls.ensureAllEventsConsumed()
+        _tapToAddStartedCalls.ensureAllEventsConsumed()
+        _tapToAddCardAddedCalls.ensureAllEventsConsumed()
+        _tapToAddCanceledCalls.ensureAllEventsConsumed()
+        _tapToAddContinueAfterCardAddedCalls.ensureAllEventsConsumed()
+        _tapToAddConfirmCalls.ensureAllEventsConsumed()
+        _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
+        _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
+        _billingAddressCompletedCalls.ensureAllEventsConsumed()
+        _pmmPromotionsFetched.ensureAllEventsConsumed()
+        _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
 
     override fun onDismiss() {
     }
 
     override fun onShowExistingPaymentOptions() {
+        _showExistingPaymentOptionsCalls.add(Unit)
     }
 
     override fun onShowManageSavedPaymentMethods() {
@@ -170,18 +186,24 @@ internal class FakeEventReporter : EventReporter {
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
     }
 
+    override fun onWalletButtonTapped(walletType: String) {
+        _walletButtonTappedCalls.add(walletType)
+    }
+
     override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
         _pressConfirmButtonCalls.add(paymentSelection)
     }
 
     override fun onPaymentSuccess(
         paymentSelection: PaymentSelection,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        intentId: String?,
     ) {
         _paymentSuccessCalls.add(
             PaymentSuccessCall(
                 paymentSelection = paymentSelection,
-                deferredIntentConfirmationType = deferredIntentConfirmationType
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                intentId = intentId,
             )
         )
     }
@@ -196,9 +218,6 @@ internal class FakeEventReporter : EventReporter {
                 error = error,
             )
         )
-    }
-
-    override fun onLpmSpecFailure(errorMessage: String?) {
     }
 
     override fun onAutofill(type: String) {
@@ -268,13 +287,26 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
-    override fun onShopPayWebViewLoadAttempt() {
+    override fun onBillingAddressCompleted(
+        addressCountryCode: String,
+        autocompleteResultSelected: Boolean,
+        editDistance: Int?,
+    ) {
+        _billingAddressCompletedCalls.add(
+            BillingAddressCompletedCall(
+                addressCountryCode = addressCountryCode,
+                autocompleteResultSelected = autocompleteResultSelected,
+                editDistance = editDistance,
+            )
+        )
     }
 
-    override fun onShopPayWebViewConfirmSuccess() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String) {
+        _pmmPromotionsFetched.add(publishableKey)
     }
 
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
+        _pmmPromotionsDisplayed.add(displayedSuccessfully)
     }
 
     override fun onCardScanStarted(implementation: String) {
@@ -295,11 +327,50 @@ internal class FakeEventReporter : EventReporter {
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
     }
 
+    override fun onCardScanButtonShown() {
+    }
+
+    override fun onNfcScanButtonShown() {
+    }
+
     override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,
-        walletsState: WalletsState?
+        walletsState: WalletsState?,
+        isVerticalLayout: Boolean
     ) {
+    }
+
+    override fun onTapToAddButtonShown() {
+        _tapToAddButtonShownCalls.add(Unit)
+    }
+
+    override fun onTapToAddStarted() {
+        _tapToAddStartedCalls.add(Unit)
+    }
+
+    override fun onCardAddedWithTapToAdd(canCollectLinkInput: Boolean) {
+        _tapToAddCardAddedCalls.add(canCollectLinkInput)
+    }
+
+    override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
+        _tapToAddCanceledCalls.add(source)
+    }
+
+    override fun onTapToAddContinueAfterCardAdded(completedLinkInput: Boolean?) {
+        _tapToAddContinueAfterCardAddedCalls.add(completedLinkInput)
+    }
+
+    override fun onTapToAddConfirm(recollectedCvc: Boolean) {
+        _tapToAddConfirmCalls.add(recollectedCvc)
+    }
+
+    override fun onFailedToAddCardWithTapToAdd(message: String) {
+        _failedToAddCardWithTapToAddCalls.add(message)
+    }
+
+    override fun onTapToAddAttemptWithUnsupportedDevice() {
+        _tapToAddAttemptWithUnsupportedDeviceCalls.add(Unit)
     }
 
     data class PaymentFailureCall(
@@ -309,7 +380,8 @@ internal class FakeEventReporter : EventReporter {
 
     data class PaymentSuccessCall(
         val paymentSelection: PaymentSelection,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val intentId: String?,
     )
 
     data class UpdatePaymentMethodSucceededCall(
@@ -340,5 +412,11 @@ internal class FakeEventReporter : EventReporter {
 
     data class FormCompletedCall(
         val code: PaymentMethodCode
+    )
+
+    data class BillingAddressCompletedCall(
+        val addressCountryCode: String,
+        val autocompleteResultSelected: Boolean,
+        val editDistance: Int?,
     )
 }

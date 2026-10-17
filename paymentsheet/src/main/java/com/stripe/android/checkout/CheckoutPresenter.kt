@@ -1,0 +1,84 @@
+package com.stripe.android.checkout
+
+import androidx.annotation.AnyThread
+import androidx.annotation.MainThread
+import androidx.annotation.RestrictTo
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.elements.CurrencySelectorElement
+import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.elements.ShippingAddressElement
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import dagger.Lazy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Provider
+
+@CheckoutSessionPreview
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@CheckoutPresenterScope
+class CheckoutPresenter @Inject internal constructor(
+    private val paymentElementProvider: Lazy<PaymentElement>,
+    private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,
+    private val shippingAddressElementProvider: Lazy<ShippingAddressElement>,
+    private val expressCheckoutElementProvider: Lazy<ExpressCheckoutElement>,
+    private val checkoutConfirmationPerformerProvider: Provider<CheckoutConfirmationPerformer>,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
+) {
+
+    /**
+     * Returns the [PaymentElement], which displays and collects the customer's payment method.
+     */
+    @MainThread
+    fun paymentElement(): PaymentElement {
+        return paymentElementProvider.get()
+    }
+
+    /**
+     * Returns the [CurrencySelectorElement], which lets the customer choose the checkout currency
+     * when multiple currencies are available.
+     */
+    @MainThread
+    fun currencySelectorElement(): CurrencySelectorElement {
+        return currencySelectorElementProvider.get()
+    }
+
+    /**
+     * Returns the [ShippingAddressElement], which collects the customer's shipping address.
+     */
+    @MainThread
+    fun shippingAddressElement(): ShippingAddressElement {
+        return shippingAddressElementProvider.get()
+    }
+
+    /**
+     * Returns the [ExpressCheckoutElement], which displays express payment buttons such as Google
+     * Pay and Link.
+     */
+    @MainThread
+    fun expressCheckoutElement(): ExpressCheckoutElement {
+        return expressCheckoutElementProvider.get()
+    }
+
+    /**
+     * Confirms the payment for the customer's currently selected payment option.
+     *
+     * The result is delivered to the [CheckoutController.ResultCallback] supplied when building the
+     * [CheckoutController].
+     * If confirmation cannot start because checkout is not ready or another operation is in progress,
+     * the callback receives [CheckoutController.Result.Failed] with an [IllegalStateException]
+     * explaining the reason. Each rejected call delivers its own failure without interrupting an
+     * active payment flow.
+     *
+     * May be called from any thread. Calls from a background thread are dispatched to the main thread.
+     */
+    @AnyThread
+    fun confirm() {
+        coroutineScope.launch(Dispatchers.Main.immediate) {
+            checkoutConfirmationPerformerProvider.get().confirm()
+        }
+    }
+}

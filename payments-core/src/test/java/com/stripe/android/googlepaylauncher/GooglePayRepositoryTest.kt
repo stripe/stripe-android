@@ -8,29 +8,28 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.whenever
+import java.util.concurrent.CountDownLatch
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 class GooglePayRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
-
-    @Before
-    fun setup() {
-        PaymentConfiguration.init(context, "pk_123")
-    }
 
     @Test
     fun `when google pay is ready, 'isReady' should return true`() = runTest {
@@ -85,6 +84,34 @@ class GooglePayRepositoryTest {
         }
     }
 
+    @Test
+    fun `when google pay times out, 'isReady' should return false`() = runTest {
+        val paymentsClient = mock<PaymentsClient>()
+        val errorReporter = FakeErrorReporter()
+        val countDownLatch = CountDownLatch(1)
+
+        whenever(paymentsClient.isReadyToPay(any())) doReturn Tasks.call {
+            countDownLatch.await() // This latch never gets counted down.
+            throw AssertionError("Should not reach this point.")
+        }
+
+        val repository = createGooglePayRepository(paymentsClient, errorReporter)
+
+        repository.isReady().test {
+            advanceTimeBy(29.seconds)
+            expectNoEvents()
+            advanceTimeBy(2.seconds)
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
+
+        assertEquals(1, errorReporter.getLoggedErrors().size)
+        assertEquals(
+            ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_TIMEOUT.eventName,
+            errorReporter.getLoggedErrors().first(),
+        )
+    }
+
     private fun createGooglePayRepository(
         paymentsClient: PaymentsClient,
         errorReporter: ErrorReporter = FakeErrorReporter()
@@ -95,9 +122,11 @@ class GooglePayRepositoryTest {
             billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
             existingPaymentMethodRequired = true,
             allowCreditCards = true,
+            googlePayConfig = GooglePayConfig(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             paymentsClientFactory = { paymentsClient },
             errorReporter = errorReporter,
             logger = Logger.noop(),
+            cardFundingFilter = DefaultCardFundingFilter,
         )
     }
 }

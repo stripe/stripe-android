@@ -62,13 +62,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val SOFORT = PaymentMethodCreateParams.create(
-        sofort = PaymentMethodCreateParams.Sofort(
-            country = "DE"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val P24 = PaymentMethodCreateParams.createP24(
         billingDetails = BILLING_DETAILS
     )
@@ -77,22 +70,11 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val GIROPAY = PaymentMethodCreateParams.createGiropay(
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val EPS = PaymentMethodCreateParams.createEps(
         billingDetails = BILLING_DETAILS
     )
 
     internal val GRABPAY = PaymentMethodCreateParams.createGrabPay(
-        billingDetails = BILLING_DETAILS
-    )
-
-    internal val UPI = PaymentMethodCreateParams.create(
-        upi = PaymentMethodCreateParams.Upi(
-            vpa = "vpa@hdfcbank"
-        ),
         billingDetails = BILLING_DETAILS
     )
 
@@ -130,6 +112,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS,
     )
 
+    internal val TWINT = PaymentMethodCreateParams.createTwint(
+        billingDetails = BILLING_DETAILS
+    )
+
     internal val ALMA = PaymentMethodCreateParams.createAlma(
         billingDetails = BILLING_DETAILS
     )
@@ -147,6 +133,10 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val CRYPTO = PaymentMethodCreateParams.createCrypto(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val PAY_BY_BANK = PaymentMethodCreateParams.createPayByBank(
         billingDetails = BILLING_DETAILS
     )
 

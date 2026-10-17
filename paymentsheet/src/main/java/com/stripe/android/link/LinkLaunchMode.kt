@@ -17,21 +17,18 @@ internal sealed interface LinkLaunchMode : Parcelable {
          * A previously selected payment that will be preselected at launch
          */
         val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
-
         /**
-         * The filter to determine available payment methods.
+         * The filters to determine available payment methods.
          */
-        val paymentMethodFilter: LinkPaymentMethodFilter? = null,
-
+        val paymentMethodFilters: List<LinkPaymentMethodFilter>? = null,
         /**
          * If true, shares the payment details immediately after creating it in passthrough mode.
          */
         val sharePaymentDetailsImmediatelyAfterCreation: Boolean = true,
-
         /**
          * Whether or not a secondary CTA to pay another way should be shown.
          */
-        val shouldShowSecondaryCta: Boolean = true,
+        val canContinueWithoutLink: Boolean = true,
     ) : LinkLaunchMode
 
     /**
@@ -39,7 +36,12 @@ internal sealed interface LinkLaunchMode : Parcelable {
      * to payment.
      */
     @Parcelize
-    data object Full : LinkLaunchMode
+    data class Full(
+        /**
+         * Whether the wallet should show a secondary button that lets the user continue without Link.
+         */
+        val showSecondaryButton: Boolean,
+    ) : LinkLaunchMode
 
     @Parcelize
     data class Confirmation(

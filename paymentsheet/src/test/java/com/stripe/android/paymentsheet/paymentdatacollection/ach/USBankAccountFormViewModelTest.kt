@@ -6,8 +6,6 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -15,6 +13,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -42,7 +43,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -92,7 +93,8 @@ class USBankAccountFormViewModelTest {
         termsDisplay = PaymentSheet.TermsDisplay.AUTOMATIC,
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
-        clientAttributionMetadata = null,
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        apiConfiguration = DEFAULT_API_CONFIG,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -100,6 +102,9 @@ class USBankAccountFormViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
@@ -153,7 +158,12 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.handlePrimaryButtonClick()
-            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+                eq(DEFAULT_API_CONFIG.publishableKey),
+                eq(DEFAULT_API_CONFIG.stripeAccountId),
+                any(),
+                any(),
+            )
         }
 
     @Test
@@ -318,9 +328,9 @@ class USBankAccountFormViewModelTest {
             assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
             assertThat(input.address).isEqualTo(customerAddress)
 
-            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+            assertThat(paymentSelection.paymentMethodCreateParams).isNotNull()
 
-            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+            val paymentMethodCreateParams = requireNotNull(paymentSelection.paymentMethodCreateParams)
 
             assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
 
@@ -384,9 +394,9 @@ class USBankAccountFormViewModelTest {
             assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
             assertThat(input.address).isEqualTo(customerAddress)
 
-            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+            assertThat(paymentSelection.paymentMethodCreateParams).isNotNull()
 
-            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+            val paymentMethodCreateParams = requireNotNull(paymentSelection.paymentMethodCreateParams)
 
             assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
 
@@ -752,7 +762,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.Email)
         }
     }
 
@@ -775,7 +785,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.Phone)
         }
     }
 
@@ -803,7 +813,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.PostalCode)
         }
     }
 
@@ -831,7 +841,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+            assertThat(awaitItem()).isEqualTo(FormFieldId.PostalCode)
         }
     }
 
@@ -1905,7 +1915,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.lastTextFieldIdentifier.test {
-            assertThat(expectMostRecentItem()).isEqualTo(IdentifierSpec.OneLineAddress)
+            assertThat(expectMostRecentItem()).isEqualTo(FormFieldId.OneLineAddress)
         }
     }
 
@@ -1929,11 +1939,11 @@ class USBankAccountFormViewModelTest {
         )
 
         turbineScope {
-            val nameErrorTurbine = viewModel.nameController.error.testIn(this)
-            val emailErrorTurbine = viewModel.emailController.error.testIn(this)
-            val phoneErrorTurbine = viewModel.phoneController.error.testIn(this)
+            val nameErrorTurbine = viewModel.nameController.validationMessage.testIn(this)
+            val emailErrorTurbine = viewModel.emailController.validationMessage.testIn(this)
+            val phoneErrorTurbine = viewModel.phoneController.validationMessage.testIn(this)
             val addressErrorTurbine =
-                viewModel.addressElement.sectionFieldErrorController().error.testIn(this)
+                viewModel.addressElement.sectionFieldErrorController().validationMessage.testIn(this)
 
             assertThat(nameErrorTurbine.awaitItem()).isNull()
             assertThat(emailErrorTurbine.awaitItem()).isNull()
@@ -2119,17 +2129,12 @@ class USBankAccountFormViewModelTest {
         args: USBankAccountFormViewModel.Args = defaultArgs,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
-        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun mockManuallyEnteredBankAccount(usesMicrodeposits: Boolean): CollectBankAccountResultInternal.Completed {
@@ -2189,7 +2194,6 @@ class USBankAccountFormViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
-        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
         const val CUSTOMER_PHONE = "+13105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(

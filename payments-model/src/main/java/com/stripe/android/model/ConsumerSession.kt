@@ -27,7 +27,24 @@ data class ConsumerSession(
     val verificationSessions: List<VerificationSession> = emptyList(),
     @SerialName("mobile_fallback_webview_params")
     val mobileFallbackWebviewParams: MobileFallbackWebviewParams? = null,
+    @SerialName("current_authentication_level")
+    val currentAuthenticationLevel: AuthenticationLevel? = null,
+    @SerialName("minimum_authentication_level")
+    val minimumAuthenticationLevel: AuthenticationLevel? = null,
+    @SerialName("link_brand")
+    val linkBrand: LinkBrand? = null,
+    @SerialName("support_payment_details_types")
+    val supportedPaymentDetailsTypes: List<String> = emptyList(),
+    @SerialName("link_session_key")
+    val linkSessionKey: String? = null,
 ) : StripeModel {
+
+    val meetsMinimumAuthenticationLevel: Boolean
+        get() {
+            val current = currentAuthenticationLevel ?: return false
+            val minimum = minimumAuthenticationLevel ?: return false
+            return current.sortOrder >= minimum.sortOrder
+        }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -41,6 +58,7 @@ data class ConsumerSession(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionType(val value: String) : Parcelable {
             Unknown(""),
+            LinkAuthToken("link_auth_token"),
             SignUp("signup"),
             Email("email"),
             Sms("sms");
@@ -67,6 +85,22 @@ data class ConsumerSession(
                 fun fromValue(value: String): SessionState =
                     entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Serializable
+    enum class AuthenticationLevel(val value: String, val sortOrder: Int) : Parcelable {
+        Unknown("", -1),
+        NotAuthenticated("not_authenticated", 0),
+        OneFactorAuthentication("1fa", 1),
+        TwoFactorAuthentication("2fa", 2);
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            fun fromValue(value: String): AuthenticationLevel =
+                entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
         }
     }
 }

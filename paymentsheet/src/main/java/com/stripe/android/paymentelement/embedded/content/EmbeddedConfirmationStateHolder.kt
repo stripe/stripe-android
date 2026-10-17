@@ -7,7 +7,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -42,8 +41,8 @@ internal class EmbeddedConfirmationStateHolder @Inject constructor(
     data class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val selection: PaymentSelection?,
-        val initializationMode: PaymentElementLoader.InitializationMode,
         val configuration: EmbeddedPaymentElement.Configuration,
+        val statusBarColor: Int?,
     ) : Parcelable
 
     companion object {

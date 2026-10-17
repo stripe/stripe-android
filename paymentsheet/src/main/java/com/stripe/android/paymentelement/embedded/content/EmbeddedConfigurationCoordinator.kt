@@ -6,17 +6,18 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 internal interface EmbeddedConfigurationCoordinator {
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult
 }
 
@@ -28,21 +29,21 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHelper: EmbeddedStateHelper,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        configuration: EmbeddedPaymentElement.Configuration
+        configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult {
         return viewModelScope.async {
             confirmationStateHolder.state = null
             configurationHandler.configure(
-                intentConfiguration = intentConfiguration,
                 configuration = configuration,
+                initializationMode = initializationMode,
             ).fold(
                 onSuccess = { state ->
                     handleLoadedState(
                         state = state,
-                        intentConfiguration = intentConfiguration,
                         configuration = configuration,
                     )
                     ConfigureResult.Succeeded()
@@ -56,7 +57,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
 
     private fun handleLoadedState(
         state: PaymentElementLoader.State,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
         val newPaymentSelection = selectionChooser.choose(
@@ -71,10 +71,8 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             confirmationState = EmbeddedConfirmationStateHolder.State(
                 paymentMethodMetadata = state.paymentMethodMetadata,
                 selection = newPaymentSelection,
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration
-                ),
                 configuration = configuration,
+                statusBarColor = statusBarColor,
             ),
             customer = state.customer,
             previousNewSelections = Bundle(),

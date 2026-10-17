@@ -32,10 +32,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -44,30 +44,28 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
-import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
-    WalletButtonsPreview::class,
+    TapToAddPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
     ExternalPaymentMethodConfirmHandler,
-    AnalyticEventCallback {
+    AnalyticEventCallback,
+    CreateCardPresentSetupIntentCallback {
     companion object {
         private const val PLAYGROUND_STATE_KEY = "playgroundState"
         const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
@@ -100,24 +98,15 @@ internal class EmbeddedPlaygroundActivity :
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
 
-        val embeddedBuilder = EmbeddedPaymentElement.Builder(
-            createIntentCallback = { _, _ ->
-                val playgroundState = playgroundState
-                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
-                    onSuccess = { state ->
-                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                        CreateIntentResult.Success(clientSecret)
-                    },
-                    onFailure = { exception ->
-                        CreateIntentResult.Failure(IllegalStateException(exception))
-                    },
-                )
-            },
-            resultCallback = ::handleEmbeddedResult,
-        )
+        val embeddedBuilder = createBuilder()
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
+            .also {
+                if (playgroundState.canUseTapToAdd) {
+                    it.createCardPresentSetupIntentCallback(this)
+                }
+            }
             .rowSelectionBehavior(
                 playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
             )
@@ -126,9 +115,7 @@ internal class EmbeddedPlaygroundActivity :
         setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
-            var loadingState: LoadingState by remember {
-                mutableStateOf(LoadingState.Loading)
-            }
+            var loadingState: LoadingState by remember { mutableStateOf(LoadingState.Loading) }
 
             val coroutineScope = rememberCoroutineScope()
 
@@ -159,9 +146,6 @@ internal class EmbeddedPlaygroundActivity :
             BottomSheetContent(
                 loadingState = loadingState,
                 configure = ::configure,
-                showWalletButtons =
-                playgroundState.snapshot[WalletButtonsSettingsDefinition] !=
-                    WalletButtonsPlaygroundType.Disabled,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }
@@ -173,14 +157,12 @@ internal class EmbeddedPlaygroundActivity :
     private fun BottomSheetContent(
         loadingState: LoadingState,
         configure: () -> Unit,
-        showWalletButtons: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         PlaygroundTheme(
             content = {
                 loadingState.Content(
                     embeddedPaymentElement = embeddedPaymentElement,
-                    showWalletButtons = showWalletButtons,
                     retry = configure
                 )
             },
@@ -197,6 +179,24 @@ internal class EmbeddedPlaygroundActivity :
                 ModeUi(configure = configure)
             }
         )
+    }
+
+    private fun createBuilder(): EmbeddedPaymentElement.Builder {
+        return if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition]) {
+            EmbeddedPaymentElement.Builder(
+                createIntentCallback = { _ ->
+                    viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                },
+                resultCallback = ::handleEmbeddedResult,
+            )
+        } else {
+            EmbeddedPaymentElement.Builder(
+                createIntentCallback = { _, _ ->
+                    viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                },
+                resultCallback = ::handleEmbeddedResult,
+            )
+        }
     }
 
     private fun setupBackPressedCallback() {
@@ -338,7 +338,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -352,19 +351,11 @@ internal class EmbeddedPlaygroundActivity :
             }
         }
         data object Complete : LoadingState() {
-            @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
-                if (showWalletButtons) {
-                    Box(modifier = Modifier.padding(bottom = 12.dp)) {
-                        embeddedPaymentElement.WalletButtons()
-                    }
-                }
-
                 Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
                     embeddedPaymentElement.Content()
                 }
@@ -374,7 +365,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Text(message)
@@ -387,7 +377,6 @@ internal class EmbeddedPlaygroundActivity :
         @Composable
         abstract fun Content(
             embeddedPaymentElement: EmbeddedPaymentElement,
-            showWalletButtons: Boolean,
             retry: () -> Unit
         )
     }
@@ -408,5 +397,9 @@ internal class EmbeddedPlaygroundActivity :
 
     override fun onEvent(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
+    }
+
+    override suspend fun createCardPresentSetupIntent(): CreateIntentResult {
+        return viewModel.createCardPresentSetupIntent(playgroundState, applicationContext)
     }
 }

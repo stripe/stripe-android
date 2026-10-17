@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -18,14 +19,88 @@ interface IdentityVerificationSheet {
     /**
      * Data to configure the verification flow.
      */
-    data class Configuration(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Brand logo to display on the consent page of verification flow.
          * The Uri could be a local drawable resource file or a web image.
          * The logo will be displayed in a 32x32 dp ImageView.
          */
-        val brandLogo: Uri
-    )
+        val brandLogo: Uri,
+
+        /**
+         * Optional color to use for the native flow's primary action buttons.
+         */
+        @get:ColorInt val brandColor: Int? = null
+    ) {
+        /**
+         * Configuration for the biometric consent screen.
+         *
+         * When `null`, the biometric consent screen uses its default layout.
+         */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var biometricConsent: BiometricConsentConfiguration? = null
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var primaryButtonStyle: PrimaryButtonStyle? = null
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var secondaryButtonStyle: SecondaryButtonStyle? = null
+
+        /**
+         * Configuration for the biometric consent screen.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class BiometricConsentConfiguration(
+            /**
+             * Whether to hide the branding header above the consent title.
+             */
+            val hideBrandingHeader: Boolean,
+
+            /**
+             * Whether to hide the decline button below the primary action.
+             */
+            val hideDeclineButton: Boolean
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class PrimaryButtonStyle(
+            val backgroundColor: ButtonColor?,
+            val textColor: ButtonColor?,
+            val shape: ButtonShape?,
+            val elevationDp: Float?,
+            val uppercase: Boolean?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class SecondaryButtonStyle(
+            val backgroundColor: ButtonColor?,
+            val textColor: ButtonColor?,
+            val shape: ButtonShape?,
+            val elevationDp: Float?,
+            val uppercase: Boolean?,
+            val showBorder: Boolean?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class ButtonColor(
+            @get:ColorInt val light: Int?,
+            @get:ColorInt val dark: Int?
+        ) : Parcelable
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class ButtonShape(
+            val cornerRadiusDp: Float,
+            val heightDp: Float?
+        ) : Parcelable
+    }
 
     /**
      * Result of verification.

@@ -1,0 +1,28 @@
+{
+  "country" : "US",
+  "merchant_id" : "acct_1HvTI7Lu5o3P18Zp",
+  "payment_methods" : [ ],
+  "partner_configs" : { },
+  "payment_plan_groups" : [ ],
+  "api_feature_flags" : [ {
+    "key" : "enable_pmme_api_content",
+    "result" : true
+  } ],
+  "experiments" : {
+    "experiment_assignments" : { },
+    "event_id" : ""
+  },
+  "content" : {
+    "images" : [ ],
+    "inline_partner_promotion" : null,
+    "learn_more" : {
+      "message" : "Learn more",
+      "url" : "https://b.stripecdn.com/payment-method-messaging-statics-srv/assets/learn-more/index.html?amount=0&country=US&currency=USD&key=pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C&locale=en"
+    },
+    "promotion" : null,
+    "summary" : {
+      "message" : "Buy now pay later",
+      "url" : null
+    }
+  }
+}

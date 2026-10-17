@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.uicore.address.CountryAddressSchema
 import com.stripe.android.uicore.address.FieldSchema
 import com.stripe.android.uicore.address.FieldType
@@ -9,7 +10,7 @@ import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -60,9 +61,9 @@ internal fun createAddressController(
         stateFlowOf(
             listOf(
                 CountryElement(
-                    identifier = IdentifierSpec.BillingAddress,
+                    identifier = FormFieldId.BillingAddress,
                     controller = DropdownFieldController(
-                        config = CountryConfig(setOf("US", "CA")),
+                        config = CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry),
                         initialValue = "US"
                     )
                 ),
@@ -77,13 +78,13 @@ private fun setAddressValueForElement(element: SectionFieldElement) {
     element.setRawValue(mapOf(identifier to identifier.toTestAddressValue()))
 }
 
-private fun IdentifierSpec.toTestAddressValue(): String {
+private fun FormFieldId.toTestAddressValue(): String {
     return when (this) {
-        FieldType.AddressLine1.identifierSpec -> "354 Oyster Point Blvd"
-        FieldType.AddressLine2.identifierSpec -> "Levels 1-5"
-        FieldType.Locality.identifierSpec -> "South San Francisco"
-        FieldType.AdministrativeArea.identifierSpec -> "CA"
-        FieldType.PostalCode.identifierSpec -> "94080"
+        FieldType.AddressLine1.formFieldId -> "354 Oyster Point Blvd"
+        FieldType.AddressLine2.formFieldId -> "Levels 1-5"
+        FieldType.Locality.formFieldId -> "South San Francisco"
+        FieldType.AdministrativeArea.formFieldId -> "CA"
+        FieldType.PostalCode.formFieldId -> "94080"
         else -> ""
     }
 }

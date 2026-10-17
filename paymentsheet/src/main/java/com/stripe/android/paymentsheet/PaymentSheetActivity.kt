@@ -12,10 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.injection.DefaultApiConfigurationResolver
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
@@ -29,20 +30,35 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
-    private val starterArgs: PaymentSheetContractV2.Args? by lazy {
-        PaymentSheetContractV2.Args.fromIntent(intent)
+    private val starterArgs: PaymentSheetContract.Args? by lazy {
+        PaymentSheetContract.Args.fromIntent(intent)
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val validationResult = initializeArgs()
 
-        val validatedArgs = validationResult.getOrNull()
-        if (validatedArgs == null) {
-            finishWithError(error = validationResult.exceptionOrNull())
+        val starterArgs = this.starterArgs
+        if (starterArgs == null) {
+            finishWithError(defaultInitializationError())
             return
+        } else {
+            try {
+                starterArgs.initializationMode.validate()
+                starterArgs.config.asCommonConfiguration().validate(
+                    initializationMode = starterArgs.initializationMode,
+                    isLiveMode = DefaultApiConfigurationResolver(this)
+                        .resolve(starterArgs.config.apiConfiguration)
+                        .isLiveMode(),
+                    callbackIdentifier = starterArgs.paymentElementCallbackIdentifier,
+                )
+            } catch (e: IllegalArgumentException) {
+                finishWithError(e)
+                return
+            }
         }
+
+        starterArgs.config.appearance.parseAppearance()
 
         viewModel.registerForActivityResult(
             activityResultCaller = this,
@@ -54,7 +70,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = starterArgs.config.appearance) {
                 val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(
@@ -65,7 +81,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     viewModel.paymentSheetResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
-                        viewModel.navigationHandler.closeScreens()
                         finish()
                     }
                 }
@@ -80,30 +95,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
     }
 
-    private fun initializeArgs(): Result<PaymentSheetContractV2.Args?> {
-        val starterArgs = this.starterArgs
-
-        val result = if (starterArgs == null) {
-            Result.failure(defaultInitializationError())
-        } else {
-            try {
-                starterArgs.initializationMode.validate()
-                starterArgs.config.asCommonConfiguration().validate(viewModel.isLiveModeProvider())
-                starterArgs.config.appearance.parseAppearance()
-                Result.success(starterArgs)
-            } catch (e: IllegalArgumentException) {
-                Result.failure(e)
-            }
-        }
-
-        earlyExitDueToIllegalState = result.isFailure
-        return result
-    }
-
     override fun setActivityResult(result: PaymentSheetResult) {
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtras(PaymentSheetContractV2.Result(result).toBundle())
+            Intent().putExtras(PaymentSheetContract.Result(result).toBundle())
         )
     }
 

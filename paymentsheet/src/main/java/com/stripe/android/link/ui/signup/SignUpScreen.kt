@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +25,19 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -44,6 +52,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
@@ -68,7 +77,8 @@ internal fun SignUpScreen(
         phoneNumberController = viewModel.phoneNumberController,
         nameController = viewModel.nameController,
         signUpScreenState = signUpScreenState,
-        onSignUpClick = viewModel::onSignUpClick
+        onSignUpClick = viewModel::onSignUpClick,
+        onSuggestedEmailClick = viewModel::onSuggestedEmailClick
     )
 }
 
@@ -78,7 +88,8 @@ internal fun SignUpBody(
     phoneNumberController: PhoneNumberController,
     nameController: TextFieldController,
     signUpScreenState: SignUpScreenState,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onSuggestedEmailClick: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val isSigningUp = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields
@@ -95,24 +106,7 @@ internal fun SignUpBody(
     }
 
     ScrollableTopLevelColumn {
-        Text(
-            text = stringResource(R.string.stripe_link_sign_up_header_v2),
-            modifier = Modifier
-                .testTag(SIGN_UP_HEADER_TAG)
-                .padding(vertical = 4.dp),
-            textAlign = TextAlign.Center,
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary
-        )
-        Text(
-            text = stringResource(R.string.stripe_link_sign_up_message_v2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 30.dp),
-            textAlign = TextAlign.Center,
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary
-        )
+        SignUpHeader(linkBrand = signUpScreenState.linkBrand)
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 canEditForm = signUpScreenState.canEditForm,
@@ -120,6 +114,16 @@ internal fun SignUpBody(
                 emailController = emailController,
                 signUpState = signUpScreenState.signUpState,
                 focusRequester = emailFocusRequester,
+            )
+        }
+        AnimatedVisibility(
+            visible = signUpScreenState.suggestedEmail != null &&
+                signUpScreenState.signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            EmailSuggestion(
+                suggestedEmail = signUpScreenState.suggestedEmail.orEmpty(),
+                onSuggestedEmailClick = onSuggestedEmailClick
             )
         }
         AnimatedVisibility(
@@ -141,22 +145,11 @@ internal fun SignUpBody(
             )
         }
 
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            label = if (isSigningUp) {
-                stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
-            } else {
-                stringResource(R.string.stripe_link_log_in_or_sign_up)
-            },
-            state = when {
-                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
-                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
-                else -> PrimaryButtonState.Disabled
-            },
-            onButtonClick = {
-                onSignUpClick()
-                keyboardController?.hide()
-            }
+        SignUpButton(
+            isSigningUp = isSigningUp,
+            signUpScreenState = signUpScreenState,
+            onSignUpClick = onSignUpClick,
+            keyboardController = keyboardController
         )
     }
 }
@@ -262,6 +255,7 @@ private fun SecondaryFields(
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
                 type = LinkTermsType.Full,
+                linkBrand = signUpScreenState.linkBrand,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -274,6 +268,126 @@ private fun SecondaryFields(
         }
     }
 }
+
+@Composable
+private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
+    Text(
+        text = stringResource(R.string.stripe_link_sign_up_header_v2),
+        modifier = Modifier
+            .testTag(SIGN_UP_HEADER_TAG)
+            .padding(vertical = 4.dp),
+        textAlign = TextAlign.Center,
+        style = LinkTheme.typography.title,
+        color = LinkTheme.colors.textPrimary
+    )
+    Text(
+        text = stringResource(
+            R.string.stripe_link_sign_up_message_v2_with_brand,
+            linkBrand.brandName(),
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 30.dp),
+        textAlign = TextAlign.Center,
+        style = LinkTheme.typography.body,
+        color = LinkTheme.colors.textTertiary
+    )
+}
+
+@Composable
+private fun SignUpButton(
+    isSigningUp: Boolean,
+    signUpScreenState: SignUpScreenState,
+    onSignUpClick: () -> Unit,
+    keyboardController: SoftwareKeyboardController?
+) {
+    PrimaryButton(
+        modifier = Modifier.padding(vertical = 16.dp),
+        label = if (isSigningUp) {
+            stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
+        } else {
+            stringResource(R.string.stripe_link_sign_in_or_sign_up)
+        },
+        state = when {
+            signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+            signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+            else -> PrimaryButtonState.Disabled
+        },
+        onButtonClick = {
+            onSignUpClick()
+            keyboardController?.hide()
+        }
+    )
+}
+
+@Composable
+private fun EmailSuggestion(
+    suggestedEmail: String,
+    onSuggestedEmailClick: (String) -> Unit
+) {
+    val updateText = stringResource(R.string.stripe_link_email_suggestion_update)
+    val fullText = stringResource(R.string.stripe_link_email_suggestion, suggestedEmail, updateText)
+
+    val annotatedString = buildEmailSuggestionAnnotatedString(
+        fullText = fullText,
+        updateText = updateText,
+        onSuggestedEmailClick = { onSuggestedEmailClick(suggestedEmail) }
+    )
+
+    Text(
+        text = annotatedString,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .testTag("emailSuggestionUpdateTag"),
+        style = LinkTheme.typography.detail.copy(textAlign = TextAlign.Center)
+    )
+}
+
+@Composable
+private fun buildEmailSuggestionAnnotatedString(
+    fullText: String,
+    updateText: String,
+    onSuggestedEmailClick: () -> Unit
+) = buildAnnotatedString {
+    val updateStartIndex = fullText.indexOf(updateText)
+    val baseStyle = detailSpanStyle(LinkTheme.colors.textSecondary)
+    val clickableStyle = detailSpanStyle(LinkTheme.colors.textBrand)
+
+    if (updateStartIndex >= 0) {
+        withStyle(baseStyle) {
+            append(fullText.substring(0, updateStartIndex))
+        }
+
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = "update",
+                linkInteractionListener = { onSuggestedEmailClick() }
+            )
+        ) {
+            withStyle(clickableStyle) {
+                append(updateText)
+            }
+        }
+
+        withStyle(baseStyle) {
+            append(fullText.substring(updateStartIndex + updateText.length))
+        }
+    } else {
+        withStyle(baseStyle) {
+            append(fullText)
+        }
+    }
+}
+
+@Composable
+private fun detailSpanStyle(color: androidx.compose.ui.graphics.Color) = SpanStyle(
+    color = color,
+    textDecoration = TextDecoration.None,
+    fontSize = LinkTheme.typography.detail.fontSize,
+    fontFamily = LinkTheme.typography.detail.fontFamily,
+    fontWeight = LinkTheme.typography.detail.fontWeight
+)
 
 internal const val SIGN_UP_HEADER_TAG = "signUpHeaderTag"
 internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"
@@ -292,8 +406,10 @@ private fun SignUpScreenLoadingPreview() {
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
-            onSignUpClick = {}
+            onSignUpClick = {},
+            onSuggestedEmailClick = {}
         )
     }
 }
@@ -312,8 +428,10 @@ private fun SignUpScreenPreview() {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
-            onSignUpClick = {}
+            onSignUpClick = {},
+            onSuggestedEmailClick = {}
         )
     }
 }

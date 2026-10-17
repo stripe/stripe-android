@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.wheneverBlocking
+import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -71,7 +71,7 @@ class EmbeddedComponentCoordinatorTest {
     fun `fetchClientSecret should return client secret when callback provides it`() = runTest {
         val expectedSecret = "test_client_secret"
 
-        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(expectedSecret)
+        whenever { mockFetchClientSecret.invoke() }.doReturn(expectedSecret)
 
         val result = coordinator.fetchClientSecret()
 
@@ -80,7 +80,7 @@ class EmbeddedComponentCoordinatorTest {
 
     @Test
     fun `fetchClientSecret should return null when callback provides null`() = runTest {
-        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(null)
+        whenever { mockFetchClientSecret.invoke() }.doReturn(null)
 
         val result = coordinator.fetchClientSecret()
 

@@ -3,17 +3,18 @@ package com.stripe.android
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Currency
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -23,40 +24,47 @@ import javax.inject.Singleton
 @Singleton
 class GooglePayJsonFactory internal constructor(
     private val googlePayConfig: GooglePayConfig,
-
     /**
      * Enable JCB as an allowed card network. By default, JCB is disabled.
      *
      * JCB currently can only be accepted in Japan.
      */
     private val isJcbEnabled: Boolean = false,
-
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    /**
+     * Enable additional networks, e.g. INTERAC
+     */
+    private val additionalEnabledNetworks: List<String> = emptyList(),
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) {
     /**
-     * [PaymentConfiguration] must be instantiated before calling this.
+     * Creates a factory using the provided API configuration.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        context: Context,
-
+        apiConfiguration: ApiConfiguration.State,
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
          * JCB currently can only be accepted in Japan.
          */
         isJcbEnabled: Boolean = false,
-
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+        additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
-        googlePayConfig = GooglePayConfig(context),
+        googlePayConfig = GooglePayConfig(
+            publishableKey = apiConfiguration.publishableKey,
+            connectedAccountId = apiConfiguration.stripeAccountId
+        ),
         isJcbEnabled = isJcbEnabled,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        additionalEnabledNetworks = additionalEnabledNetworks
     )
 
     constructor(
         context: Context,
-
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
@@ -66,34 +74,45 @@ class GooglePayJsonFactory internal constructor(
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
-        cardBrandFilter = DefaultCardBrandFilter
+        cardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter
     )
 
     constructor(
         googlePayConfig: GooglePayConfig,
-
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
          * JCB currently can only be accepted in Japan.
          */
-        isJcbEnabled: Boolean = false
+        isJcbEnabled: Boolean = false,
+        /**
+         * Enable additional networks, e.g. INTERAC
+         */
+        additionalEnabledNetworks: List<String> = emptyList()
     ) : this(
         googlePayConfig = googlePayConfig,
         isJcbEnabled = isJcbEnabled,
-        cardBrandFilter = DefaultCardBrandFilter
+        additionalEnabledNetworks = additionalEnabledNetworks,
+        cardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter = DefaultCardFundingFilter
     )
 
     @Inject
     internal constructor(
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        apiConfigProvider: ApiConfiguration.State,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
-        cardBrandFilter: CardBrandFilter
+        cardBrandFilter: CardBrandFilter,
+        cardFundingFilter: CardFundingFilter
     ) : this(
-        googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
+        googlePayConfig = GooglePayConfig(
+            apiConfigProvider.publishableKey,
+            apiConfigProvider.stripeAccountId
+        ),
         isJcbEnabled = googlePayConfig.isJcbEnabled,
-        cardBrandFilter = cardBrandFilter
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        additionalEnabledNetworks = googlePayConfig.additionalEnabledNetworks
     )
 
     /**
@@ -105,14 +124,12 @@ class GooglePayJsonFactory internal constructor(
          * Configure additional fields to be returned for a requested billing address.
          */
         billingAddressParameters: BillingAddressParameters? = null,
-
         /**
          * If set to true, then the `isReadyToPay()` class method will return `true` if the current
          * viewer is ready to pay with one or more payment methods specified in
          * `allowedPaymentMethods`.
          */
         existingPaymentMethodRequired: Boolean? = null,
-
         /**
          * Set to false if you don't support credit cards
          */
@@ -149,32 +166,46 @@ class GooglePayJsonFactory internal constructor(
          * the transaction or not. Includes total price and price status.
          */
         transactionInfo: TransactionInfo,
-
         /**
          * Configure additional fields to be returned for a requested billing address.
          */
         billingAddressParameters: BillingAddressParameters? = null,
-
         /**
          * Specify shipping address restrictions.
          */
         shippingAddressParameters: ShippingAddressParameters? = null,
-
         /**
          * Set to true to request an email address.
          */
         isEmailRequired: Boolean = false,
-
         /**
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
          * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant” message is displayed in the payment sheet.
          */
         merchantInfo: MerchantInfo? = null,
-
         /**
          * Set to false if you don't support credit cards
          */
         allowCreditCards: Boolean? = null
+    ): JSONObject {
+        return createPaymentDataRequest(
+            transactionInfo = transactionInfo,
+            billingAddressParameters = billingAddressParameters,
+            shippingAddressParameters = shippingAddressParameters,
+            isEmailRequired = isEmailRequired,
+            merchantInfo = merchantInfo ?: MerchantInfo(),
+            allowCreditCards = allowCreditCards
+        )
+    }
+
+    internal fun createPaymentDataRequest(
+        transactionInfo: TransactionInfo,
+        merchantInfo: MerchantInfo,
+        billingAddressParameters: BillingAddressParameters? = null,
+        shippingAddressParameters: ShippingAddressParameters? = null,
+        hasDynamicCallbacks: Boolean = false,
+        isEmailRequired: Boolean = false,
+        allowCreditCards: Boolean? = null,
     ): JSONObject {
         return JSONObject()
             .put("apiVersion", API_VERSION)
@@ -200,17 +231,38 @@ class GooglePayJsonFactory internal constructor(
                     )
                 }
 
-                if (merchantInfo != null && !merchantInfo.merchantName.isNullOrEmpty()) {
-                    put(
-                        "merchantInfo",
-                        JSONObject()
-                            .put("merchantName", merchantInfo.merchantName)
+                if (hasDynamicCallbacks) {
+                    val intents = listOfNotNull(
+                        "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
                     )
+
+                    if (intents.isNotEmpty()) {
+                        put(
+                            "callbackIntents",
+                            JSONArray(intents)
+                        )
+                    }
                 }
+
+                put(
+                    "merchantInfo",
+                    JSONObject().apply {
+                        if (!merchantInfo.merchantName.isNullOrEmpty()) {
+                            put("merchantName", merchantInfo.merchantName)
+                        }
+
+                        put(
+                            "softwareInfo",
+                            JSONObject()
+                                .put("id", merchantInfo.softwareInfo.id.code)
+                                .put("version", StripeSdkVersion.VERSION_NAME)
+                        )
+                    }
+                )
             }
     }
 
-    private fun createTransactionInfo(
+    internal fun createTransactionInfo(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
@@ -243,6 +295,27 @@ class GooglePayJsonFactory internal constructor(
 
                 transactionInfo.checkoutOption?.let {
                     put("checkoutOption", it.code)
+                }
+
+                if (transactionInfo.displayItems.isNotEmpty()) {
+                    val displayItemsArray = JSONArray()
+                    for (item in transactionInfo.displayItems) {
+                        displayItemsArray.put(
+                            JSONObject()
+                                .put("label", item.label)
+                                .put("type", item.type.code)
+                                .put(
+                                    "price",
+                                    PayWithGoogleUtils.getPriceString(
+                                        item.price,
+                                        Currency.getInstance(
+                                            transactionInfo.currencyCode.uppercase()
+                                        )
+                                    )
+                                )
+                        )
+                    }
+                    put("displayItems", displayItemsArray)
                 }
             }
     }
@@ -281,9 +354,10 @@ class GooglePayJsonFactory internal constructor(
                             .put("format", billingAddressParameters.format.code)
                     )
                 }
-                allowCreditCards?.let {
-                    put("allowCreditCards", it)
-                }
+                val allowCreditCards = cardFundingFilter.isAccepted(CardFunding.Credit)
+                    .and(allowCreditCards ?: true)
+                put("allowCreditCards", allowCreditCards)
+                put("allowPrepaidCards", cardFundingFilter.isAccepted(CardFunding.Prepaid))
             }
 
         return JSONObject()
@@ -296,10 +370,12 @@ class GooglePayJsonFactory internal constructor(
         val acceptedCardBrands = if (forIsReadyToPayRequest) {
             // Use all card networks for isReadyToPayRequest
             DEFAULT_CARD_NETWORKS.plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+                .plus(additionalEnabledNetworks)
         } else {
             // Apply filtering for actual payment request
             DEFAULT_CARD_NETWORKS
                 .plus(listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList())
+                .plus(additionalEnabledNetworks)
                 .filter {
                     val cardBrand = networkStringToCardBrandMap[it] ?: CardBrand.Unknown
                     cardBrandFilter.isAccepted(cardBrand)
@@ -317,14 +393,13 @@ class GooglePayJsonFactory internal constructor(
      * Configure additional fields to be returned for a requested billing address.
      */
     @Parcelize
-    data class BillingAddressParameters @JvmOverloads constructor(
+    @Poko
+    class BillingAddressParameters @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
-
         /**
          * Billing address format required to complete the transaction.
          */
         internal val format: Format = Format.Min,
-
         /**
          * Set to true if a phone number is required to process the transaction.
          */
@@ -347,14 +422,24 @@ class GooglePayJsonFactory internal constructor(
     }
 
     @Parcelize
-    data class TransactionInfo internal constructor(
-        internal val currencyCode: String,
-        internal val totalPriceStatus: TotalPriceStatus,
-        internal val countryCode: String?,
-        internal val transactionId: String?,
-        internal val totalPrice: Long?,
-        internal val totalPriceLabel: String?,
-        internal val checkoutOption: CheckoutOption?,
+    @Poko
+    class TransactionInfo @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val currencyCode: String,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceStatus: TotalPriceStatus,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val countryCode: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val transactionId: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPrice: Long?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val totalPriceLabel: String?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val checkoutOption: CheckoutOption?,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val displayItems: List<DisplayItem> = emptyList(),
     ) : Parcelable {
 
         /**
@@ -391,30 +476,8 @@ class GooglePayJsonFactory internal constructor(
             totalPrice = totalPrice?.toLong(),
             totalPriceLabel = totalPriceLabel,
             checkoutOption = checkoutOption,
+            displayItems = emptyList(),
         )
-
-        @Deprecated(
-            message = "This method isn't meant for public usage and will be removed in a future release.",
-        )
-        fun copy(
-            currencyCode: String = this.currencyCode,
-            totalPriceStatus: TotalPriceStatus = this.totalPriceStatus,
-            countryCode: String? = this.countryCode,
-            transactionId: String? = this.transactionId,
-            totalPrice: Int? = this.totalPrice?.toInt(),
-            totalPriceLabel: String? = this.totalPriceLabel,
-            checkoutOption: CheckoutOption? = this.checkoutOption,
-        ): TransactionInfo {
-            return copy(
-                currencyCode = currencyCode,
-                totalPriceStatus = totalPriceStatus,
-                countryCode = countryCode,
-                transactionId = transactionId,
-                totalPrice = totalPrice?.toLong(),
-                totalPriceLabel = totalPriceLabel,
-                checkoutOption = checkoutOption,
-            )
-        }
 
         /**
          * The status of the total price used.
@@ -458,21 +521,45 @@ class GooglePayJsonFactory internal constructor(
     }
 
     /**
+     * A display line item for the Google Pay payment sheet.
+     *
+     * [DisplayLineItem](https://developers.google.com/pay/api/android/reference/request-objects#DisplayLineItem)
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Poko
+    class DisplayItem(
+        val label: String,
+        val type: Type,
+        val price: Long,
+    ) : Parcelable {
+        /**
+         * The type of display line item.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Type(val code: String) {
+            LINE_ITEM("LINE_ITEM"),
+            SUBTOTAL("SUBTOTAL"),
+            TAX("TAX"),
+            DISCOUNT("DISCOUNT"),
+        }
+    }
+
+    /**
      * [ShippingAddressParameters](https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters)
      */
     @Parcelize
-    data class ShippingAddressParameters @JvmOverloads constructor(
+    @Poko
+    class ShippingAddressParameters @JvmOverloads constructor(
         /**
          * Set to true to request a full shipping address.
          */
         internal val isRequired: Boolean = false,
-
         /**
          * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
          * If this object isn't specified, all shipping address countries are allowed.
          */
         private val allowedCountryCodes: Set<String> = emptySet(),
-
         /**
          * Set to true if a phone number is required for the provided shipping address.
          */
@@ -500,18 +587,64 @@ class GooglePayJsonFactory internal constructor(
         }
     }
 
+    @Parcelize
+    @Poko
+    internal class SoftwareInfo(
+        val id: SoftwareId
+    ) : Parcelable {
+        /**
+         * An identifier for the library
+         */
+        enum class SoftwareId(val code: String) {
+            /**
+             * An identifier for the flow using the Google Pay launchers
+             */
+            Launcher("android/stripe-launcher"),
+
+            /**
+             * An identifier for the flow using the `createPaymentDataRequest` API
+             */
+            Manual("android/stripe-manual-api"),
+
+            /**
+             * An identifier for the flow using Stripe Elements APIs
+             */
+            Elements("android/stripe-elements"),
+        }
+    }
+
     /**
      * [MerchantInfo](https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo)
      */
     @Parcelize
-    data class MerchantInfo(
+    @Poko
+    class MerchantInfo internal constructor(
         /**
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
-         * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant”
+         * In TEST environment, or if a merchant isn't recognized, a "Pay Unverified Merchant"
          * message is displayed in the payment sheet.
          */
-        internal val merchantName: String? = null
-    ) : Parcelable
+        internal val merchantName: String? = null,
+        /**
+         * Basic information about the library used to make calls to Google Pay from this SDK.
+         */
+        internal val softwareInfo: SoftwareInfo,
+    ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            /**
+             * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
+             * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant”
+             * message is displayed in the payment sheet.
+             */
+            merchantName: String? = null,
+        ) : this(
+            merchantName = merchantName,
+            softwareInfo = SoftwareInfo(
+                id = SoftwareInfo.SoftwareId.Manual,
+            )
+        )
+    }
 
     private companion object {
         private const val ALLOWED_PAYMENT_METHODS = "allowedPaymentMethods"

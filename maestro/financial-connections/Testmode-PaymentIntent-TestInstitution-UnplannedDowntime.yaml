@@ -10,6 +10,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: "connect_accounts"
+    timeout: 30000
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -20,12 +21,32 @@ tags:
 - tapOn:
     id: "consent_cta"
 # Select Down institution
-- tapOn: "Down Bank (Unscheduled)"
+- extendedWaitUntil:
+    visible: "Search"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Down (Unscheduled)"
+    timeout: 30000
+- tapOn: "Down (Unscheduled)"
 # Selecting another bank resets the flow
+- extendedWaitUntil:
+    visible: "Select another bank"
+    timeout: 30000
 - tapOn: "Select another bank"
-# Assert flow correctly returns to institution picker
-- tapOn: "Down Bank (Unscheduled)"
+# The picker may reopen at the top of the list or stay near the prior position.
+- extendedWaitUntil:
+    visible: "Search"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Down (Unscheduled)"
+    timeout: 30000
+- tapOn: "Down (Unscheduled)"
 # Close flow from error page
+- extendedWaitUntil:
+    visible: "Close icon"
+    timeout: 30000
 - tapOn: "Close icon"
 - scrollUntilVisible:
     element:

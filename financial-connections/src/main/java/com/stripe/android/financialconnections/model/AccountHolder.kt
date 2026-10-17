@@ -17,17 +17,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Suppress("unused")
 data class AccountHolder(
-
     @SerialName("type")
     val type: Type = Type.UNKNOWN,
-
     @SerialName("account")
     val account: String? = null,
-
     /* ID of the Customer this account belongs to. Present if and only if `type` is `customer`. */
     @SerialName("customer")
     val customer: String? = null
-
 ) : StripeModel, Parcelable {
 
     @Serializable

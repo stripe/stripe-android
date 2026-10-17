@@ -3,29 +3,64 @@ package com.stripe.android.crypto.onramp
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import androidx.core.net.toUri
+import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.StringRes
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
+import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayLauncher
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayPresentation
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityArgs
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationActivityContract
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
+import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
+import com.stripe.android.crypto.onramp.ui.KycActivityArgs
+import com.stripe.android.crypto.onramp.ui.KycActivityContract
+import com.stripe.android.crypto.onramp.ui.KycActivityResult
+import com.stripe.android.crypto.onramp.ui.KycScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
+import com.stripe.android.crypto.onramp.ui.isSupportedForCollection
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -33,20 +68,23 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    private val onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
+    private val onrampCallbackIdentifier: String,
+    private val samsungPayLauncherFactory: SamsungPayLauncher.Factory,
 ) {
+    private val onrampCallbacksState: OnrampCallbacks.State
+        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
+            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
         presentPaymentMethodsCallback = ::handlePresentPaymentResult,
-        authenticationCallback = ::handleAuthenticationResult,
+        authenticationCallback = { /* No-op: Authentication is not used for Onramp */ },
         authorizeCallback = ::handleAuthorizeResult
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
-
     private val paymentLauncherFactory: PaymentLauncherFactory = PaymentLauncherFactory(
         activityResultRegistryOwner = activity,
         lifecycleOwner = lifecycleOwner,
@@ -54,23 +92,83 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         callback = ::handlePaymentLauncherResult
     )
 
-    private val currentLinkAccount: LinkController.LinkAccount?
-        get() = interactor.state.value.linkControllerState?.internalLinkAccount
+    private val googlePayActivityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args> =
+        activity.activityResultRegistry.register(
+            "OnrampPresenterCoordinator_GooglePayResultLauncher",
+            GooglePayPaymentMethodLauncherContractV2(),
+            ::handleGooglePayPaymentSelection
+        )
+
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
+        GooglePayPaymentMethodLauncher(
+            context = activity,
+            lifecycleOwner = activity,
+            activityResultLauncher = googlePayActivityResultLauncher,
+            config = it,
+            readyCallback = ::handleGooglePayIsReady,
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter
+        )
+    }
+
+    private var samsungPayLauncher: SamsungPayLauncher? = null
+
+    private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher($onrampCallbackIdentifier)",
+            contract = VerifyKycInfoActivityContract(),
+            callback = ::handleVerifyKycResult
+        )
+
+    private val userAttestationResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_UserAttestationResultLauncher($onrampCallbackIdentifier)",
+            contract = HTMLConfirmationActivityContract(),
+            callback = ::handleUserAttestationResult
+        )
+
+    private val kycResultLauncher: ActivityResultLauncher<KycActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_KycResultLauncher($onrampCallbackIdentifier)",
+            contract = KycActivityContract(),
+            callback = ::handleKycResult,
+        )
+
+    private val termsAndConditionsResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_TermsAndConditionsResultLauncher($onrampCallbackIdentifier)",
+            contract = HTMLConfirmationActivityContract(),
+            callback = ::handleTermsAndConditionsResult,
+        )
+
+    private val termsOfServiceResultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_TermsOfServiceResultLauncher($onrampCallbackIdentifier)",
+            contract = HTMLConfirmationActivityContract(),
+            callback = ::handleTermsOfServiceResult,
+        )
 
     init {
+        KycSubmissionHandlerRegistry.setUploader(
+            onrampCallbackIdentifier,
+            KycDocumentUploader(interactor::uploadKycDocument),
+        )
+        KycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
+            KycSubmissionHandler { submission ->
+                interactor.fulfillKycRequirements(submission)
+            }
+
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
                 interactor.onLinkControllerState(state)
+                if (state.elementsSessionId != null && samsungPayLauncher == null) {
+                    initializeSamsungPay()
+                }
             }
         }
 
-        // Update the identity verification sheet when the merchant logo URL changes.
-        lifecycleOwner.lifecycleScope.launch {
-            linkControllerState.distinctUntilChangedBy { it.merchantLogoUrl }.collect { state ->
-                identityVerificationSheet = createIdentityVerificationSheet(state.merchantLogoUrl)
-            }
-        }
+        identityVerificationSheet = createIdentityVerificationSheet()
 
         // Observe checkout state changes and react accordingly
         lifecycleOwner.lifecycleScope.launch {
@@ -78,18 +176,25 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .distinctUntilChangedBy { it.checkoutState }
                 .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
-    }
 
-    fun authenticateUser() {
-        val email = currentLinkAccount?.email
-        if (email == null) {
-            onrampCallbacks.authenticateUserCallback.onResult(
-                OnrampAuthenticateResult.Failed(NoLinkAccountFoundException())
-            )
-            return
-        }
-        interactor.onAuthenticateUser()
-        linkPresenter.authenticateExistingConsumer(email)
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    googlePayActivityResultLauncher.unregister()
+                    samsungPayLauncher?.destroy()
+                    verifyKycResultLauncher.unregister()
+                    userAttestationResultLauncher.unregister()
+                    kycResultLauncher.unregister()
+                    termsAndConditionsResultLauncher.unregister()
+                    termsOfServiceResultLauncher.unregister()
+
+                    if (activity.isFinishing) {
+                        KycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
+                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
+                    }
+                }
+            }
+        )
     }
 
     fun verifyIdentity() {
@@ -102,13 +207,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
                     } ?: run {
-                        onrampCallbacks.verifyIdentityCallback.onResult(
-                            OnrampVerifyIdentityResult.Failed(APIException(message = "No ephemeral key found."))
+                        onrampCallbacksState.verifyIdentityCallback.onResult(
+                            interactor.handleIdentityVerificationResult(
+                                IdentityVerificationSheet.VerificationFlowResult.Failed(
+                                    APIException(message = "No ephemeral key found.")
+                                )
+                            )
                         )
                     }
                 }
                 is OnrampStartVerificationResult.Failed -> {
-                    onrampCallbacks.verifyIdentityCallback.onResult(
+                    onrampCallbacksState.verifyIdentityCallback.onResult(
                         OnrampVerifyIdentityResult.Failed(verification.error)
                     )
                 }
@@ -116,12 +225,240 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun collectPaymentMethod(type: PaymentMethodType) {
-        interactor.onCollectPaymentMethod(type)
-        linkPresenter.presentPaymentMethodsForOnramp(
-            email = clientEmail(),
-            paymentMethodType = type.toLinkType()
+    fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
+        coroutineScope.launch {
+            when (val verification = interactor.startKycVerification(updatedAddress)) {
+                is OnrampStartKycVerificationResult.Completed -> {
+                    verifyKycResultLauncher.launch(
+                        VerifyKycActivityArgs(verification.response, verification.appearance)
+                    )
+                }
+                is OnrampStartKycVerificationResult.Failed -> {
+                    onrampCallbacksState.verifyKycCallback.onResult(
+                        OnrampVerifyKycInfoResult.Failed(verification.error)
+                    )
+                }
+            }
+        }
+    }
+
+    fun presentUserAttestation() {
+        coroutineScope.launch {
+            when (val result = interactor.startUserAttestation()) {
+                is OnrampStartUserAttestationResult.Completed -> {
+                    presentHTMLConfirmation(
+                        resultLauncher = userAttestationResultLauncher,
+                        html = result.attestation.text,
+                        content = HTMLConfirmationContent.UserAttestation,
+                        appearance = result.appearance,
+                        headingResId =
+                            PaymentSheetR.string.stripe_link_onramp_carf_declaration_screen_title,
+                    )
+                }
+                is OnrampStartUserAttestationResult.Failed -> {
+                    onrampCallbacksState.userAttestationCallback?.onResult(
+                        OnrampUserAttestationResult.Failed(result.error)
+                    )
+                }
+            }
+        }
+    }
+
+    fun fulfillKycRequirements() {
+        interactor.onKycFlowStarted()
+        coroutineScope.launch {
+            interactor.retrieveKycRequirements().fold(
+                onSuccess = { requirements ->
+                    val callback = onrampCallbacksState.kycCallback
+                    if (requirements.userActionRequired.isEmpty()) {
+                        when {
+                            requirements.unrecognizedActionOwner.isNotEmpty() -> callback?.onResult(
+                                OnrampKycResult.Failed(
+                                    IllegalArgumentException("Unsupported KYC requirement")
+                                )
+                            )
+                            requirements.pendingPartnerAction.isNotEmpty() ||
+                                requirements.pendingStripeAction.isNotEmpty() -> {
+                                interactor.onKycFlowCompleted()
+                                callback?.onResult(OnrampKycResult.PendingVerification())
+                            }
+                            else -> callback?.onResult(OnrampKycResult.NotRequired())
+                        }
+                        return@fold
+                    }
+                    if (requirements.userActionRequired.any { !it.isSupportedForCollection() }) {
+                        callback?.onResult(
+                            OnrampKycResult.Failed(
+                                IllegalArgumentException("Unsupported KYC requirement")
+                            )
+                        )
+                        return@fold
+                    }
+                    kycResultLauncher.launch(
+                        KycActivityArgs(
+                            requirements = requirements,
+                            linkAppearance = interactor.state.value.configurationState?.appearance,
+                            submissionHandlerKey = onrampCallbackIdentifier,
+                        )
+                    )
+                },
+                onFailure = { error ->
+                    onrampCallbacksState.kycCallback?.onResult(
+                        OnrampKycResult.Failed(error)
+                    )
+                },
+            )
+        }
+    }
+
+    fun presentTermsAndConditionsIfNeeded() {
+        presentPartnerTermsIfNeeded(
+            declarationType = PartnerDeclarationType.TransactionTerms,
+            resultLauncher = termsAndConditionsResultLauncher,
+            callback = onrampCallbacksState.termsAndConditionsCallback,
+            headingResId = PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
         )
+    }
+
+    fun presentTermsOfServiceIfNeeded() {
+        presentPartnerTermsIfNeeded(
+            declarationType = PartnerDeclarationType.TermsOfService,
+            resultLauncher = termsOfServiceResultLauncher,
+            callback = onrampCallbacksState.termsOfServiceCallback,
+            headingResId = PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
+        )
+    }
+
+    private fun presentPartnerTermsIfNeeded(
+        declarationType: PartnerDeclarationType,
+        resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
+        callback: OnrampPartnerTermsCallback?,
+        @StringRes headingResId: Int,
+    ) {
+        coroutineScope.launch {
+            when (val result = interactor.startPartnerTerms(declarationType)) {
+                is OnrampStartPartnerTermsResult.PresentationRequired -> {
+                    presentHTMLConfirmation(
+                        resultLauncher = resultLauncher,
+                        html = result.terms.declaration.text,
+                        content = HTMLConfirmationContent.PartnerTerms(
+                            declarationId = result.terms.declaration.id,
+                            declarationType = declarationType,
+                        ),
+                        appearance = result.appearance,
+                        headingResId = headingResId,
+                    )
+                }
+                OnrampStartPartnerTermsResult.NotRequired -> {
+                    callback?.onResult(OnrampPartnerTermsResult.NotRequired())
+                }
+                is OnrampStartPartnerTermsResult.Failed -> {
+                    callback?.onResult(OnrampPartnerTermsResult.Failed(result.error))
+                }
+            }
+        }
+    }
+
+    private fun presentHTMLConfirmation(
+        resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
+        html: String,
+        content: HTMLConfirmationContent,
+        appearance: LinkAppearance?,
+        @StringRes headingResId: Int,
+    ) {
+        resultLauncher.launch(
+            HTMLConfirmationActivityArgs(
+                html = html,
+                content = content,
+                linkAppearance = appearance,
+                headingResId = headingResId,
+                confirmationButtonResId =
+                    PaymentSheetR.string.stripe_link_onramp_carf_declaration_accept_button_text,
+                cancelButtonResId =
+                    PaymentSheetR.string.stripe_link_onramp_carf_declaration_cancel_button_text,
+            )
+        )
+    }
+
+    fun collectPaymentMethod(selection: PaymentMethodSelection) {
+        interactor.onCollectPaymentMethod(selection.type)
+
+        when (selection) {
+            is PaymentMethodSelection.Card,
+            is PaymentMethodSelection.BankAccount,
+            is PaymentMethodSelection.CardAndBankAccount -> {
+                linkPresenter.presentPaymentMethodsForOnramp(
+                    email = clientEmail(),
+                    paymentMethodTypes = selection.type.toLinkType(),
+                    collectName = selection.type.requiresNameCollection(),
+                )
+            }
+            is PaymentMethodSelection.GooglePay -> {
+                coroutineScope.launch {
+                    interactor.getOrFetchPlatformKey().fold(
+                        onSuccess = {
+                            interactor.onGooglePayPresented(it)
+                            googlePayPaymentMethodLauncher?.present(
+                                currencyCode = selection.currencyCode,
+                                amount = selection.amount,
+                                clientAttributionMetadata = null,
+                                transactionId = selection.transactionId,
+                                label = selection.label,
+                                publishableKey = it
+                            )
+                        },
+                        onFailure = { error ->
+                            onrampCallbacksState.collectPaymentCallback.onResult(
+                                interactor.collectPaymentMethodFailure(error)
+                            )
+                        }
+                    )
+                }
+            }
+            is PaymentMethodSelection.SamsungPay -> {
+                presentSamsungPay(selection)
+            }
+        }
+    }
+
+    private fun presentSamsungPay(selection: PaymentMethodSelection.SamsungPay) {
+        coroutineScope.launch {
+            val launcher = samsungPayLauncher
+            if (launcher == null) {
+                handleSamsungPayPaymentSelection(
+                    SamsungPayResult.Failed(
+                        SamsungPaySdkException(
+                            message = "Samsung Pay is not configured for this onramp coordinator.",
+                            cause = null,
+                            errorCode = null,
+                            reason = Reason.NotConfigured,
+                        ),
+                    ),
+                    platformPublishableKey = null,
+                )
+                return@launch
+            }
+
+            interactor.getOrFetchPlatformKey().fold(
+                onSuccess = { platformPublishableKey ->
+                    launcher.present(
+                        presentation = SamsungPayPresentation(
+                            currencyCode = selection.currencyCode,
+                            amount = selection.amount,
+                            orderNumber = selection.orderNumber,
+                        ),
+                        callback = { result ->
+                            handleSamsungPayPaymentSelection(result, platformPublishableKey)
+                        },
+                    )
+                },
+                onFailure = { error ->
+                    onrampCallbacksState.collectPaymentCallback.onResult(
+                        interactor.handleSamsungPayPlatformKeyFailure(error),
+                    )
+                },
+            )
+        }
     }
 
     fun authorize(linkAuthIntentId: String) {
@@ -133,17 +470,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Performs the checkout flow for a crypto onramp session, handling any required authentication steps.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-     *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
-     *     The closure should return the onramp session client secret on success, or throw an Error on failure.
-     *     This closure may be called twice: once initially, and once more after handling any required authentication.
      */
     fun performCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, checkoutHandler)
+            interactor.startCheckout(onrampSessionId)
         }
     }
 
@@ -156,12 +488,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 // Nothing to do - let the interactor work
             }
             is CheckoutState.Status.RequiresNextAction -> {
-                // Launch PaymentLauncher for next action
-                handleNextAction(status.paymentIntent, status.platformKey)
+                // Launch PaymentLauncher for next action, unless it has already been launched
+                if (interactor.markNextActionLaunched(status)) {
+                    handleNextAction(status.paymentIntent, status.platformKey)
+                }
             }
             is CheckoutState.Status.Completed -> {
                 // Checkout finished - notify callback
-                onrampCallbacks.checkoutCallback.onResult(status.result)
+                onrampCallbacksState.checkoutCallback.onResult(status.result)
             }
         }
     }
@@ -176,7 +510,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             // No client secret - notify failure immediately
             val error = PaymentFailedException()
             interactor.onHandleNextActionError(error)
-            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(error))
             return
         }
 
@@ -195,33 +528,104 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
-                onrampCallbacks.checkoutCallback.onResult(
-                    OnrampCheckoutResult.Canceled()
-                )
+                interactor.onHandleNextActionCanceled()
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
-                onrampCallbacks.checkoutCallback.onResult(
-                    OnrampCheckoutResult.Failed(paymentResult.throwable)
-                )
+                interactor.onHandleNextActionError(paymentResult.throwable)
             }
+        }
+    }
+
+    private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
+        coroutineScope.launch {
+            onrampCallbacksState.verifyKycCallback.onResult(
+                interactor.handleVerifyKycResult(result)
+            )
+        }
+    }
+
+    private fun handleUserAttestationResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.userAttestationCallback?.onResult(OnrampUserAttestationResult.Cancelled())
+        }
+    }
+
+    private fun handleTermsAndConditionsResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.termsAndConditionsCallback?.onResult(OnrampPartnerTermsResult.Cancelled())
+        }
+    }
+
+    private fun handleTermsOfServiceResult(result: HTMLConfirmationResult) {
+        handleHTMLConfirmationResult(result) {
+            onrampCallbacksState.termsOfServiceCallback?.onResult(OnrampPartnerTermsResult.Cancelled())
+        }
+    }
+
+    private fun handleHTMLConfirmationResult(
+        result: HTMLConfirmationResult,
+        onCancelled: () -> Unit,
+    ) {
+        coroutineScope.launch {
+            when (result) {
+                HTMLConfirmationResult.Cancelled -> onCancelled()
+                is HTMLConfirmationResult.Confirmed -> when (val content = result.content) {
+                    HTMLConfirmationContent.UserAttestation -> {
+                        val attestationResult = interactor.confirmUserAttestation()
+                        onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
+                    }
+                    is HTMLConfirmationContent.PartnerTerms -> {
+                        val termsResult = interactor.confirmPartnerTerms(
+                            declarationId = content.declarationId,
+                            declarationType = content.declarationType,
+                        )
+                        val callback = when (content.declarationType) {
+                            PartnerDeclarationType.TransactionTerms -> onrampCallbacksState.termsAndConditionsCallback
+                            PartnerDeclarationType.TermsOfService -> onrampCallbacksState.termsOfServiceCallback
+                        }
+                        callback?.onResult(termsResult)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleKycResult(result: KycActivityResult) {
+        val kycResult = when (result.action) {
+            is KycScreenAction.Cancelled -> {
+                OnrampKycResult.Cancelled()
+            }
+            is KycScreenAction.Submitted -> {
+                interactor.onKycFlowCompleted()
+                OnrampKycResult.Submitted()
+            }
+        }
+
+        onrampCallbacksState.kycCallback?.onResult(kycResult)
+    }
+
+    private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
+        interactor.state.value.configurationState?.googlePayConfig
+
+    private fun initializeSamsungPay() {
+        val onrampConfiguration = interactor.state.value.configurationState ?: return
+        val configuration = onrampConfiguration.samsungPayConfig ?: return
+        samsungPayLauncher = samsungPayLauncherFactory.create(
+            context = activity.applicationContext,
+            configuration = configuration,
+            merchantDisplayName = onrampConfiguration.merchantDisplayName,
+        ).also { launcher ->
+            launcher.getStatus(::handleSamsungPayStatus)
         }
     }
 
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
-    private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
-        coroutineScope.launch {
-            onrampCallbacks.authenticateUserCallback.onResult(
-                interactor.handleAuthenticationResult(result)
-            )
-        }
-    }
-
     private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {
-            onrampCallbacks.authorizeCallback.onResult(
+            onrampCallbacksState.authorizeCallback.onResult(
                 interactor.handleAuthorizeResult(result)
             )
         }
@@ -229,7 +633,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
-            onrampCallbacks.verifyIdentityCallback.onResult(
+            onrampCallbacksState.verifyIdentityCallback.onResult(
                 interactor.handleIdentityVerificationResult(result)
             )
         }
@@ -237,33 +641,74 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handlePresentPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
-            onrampCallbacks.collectPaymentCallback.onResult(
+            onrampCallbacksState.collectPaymentCallback.onResult(
                 interactor.handlePresentPaymentMethodsResult(result, activity)
             )
         }
     }
 
-    private fun createIdentityVerificationSheet(merchantLogoUrl: String?): IdentityVerificationSheet {
-        check(R.drawable.stripe_ic_business_with_bg != 0)
-        val fallbackMerchantLogoUri: Uri = Uri.Builder()
+    private fun createIdentityVerificationSheet(): IdentityVerificationSheet {
+        check(com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow != 0)
+        val linkLogoUri: Uri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(activity.packageName)
             .appendPath("drawable")
-            .appendPath("stripe_ic_business_with_bg")
+            .appendPath("stripe_ic_paymentsheet_link_arrow")
             .build()
-
-        val logoUri = merchantLogoUrl?.toUri() ?: fallbackMerchantLogoUri
 
         return IdentityVerificationSheet.onrampCreate(
             from = activity,
-            configuration = IdentityVerificationSheet.Configuration(brandLogo = logoUri),
+            configuration = IdentityVerificationSheet.Configuration(brandLogo = linkLogoUri),
             identityVerificationCallback = ::handleIdentityVerificationResult
         )
     }
+
+    private fun handleGooglePayPaymentSelection(result: GooglePayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleGooglePayPaymentResult(result)
+            )
+        }
+    }
+
+    private fun handleSamsungPayPaymentSelection(
+        result: SamsungPayResult,
+        platformPublishableKey: String?,
+    ) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleSamsungPayPaymentResult(result, platformPublishableKey),
+            )
+        }
+    }
+
+    private fun handleGooglePayIsReady(isReady: Boolean) {
+        coroutineScope.launch {
+            onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
+        }
+    }
+
+    private fun handleSamsungPayStatus(status: SamsungPayStatus) {
+        coroutineScope.launch {
+            onrampCallbacksState.samsungPayIsReadyCallback?.let { callback ->
+                val availability = interactor.handleSamsungPayAvailability(status)
+                callback(
+                    availability is SamsungPayAvailabilityResult.Available,
+                    availability,
+                )
+            }
+        }
+    }
 }
 
-private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
+private fun PaymentMethodType.toLinkType(): List<LinkController.PaymentMethodType>? =
     when (this) {
-        PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
-        PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+        PaymentMethodType.Card -> listOf(LinkController.PaymentMethodType.Card)
+        PaymentMethodType.BankAccount -> listOf(LinkController.PaymentMethodType.BankAccount)
+        PaymentMethodType.CardAndBankAccount -> null
+        PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
+        PaymentMethodType.SamsungPay -> error("Samsung Pay is not supported in LinkController")
     }
+
+private fun PaymentMethodType.requiresNameCollection(): Boolean =
+    this == PaymentMethodType.BankAccount || this == PaymentMethodType.CardAndBankAccount

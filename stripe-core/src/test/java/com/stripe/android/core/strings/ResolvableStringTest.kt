@@ -2,10 +2,14 @@ package com.stripe.android.core.strings
 
 import android.os.Bundle
 import android.os.Parcel
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.transformations.Replace
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
@@ -103,6 +107,35 @@ class ResolvableStringTest {
     }
 
     @Test
+    fun `static resolvable string with format specifier in value and no args resolves without error`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        // Values containing printf-style specifiers must not throw when there are no format args.
+        assertEquals("%@", "%@".resolvableString.resolve(context))
+        assertEquals("%s", "%s".resolvableString.resolve(context))
+        assertEquals("%d", "%d".resolvableString.resolve(context))
+        assertEquals("%@ 100 %s", "%@ 100 %s".resolvableString.resolve(context))
+        assertEquals("100%", "100%".resolvableString.resolve(context))
+        assertEquals("% discount", "% discount".resolvableString.resolve(context))
+    }
+
+    @Test
+    fun `static resolvable string with format specifier still formats when args are provided`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        assertEquals("hello world", resolvableString(value = "hello %s", "world").resolve(context))
+        assertEquals("count: 42", resolvableString(value = "count: %d", 42).resolve(context))
+    }
+
+    @Test
+    fun `identifier resolvable string with percent sign and no args resolves without formatting`() {
+        val context = mock<android.content.Context>().also {
+            whenever(it.getString(IDENTIFIER_WITH_PERCENT)).thenReturn("A 3.5% fee applies")
+        }
+
+        assertThat(IDENTIFIER_WITH_PERCENT.resolvableString.resolve(context))
+            .isEqualTo("A 3.5% fee applies")
+    }
+
+    @Test
     fun `resolvable strings should parcelize and un-parcelize properly with raw value types`() {
         val identifierResolvable = IdentifierResolvableString(
             id = 1453235,
@@ -184,5 +217,9 @@ class ResolvableStringTest {
 
             unparcelizedResolvable
         }
+    }
+
+    private companion object {
+        const val IDENTIFIER_WITH_PERCENT = 123
     }
 }

@@ -1,10 +1,10 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
@@ -29,12 +29,11 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ): ConfirmationDefinition.Action<BacsMandateData> {
         return BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = data,
-                deferredIntentConfirmationType = null,
                 receivesResultInProcess = true,
             )
         } ?: run {
@@ -50,6 +49,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner,
         onResult: (BacsMandateConfirmationResult) -> Unit
     ): BacsMandateConfirmationLauncher {
         return bacsMandateConfirmationLauncherFactory.create(
@@ -64,18 +64,18 @@ internal class BacsConfirmationDefinition @Inject constructor(
         launcher: BacsMandateConfirmationLauncher,
         arguments: BacsMandateData,
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
+        confirmationArgs: ConfirmationHandler.Args,
     ) {
         launcher.launch(
             data = arguments,
-            appearance = confirmationParameters.appearance
+            appearance = confirmationArgs.paymentMethodMetadata.appearance
         )
     }
 
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
-        confirmationParameters: ConfirmationDefinition.Parameters,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        confirmationArgs: ConfirmationHandler.Args,
+        launcherArgs: BacsMandateData,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -85,12 +85,11 @@ internal class BacsConfirmationDefinition @Inject constructor(
                     optionsParams = null,
                     extraParams = null,
                     shouldSave = false,
-                    passiveCaptchaParams = confirmationOption.passiveCaptchaParams,
                 )
 
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
-                    parameters = confirmationParameters,
+                    arguments = confirmationArgs,
                 )
             }
             is BacsMandateConfirmationResult.ModifyDetails -> ConfirmationDefinition.Result.Canceled(

@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -23,17 +22,16 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlin.jvm.JvmOverloads
 import kotlin.properties.Delegates
 
 /**
@@ -45,11 +43,12 @@ import kotlin.properties.Delegates
  * The card number, cvc, and expiry date will always be left to right regardless of locale.  Postal
  * code layout direction will be set according to the locale.
  */
-class CardMultilineWidget @JvmOverloads constructor(
+class CardMultilineWidget internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+    private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED,
+    private val cardElementAnalytics: CardElementAnalytics,
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val viewBinding = StripeCardMultilineWidgetBinding.inflate(
         LayoutInflater.from(context),
@@ -94,12 +93,18 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
-    private val cardValidTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
+
+    private val cardElementWatchers = CardElementWatchers(
+        context = context,
+        cardElementAnalytics = cardElementAnalytics,
+        invalidFieldProviders = { invalidFields },
+        cardValidCallbackProvider = { cardValidCallback },
+    )
+
+    private val textFocusWatcher = cardElementWatchers.textFocusWatcher
+
+    private val textInputWatcher = cardElementWatchers.textInputWatcher
+
     internal val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
@@ -162,22 +167,61 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null
 
     /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    @Deprecated("Use paymentMethodCreateParams instead")
+    override val cardParams: CardParams?
+        get() {
+            if (!validateAllFields()) {
+                shouldShowErrorIcon = true
+                return null
+            }
+
+            shouldShowErrorIcon = false
+
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
+            val cvcValue = cvcEditText.text?.toString()
+            val postalCode = postalCodeEditText.text?.toString()
+                .takeIf { shouldShowPostalCode }
+
+            return CardParams(
+                brand = brand,
+                loggingTokens = setOf(CARD_MULTILINE_TOKEN),
+                number = validatedCardNumber?.value.orEmpty(),
+                expMonth = expirationDate.month,
+                expYear = expirationDate.year,
+                cvc = cvcValue,
+                address = Address.Builder()
+                    .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
+                    .build(),
+                networks = cardBrandView.cardParamsNetworks()
+            )
+        }
+
+    /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
-                PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution,
-                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
+            if (!validateAllFields()) {
+                shouldShowErrorIcon = true
+                return null
             }
+
+            shouldShowErrorIcon = false
+
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
+            val cvcValue = cvcEditText.text?.toString()
+            return PaymentMethodCreateParams.Card(
+                number = validatedCardNumber?.value.orEmpty(),
+                cvc = cvcValue,
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
+                attribution = setOf(CARD_MULTILINE_TOKEN),
+                networks = cardBrandView.paymentMethodCreateParamsNetworks(),
+            )
         }
 
     /**
@@ -233,38 +277,6 @@ class CardMultilineWidget @JvmOverloads constructor(
                 }
                 field = value
             }
-        }
-
-    /**
-     * A [CardParams] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    override val cardParams: CardParams?
-        get() {
-            if (!validateAllFields()) {
-                shouldShowErrorIcon = true
-                return null
-            }
-
-            shouldShowErrorIcon = false
-
-            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
-            val cvcValue = cvcEditText.text?.toString()
-            val postalCode = postalCodeEditText.text?.toString()
-                .takeIf { shouldShowPostalCode }
-
-            return CardParams(
-                brand = brand,
-                loggingTokens = setOf(CARD_MULTILINE_TOKEN),
-                number = validatedCardNumber?.value.orEmpty(),
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
-                cvc = cvcValue,
-                address = Address.Builder()
-                    .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
-                    .build(),
-                networks = cardBrandView.cardParamsNetworks()
-            )
         }
 
     internal val validatedCardNumber: CardNumber.Validated?
@@ -366,6 +378,24 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+        shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED,
+    ) : this(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        shouldShowPostalCode = shouldShowPostalCode,
+        cardElementAnalytics = if (isIntegratedWithinStripeView(context, attrs)) {
+            NoOpCardElementCardElementAnalytics
+        } else {
+            DefaultCardElementAnalytics(CardElementWidgetType.CardMultilineWidget)
+        },
+    )
+
     init {
         orientation = VERTICAL
 
@@ -454,6 +484,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateBrandUi()
 
         allFields.forEach { field ->
+            field.internalFocusChangeListeners.remove(textFocusWatcher)
+            field.removeTextChangedListener(textInputWatcher)
+            field.addTextChangedListener(textInputWatcher)
+            field.internalFocusChangeListeners.add(textFocusWatcher)
+
             field.doAfterTextChanged {
                 shouldShowErrorIcon = false
             }
@@ -478,6 +513,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        cardElementAnalytics.reportShown(context)
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
 
@@ -524,12 +560,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        allFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
-
-        // only add the TextWatcher if it will be used
-        if (callback != null) {
-            allFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
-        }
 
         // call immediately after setting
         cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
@@ -578,13 +608,15 @@ class CardMultilineWidget @JvmOverloads constructor(
         return bundleOf(
             STATE_REMAINING_STATE to super.onSaveInstanceState(),
             STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        ).apply {
+            cardElementAnalytics.saveState(this)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             onBehalfOf = state.getString(STATE_ON_BEHALF_OF)
-
+            cardElementAnalytics.restoreState(state)
             super.onRestoreInstanceState(state.getParcelable(STATE_REMAINING_STATE))
         } else {
             super.onRestoreInstanceState(state)
@@ -852,5 +884,25 @@ class CardMultilineWidget @JvmOverloads constructor(
         private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         private const val STATE_REMAINING_STATE = "state_remaining_state"
         private const val STATE_ON_BEHALF_OF = "state_on_behalf_of"
+    }
+}
+
+private fun isIntegratedWithinStripeView(
+    context: Context,
+    attrs: AttributeSet?,
+): Boolean {
+    if (attrs == null) {
+        return false
+    }
+
+    val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CardElement)
+
+    return try {
+        typedArray.getBoolean(
+            R.styleable.CardElement_isIntegratedInStripeView,
+            false,
+        )
+    } finally {
+        typedArray.recycle()
     }
 }

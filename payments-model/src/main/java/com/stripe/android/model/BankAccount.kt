@@ -19,28 +19,24 @@ constructor(
      * [id](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-id)
      */
     override val id: String? = null,
-
     /**
      * The name of the person or business that owns the bank account.
      *
      * [account_holder_name](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-account_holder_name)
      */
     val accountHolderName: String? = null,
-
     /**
      * The type of entity that holds the account. This can be either individual or company.
      *
      * [account_holder_type](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-account_holder_type)
      */
     val accountHolderType: Type? = null,
-
     /**
      * Name of the bank associated with the routing number (e.g., WELLS FARGO).
      *
      * [bank_name](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-bank_name)
      */
     val bankName: String? = null,
-
     /**
      * Two-letter ISO code representing the country the bank account is located in.
      *
@@ -50,7 +46,6 @@ constructor(
     @field:Size(2)
     @get:Size(2)
     val countryCode: String? = null,
-
     /**
      * Three-letter ISO code for the currency paid out to the bank account.
      *
@@ -60,7 +55,6 @@ constructor(
     @field:Size(3)
     @get:Size(3)
     val currency: String? = null,
-
     /**
      * Uniquely identifies this particular bank account. You can use this attribute to check
      * whether two bank accounts are the same.
@@ -68,19 +62,16 @@ constructor(
      * [fingerprint](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-fingerprint)
      */
     val fingerprint: String? = null,
-
     /**
      * [last4](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-last4)
      */
     val last4: String? = null,
-
     /**
      * The routing transit number for the bank account.
      *
      * [routing_number](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-routing_number)
      */
     val routingNumber: String? = null,
-
     /**
      * For bank accounts, possible values are `new`, `validated`, `verified`, `verification_failed`,
      * or `errored`. A bank account that hasn’t had any activity or validation performed is new.

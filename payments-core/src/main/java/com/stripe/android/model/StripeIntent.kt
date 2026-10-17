@@ -4,8 +4,11 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
+import androidx.core.net.toUri
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
+import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -97,14 +100,16 @@ sealed interface StripeIntent : StripeModel {
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
-        UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
         DisplayMultibancoDetails("multibanco_display_details"),
         DisplayPayNowDetails("paynow_display_qr_code"),
         DisplayPromptPayDetails("promptpay_display_qr_code"),
-        SwishRedirect("swish_handle_redirect_or_display_qr_code");
+        DisplayPixDetails("pix_display_qr_code"),
+        SwishRedirect("swish_handle_redirect_or_display_qr_code"),
+        AwaitAuthorization("await_authorization"),
+        MbWayAwaitAuthorization("mb_way_await_authorization");
 
         @Keep
         override fun toString(): String {
@@ -189,12 +194,10 @@ sealed interface StripeIntent : StripeModel {
              * The timestamp after which the OXXO expires.
              */
             val expiresAfter: Int = 0,
-
             /**
              * The OXXO number.
              */
             val number: String? = null,
-
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
@@ -246,12 +249,38 @@ sealed interface StripeIntent : StripeModel {
             val qrCodeUrl: String? = null,
         ) : NextActionData()
 
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayPixDetails(
+            /** The Pix copy-and-paste string represented by the QR code. */
+            val data: String? = null,
+            /** URL for a PNG image containing the Pix QR code. */
+            val imageUrlPng: String? = null,
+            /** URL for an SVG image containing the Pix QR code. */
+            val imageUrlSvg: String? = null,
+            /** Unix timestamp when the Pix QR code expires. */
+            val expiresAt: Long? = null,
+            /** URL for Stripe-hosted instructions to complete the Pix payment. */
+            val hostedInstructionsUrl: String,
+        ) : NextActionData() {
+            override fun toString(): String {
+                return "DisplayPixDetails(" +
+                    "data=${if (data == null) "null" else "<redacted>"}, " +
+                    "imageUrlPng=$imageUrlPng, " +
+                    "imageUrlSvg=$imageUrlSvg, " +
+                    "expiresAt=$expiresAt, " +
+                    "hostedInstructionsUrl=$hostedInstructionsUrl" +
+                    ")"
+            }
+        }
+
         /**
          * Contains instructions for authenticating by redirecting your customer to another
          * page or application.
          */
         @Parcelize
-        data class RedirectToUrl(
+        @Poko
+        class RedirectToUrl(
             /**
              * The URL you must redirect your customer to in order to authenticate.
              */
@@ -264,17 +293,45 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        internal data class AlipayRedirect constructor(
-            val data: String,
-            val authCompleteUrl: String?,
+        internal data class AlipayRedirect(
+            val type: Type,
             val webViewUrl: Uri,
-            val returnUrl: String? = null
+            val returnUrl: String?
         ) : NextActionData() {
+            sealed interface Type : Parcelable {
+                @Parcelize
+                data object Default : Type
 
-            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
-                this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
+                @Parcelize
+                data class WithNativeData(val data: String) : Type {
+                    @IgnoredOnParcel
+                    val authCompleteUrl: String? by lazy {
+                        extractReturnUrl(data)
+                    }
+                }
+            }
 
-            private companion object {
+            internal companion object {
+                fun create(
+                    data: String?,
+                    webViewUrl: String,
+                    returnUrl: String? = null
+                ): AlipayRedirect {
+                    val webViewUri = webViewUrl.toUri()
+
+                    val type = if (data != null) {
+                        Type.WithNativeData(data = data)
+                    } else {
+                        Type.Default
+                    }
+
+                    return AlipayRedirect(
+                        type = type,
+                        webViewUrl = webViewUri,
+                        returnUrl = returnUrl,
+                    )
+                }
+
                 /**
                  * The alipay data string is formatted as query parameters.
                  * When authenticate is complete, we make a request to the
@@ -282,10 +339,9 @@ sealed interface StripeIntent : StripeModel {
                  * the updated state
                  */
                 private fun extractReturnUrl(data: String): String? = runCatching {
-                    Uri.parse("alipay://url?$data")
-                        .getQueryParameter("return_url")?.takeIf {
-                            StripeUrlUtils.isStripeUrl(it)
-                        }
+                    "alipay://url?$$data".toUri().getQueryParameter("return_url")?.takeIf {
+                        StripeUrlUtils.isStripeUrl(it)
+                    }
                 }.getOrNull()
             }
         }
@@ -296,11 +352,6 @@ sealed interface StripeIntent : StripeModel {
          * to change and is only intended to be used by the Stripe SDK.
          */
         sealed class SdkData : NextActionData() {
-            @Parcelize
-            data class Use3DS1(
-                val url: String
-            ) : SdkData()
-
             /**
              * Contains all parameters needed to perform a 3DS2 authentication.
              *
@@ -314,7 +365,8 @@ sealed interface StripeIntent : StripeModel {
              * different than the original merchant's key.
              */
             @Parcelize
-            data class Use3DS2(
+            @Poko
+            class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
@@ -323,11 +375,24 @@ sealed interface StripeIntent : StripeModel {
                 val publishableKey: String?
             ) : SdkData() {
                 @Parcelize
-                data class DirectoryServerEncryption(
+                @Poko
+                class DirectoryServerEncryption(
                     val directoryServerId: String,
                     val dsCertificateData: String,
                     val rootCertsData: List<String>,
                     val keyId: String?
+                ) : Parcelable
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @Parcelize
+            data class IntentConfirmationChallenge(
+                val stripeJs: StripeJs
+            ) : SdkData() {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class StripeJs(
+                    val captchaVendorName: String?
                 ) : Parcelable
             }
         }
@@ -337,23 +402,30 @@ sealed interface StripeIntent : StripeModel {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
+        data object AwaitAuthorization : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data object MbWayAwaitAuthorization : NextActionData()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
 
         @Parcelize
-        data class VerifyWithMicrodeposits(
+        @Poko
+        class VerifyWithMicrodeposits(
             val arrivalDate: Long,
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
         ) : NextActionData()
 
-        @Parcelize
-        data object UpiAwaitNotification : NextActionData()
-
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.
          */
         @Parcelize
-        data class CashAppRedirect(
+        @Poko
+        class CashAppRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
 
@@ -361,7 +433,8 @@ sealed interface StripeIntent : StripeModel {
          * Contains the authentication URL for redirecting your customer to Swish.
          */
         @Parcelize
-        data class SwishRedirect(
+        @Poko
+        class SwishRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
     }

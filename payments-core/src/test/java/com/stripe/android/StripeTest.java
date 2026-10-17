@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory;
+import com.stripe.android.core.ApiConfiguration;
 import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
@@ -91,7 +92,10 @@ public class StripeTest {
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
-            DefaultFraudDetectionDataRepository(context);
+            DefaultFraudDetectionDataRepository(
+                    context,
+                    () -> new ApiConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY).build()
+            );
     @NonNull
     private final Stripe defaultStripe = createStripe();
 
@@ -349,19 +353,6 @@ public class StripeTest {
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
         assertEquals(Source.Usage.SingleUse, source.getUsage());
-    }
-
-    @Test
-    public void createMasterpassParams_whenUnactivated_throwsException() {
-        final SourceParams sourceParams = SourceParams.createMasterpassParams(
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString()
-        );
-        final InvalidRequestException ex = assertThrows(
-                InvalidRequestException.class,
-                () -> defaultStripe.createSourceSynchronous(sourceParams)
-        );
-        assertEquals("masterpass must be activated before use.", ex.getMessage());
     }
 
     @Test
@@ -852,33 +843,6 @@ public class StripeTest {
     }
 
     @NonNull
-    private Source createSource() throws StripeException {
-        final Stripe stripe = defaultStripe;
-        final SourceParams params = SourceParams.createCardParams(CARD_PARAMS);
-
-        final Source cardSource = stripe.createSourceSynchronous(params);
-
-        assertNotNull(cardSource);
-        assertNotNull(cardSource.getId());
-        SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                5000L,
-                "brl",
-                "example://return",
-                cardSource.getId()
-        );
-
-        final Map<String, String> metamap = new HashMap<String, String>() {{
-            put("dimensions", "three");
-            put("type", "beach ball");
-        }};
-        threeDParams.setMetadata(metamap);
-
-        final Source source = stripe.createSourceSynchronous(threeDParams);
-        assertNotNull(source);
-        return source;
-    }
-
-    @NonNull
     private Stripe createStripe() {
         return createStripe(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
     }
@@ -963,7 +927,7 @@ public class StripeTest {
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository,
-                new DefaultCardAccountRangeRepositoryFactory(context)
+                new DefaultCardAccountRangeRepositoryFactory(context, () -> publishableKey)
         );
     }
 

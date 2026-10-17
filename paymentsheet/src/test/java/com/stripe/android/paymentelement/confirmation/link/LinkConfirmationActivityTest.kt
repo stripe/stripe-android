@@ -21,10 +21,12 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.RequestSurface
-import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -33,9 +35,7 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -98,13 +98,13 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
+            val paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(passiveCaptchaParams = null)
+
             confirmationHandler.start(
                 ConfirmationHandler.Args(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
-                    appearance = CONFIRMATION_PARAMETERS.appearance,
-                    intent = CONFIRMATION_PARAMETERS.intent,
-                    shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
-                    initializationMode = CONFIRMATION_PARAMETERS.initializationMode,
+                    statusBarColor = null,
+                    paymentMethodMetadata = paymentMethodMetadata,
                 )
             )
 
@@ -112,17 +112,17 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             assertThat(confirmingWithLink.option).isEqualTo(LINK_CONFIRMATION_OPTION)
 
-            intendedLinkToBeLaunched()
+            intendedLinkToBeLaunched(paymentMethodMetadata)
 
             val confirmingWithSavedPaymentMethod = awaitItem().assertConfirming()
 
             assertThat(confirmingWithSavedPaymentMethod.option)
                 .isEqualTo(
                     PaymentMethodConfirmationOption.Saved(
+                        shippingInformation = null,
                         paymentMethod = paymentMethod,
                         optionsParams = null,
                         originatedFromWallet = true,
-                        passiveCaptchaParams = null
                     )
                 )
 
@@ -131,7 +131,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
             assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
@@ -178,7 +178,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         )
     }
 
-    private fun intendedLinkToBeLaunched() {
+    private fun intendedLinkToBeLaunched(paymentMethodMetadata: PaymentMethodMetadata) {
         if (FeatureFlags.nativeLinkEnabled.isEnabled) {
             intended(
                 allOf(
@@ -187,14 +187,14 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                         "native_link_args",
                         NativeLinkArgs(
                             configuration = TestFactory.LINK_CONFIGURATION,
+                            paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
-                            publishableKey = PUBLISHABLE_KEY,
-                            stripeAccountId = null,
+                            apiConfiguration = TestFactory.LINK_CONFIGURATION.apiConfiguration,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
-                            launchMode = LinkLaunchMode.Full,
-                            passiveCaptchaParams = null
+                            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+                            statusBarColor = null,
                         )
                     )
                 )
@@ -229,16 +229,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkExpressMode = LinkExpressMode.ENABLED,
-            passiveCaptchaParams = null
-        )
-
-        val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_123"
-            ),
-            shippingDetails = null,
-            intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
         )
 
         const val LINK_COMPLETE_CODE = 49871

@@ -1,21 +1,24 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.paymentsheet.DefaultFormHelper
+import com.stripe.android.paymentsheet.BaseSheetFormHelperFactory
+import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,18 +28,9 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
-    val isLiveMode: Boolean
-
-    val shouldTrackRenderedLPMs: Boolean
-
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
-
-    fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
-    )
 
     fun close()
 
@@ -64,6 +58,10 @@ internal interface AddPaymentMethodInteractor {
         ) : ViewAction()
 
         data class ReportFieldInteraction(val code: PaymentMethodCode) : ViewAction()
+
+        data class UpdatePaymentMethodVisibility(
+            val initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
+        ) : ViewAction()
     }
 }
 
@@ -80,23 +78,26 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
+    private val reportPromotionDisplayed: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
-    override val isLiveMode: Boolean,
 ) : AddPaymentMethodInteractor {
 
     companion object {
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): AddPaymentMethodInteractor {
-            val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-            val formHelper = DefaultFormHelper.create(
-                viewModel = viewModel,
+            val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Main)
+            val formHelper = BaseSheetFormHelperFactory(viewModel).create(
+                coroutineScope = coroutineScope,
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkInlineHandler = LinkInlineHandler.create(),
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)
 
@@ -112,6 +113,9 @@ internal class DefaultAddPaymentMethodInteractor(
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
+                reportPromotionDisplayed = { code ->
+                    paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(code, paymentMethodMetadata)
+                },
                 createUSBankAccountFormArguments = {
                     USBankAccountFormArguments.create(
                         viewModel = viewModel,
@@ -124,20 +128,18 @@ internal class DefaultAddPaymentMethodInteractor(
                 coroutineScope = coroutineScope,
                 validationRequested = viewModel.validationRequested,
                 uiContext = Dispatchers.Main,
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                 onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                     viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                         visiblePaymentMethods = visiblePaymentMethods,
                         hiddenPaymentMethods = hiddenPaymentMethods,
                         // Flow Controller does not show wallet header in AddPaymentMethod
                         walletsState = viewModel.walletsState.value?.takeIf { viewModel.isCompleteFlow },
+                        isVerticalLayout = false,
                     )
                 }
             )
         }
     }
-
-    override val shouldTrackRenderedLPMs: Boolean = true
 
     private val _selectedPaymentMethodCode: MutableStateFlow<String> =
         MutableStateFlow(initiallySelectedPaymentMethodType)
@@ -150,6 +152,7 @@ internal class DefaultAddPaymentMethodInteractor(
 
     private fun getInitialState(): AddPaymentMethodInteractor.State {
         val selectedPaymentMethodCode = selectedPaymentMethodCode.value
+        reportPromotionDisplayed(selectedPaymentMethodCode)
 
         return AddPaymentMethodInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -203,6 +206,14 @@ internal class DefaultAddPaymentMethodInteractor(
         }
 
         coroutineScope.launch {
+            incentive.collect {
+                _state.value = _state.value.copy(
+                    incentive = it
+                )
+            }
+        }
+
+        coroutineScope.launch {
             validationRequested.collect {
                 withContext(uiContext) {
                     _state.value = _state.value.copy(
@@ -226,19 +237,25 @@ internal class DefaultAddPaymentMethodInteractor(
                 if (selectedPaymentMethodCode.value != viewAction.code) {
                     _selectedPaymentMethodCode.value = viewAction.code
                     reportPaymentMethodTypeSelected(viewAction.code)
+                    reportPromotionDisplayed(viewAction.code)
                 }
+            }
+            is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility -> {
+                updatePaymentMethodVisibility(
+                    viewAction.initialVisibilityTrackerData
+                )
             }
         }
     }
 
-    override fun reportInitialPaymentMethodVisibilitySnapshot(
-        visiblePaymentMethods: List<String>,
-        hiddenPaymentMethods: List<String>,
+    private fun updatePaymentMethodVisibility(
+        initialVisibilityTrackerData: AddPaymentMethodInitialVisibilityTrackerData
     ) {
-        onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
-            visiblePaymentMethods,
-            hiddenPaymentMethods,
-        )
+        AddPaymentMethodInitialVisibilityTracker
+            .reportInitialPaymentMethodVisibilitySnapshot(
+                data = initialVisibilityTrackerData,
+                callback = onInitiallyDisplayedPaymentMethodVisibilitySnapshot
+            )
     }
 
     override fun close() {

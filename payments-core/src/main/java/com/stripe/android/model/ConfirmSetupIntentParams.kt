@@ -1,7 +1,9 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CONFIRMATION_TOKEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -10,25 +12,24 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm).
  */
 @Parcelize
-data class ConfirmSetupIntentParams
+@Poko
+class ConfirmSetupIntentParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     @get:JvmSynthetic override val clientSecret: String,
-
     /**
      * ID of the payment method (a PaymentMethod, Card, or saved Source object) to attach to this
      * SetupIntent.
      */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
-
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-
     /**
      * The URL to redirect your customer back to after they authenticate on the payment method’s
      * app or site. If you’d prefer to redirect to a mobile application, you can alternatively
@@ -36,28 +37,22 @@ constructor(
      * redirect-based payment methods.
      */
     override var returnUrl: String? = null,
-
     private val useStripeSdk: Boolean = false,
-
     /**
      * ID of the mandate to be used for this payment.
      */
     var mandateId: String? = null,
-
     /**
      * This hash contains details about the Mandate to create.
      *
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null,
-
     /**
      * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
-
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
-
     /**
      * Payment-method-specific configuration for this SetupIntent.
      *
@@ -66,12 +61,53 @@ constructor(
      * ).
      */
     val paymentMethodOptions: PaymentMethodOptionsParams? = null,
-
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
+    private val clientAttributionMetadata: ClientAttributionMetadata? = null,
+    /**
+     * ID of the ConfirmationToken used to confirm this SetupIntent.
+     *
+     * If the provided ConfirmationToken contains properties that are also being provided in this
+     * request, such as payment_method, then the values in this request will take precedence.
+     *
+     * See
+     * [confirmation_token](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-confirmation_token).
+     */
+    private val confirmationTokenId: String? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        clientSecret: String = this.clientSecret,
+        paymentMethodId: String? = this.paymentMethodId,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = this.paymentMethodCreateParams,
+        returnUrl: String? = this.returnUrl,
+        useStripeSdk: Boolean = this.useStripeSdk,
+        mandateId: String? = this.mandateId,
+        mandateData: MandateDataParams? = this.mandateData,
+        setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
+        paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
+        radarOptions: RadarOptions? = this.radarOptions,
+        clientAttributionMetadata: ClientAttributionMetadata? = this.clientAttributionMetadata,
+        confirmationTokenId: String? = this.confirmationTokenId,
+    ): ConfirmSetupIntentParams {
+        return ConfirmSetupIntentParams(
+            clientSecret = clientSecret,
+            paymentMethodId = paymentMethodId,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            returnUrl = returnUrl,
+            useStripeSdk = useStripeSdk,
+            mandateId = mandateId,
+            mandateData = mandateData,
+            setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+            paymentMethodCode = paymentMethodCode,
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
+            confirmationTokenId = confirmationTokenId,
+        )
     }
 
     override fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmSetupIntentParams {
@@ -102,7 +138,13 @@ constructor(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
             }.orEmpty()
-        ).plus(paymentMethodParamMap)
+        ).plus(
+            paymentMethodParamMap
+        ).plus(
+            clientAttributionMetadata?.let {
+                mapOf(PARAM_CLIENT_ATTRIBUTION_METADATA to it.toParamMap())
+            }.orEmpty()
+        )
     }
 
     private val paymentMethodParamMap: Map<String, Any>
@@ -113,6 +155,9 @@ constructor(
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                confirmationTokenId != null -> {
+                    mapOf(PARAM_CONFIRMATION_TOKEN to confirmationTokenId)
                 }
                 else -> {
                     emptyMap()
@@ -231,7 +276,8 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = null,
-                radarOptions = null
+                radarOptions = null,
+                clientAttributionMetadata = null,
             )
         }
 
@@ -241,7 +287,8 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 clientSecret = clientSecret,
@@ -250,7 +297,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCreateParams.code,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 
@@ -261,7 +309,8 @@ constructor(
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
             paymentMethodCode: PaymentMethodCode,
-            radarOptions: RadarOptions?
+            radarOptions: RadarOptions?,
+            clientAttributionMetadata: ClientAttributionMetadata?
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -270,7 +319,8 @@ constructor(
                 mandateData = mandateData,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
                 paymentMethodCode = paymentMethodCode,
-                radarOptions = radarOptions
+                radarOptions = radarOptions,
+                clientAttributionMetadata = clientAttributionMetadata,
             )
         }
 

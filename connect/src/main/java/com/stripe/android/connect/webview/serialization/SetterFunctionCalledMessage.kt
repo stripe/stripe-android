@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.EmbeddedComponentError
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -69,7 +70,7 @@ internal data class SetOnLoadError(
 
     @Serializable
     data class LoadError(
-        val type: String?, // TODO - possibly use an enum or sealed class here.
+        val type: EmbeddedComponentError.ErrorType,
         val message: String?,
     )
 }

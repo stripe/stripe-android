@@ -3,8 +3,8 @@ package com.stripe.android.test.core
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippi
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkDisplaySetting
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
@@ -27,7 +28,6 @@ internal data class TestParameters(
     val useBrowser: Browser? = null,
     val resetCustomer: Boolean = false,
     val authorizationAction: AuthorizeAction? = null,
-    val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
 ) {
     val isSetupMode: Boolean =
@@ -45,7 +45,6 @@ internal data class TestParameters(
             paymentMethodCode: String,
             requiresBrowser: Boolean = true,
             authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
-            executeInNightlyRun: Boolean = false,
             saveForFutureUseCheckboxVisible: Boolean = false,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
@@ -54,7 +53,6 @@ internal data class TestParameters(
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = saveForFutureUseCheckboxVisible,
                 authorizationAction = authorizationAction,
-                executeInNightlyRun = executeInNightlyRun,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
             )
         }
@@ -63,8 +61,8 @@ internal data class TestParameters(
             val settings = PlaygroundSettings.createFromDefaults()
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[CustomerSessionSettingsDefinition] = false
-            settings[LinkSettingsDefinition] = false
-            settings[CountrySettingsDefinition] = Country.GB
+            settings[LinkSettingsDefinition] = LinkDisplaySetting.Never
+            settings[MerchantSettingsDefinition] = Merchant.GB
             settings[CurrencySettingsDefinition] = Currency.EUR
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false
@@ -115,11 +113,7 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true,
     ) : AuthorizeAction {
         override fun text(isSetup: Boolean): String {
-            return if (isSetup) {
-                "AUTHORIZE TEST SETUP"
-            } else {
-                "AUTHORIZE TEST PAYMENT"
-            }
+            return testAuthorizationButtonText(isSetup)
         }
         override val isConsideredDone: Boolean = true
     }
@@ -195,5 +189,13 @@ internal sealed interface AuthorizeAction {
             override val requiresBrowser: Boolean = false
             override val isConsideredDone: Boolean = true
         }
+    }
+}
+
+internal fun testAuthorizationButtonText(isSetup: Boolean): String {
+    return if (isSetup) {
+        "AUTHORIZE TEST SETUP"
+    } else {
+        "AUTHORIZE TEST PAYMENT"
     }
 }

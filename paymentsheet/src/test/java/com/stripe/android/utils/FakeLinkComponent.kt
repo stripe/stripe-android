@@ -30,13 +30,11 @@ internal class FakeLinkComponent(
     }
 ) : LinkComponent() {
 
-    class Builder(private val instance: FakeLinkComponent) : LinkComponent.Builder {
-        override fun configuration(configuration: LinkConfiguration): LinkComponent.Builder {
+    class Factory(private val instance: FakeLinkComponent) : LinkComponent.Factory {
+        override fun create(
+            configuration: LinkConfiguration,
+        ): LinkComponent {
             instance.configuration = configuration
-            return this
-        }
-
-        override fun build(): LinkComponent {
             return instance
         }
     }

@@ -1,36 +1,83 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
+import com.stripe.android.paymentsheet.ui.isDarkTheme
+import com.stripe.android.uicore.isSystemDarkTheme
 import javax.inject.Inject
 
-internal class PaymentOptionFactory @Inject constructor(
+internal fun interface PaymentOptionFactory {
+    fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+        appearance: PaymentSheet.Appearance,
+    ): PaymentOption
+}
+
+internal class DefaultPaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
+    private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
-) {
-    fun create(selection: PaymentSelection): PaymentOption {
+) : PaymentOptionFactory {
+    override fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+        appearance: PaymentSheet.Appearance,
+    ): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
-
-        return PaymentOption(
-            drawableResourceId = drawableResourceId,
-            label = selection.label.resolve(context),
-            paymentMethodType = selection.paymentMethodType,
-            _labels = PaymentOptionLabelsFactory.create(context, selection),
-            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
-            _shippingDetails = selection.shippingDetails,
-            imageLoader = {
-                iconLoader.load(
+        val paymentOptionResource = DefaultPaymentOptionResource(
+            appearance = appearance,
+            loader = { packet ->
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(
+                    isSystemDarkTheme = packet.isSystemDarkTheme,
+                    context = context,
+                )
+                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
+                    useDarkThemeIcon = useDarkThemeIcon,
                 )
-            },
+            }
+        )
+
+        return PaymentOption(
+            drawableResourceId = drawableResourceId,
+            label = selection.label(linkBrand).resolve(context),
+            paymentMethodType = selection.paymentMethodType,
+            _labels = PaymentOptionLabelsFactory.create(context, selection, linkBrand),
+            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
+            _shippingDetails = selection.shippingDetails,
+            paymentOptionResource = paymentOptionResource
         )
     }
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(
+    isSystemDarkTheme: Boolean?,
+    context: Context,
+): Boolean {
+    val isSystemDarkTheme = isSystemDarkTheme ?: context.isSystemDarkTheme()
+    return shouldUseDarkThemeIcon(isSystemDarkTheme)
+}
+
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
+    val isDark = themeMode.isDarkTheme(isSystemDarkTheme)
+    if (FeatureFlags.disableLuminanceBasedThemes.isEnabled) {
+        return isDark
+    }
+    val componentColor = Color(getColors(isDark).component)
+    return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
 
 internal val PaymentSelection.shippingDetails: AddressDetails?
@@ -40,9 +87,7 @@ internal val PaymentSelection.shippingDetails: AddressDetails?
         is PaymentSelection.GooglePay,
         is PaymentSelection.New.Card,
         is PaymentSelection.New.GenericPaymentMethod,
-        is PaymentSelection.New.LinkInline,
         is PaymentSelection.New.USBankAccount,
-        is PaymentSelection.ShopPay,
         is PaymentSelection.Saved -> {
             null
         }

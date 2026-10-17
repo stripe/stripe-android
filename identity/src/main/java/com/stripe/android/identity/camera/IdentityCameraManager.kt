@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraXAdapter
 import com.stripe.android.camera.scanui.CameraView
 
 /**
@@ -29,6 +30,41 @@ internal abstract class IdentityCameraManager {
 
     fun requireCameraView() = requireNotNull(cameraView)
     fun requireCameraAdapter() = requireNotNull(cameraAdapter)
+
+    /**
+     * Get the camera lens model if available.
+     */
+    fun getCameraLensModel(): String? {
+        return (cameraAdapter as? CameraXAdapter)?.getCameraLensModel()
+    }
+
+    /**
+     * Get current exposure ISO if available.
+     */
+    fun getExposureIso(): Float? {
+        return (cameraAdapter as? CameraXAdapter)?.getExposureIso()
+    }
+
+    /**
+     * Get current focal length (in mm) if available.
+     */
+    fun getFocalLength(): Float? {
+        return (cameraAdapter as? CameraXAdapter)?.getFocalLength()
+    }
+
+    /**
+     * Get current exposure duration (in milliseconds) if available.
+     */
+    fun getExposureDuration(): Long? {
+        return (cameraAdapter as? CameraXAdapter)?.getExposureDuration()
+    }
+
+    /**
+     * Check if the current camera is a virtual/logical camera (combining multiple physical cameras).
+     */
+    fun isVirtualCamera(): Boolean? {
+        return (cameraAdapter as? CameraXAdapter)?.isVirtualCamera()
+    }
 
     /**
      * Initialize [cameraAdapter] when a new [CameraView] is created from compose.

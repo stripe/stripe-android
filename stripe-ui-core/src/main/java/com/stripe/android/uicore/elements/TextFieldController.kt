@@ -4,14 +4,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -22,26 +20,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface TextFieldController : InputController, SectionFieldComposable, SectionFieldErrorController {
+interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
+    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item?) {}
 
     val initialValue: String?
-    val autofillType: AutofillType?
+    val autofillType: ContentType?
     val debugLabel: String
     val trailingIcon: StateFlow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
-    val layoutDirection: LayoutDirection?
     override val label: StateFlow<ResolvableString>
     val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
     val fieldState: StateFlow<TextFieldState>
     override val fieldValue: StateFlow<String>
-    val visibleError: StateFlow<Boolean>
+    val visibleValidationMessage: StateFlow<Boolean>
     val loading: StateFlow<Boolean>
     val placeHolder: StateFlow<String?>
         get() = stateFlowOf(null)
@@ -59,8 +56,8 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
         TextField(
             textFieldController = this,
@@ -83,7 +80,6 @@ sealed class TextFieldIcon {
         val idRes: Int,
         @StringRes
         val contentDescription: Int? = null,
-
         /** If it is an icon that should be tinted to match the text the value should be true */
         val isTintable: Boolean,
         val onClick: (() -> Unit)? = null
@@ -92,7 +88,8 @@ sealed class TextFieldIcon {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class MultiTrailing(
         val staticIcons: List<Trailing>,
-        val animatedIcons: List<Trailing>
+        val animatedIcons: List<Trailing>,
+        val contentDescription: ResolvableString? = null
     ) : TextFieldIcon()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -109,6 +106,23 @@ sealed class TextFieldIcon {
             override val icon: Int,
             override val enabled: Boolean = true
         ) : SingleChoiceDropdownItem
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Selector(
+        val message: ResolvableString,
+        val showSelector: Boolean,
+        val currentItem: Item,
+        val items: List<Item>,
+        val hasMadeSelection: Boolean
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            val id: String,
+            val label: ResolvableString,
+            val icon: Int,
+            val enabled: Boolean = true
+        )
     }
 }
 
@@ -133,14 +147,14 @@ class SimpleTextFieldController(
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
-    override val layoutDirection: LayoutDirection? = textFieldConfig.layoutDirection
+    override val enforceLeftToRightTextDirection: Boolean = textFieldConfig.enforceLeftToRightTextDirection
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType? = when (textFieldConfig) {
-        is DateConfig -> AutofillType.CreditCardExpirationDate
-        is PostalCodeConfig -> AutofillType.PostalCode
-        is EmailConfig -> AutofillType.EmailAddress
-        is NameConfig -> AutofillType.PersonFullName
+    override val autofillType: ContentType? = when (textFieldConfig) {
+        is DateConfig -> ContentType.CreditCardExpirationDate
+        is PostalCodeConfig -> ContentType.PostalCode
+        is EmailConfig -> ContentType.EmailAddress
+        is NameConfig -> ContentType.PersonFullName
+        is AddressTextFieldConfig -> textFieldConfig.autofillContentType
         else -> null
     }
 
@@ -169,20 +183,21 @@ class SimpleTextFieldController(
 
     private val _isValidating = MutableStateFlow(false)
     private val _hasFocus = MutableStateFlow(false)
+    private val focusAsk = MutableStateFlow(false)
 
-    override val visibleError: StateFlow<Boolean> =
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
-        visibleError,
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
+        visibleValidationMessage,
         _fieldState
     ) { visibleError, fieldState ->
-        fieldState.getError()?.takeIf { visibleError }
+        fieldState.getValidationMessage()?.takeIf { visibleError }
     }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
@@ -230,14 +245,20 @@ class SimpleTextFieldController(
         _isValidating.value = isValidating
     }
 
+    fun requestFocus() {
+        focusAsk.value = true
+    }
+
     @Composable
     override fun ComposeUI(
         enabled: Boolean,
         field: SectionFieldElement,
         modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
+        hiddenIdentifiers: Set<FormFieldId>,
+        lastTextFieldIdentifier: FormFieldId?,
     ) {
+        val focusRequester = rememberTextFocusRequester(focusAsk)
+
         TextField(
             textFieldController = this,
             enabled = enabled,
@@ -247,6 +268,7 @@ class SimpleTextFieldController(
                 ImeAction.Next
             },
             modifier = modifier,
+            focusRequester = focusRequester,
             shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
             shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )

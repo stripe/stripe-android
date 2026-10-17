@@ -69,7 +69,8 @@ interface ConsumersApiService {
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup
 
     suspend fun refreshConsumerSession(
@@ -87,7 +88,8 @@ interface ConsumersApiService {
         type: VerificationType,
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean = false
     ): ConsumerSession
 
     suspend fun confirmConsumerVerification(
@@ -120,10 +122,18 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails>
 
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String
+    ): Result<ConsumerPaymentDetails>
+
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
@@ -254,7 +264,8 @@ class ConsumersApiServiceImpl(
         supportedVerificationTypes: List<String>?,
         requestOptions: ApiRequest.Options,
         sessionId: String,
-        customerId: String?
+        customerId: String?,
+        linkAuthTokenClientSecret: String?
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -271,7 +282,8 @@ class ConsumersApiServiceImpl(
                     "email_source" to emailSource?.backendValue,
                     "app_id" to appId,
                     "customer_id" to customerId,
-                    "supported_verification_types" to supportedVerificationTypes
+                    "supported_verification_types" to supportedVerificationTypes,
+                    "link_auth_token_client_secret" to linkAuthTokenClientSecret
                 ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -315,6 +327,7 @@ class ConsumersApiServiceImpl(
         customEmailType: CustomEmailType?,
         connectionsMerchantName: String?,
         requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -322,16 +335,17 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 startConsumerVerificationUrl,
                 requestOptions,
-                mapOf(
-                    "request_surface" to requestSurface,
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to consumerSessionClientSecret
-                    ),
-                    "type" to type.value,
-                    "custom_email_type" to customEmailType?.value,
-                    "connections_merchant_name" to connectionsMerchantName,
-                    "locale" to locale.toLanguageTag()
-                ).filterValues { it != null }
+                buildMap {
+                    put("request_surface", requestSurface)
+                    put("credentials", mapOf("consumer_session_client_secret" to consumerSessionClientSecret))
+                    put("type", type.value)
+                    customEmailType?.value?.let { put("custom_email_type", it) }
+                    connectionsMerchantName?.let { put("connections_merchant_name", it) }
+                    put("locale", locale.toLanguageTag())
+                    if (isResendSmsCode) {
+                        put("is_resend_sms_code", true)
+                    }
+                }
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )
@@ -438,10 +452,36 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String,
+    ): Result<ConsumerPaymentDetails> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = createPaymentDetailsFromPaymentMethod,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "payment_method_id" to paymentMethodId,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "customer_ephemeral_key_secret" to customerEphemeralKey
+                )
+            ),
+            responseJsonParser = ConsumerPaymentDetailsJsonParser,
+        )
+    }
+
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
@@ -547,80 +587,92 @@ class ConsumersApiServiceImpl(
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
          */
-        internal val consumerAccountsSignUpUrl: String =
-            getApiUrl("consumers/accounts/sign_up")
+        internal val consumerAccountsSignUpUrl: String
+            get() = getApiUrl("consumers/accounts/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/mobile/sign_up`
          */
-        internal val consumerMobileSignUpUrl: String =
-            getApiUrl("consumers/mobile/sign_up")
+        internal val consumerMobileSignUpUrl: String
+            get() = getApiUrl("consumers/mobile/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
          */
-        internal val consumerSessionLookupUrl: String =
-            getApiUrl("consumers/sessions/lookup")
+        internal val consumerSessionLookupUrl: String
+            get() = getApiUrl("consumers/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/mobile/sessions/lookup`
          */
-        internal val mobileConsumerSessionLookupUrl: String =
-            getApiUrl("consumers/mobile/sessions/lookup")
+        internal val mobileConsumerSessionLookupUrl: String
+            get() = getApiUrl("consumers/mobile/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/refresh`
          */
-        internal val consumerSessionRefreshUrl: String =
-            getApiUrl("consumers/sessions/refresh")
+        internal val consumerSessionRefreshUrl: String
+            get() = getApiUrl("consumers/sessions/refresh")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
          */
-        internal val startConsumerVerificationUrl: String =
-            getApiUrl("consumers/sessions/start_verification")
+        internal val startConsumerVerificationUrl: String
+            get() = getApiUrl("consumers/sessions/start_verification")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
          */
-        internal val confirmConsumerVerificationUrl: String =
-            getApiUrl("consumers/sessions/confirm_verification")
+        internal val confirmConsumerVerificationUrl: String
+            get() = getApiUrl("consumers/sessions/confirm_verification")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/attach_link_consumer_to_link_account_session`
          */
-        internal val attachLinkConsumerToLinkAccountSession: String =
-            getApiUrl("consumers/attach_link_consumer_to_link_account_session")
+        internal val attachLinkConsumerToLinkAccountSession: String
+            get() = getApiUrl("consumers/attach_link_consumer_to_link_account_session")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
-        private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+        private val createPaymentDetails: String
+            get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/from_payment_method`
+         */
+        private val createPaymentDetailsFromPaymentMethod: String
+            get() = getApiUrl("consumers/payment_details/from_payment_method")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
          */
-        private val createLinkAccountSession: String = getApiUrl("consumers/link_account_sessions")
+        private val createLinkAccountSession: String
+            get() = getApiUrl("consumers/link_account_sessions")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`
          */
-        private val sharePaymentDetails: String = getApiUrl("consumers/payment_details/share")
+        private val sharePaymentDetails: String
+            get() = getApiUrl("consumers/payment_details/share")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/incentives/update_available`
          */
-        private val updateAvailableIncentivesUrl: String = getApiUrl("consumers/incentives/update_available")
+        private val updateAvailableIncentivesUrl: String
+            get() = getApiUrl("consumers/incentives/update_available")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/consent_update`
          */
-        internal val consentUpdateUrl: String = getApiUrl("consumers/sessions/consent_update")
+        internal val consentUpdateUrl: String
+            get() = getApiUrl("consumers/sessions/consent_update")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/accounts/update_phone`
          */
-        internal val updatePhoneNumberUrl: String = getApiUrl("consumers/accounts/update_phone")
+        internal val updatePhoneNumberUrl: String
+            get() = getApiUrl("consumers/accounts/update_phone")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

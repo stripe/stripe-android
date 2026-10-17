@@ -2,47 +2,100 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
+import android.os.Parcelable
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent.ErrorOccurred.Operation
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
+import com.stripe.android.crypto.onramp.exception.MissingKycFileIdException
+import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.PlatformPayAccountChangedException
+import com.stripe.android.crypto.onramp.exception.SamsungPayException
+import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
+import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
+import com.stripe.android.crypto.onramp.exception.UnexpectedException
+import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
+import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycCollectionSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswerRequest
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
+import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
+import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.platformPayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPaySdkException
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
+import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.LinkController.ConfigureResult
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
+import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.stripe.android.crypto.onramp.R as OnrampR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass", "TooManyFunctions")
 @Singleton
@@ -51,41 +104,112 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory,
+    private val errorLogger: OnrampErrorLogger,
+    private val checkoutHandler: OnrampSessionClientSecretProvider,
+    private val savedStateHandle: SavedStateHandle
 ) {
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
 
     private var analyticsService: OnrampAnalyticsService? = null
 
-    suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
-        _state.value = OnrampState(
-            configuration = configuration,
-            cryptoCustomerId = configuration.cryptoCustomerId,
+    private fun mapError(
+        operation: Operation,
+        error: Throwable,
+    ): Throwable {
+        return error.toCryptoOnrampError(
+            context = application,
+            operation = operation,
+            publishableKey = state.value.configurationState?.publishableKey,
+            additionalSdkVersions = state.value.configurationState?.additionalSdkVersions.orEmpty(),
         )
+    }
 
-        // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
-        // `LinkController.configure()` to do it.
-        val linkResult: ConfigureResult = linkController.configure(
-            LinkController.Configuration.Builder(
-                merchantDisplayName = configuration.merchantDisplayName,
-                publishableKey = configuration.publishableKey,
+    private fun trackError(
+        operation: Operation,
+        error: Throwable,
+    ) {
+        errorLogger.log(operation, error)
+        analyticsService?.track(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = operation,
+                error = error,
             )
-                .allowLogOut(false)
+        )
+    }
+
+    suspend fun configure(configurationState: OnrampConfiguration.State): OnrampConfigurationResult {
+        _state.update { currentState ->
+            OnrampState(
+                configurationState = configurationState,
+                cryptoCustomerId = configurationState.cryptoCustomerId ?: currentState.cryptoCustomerId,
+                collectingPaymentMethodType = currentState.collectingPaymentMethodType,
+                checkoutState = currentState.checkoutState,
+                platformKeyCache = currentState.platformKeyCache,
+                selectedPaymentSource = currentState.selectedPaymentSource,
+            )
+        }
+
+        PaymentConfiguration.init(
+            context = application.applicationContext,
+            publishableKey = configurationState.publishableKey,
+        )
+        val linkResult = linkController.configure(
+            LinkController.Configuration(
+                merchantDisplayName = configurationState.merchantDisplayName,
+                publishableKey = configurationState.publishableKey,
+            )
+                .allowLogout(false)
                 .allowUserEmailEdits(false)
-                .appearance(configuration.appearance)
-                .build()
+                .appearance(configurationState.appearance)
         )
 
-        return when (linkResult) {
-            is ConfigureResult.Success -> OnrampConfigurationResult.Completed(success = true)
-            is ConfigureResult.Failed -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Configure,
-                        error = linkResult.error,
+        return if (linkResult.isSuccess) {
+            OnrampConfigurationResult.Completed(success = true)
+        } else {
+            val error = mapError(Operation.Configure, linkResult.exceptionOrNull() ?: Exception("Unknown error"))
+            trackError(Operation.Configure, error)
+            OnrampConfigurationResult.Failed(error)
+        }
+    }
+
+    suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        return when (
+            val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
+        ) {
+            is LinkController.AuthenticateWithTokenResult.Success -> {
+                val secret = consumerSessionClientSecret()
+                if (secret != null) {
+                    cryptoApiRepository.createCryptoCustomer(consumerSessionClientSecret = secret)
+                        .fold(
+                            onSuccess = { customerResponse ->
+                                _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
+
+                                analyticsService?.track(
+                                    OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
+                                )
+
+                                OnrampTokenAuthenticationResult.Completed()
+                            },
+                            onFailure = { error ->
+                                val mappedError = mapError(Operation.AuthenticateUserWithAuthToken, error)
+                                trackError(Operation.AuthenticateUserWithAuthToken, mappedError)
+                                OnrampTokenAuthenticationResult.Failed(mappedError)
+                            }
+                        )
+                } else {
+                    val error = mapError(
+                        operation = Operation.AuthenticateUserWithAuthToken,
+                        error = MissingConsumerSecretException(),
                     )
-                )
-                OnrampConfigurationResult.Failed(linkResult.error)
+                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                    OnrampTokenAuthenticationResult.Failed(error)
+                }
+            }
+            is LinkController.AuthenticateWithTokenResult.Failed -> {
+                val error = mapError(Operation.AuthenticateUserWithAuthToken, result.error)
+                trackError(Operation.AuthenticateUserWithAuthToken, error)
+                OnrampTokenAuthenticationResult.Failed(error)
             }
         }
     }
@@ -103,14 +227,10 @@ internal class OnrampInteractor @Inject constructor(
                 )
             }
             is LinkController.LookupConsumerResult.Failed -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.HasLinkAccount,
-                        error = result.error,
-                    )
-                )
+                val error = mapError(Operation.HasLinkAccount, result.error)
+                trackError(Operation.HasLinkAccount, error)
                 OnrampHasLinkAccountResult.Failed(
-                    error = result.error
+                    error = error
                 )
             }
         }
@@ -135,35 +255,25 @@ internal class OnrampInteractor @Inject constructor(
                             OnrampRegisterLinkUserResult.Completed(customerResponse.id)
                         },
                         onFailure = { error ->
-                            analyticsService?.track(
-                                OnrampAnalyticsEvent.ErrorOccurred(
-                                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
-                                    error = error,
-                                )
-                            )
-                            OnrampRegisterLinkUserResult.Failed(error)
+                            val mappedError = mapError(Operation.RegisterLinkUser, error)
+                            trackError(Operation.RegisterLinkUser, mappedError)
+                            OnrampRegisterLinkUserResult.Failed(mappedError)
                         }
                     )
                 } else {
-                    val error = MissingConsumerSecretException()
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
-                            error = error,
-                        )
+                    val error = mapError(
+                        operation = Operation.RegisterLinkUser,
+                        error = MissingConsumerSecretException(),
                     )
+                    trackError(Operation.RegisterLinkUser, error)
                     OnrampRegisterLinkUserResult.Failed(error)
                 }
             }
             is LinkController.RegisterConsumerResult.Failed -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
-                        error = result.error,
-                    )
-                )
+                val error = mapError(Operation.RegisterLinkUser, result.error)
+                trackError(Operation.RegisterLinkUser, error)
                 OnrampRegisterLinkUserResult.Failed(
-                    error = result.error
+                    error = error
                 )
             }
         }
@@ -173,17 +283,13 @@ internal class OnrampInteractor @Inject constructor(
         return when (val result = linkController.updatePhoneNumber(phoneNumber)) {
             is LinkController.UpdatePhoneNumberResult.Success -> {
                 analyticsService?.track(OnrampAnalyticsEvent.LinkPhoneNumberUpdated)
-                OnrampUpdatePhoneNumberResult.Completed
+                OnrampUpdatePhoneNumberResult.Completed()
             }
             is LinkController.UpdatePhoneNumberResult.Failed -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.UpdatePhoneNumber,
-                        error = result.error,
-                    )
-                )
+                val error = mapError(Operation.UpdatePhoneNumber, result.error)
+                trackError(Operation.UpdatePhoneNumber, error)
                 OnrampUpdatePhoneNumberResult.Failed(
-                    error = result.error
+                    error = error
                 )
             }
         }
@@ -202,37 +308,117 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampRegisterWalletAddressResult.Completed()
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterWalletAddress,
-                            error = error,
-                        )
-                    )
-                    OnrampRegisterWalletAddressResult.Failed(error)
+                    val mappedError = mapError(Operation.RegisterWalletAddress, error)
+                    trackError(Operation.RegisterWalletAddress, mappedError)
+                    OnrampRegisterWalletAddressResult.Failed(mappedError)
                 }
             )
         } else {
-            val error = MissingConsumerSecretException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterWalletAddress,
-                    error = error,
-                )
+            val error = mapError(
+                operation = Operation.RegisterWalletAddress,
+                error = MissingConsumerSecretException(),
             )
+            trackError(Operation.RegisterWalletAddress, error)
             OnrampRegisterWalletAddressResult.Failed(error)
+        }
+    }
+
+    suspend fun deleteWalletAddress(walletId: String): OnrampDeleteWalletAddressResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            cryptoApiRepository.deleteWalletAddress(walletId, secret).fold(
+                onSuccess = {
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletDeleted)
+                    OnrampDeleteWalletAddressResult.Completed()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.DeleteWalletAddress, error)
+                    trackError(Operation.DeleteWalletAddress, mappedError)
+                    OnrampDeleteWalletAddressResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.DeleteWalletAddress,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.DeleteWalletAddress, error)
+            OnrampDeleteWalletAddressResult.Failed(error)
+        }
+    }
+
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.getWalletOwnershipChallenge(
+                walletAddress = walletAddress,
+                network = network,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { challenge ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipChallengeRetrieved(network))
+                    OnrampGetWalletOwnershipChallengeResult.Completed(challenge)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.GetWalletOwnershipChallenge, error)
+                    trackError(Operation.GetWalletOwnershipChallenge, mappedError)
+                    OnrampGetWalletOwnershipChallengeResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.GetWalletOwnershipChallenge,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.GetWalletOwnershipChallenge, error)
+            OnrampGetWalletOwnershipChallengeResult.Failed(error)
+        }
+    }
+
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.submitWalletOwnershipSignature(
+                challengeId = challengeId,
+                signature = signature,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { consumerWallet ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipVerified(consumerWallet.network))
+                    OnrampSubmitWalletOwnershipSignatureResult.Completed(consumerWallet)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.SubmitWalletOwnershipSignature, error)
+                    trackError(Operation.SubmitWalletOwnershipSignature, mappedError)
+                    OnrampSubmitWalletOwnershipSignatureResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.SubmitWalletOwnershipSignature,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.SubmitWalletOwnershipSignature, error)
+            OnrampSubmitWalletOwnershipSignatureResult.Failed(error)
         }
     }
 
     suspend fun attachKycInfo(kycInfo: KycInfo): OnrampAttachKycInfoResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
-            val error = MissingConsumerSecretException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AttachKycInfo,
-                    error = error,
-                )
+            val error = mapError(
+                operation = Operation.AttachKycInfo,
+                error = MissingConsumerSecretException(),
             )
+            trackError(Operation.AttachKycInfo, error)
             return OnrampAttachKycInfoResult.Failed(error)
         }
 
@@ -240,30 +426,259 @@ internal class OnrampInteractor @Inject constructor(
             .fold(
                 onSuccess = {
                     analyticsService?.track(OnrampAnalyticsEvent.KycInfoSubmitted)
-                    OnrampAttachKycInfoResult.Completed
+                    OnrampAttachKycInfoResult.Completed()
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AttachKycInfo,
-                            error = error,
-                        )
-                    )
-                    OnrampAttachKycInfoResult.Failed(error)
+                    val mappedError = mapError(Operation.AttachKycInfo, error)
+                    trackError(Operation.AttachKycInfo, mappedError)
+                    OnrampAttachKycInfoResult.Failed(mappedError)
                 }
             )
+    }
+
+    fun onKycFlowStarted() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentStarted)
+    }
+
+    fun onKycFlowCompleted() {
+        analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentCompleted)
+    }
+
+    suspend fun retrieveKycRequirements(): Result<KycRequirements> {
+        val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
+        val linkAccount = storedLinkAccount?.takeIf { it.consumerSessionClientSecret != null }
+            ?: linkController.state(application).value.internalLinkAccount
+        val secret = linkAccount?.consumerSessionClientSecret
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.RetrieveKycRequirements,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.RetrieveKycRequirements, error)
+            return Result.failure(error)
+        }
+
+        if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
+            val error = mapError(
+                operation = Operation.RetrieveKycRequirements,
+                error = LinkAccountNotVerifiedException(),
+            )
+            trackError(Operation.RetrieveKycRequirements, error)
+            return Result.failure(error)
+        }
+
+        return cryptoApiRepository.retrieveKycRequirements(
+            consumerSessionClientSecret = secret,
+        ).fold(
+            onSuccess = { response ->
+                Result.success(response.requirements.toKycRequirements())
+            },
+            onFailure = { error ->
+                val mappedError = mapError(Operation.RetrieveKycRequirements, error)
+                trackError(Operation.RetrieveKycRequirements, mappedError)
+                Result.failure(mappedError)
+            }
+        )
+    }
+
+    suspend fun fulfillKycRequirements(
+        submission: KycSubmission,
+    ): Result<Unit> {
+        val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
+        val linkAccount = storedLinkAccount?.takeIf { !it.linkSessionKey.isNullOrBlank() }
+            ?: linkController.state(application).value.internalLinkAccount
+        val linkSessionKey = linkAccount?.linkSessionKey?.takeIf { it.isNotBlank() }
+            ?: return fulfillKycRequirementsFailure(MissingLinkSessionKeyException())
+
+        if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
+            return fulfillKycRequirementsFailure(LinkAccountNotVerifiedException())
+        }
+
+        val requirements = submission.requirements.mapValues { (_, requirement) ->
+            val documents = requirement.documents.map { document ->
+                KycDocumentSubmissionRequest(
+                    documentSubtype = document.documentSubtype,
+                    fileIds = document.uploadedFileIds,
+                )
+            }
+
+            val collectionRequirements = requirement.questionnaire?.let { questionnaire ->
+                KycCollectionSubmissionRequest(
+                    questionnaire = KycQuestionnaireSubmissionRequest(
+                        answers = questionnaire.answers.map { answer ->
+                            KycQuestionnaireAnswerRequest(
+                                questionId = answer.questionId,
+                                value = answer.value,
+                            )
+                        }
+                    )
+                )
+            }
+
+            KycRequirementSubmissionRequest(
+                requestedBy = requirement.requestedBy,
+                documents = documents,
+                collectionRequirements = collectionRequirements,
+            )
+        }
+
+        return cryptoApiRepository.fulfillKycRequirements(
+            requirements = requirements,
+            linkSessionKey = linkSessionKey,
+        ).fold(
+            onSuccess = { response -> Result.success(response) },
+            onFailure = { error -> fulfillKycRequirementsFailure(error) },
+        )
+    }
+
+    suspend fun uploadKycDocument(file: File): Result<String> {
+        val account = _state.value.linkControllerState?.internalLinkAccount
+            ?.takeIf { !it.linkSessionKey.isNullOrBlank() }
+            ?: linkController.state(application).value.internalLinkAccount
+        val key = account?.linkSessionKey?.takeIf { it.isNotBlank() }
+            ?: return fulfillKycRequirementsFailure(MissingLinkSessionKeyException())
+        if (account.sessionState != LinkController.SessionState.LoggedIn) {
+            return fulfillKycRequirementsFailure(LinkAccountNotVerifiedException())
+        }
+        return cryptoApiRepository.uploadKycDocument(file, key).fold(
+            onSuccess = { uploaded ->
+                uploaded.id?.takeIf { it.isNotBlank() }?.let { Result.success(it) }
+                    ?: fulfillKycRequirementsFailure(MissingKycFileIdException())
+            },
+            onFailure = { fulfillKycRequirementsFailure(it) },
+        )
+    }
+
+    private fun <T> fulfillKycRequirementsFailure(error: Throwable): Result<T> {
+        val mappedError = mapError(Operation.FulfillKycRequirements, error)
+        trackError(Operation.FulfillKycRequirements, mappedError)
+        return Result.failure(mappedError)
+    }
+
+    suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.RetrieveMissingIdentifiers,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.RetrieveMissingIdentifiers, error)
+            return OnrampRetrieveMissingIdentifiersResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrieveMissingIdentifiers(secret)
+            .fold(
+                onSuccess = { requirements ->
+                    analyticsService?.track(OnrampAnalyticsEvent.MissingIdentifiersRetrieved)
+                    OnrampRetrieveMissingIdentifiersResult.Completed(requirements)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.RetrieveMissingIdentifiers, error)
+                    trackError(Operation.RetrieveMissingIdentifiers, mappedError)
+                    OnrampRetrieveMissingIdentifiersResult.Failed(mappedError)
+                }
+            )
+    }
+
+    suspend fun submitIdentifiers(identifiers: List<ComplianceIdentifier>): OnrampSubmitIdentifiersResult {
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.SubmitIdentifiers,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.SubmitIdentifiers, error)
+            return OnrampSubmitIdentifiersResult.Failed(error)
+        }
+
+        return cryptoApiRepository.submitIdentifiers(identifiers, secret)
+            .fold(
+                onSuccess = { result ->
+                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted(result.completed))
+                    OnrampSubmitIdentifiersResult.Completed(result)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.SubmitIdentifiers, error)
+                    trackError(Operation.SubmitIdentifiers, mappedError)
+                    OnrampSubmitIdentifiersResult.Failed(mappedError)
+                }
+            )
+    }
+
+    suspend fun startUserAttestation(): OnrampStartUserAttestationResult {
+        val secret = authenticatedConsumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.PresentUserAttestation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(Operation.PresentUserAttestation, error)
+            return OnrampStartUserAttestationResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrieveUserAttestation(secret)
+            .fold(
+                onSuccess = { attestation ->
+                    analyticsService?.track(OnrampAnalyticsEvent.UserAttestationStarted)
+                    OnrampStartUserAttestationResult.Completed(
+                        attestation = attestation,
+                        appearance = state.value.configurationState?.appearance
+                    )
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.PresentUserAttestation, error)
+                    trackError(Operation.PresentUserAttestation, mappedError)
+                    OnrampStartUserAttestationResult.Failed(mappedError)
+                }
+            )
+    }
+
+    suspend fun startPartnerTerms(
+        declarationType: PartnerDeclarationType,
+    ): OnrampStartPartnerTermsResult {
+        analyticsService?.track(declarationType.startedEvent)
+        val operation = declarationType.operation
+
+        val secret = authenticatedConsumerSessionClientSecret()
+        if (secret == null) {
+            val error = mapError(
+                operation = operation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(operation, error)
+            return OnrampStartPartnerTermsResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrievePartnerTerms(
+            consumerSessionClientSecret = secret,
+            declarationType = declarationType,
+        ).fold(
+            onSuccess = { terms ->
+                when (terms) {
+                    PartnerTerms.NotRequired ->
+                        OnrampStartPartnerTermsResult.NotRequired
+                    is PartnerTerms.Required -> OnrampStartPartnerTermsResult.PresentationRequired(
+                        terms = terms,
+                        appearance = state.value.configurationState?.appearance,
+                    )
+                }
+            },
+            onFailure = { error ->
+                val mappedError = mapError(operation, error)
+                trackError(operation, mappedError)
+                OnrampStartPartnerTermsResult.Failed(mappedError)
+            }
+        )
     }
 
     suspend fun startIdentityVerification(): OnrampStartVerificationResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
-            val error = MissingConsumerSecretException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
-                    error = error,
-                )
+            val error = mapError(
+                operation = Operation.VerifyIdentity,
+                error = MissingConsumerSecretException(),
             )
+            trackError(Operation.VerifyIdentity, error)
             return OnrampStartVerificationResult.Failed(error)
         }
 
@@ -274,47 +689,93 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampStartVerificationResult.Completed(result)
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
-                            error = error,
-                        )
+                    val mappedError = mapError(Operation.VerifyIdentity, error)
+                    trackError(Operation.VerifyIdentity, mappedError)
+                    OnrampStartVerificationResult.Failed(mappedError)
+                }
+            )
+    }
+
+    suspend fun startKycVerification(updatedAddress: PaymentSheet.Address?): OnrampStartKycVerificationResult {
+        val secret = consumerSessionClientSecret()
+
+        if (secret == null) {
+            val error = mapError(
+                operation = Operation.VerifyKyc,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.VerifyKyc, error)
+            return OnrampStartKycVerificationResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrieveKycInfo(secret)
+            .fold(
+                onSuccess = { result ->
+                    val kycInfo = result.copy(
+                        address = updatedAddress ?: result.address
                     )
-                    OnrampStartVerificationResult.Failed(error)
+
+                    analyticsService?.track(OnrampAnalyticsEvent.KycVerificationStarted)
+
+                    OnrampStartKycVerificationResult.Completed(
+                        response = kycInfo,
+                        appearance = state.value.configurationState?.appearance
+                    )
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.VerifyKyc, error)
+                    trackError(Operation.VerifyKyc, mappedError)
+                    OnrampStartKycVerificationResult.Failed(mappedError)
                 }
             )
     }
 
     @Suppress("LongMethod")
     suspend fun createCryptoPaymentToken(): OnrampCreateCryptoPaymentTokenResult {
-        val cryptoCustomerId = _state.value.cryptoCustomerId
+        val state = _state.value
+        val cryptoCustomerId = state.cryptoCustomerId
         if (cryptoCustomerId == null) {
-            val error = MissingCryptoCustomerException()
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
-                    error = error,
-                )
+            val error = mapError(
+                operation = Operation.CreateCryptoPaymentToken,
+                error = MissingCryptoCustomerException(),
             )
+            trackError(Operation.CreateCryptoPaymentToken, error)
             return OnrampCreateCryptoPaymentTokenResult.Failed(error)
         }
 
         // Get the platform publishable key
-        return getOrFetchPlatformKey()
+        // KYC can change the account even when the customer ID has not changed.
+        // Keep routing consistent if configuration changes while either request is in flight.
+        return getPlatformKey(state, forceRefresh = state.selectedPaymentSource is SelectedPaymentSource.Wallet)
             // Create a PaymentMethod + Crypto PaymentToken
             .flatMapCatching { platformPublishableKey ->
-                when (val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)) {
-                    is LinkController.CreatePaymentMethodResult.Success -> {
-                        // Create a crypto payment token
-                        cryptoApiRepository.createPaymentToken(
-                            cryptoCustomerId = cryptoCustomerId,
-                            paymentMethod = result.paymentMethod.id!!,
-                        )
+                val selected = state.selectedPaymentSource
+                    ?: throw IllegalStateException("No selected payment source")
+
+                validateWalletAccount(selected, platformPublishableKey)
+
+                val paymentMethodId = when (selected) {
+                    SelectedPaymentSource.Link -> {
+                        when (
+                            val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)
+                        ) {
+                            is LinkController.CreatePaymentMethodResult.Success -> {
+                                result.paymentMethod.id
+                            }
+                            is LinkController.CreatePaymentMethodResult.Failed -> {
+                                throw result.error
+                            }
+                        }
                     }
-                    is LinkController.CreatePaymentMethodResult.Failed -> {
-                        throw result.error
-                    }
+                    is SelectedPaymentSource.GooglePay -> selected.paymentMethodId
+                    is SelectedPaymentSource.SamsungPay -> selected.paymentMethodId
                 }
+
+                cryptoApiRepository.createPaymentToken(
+                    cryptoCustomerId = cryptoCustomerId,
+                    paymentMethod = paymentMethodId,
+                    countryHint = state.configurationState?.countryHint,
+                )
             }
             .fold(
                 onSuccess = { cryptoPaymentToken ->
@@ -326,78 +787,38 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampCreateCryptoPaymentTokenResult.Completed(cryptoPaymentToken.id)
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CreateCryptoPaymentToken,
-                            error = error,
-                        )
-                    )
-                    OnrampCreateCryptoPaymentTokenResult.Failed(error)
+                    val mappedError = mapError(Operation.CreateCryptoPaymentToken, error)
+                    trackError(Operation.CreateCryptoPaymentToken, mappedError)
+                    OnrampCreateCryptoPaymentTokenResult.Failed(mappedError)
                 }
             )
+    }
+
+    private fun validateWalletAccount(selected: SelectedPaymentSource, platformPublishableKey: String) {
+        // A missing collection key cannot establish account ownership. Never replace it with the current key.
+        if (selected is SelectedPaymentSource.Wallet && selected.platformPublishableKey != platformPublishableKey) {
+            throw PlatformPayAccountChangedException(
+                application.getString(OnrampR.string.stripe_onramp_platform_pay_account_changed)
+            )
+        }
     }
 
     suspend fun logOut(): OnrampLogOutResult {
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
+                savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
+                _state.update {
+                    it.copy(cryptoCustomerId = null, platformKeyCache = null, selectedPaymentSource = null)
+                }
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
-                OnrampLogOutResult.Completed
+                OnrampLogOutResult.Completed()
             }
             is LinkController.LogOutResult.Failed -> {
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.LogOut,
-                        error = result.error,
-                    )
-                )
-                OnrampLogOutResult.Failed(result.error)
+                val error = mapError(Operation.LogOut, result.error)
+                trackError(Operation.LogOut, error)
+                OnrampLogOutResult.Failed(error)
             }
         }
-    }
-
-    suspend fun handleAuthenticationResult(
-        result: LinkController.AuthenticationResult
-    ): OnrampAuthenticateResult = when (result) {
-        is LinkController.AuthenticationResult.Success -> {
-            val secret = consumerSessionClientSecret()
-            if (secret != null) {
-                cryptoApiRepository.createCryptoCustomer(secret).fold(
-                    onSuccess = { customerResponse ->
-                        _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
-                        OnrampAuthenticateResult.Completed(customerResponse.id)
-                    },
-                    onFailure = { error ->
-                        analyticsService?.track(
-                            OnrampAnalyticsEvent.ErrorOccurred(
-                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                                error = error,
-                            )
-                        )
-                        OnrampAuthenticateResult.Failed(error)
-                    }
-                )
-            } else {
-                val error = MissingConsumerSecretException()
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                        error = error,
-                    )
-                )
-                OnrampAuthenticateResult.Failed(error)
-            }
-        }
-        is LinkController.AuthenticationResult.Failed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                    error = result.error,
-                )
-            )
-            OnrampAuthenticateResult.Failed(result.error)
-        }
-        is LinkController.AuthenticationResult.Canceled -> OnrampAuthenticateResult.Cancelled()
     }
 
     suspend fun handleAuthorizeResult(
@@ -413,23 +834,17 @@ internal class OnrampInteractor @Inject constructor(
                         OnrampAuthorizeResult.Consented(customerResponse.id)
                     },
                     onFailure = { error ->
-                        analyticsService?.track(
-                            OnrampAnalyticsEvent.ErrorOccurred(
-                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
-                                error = error,
-                            )
-                        )
-                        OnrampAuthorizeResult.Failed(error)
+                        val mappedError = mapError(Operation.Authorize, error)
+                        trackError(Operation.Authorize, mappedError)
+                        OnrampAuthorizeResult.Failed(mappedError)
                     }
                 )
             } else {
-                val error = MissingConsumerSecretException()
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
-                        error = error,
-                    )
+                val error = mapError(
+                    operation = Operation.Authorize,
+                    error = MissingConsumerSecretException(),
                 )
+                trackError(Operation.Authorize, error)
                 OnrampAuthorizeResult.Failed(error)
             }
         }
@@ -440,13 +855,9 @@ internal class OnrampInteractor @Inject constructor(
         is LinkController.AuthorizeResult.Canceled ->
             OnrampAuthorizeResult.Canceled()
         is LinkController.AuthorizeResult.Failed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.Authorize,
-                    error = result.error,
-                )
-            )
-            OnrampAuthorizeResult.Failed(result.error)
+            val error = mapError(Operation.Authorize, result.error)
+            trackError(Operation.Authorize, error)
+            OnrampAuthorizeResult.Failed(error)
         }
     }
 
@@ -458,13 +869,9 @@ internal class OnrampInteractor @Inject constructor(
             OnrampVerifyIdentityResult.Completed()
         }
         is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.VerifyIdentity,
-                    error = result.throwable,
-                )
-            )
-            OnrampVerifyIdentityResult.Failed(result.throwable)
+            val error = mapError(Operation.VerifyIdentity, result.throwable)
+            trackError(Operation.VerifyIdentity, error)
+            OnrampVerifyIdentityResult.Failed(error)
         }
         is IdentityVerificationSheet.VerificationFlowResult.Canceled ->
             OnrampVerifyIdentityResult.Cancelled()
@@ -481,33 +888,389 @@ internal class OnrampInteractor @Inject constructor(
                 )
             )
             linkController.state(context).value.selectedPaymentMethodPreview?.let {
+                _state.update { state ->
+                    state.copy(selectedPaymentSource = SelectedPaymentSource.Link)
+                }
+
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
-                        iconRes = it.iconRes,
+                        imageLoader = it.imageLoader,
                         label = it.label,
-                        sublabel = it.sublabel
-                    )
+                        sublabel = it.sublabel,
+                        type = it.type.toDisplayType()
+                    ),
+                    kycInfo = null
                 )
             } ?: run {
-                OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
+                collectPaymentMethodFailure(MissingPaymentMethodException())
             }
         }
-        is LinkController.PresentPaymentMethodsResult.Failed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
-                    error = result.error,
-                )
-            )
-            OnrampCollectPaymentMethodResult.Failed(result.error)
-        }
+        is LinkController.PresentPaymentMethodsResult.Failed -> collectPaymentMethodFailure(result.error)
         is LinkController.PresentPaymentMethodsResult.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    fun onGooglePayPresented(platformPublishableKey: String) {
+        savedStateHandle[KEY_GOOGLE_PAY_PLATFORM_KEY] = platformPublishableKey
+    }
+
+    fun handleGooglePayPaymentResult(
+        result: GooglePayPaymentMethodLauncher.Result
+    ): OnrampCollectPaymentMethodResult {
+        val platformPublishableKey = savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
+        return when (result) {
+            is GooglePayPaymentMethodLauncher.Result.Completed -> {
+                val kycInfo = result.paymentMethod.platformPayKycInfo()
+                handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
+                    OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
+                }
+            }
+            is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
+            is GooglePayPaymentMethodLauncher.Result.Canceled -> OnrampCollectPaymentMethodResult.Cancelled()
+        }
+    }
+
+    internal fun collectPaymentMethodFailure(error: Throwable): OnrampCollectPaymentMethodResult.Failed {
+        val mappedError = mapError(Operation.CollectPaymentMethod, error)
+        trackError(Operation.CollectPaymentMethod, mappedError)
+        return OnrampCollectPaymentMethodResult.Failed(mappedError)
+    }
+
+    suspend fun handleSamsungPayPaymentResult(
+        result: SamsungPayResult,
+        platformPublishableKey: String?,
+    ): OnrampCollectPaymentMethodResult = when (result) {
+        is SamsungPayResult.Completed -> {
+            if (platformPublishableKey == null) {
+                samsungPayFailureResult(
+                    error = IllegalStateException(
+                        "Samsung Pay completed without an onramp platform publishable key.",
+                    ),
+                    fallbackReason = Reason.PlatformKeyUnavailable,
+                )
+            } else {
+                cryptoApiRepository.createSamsungPayPaymentMethod(
+                    paymentCredential = result.paymentCredential,
+                    platformPublishableKey = platformPublishableKey,
+                ).fold(
+                    onSuccess = { paymentMethod ->
+                        handleSamsungPayPaymentMethod(paymentMethod, platformPublishableKey) { displayData ->
+                            OnrampCollectPaymentMethodResult.Completed(
+                                displayData, kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo()
+                            )
+                        }
+                    },
+                    onFailure = { failure ->
+                        samsungPayFailureResult(
+                            error = failure,
+                            fallbackReason = Reason.CredentialsFailed,
+                        )
+                    },
+                )
+            }
+        }
+        is SamsungPayResult.Failed -> {
+            samsungPayFailureResult(
+                error = result.error,
+                fallbackReason = Reason.OperationFailed,
+            )
+        }
+        SamsungPayResult.Canceled -> OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    fun handleSamsungPayPlatformKeyFailure(error: Throwable): OnrampCollectPaymentMethodResult {
+        return samsungPayFailureResult(
+            error = error,
+            fallbackReason = Reason.PlatformKeyUnavailable,
+        )
+    }
+
+    fun handleSamsungPayAvailability(status: SamsungPayStatus): SamsungPayAvailabilityResult {
+        return when (status) {
+            SamsungPayStatus.Ready -> SamsungPayAvailabilityResult.Available()
+            SamsungPayStatus.NotSupported -> unavailableSamsungPay(Reason.NotSupported, null, null)
+            SamsungPayStatus.TemporarilyUnavailable -> {
+                unavailableSamsungPay(Reason.TemporarilyUnavailable, null, null)
+            }
+            is SamsungPayStatus.NotReady -> when (val reason = status.reason) {
+                SamsungPayStatus.NotReady.Reason.NeedsUserSetup -> {
+                    unavailableSamsungPay(Reason.SetupRequired, null, null)
+                }
+                SamsungPayStatus.NotReady.Reason.NeedsAppUpdate -> {
+                    unavailableSamsungPay(Reason.AppUpdateRequired, null, null)
+                }
+                is SamsungPayStatus.NotReady.Reason.Other -> {
+                    unavailableSamsungPay(Reason.NotReady, null, reason.code)
+                }
+            }
+            is SamsungPayStatus.Failed -> {
+                val internalError = status.error as? SamsungPaySdkException
+                unavailableSamsungPay(
+                    reason = internalError?.reason ?: Reason.OperationFailed,
+                    underlyingError = status.error,
+                    samsungPayErrorCode = internalError?.errorCode,
+                )
+            }
+        }
+    }
+
+    private fun unavailableSamsungPay(
+        reason: Reason,
+        underlyingError: Throwable?,
+        samsungPayErrorCode: Int?,
+    ): SamsungPayAvailabilityResult.Unavailable {
+        return SamsungPayAvailabilityResult.Unavailable(
+            createSamsungPayException(
+                reason = reason,
+                underlyingError = underlyingError,
+                samsungPayErrorCode = samsungPayErrorCode,
+            ),
+        )
+    }
+
+    private fun samsungPayFailureResult(
+        error: Throwable,
+        fallbackReason: Reason,
+    ): OnrampCollectPaymentMethodResult.Failed {
+        val mappedError = mapSamsungPayError(error, fallbackReason)
+        trackError(Operation.CollectPaymentMethod, mappedError)
+        return OnrampCollectPaymentMethodResult.Failed(mappedError)
+    }
+
+    private fun mapSamsungPayError(
+        error: Throwable,
+        fallbackReason: Reason,
+    ): Throwable {
+        val mappedError = mapError(Operation.CollectPaymentMethod, error)
+        if (mappedError is StripeCryptoOnrampError && mappedError !is UnexpectedException) {
+            return mappedError
+        }
+
+        val underlyingError = (mappedError as? UnexpectedException)?.underlyingError ?: mappedError
+        val internalError = underlyingError as? SamsungPaySdkException
+        return createSamsungPayException(
+            reason = internalError?.reason ?: fallbackReason,
+            underlyingError = underlyingError,
+            samsungPayErrorCode = internalError?.errorCode,
+        )
+    }
+
+    private fun createSamsungPayException(
+        reason: Reason,
+        underlyingError: Throwable?,
+        samsungPayErrorCode: Int?,
+    ): SamsungPayException {
+        val configuration = state.value.configurationState
+        return SamsungPayException(
+            reason = reason,
+            samsungPayErrorCode = samsungPayErrorCode,
+            underlyingError = underlyingError,
+            userMessage = application.getString(OnrampR.string.stripe_onramp_samsung_pay_error_user_message),
+            diagnosticContext = createDiagnosticContext(
+                context = application,
+                operation = Operation.CollectPaymentMethod,
+                publishableKey = configuration?.publishableKey,
+                additionalSdkVersions = configuration?.additionalSdkVersions.orEmpty(),
+            ),
+            developerSummary = underlyingError?.message
+                ?: "Samsung Pay is unavailable (${reason.code}).",
+        )
+    }
+
+    private fun handleGooglePayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        platformPublishableKey: String?,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.GooglePay
+            )
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.GooglePay(
+                    paymentMethodId = paymentMethod.id,
+                    platformPublishableKey = platformPublishableKey,
+                )
+            )
+        }
+
+        return buildResult(googlePayDisplayData(paymentMethod))
+    }
+
+    private fun handleSamsungPayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        platformPublishableKey: String,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.SamsungPay,
+            ),
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.SamsungPay(
+                    paymentMethodId = paymentMethod.id,
+                    platformPublishableKey = platformPublishableKey,
+                ),
+            )
+        }
+
+        return buildResult(samsungPayDisplayData(paymentMethod))
+    }
+
+    private fun googlePayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    R.drawable.stripe_google_pay_mark
+                )!!
+            },
+            label = "Google Pay",
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
+            type = PaymentMethodDisplayData.Type.GooglePay
+        )
+    }
+
+    private fun samsungPayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    PaymentSheetR.drawable.stripe_ic_paymentsheet_card_unknown_day,
+                )!!
+            },
+            label = "Samsung Pay",
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
+            type = PaymentMethodDisplayData.Type.SamsungPay,
+        )
+    }
+
+    suspend fun handleVerifyKycResult(
+        result: VerifyKycActivityResult,
+    ): OnrampVerifyKycInfoResult = when (val action = result.action) {
+        is KycRefreshScreenAction.Cancelled -> {
+            OnrampVerifyKycInfoResult.Cancelled()
+        }
+        is KycRefreshScreenAction.Edit -> {
+            OnrampVerifyKycInfoResult.UpdateAddress()
+        }
+        is KycRefreshScreenAction.Confirm -> {
+            val secret = consumerSessionClientSecret()
+
+            if (secret != null) {
+                val refreshResult = cryptoApiRepository.refreshKycData(
+                    kycInfo = action.info,
+                    consumerSessionClientSecret = secret
+                )
+
+                refreshResult.fold(
+                    onSuccess = {
+                        analyticsService?.track(OnrampAnalyticsEvent.KycVerificationCompleted)
+
+                        OnrampVerifyKycInfoResult.Confirmed()
+                    },
+                    onFailure = {
+                        val error = mapError(
+                            operation = Operation.VerifyKyc,
+                            error = refreshResult.exceptionOrNull() ?: Exception("Unknown error"),
+                        )
+                        trackError(Operation.VerifyKyc, error)
+                        OnrampVerifyKycInfoResult.Failed(error)
+                    }
+                )
+            } else {
+                val error = mapError(
+                    operation = Operation.VerifyKyc,
+                    error = MissingConsumerSecretException(),
+                )
+                trackError(Operation.VerifyKyc, error)
+                OnrampVerifyKycInfoResult.Failed(error)
+            }
+        }
+    }
+
+    suspend fun confirmUserAttestation(): OnrampUserAttestationResult {
+        val secret = authenticatedConsumerSessionClientSecret()
+        return if (secret == null) {
+            val error = mapError(
+                operation = Operation.PresentUserAttestation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(Operation.PresentUserAttestation, error)
+            OnrampUserAttestationResult.Failed(error)
+        } else {
+            cryptoApiRepository.confirmUserAttestation(secret).fold(
+                onSuccess = {
+                    analyticsService?.track(OnrampAnalyticsEvent.UserAttestationCompleted)
+                    OnrampUserAttestationResult.Confirmed()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.PresentUserAttestation, error)
+                    trackError(Operation.PresentUserAttestation, mappedError)
+                    OnrampUserAttestationResult.Failed(mappedError)
+                }
+            )
+        }
+    }
+
+    suspend fun confirmPartnerTerms(
+        declarationId: String,
+        declarationType: PartnerDeclarationType,
+    ): OnrampPartnerTermsResult {
+        val operation = declarationType.operation
+        val secret = authenticatedConsumerSessionClientSecret()
+        return if (secret == null) {
+            val error = mapError(
+                operation = operation,
+                error = authenticatedLinkSessionError(),
+            )
+            trackError(operation, error)
+            OnrampPartnerTermsResult.Failed(error)
+        } else {
+            cryptoApiRepository.confirmPartnerTerms(
+                secret,
+                declarationId,
+            ).fold(
+                onSuccess = {
+                    analyticsService?.track(declarationType.completedEvent)
+                    OnrampPartnerTermsResult.Accepted()
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(operation, error)
+                    trackError(operation, mappedError)
+                    OnrampPartnerTermsResult.Failed(mappedError)
+                }
+            )
+        }
     }
 
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
+
+    private fun authenticatedConsumerSessionClientSecret(): String? {
+        val linkState = _state.value.linkControllerState ?: linkController.state(application).value
+        return if (linkState.isConsumerVerified == true) {
+            linkState.internalLinkAccount?.consumerSessionClientSecret
+        } else {
+            null
+        }
+    }
+
+    private fun authenticatedLinkSessionError(): Throwable {
+        val linkState = _state.value.linkControllerState ?: linkController.state(application).value
+        return if (linkState.isConsumerVerified == false) {
+            LinkAccountNotVerifiedException()
+        } else {
+            MissingConsumerSecretException()
+        }
+    }
 
     fun onLinkControllerState(linkState: LinkController.State) {
         if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
@@ -518,12 +1281,12 @@ internal class OnrampInteractor @Inject constructor(
         _state.value = _state.value.copy(linkControllerState = linkState)
     }
 
-    fun onAuthorize() {
-        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
+    fun trackAnalyticsEvent(event: OnrampAnalyticsEvent) {
+        analyticsService?.track(event)
     }
 
-    fun onAuthenticateUser() {
-        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
+    fun onAuthorize() {
+        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
     }
 
     fun onCollectPaymentMethod(type: PaymentMethodType) {
@@ -534,12 +1297,32 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     fun onHandleNextActionError(error: Throwable) {
-        analyticsService?.track(
-            OnrampAnalyticsEvent.ErrorOccurred(
-                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
-                error = error,
+        val mappedError = mapError(Operation.PerformCheckout, error)
+        trackError(Operation.PerformCheckout, mappedError)
+
+        clearLaunchedNextAction()
+        clearPendingCheckout()
+
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    Status.Completed(OnrampCheckoutResult.Failed(mappedError))
+                )
             )
-        )
+        }
+    }
+
+    fun onHandleNextActionCanceled() {
+        clearLaunchedNextAction()
+        clearPendingCheckout()
+
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    Status.Completed(OnrampCheckoutResult.Canceled())
+                )
+            )
+        }
     }
 
     /**
@@ -547,25 +1330,15 @@ internal class OnrampInteractor @Inject constructor(
      * through the state StateFlow. The coordinator should observe the checkoutState and react accordingly.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
      */
-    suspend fun startCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend () -> String
-    ) {
-        if (_state.value.checkoutState?.status?.inProgress == true) {
-            // Checkout is already in progress - ignore duplicate calls
-            return
-        }
+    suspend fun startCheckout(onrampSessionId: String) {
+        if (_state.value.checkoutState?.status?.inProgress == true) return
+
+        clearLaunchedNextAction()
+        savePendingCheckout(onrampSessionId)
+
         _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    status = Status.Processing(
-                        onrampSessionId = onrampSessionId,
-                        checkoutHandler = checkoutHandler
-                    )
-                )
-            )
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
         }
         analyticsService?.track(
             OnrampAnalyticsEvent.CheckoutStarted(
@@ -573,47 +1346,49 @@ internal class OnrampInteractor @Inject constructor(
                 paymentMethodType = _state.value.collectingPaymentMethodType
             )
         )
-        performCheckoutInternal(
-            onrampSessionId = onrampSessionId,
-            checkoutHandler = checkoutHandler,
-            isContinuation = false,
-        )
+        performCheckoutInternal(onrampSessionId, isContinuation = false)
     }
 
     /**
      * Continues the checkout flow after PaymentLauncher completes a next action.
-     * This should be called by the coordinator when PaymentLauncher finishes successfully.
+     * Reads the session ID from in-memory state, or falls back to SavedStateHandle
+     * if the process was killed and restored.
      */
     suspend fun continueCheckout() {
-        val currentCheckoutState = _state.value.checkoutState
-        when (val status = currentCheckoutState?.status) {
-            is Status.RequiresNextAction -> {
-                // Continue processing with the existing session info
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Processing(
-                                onrampSessionId = status.onrampSessionId,
-                                checkoutHandler = status.checkoutHandler
-                            )
-                        )
+        val onrampSessionId = resolveOnrampSessionId()
+        if (onrampSessionId == null) {
+            clearLaunchedNextAction()
+            _state.update {
+                it.copy(
+                    checkoutState = CheckoutState(
+                        Status.Completed(createAndTrackPaymentFailedCheckoutResult())
                     )
-                }
-                performCheckoutInternal(
-                    onrampSessionId = status.onrampSessionId,
-                    checkoutHandler = status.checkoutHandler,
-                    isContinuation = true,
                 )
             }
-            else -> {
-                // No valid session to continue - this shouldn't happen
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                        )
-                    )
+            return
+        }
+
+        _state.update {
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
+        }
+        performCheckoutInternal(onrampSessionId, isContinuation = true)
+    }
+
+    /**
+     * Resolves the onramp session ID from in-memory state, falling back to
+     * SavedStateHandle for process death recovery.
+     */
+    private fun resolveOnrampSessionId(): String? {
+        when (val status = _state.value.checkoutState?.status) {
+            is Status.Completed -> return null // Completed sessions should not be continued
+            is Status.Processing -> return status.onrampSessionId
+            is Status.RequiresNextAction -> return status.onrampSessionId
+            null -> {
+                val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
+                if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
+                    _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
                 }
+                return pending.onrampSessionId
             }
         }
     }
@@ -624,14 +1399,18 @@ internal class OnrampInteractor @Inject constructor(
     @Suppress("LongMethod")
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String,
         isContinuation: Boolean,
     ) {
-        val checkoutStatus = getOrFetchPlatformKey()
+        val platformKeyResult = if (_state.value.cryptoCustomerId == null) {
+            Result.failure(MissingCryptoCustomerException())
+        } else {
+            getOrFetchPlatformKey()
+        }
+        val checkoutStatus = platformKeyResult
             .flatMapCatching { platformApiKey ->
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,
-                    onrampSessionClientSecret = checkoutHandler(),
+                    onrampSessionClientSecret = checkoutHandler.getClientSecret(onrampSessionId),
                     platformApiKey = platformApiKey
                 ).map { platformApiKey to it }
             }
@@ -653,21 +1432,48 @@ internal class OnrampInteractor @Inject constructor(
                         ?: Status.RequiresNextAction(
                             platformKey = platformApiKey,
                             onrampSessionId = onrampSessionId,
-                            checkoutHandler = checkoutHandler,
                             paymentIntent = paymentIntent
                         )
                 },
                 onFailure = { error ->
-                    analyticsService?.track(
-                        OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
-                            error = error,
-                        )
-                    )
-                    Status.Completed(OnrampCheckoutResult.Failed(error))
+                    val mappedError = mapError(Operation.PerformCheckout, error)
+                    trackError(Operation.PerformCheckout, mappedError)
+                    Status.Completed(OnrampCheckoutResult.Failed(mappedError))
                 }
             )
+
+        if (checkoutStatus is Status.Completed) {
+            clearPendingCheckout()
+        }
+
         _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
+    }
+
+    fun markNextActionLaunched(status: Status.RequiresNextAction): Boolean {
+        val deduplicationKey = status.nextActionLaunchDeduplicationKey()
+        val previousDeduplicationKey = savedStateHandle.get<String>(KEY_LAUNCHED_NEXT_ACTION)
+
+        return if (previousDeduplicationKey == deduplicationKey) {
+            false
+        } else {
+            savedStateHandle[KEY_LAUNCHED_NEXT_ACTION] = deduplicationKey
+            true
+        }
+    }
+
+    private fun savePendingCheckout(onrampSessionId: String) {
+        savedStateHandle[KEY_PENDING_CHECKOUT] = PendingCheckout(
+            onrampSessionId = onrampSessionId,
+            cryptoCustomerId = _state.value.cryptoCustomerId,
+        )
+    }
+
+    internal fun clearPendingCheckout() {
+        savedStateHandle.remove<PendingCheckout>(KEY_PENDING_CHECKOUT)
+    }
+
+    private fun clearLaunchedNextAction() {
+        savedStateHandle.remove<String>(KEY_LAUNCHED_NEXT_ACTION)
     }
 
     /**
@@ -709,36 +1515,62 @@ internal class OnrampInteractor @Inject constructor(
                 if (paymentMethod?.type == PaymentMethod.Type.USBankAccount) {
                     OnrampCheckoutResult.Completed()
                 } else {
-                    OnrampCheckoutResult.Failed(PaymentFailedException())
+                    createAndTrackPaymentFailedCheckoutResult()
                 }
             }
-            StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
+            StripeIntent.Status.RequiresPaymentMethod -> createAndTrackPaymentFailedCheckoutResult()
             StripeIntent.Status.RequiresAction -> null // More handling needed
-            else -> OnrampCheckoutResult.Failed(PaymentFailedException())
+            else -> createAndTrackPaymentFailedCheckoutResult()
         }
+    }
+
+    private fun createAndTrackPaymentFailedCheckoutResult(): OnrampCheckoutResult.Failed {
+        val error = mapError(
+            operation = Operation.PerformCheckout,
+            error = PaymentFailedException(),
+        )
+        trackError(Operation.PerformCheckout, error)
+        return OnrampCheckoutResult.Failed(error)
+    }
+
+    private fun Status.RequiresNextAction.nextActionLaunchDeduplicationKey(): String {
+        return deduplicationKey(
+            onrampSessionId,
+            paymentIntent.id ?: paymentIntent.clientSecret,
+            paymentIntent.nextActionData?.launchDeduplicationKeyComponent() ?: paymentIntent.nextActionType?.code
+        )
+    }
+
+    private fun StripeIntent.NextActionData.launchDeduplicationKeyComponent(): String {
+        return UUID.nameUUIDFromBytes("${javaClass.name}:$this".toByteArray()).toString()
+    }
+
+    private fun deduplicationKey(vararg parts: String?): String {
+        return parts.filterNotNull().joinToString("|")
     }
 
     /**
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    private suspend fun getOrFetchPlatformKey(): Result<String> {
-        val cryptoCustomerId = _state.value.cryptoCustomerId
-        val cachedKey = _state.value.platformKeyCache
+    internal suspend fun getOrFetchPlatformKey(): Result<String> = getPlatformKey(_state.value, forceRefresh = false)
+
+    private suspend fun getPlatformKey(state: OnrampState, forceRefresh: Boolean): Result<String> {
+        val cryptoCustomerId = state.cryptoCustomerId
+        val countryHint = state.configurationState?.countryHint
+        val merchantPublishableKey = state.configurationState?.publishableKey
+        val cachedKey = state.platformKeyCache
 
         // Check if we have a valid cached key for the current customer
-        if (cachedKey != null && cachedKey.cryptoCustomerId == cryptoCustomerId) {
+        val cacheMatches = cachedKey?.matches(cryptoCustomerId, countryHint, merchantPublishableKey) == true
+        if (!forceRefresh && cachedKey != null && cacheMatches) {
             return Result.success(cachedKey.publishableKey)
-        }
-
-        if (cryptoCustomerId == null) {
-            return Result.failure(MissingCryptoCustomerException())
         }
 
         // Fetch platform settings if not available or customer changed
         return cryptoApiRepository.getPlatformSettings(
             cryptoCustomerId = cryptoCustomerId,
-            countryHint = null
+            countryHint = countryHint
         )
             .map { it.publishableKey }
             .onSuccess { platformPublishableKey ->
@@ -747,7 +1579,9 @@ internal class OnrampInteractor @Inject constructor(
                     it.copy(
                         platformKeyCache = PlatformKeyCache(
                             publishableKey = platformPublishableKey,
-                            cryptoCustomerId = cryptoCustomerId
+                            cryptoCustomerId = cryptoCustomerId,
+                            countryHint = countryHint,
+                            merchantPublishableKey = merchantPublishableKey,
                         )
                     )
                 }
@@ -755,19 +1589,81 @@ internal class OnrampInteractor @Inject constructor(
     }
 }
 
+private const val KEY_GOOGLE_PAY_PLATFORM_KEY = "onramp_google_pay_platform_key"
+
+private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
+private const val KEY_LAUNCHED_NEXT_ACTION = "onramp_launched_next_action"
+
+private val PartnerDeclarationType.operation: Operation
+    get() = when (this) {
+        PartnerDeclarationType.TransactionTerms -> Operation.PresentTermsAndConditionsIfNeeded
+        PartnerDeclarationType.TermsOfService -> Operation.PresentTermsOfServiceIfNeeded
+    }
+
+private val PartnerDeclarationType.startedEvent: OnrampAnalyticsEvent
+    get() = when (this) {
+        PartnerDeclarationType.TransactionTerms -> OnrampAnalyticsEvent.TermsAndConditionsStarted
+        PartnerDeclarationType.TermsOfService -> OnrampAnalyticsEvent.TermsOfServiceStarted
+    }
+
+private val PartnerDeclarationType.completedEvent: OnrampAnalyticsEvent
+    get() = when (this) {
+        PartnerDeclarationType.TransactionTerms -> OnrampAnalyticsEvent.TermsAndConditionsCompleted
+        PartnerDeclarationType.TermsOfService -> OnrampAnalyticsEvent.TermsOfServiceCompleted
+    }
+
+@Parcelize
+private data class PendingCheckout(
+    val onrampSessionId: String,
+    val cryptoCustomerId: String?,
+) : Parcelable
+
 internal data class OnrampState(
-    val configuration: OnrampConfiguration? = null,
+    val configurationState: OnrampConfiguration.State? = null,
     val linkControllerState: LinkController.State? = null,
     val cryptoCustomerId: String? = null,
     val collectingPaymentMethodType: PaymentMethodType? = null,
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
+    val selectedPaymentSource: SelectedPaymentSource? = null
 )
 
-/**
- * Caches the platform publishable key along with the consumer session it was fetched for.
- */
-internal data class PlatformKeyCache(
-    val publishableKey: String,
-    val cryptoCustomerId: String?
-)
+internal sealed interface SelectedPaymentSource {
+    val analyticsValue: String
+
+    data object Link : SelectedPaymentSource {
+        override val analyticsValue: String = "link"
+    }
+
+    sealed interface Wallet : SelectedPaymentSource {
+        val paymentMethodId: String
+        val platformPublishableKey: String?
+    }
+
+    data class GooglePay(
+        override val paymentMethodId: String,
+        override val platformPublishableKey: String?,
+    ) : Wallet {
+        override val analyticsValue: String = "google_pay"
+    }
+
+    data class SamsungPay(
+        override val paymentMethodId: String,
+        override val platformPublishableKey: String,
+    ) : Wallet {
+        override val analyticsValue: String = "samsung_pay"
+    }
+}
+
+internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {
+    return when (this) {
+        LinkController.PaymentMethodType.Card ->
+            PaymentMethodDisplayData.Type.Card
+
+        LinkController.PaymentMethodType.BankAccount ->
+            PaymentMethodDisplayData.Type.BankAccount
+
+        LinkController.PaymentMethodType.Generic ->
+            PaymentMethodDisplayData.Type.Card
+    }
+}

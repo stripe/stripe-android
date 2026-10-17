@@ -10,7 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -31,9 +31,15 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         args.appearance.parseAppearance()
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = args.appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val state by viewModel.viewState.collectAsState()
 
@@ -56,13 +62,16 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                 ) {
                     CvcRecollectionScreen(
                         lastFour = state.lastFour,
-                        isTestMode = state.isTestMode,
                         cvcState = state.cvcState,
                         viewActionHandler = viewModel::handleViewAction
                     )
                 }
             }
         }
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return CvcRecollectionContract.Args.fromIntent(intent) != null
     }
 
     override fun finish() {

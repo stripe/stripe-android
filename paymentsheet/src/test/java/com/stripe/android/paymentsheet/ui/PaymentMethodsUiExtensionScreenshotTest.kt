@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
@@ -124,9 +125,6 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 }
                 items(
                     items = icons,
-                    key = {
-                        "icon_$it"
-                    }
                 ) { iconRes ->
                     iconCard(
                         iconRes,
@@ -141,7 +139,9 @@ class PaymentMethodsUiExtensionScreenshotTest {
         return CardBrand.orderedBrands.map {
             it.getCardBrandIconForHorizontalMode(showNightIcon = showNightIcon)
         }.plus(
-            getLinkIcon(showNightIcon = showNightIcon)
+            getLinkIcon(brand = LinkBrand.Link, showNightIcon = showNightIcon)
+        ).plus(
+            getLinkIcon(brand = LinkBrand.Onelink, showNightIcon = showNightIcon)
         ).plus(
             getSepaIcon(showNightIcon = showNightIcon)
         )

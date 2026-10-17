@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -12,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -56,7 +53,6 @@ internal object PaymentSheetFixtures {
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        primaryButtonColor = ColorStateList.valueOf(Color.Black.toArgb()),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
@@ -91,13 +87,14 @@ internal object PaymentSheetFixtures {
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
-        )
+        ),
+        opensCardScannerAutomatically = true,
     )
 
-    const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+    const val DEFAULT_EPHEMERAL_KEY = "ek_123"
 
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
-        id = "customer_id",
+        id = "cus_123",
         ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
 
@@ -108,9 +105,6 @@ internal object PaymentSheetFixtures {
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
-        id = defaultCustomerConfig.id,
-        ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
-        customerSessionClientSecret = null,
         paymentMethods = listOf(),
         defaultPaymentMethodId = null,
     )
@@ -132,7 +126,6 @@ internal object PaymentSheetFixtures {
             .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
             .build()
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     internal val CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
         get() = CONFIG_CUSTOMER.newBuilder()
             .customPaymentMethods(
@@ -176,6 +169,7 @@ internal object PaymentSheetFixtures {
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         linkAccountInfo = LinkAccountUpdate.Value(null),
         walletButtonsRendered = false,
+        promotions = null
     )
 
     internal fun PaymentOptionContract.Args.updateState(
@@ -189,9 +183,6 @@ internal object PaymentSheetFixtures {
         return copy(
             state = state.copy(
                 customer = CustomerState(
-                    id = config.customer?.id ?: "cus_1",
-                    ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
-                    customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
                     defaultPaymentMethodId = null,
                 ),
@@ -201,6 +192,7 @@ internal object PaymentSheetFixtures {
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkState,
+                    paymentMethodLayout = config.paymentMethodLayout
                 ),
             ),
             configuration = config,
@@ -208,7 +200,7 @@ internal object PaymentSheetFixtures {
     }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
@@ -216,7 +208,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -226,7 +218,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -243,7 +235,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val ARGS_DEFERRED_INTENT
-        get() = PaymentSheetContractV2.Args(
+        get() = PaymentSheetContract.Args(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -296,11 +288,11 @@ internal object PaymentSheetFixtures {
         ] 
     """.trimIndent()
 
-    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.copy(
-        email = null,
-        name = null,
-        phone = null
-    )
+    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.toBuilder()
+        .setEmail(null)
+        .setName(null)
+        .setPhone(null)
+        .build()
 
     internal fun billingDetailsFormState(
         line1: FormFieldEntry? = FormFieldEntry("1234 Main Street", isComplete = true),

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Label for a button that lets the user skip address autocomplete and type their address manually -->
+  <string name="stripe_address_enter_manually">Daħħal l-indirizz manwalment</string>
+  <!-- Content description for Google Maps logo in address predictions -->
+  <string name="stripe_address_google_maps">Google Maps</string>
   <!-- Caption for Address field on address form -->
   <string name="stripe_address_label_address">Indirizz</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
@@ -46,6 +50,8 @@
   <string name="stripe_address_postal_code_invalid">Il-kodiċi postali tiegħek mhux validu.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Fittex</string>
+  <!-- Label shown before the Google Maps logo in inline address predictions -->
+  <string name="stripe_address_suggestions">Suġġerimenti pprovduti minn</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
   <string name="stripe_address_zip_incomplete">Iż-ZIP postali tiegħek mhux komplut.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -58,6 +64,10 @@
   <string name="stripe_billing_same_as_shipping">L-indirizz tal-fatturazzjoni huwa l-istess bħall-indirizz tal-posta</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="stripe_blank_and_required">Dit-taqsima ma tistax titħalla vojta.</string>
+  <!-- String to describe an empty card number text field with no supported card brands. -->
+  <string name="stripe_card_number_empty_content_description">Numru tal-Kard</string>
+  <!-- String to describe an empty card number text field with no supported card brands. Includes a list of supported card brands, such as Visa, Mastercard. -->
+  <string name="stripe_card_number_with_brands_content_description">Numru tal-kard. Il-kards appoġġjati jinkludu %s</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
   <string name="stripe_change">Ibdel</string>
   <!-- Caption for Email field on address form -->

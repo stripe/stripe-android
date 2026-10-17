@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -26,6 +27,7 @@ internal class LinkAppBarMenuScreenshotTest {
         paparazziRule.snapshot {
             DefaultLinkTheme {
                 LinkAppBarMenu(
+                    linkBrand = LinkBrand.Link,
                     onLogoutClicked = {}
                 )
             }

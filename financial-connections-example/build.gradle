@@ -1,27 +1,11 @@
 apply from: configs.androidApplication
 
-apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 def testEnvironment = System.getenv("test_environment") ?: "production"
-
-emerge {
-    // Api token is implicitly set to the EMERGE_API_TOKEN env variable
-
-    size {
-        tag.set(System.getenv("EMERGE_TAG"))
-    }
-
-    vcs {
-        gitHub {
-            repoOwner.set("stripe")
-            repoName.set("stripe-android")
-        }
-    }
-}
 
 android {
     defaultConfig {
@@ -48,6 +32,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         compose true
     }
 }
@@ -71,7 +56,6 @@ dependencies {
     implementation libs.androidx.workManager
     implementation libs.compose.activity
     implementation libs.compose.material
-    implementation libs.compose.materialIcons
     implementation libs.compose.liveData
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
@@ -85,9 +69,6 @@ dependencies {
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.leakCanary
-
-    testImplementation testLibs.androidx.junit
-    testImplementation testLibs.junit
 
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.androidx.composeUi

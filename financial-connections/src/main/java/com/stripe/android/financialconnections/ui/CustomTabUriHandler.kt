@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.net.Uri
 import androidx.compose.ui.platform.UriHandler
@@ -14,8 +15,14 @@ internal class CustomTabUriHandler(
     private val browserManager: BrowserManager
 ) : UriHandler {
     override fun openUri(uri: String) {
-        context.startActivity(
-            browserManager.createBrowserIntentForUrl(uri = Uri.parse(uri))
-        )
+        try {
+            context.startActivity(
+                browserManager.createBrowserIntentForUrl(uri = Uri.parse(uri))
+            )
+        } catch (_: ActivityNotFoundException) {
+            // No browser available on the device.
+        } catch (_: SecurityException) {
+            // A non-exported activity on the device matched the URL intent filter.
+        }
     }
 }

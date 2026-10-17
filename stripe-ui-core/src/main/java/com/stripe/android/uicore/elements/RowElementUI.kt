@@ -23,8 +23,8 @@ import com.stripe.android.uicore.stripeShapes
 fun RowElementUI(
     enabled: Boolean,
     controller: RowController,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?,
+    hiddenIdentifiers: Set<FormFieldId>,
+    lastTextFieldIdentifier: FormFieldId?,
     modifier: Modifier = Modifier,
 ) {
     val visibleFields = controller.fields.filter { !hiddenIdentifiers.contains(it.identifier) }

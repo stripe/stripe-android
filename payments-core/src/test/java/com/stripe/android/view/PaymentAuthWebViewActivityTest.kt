@@ -11,6 +11,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Rule
@@ -46,7 +47,8 @@ internal class PaymentAuthWebViewActivityTest {
                 .isEqualTo(
                     PaymentFlowResult.Unvalidated(
                         clientSecret = CLIENT_SECRET,
-                        sourceId = ""
+                        sourceId = "",
+                        stripeAccountId = "acct_123",
                     )
                 )
         }
@@ -69,7 +71,8 @@ internal class PaymentAuthWebViewActivityTest {
                         exception = StripeException.create(ActivityNotFoundException()),
                         flowOutcome = StripeIntentResult.Outcome.FAILED,
                         canCancelSource = true,
-                        sourceId = ""
+                        sourceId = "",
+                        stripeAccountId = "acct_123",
                     )
                 )
         }
@@ -98,7 +101,7 @@ internal class PaymentAuthWebViewActivityTest {
             clientSecret = CLIENT_SECRET,
             url = "https://example.com",
             statusBarColor = Color.RED,
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             isInstantApp = false
         )
     }

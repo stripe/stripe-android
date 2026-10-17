@@ -6,7 +6,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
@@ -18,7 +17,9 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.MaybePresentGenericError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -62,6 +63,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val consumerSessionProvider: ConsumerSessionProvider,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -69,6 +71,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val maybePresentGenericError: MaybePresentGenericError,
     private val presentSheet: PresentSheet,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -226,6 +229,9 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     extraMessage = "Error retrieving accounts",
                     error = it
                 )
+                // This pane renders its errors inline rather than routing them through HandleError,
+                // so it checks for a server-driven error pane itself.
+                maybePresentGenericError(error = it, referrer = PANE)
             },
         )
         onAsync(
@@ -298,7 +304,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
         }
-        FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
+        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
                 submitAccounts(
@@ -338,6 +344,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
+                    linkBrand = currentLinkBrand(),
                 )
             }
 

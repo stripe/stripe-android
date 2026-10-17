@@ -46,11 +46,17 @@ sealed class PaymentMethodExtraParams(
     data class Card(
         val setAsDefault: Boolean? = null,
         val phoneNumberCountry: String? = null,
+        val fromValidatedScan: Boolean? = null,
     ) : PaymentMethodExtraParams(PaymentMethod.Type.Card) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString(),
+                PARAM_VALIDATED_SCAN to fromValidatedScan?.toString()
             )
+        }
+
+        internal companion object {
+            const val PARAM_VALIDATED_SCAN = "validated_scan"
         }
     }
 

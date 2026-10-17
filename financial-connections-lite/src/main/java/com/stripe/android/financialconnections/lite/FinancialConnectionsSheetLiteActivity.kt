@@ -2,12 +2,14 @@ package com.stripe.android.financialconnections.lite
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -17,6 +19,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -48,6 +51,13 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         setContentView(R.layout.stripe_activity_lite)
 
         webView = findViewById(R.id.webView)
@@ -67,6 +77,14 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::webView.isInitialized) {
+            (webView.parent as? ViewGroup)?.removeView(webView)
+            webView.destroy()
+        }
+        super.onDestroy()
     }
 
     private fun handleEdgeToEdge() {
@@ -149,12 +167,21 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     }
 
     private fun openCustomTab(uri: String) {
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-            .setBookmarksButtonEnabled(false)
-            .build()
-            .launchUrl(this, uri.toUri())
+        try {
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                .setBookmarksButtonEnabled(false)
+                .build()
+            CustomTabsClient.getPackageName(this, null)?.let { browserPackage ->
+                customTabsIntent.intent.setPackage(browserPackage)
+            }
+            customTabsIntent.launchUrl(this, uri.toUri())
+        } catch (_: ActivityNotFoundException) {
+            finish()
+        } catch (_: SecurityException) {
+            finish()
+        }
     }
 
     private fun handleUrl(uri: Uri?): Boolean {
@@ -168,6 +195,10 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return intent?.extras?.containsKey(EXTRA_ARGS) == true
     }
 
     companion object {

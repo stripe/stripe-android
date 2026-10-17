@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Country
-import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
+import com.stripe.android.test.core.FieldPopulator.AddressEntryMode
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,10 +24,9 @@ import org.junit.runner.RunWith
 internal class TestBoleto : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "boleto",
-        executeInNightlyRun = true,
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
-        settings[CountrySettingsDefinition] = Country.BR
+        settings[MerchantSettingsDefinition] = Merchant.BR
         settings[CurrencySettingsDefinition] = Currency.BRL
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
@@ -36,7 +36,8 @@ internal class TestBoleto : BasePlaygroundTest() {
 
     private val boletoValues = FieldPopulator.Values().copy(
         zip = "76600-000",
-        state = "GO",
+        state = "Goiás",
+        addressEntryMode = AddressEntryMode.InlineAutocomplete,
     )
 
     @Test
@@ -45,7 +46,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             testParameters = testParameters,
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()
@@ -61,7 +62,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             },
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()
@@ -77,21 +78,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             },
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
-                populateName()
-                populateAddress()
-                populateEmail()
-            }
-        )
-    }
-
-    @Test
-    fun testBoletoInCustomFlow() {
-        testDriver.confirmCustom(
-            testParameters = testParameters,
-            values = boletoValues,
-            populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()

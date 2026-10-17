@@ -4,5 +4,5 @@ import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class SectionMultiFieldElement(
-    override val identifier: IdentifierSpec
+    override val identifier: FormFieldId
 ) : SectionFieldElement

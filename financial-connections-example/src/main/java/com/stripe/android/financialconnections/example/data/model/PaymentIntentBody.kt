@@ -33,4 +33,6 @@ data class PaymentIntentBody(
     val linkMode: String? = null,
     @SerialName("relink_authorization")
     val relinkAuthorization: String? = null,
+    @SerialName("account_holder")
+    val accountHolder: AccountHolder? = null,
 )

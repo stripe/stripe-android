@@ -23,18 +23,34 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.DisplayMultibancoDetails -> DisplayMultibancoDetailsJsonParser()
             StripeIntent.NextActionType.DisplayPayNowDetails -> DisplayPayNowDetailsJsonParser()
             StripeIntent.NextActionType.DisplayPromptPayDetails -> DisplayPromptPayDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayPixDetails -> DisplayPixDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
-            StripeIntent.NextActionType.UpiAwaitNotification -> UpiAwaitNotificationParser()
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
             StripeIntent.NextActionType.SwishRedirect -> SwishRedirectParser()
+            StripeIntent.NextActionType.AwaitAuthorization -> AwaitAuthorizationParser()
+            StripeIntent.NextActionType.MbWayAwaitAuthorization -> MbWayAwaitAuthorizationParser()
             null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
+    }
+
+    private class AwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.AwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.AwaitAuthorization {
+            return StripeIntent.NextActionData.AwaitAuthorization
+        }
+    }
+
+    private class MbWayAwaitAuthorizationParser :
+        ModelJsonParser<StripeIntent.NextActionData.MbWayAwaitAuthorization> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.MbWayAwaitAuthorization {
+            return StripeIntent.NextActionData.MbWayAwaitAuthorization
+        }
     }
 
     private class DisplayOxxoDetailsJsonParser :
@@ -131,6 +147,31 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
     }
 
+    private class DisplayPixDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayPixDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayPixDetails? {
+            val hostedInstructionsUrl = optString(json, FIELD_HOSTED_INSTRUCTIONS_URL) ?: return null
+
+            return StripeIntent.NextActionData.DisplayPixDetails(
+                data = optString(json, FIELD_DATA),
+                imageUrlPng = optString(json, FIELD_IMAGE_URL_PNG),
+                imageUrlSvg = optString(json, FIELD_IMAGE_URL_SVG),
+                expiresAt = (json.opt(FIELD_EXPIRES_AT) as? Number)?.toLong(),
+                hostedInstructionsUrl = hostedInstructionsUrl,
+            )
+        }
+
+        private companion object {
+            private const val FIELD_DATA = "data"
+            private const val FIELD_IMAGE_URL_PNG = "image_url_png"
+            private const val FIELD_IMAGE_URL_SVG = "image_url_svg"
+            private const val FIELD_EXPIRES_AT = "expires_at"
+            private const val FIELD_HOSTED_INSTRUCTIONS_URL = "hosted_instructions_url"
+        }
+    }
+
     internal class RedirectToUrlParser :
         ModelJsonParser<StripeIntent.NextActionData.RedirectToUrl> {
         override fun parse(
@@ -157,10 +198,10 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         override fun parse(
             json: JSONObject
         ): StripeIntent.NextActionData.AlipayRedirect {
-            return StripeIntent.NextActionData.AlipayRedirect(
-                json.getString(FIELD_NATIVE_DATA),
-                json.getString(FIELD_URL),
-                optString(json, FIELD_RETURN_URL)
+            return StripeIntent.NextActionData.AlipayRedirect.create(
+                data = optString(json, FIELD_NATIVE_DATA),
+                webViewUrl = json.getString(FIELD_URL),
+                returnUrl = optString(json, FIELD_RETURN_URL),
             )
         }
 
@@ -174,9 +215,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
     private class SdkDataJsonParser : ModelJsonParser<StripeIntent.NextActionData.SdkData> {
         override fun parse(json: JSONObject): StripeIntent.NextActionData.SdkData? {
             return when (optString(json, FIELD_TYPE)) {
-                TYPE_3DS1 -> StripeIntent.NextActionData.SdkData.Use3DS1(
-                    json.optString(FIELD_STRIPE_JS)
-                )
                 TYPE_3DS2 -> StripeIntent.NextActionData.SdkData.Use3DS2(
                     json.optString(FIELD_THREE_D_SECURE_2_SOURCE),
                     json.optString(FIELD_DIRECTORY_SERVER_NAME),
@@ -188,6 +226,16 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     optString(json, FIELD_THREE_D_SECURE_2_INTENT),
                     optString(json, FIELD_PUBLISHABLE_KEY)
                 )
+                TYPE_INTENT_CONFIRMATION_CHALLENGE -> {
+                    val stripeJs = json.optJSONObject(FIELD_STRIPE_JS)
+                    val captchaVendorName = stripeJs?.let { optString(it, FIELD_CAPTCHA_VENDOR_NAME) }
+                        ?.takeIf { it.isNotEmpty() }
+                    StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                        stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                            captchaVendorName = captchaVendorName
+                        )
+                    )
+                }
                 else -> null
             }
         }
@@ -217,7 +265,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_TYPE = "type"
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
-            private const val TYPE_3DS1 = "three_d_secure_redirect"
+            private const val TYPE_INTENT_CONFIRMATION_CHALLENGE = "intent_confirmation_challenge"
 
             private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
             private const val FIELD_DIRECTORY_SERVER_NAME = "directory_server_name"
@@ -233,6 +281,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
 
             private const val FIELD_STRIPE_JS = "stripe_js"
+            private const val FIELD_CAPTCHA_VENDOR_NAME = "captcha_vendor_name"
         }
     }
 
@@ -294,13 +343,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val ARRIVAL_DATE = "arrival_date"
             private const val HOSTED_VERIFICATION_URL = "hosted_verification_url"
             private const val MICRODEPOSIT_TYPE = "microdeposit_type"
-        }
-    }
-
-    internal class UpiAwaitNotificationParser :
-        ModelJsonParser<StripeIntent.NextActionData.UpiAwaitNotification> {
-        override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiAwaitNotification {
-            return StripeIntent.NextActionData.UpiAwaitNotification
         }
     }
 

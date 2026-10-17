@@ -39,9 +39,6 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -69,7 +66,9 @@ import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import kotlin.math.roundToInt
 
@@ -114,10 +113,16 @@ private fun AppearancePicker(
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
+    var disableLuminanceBasedThemes by remember {
+        mutableStateOf(FeatureFlags.disableLuminanceBasedThemes.isEnabled)
+    }
 
     Scaffold(
         topBar = {
-            AppearanceTopAppBar(resetAppearance)
+            AppearanceTopAppBar {
+                resetAppearance()
+                disableLuminanceBasedThemes = FeatureFlags.disableLuminanceBasedThemes.isEnabled
+            }
         },
         modifier = Modifier
             .systemBarsPadding()
@@ -130,6 +135,22 @@ private fun AppearancePicker(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
+            CustomizationCard("Theme") {
+                ThemeModeDropDown(
+                    themeMode = currentAppearance.themeMode,
+                    onThemeModeSelected = {
+                        updateAppearance(currentAppearance.copy(themeMode = it))
+                    },
+                )
+                AppearanceToggle(
+                    label = FeatureFlags.disableLuminanceBasedThemes.name,
+                    value = disableLuminanceBasedThemes,
+                    onValueChange = {
+                        disableLuminanceBasedThemes = it
+                        FeatureFlags.disableLuminanceBasedThemes.setEnabled(it)
+                    },
+                )
+            }
             CustomizationCard("Icons") {
                 Icons(
                     currentAppearance = currentAppearance,
@@ -1249,7 +1270,7 @@ private fun IncrementDecrementItem(
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Remove,
+                    painter = painterResource(R.drawable.ic_remove),
                     contentDescription = null,
                 )
             }
@@ -1264,7 +1285,7 @@ private fun IncrementDecrementItem(
                     }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Add,
+                    painter = painterResource(R.drawable.ic_add),
                     contentDescription = null,
                 )
             }
@@ -1306,6 +1327,46 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
             onValueChange(it)
         }
     )
+}
+
+@Composable
+private fun ThemeModeDropDown(
+    themeMode: PaymentSheet.ThemeMode,
+    onThemeModeSelected: (PaymentSheet.ThemeMode) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "ThemeMode: $themeMode",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PaymentSheet.ThemeMode.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onThemeModeSelected(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -1510,9 +1571,9 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
 private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = mapOf(
-        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
-        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
-        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+        R.drawable.ic_arrow_down to "Down",
+        R.drawable.ic_add_black_32dp to "Add",
+        R.drawable.ic_chevron_right to "Default"
     )
 
     items[iconResId].let {

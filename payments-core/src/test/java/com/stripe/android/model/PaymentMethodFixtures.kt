@@ -376,7 +376,102 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    internal val CARD_WITH_LINK_WALLET_TYPE_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GDwTNAI5zDH",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null
+            },
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": null,
+                    "address_postal_code_check": null,
+                    "cvc_check": null
+                },
+                "country": "US",
+                "exp_month": 12,
+                "exp_year": 2024,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "9999",
+                "display_brand": "cartes_bancaires",
+                "three_d_secure_usage": {
+                    "supported": true
+                },
+                "wallet": {
+                    "dynamic_last4": "4242",
+                    "link": {},
+                    "type": "link"
+                }
+            },
+            "created": 15821393,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "card"
+        }
+        """.trimIndent()
+    )
+
     internal val CARD_WITH_DISPLAY_BRAND = PaymentMethodJsonParser().parse(CARD_WITH_DISPLAY_BRAND_JSON)
+
+    internal val CARD_WITH_CARD_ART_JSON = JSONObject(
+        """
+        {
+            "id": "pm_123456789",
+            "created": 1550757934255,
+            "livemode": true,
+            "type": "card",
+            "card": {
+                "brand": "visa",
+                "country": "US",
+                "exp_month": 8,
+                "exp_year": 2022,
+                "funding": "credit",
+                "last4": "4242",
+                "card_art": {
+                    "art_image": {
+                        "format": "image/png",
+                        "url": "https://example.com/card_art.png"
+                    },
+                    "program_name": "My Card Program"
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    internal val CARD_WITHOUT_CARD_ART_JSON = JSONObject(
+        """
+        {
+            "id": "pm_123456789",
+            "created": 1550757934255,
+            "livemode": true,
+            "type": "card",
+            "card": {
+                "brand": "visa",
+                "country": "US",
+                "exp_month": 8,
+                "exp_year": 2022,
+                "funding": "credit",
+                "last4": "4242"
+            }
+        }
+        """.trimIndent()
+    )
 
     val IDEAL_JSON = JSONObject(
         """
@@ -626,28 +721,26 @@ internal object PaymentMethodFixtures {
     val BLIK_JSON = JSONObject(
         """
         {
-            "payment_method": {
-                "id": "pm_1Mm5TUKG6vc7r7YC41rnkvqS",
-                "object": "payment_method",
-                "billing_details": {
-                  "address": {
-                    "city": null,
-                    "country": null,
-                    "line1": null,
-                    "line2": null,
-                    "postal_code": null,
-                    "state": null
-                  },
-                  "email": null,
-                  "name": null,
-                  "phone": null
-                },
-                "blik": {},
-                "created": 1678929564,
-                "customer": null,
-                "livemode": false,
-                "type": "blik"
-            }
+            "id": "pm_1Mm5TUKG6vc7r7YC41rnkvqS",
+            "object": "payment_method",
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "blik": {},
+            "created": 1678929564,
+            "customer": null,
+            "livemode": false,
+            "type": "blik"
         }
         """.trimIndent()
     )

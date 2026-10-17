@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.navigation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.PaymentMethodFactory
@@ -78,13 +80,15 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
         return ManageScreenInteractor.State(
             paymentMethods = paymentMethods.map { paymentMethod ->
                 DisplayableSavedPaymentMethod.create(
-                    displayName = paymentMethod.id?.resolvableString ?: "unknown".resolvableString,
-                    paymentMethod = paymentMethod
+                    displayName = paymentMethod.id.resolvableString,
+                    paymentMethod = paymentMethod,
                 )
             },
             currentSelection = null,
             isEditing = isEditing,
             canEdit = true,
+            linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     }
 }

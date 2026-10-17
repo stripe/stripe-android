@@ -7,6 +7,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -14,6 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(WalletButtonsPreview::class)
 @RunWith(AndroidJUnit4::class)
 class WalletButtonsContentTest {
     @get:Rule
@@ -31,7 +34,7 @@ class WalletButtonsContentTest {
             val shouldRenderContent by shouldRender
 
             if (shouldRenderContent) {
-                content.Content()
+                content.Content { false }
             }
         }
 
@@ -68,6 +71,7 @@ class WalletButtonsContentTest {
             fun test(
                 state: StateFlow<WalletButtonsInteractor.State> = stateFlowOf(
                     WalletButtonsInteractor.State(
+                        appearance = PaymentSheet.Appearance(),
                         walletButtons = emptyList(),
                         link2FAState = null,
                         buttonsEnabled = false

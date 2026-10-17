@@ -28,8 +28,16 @@ internal sealed class LinkEvent : AnalyticsEvent {
         override val eventName = "link.signup.failure.invalidSessionState"
     }
 
+    object EmailSuggestionAccepted : LinkEvent() {
+        override val eventName = "link.email_suggestion.accepted"
+    }
+
     object AccountLookupFailure : LinkEvent() {
         override val eventName = "link.account_lookup.failure"
+    }
+
+    object AccountLookupComplete : LinkEvent() {
+        override val eventName = "link.account_lookup.complete"
     }
 
     object AccountRefreshFailure : LinkEvent() {
@@ -54,6 +62,12 @@ internal sealed class LinkEvent : AnalyticsEvent {
 
     object TwoFACancel : LinkEvent() {
         override val eventName = "link.2fa.cancel"
+    }
+
+    data class TwoFAResendCode(
+        val verificationType: String
+    ) : LinkEvent() {
+        override val eventName = "link.2fa.resend_code"
     }
 
     object PopupShow : LinkEvent() {

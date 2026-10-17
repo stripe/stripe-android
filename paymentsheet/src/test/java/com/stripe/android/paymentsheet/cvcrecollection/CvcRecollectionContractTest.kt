@@ -25,7 +25,6 @@ class CvcRecollectionContractTest {
             lastFour = "444",
             cardBrand = CardBrand.Visa,
             appearance = PaymentSheet.Appearance(),
-            isTestMode = true
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), input)

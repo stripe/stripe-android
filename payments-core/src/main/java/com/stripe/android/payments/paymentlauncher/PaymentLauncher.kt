@@ -6,12 +6,17 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
+import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.utils.rememberActivityOrNull
 
 /**
@@ -37,6 +42,15 @@ interface PaymentLauncher {
      * Fetches a [SetupIntent] and handles its next action.
      */
     fun handleNextActionForSetupIntent(clientSecret: String)
+
+    /**
+     * Handles next action for a [StripeIntent] that has already been loaded.
+     * This is an internal optimization to avoid re-fetching the intent when we already have it.
+     *
+     * @RestrictTo for paymentsheet module use only
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun handleNextActionForStripeIntent(intent: StripeIntent)
 
     /**
      * Fetches a [PaymentIntent] from a hashed value and handles its next action.
@@ -75,6 +89,22 @@ interface PaymentLauncher {
             callback.toInternalResultCallback()
         ).create(publishableKey, stripeAccountId)
 
+        @JvmStatic
+        @JvmOverloads
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ReactNativeSdkInternal
+        fun create(
+            activity: ComponentActivity,
+            signal: UnregisterSignal,
+            publishableKey: String,
+            stripeAccountId: String? = null,
+            callback: PaymentResultCallback
+        ) = PaymentLauncherFactory(
+            activity,
+            signal,
+            callback.toInternalResultCallback()
+        ).create(publishableKey, stripeAccountId)
+
         /**
          * Create a [PaymentLauncher] instance with [Fragment].
          *
@@ -92,6 +122,23 @@ interface PaymentLauncher {
             fragment,
             callback.toInternalResultCallback()
         ).create(publishableKey, stripeAccountId)
+
+        /**
+         * Create a [PaymentLauncher] instance with [ComponentActivity].
+         *
+         * This API registers an [ActivityResultLauncher] into the [ComponentActivity], it needs
+         * to be called before the [ComponentActivity] is created.
+         *
+         * The publishable key and Stripe account ID are read lazily from [PaymentConfiguration].
+         */
+        @JvmStatic
+        fun create(
+            activity: ComponentActivity,
+            callback: PaymentResultCallback
+        ) = PaymentLauncherFactory(
+            activity = activity,
+            callback = callback.toInternalResultCallback()
+        ).create(activity.applicationContext)
 
         /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
@@ -174,5 +221,38 @@ fun rememberPaymentLauncher(
             hostActivityLauncher = activityResultLauncher,
             statusBarColor = activity?.window?.statusBarColor,
         ).create(publishableKey, stripeAccountId)
+    }
+}
+
+/**
+ * Creates a [PaymentLauncher] that is remembered across compositions.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * The publishable key and Stripe account ID are read lazily from [PaymentConfiguration].
+ *
+ * @param callback Called with the result of the payment operation
+ */
+@Composable
+fun rememberPaymentLauncher(
+    callback: PaymentLauncher.PaymentResultCallback
+): PaymentLauncher {
+    val activity = rememberActivityOrNull()
+    val context = LocalContext.current.applicationContext
+
+    val launcherCallback = remember(callback) {
+        callback.toInternalResultCallback()
+    }
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        PaymentLauncherContract(),
+        launcherCallback::onPaymentResult
+    )
+
+    return remember {
+        PaymentLauncherFactory(
+            hostActivityLauncher = activityResultLauncher,
+            statusBarColor = activity?.window?.statusBarColor,
+        ).create(context)
     }
 }

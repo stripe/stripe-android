@@ -25,7 +25,7 @@ internal fun PaymentSelection.toSavedSelection(): SavedSelection? {
         is PaymentSelection.GooglePay -> SavedSelection.GooglePay
         is PaymentSelection.Link -> SavedSelection.Link
         is PaymentSelection.Saved -> SavedSelection.PaymentMethod(
-            id = paymentMethod.id.orEmpty(),
+            id = paymentMethod.id,
             isLinkOrigin = paymentMethod.isLinkPaymentMethod || paymentMethod.isLinkPassthroughMode,
         )
         else -> null

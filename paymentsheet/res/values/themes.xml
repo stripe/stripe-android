@@ -32,6 +32,10 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="StripePaymentSheetTapToAddTheme" parent="StripePaymentSheetDefaultTheme">
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="StripePaymentSheetAddPaymentMethodTheme">
         <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>
         <item name="colorPrimary">@color/stripe_paymentsheet_form</item>

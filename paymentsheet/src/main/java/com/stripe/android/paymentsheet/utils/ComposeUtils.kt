@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -9,11 +10,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeFormInsets
 
 @Composable
 internal fun PaymentSheetContentPadding(subtractingExtraPadding: Dp = 0.dp) {
-    val bottomPadding = StripeTheme.formInsets.bottom.dp - subtractingExtraPadding
+    val bottomPadding = MaterialTheme.stripeFormInsets.bottom.dp - subtractingExtraPadding
     Spacer(modifier = Modifier.requiredHeight(bottomPadding.coerceAtLeast(0.dp)))
 }
 

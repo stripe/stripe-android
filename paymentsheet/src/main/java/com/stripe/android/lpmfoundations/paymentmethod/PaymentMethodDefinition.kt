@@ -20,7 +20,9 @@ internal interface PaymentMethodDefinition {
      */
     fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
-    fun uiDefinitionFactory(): UiDefinitionFactory
+    fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory
 }
 
 internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {

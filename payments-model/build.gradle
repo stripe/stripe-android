@@ -3,11 +3,12 @@ apply from: configs.androidLibrary
 apply plugin: 'checkstyle'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'dev.drewhamilton.poko'
 
 android {
-    testOptions {
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"])
         }
     }
 }

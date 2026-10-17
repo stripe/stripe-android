@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.testing.QuarantinedTestRule
 import com.stripe.android.testing.RetryRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
@@ -36,6 +37,7 @@ class TestRules private constructor(
             val composeTestRule = createEmptyComposeRule()
 
             val chain = RuleChain.emptyRuleChain()
+                .around(QuarantinedTestRule())
                 .around(DetectLeaksAfterTestSuccess())
                 .around(composeTestRule)
                 .let { chain ->
@@ -45,7 +47,7 @@ class TestRules private constructor(
                         chain
                     }
                 }.let { chain ->
-                    if (BuildConfig.IS_RUNNING_IN_CI) {
+                    if (BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI) {
                         chain.around(RetryRule(retryCount))
                     } else {
                         chain

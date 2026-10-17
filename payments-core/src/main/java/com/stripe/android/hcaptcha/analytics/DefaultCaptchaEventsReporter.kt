@@ -41,7 +41,7 @@ internal class DefaultCaptchaEventsReporter @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_FAILURE)
             }
             else -> {
-                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.HCAPTCHA_UNEXPECTED_FAILURE)
             }
         }
 

@@ -3,6 +3,7 @@
 package com.stripe.android.stripecardscan.payment.card
 
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
@@ -274,7 +275,7 @@ internal fun getCardIssuer(pan: String?): CardIssuer =
 /**
  * Determine if a PAN is valid.
  *
- * TODO: this should use a contract like the following once contracts are no longer experimental:
+ * Note: this should use a contract like the following once contracts are no longer experimental:
  * ```
  * contract { returns(true) implies (pan != null) }
  * ```
@@ -343,6 +344,7 @@ private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
 /**
  * Adds support for a new [CardIssuer]
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @CheckResult
 fun supportCardIssuer(
     iins: IntRange,

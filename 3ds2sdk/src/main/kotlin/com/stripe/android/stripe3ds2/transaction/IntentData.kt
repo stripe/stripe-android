@@ -9,17 +9,14 @@ data class IntentData(
      * The client_secret of a PaymentIntent or SetupIntent.
      */
     val clientSecret: String,
-
     /**
      * The 3DS2 Source Id for this transaction.
      */
     val sourceId: String,
-
     /**
      * The publishable key.
      */
     val publishableKey: String,
-
     /**
      * Optional connected account id.
      */

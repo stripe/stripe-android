@@ -2,16 +2,15 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.ColorInt
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -68,30 +67,26 @@ internal interface ConfirmationHandler {
     @Parcelize
     data class Args(
         /**
-         * The [StripeIntent] that is being potentially confirmed by the handler
-         */
-        val intent: StripeIntent,
-
-        /**
          * The confirmation option used to in order to potentially confirm the intent
          */
         val confirmationOption: Option,
-
         /**
-         * Appearance values to be used when styling the launched activities
+         * The immutable data created during configuration.
          */
-        val appearance: PaymentSheet.Appearance,
-
+        val paymentMethodMetadata: PaymentMethodMetadata,
         /**
-         * The mode that a Payment Element product was initialized with
+         * The status bar color of the host activity, forwarded to auth surfaces that briefly take
+         * over the screen (the 3DS2 challenge activity and browser Custom Tab) so they match the
+         * merchant's chrome. Always `null` on API 35+, where the platform enforces edge-to-edge.
          */
-        val initializationMode: PaymentElementLoader.InitializationMode,
-
+        @ColorInt val statusBarColor: Int?,
+    ) : Parcelable {
         /**
-         * The shipping details of the customer that can be attached during the confirmation flow
+         * The [StripeIntent] that is being potentially confirmed by the handler
          */
-        val shippingDetails: AddressDetails?
-    ) : Parcelable
+        @IgnoredOnParcel
+        val intent: StripeIntent = paymentMethodMetadata.stripeIntent
+    }
 
     /**
      * Defines the state types that [ConfirmationHandler] can be in with regards to confirmation.
@@ -122,6 +117,8 @@ internal interface ConfirmationHandler {
      * Defines the result types that can be returned after completing a confirmation process.
      */
     sealed interface Result {
+        fun log(logger: Logger)
+
         /**
          * Indicates that the confirmation process was canceled by the customer.
          */
@@ -149,6 +146,10 @@ internal interface ConfirmationHandler {
                  */
                 None,
             }
+
+            override fun log(logger: Logger) {
+                logger.info("ConfirmationHandler.Result.Canceled: $action")
+            }
         }
 
         /**
@@ -157,9 +158,13 @@ internal interface ConfirmationHandler {
          */
         data class Succeeded(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
-        ) : Result
+        ) : Result {
+            override fun log(logger: Logger) {
+                logger.info("ConfirmationHandler.Result.Succeeded")
+            }
+        }
 
         /**
          * Indicates that the confirmation process has failed. A cause and potentially a resolvable message are
@@ -170,6 +175,10 @@ internal interface ConfirmationHandler {
             val message: ResolvableString,
             val type: ErrorType,
         ) : Result {
+            override fun log(logger: Logger) {
+                logger.error("ConfirmationHandler.Result.Failed", cause)
+            }
+
             /**
              * Types of errors that can occur when confirming a payment.
              */
@@ -208,4 +217,12 @@ internal interface ConfirmationHandler {
     }
 
     interface Option : Parcelable
+
+    fun interface Saver {
+        fun save(
+            stripeIntent: StripeIntent,
+            confirmationOption: Option,
+            alwaysSave: Boolean,
+        )
+    }
 }

@@ -1,8 +1,7 @@
 package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
-import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerSheet
@@ -12,13 +11,12 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetDataCommonModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
-@OptIn(ExperimentalCustomerSessionApi::class)
 @Singleton
 @Component(
     modules = [
@@ -29,8 +27,8 @@ import javax.inject.Singleton
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ApplicationIdModule::class,
-        MobileSessionIdModule::class,
+        ElementsSessionClientParamsModule::class,
+        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface CustomerSessionDataSourceComponent {
@@ -39,15 +37,11 @@ internal interface CustomerSessionDataSourceComponent {
     val customerSheetIntentDataSource: CustomerSheetIntentDataSource
     val customerSheetInitializationDataSource: CustomerSheetInitializationDataSource
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun customerSessionProvider(customerSessionProvider: CustomerSheet.CustomerSessionProvider): Builder
-
-        fun build(): CustomerSessionDataSourceComponent
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance application: Application,
+            @BindsInstance customerSessionProvider: CustomerSheet.CustomerSessionProvider,
+        ): CustomerSessionDataSourceComponent
     }
 }

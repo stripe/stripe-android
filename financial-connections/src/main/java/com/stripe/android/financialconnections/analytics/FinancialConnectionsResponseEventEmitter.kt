@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.analytics
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -17,7 +16,8 @@ import javax.inject.Inject
  */
 internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
     private val json: Json,
-    private val logger: Logger
+    private val logger: Logger,
+    private val eventEmitter: FinancialConnectionsEventEmitter
 ) {
 
     fun emitIfPresent(
@@ -29,11 +29,7 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
                     ListSerializer(UserFacingEventResponse.serializer()),
                     eventsResponse
                 )
-                    .mapNotNull { it.toEvent() }
-                    .forEach {
-                        logger.debug("Emitting event ${it.name} with metadata ${it.metadata}")
-                        FinancialConnections.emitEvent(it.name, it.metadata)
-                    }
+                    .forEach { it.emitEvent() }
             }
     }.onFailure {
         logger.error("Error decoding event response", it)
@@ -51,8 +47,8 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
         ?.optString(EVENTS_TO_EMIT)
         ?.takeIf { it.isNotEmpty() }
 
-    private fun UserFacingEventResponse.toEvent() = runCatching {
-        FinancialConnectionsEvent(
+    private fun UserFacingEventResponse.emitEvent() = runCatching {
+        eventEmitter.emit(
             name = Name.entries.first { it.value == type },
             metadata = Metadata(
                 errorCode = error?.errorCode

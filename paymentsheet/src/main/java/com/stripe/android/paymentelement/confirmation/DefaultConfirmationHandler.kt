@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
@@ -30,8 +31,18 @@ internal class DefaultConfirmationHandler(
     private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-    private val ioContext: CoroutineContext
+    private val ioContext: CoroutineContext,
+    private val logger: Logger,
+    private val confirmationSaver: ConfirmationHandler.Saver,
 ) : ConfirmationHandler {
+    private var initialConfirmationArguments: ConfirmationHandler.Args?
+        get() {
+            return savedStateHandle.get<ConfirmationHandler.Args>(INITIAL_CONFIRMATION_ARGUMENTS_KEY)
+        }
+        set(value) {
+            savedStateHandle.set(INITIAL_CONFIRMATION_ARGUMENTS_KEY, value)
+        }
+
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
     override val hasReloadedFromProcessDeath = isInitiallyAwaitingForResultData != null
@@ -70,7 +81,11 @@ internal class DefaultConfirmationHandler(
         lifecycleOwner: LifecycleOwner,
     ) {
         mediators.forEach { mediator ->
-            mediator.register(activityResultCaller, ::onResult)
+            mediator.register(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+                onResult = ::onResult,
+            )
         }
 
         lifecycleOwner.lifecycle.addObserver(
@@ -94,6 +109,8 @@ internal class DefaultConfirmationHandler(
     override suspend fun start(
         arguments: ConfirmationHandler.Args,
     ) {
+        initialConfirmationArguments = arguments
+
         withContext(coroutineScope.coroutineContext) {
             val currentState = _state.value
 
@@ -124,10 +141,8 @@ internal class DefaultConfirmationHandler(
 
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
-        val parameters = arguments.toParameters()
-
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption, parameters)
+            mediator.canConfirm(confirmationOption, arguments)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -153,16 +168,16 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        handleMediatorAction(confirmationOption, parameters, mediator)
+        handleMediatorAction(confirmationOption, arguments, mediator)
     }
 
     private suspend fun handleMediatorAction(
         confirmationOption: ConfirmationHandler.Option,
-        parameters: ConfirmationDefinition.Parameters,
+        arguments: ConfirmationHandler.Args,
         mediator: ConfirmationMediator<*, *, *, *>,
     ) {
         val action = withContext(ioContext) {
-            mediator.action(confirmationOption, parameters)
+            mediator.action(confirmationOption, arguments)
         }
         when (action) {
             is ConfirmationMediator.Action.Launch -> {
@@ -187,7 +202,7 @@ internal class DefaultConfirmationHandler(
                 onHandlerResult(
                     ConfirmationHandler.Result.Succeeded(
                         intent = action.intent,
-                        deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                        metadata = action.metadata,
                         completedFullPaymentFlow = action.completedFullPaymentFlow,
                     )
                 )
@@ -201,14 +216,8 @@ internal class DefaultConfirmationHandler(
                 removeIsAwaitingForResult()
 
                 coroutineScope.launch {
-                    val parameters = result.parameters
-
                     confirm(
-                        arguments = ConfirmationHandler.Args(
-                            intent = parameters.intent,
-                            shippingDetails = parameters.shippingDetails,
-                            appearance = parameters.appearance,
-                            initializationMode = parameters.initializationMode,
+                        arguments = result.arguments.copy(
                             confirmationOption = result.confirmationOption,
                         )
                     )
@@ -218,7 +227,7 @@ internal class DefaultConfirmationHandler(
             }
             is ConfirmationDefinition.Result.Succeeded -> ConfirmationHandler.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                metadata = result.metadata,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
@@ -235,7 +244,21 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun onHandlerResult(result: ConfirmationHandler.Result) {
+        result.log(logger)
+
         _state.value = ConfirmationHandler.State.Complete(result)
+
+        if (result is ConfirmationHandler.Result.Succeeded) {
+            initialConfirmationArguments?.let { arguments ->
+                confirmationSaver.save(
+                    result.intent,
+                    arguments.confirmationOption,
+                    arguments.paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
+                )
+            }
+        }
+
+        initialConfirmationArguments = null
 
         removeIsAwaitingForResult()
     }
@@ -258,15 +281,6 @@ internal class DefaultConfirmationHandler(
 
     private fun retrieveIsAwaitingForResultData(): AwaitingConfirmationResultData? {
         return savedStateHandle.get<AwaitingConfirmationResultData>(AWAITING_CONFIRMATION_RESULT_KEY)
-    }
-
-    private fun ConfirmationHandler.Args.toParameters(): ConfirmationDefinition.Parameters {
-        return ConfirmationDefinition.Parameters(
-            appearance = appearance,
-            shippingDetails = shippingDetails,
-            initializationMode = initializationMode,
-            intent = intent
-        )
     }
 
     private suspend inline fun <reified T> Flow<*>.firstInstanceOf(): T {
@@ -293,6 +307,8 @@ internal class DefaultConfirmationHandler(
         private val savedStateHandle: SavedStateHandle,
         private val errorReporter: ErrorReporter,
         @IOContext private val ioContext: CoroutineContext,
+        private val logger: Logger,
+        private val confirmationSaver: ConfirmationHandler.Saver,
     ) : ConfirmationHandler.Factory {
         override fun create(scope: CoroutineScope): ConfirmationHandler {
             return DefaultConfirmationHandler(
@@ -300,12 +316,15 @@ internal class DefaultConfirmationHandler(
                 coroutineScope = scope,
                 errorReporter = errorReporter,
                 savedStateHandle = savedStateHandle,
-                ioContext = ioContext
+                ioContext = ioContext,
+                logger = logger,
+                confirmationSaver = confirmationSaver,
             )
         }
     }
 
     internal companion object {
         private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
+        private const val INITIAL_CONFIRMATION_ARGUMENTS_KEY = "INITIAL_CONFIRMATION_ARGUMENTS_KEY"
     }
 }

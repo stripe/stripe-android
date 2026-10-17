@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.stripe.android.stripecardscan.payment.ml.ssd
 
 import com.stripe.android.stripecardscan.framework.ml.hardNonMaximumSuppression
@@ -25,7 +27,7 @@ internal data class OcrFeatureMapSizes(
  * This method serves to rearrange the output if you are using outputs from multiple layers If you
  * use outputs from single layer use the method defined above
  *
- * TODO: simplify this
+ * Note: simplify this
  */
 internal fun rearrangeOCRArray(
     locations: Array<FloatArray>,

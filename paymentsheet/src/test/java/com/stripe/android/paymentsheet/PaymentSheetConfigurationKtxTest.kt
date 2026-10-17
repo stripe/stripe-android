@@ -1,14 +1,26 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import android.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.utils.PaymentElementCallbackTestRule
+import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
+    @get:Rule
+    val callbackTestRule = PaymentElementCallbackTestRule()
+
     @Test
     fun `'validate' should fail when ephemeral key secret is blank`() {
         val configWithBlankEphemeralKeySecret = configuration.newBuilder()
@@ -26,7 +38,11 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the ephemeralKeySecret cannot be an empty string."
         ) {
-            configWithBlankEphemeralKeySecret.validate(isLiveMode = false)
+            configWithBlankEphemeralKeySecret.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
@@ -42,8 +58,21 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
-        getConfig("ek_askljdlkasfhgasdfjls").validate(isLiveMode = false)
-        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
+        getConfig("ek_askljdlkasfhgasdfjls").validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
+        getConfig("uk_12345").validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
     }
 
     @Test
@@ -53,7 +82,11 @@ class PaymentSheetConfigurationKtxTest {
                 IllegalArgumentException::class,
                 message = "`ephemeralKeySecret` format does not match expected client secret formatting"
             ) {
-                getConfig(ephemeralKeySecret).validate(isLiveMode = false)
+                getConfig(ephemeralKeySecret).validate(
+                    initializationMode = DEFAULT_INITIALIZATION_MODE,
+                    isLiveMode = false,
+                    callbackIdentifier = "",
+                )
             }
         }
 
@@ -65,7 +98,6 @@ class PaymentSheetConfigurationKtxTest {
         assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
         val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
@@ -81,11 +113,14 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the customerSessionClientSecret cannot be an empty string."
         ) {
-            configWithBlankCustomerSessionClientSecret.validate(isLiveMode = false)
+            configWithBlankCustomerSessionClientSecret.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
         val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
@@ -101,11 +136,14 @@ class PaymentSheetConfigurationKtxTest {
             message = "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
                 "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(isLiveMode = false)
+            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
         val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
@@ -121,7 +159,11 @@ class PaymentSheetConfigurationKtxTest {
             message = "Argument does not look like a CustomerSession client secret. " +
                 "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithInvalidCustomerSessionClientSecret.validate(isLiveMode = false)
+            configWithInvalidCustomerSessionClientSecret.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
@@ -133,7 +175,11 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         // Should not throw
-        configWithValidExternalPaymentMethods.validate(isLiveMode = false)
+        configWithValidExternalPaymentMethods.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
     }
 
     @Test
@@ -150,7 +196,11 @@ class PaymentSheetConfigurationKtxTest {
                 "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-" +
                 "payment-methods"
         ) {
-            configWithInvalidExternalPaymentMethod.validate(isLiveMode = false)
+            configWithInvalidExternalPaymentMethod.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
@@ -162,7 +212,11 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         // Should not throw
-        configWithEmptyExternalPaymentMethods.validate(isLiveMode = false)
+        configWithEmptyExternalPaymentMethods.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
     }
 
     @Test
@@ -179,7 +233,11 @@ class PaymentSheetConfigurationKtxTest {
                 "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external" +
                 "-payment-methods"
         ) {
-            configWithMultipleInvalidExternalPaymentMethods.validate(isLiveMode = false)
+            configWithMultipleInvalidExternalPaymentMethods.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = "",
+            )
         }
     }
 
@@ -191,10 +249,314 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         // Should not throw when in live mode
-        configWithInvalidExternalPaymentMethods.validate(isLiveMode = true)
+        configWithInvalidExternalPaymentMethods.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = true,
+            callbackIdentifier = "",
+        )
+    }
+
+    @Test
+    fun `'validate' should fail when CT callback is set with LegacyCustomerEphemeralKey in test mode`() {
+        val callbackIdentifier = "test_identifier"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ -> error("Should not be called!") }
+            .build()
+
+        val configWithLegacyKey = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_test_123",
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
+        ) {
+            configWithLegacyKey.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = callbackIdentifier
+            )
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when CT callback is set with LegacyCustomerEphemeralKey in live mode`() {
+        val callbackIdentifier = "test_identifier"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ -> error("Should not be called!") }
+            .build()
+
+        val configWithLegacyKey = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_live_123",
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        configWithLegacyKey.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = true,
+            callbackIdentifier = callbackIdentifier
+        )
+    }
+
+    @Test
+    fun `'validate' should succeed when createIntentWithConfirmationTokenCallback is set with CustomerSession`() {
+        val callbackIdentifier = "test_identifier"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ -> error("Should not be called!") }
+            .build()
+
+        val configWithCustomerSession = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_123",
+                    clientSecret = "cuss_test_123"
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        configWithCustomerSession.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = callbackIdentifier
+        )
+    }
+
+    @Test
+    fun `'validate' should succeed when customer is null and createIntentWithConfirmationTokenCallback is set`() {
+        val callbackIdentifier = "test_identifier"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _ -> error("Should not be called!") }
+            .build()
+
+        val configWithoutCustomer = configuration.newBuilder()
+            .customer(null)
+            .build()
+            .asCommonConfiguration()
+
+        configWithoutCustomer.validate(
+            DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = callbackIdentifier
+        )
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
+        val configWithCustomer = configuration.asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.customer must not be set when using CheckoutSession initialization mode. " +
+                "Customer information is provided by the checkout session."
+        ) {
+            configWithCustomer.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when using CheckoutSession mode with null customer`() {
+        val configWithoutCustomer = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        // Should not throw
+        configWithoutCustomer.validate(
+            initializationMode = checkoutSessionMode,
+            isLiveMode = false,
+            callbackIdentifier = ""
+        )
+    }
+
+    @Test
+    fun `'validate' should succeed when using CheckoutSession mode with null email`() {
+        val configWithoutEmail = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(null)
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        configWithoutEmail.validate(
+            initializationMode = checkoutSessionMode,
+            isLiveMode = false,
+            callbackIdentifier = ""
+        )
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with non-empty externalPaymentMethods`() {
+        val config = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
+            .externalPaymentMethods(listOf("external_paypal"))
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.externalPaymentMethods must not be set when using CheckoutSession " +
+                "initialization mode."
+        ) {
+            config.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with non-empty customPaymentMethods`() {
+        val config = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
+            .customPaymentMethods(
+                listOf(
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_123",
+                        subtitle = "Pay with BufoPay",
+                        disableBillingDetailCollection = false,
+                    )
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.customPaymentMethods must not be set when using CheckoutSession " +
+                "initialization mode."
+        ) {
+            config.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    @Test
+    fun `'validate' should fail when Tap to Add callback is set and billing details collection collects anything`() {
+        val callbackIdentifier = "tap_to_add_common_configuration_test"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createCardPresentSetupIntentCallback {
+                error("Should not be called")
+            }
+            .build()
+
+        val configCollectingBilling = configuration.newBuilder()
+            .billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith<IllegalArgumentException>(
+            "Tap to Add does not supporting collecting billing fields with " +
+                "BillingDetailsCollectionConfiguration. To use Tap to Add, set all " +
+                "BillingDetailsCollectionConfiguration config options to 'Automatic'."
+        ) {
+            configCollectingBilling.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = callbackIdentifier,
+            )
+        }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    @Test
+    fun `'validate' should succeed when Tap to Add callback is set and billing details collection collects nothing`() {
+        val callbackIdentifier = "tap_to_add_common_configuration_test"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createCardPresentSetupIntentCallback {
+                error("Should not be called")
+            }
+            .build()
+
+        val configNotCollectingBilling = configuration.newBuilder()
+            .billingDetailsCollectionConfiguration(PaymentSheet.BillingDetailsCollectionConfiguration())
+            .build()
+            .asCommonConfiguration()
+
+        configNotCollectingBilling.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = callbackIdentifier,
+        )
     }
 
     private companion object {
+        val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = "pi_123_secret_456",
+        )
+
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
             customer = PaymentSheet.CustomerConfiguration(
@@ -209,7 +571,20 @@ class PaymentSheetConfigurationKtxTest {
                 label = "Merchant, Inc.",
                 buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
             ),
-            primaryButtonColor = ColorStateList.valueOf(Color.BLUE),
+            appearance = PaymentSheet.Appearance(
+                primaryButton = PaymentSheet.PrimaryButton(
+                    colorsLight = PaymentSheet.PrimaryButtonColors(
+                        background = Color.BLUE,
+                        onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                        border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    ),
+                    colorsDark = PaymentSheet.PrimaryButtonColors(
+                        background = Color.BLUE,
+                        onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                        border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    )
+                ),
+            ),
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 name = "Jenny Rosen",
             ),

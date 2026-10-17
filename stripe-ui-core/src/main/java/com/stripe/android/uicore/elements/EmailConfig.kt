@@ -25,6 +25,7 @@ class EmailConfig(
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
+    override val enforceLeftToRightTextDirection: Boolean = true
 
     /**
      * This will allow all characters, but will show as invalid if it doesn't match
