@@ -647,6 +647,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        TrueMoney(
+            "truemoney",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         GCash(
             "gcash",
             isReusable = false,

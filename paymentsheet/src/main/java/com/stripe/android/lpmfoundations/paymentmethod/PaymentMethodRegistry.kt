@@ -55,6 +55,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TouchNGoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.TrueMoneyDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
@@ -119,6 +120,7 @@ internal object PaymentMethodRegistry {
         SunbitDefinition,
         SwishDefinition,
         TouchNGoDefinition,
+        TrueMoneyDefinition,
         TwintDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
