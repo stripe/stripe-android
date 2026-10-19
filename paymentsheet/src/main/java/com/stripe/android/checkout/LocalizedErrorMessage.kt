@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 
@@ -10,6 +11,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
  * display a generic localized error message instead.
  */
 @CheckoutSessionPreview
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Throwable.localizedErrorMessage(): String? {
     return (this as? StripeException)?.stripeError?.message
 }
