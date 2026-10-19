@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -284,6 +283,7 @@ internal class CheckoutConfirmationPerformerTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
         assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
         assertThat(request).containsEntry("selected_lpm", "google_pay")
+        assertThat(request).containsEntry("payment_method_orientation", "horizontal")
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
@@ -347,7 +347,7 @@ internal class CheckoutConfirmationPerformerTest {
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
+        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
         val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
