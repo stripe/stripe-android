@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,31 +41,6 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SameAsShippingElementUI
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
-import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.flow.StateFlow
-
-@Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun FormUI(
-    hiddenIdentifiersFlow: StateFlow<Set<FormFieldId>>,
-    enabledFlow: StateFlow<Boolean>,
-    elementsFlow: StateFlow<List<FormElement>>,
-    lastTextFieldIdentifierFlow: StateFlow<FormFieldId?>,
-    modifier: Modifier = Modifier
-) {
-    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState()
-    val enabled by enabledFlow.collectAsState()
-    val elements by elementsFlow.collectAsState()
-    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState()
-
-    FormUI(
-        hiddenIdentifiers = hiddenIdentifiers,
-        enabled = enabled,
-        elements = elements,
-        lastTextFieldIdentifier = lastTextFieldIdentifier,
-        modifier = modifier
-    )
-}
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
