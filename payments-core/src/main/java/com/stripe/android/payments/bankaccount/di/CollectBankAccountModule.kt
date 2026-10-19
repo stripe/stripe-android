@@ -20,10 +20,7 @@ internal object CollectBankAccountModule {
     @Provides
     fun provideApiConfiguration(
         args: CollectBankAccountContract.Args
-    ): ApiConfiguration.State = ApiConfiguration.State(
-        publishableKey = args.publishableKey,
-        stripeAccountId = args.stripeAccountId,
-    )
+    ): ApiConfiguration.State = args.apiConfiguration
 
     @Provides
     @Named(PRODUCT_USAGE)

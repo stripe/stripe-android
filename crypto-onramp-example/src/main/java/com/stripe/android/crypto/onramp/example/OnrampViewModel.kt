@@ -40,6 +40,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -83,6 +84,7 @@ internal class OnrampViewModel(
     internal val callbacks = OnrampCallbacks()
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
+        .kycCallback(callback = ::onKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
@@ -401,6 +403,16 @@ internal class OnrampViewModel(
             is OnrampVerifyKycInfoResult.Failed -> {
                 _message.value = "KYC Verification Failed: ${result.error.message}"
             }
+        }
+    }
+
+    fun onKycResult(result: OnrampKycResult) {
+        _message.value = when (result) {
+            is OnrampKycResult.NotRequired -> "KYC Not Required"
+            is OnrampKycResult.PendingVerification -> "KYC Pending Verification"
+            is OnrampKycResult.Submitted -> "KYC Submitted"
+            is OnrampKycResult.Cancelled -> "KYC Cancelled"
+            is OnrampKycResult.Failed -> "KYC Failed: ${result.error.message}"
         }
     }
 

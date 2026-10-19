@@ -5,6 +5,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
@@ -25,12 +26,18 @@ import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_PROMO_BADGE
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
 import com.stripe.android.testing.waitUntilWithIdle
 
 internal class EmbeddedFormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     val cardNumberText: SemanticsNodeInteraction = nodeWithLabel("Card number")
+
+    fun assertTitle(title: String) {
+        waitUntilVisible()
+        composeTestRule.onNodeWithTag(TEST_TAG_HEADER_TITLE).assertTextEquals(title)
+    }
 
     fun fillOutCardDetails(
         newCardNumber: String = "4242424242424242",

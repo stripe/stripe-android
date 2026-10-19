@@ -151,7 +151,7 @@ internal class EmbeddedNavigator private constructor(
 
     sealed class Screen {
         @Composable
-        abstract fun Content()
+        abstract fun Content(showsWalletsHeader: Boolean)
 
         abstract fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
@@ -179,7 +179,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 ManageScreenUI(interactor = interactor)
                 PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
             }
@@ -203,7 +203,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
                 PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
             }
@@ -235,10 +235,11 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
+                    showsWalletsHeader = showsWalletsHeader,
                     onClick = {
                         confirmationHelper.confirm()
                     },
@@ -308,7 +309,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 val state by sheetActivityStateHolder.state.collectAsState()
                 DismissKeyboardOnProcessing(state.isProcessing)
 
@@ -360,7 +361,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 val state by sheetActivityState.collectAsState()
                 PaymentMethodVerticalLayoutUI(
                     interactor = interactor,
@@ -406,7 +407,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 AddPaymentMethod(interactor = interactor)
                 val state by sheetActivityState.collectAsState()
                 USBankAccountMandate(state)
@@ -456,7 +457,7 @@ internal class EmbeddedNavigator private constructor(
             }
 
             @Composable
-            override fun Content() {
+            override fun Content(showsWalletsHeader: Boolean) {
                 SavedPaymentMethodTabLayoutUI(
                     interactor = interactor,
                     cvcRecollectionState = CvcRecollectionState.NotRequired,

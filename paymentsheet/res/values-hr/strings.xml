@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Stvaranje računa s pomoću Linka za brže izvršenje plaćanja na mreži</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Izradite račun s %s za brže izvršenje plaćanja na mreži</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Nismo uspjeli autentificirati vaš račun. Zatvorite ovaj prozor i pokušajte ponovno.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">Kȏd u poruci e-pošte</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Više mogućnosti</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Prije nego što vam možemo poslati kôd na vašu e-poštu, moramo provjeriti dodatne podatke o vama. Upišite svoj telefonski broj koji završava na ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Prije nego što vam budemo mogli poslati kôd u poruci e-pošte, moramo potvrditi dodatne informacije o vama. Upišite telefonski broj na vašem računu Link.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Potvrdite svoj telefonski broj</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Ponovno pošalji kôd za %d s</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kreditna kartica</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -106,6 +120,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Odjava s %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Potvrdite plaćanje u svojoj aplikaciji MB WAY unutar %s da biste dovršili kupnju.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Više načina plaćanja</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Došlo je do pogreške. Provjerite vezu i pokušajte ponovno.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

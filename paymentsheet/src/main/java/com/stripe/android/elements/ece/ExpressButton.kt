@@ -20,16 +20,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 
 internal sealed interface ExpressButton {
-
-    val buttonTheme: ButtonTheme
-
     fun toSelection(): PaymentSelection
     fun toWalletType(): WalletType
 
     data class Link(
         val state: LinkButtonState,
         val linkBrand: LinkBrand,
-        override val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection {
@@ -45,7 +41,6 @@ internal sealed interface ExpressButton {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
                 linkAccountInfo: LinkAccountUpdate.Value,
-                buttonTheme: ButtonTheme,
             ): Link {
                 val linkConfiguration = paymentMethodMetadata.linkState?.configuration
                 val linkAccount = linkAccountInfo.account
@@ -56,7 +51,6 @@ internal sealed interface ExpressButton {
                         paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
                     linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
-                    buttonTheme = buttonTheme,
                 )
             }
         }
@@ -71,7 +65,7 @@ internal sealed interface ExpressButton {
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String>,
         val shippingAddressRequired: Boolean,
-        override val buttonTheme: ButtonTheme,
+        val buttonTheme: ButtonTheme,
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay

@@ -65,6 +65,7 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
@@ -111,6 +112,7 @@ android {
 
     kotlin {
         compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
             freeCompilerArgs.addAll([
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                     "-Xcontext-parameters",

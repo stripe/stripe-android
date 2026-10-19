@@ -4,6 +4,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -31,7 +32,10 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
 
     override fun onContinue() {
         val selection = selectionHolder.selection.value
-        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(paymentMethodMetadata, selection)
+        val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
+            checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
+            selection = selection,
+        )
         if (taxRegionUpdate == null) {
             stateHolder.setResult(createResult(selection, checkoutSessionResponse = null))
             return

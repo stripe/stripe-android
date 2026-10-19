@@ -4,8 +4,8 @@ import android.content.Context
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal object GooglePayDisplayItemsFactory {
@@ -14,8 +14,7 @@ internal object GooglePayDisplayItemsFactory {
         paymentMethodMetadata: PaymentMethodMetadata,
         context: Context,
     ): List<GooglePayJsonFactory.DisplayItem> {
-        val response = (paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession)
-            ?.checkoutSessionResponse ?: return emptyList()
+        val response = paymentMethodMetadata.checkoutSessionResponse ?: return emptyList()
 
         return create(response, context)
     }
@@ -30,7 +29,7 @@ internal object GooglePayDisplayItemsFactory {
         items += response.subtotalDisplayItem(context)
         items += response.recurringDetails?.totalDiscountAmounts.orEmpty().map { it.asDisplayItem(context) }
         items += response.recurringDetails?.totalTaxAmounts.orEmpty().map { it.asDisplayItem(context) }
-        items += response.estimatedTotalLineItem(context)
+        items += response.totalLineItem(context)
 
         return items
     }
@@ -39,17 +38,25 @@ internal object GooglePayDisplayItemsFactory {
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
-            label = R.string.stripe_google_pay_cost_excluding_tax.resolvableString.resolve(context),
+            label = if (automaticTaxEnabled) {
+                R.string.stripe_google_pay_cost_excluding_tax
+            } else {
+                R.string.stripe_google_pay_subtotal
+            }.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
             price = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.subtotal } },
         )
     }
 
-    private fun CheckoutSessionResponse.estimatedTotalLineItem(
+    private fun CheckoutSessionResponse.totalLineItem(
         context: Context,
     ): GooglePayJsonFactory.DisplayItem {
         return GooglePayJsonFactory.DisplayItem(
-            label = R.string.stripe_google_pay_estimated_total.resolvableString.resolve(context),
+            label = if (automaticTaxEnabled) {
+                R.string.stripe_google_pay_estimated_total
+            } else {
+                R.string.stripe_google_pay_total
+            }.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
             price = amount,
         )

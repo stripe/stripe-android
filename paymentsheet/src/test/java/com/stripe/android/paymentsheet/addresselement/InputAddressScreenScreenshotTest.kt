@@ -21,6 +21,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.FormUI
@@ -137,31 +138,32 @@ internal class InputAddressScreenScreenshotTest {
             )
         }
 
-        InputAddressScreen(
-            appearance = appearance,
-            primaryButtonEnabled = addressFormController.completeFormValues.value != null,
-            primaryButtonLoading = false,
-            closeButtonEnabled = true,
-            primaryButtonText = primaryButtonText,
-            title = title,
-            onPrimaryButtonClick = {},
-            onDisabledButtonClick = {},
-            onCloseClick = {},
-            topContent = {},
-            formContent = {
-                if (scrollToBottom) {
-                    ScrollToBottom()
-                }
-                FormUI(
-                    hiddenIdentifiers = emptySet(),
-                    enabled = true,
-                    elements = addressFormController.elements,
-                    lastTextFieldIdentifier = addressFormController.lastTextFieldIdentifier.value,
-                )
-            },
-            bottomContent = {},
-            saveError = null,
-        )
+        PaymentElementTheme(appearance = appearance) {
+            InputAddressScreen(
+                primaryButtonEnabled = addressFormController.completeFormValues.value != null,
+                primaryButtonLoading = false,
+                closeButtonEnabled = true,
+                primaryButtonText = primaryButtonText,
+                title = title,
+                onPrimaryButtonClick = {},
+                onDisabledButtonClick = {},
+                onCloseClick = {},
+                topContent = {},
+                formContent = {
+                    if (scrollToBottom) {
+                        ScrollToBottom()
+                    }
+                    FormUI(
+                        hiddenIdentifiers = emptySet(),
+                        enabled = true,
+                        elements = addressFormController.elements,
+                        lastTextFieldIdentifier = addressFormController.lastTextFieldIdentifier.value,
+                    )
+                },
+                bottomContent = {},
+                saveError = null,
+            )
+        }
     }
 
     @Composable
@@ -171,28 +173,29 @@ internal class InputAddressScreenScreenshotTest {
     ) {
         val completeValues by formController.completeFormValues.collectAsState()
 
-        InputAddressScreen(
-            appearance = PaymentSheet.Appearance(),
-            primaryButtonEnabled = completeValues != null,
-            primaryButtonLoading = false,
-            closeButtonEnabled = true,
-            primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
-            title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
-            onPrimaryButtonClick = {},
-            onDisabledButtonClick = {},
-            onCloseClick = {},
-            topContent = {},
-            formContent = {
-                FormUI(
-                    hiddenIdentifiers = emptySet(),
-                    enabled = true,
-                    elements = formController.elements,
-                    lastTextFieldIdentifier = formController.lastTextFieldIdentifier.value,
-                )
-            },
-            bottomContent = {},
-            saveError = saveError,
-        )
+        PaymentElementTheme(appearance = PaymentSheet.Appearance()) {
+            InputAddressScreen(
+                primaryButtonEnabled = completeValues != null,
+                primaryButtonLoading = false,
+                closeButtonEnabled = true,
+                primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
+                title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
+                onPrimaryButtonClick = {},
+                onDisabledButtonClick = {},
+                onCloseClick = {},
+                topContent = {},
+                formContent = {
+                    FormUI(
+                        hiddenIdentifiers = emptySet(),
+                        enabled = true,
+                        elements = formController.elements,
+                        lastTextFieldIdentifier = formController.lastTextFieldIdentifier.value,
+                    )
+                },
+                bottomContent = {},
+                saveError = saveError,
+            )
+        }
     }
 
     private fun createFilledFormController() = AddressFormController(

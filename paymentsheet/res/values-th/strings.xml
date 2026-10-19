@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">สร้างบัญชีด้วย Link เพื่อการชำระเงินบนเว็บที่รวดเร็วขึ้น</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">สร้างบัญชีด้วย %s เพื่อการชำระเงินบนเว็บที่รวดเร็วขึ้น</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">เรายืนยันบัญชีของคุณไม่สำเร็จ โปรดปิดหน้าต่างนี้แล้วลองอีกครั้ง</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">รหัสอีเมล</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">ตัวเลือกเพิ่มเติม</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">เราจำเป็นต้องยืนยันข้อมูลเพิ่มเติมเกี่ยวกับคุณก่อนที่จะส่งรหัสไปยังอีเมล โปรดป้อนหมายเลขโทรศัพท์ที่ลงท้ายด้วย ••%s</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">เราจำเป็นต้องยืนยันข้อมูลเพิ่มเติมเกี่ยวกับคุณก่อนที่จะส่งรหัสไปยังอีเมล โปรดป้อนหมายเลขโทรศัพท์ในบัญชี Link ของคุณ</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">ยืนยันหมายเลขโทรศัพท์ของคุณ</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">ส่งรหัสอีกครั้งในอีก %d วินาที</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">บัตรเครดิต %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -104,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">ออกจากระบบ %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">ยืนยันการชำระเงินในแอป MB WAY ของคุณภายใน %s เพื่อให้การซื้อเสร็จสมบูรณ์</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">วิธีการชำระเงินเพิ่มเติม</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">เพื่อความปลอดภัย ต้องปิดตัวเลือกสำหรับนักพัฒนาเพื่อใช้ \"แตะเพื่อเพิ่ม\"</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">เปิดการตั้งค่า</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">ปิดตัวเลือกสำหรับนักพัฒนา</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">บัตรหมดอายุ โปรดลองใช้บัตรใบอื่น</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">แตะบัตร</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">บัตรถูกปฏิเสธ โปรดใช้บัตรอื่น</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->

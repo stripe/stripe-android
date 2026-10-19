@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -112,10 +113,16 @@ private fun AppearancePicker(
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
+    var disableLuminanceBasedThemes by remember {
+        mutableStateOf(FeatureFlags.disableLuminanceBasedThemes.isEnabled)
+    }
 
     Scaffold(
         topBar = {
-            AppearanceTopAppBar(resetAppearance)
+            AppearanceTopAppBar {
+                resetAppearance()
+                disableLuminanceBasedThemes = FeatureFlags.disableLuminanceBasedThemes.isEnabled
+            }
         },
         modifier = Modifier
             .systemBarsPadding()
@@ -133,6 +140,14 @@ private fun AppearancePicker(
                     themeMode = currentAppearance.themeMode,
                     onThemeModeSelected = {
                         updateAppearance(currentAppearance.copy(themeMode = it))
+                    },
+                )
+                AppearanceToggle(
+                    label = FeatureFlags.disableLuminanceBasedThemes.name,
+                    value = disableLuminanceBasedThemes,
+                    onValueChange = {
+                        disableLuminanceBasedThemes = it
+                        FeatureFlags.disableLuminanceBasedThemes.setEnabled(it)
                     },
                 )
             }
@@ -1556,9 +1571,9 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
 private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = mapOf(
-        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
-        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
-        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+        R.drawable.ic_arrow_down to "Down",
+        R.drawable.ic_add_black_32dp to "Add",
+        R.drawable.ic_chevron_right to "Default"
     )
 
     items[iconResId].let {

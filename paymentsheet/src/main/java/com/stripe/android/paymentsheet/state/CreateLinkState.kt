@@ -146,8 +146,10 @@ internal class DefaultCreateLinkState @Inject constructor(
         }
 
         val requiresCheckoutSessionEmail =
-            initializationMode.requiresEmailAddress() && configuration.defaultBillingDetails?.email == null
-        if (requiresCheckoutSessionEmail && useWebLink) {
+            initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession &&
+                initializationMode.checkoutSessionResponse.customerEmail == null &&
+                configuration.defaultBillingDetails?.email == null
+        if (requiresCheckoutSessionEmail && useWebLink && elementsSession.linkPassthroughModeEnabled) {
             add(LinkDisabledReason.CheckoutSessionsRequiresEmail)
         }
 

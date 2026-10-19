@@ -1,10 +1,13 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
@@ -76,26 +80,26 @@ class ConsentScreenTest {
 
     private val mockNavController = mock<NavController>()
 
-    private val verificationPage = mock<VerificationPage>().also {
-        whenever(it.biometricConsent).thenReturn(
-            VerificationPageStaticContentConsentPage(
-                acceptButtonText = CONSENT_ACCEPT_TEXT,
-                title = CONSENT_TITLE,
-                privacyPolicy = CONSENT_PRIVACY_POLICY,
-                declineButtonText = CONSENT_DECLINE_TEXT,
-                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT,
-                lines = listOf(
-                    VerificationPageStaticConsentLineContent(
-                        icon = VerificationPageIconType.CAMERA,
-                        content = CONTENT_CAMERA_LINE
-                    ),
-                    VerificationPageStaticConsentLineContent(
-                        icon = VerificationPageIconType.CLOUD,
-                        content = CONTENT_CLOUD_LINE
-                    )
-                )
+    private val consentPage = VerificationPageStaticContentConsentPage(
+        acceptButtonText = CONSENT_ACCEPT_TEXT,
+        title = CONSENT_TITLE,
+        privacyPolicy = CONSENT_PRIVACY_POLICY,
+        declineButtonText = CONSENT_DECLINE_TEXT,
+        scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT,
+        lines = listOf(
+            VerificationPageStaticConsentLineContent(
+                icon = VerificationPageIconType.CAMERA,
+                content = CONTENT_CAMERA_LINE
+            ),
+            VerificationPageStaticConsentLineContent(
+                icon = VerificationPageIconType.CLOUD,
+                content = CONTENT_CLOUD_LINE
             )
         )
+    )
+
+    private val verificationPage = mock<VerificationPage>().also {
+        whenever(it.biometricConsent).thenReturn(consentPage)
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = listOf(Requirement.BIOMETRICCONSENT)
@@ -108,7 +112,10 @@ class ConsentScreenTest {
         runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(SUBTITLE_TAG).assertDoesNotExist()
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
+            onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
             onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -117,6 +124,18 @@ class ConsentScreenTest {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `when biometric consent has subtitle it is shown below title`() {
+        whenever(verificationPage.biometricConsent).thenReturn(
+            consentPage.copy(subtitle = CONSENT_SUBTITLE)
+        )
+
+        runScenario(Resource.success(verificationPage)) {
+            onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(SUBTITLE_TAG).assertTextEquals(CONSENT_SUBTITLE)
         }
     }
 
@@ -140,6 +159,9 @@ class ConsentScreenTest {
 
     @Test
     fun `when hideBrandingHeader is true consent header is hidden`() {
+        whenever(verificationPage.biometricConsent).thenReturn(
+            consentPage.copy(subtitle = CONSENT_SUBTITLE)
+        )
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
                 hideBrandingHeader = true,
@@ -149,6 +171,7 @@ class ConsentScreenTest {
 
         runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
+            onNodeWithTag(SUBTITLE_TAG).assertTextEquals(CONSENT_SUBTITLE)
         }
     }
 
@@ -188,6 +211,31 @@ class ConsentScreenTest {
         runScenario(Resource.success(verificationPage)) {
             onNodeWithTag(ACCEPT_BUTTON_TAG).assertIsDisplayed()
             onNodeWithTag(DECLINE_BUTTON_TAG).assertDoesNotExist()
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertIsDisplayed()
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    onNodeWithTag(ACCEPT_BUTTON_TAG).fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
+        }
+    }
+
+    @Test
+    fun `when biometric consent configuration is null policy is below consent buttons`() {
+        whenever(mockVerificationArgs.biometricConsent).thenReturn(null)
+
+        runScenario(Resource.success(verificationPage)) {
+            val privacyPolicy = onNodeWithTag(PRIVACY_POLICY_TAG)
+                .assertTextEquals(CONSENT_PRIVACY_POLICY)
+                .assertIsDisplayed()
+                .assert(!hasAnyAncestor(hasTestTag(SCROLLABLE_COLUMN_TAG)))
+            val declineButton = onNodeWithTag(DECLINE_BUTTON_TAG)
+
+            assertThat(
+                privacyPolicy.fetchSemanticsNode().boundsInRoot.top >
+                    declineButton.fetchSemanticsNode().boundsInRoot.bottom
+            ).isTrue()
         }
     }
 
@@ -283,6 +331,7 @@ class ConsentScreenTest {
 
     private companion object {
         const val CONSENT_TITLE = "title"
+        const val CONSENT_SUBTITLE = "Complete a one-time identity check"
         const val CONSENT_PRIVACY_POLICY = "privacy policy"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"

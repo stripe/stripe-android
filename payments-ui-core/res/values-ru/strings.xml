@@ -73,6 +73,8 @@
   <string name="stripe_konbini_confirmation_number_label">Телефон</string>
   <!-- Korean payment method mandate text -->
   <string name="stripe_kr_card_mandate">Подтверждая платеж через NICEPAY, вы тем самым разрешаете %s списывать средства с этого способа оплаты для будущих платежей согласно условиям компании.</string>
+  <!-- Message shown when Mondu is selected -->
+  <string name="stripe_mondu_buyer_message">Оплата по счету для корпоративных покупателей.</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Имя и фамилия, указанные на карте</string>
   <!-- Label for the Naver Pay funding source selector -->
@@ -89,6 +91,8 @@
   <string name="stripe_payment_method_bank">Банк</string>
   <!-- Label shown in the payment type picker describing a card payment -->
   <string name="stripe_payment_method_debit_or_credit_card">Дебетовая или кредитная карта</string>
+  <!-- Title shown above a card entry form when the customer has no saved cards. -->
+  <string name="stripe_paymentsheet_add_a_card">Добавить карту</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Добавить карту</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

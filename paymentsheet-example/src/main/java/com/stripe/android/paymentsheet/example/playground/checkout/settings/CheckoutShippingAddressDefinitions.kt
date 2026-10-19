@@ -11,6 +11,15 @@ internal object CheckoutShippingAddressDefinitions {
         displayName = "Set configuration",
     )
 
+    val title = optionalText(
+        key = "shipping_address.title",
+        displayName = "Title",
+    )
+    val buttonTitle = optionalText(
+        key = "shipping_address.button_title",
+        displayName = "Button title",
+    )
+
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
@@ -139,6 +148,6 @@ internal object CheckoutShippingAddressDefinitions {
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "controller.shipping_address",
         displayName = "Shipping Address Element",
-        children = arrayOf(shouldSetConfiguration, appearance.configuration),
+        children = arrayOf(shouldSetConfiguration, title, buttonTitle, appearance.configuration),
     )
 }

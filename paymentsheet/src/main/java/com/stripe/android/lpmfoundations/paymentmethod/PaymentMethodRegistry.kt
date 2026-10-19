@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CashAppPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GCashDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GoPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
@@ -28,8 +29,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MbWayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MonduDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgCardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgUssdDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgWalletDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
@@ -48,6 +54,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.TouchNGoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TrueMoneyDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
@@ -75,6 +82,7 @@ internal object PaymentMethodRegistry {
         CryptoDefinition,
         EpsDefinition,
         FpxDefinition,
+        GCashDefinition,
         GoPayDefinition,
         GrabPayDefinition,
         IdealWeroDefinition,
@@ -86,8 +94,13 @@ internal object PaymentMethodRegistry {
         MbWayDefinition,
         MoMoDefinition,
         MobilePayDefinition,
+        MonduDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
+        NgBankTransferDefinition,
+        NgCardDefinition,
+        NgUssdDefinition,
+        NgWalletDefinition,
         OxxoDefinition,
         P24Definition,
         PayByBankDefinition,
@@ -106,6 +119,7 @@ internal object PaymentMethodRegistry {
         ShopeePayDefinition,
         SunbitDefinition,
         SwishDefinition,
+        TouchNGoDefinition,
         TrueMoneyDefinition,
         TwintDefinition,
         UsBankAccountDefinition,

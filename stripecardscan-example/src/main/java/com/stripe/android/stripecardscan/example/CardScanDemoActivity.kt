@@ -2,6 +2,7 @@ package com.stripe.android.stripecardscan.example
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -12,6 +13,7 @@ class CardScanDemoActivity : AppCompatActivity() {
         ActivityCardScanDemoBinding.inflate(layoutInflater)
     }
 
+    @OptIn(ApiConfigurationPreview::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)

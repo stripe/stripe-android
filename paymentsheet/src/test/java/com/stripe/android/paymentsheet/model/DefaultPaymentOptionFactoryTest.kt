@@ -3,10 +3,13 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import android.graphics.drawable.ShapeDrawable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
@@ -21,21 +24,37 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @Suppress("DEPRECATION")
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class DefaultPaymentOptionFactoryTest {
 
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @get:Rule
+    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
+        isEnabled = false,
+    )
 
     @Test
     fun `create() with GooglePay should return expected object`() {
@@ -279,42 +298,94 @@ class DefaultPaymentOptionFactoryTest {
 
     @Test
     @Config(qualifiers = "notnight")
-    fun `always dark uses dark icon on light system`() = runIconScenario(
+    fun `iconPainter always dark uses dark icon on light system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysDark,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        useIconPainter = true,
     ) {
         assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
     }
 
     @Test
     @Config(qualifiers = "night")
-    fun `always light uses light icon on dark system`() = runIconScenario(
+    fun `iconPainter always light uses light icon on dark system`() = runIconScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysLight,
         lightComponent = Color.White,
         darkComponent = Color.Black,
+        useIconPainter = true,
     ) {
         assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
     @Config(qualifiers = "notnight")
-    fun `always dark with bright component uses light icon`() = runIconScenario(
-        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
-        lightComponent = Color.Black,
-        darkComponent = Color.White,
+    fun `always dark with bright component selects icon according to luminance flag`(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
+        @TestParameter useIconPainter: Boolean,
+    ) {
+        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
+        runIconScenario(
+            themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+            lightComponent = Color.Black,
+            darkComponent = Color.White,
+            useIconPainter = useIconPainter,
+        ) {
+            assertThat(loadedUrl).isEqualTo(if (disableLuminanceBasedThemes) DARK_ICON_URL else LIGHT_ICON_URL)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `always light with dark component selects icon according to luminance flag`(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
+        @TestParameter useIconPainter: Boolean,
+    ) {
+        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
+        runIconScenario(
+            themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+            lightComponent = Color.Black,
+            darkComponent = Color.White,
+            useIconPainter = useIconPainter,
+        ) {
+            assertThat(loadedUrl).isEqualTo(if (disableLuminanceBasedThemes) LIGHT_ICON_URL else DARK_ICON_URL)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `icon() uses light icon on light system`() = runIconScenario(
+        appearance = ConfigurationDefaults.appearance,
+        useIconPainter = false,
     ) {
         assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
     }
 
     @Test
     @Config(qualifiers = "night")
-    fun `always light with dark component uses dark icon`() = runIconScenario(
-        themeMode = PaymentSheet.ThemeMode.AlwaysLight,
-        lightComponent = Color.Black,
-        darkComponent = Color.White,
+    fun `icon() uses dark icon on dark system`() = runIconScenario(
+        appearance = ConfigurationDefaults.appearance,
+        useIconPainter = false,
     ) {
         assertThat(loadedUrl).isEqualTo(DARK_ICON_URL)
+    }
+
+    @Test
+    @Config(qualifiers = "notnight")
+    fun `icon() uses appearance instead of legacy mutable colors`(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
+    ) {
+        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
+        val originalColors = StripeTheme.colorsLightMutable
+        try {
+            StripeTheme.colorsLightMutable = originalColors.copy(component = Color.Black)
+
+            runIconScenario(appearance = ConfigurationDefaults.appearance, useIconPainter = false) {
+                assertThat(loadedUrl).isEqualTo(LIGHT_ICON_URL)
+            }
+        } finally {
+            StripeTheme.colorsLightMutable = originalColors
+        }
     }
 
     @Test
@@ -354,6 +425,21 @@ class DefaultPaymentOptionFactoryTest {
         themeMode: PaymentSheet.ThemeMode,
         lightComponent: Color,
         darkComponent: Color,
+        useIconPainter: Boolean,
+        block: IconScenario.() -> Unit,
+    ) = runIconScenario(
+        appearance = PaymentSheet.Appearance.Builder()
+            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
+            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
+            .themeMode(themeMode)
+            .build(),
+        useIconPainter = useIconPainter,
+        block = block,
+    )
+
+    private fun runIconScenario(
+        appearance: PaymentSheet.Appearance,
+        useIconPainter: Boolean,
         block: IconScenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -366,11 +452,6 @@ class DefaultPaymentOptionFactoryTest {
             cardArtDrawableLoader = { null },
             context = context,
         )
-        val appearance = PaymentSheet.Appearance.Builder()
-            .colorsLight(PaymentSheet.Colors.Builder.light().component(lightComponent).build())
-            .colorsDark(PaymentSheet.Colors.Builder.dark().component(darkComponent).build())
-            .themeMode(themeMode)
-            .build()
         val selection = PaymentSelection.CustomPaymentMethod(
             id = "cpm_123",
             billingDetails = null,
@@ -379,11 +460,20 @@ class DefaultPaymentOptionFactoryTest {
             darkThemeIconUrl = DARK_ICON_URL,
         )
 
-        factory.create(
+        val paymentOption = factory.create(
             selection = selection,
             linkBrand = null,
             appearance = appearance,
-        ).icon()
+        )
+
+        if (useIconPainter) {
+            composeRule.setContent {
+                paymentOption.iconPainter
+            }
+            composeRule.waitForIdle()
+        } else {
+            paymentOption.icon()
+        }
 
         IconScenario(loadedUrl = imageLoader.awaitLoadCall().url).apply(block)
         imageLoader.ensureAllEventsConsumed()

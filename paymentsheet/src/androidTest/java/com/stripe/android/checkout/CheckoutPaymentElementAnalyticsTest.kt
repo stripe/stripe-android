@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -88,6 +89,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         contentPage.clickOnLpm("card")
         formPage.waitUntilVisible()
+
+        networkRule.validateAnalyticsRequest(
+            eventName = "mc_dismiss",
+            productUsage = setOf("Checkout"),
+        )
+        Espresso.pressBack()
+        formPage.waitUntilMissing()
         markTestSucceeded()
     }
 
@@ -136,8 +144,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
-                productUsage = setOf("Checkout"),
+                eventName = "checkout_elements.confirm.failed",
+                productUsage = setOf("checkout_elements"),
                 analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),

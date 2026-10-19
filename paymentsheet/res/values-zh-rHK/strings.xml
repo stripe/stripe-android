@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">使用 Link 建立帳戶，以便在網站上更快結帳</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">透過 %s 建立賬戶，網上各處享受更快捷的結賬體驗</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">我們無法驗證貴賬戶。請關閉此視窗並重試。</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">電郵地址</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">更多選項</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">我們需要驗證閣下的額外資訊後才能透過電郵向閣下傳送驗證碼。請輸入以 ••%s 結尾的手機號碼。</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">在我們將代碼發送至閣下的電郵之前，我們需要核實有關閣下的額外資訊。請輸入閣下 Link 帳戶上的電話號碼。</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">驗證閣下的電話號碼</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">在 %d 秒後重新發送代碼</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -106,6 +120,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">登出 %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">請在 %s 內透過你的 MB WAY 應用程式確認付款，以完成購買。</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">更多付款方式</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出錯了，檢查您的連接並重試。</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -33,6 +34,22 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
+        val paymentOptionResource = DefaultPaymentOptionResource(
+            appearance = appearance,
+            loader = { packet ->
+                val useDarkThemeIcon = packet.appearance.shouldUseDarkThemeIcon(
+                    isSystemDarkTheme = packet.isSystemDarkTheme,
+                    context = context,
+                )
+                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
+                    drawableResourceId = drawableResourceId,
+                    drawableResourceIdNight = drawableResourceId,
+                    lightThemeIconUrl = lightThemeIconUrl,
+                    darkThemeIconUrl = darkThemeIconUrl,
+                    useDarkThemeIcon = useDarkThemeIcon,
+                )
+            }
+        )
 
         return PaymentOption(
             drawableResourceId = drawableResourceId,
@@ -41,25 +58,24 @@ internal class DefaultPaymentOptionFactory @Inject constructor(
             _labels = PaymentOptionLabelsFactory.create(context, selection, linkBrand),
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
-            imageLoader = { isSystemDark: Boolean? ->
-                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
-                    drawableResourceId = drawableResourceId,
-                    drawableResourceIdNight = drawableResourceId,
-                    lightThemeIconUrl = lightThemeIconUrl,
-                    darkThemeIconUrl = darkThemeIconUrl,
-                    useDarkThemeIcon = appearance.shouldUseDarkThemeIcon(isSystemDark ?: context.isSystemDarkTheme()),
-                )
-            },
+            paymentOptionResource = paymentOptionResource
         )
     }
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(context: Context): Boolean {
-    return shouldUseDarkThemeIcon(context.isSystemDarkTheme())
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(
+    isSystemDarkTheme: Boolean?,
+    context: Context,
+): Boolean {
+    val isSystemDarkTheme = isSystemDarkTheme ?: context.isSystemDarkTheme()
+    return shouldUseDarkThemeIcon(isSystemDarkTheme)
 }
 
-internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDark: Boolean): Boolean {
-    val isDark = themeMode.isDarkTheme(isSystemDark)
+internal fun PaymentSheet.Appearance.shouldUseDarkThemeIcon(isSystemDarkTheme: Boolean): Boolean {
+    val isDark = themeMode.isDarkTheme(isSystemDarkTheme)
+    if (FeatureFlags.disableLuminanceBasedThemes.isEnabled) {
+        return isDark
+    }
     val componentColor = Color(getColors(isDark).component)
     return componentColor.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
 }
