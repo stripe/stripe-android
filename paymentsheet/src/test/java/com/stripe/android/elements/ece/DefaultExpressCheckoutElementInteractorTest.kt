@@ -90,6 +90,17 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state contains configured corner radius`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .cornerRadius(12f)
+            ),
+    ) {
+        assertThat(interactor.state.value.cornerRadius).isEqualTo(12f)
+    }
+
+    @Test
     fun `state has no buttons when ECE configuration is absent`() = runScenario(
         configuration = null,
     ) {

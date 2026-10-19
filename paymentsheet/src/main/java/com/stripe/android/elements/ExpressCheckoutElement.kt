@@ -223,6 +223,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
             private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
+            private var cornerRadius: Float = DEFAULT_CORNER_RADIUS
 
             /** Themes for express buttons. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -297,16 +298,34 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.buttonTheme = buttonTheme
             }
 
+            /**
+             * Sets the corner radius of the express buttons in density-independent pixels.
+             *
+             * Must be finite and non-negative. Defaults to 6.
+             */
+            fun cornerRadius(cornerRadius: Float): Appearance = apply {
+                require(cornerRadius.isFinite() && cornerRadius >= 0f) {
+                    "cornerRadius must be finite and non-negative."
+                }
+                this.cornerRadius = cornerRadius
+            }
+
             @Parcelize
             internal data class State(
                 val buttonLayout: ButtonLayout.State,
                 val buttonTheme: ButtonTheme,
+                val cornerRadius: Float,
             ) : Parcelable
 
             internal fun build(): State = State(
                 buttonLayout = buttonLayout.build(),
                 buttonTheme = buttonTheme,
+                cornerRadius = cornerRadius,
             )
+
+            private companion object {
+                const val DEFAULT_CORNER_RADIUS = 6f
+            }
         }
 
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()

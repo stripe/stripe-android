@@ -20,6 +20,7 @@ import com.stripe.android.elements.ece.ExpressButton
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractorStateFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -54,6 +55,20 @@ internal class ExpressCheckoutElementScreenshotTest {
                     ),
                 ),
                 googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+            )
+        }
+    }
+
+    @Test
+    fun rendersGooglePayAndLinkButtonsWithCustomCornerRadius() {
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        ExpressCheckoutElementInteractorStateFactory.create(cornerRadius = 24f)
+                    ),
+                ),
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -138,7 +153,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                 .alpha(if (enabled) 1f else 0.5f)
                 .background(
                     color = Color.Black,
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(PrimaryButtonTheme.shape.cornerRadius),
                 ),
             contentAlignment = Alignment.Center,
         ) {

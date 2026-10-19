@@ -27,6 +27,7 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic
         )
+        assertThat(state.appearance.cornerRadius).isEqualTo(6f)
     }
 
     @Test
@@ -69,6 +70,7 @@ internal class ExpressCheckoutElementTest {
                             .maxRows(1)
                     )
                     .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+                    .cornerRadius(12f)
             )
             .build()
 
@@ -77,6 +79,25 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
         )
+        assertThat(state.appearance.cornerRadius).isEqualTo(12f)
+    }
+
+    @Test
+    fun `appearance rejects negative corner radius`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance().cornerRadius(-1f)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+    }
+
+    @Test
+    fun `appearance rejects non-finite corner radius`() {
+        val exception = runCatching {
+            ExpressCheckoutElement.Configuration.Appearance().cornerRadius(Float.NaN)
+        }.exceptionOrNull()
+
+        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
     }
 
     @Test

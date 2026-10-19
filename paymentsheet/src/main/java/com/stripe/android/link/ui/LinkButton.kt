@@ -71,7 +71,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 
 private val LinkButtonTheme.textColor: Color
@@ -109,9 +108,12 @@ private fun LinkButtonTheme.logoRes(linkBrand: LinkBrand): Int = when (linkBrand
 }
 
 @Composable
-private fun Modifier.themeBorder(theme: LinkButtonTheme): Modifier {
+private fun Modifier.themeBorder(
+    theme: LinkButtonTheme,
+    shape: RoundedCornerShape,
+): Modifier {
     return theme.borderColor?.let { borderColor ->
-        this.border(1.dp, borderColor, LinkButtonShape)
+        this.border(1.dp, borderColor, shape)
     } ?: this
 }
 
@@ -132,10 +134,6 @@ private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
 private val LinkButtonVerticalPadding = 10.dp
 private val LinkButtonHorizontalPadding = 25.dp
 private val LinkButtonCompactWidth = 200.dp
-private val LinkButtonShape: RoundedCornerShape
-    get() = RoundedCornerShape(
-        StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
-    )
 
 private const val LINK_ICON_ID = "LinkIcon"
 private const val LINK_DIVIDER_SPACER_ID = "LinkDividerSpacer"
@@ -204,6 +202,7 @@ internal fun LinkButton(
         ContentAlpha.disabled
     }
     val compact = containerWidth?.let { it < LinkButtonCompactWidth } == true
+    val shape = RoundedCornerShape(PrimaryButtonTheme.shape.cornerRadius)
     CompositionLocalProvider(
         LocalContentAlpha provides alpha
     ) {
@@ -213,10 +212,10 @@ internal fun LinkButton(
                 modifier = modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
-                    .themeBorder(theme)
+                    .themeBorder(theme, shape)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
-                shape = LinkButtonShape,
+                shape = shape,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = theme.buttonColors(),
                 contentPadding = PaddingValues(
