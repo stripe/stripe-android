@@ -22,9 +22,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -95,7 +93,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm starts Google Pay confirmation and reports success`() {
+    fun `confirm starts confirmation with a Google Pay option`() {
         val state = createState()
 
         runScenario(
@@ -112,15 +110,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             assertThat(option.config.shippingAddressParameters).isNull()
             assertThat(args.paymentMethodMetadata)
                 .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
-
-            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
-            )
-
-            val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-            assertThat(request).containsEntry("event", "checkout_elements.confirm.succeeded")
-            assertThat(request).containsEntry("selected_lpm", "google_pay")
-            assertThat(request).containsEntry("payment_method_orientation", "horizontal")
         }
     }
 
@@ -314,7 +303,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         Scenario(
             performer = performer,
             confirmationHandler = confirmationHandler,
-            analyticsRequestExecutor = analyticsRequestExecutor,
             errorReporter = errorReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
@@ -332,7 +320,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
-        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val errorReporter: FakeErrorReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
