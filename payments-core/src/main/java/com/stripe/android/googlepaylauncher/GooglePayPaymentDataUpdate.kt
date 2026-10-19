@@ -138,7 +138,7 @@ class GooglePayPaymentDataUpdate(
         private const val FIELD_CALLBACK_TRIGGER = "callbackTrigger"
         private const val FIELD_SHIPPING_ADDRESS = "shippingAddress"
         private const val FIELD_PAYMENT_METHOD_DATA = "paymentMethodData"
-        private const val FIELD_INTERMEDIATE_CARD_INFO = "intermediateCardInfo"
+        private const val FIELD_INTERMEDIATE_CARD_INFO = "info"
         private const val FIELD_BILLING_ADDRESS = "billingAddress"
         private const val FIELD_COUNTRY_CODE = "countryCode"
         private const val FIELD_ADMINISTRATIVE_AREA = "administrativeArea"
