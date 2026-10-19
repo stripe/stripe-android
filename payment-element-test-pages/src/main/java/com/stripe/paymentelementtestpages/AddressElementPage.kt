@@ -47,7 +47,9 @@ class AddressElementPage(
         context.getString(R.string.stripe_paymentsheet_close)
     )
     private val scrim = composeTestRule.onNodeWithContentDescription(context.getString(ComposeUiR.string.close_sheet))
-    private val discardDialogTitle = context.getString(R.string.stripe_paymentsheet_address_element_discard_changes_title)
+    private val discardDialogTitle = context.getString(
+        R.string.stripe_paymentsheet_address_element_discard_changes_title
+    )
     private val discardDialogBody = context.getString(R.string.stripe_paymentsheet_address_element_discard_changes_body)
 
     fun waitUntilVisible() {
