@@ -3,15 +3,19 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
@@ -52,6 +56,7 @@ class CheckoutSessionRepositoryTest {
     fun `init sends elements_session_client params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutInit(
+            header(HEADER_STRIPE_VERSION, "2026-08-26.dahlia"),
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
             bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
@@ -72,6 +77,7 @@ class CheckoutSessionRepositoryTest {
     fun `detach sends elements_session_client params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutUpdate(
+            header(HEADER_STRIPE_VERSION, "2026-08-26.dahlia"),
             bodyPart("payment_method_to_detach", "pm_123"),
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             bodyPart("elements_session_client[locale]", clientParams.locale),
@@ -85,6 +91,38 @@ class CheckoutSessionRepositoryTest {
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             paymentMethodId = "pm_123",
             clientParams = clientParams,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `confirm uses Dahlia`() = runTest {
+        networkRule.checkoutConfirm(
+            header(HEADER_STRIPE_VERSION, "2026-08-26.dahlia"),
+            bodyPart("payment_method", "pm_123"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = repository.confirm(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            params = ConfirmCheckoutSessionParams(
+                paymentMethodId = "pm_123",
+                expectedPaymentMethodType = "card",
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = null,
+                    paymentIntentCreationFlow = null,
+                    paymentMethodSelectionFlow = null,
+                    checkoutSessionId = DEFAULT_CHECKOUT_SESSION_ID,
+                ),
+                returnUrl = "stripesdk://return_url",
+                expectedAmount = 5099L,
+                savePaymentMethod = null,
+                shipping = null,
+                collectedInformation = null,
+            ),
         )
 
         assertThat(result.isSuccess).isTrue()

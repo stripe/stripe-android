@@ -28,7 +28,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
-        apiVersion = Stripe.API_VERSION,
+        apiVersion = "2026-08-26.dahlia",
         sdkVersion = StripeSdkVersion.VERSION,
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
