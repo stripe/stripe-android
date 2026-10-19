@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.localizedErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
@@ -158,7 +159,7 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             _operationMessage.value = operation().fold(
                 onSuccess = { successMessage },
-                onFailure = { it.message ?: "Operation failed" },
+                onFailure = { it.localizedErrorMessage() ?: "Operation failed" },
             )
         }
     }
@@ -172,14 +173,14 @@ internal class CheckoutControllerExampleViewModel(
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
             is CheckoutController.Result.Failed -> {
-                result.error.message?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+                result.error.localizedErrorMessage()?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
             }
         }
     }
 
     private fun showError(prefix: String, error: Throwable) {
         Log.e(TAG, prefix, error)
-        _status.value = Status.Error(error.message ?: prefix)
+        _status.value = Status.Error(error.localizedErrorMessage() ?: prefix)
     }
 
     private fun clearMessages() {
