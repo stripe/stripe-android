@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 internal class LocalizedErrorMessageTest {
     @Test
     fun `returns server message regardless of error type`(
-        @TestParameter(values = ["card_error", "invalid_request_error", "api_error"]) type: String,
+        @TestParameter(value = ["card_error", "invalid_request_error", "api_error"]) type: String,
     ) {
         val error = APIException(
             stripeError = StripeError(type = type, message = "Ce code promotionnel est invalide."),
