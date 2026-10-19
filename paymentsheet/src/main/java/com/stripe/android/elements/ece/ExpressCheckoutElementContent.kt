@@ -77,7 +77,7 @@ internal fun ExpressCheckoutElementContent(
     )
 
     PrimaryButtonTheme(
-        shape = PrimaryButtonShape(cornerRadius = state.cornerRadius.dp),
+        shape = PrimaryButtonShape(cornerRadius = state.cornerRadiusDp.dp),
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)

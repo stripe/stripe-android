@@ -94,10 +94,10 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         configuration = ExpressCheckoutElement.Configuration()
             .appearance(
                 ExpressCheckoutElement.Configuration.Appearance()
-                    .cornerRadius(12f)
+                    .cornerRadiusDp(12f)
             ),
     ) {
-        assertThat(interactor.state.value.cornerRadius).isEqualTo(12f)
+        assertThat(interactor.state.value.cornerRadiusDp).isEqualTo(12f)
     }
 
     @Test

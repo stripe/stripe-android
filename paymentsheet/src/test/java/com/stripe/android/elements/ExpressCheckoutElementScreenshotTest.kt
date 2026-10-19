@@ -65,7 +65,7 @@ internal class ExpressCheckoutElementScreenshotTest {
             ExpressCheckoutElementContent(
                 interactor = FakeExpressCheckoutElementInteractor(
                     state = stateFlowOf(
-                        ExpressCheckoutElementInteractorStateFactory.create(cornerRadius = 24f)
+                        ExpressCheckoutElementInteractorStateFactory.create(cornerRadiusDp = 24f)
                     ),
                 ),
                 googlePayButton = { _, _, _ -> FakeGooglePayButton() },

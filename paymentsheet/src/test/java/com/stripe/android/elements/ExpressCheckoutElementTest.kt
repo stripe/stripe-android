@@ -3,6 +3,7 @@ package com.stripe.android.elements
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
@@ -27,7 +28,8 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic
         )
-        assertThat(state.appearance.cornerRadius).isEqualTo(6f)
+        assertThat(state.appearance.cornerRadiusDp)
+            .isEqualTo(StripeThemeDefaults.shapes.cornerRadius)
     }
 
     @Test
@@ -70,7 +72,7 @@ internal class ExpressCheckoutElementTest {
                             .maxRows(1)
                     )
                     .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
-                    .cornerRadius(12f)
+                    .cornerRadiusDp(12f)
             )
             .build()
 
@@ -79,25 +81,7 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
         )
-        assertThat(state.appearance.cornerRadius).isEqualTo(12f)
-    }
-
-    @Test
-    fun `appearance rejects negative corner radius`() {
-        val exception = runCatching {
-            ExpressCheckoutElement.Configuration.Appearance().cornerRadius(-1f)
-        }.exceptionOrNull()
-
-        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun `appearance rejects non-finite corner radius`() {
-        val exception = runCatching {
-            ExpressCheckoutElement.Configuration.Appearance().cornerRadius(Float.NaN)
-        }.exceptionOrNull()
-
-        assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(state.appearance.cornerRadiusDp).isEqualTo(12f)
     }
 
     @Test

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -223,7 +224,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
             private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
-            private var cornerRadius: Float = DEFAULT_CORNER_RADIUS
+            private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
 
             /** Themes for express buttons. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -299,33 +300,26 @@ class ExpressCheckoutElement @Inject internal constructor(
             }
 
             /**
-             * Sets the corner radius of the express buttons in density-independent pixels.
+             * The corner radius used for buttons in Express Checkout Element.
              *
-             * Must be finite and non-negative. Defaults to 6.
+             * @param cornerRadiusDp The corner radius in dp.
              */
-            fun cornerRadius(cornerRadius: Float): Appearance = apply {
-                require(cornerRadius.isFinite() && cornerRadius >= 0f) {
-                    "cornerRadius must be finite and non-negative."
-                }
-                this.cornerRadius = cornerRadius
+            fun cornerRadiusDp(cornerRadiusDp: Float): Appearance = apply {
+                this.cornerRadiusDp = cornerRadiusDp
             }
 
             @Parcelize
             internal data class State(
                 val buttonLayout: ButtonLayout.State,
                 val buttonTheme: ButtonTheme,
-                val cornerRadius: Float,
+                val cornerRadiusDp: Float,
             ) : Parcelable
 
             internal fun build(): State = State(
                 buttonLayout = buttonLayout.build(),
                 buttonTheme = buttonTheme,
-                cornerRadius = cornerRadius,
+                cornerRadiusDp = cornerRadiusDp,
             )
-
-            private companion object {
-                const val DEFAULT_CORNER_RADIUS = 6f
-            }
         }
 
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()

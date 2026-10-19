@@ -21,7 +21,7 @@ internal interface ExpressCheckoutElementInteractor {
     data class State(
         val expressButtons: List<ExpressButton>,
         val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
-        val cornerRadius: Float,
+        val cornerRadiusDp: Float,
         val enabled: Boolean,
     )
 
@@ -61,7 +61,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
-                cornerRadius = ExpressCheckoutElement.Configuration.Appearance().build().cornerRadius,
+                cornerRadiusDp = ExpressCheckoutElement.Configuration.Appearance().build().cornerRadiusDp,
                 enabled = !isUpdating,
             )
         }
@@ -82,7 +82,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
             buttonLayout = configuration.appearance.buttonLayout,
-            cornerRadius = configuration.appearance.cornerRadius,
+            cornerRadiusDp = configuration.appearance.cornerRadiusDp,
             enabled = !isUpdating,
         )
     }
