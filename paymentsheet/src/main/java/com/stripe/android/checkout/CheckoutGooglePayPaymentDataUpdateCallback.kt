@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -29,6 +30,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         }
 
         val countryCode = currentState.checkoutSessionResponse.merchantCountry
+
+        Log.d("xkcd", "onPaymentDataChanged called for trigger: ${paymentDataUpdate.callbackTrigger?.name}")
 
         return when (val trigger = paymentDataUpdate.callbackTrigger) {
             GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
@@ -86,6 +89,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 result.address
             }
         }
+
+        Log.d("xkcd", "updating address to be addr in ${address.city}, ${address.country}")
 
         return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = currentState.checkoutSessionResponse,

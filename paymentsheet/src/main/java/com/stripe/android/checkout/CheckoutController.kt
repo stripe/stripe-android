@@ -1396,6 +1396,10 @@ class CheckoutController @Inject internal constructor(
                 state = state?.trim(),
             )
         }
+
+        override fun toString(): String {
+            return "addr in $city, $country"
+        }
     }
 
     /**

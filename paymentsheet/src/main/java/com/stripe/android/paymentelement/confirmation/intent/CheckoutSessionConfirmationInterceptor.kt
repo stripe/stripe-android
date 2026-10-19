@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -123,6 +124,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         val checkoutSessionResponse = integrationMetadata.checkoutSessionResponse
         val initialEstimatedTotal = checkoutSessionResponse.amount
         val billingAddress = billingDetails?.address?.toCheckoutAddress()
+        Log.d("xkcd", "billing address for PM: $billingAddress")
         val updatedCheckoutSessionResponse = if (billingAddress != null) {
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
