@@ -274,7 +274,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider<PaymentMethodMetadata?> { null }
+        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
         val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
