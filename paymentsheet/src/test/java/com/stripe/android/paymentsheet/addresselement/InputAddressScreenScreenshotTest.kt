@@ -1,4 +1,7 @@
-@file:OptIn(com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class)
+@file:OptIn(
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+)
 
 package com.stripe.android.paymentsheet.addresselement
 
@@ -17,8 +20,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
@@ -32,6 +37,7 @@ import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.stripe.android.elements.ShippingAddressElement.Configuration.Appearance as ShippingAppearance
 
 @RunWith(TestParameterInjector::class)
 internal class InputAddressScreenScreenshotTest {
@@ -43,16 +49,31 @@ internal class InputAddressScreenScreenshotTest {
     )
 
     @Test
-    fun `default appearance renders the default appearance`() {
-        snapshot(PaymentSheet.Appearance())
+    fun `default appearance renders the default appearance`(
+        @TestParameter appearanceSource: AppearanceSource,
+    ) {
+        val appearance = when (appearanceSource) {
+            AppearanceSource.LegacyAddressElement -> PaymentSheet.Appearance()
+            AppearanceSource.ShippingAddressElement ->
+                ShippingAddressElement.Configuration().build().appearance.asPaymentSheet()
+        }
+
+        snapshot(appearance = appearance, appearanceSource = appearanceSource)
     }
 
     @Test
     fun `custom appearance renders in every theme mode`(
+        @TestParameter appearanceSource: AppearanceSource,
         @TestParameter themeMode: PaymentSheet.ThemeMode,
     ) {
+        val appearance = when (appearanceSource) {
+            AppearanceSource.LegacyAddressElement -> configuredLegacyAppearance(themeMode)
+            AppearanceSource.ShippingAddressElement -> configuredShippingAppearance(themeMode)
+        }
+
         snapshot(
-            appearance = configuredAppearance(themeMode),
+            appearance = appearance,
+            appearanceSource = appearanceSource,
             title = "Checkout shipping address",
             primaryButtonText = "Use this address",
         )
@@ -63,7 +84,7 @@ internal class InputAddressScreenScreenshotTest {
         paparazziRule.snapshot {
             Box(modifier = Modifier.height(500.dp)) {
                 InputAddressTestScreen(
-                    appearance = PaymentSheet.Appearance(),
+                    config = AddressLauncher.Configuration(),
                     title = "Checkout shipping address",
                     primaryButtonText = "Use this address",
                     scrollToBottom = true,
@@ -107,12 +128,23 @@ internal class InputAddressScreenScreenshotTest {
 
     private fun snapshot(
         appearance: PaymentSheet.Appearance,
+        appearanceSource: AppearanceSource,
         title: String? = null,
         primaryButtonText: String? = null,
     ) {
+        val config = AddressLauncher.Configuration(
+            appearance = appearance,
+            additionalFields = when (appearanceSource) {
+                AppearanceSource.LegacyAddressElement -> null
+                AppearanceSource.ShippingAddressElement -> AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                )
+            },
+        )
+
         paparazziRule.snapshot {
             InputAddressTestScreen(
-                appearance = appearance,
+                config = config,
                 title = title ?: stringResource(
                     R.string.stripe_paymentsheet_address_element_shipping_address
                 ),
@@ -125,7 +157,7 @@ internal class InputAddressScreenScreenshotTest {
 
     @Composable
     private fun InputAddressTestScreen(
-        appearance: PaymentSheet.Appearance,
+        config: AddressLauncher.Configuration,
         title: String,
         primaryButtonText: String,
         scrollToBottom: Boolean = false,
@@ -133,12 +165,12 @@ internal class InputAddressScreenScreenshotTest {
         val addressFormController = remember {
             AddressFormController(
                 initialValues = emptyMap(),
-                config = AddressLauncher.Configuration(),
+                config = config,
                 interactor = TestAutocompleteAddressInteractor.noOp(),
             )
         }
 
-        PaymentElementTheme(appearance = appearance) {
+        PaymentElementTheme(appearance = config.appearance) {
             InputAddressScreen(
                 primaryButtonEnabled = addressFormController.completeFormValues.value != null,
                 primaryButtonLoading = false,
@@ -214,38 +246,27 @@ internal class InputAddressScreenScreenshotTest {
         }
     }
 
-    private fun configuredAppearance(
+    private fun configuredLegacyAppearance(
         themeMode: PaymentSheet.ThemeMode,
     ) = PaymentSheet.Appearance(
         // Match Material's background colors so contentColorFor would choose onBackground
         // instead of our custom onSurface unless the screen sets contentColor explicitly.
-        colorsLight = PaymentSheet.Colors(
-            primary = Color(0xFF0057B8),
-            surface = Color.White,
-            component = Color(0xFFE0ECFF),
-            componentBorder = Color(0xFF0057B8),
-            componentDivider = Color(0xFF8AA4C5),
-            onComponent = Color(0xFF071A2F),
-            subtitle = Color(0xFF3E5A75),
-            placeholderText = Color(0xFF5F7891),
-            onSurface = Color(0xFFAD167E),
-            appBarIcon = Color(0xFF0057B8),
-            error = Color(0xFFB00020),
-        ),
-        colorsDark = PaymentSheet.Colors(
-            primary = Color(0xFF8CC8FF),
-            surface = Color(0xFF121212),
-            component = Color(0xFF203448),
-            componentBorder = Color(0xFF8CC8FF),
-            componentDivider = Color(0xFF64809B),
-            onComponent = Color.White,
-            subtitle = Color(0xFFB7C9D9),
-            placeholderText = Color(0xFF9FB3C5),
-            onSurface = Color.Cyan,
-            appBarIcon = Color(0xFF8CC8FF),
-            error = Color(0xFFFF8A80),
-        ),
+        colorsLight = configuredLegacyColorsLight(),
+        colorsDark = configuredLegacyColorsDark(),
         themeMode = themeMode,
+        shapes = PaymentSheet.Shapes(cornerRadiusDp = 16f, borderStrokeWidthDp = 3f),
+        typography = PaymentSheet.Typography(
+            sizeScaleFactor = 1.2f,
+            fontResId = R.font.cursive,
+            custom = PaymentSheet.Typography.Custom(
+                h1 = PaymentSheet.Typography.Font(
+                    fontFamily = R.font.cursive,
+                    fontSizeSp = 26f,
+                    fontWeight = 700,
+                    letterSpacingSp = 1f,
+                )
+            ),
+        ),
         primaryButton = PaymentSheet.PrimaryButton(
             colorsLight = PaymentSheet.PrimaryButtonColors(
                 background = Color(0xFF0057B8),
@@ -268,6 +289,104 @@ internal class InputAddressScreenScreenshotTest {
             ),
         ),
     )
+
+    private fun configuredLegacyColorsLight() = PaymentSheet.Colors(
+        primary = Color(0xFF0057B8),
+        surface = Color.White,
+        component = Color(0xFFE0ECFF),
+        componentBorder = Color(0xFF0057B8),
+        componentDivider = Color(0xFF8AA4C5),
+        onComponent = Color(0xFF071A2F),
+        subtitle = Color(0xFF3E5A75),
+        placeholderText = Color(0xFF5F7891),
+        onSurface = Color(0xFFAD167E),
+        appBarIcon = Color(0xFF0057B8),
+        error = Color(0xFFB00020),
+    )
+
+    private fun configuredLegacyColorsDark() = PaymentSheet.Colors(
+        primary = Color(0xFF8CC8FF),
+        surface = Color(0xFF121212),
+        component = Color(0xFF203448),
+        componentBorder = Color(0xFF8CC8FF),
+        componentDivider = Color(0xFF64809B),
+        onComponent = Color.White,
+        subtitle = Color(0xFFB7C9D9),
+        placeholderText = Color(0xFF9FB3C5),
+        onSurface = Color.Cyan,
+        appBarIcon = Color(0xFF8CC8FF),
+        error = Color(0xFFFF8A80),
+    )
+
+    private fun configuredShippingAppearance(
+        themeMode: PaymentSheet.ThemeMode,
+    ): PaymentSheet.Appearance {
+        val appearance = ShippingAppearance()
+            .colorsLight(configuredShippingColorsLight())
+            .colorsDark(configuredShippingColorsDark())
+            .themeMode(
+                when (themeMode) {
+                    PaymentSheet.ThemeMode.Automatic -> ShippingAppearance.ThemeMode.Automatic
+                    PaymentSheet.ThemeMode.AlwaysLight -> ShippingAppearance.ThemeMode.AlwaysLight
+                    PaymentSheet.ThemeMode.AlwaysDark -> ShippingAppearance.ThemeMode.AlwaysDark
+                }
+            )
+            .primaryButton(configuredShippingPrimaryButton())
+
+        return ShippingAddressElement.Configuration().appearance(appearance).build().appearance.asPaymentSheet()
+    }
+
+    private fun configuredShippingColorsLight() = ShippingAppearance.Colors.light()
+        .primary(Color(0xFF0057B8))
+        .surface(Color.White)
+        .component(Color(0xFFE0ECFF))
+        .componentBorder(Color(0xFF0057B8))
+        .componentDivider(Color(0xFF8AA4C5))
+        .onComponent(Color(0xFF071A2F))
+        .subtitle(Color(0xFF3E5A75))
+        .placeholderText(Color(0xFF5F7891))
+        .onSurface(Color(0xFFAD167E))
+        .appBarIcon(Color(0xFF0057B8))
+        .error(Color(0xFFB00020))
+
+    private fun configuredShippingColorsDark() = ShippingAppearance.Colors.dark()
+        .primary(Color(0xFF8CC8FF))
+        .surface(Color(0xFF121212))
+        .component(Color(0xFF203448))
+        .componentBorder(Color(0xFF8CC8FF))
+        .componentDivider(Color(0xFF64809B))
+        .onComponent(Color.White)
+        .subtitle(Color(0xFFB7C9D9))
+        .placeholderText(Color(0xFF9FB3C5))
+        .onSurface(Color.Cyan)
+        .appBarIcon(Color(0xFF8CC8FF))
+        .error(Color(0xFFFF8A80))
+
+    private fun configuredShippingPrimaryButton() = ShippingAppearance.PrimaryButton()
+        .colorsLight(
+            ShippingAppearance.PrimaryButton.Colors.light()
+                .background(Color(0xFF0057B8))
+                .onBackground(Color.White)
+                .border(Color(0xFF003B7A))
+        )
+        .colorsDark(
+            ShippingAppearance.PrimaryButton.Colors.dark()
+                .background(Color(0xFF8CC8FF))
+                .onBackground(Color(0xFF071A2F))
+                .border(Color.White)
+        )
+        .shape(
+            ShippingAppearance.PrimaryButton.Shape()
+                .cornerRadiusDp(28f)
+                .borderStrokeWidthDp(2f)
+                .heightDp(56f)
+        )
+        .typography(ShippingAppearance.PrimaryButton.Typography().fontSizeSp(18f))
+
+    enum class AppearanceSource {
+        LegacyAddressElement,
+        ShippingAddressElement,
+    }
 
     private companion object {
         val SAVE_ERROR = "Taxes can't be calculated for this address.".resolvableString
