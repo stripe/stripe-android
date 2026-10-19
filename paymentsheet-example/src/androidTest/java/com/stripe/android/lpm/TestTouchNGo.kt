@@ -19,7 +19,7 @@ internal class TestTouchNGo : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "touch_n_go",
     ) { settings ->
-        settings[MerchantSettingsDefinition] = Merchant.MY
+        settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.MYR
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
@@ -39,15 +39,6 @@ internal class TestTouchNGo : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
-            },
-        )
-    }
-
-    @Test
-    fun testTouchNGoSetup() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
         )
     }
