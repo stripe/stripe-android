@@ -91,6 +91,8 @@
   <string name="stripe_payment_method_bank">銀行</string>
   <!-- Label shown in the payment type picker describing a card payment -->
   <string name="stripe_payment_method_debit_or_credit_card">デビットカードまたはクレジットカード</string>
+  <!-- Title shown above a card entry form when the customer has no saved cards. -->
+  <string name="stripe_paymentsheet_add_a_card">カードを追加</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">カードを追加</string>
   <!-- Title shown above a view allowing the customer to save a card. -->
