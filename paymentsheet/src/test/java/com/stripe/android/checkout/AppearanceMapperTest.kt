@@ -77,7 +77,7 @@ class AppearanceMapperTest {
     }
 
     @Test
-    fun `shipping address appearance maps all supported fields`() {
+    fun `shipping address appearance maps colors primary button and insets`() {
         val appearance = ShippingAddressElement.Configuration.Appearance()
             .colorsLight(
                 ShippingAddressElement.Configuration.Appearance.Colors.light()
@@ -127,6 +127,117 @@ class AppearanceMapperTest {
         assertThat(mapped.formInsetValues.topDp).isEqualTo(2f)
         assertThat(mapped.formInsetValues.endDp).isEqualTo(3f)
         assertThat(mapped.formInsetValues.bottomDp).isEqualTo(4f)
+    }
+
+    @Test
+    fun `shipping address configuration retains and applies shapes and form typography`() {
+        val appearance = ShippingAddressElement.Configuration.Appearance()
+            .shapes(
+                ShippingAddressElement.Configuration.Appearance.Shapes()
+                    .cornerRadiusDp(16f)
+                    .borderStrokeWidthDp(3f)
+                    .bottomSheetCornerRadiusDp(24f)
+            )
+            .typography(
+                ShippingAddressElement.Configuration.Appearance.Typography()
+                    .fontResId(123)
+                    .sizeScaleFactor(1.5f)
+                    .custom(
+                        ShippingAddressElement.Configuration.Appearance.Typography.Custom().h1(
+                            ShippingAddressElement.Configuration.Appearance.Typography.Font()
+                                .fontFamily(456)
+                                .fontSizeSp(22f)
+                                .fontWeight(600)
+                                .letterSpacingSp(0.5f)
+                        )
+                    )
+            )
+
+        val mapped = ShippingAddressElement.Configuration().appearance(appearance).build().appearance.asPaymentSheet()
+
+        assertThat(mapped.shapes).isEqualTo(
+            PaymentSheet.Shapes(cornerRadiusDp = 16f, borderStrokeWidthDp = 3f, bottomSheetCornerRadiusDp = 24f)
+        )
+        assertThat(mapped.typography).isEqualTo(
+            PaymentSheet.Typography(
+                sizeScaleFactor = 1.5f,
+                fontResId = 123,
+                custom = PaymentSheet.Typography.Custom(
+                    h1 = PaymentSheet.Typography.Font(456, 22f, 600, 0.5f)
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `shipping address bottom sheet radius defaults to component corner radius`() {
+        val mapped = ShippingAddressElement.Configuration.Appearance()
+            .shapes(ShippingAddressElement.Configuration.Appearance.Shapes().cornerRadiusDp(17f))
+            .build().asPaymentSheet()
+
+        assertThat(mapped.shapes.cornerRadiusDp).isEqualTo(17f)
+        assertThat(mapped.shapes.bottomSheetCornerRadiusDp).isEqualTo(17f)
+    }
+
+    @Test
+    fun `shipping address nested mutations leave built configuration unchanged`() {
+        val shapes = ShippingAddressElement.Configuration.Appearance.Shapes()
+            .cornerRadiusDp(12f)
+            .bottomSheetCornerRadiusDp(24f)
+        val font = ShippingAddressElement.Configuration.Appearance.Typography.Font().fontSizeSp(22f)
+        val typography = ShippingAddressElement.Configuration.Appearance.Typography()
+            .custom(ShippingAddressElement.Configuration.Appearance.Typography.Custom().h1(font))
+        val configuration = ShippingAddressElement.Configuration().appearance(
+            ShippingAddressElement.Configuration.Appearance().shapes(shapes).typography(typography)
+        )
+        val firstConfiguration = configuration.build()
+
+        shapes.cornerRadiusDp(30f)
+        font.fontSizeSp(40f)
+        typography.sizeScaleFactor(2f)
+        val secondConfiguration = configuration.build()
+
+        val first = firstConfiguration.appearance.asPaymentSheet()
+        val second = secondConfiguration.appearance.asPaymentSheet()
+
+        assertThat(first.shapes.cornerRadiusDp).isEqualTo(12f)
+        assertThat(second.shapes.cornerRadiusDp).isEqualTo(30f)
+        assertThat(first.shapes.bottomSheetCornerRadiusDp).isEqualTo(24f)
+        assertThat(second.shapes.bottomSheetCornerRadiusDp).isEqualTo(24f)
+        assertThat(first.typography.custom.h1?.fontSizeSp).isEqualTo(22f)
+        assertThat(second.typography.custom.h1?.fontSizeSp).isEqualTo(40f)
+        assertThat(first.typography.sizeScaleFactor).isEqualTo(1f)
+        assertThat(second.typography.sizeScaleFactor).isEqualTo(2f)
+    }
+
+    @Test
+    fun `shipping address nullable font overrides can be reset`() {
+        val font = ShippingAddressElement.Configuration.Appearance.Typography.Font()
+            .fontFamily(123).fontSizeSp(22f).fontWeight(600).letterSpacingSp(0.5f)
+        val custom = ShippingAddressElement.Configuration.Appearance.Typography.Custom().h1(font)
+        val typography = ShippingAddressElement.Configuration.Appearance.Typography().fontResId(456).custom(custom)
+        val appearance = ShippingAddressElement.Configuration.Appearance().typography(typography)
+
+        assertThat(appearance.build().asPaymentSheet().typography).isEqualTo(
+            PaymentSheet.Typography(
+                sizeScaleFactor = 1f,
+                fontResId = 456,
+                custom = PaymentSheet.Typography.Custom(
+                    h1 = PaymentSheet.Typography.Font(123, 22f, 600, 0.5f)
+                ),
+            )
+        )
+
+        font.fontFamily(null).fontSizeSp(null).fontWeight(null).letterSpacingSp(null)
+        typography.fontResId(null)
+        val reset = appearance.build().asPaymentSheet().typography
+
+        assertThat(reset.fontResId).isNull()
+        assertThat(reset.custom.h1).isEqualTo(PaymentSheet.Typography.Font())
+
+        custom.h1(null)
+
+        assertThat(appearance.build().asPaymentSheet().typography.custom.h1).isNull()
     }
 
     @Test
