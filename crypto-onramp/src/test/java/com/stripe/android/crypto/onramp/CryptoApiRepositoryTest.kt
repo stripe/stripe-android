@@ -384,7 +384,7 @@ class CryptoApiRepositoryTest {
             assertThat(apiRequest.url)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
-                .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
+                .isEqualTo("2026-08-26.dahlia")
             assertThat(apiRequest.headers["Stripe-Consumer-Auth-Token"])
                 .isEqualTo("test-secret")
 
@@ -994,7 +994,7 @@ class CryptoApiRepositoryTest {
             assertThat(apiRequest.baseUrl)
                 .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet")
             assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
-                .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
+                .isEqualTo("2026-08-26.dahlia")
 
             val params = apiRequest.params!!
             assertThat(params["wallet_address"]).isEqualTo("0x1234567890abcdef")
@@ -1052,7 +1052,7 @@ class CryptoApiRepositoryTest {
         assertThat(apiRequest.url)
             .startsWith("https://api.stripe.com/v1/crypto/internal/wallet?")
         assertThat(apiRequest.headers[HEADER_STRIPE_VERSION])
-            .isEqualTo(CRYPTO_ONRAMP_API_VERSION)
+            .isEqualTo("2026-08-26.dahlia")
         assertThat(apiRequest.params).isEqualTo(
             mapOf(
                 "wallet_token" to "ccw_12345",

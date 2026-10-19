@@ -1,6 +1,8 @@
 package com.stripe.android.core.networking
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiKeyFixtures
+import com.stripe.android.core.ApiVersion
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -12,6 +14,38 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {
+    @Test
+    fun `GET requests use Dahlia`() {
+        val request = FACTORY.createGet(SOURCES_URL, OPTIONS)
+
+        assertThat(request.headers[HEADER_STRIPE_VERSION]).isEqualTo("2026-08-26.dahlia")
+    }
+
+    @Test
+    fun `POST requests use Dahlia`() {
+        val request = FACTORY.createPost(PAYMENT_METHODS_URL, OPTIONS)
+
+        assertThat(request.headers[HEADER_STRIPE_VERSION]).isEqualTo("2026-08-26.dahlia")
+    }
+
+    @Test
+    fun `DELETE requests use Dahlia`() {
+        val request = FACTORY.createDelete(SOURCES_URL, OPTIONS)
+
+        assertThat(request.headers[HEADER_STRIPE_VERSION]).isEqualTo("2026-08-26.dahlia")
+    }
+
+    @Test
+    fun `requests preserve beta suffixes on Dahlia`() {
+        val factory = ApiRequest.Factory(
+            apiVersion = ApiVersion(setOf("financial_connections_client_api_beta=v1", "another_beta=v2")).code
+        )
+        val request = factory.createGet(SOURCES_URL, OPTIONS)
+
+        assertThat(request.headers[HEADER_STRIPE_VERSION])
+            .isEqualTo("2026-08-26.dahlia;financial_connections_client_api_beta=v1;another_beta=v2")
+    }
+
     @Test
     fun getContentType() {
         val contentType = FACTORY.createGet(
