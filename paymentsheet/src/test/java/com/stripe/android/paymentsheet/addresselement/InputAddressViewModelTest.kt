@@ -329,7 +329,7 @@ class InputAddressViewModelTest {
     fun `cancellation analytics keeps merchant prefill out of autocomplete data`() = runScenario(
         address = EXPECTED_ADDRESS,
     ) {
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
             FakeAddressElementEventReporter.AddressCall(
@@ -362,7 +362,7 @@ class InputAddressViewModelTest {
         )
         viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
 
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
             FakeAddressElementEventReporter.AddressCall(
@@ -401,7 +401,7 @@ class InputAddressViewModelTest {
             assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
         }
 
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         val cancellationCall = eventReporter.canceledCalls.awaitItem()
         assertThat(cancellationCall.addressDetails.address?.country).isEqualTo("US")
@@ -415,7 +415,7 @@ class InputAddressViewModelTest {
     fun `pending cancellation is reported when the view model is created`() = runScenario(
         address = EXPECTED_ADDRESS,
         beforeViewModelCreation = {
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
         },
     ) {
@@ -429,8 +429,8 @@ class InputAddressViewModelTest {
 
     @Test
     fun `duplicate cancellation requests report only once`() = runScenario {
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         val cancellationCall = eventReporter.canceledCalls.awaitItem()
         assertThat(cancellationCall.addressDetails.address?.country)
@@ -445,7 +445,7 @@ class InputAddressViewModelTest {
     fun `cancellation while saving does not report cancellation analytics`() = runScenario {
         assertThat(resultStateHolder.tryStartSaving()).isTrue()
 
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
         eventReporter.canceledCalls.expectNoEvents()
@@ -467,7 +467,7 @@ class InputAddressViewModelTest {
             )
         )
 
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         eventReporter.canceledCalls.expectNoEvents()
     }
