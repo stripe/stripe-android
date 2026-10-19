@@ -68,15 +68,7 @@ internal class AddressElementActivity : ComponentActivity() {
             viewModel.navigator.navigationController = navController
 
             val bottomSheetState = rememberStripeBottomSheetState(
-                confirmValueChange = { target ->
-                    target != ModalBottomSheetValue.Hidden || when (viewModel.resultStateHolder.state.value) {
-                        is State.Finished -> true
-                        else -> {
-                            dismiss()
-                            false
-                        }
-                    }
-                },
+                confirmValueChange = ::confirmValueChange,
             )
 
             LaunchedEffect(bottomSheetState) {
@@ -152,6 +144,17 @@ internal class AddressElementActivity : ComponentActivity() {
                     onDiscardChanges = viewModel.resultStateHolder::onDiscardChanges,
                     onKeepEditing = viewModel.resultStateHolder::onKeepEditing,
                 )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun confirmValueChange(target: ModalBottomSheetValue): Boolean {
+        return target != ModalBottomSheetValue.Hidden || when (viewModel.resultStateHolder.state.value) {
+            is State.Finished -> true
+            else -> {
+                dismiss()
+                false
             }
         }
     }

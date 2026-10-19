@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -21,6 +23,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -36,7 +39,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@OptIn(AppearanceAPIAdditionsPreview::class)
+@OptIn(AppearanceAPIAdditionsPreview::class, ExperimentalMaterialApi::class)
 internal class AddressElementActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
@@ -356,6 +359,26 @@ internal class AddressElementActivityTest {
     }
 
     @Test
+    fun `finished cancellation allows the sheet to hide without requesting confirmation again`() = runScenario {
+        addressPage.assertReadyToSave()
+
+        activityScenario.onActivity { activity ->
+            val stateHolder = ViewModelProvider(activity)[AddressElementViewModel::class.java].resultStateHolder
+
+            assertThat(activity.confirmValueChange(ModalBottomSheetValue.Hidden)).isFalse()
+            assertThat(stateHolder.state.value).isEqualTo(State.ConfirmingCancellation)
+
+            stateHolder.onDiscardChanges()
+            stateHolder.onCancelCompleted()
+
+            assertThat(activity.confirmValueChange(ModalBottomSheetValue.Hidden)).isTrue()
+            assertThat(stateHolder.state.value).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.Canceled)
+            )
+        }
+    }
+
+    @Test
     fun `checkout shipping close is disabled while tax update is in flight`() = runScenario {
         val taxUpdate = enqueueTaxUpdate()
 
@@ -466,24 +489,23 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping close requests confirmation when input is unchanged`() = runScenario {
+    fun `checkout shipping canceling discard confirmation preserves edits and enables the form`() = runScenario {
         addressPage.assertReadyToSave()
-        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.editName(EDITED_NAME)
 
         addressPage.clickClose()
 
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
         addressPage.keepEditing()
         addressPage.assertDiscardConfirmationNotDisplayed()
-        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.assertName(EDITED_NAME)
         addressPage.assertReadyToSave()
+        assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
     }
 
     @Test
     fun `checkout shipping discard dialog survives recreation`() = runScenario {
         addressPage.assertReadyToSave()
-        addressPage.editName(EDITED_NAME)
         addressPage.clickClose()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
@@ -492,16 +514,6 @@ internal class AddressElementActivityTest {
         composeTestRule.waitForIdle()
 
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        addressPage.keepEditing()
-        addressPage.assertDiscardConfirmationNotDisplayed()
-        addressPage.assertName(EDITED_NAME)
-        addressPage.assertReadyToSave()
-
-        addressPage.clickClose()
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        addressPage.discardChanges()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
 
     @Test

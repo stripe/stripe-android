@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -18,6 +19,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -45,6 +47,8 @@ class AddressElementPage(
         context.getString(R.string.stripe_paymentsheet_close)
     )
     private val scrim = composeTestRule.onNodeWithContentDescription(context.getString(ComposeUiR.string.close_sheet))
+    private val discardDialogTitle = context.getString(R.string.stripe_paymentsheet_address_element_discard_changes_title)
+    private val discardDialogBody = context.getString(R.string.stripe_paymentsheet_address_element_discard_changes_body)
 
     fun waitUntilVisible() {
         waitForNode(hasText("Shipping Address"))
@@ -95,7 +99,10 @@ class AddressElementPage(
     fun assertDiscardConfirmation(loadingIndicatorTestTag: String) {
         primaryButton.assertIsNotEnabled()
         closeButton.assertIsNotEnabled()
-        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertIsDisplayed()
+        val dialog = composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG)
+        dialog.assertIsDisplayed()
+        dialog.onChildren().assertAny(hasText(discardDialogTitle))
+        dialog.onChildren().assertAny(hasText(discardDialogBody))
         composeTestRule.onNodeWithTag(loadingIndicatorTestTag, useUnmergedTree = true)
             .assertDoesNotExist()
     }
