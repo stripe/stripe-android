@@ -1,9 +1,11 @@
 package com.stripe.android.googlepaylauncher.callback
 
 import android.content.Context
+import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.callback.BasePaymentDataCallbacks
 import com.google.android.gms.wallet.callback.IntermediatePaymentData
 import com.google.android.gms.wallet.callback.OnCompleteListener
+import com.google.android.gms.wallet.callback.PaymentAuthorizationResult
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
@@ -44,6 +46,13 @@ internal class StripeGooglePayPaymentDataCallbacks(
             productUsage = emptySet(),
         ),
     )
+
+    override fun onPaymentAuthorized(
+        paymentData: PaymentData?,
+        onCompleteListener: OnCompleteListener<PaymentAuthorizationResult>,
+    ) {
+        GooglePayPaymentDataCallbackHandler.onPaymentAuthorized(onCompleteListener)
+    }
 
     override fun onPaymentDataChanged(
         request: IntermediatePaymentData?,

@@ -40,7 +40,7 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
-    fun `payment data request includes payment method callback intent when billing address is required`() {
+    fun `billing address request includes payment method and authorization callback intents`() {
         val json = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "USD",
@@ -54,11 +54,11 @@ class GooglePayJsonFactoryTest {
         )
 
         assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
-            .containsExactly("PAYMENT_METHOD")
+            .containsExactly("PAYMENT_METHOD", "PAYMENT_AUTHORIZATION")
     }
 
     @Test
-    fun `payment data request includes shipping and payment method callback intents`() {
+    fun `payment data request includes shipping, payment method, and authorization callback intents`() {
         val json = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
                 currencyCode = "USD",
@@ -75,7 +75,7 @@ class GooglePayJsonFactoryTest {
         )
 
         assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
-            .containsExactly("SHIPPING_ADDRESS", "PAYMENT_METHOD")
+            .containsExactly("SHIPPING_ADDRESS", "PAYMENT_METHOD", "PAYMENT_AUTHORIZATION")
             .inOrder()
     }
 

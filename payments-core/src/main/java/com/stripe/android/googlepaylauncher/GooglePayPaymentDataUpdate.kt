@@ -18,8 +18,8 @@ import org.json.JSONObject
 @Poko
 class GooglePayPaymentDataUpdate(
     val callbackTrigger: CallbackTrigger?,
-    val shippingAddress: ShippingAddress?,
-    val billingAddress: ShippingAddress?,
+    val shippingAddress: GooglePayAddress?,
+    val billingAddress: GooglePayAddress?,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CallbackTrigger {
@@ -62,7 +62,7 @@ class GooglePayPaymentDataUpdate(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
-    class ShippingAddress(
+    class GooglePayAddress(
         val administrativeArea: String,
         val countryCode: String,
         val locality: String,
@@ -124,8 +124,8 @@ class GooglePayPaymentDataUpdate(
             )
         }
 
-        private fun JSONObject.toAddress(): ShippingAddress {
-            return ShippingAddress(
+        private fun JSONObject.toAddress(): GooglePayAddress {
+            return GooglePayAddress(
                 administrativeArea = optString(this, FIELD_ADMINISTRATIVE_AREA).orEmpty(),
                 countryCode = optString(this, FIELD_COUNTRY_CODE).orEmpty(),
                 locality = optString(this, FIELD_LOCALITY).orEmpty(),

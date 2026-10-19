@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher.callback
 
 import com.google.android.gms.wallet.callback.IntermediatePaymentData
+import com.google.android.gms.wallet.callback.PaymentAuthorizationResult
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -25,6 +26,17 @@ class GooglePayPaymentDataCallbackHandlerTest {
     fun tearDown() {
         GooglePayPaymentDataUpdateCallbackRegistry.deselect()
         GooglePayPaymentDataUpdateCallbackRegistry.deregister(CALLBACK_KEY)
+    }
+
+    @Test
+    fun `payment authorization completes successfully`() = runTest {
+        val listener = FakeOnCompleteListener<PaymentAuthorizationResult>()
+
+        GooglePayPaymentDataCallbackHandler.onPaymentAuthorized(listener)
+
+        val result = JSONObject(listener.completions.awaitItem().toJson())
+        assertThat(result.getString("transactionState")).isEqualTo("SUCCESS")
+        listener.ensureAllEventsConsumed()
     }
 
     @Test
@@ -227,7 +239,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val callback = FakeGooglePayPaymentDataUpdateCallback(callbackResult)
-        val listener = FakeOnCompleteListener()
+        val listener = FakeOnCompleteListener<PaymentDataRequestUpdate>()
         val errorReporter = FakeErrorReporter()
 
         if (registerCallback) {
@@ -250,7 +262,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
     private data class Scenario(
         val testScope: TestScope,
         val callback: FakeGooglePayPaymentDataUpdateCallback,
-        val listener: FakeOnCompleteListener,
+        val listener: FakeOnCompleteListener<PaymentDataRequestUpdate>,
         val errorReporter: FakeErrorReporter,
     ) {
         fun onPaymentDataChanged(request: IntermediatePaymentData?) {
@@ -308,7 +320,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
                       "callbackTrigger": "PAYMENT_METHOD",
                       "paymentMethodData": {
                         "type": "CARD",
-                        "intermediateCardInfo": {
+                        "info": {
                           "cardNetwork": "VISA",
                           "cardFundingSource": "CREDIT",
                           "billingAddress": {

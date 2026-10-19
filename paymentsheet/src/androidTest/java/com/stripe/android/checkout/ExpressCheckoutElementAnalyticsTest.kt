@@ -168,7 +168,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 shippingInformation = shippingInformation,
                 paymentDataUpdate = GooglePayPaymentDataUpdate(
                     callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                    shippingAddress = GooglePayPaymentDataUpdate.ShippingAddress(
+                    shippingAddress = GooglePayPaymentDataUpdate.GooglePayAddress(
                         administrativeArea = "California",
                         countryCode = "US",
                         locality = "San Francisco",
