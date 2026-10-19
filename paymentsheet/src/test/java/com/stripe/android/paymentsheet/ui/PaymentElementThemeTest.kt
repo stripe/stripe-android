@@ -6,11 +6,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.toPaymentElementThemeValues
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
@@ -29,14 +34,15 @@ import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.stripeVerticalModeRowPadding
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.annotation.Config
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentElementThemeTest {
     @get:Rule
@@ -45,10 +51,20 @@ internal class PaymentElementThemeTest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @get:Rule
+    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
+        isEnabled = false,
+    )
+
     @Test
     @Config(qualifiers = "notnight")
     fun `always dark provides dark appearance independently of system theme`() = runScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        colorsLight = DEFAULT_LIGHT_COLORS,
         colorsDark = DEFAULT_DARK_COLORS,
     ) {
         assertThat(isDark).isTrue()
@@ -64,12 +80,14 @@ internal class PaymentElementThemeTest {
         assertThat(iconStyle).isEqualTo(IconStyle.Outlined)
         assertThat(verticalModeRowPadding).isEqualTo(9f)
         assertThat(iconUrl).isEqualTo(DARK_ICON_URL)
+        assertThat(iconRes).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_paypal_night)
     }
 
     @Test
     @Config(qualifiers = "night")
     fun `always light provides light appearance independently of system theme`() = runScenario(
         themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+        colorsLight = DEFAULT_LIGHT_COLORS,
         colorsDark = DEFAULT_DARK_COLORS,
     ) {
         assertThat(isDark).isFalse()
@@ -77,16 +95,53 @@ internal class PaymentElementThemeTest {
         assertThat(colors.materialColors.primary).isEqualTo(LIGHT_PRIMARY)
         assertThat(primaryButtonStyle.colorsLight.background).isEqualTo(LIGHT_BUTTON)
         assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
+        assertThat(iconRes).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_paypal_day)
     }
 
     @Test
     @Config(qualifiers = "notnight")
-    fun `always dark with light component uses light icon for contrast`() = runScenario(
-        themeMode = PaymentSheet.ThemeMode.AlwaysDark,
-        colorsDark = LIGHT_COMPONENT_DARK_COLORS,
+    fun `always dark with light component selects icon according to luminance flag`(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
     ) {
-        assertThat(isDark).isTrue()
-        assertThat(iconUrl).isEqualTo(LIGHT_ICON_URL)
+        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
+        runScenario(
+            themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+            colorsLight = DEFAULT_LIGHT_COLORS,
+            colorsDark = LIGHT_COMPONENT_DARK_COLORS,
+        ) {
+            assertThat(isDark).isTrue()
+            assertThat(iconUrl).isEqualTo(if (disableLuminanceBasedThemes) DARK_ICON_URL else LIGHT_ICON_URL)
+            assertThat(iconRes).isEqualTo(
+                if (disableLuminanceBasedThemes) {
+                    R.drawable.stripe_ic_paymentsheet_pm_paypal_night
+                } else {
+                    R.drawable.stripe_ic_paymentsheet_pm_paypal_day
+                }
+            )
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun `always light with dark component selects icon according to luminance flag`(
+        @TestParameter disableLuminanceBasedThemes: Boolean,
+    ) {
+        disableLuminanceBasedThemesRule.setEnabled(disableLuminanceBasedThemes)
+        runScenario(
+            themeMode = PaymentSheet.ThemeMode.AlwaysLight,
+            colorsLight = DARK_COMPONENT_LIGHT_COLORS,
+            colorsDark = DEFAULT_DARK_COLORS,
+        ) {
+            assertThat(isDark).isFalse()
+            assertThat(iconUrl).isEqualTo(if (disableLuminanceBasedThemes) LIGHT_ICON_URL else DARK_ICON_URL)
+            assertThat(iconRes).isEqualTo(
+                if (disableLuminanceBasedThemes) {
+                    R.drawable.stripe_ic_paymentsheet_pm_paypal_day
+                } else {
+                    R.drawable.stripe_ic_paymentsheet_pm_paypal_night
+                }
+            )
+        }
     }
 
     @Test
@@ -103,6 +158,7 @@ internal class PaymentElementThemeTest {
     fun `parse appearance applies immutable values to legacy theme`() {
         val appearance = createAppearance(
             themeMode = PaymentSheet.ThemeMode.Automatic,
+            colorsLight = DEFAULT_LIGHT_COLORS,
             colorsDark = DEFAULT_DARK_COLORS,
         )
         val expected = appearance.toPaymentElementThemeValues()
@@ -129,6 +185,7 @@ internal class PaymentElementThemeTest {
 
     private fun runScenario(
         themeMode: PaymentSheet.ThemeMode,
+        colorsLight: PaymentSheet.Colors,
         colorsDark: PaymentSheet.Colors,
         block: ThemeSnapshot.() -> Unit,
     ) {
@@ -138,6 +195,7 @@ internal class PaymentElementThemeTest {
             PaymentElementTheme(
                 appearance = createAppearance(
                     themeMode = themeMode,
+                    colorsLight = colorsLight,
                     colorsDark = colorsDark,
                 )
             ) {
@@ -157,6 +215,11 @@ internal class PaymentElementThemeTest {
                         lightThemeIconUrl = LIGHT_ICON_URL,
                         darkThemeIconUrl = DARK_ICON_URL,
                     ),
+                    iconRes = IconHelper.icon(
+                        iconRes = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,
+                        iconResNight = R.drawable.stripe_ic_paymentsheet_pm_paypal_night,
+                        outlinedIconResource = null,
+                    ),
                 )
             }
         }
@@ -167,10 +230,11 @@ internal class PaymentElementThemeTest {
 
     private fun createAppearance(
         themeMode: PaymentSheet.ThemeMode,
+        colorsLight: PaymentSheet.Colors,
         colorsDark: PaymentSheet.Colors,
     ): PaymentSheet.Appearance {
         return PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = LIGHT_PRIMARY),
+            colorsLight = colorsLight,
             colorsDark = colorsDark,
             themeMode = themeMode,
             shapes = PaymentSheet.Shapes(
@@ -225,6 +289,7 @@ internal class PaymentElementThemeTest {
         val iconStyle: IconStyle,
         val verticalModeRowPadding: Float,
         val iconUrl: String?,
+        val iconRes: Int,
     )
 
     private companion object {
@@ -232,6 +297,13 @@ internal class PaymentElementThemeTest {
         val DARK_PRIMARY = Color(0xFF654321)
         val LIGHT_BUTTON = Color(0xFFABCDEF)
         val DARK_BUTTON = Color(0xFFFEDCBA)
+        val DEFAULT_LIGHT_COLORS = PaymentSheet.Colors.Builder.light()
+            .primary(LIGHT_PRIMARY)
+            .build()
+        val DARK_COMPONENT_LIGHT_COLORS = PaymentSheet.Colors.Builder.light()
+            .primary(LIGHT_PRIMARY)
+            .component(Color.Black)
+            .build()
         val DEFAULT_DARK_COLORS = PaymentSheet.Colors.Builder.dark()
             .primary(DARK_PRIMARY)
             .build()

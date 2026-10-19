@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
@@ -10,8 +9,6 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
-import com.stripe.android.core.networking.AnalyticsRequest
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
@@ -1590,19 +1587,6 @@ class DefaultEventReporterTest {
         val analyticsEventTurbine: Turbine<AnalyticEvent>,
         val userFacingLoggerTurbine: Turbine<String>,
     )
-
-    private class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
-        private val _requestTurbine = Turbine<AnalyticsRequest>()
-        val requestTurbine: ReceiveTurbine<AnalyticsRequest> = _requestTurbine
-
-        override fun executeAsync(request: AnalyticsRequest) {
-            _requestTurbine.add(request)
-        }
-
-        fun validate() {
-            _requestTurbine.ensureAllEventsConsumed()
-        }
-    }
 
     private class FakeDurationProvider : DurationProvider {
         val startCalls: Stack<StartCall> = Stack()

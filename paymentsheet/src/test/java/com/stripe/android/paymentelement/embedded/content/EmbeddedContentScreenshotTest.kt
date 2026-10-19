@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -11,6 +12,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import kotlin.test.Test
@@ -21,6 +23,18 @@ internal class EmbeddedContentScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         includeStripeTheme = false,
+    )
+
+    @get:Rule
+    val themeBasedIconsPaparazziRule = PaparazziRule(
+        listOf(SystemAppearance.DarkTheme),
+        includeStripeTheme = false,
+    )
+
+    @get:Rule
+    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
+        isEnabled = false,
     )
 
     @Test
@@ -87,6 +101,7 @@ internal class EmbeddedContentScreenshotTest {
                 themeMode = PaymentSheet.ThemeMode.AlwaysDark,
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
+            paparazziRule,
         )
     }
 
@@ -97,24 +112,33 @@ internal class EmbeddedContentScreenshotTest {
                 themeMode = PaymentSheet.ThemeMode.AlwaysLight,
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
+            paparazziRule,
         )
     }
 
     @Test
     fun displaysCustomAppearanceTheme() {
+        snapshotWithAppearance(customAppearance(), paparazziRule)
+    }
+
+    @Test
+    fun displaysCustomAppearanceThemeWithLuminanceDisabled() {
+        disableLuminanceBasedThemesRule.setEnabled(true)
+        snapshotWithAppearance(customAppearance(), themeBasedIconsPaparazziRule)
+    }
+
+    private fun customAppearance(): PaymentSheet.Appearance {
         val customAppearance = PaymentSheetAppearance.CrazyAppearance.appearance
-        snapshotWithAppearance(
-            PaymentSheet.Appearance(
-                colorsLight = customAppearance.colorsLight,
-                colorsDark = customAppearance.colorsDark,
-                shapes = customAppearance.shapes,
-                typography = customAppearance.typography,
-                embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
-            )
+        return PaymentSheet.Appearance(
+            colorsLight = customAppearance.colorsLight,
+            colorsDark = customAppearance.colorsDark,
+            shapes = customAppearance.shapes,
+            typography = customAppearance.typography,
+            embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
         )
     }
 
-    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance) {
+    private fun snapshotWithAppearance(appearance: PaymentSheet.Appearance, rule: PaparazziRule) {
         val metadata = createMetadata()
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
         val content = EmbeddedContent(
@@ -123,7 +147,7 @@ internal class EmbeddedContentScreenshotTest {
             appearance = appearance,
             isImmediateAction = false,
         )
-        paparazziRule.snapshot {
+        rule.snapshot {
             content.Content()
         }
     }

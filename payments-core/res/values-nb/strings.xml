@@ -160,6 +160,8 @@
   <string name="stripe_google_pay_cost_excluding_tax">Kostnad ekskl. skatt</string>
   <!-- Google Pay total label when the final tax may change with the selected billing address. -->
   <string name="stripe_google_pay_estimated_total">Beregnet total (endelig skatt kan variere)</string>
+  <!-- Google Pay summary label for the subtotal when automatic tax is disabled. -->
+  <string name="stripe_google_pay_subtotal">Delsum</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Totalt</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->

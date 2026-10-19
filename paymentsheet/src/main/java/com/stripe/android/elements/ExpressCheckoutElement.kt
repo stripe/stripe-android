@@ -70,12 +70,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                  * Link will never be displayed.
                  */
                 Never,
-
-                /**
-                 * Link remains enabled. Its button or row is shown when an existing Link user is
-                 * detected and hidden otherwise.
-                 */
-                WalletButtonHidden,
             }
 
             /** Sets the display configuration for Link. */
@@ -318,7 +312,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
-        private var paymentMethodOrder: List<String> = emptyList()
         private var appearance: Appearance = Appearance()
 
         /** Sets the configuration for Link. */
@@ -334,21 +327,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.googlePayConfiguration = googlePayConfiguration
         }
 
-        /**
-         * Sets the order in which express payment methods are displayed.
-         *
-         * Supported values are `"google_pay"` and `"link"`.
-         *
-         * By default, the Express Checkout Element uses dynamic ordering. Payment methods omitted
-         * from [paymentMethodOrder] are displayed after the specified payment methods. Payment
-         * methods that are unavailable or invalid are ignored.
-         */
-        fun paymentMethodOrder(
-            paymentMethodOrder: List<String>,
-        ): Configuration = apply {
-            this.paymentMethodOrder = paymentMethodOrder
-        }
-
         /** Sets the appearance of the Express Checkout Element. */
         fun appearance(appearance: Appearance): Configuration = apply {
             this.appearance = appearance
@@ -358,25 +336,12 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
-            val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
         ) : Parcelable
-
-        internal enum class PaymentMethodType {
-            GooglePay,
-            Link,
-        }
 
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
-            paymentMethodOrder = paymentMethodOrder.mapNotNull { paymentMethod ->
-                when (paymentMethod) {
-                    "google_pay" -> PaymentMethodType.GooglePay
-                    "link" -> PaymentMethodType.Link
-                    else -> null
-                }
-            },
             appearance = appearance.build(),
         )
     }

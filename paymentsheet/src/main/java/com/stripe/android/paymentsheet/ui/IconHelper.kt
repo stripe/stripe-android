@@ -4,9 +4,11 @@ import androidx.annotation.DrawableRes
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.luminance
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 
 internal const val MIN_LUMINANCE_FOR_LIGHT_ICON = 0.5
 
@@ -28,6 +30,9 @@ internal object IconHelper {
 
     @Composable
     fun isDark(): Boolean {
+        if (FeatureFlags.disableLuminanceBasedThemes.isEnabled) {
+            return MaterialTheme.stripeThemeIsDark
+        }
         val color = MaterialTheme.stripeColors.component
         return color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
     }

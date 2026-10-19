@@ -32,8 +32,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun confirm(params: ConfirmPaymentIntentParams) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                publishableKey = apiConfigurationProvider.get().publishableKey,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 confirmStripeIntentParams = params,
@@ -46,8 +45,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun confirm(params: ConfirmSetupIntentParams) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
-                publishableKey = apiConfigurationProvider.get().publishableKey,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -60,8 +58,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun handleNextActionForPaymentIntent(clientSecret: String) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                publishableKey = apiConfigurationProvider.get().publishableKey,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -74,8 +71,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun handleNextActionForSetupIntent(clientSecret: String) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                publishableKey = apiConfigurationProvider.get().publishableKey,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
@@ -88,8 +84,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     override fun handleNextActionForStripeIntent(intent: StripeIntent) {
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.StripeIntentNextActionWithIntentArgs(
-                publishableKey = apiConfigurationProvider.get().publishableKey,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                apiConfiguration = apiConfigurationProvider.get(),
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,

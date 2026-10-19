@@ -103,9 +103,7 @@ internal data class PaymentMethodMetadata(
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
-            ?.checkoutSessionResponse
-            ?.collectsTaxFromBillingAddress == true
+        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -532,5 +530,14 @@ internal data class PaymentMethodMetadata(
                 apiConfiguration = apiConfiguration,
             )
         }
+    }
+}
+
+internal fun PaymentMethodMetadata?.defaultAnalyticsParams(): Map<String, Any> {
+    return if (this != null) {
+        analyticsMetadata.paramsMap +
+            ("payment_method_orientation" to paymentMethodOrientation().name.lowercase())
+    } else {
+        emptyMap()
     }
 }

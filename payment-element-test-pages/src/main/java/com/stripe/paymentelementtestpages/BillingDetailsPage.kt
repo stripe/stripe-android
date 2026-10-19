@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BillingDetailsPage(
@@ -15,6 +17,10 @@ class BillingDetailsPage(
     val city: SemanticsNodeInteraction = nodeWithLabel("City")
     val zipCode: SemanticsNodeInteraction = nodeWithLabel("ZIP Code")
     val state: SemanticsNodeInteraction = nodeWithLabel("State")
+
+    fun updateLine1(value: String) {
+        line1.performScrollTo().performTextReplacement(value)
+    }
 
     private fun nodeWithLabel(label: String): SemanticsNodeInteraction {
         return composeTestRule.onNode(hasText(label))

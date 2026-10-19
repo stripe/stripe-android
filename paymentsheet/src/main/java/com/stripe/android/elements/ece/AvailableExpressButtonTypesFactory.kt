@@ -26,7 +26,7 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
         expressCheckoutElementConfiguration ?: return emptyList()
         paymentMethodMetadata ?: return emptyList()
 
-        val availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
             when (walletType) {
                 WalletType.GooglePay -> ExpressButtonType.GooglePay(
                         googlePayConfiguration = expressCheckoutElementConfiguration.googlePayConfiguration,
@@ -39,27 +39,6 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
                         !requiresShippingAddress
                 }
             }
-        }
-
-        val paymentMethodOrder = expressCheckoutElementConfiguration.paymentMethodOrder
-        if (paymentMethodOrder.isEmpty()) {
-            return availableExpressButtonTypes
-        }
-
-        return availableExpressButtonTypes.sortedBy { expressButtonType ->
-            paymentMethodOrder.indexOfFirst { paymentMethod ->
-                paymentMethod.matches(expressButtonType)
-            }.takeIf { it >= 0 } ?: Int.MAX_VALUE
-        }
-    }
-
-    private fun ExpressCheckoutElement.Configuration.PaymentMethodType.matches(
-        expressButtonType: ExpressButtonType,
-    ): Boolean {
-        return when (this) {
-            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay ->
-                expressButtonType is ExpressButtonType.GooglePay
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link -> expressButtonType is ExpressButtonType.Link
         }
     }
 }

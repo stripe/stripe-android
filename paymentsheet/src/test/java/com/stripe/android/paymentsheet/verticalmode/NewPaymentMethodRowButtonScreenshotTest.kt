@@ -3,16 +3,22 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito
 
+@RunWith(TestParameterInjector::class)
 internal class NewPaymentMethodRowButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -23,80 +29,44 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
             .padding(16.dp)
     )
 
+    @get:Rule
+    val themeBasedIconsPaparazziRule = PaparazziRule(
+        listOf(SystemAppearance.DarkTheme),
+        listOf(PaymentSheetAppearance.CrazyAppearance),
+        FontSize.entries,
+        boxModifier = Modifier.padding(16.dp),
+    )
+
+    @get:Rule
+    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
+        isEnabled = false,
+    )
+
     @Test
     fun testSelectedState() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        snapshot(RowState.Selected, paparazziRule)
     }
 
     @Test
     fun testUnselectedState() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        snapshot(RowState.Unselected, paparazziRule)
     }
 
     @Test
     fun testDisabled() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = false,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        snapshot(RowState.Disabled, paparazziRule)
     }
 
     @Test
     fun testLongTitle() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "The Greatest US Bank Account",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        snapshot(RowState.LongTitle, paparazziRule)
+    }
+
+    @Test
+    fun testThemeBasedIcons(@TestParameter state: RowState) {
+        disableLuminanceBasedThemesRule.setEnabled(true)
+        snapshot(state, themeBasedIconsPaparazziRule)
     }
 
     @Test
@@ -161,5 +131,35 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 }
             )
         }
+    }
+
+    private fun snapshot(state: RowState, rule: PaparazziRule) {
+        rule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = state.isEnabled,
+                isSelected = state.isSelected,
+                iconRes = state.iconRes,
+                iconUrl = null,
+                imageLoader = Mockito.mock(),
+                title = state.title,
+                subtitle = null,
+                promoText = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    enum class RowState(
+        val isSelected: Boolean,
+        val isEnabled: Boolean,
+        val iconRes: Int,
+        val title: String,
+    ) {
+        Selected(true, true, R.drawable.stripe_ic_paymentsheet_pm_card, "Card"),
+        Unselected(false, true, R.drawable.stripe_ic_paymentsheet_pm_card, "Card"),
+        Disabled(false, false, R.drawable.stripe_ic_paymentsheet_pm_card, "Card"),
+        LongTitle(false, true, R.drawable.stripe_ic_paymentsheet_pm_bank, "The Greatest US Bank Account"),
     }
 }

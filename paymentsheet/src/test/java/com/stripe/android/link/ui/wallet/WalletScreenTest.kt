@@ -803,7 +803,7 @@ internal class WalletScreenTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         navigationManager: TestNavigationManager = TestNavigationManager(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         configuration: com.stripe.android.link.LinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 linkFundingSources = listOf(ConsumerPaymentDetails.Card.TYPE)

@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
@@ -24,7 +25,7 @@ class AddressElement(
     override val countryElement: CountryElement = CountryElement(
         FormFieldId.Country,
         DropdownFieldController(
-            CountryConfig(countryCodes),
+            CountryConfig(countryCodes, autofillType = ContentType.AddressCountry),
             rawValuesMap[FormFieldId.Country]
         )
     ),
@@ -89,7 +90,7 @@ class AddressElement(
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[FormFieldId.Phone] ?: "",
             showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
-            acceptAnyInput = addressInputMode.phoneNumberConfig != AddressFieldConfiguration.REQUIRED,
+            acceptEmptyInput = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
         )
     )
 

@@ -20,13 +20,23 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     override fun convertToValue(value: String): DefaultBillingAddress {
         if (value.startsWith(CUSTOM_EMAIL_PREFIX)) {
-            return DefaultBillingAddress.WithEmail(value.removePrefix(CUSTOM_EMAIL_PREFIX))
+            return DefaultBillingAddress.WithEmail(
+                email = value.removePrefix(CUSTOM_EMAIL_PREFIX),
+                phone = DEFAULT_BILLING_ADDRESS_PHONE,
+            )
+        }
+
+        if (value.startsWith(CUSTOM_EMAIL_AND_NO_PHONE_PREFIX)) {
+            return DefaultBillingAddress.WithEmail(
+                email = value.removePrefix(CUSTOM_EMAIL_AND_NO_PHONE_PREFIX),
+                phone = null,
+            )
         }
 
         return when (value) {
             "on" -> DefaultBillingAddress.On
             "on_with_random_email" -> DefaultBillingAddress.OnWithRandomEmail
-            "with_email" -> DefaultBillingAddress.WithEmail("")
+            "with_email" -> DefaultBillingAddress.WithEmail(email = "", phone = DEFAULT_BILLING_ADDRESS_PHONE)
             "off" -> DefaultBillingAddress.Off
             else -> defaultValue
         }
@@ -34,7 +44,11 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     override fun convertToString(value: DefaultBillingAddress): String {
         return when (value) {
-            is DefaultBillingAddress.WithEmail -> CUSTOM_EMAIL_PREFIX + value.email
+            is DefaultBillingAddress.WithEmail -> if (value.phone == null) {
+                CUSTOM_EMAIL_AND_NO_PHONE_PREFIX + value.email
+            } else {
+                CUSTOM_EMAIL_PREFIX + value.email
+            }
             else -> value.value
         }
     }
@@ -47,7 +61,7 @@ internal object DefaultBillingAddressSettingsDefinition :
     ) = listOf(
         option("On", DefaultBillingAddress.On),
         option("On with random email", DefaultBillingAddress.OnWithRandomEmail),
-        option("Custom email", DefaultBillingAddress.WithEmail("")),
+        option("Custom email", DefaultBillingAddress.WithEmail(email = "", phone = DEFAULT_BILLING_ADDRESS_PHONE)),
         option("Off", DefaultBillingAddress.Off),
     )
 
@@ -69,7 +83,10 @@ internal object DefaultBillingAddressSettingsDefinition :
         value: DefaultBillingAddress,
         textInputValue: String,
     ): DefaultBillingAddress {
-        return DefaultBillingAddress.WithEmail(textInputValue)
+        return DefaultBillingAddress.WithEmail(
+            email = textInputValue,
+            phone = (value as? DefaultBillingAddress.WithEmail)?.phone ?: DEFAULT_BILLING_ADDRESS_PHONE,
+        )
     }
 
     override fun configure(
@@ -147,17 +164,27 @@ internal object DefaultBillingAddressSettingsDefinition :
                 ),
                 email = email,
                 name = "Jenny Rosen",
-                phone = "+18008675309",
+                phone = if (value is DefaultBillingAddress.WithEmail) {
+                    value.phone
+                } else {
+                    DEFAULT_BILLING_ADDRESS_PHONE
+                },
             )
         }
     }
 }
 
+internal const val DEFAULT_BILLING_ADDRESS_PHONE = "+18008675309"
+
 internal sealed class DefaultBillingAddress(val value: String) {
     data object On : DefaultBillingAddress("on")
     data object OnWithRandomEmail : DefaultBillingAddress("on_with_random_email")
     data object Off : DefaultBillingAddress("off")
-    data class WithEmail(val email: String) : DefaultBillingAddress("with_email")
+    data class WithEmail(
+        val email: String,
+        val phone: String?,
+    ) : DefaultBillingAddress("with_email")
 }
 
 private const val CUSTOM_EMAIL_PREFIX = "with_email:"
+private const val CUSTOM_EMAIL_AND_NO_PHONE_PREFIX = "with_email_and_no_phone:"

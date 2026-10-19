@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Créez un compte avec Link pour un paiement plus rapide sur le Web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Créer un compte avec %s pour profiter d’un processus de paiement plus rapide sur internet</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Nous n’avons pas pu vérifier votre compte. Veuillez fermer cette fenêtre et réessayer.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">Code reçu par e-mail</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Plus d’options</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Avant de vous envoyer un code par e-mail, nous devons vérifier d’autres informations à votre sujet. Veuillez saisir votre numéro de téléphone se terminant par ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Avant de vous envoyer un code par e-mail, nous devons vérifier d’autres informations à votre sujet. Veuillez saisir le numéro de téléphone associé à votre compte Link.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Vérifiez votre numéro de téléphone</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Renvoyer le code dans %d secondes</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Carte de crédit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -106,6 +120,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Se déconnecter de %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Pour finaliser l’achat, confirmez le paiement dans votre application MB WAY dans un délai de %s.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Autres moyens de paiement</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

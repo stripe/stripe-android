@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Gumawa ng account na may Link para sa mas mabilis na pag-checkout sa web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Lumikha ng account sa %s para sa mas mabilis na pag-checkout sa buong web</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Hindi namin ma-verify ang iyong account. Mangyaring isara ang window na ito at subukang muli.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">Email code</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Higit pang opsyon</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Bago kami makapagpadala ng code sa iyong email, kailangan naming i-verify ang karagdagang impormasyon tungkol sa iyo. Pakilagay ang iyong numero ng telepono na nagtatapos sa ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Bago kami makapagpadala ng code sa iyong email, kailangan naming i-verify ang karagdagang impormasyon tungkol sa iyo. Pakilagay ang numero ng telepono sa iyong Link account.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">I-verify ang iyong numero ng telepono</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Muling ipadala ang code sa loob ng %d na segundo</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -106,6 +120,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Mag-log out sa %s</string>
   <!-- Instructions shown while waiting for an MB WAY payment authorization -->
   <string name="stripe_mb_way_confirm_payment">Kumpirmahin ang pagbabayad sa iyong MB WAY app sa loob ng %s para makumpleto ang pagbili.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Higit pang mga pamamaraan sa pagbabayad</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">May nangyaring mali. Tingnan ang iyong koneksyon at subukan muli.</string>
   <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->

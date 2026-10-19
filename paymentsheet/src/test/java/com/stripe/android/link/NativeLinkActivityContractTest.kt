@@ -44,7 +44,7 @@ class NativeLinkActivityContractTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-            launchMode = LinkLaunchMode.Full,
+            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
             statusBarColor = 0x00FF00,
         )
 
@@ -64,7 +64,7 @@ class NativeLinkActivityContractTest {
                 linkExpressMode = LinkExpressMode.DISABLED,
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-                launchMode = LinkLaunchMode.Full,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
                 statusBarColor = 0x00FF00,
             )
         )

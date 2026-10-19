@@ -202,6 +202,53 @@ internal class DefaultEmbeddedStateHelperTest {
         contentStateHolder.dataLoadedTurbine.awaitItem()
     }
 
+    @Test
+    fun `setting state without a bank selection discards the previous bank draft`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+        assertThat(selectionHolder.getPreviousNewSelection("us_bank_account")).isNotNull()
+
+        setState(selection = null)
+
+        confirmationHandler.bootstrapTurbine.awaitItem()
+        contentStateHolder.dataLoadedTurbine.awaitItem()
+        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(selectionHolder.getPreviousNewSelection("us_bank_account")).isNull()
+    }
+
+    @Test
+    fun `setting state retains the selected bank and discards unrelated drafts`() = testScenario {
+        val bankSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+        selectionHolder.setSelection(bankSelection)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(selectionHolder.getPreviousNewSelection("card")).isNotNull()
+
+        setState(selection = bankSelection)
+
+        confirmationHandler.bootstrapTurbine.awaitItem()
+        contentStateHolder.dataLoadedTurbine.awaitItem()
+        assertThat(selectionHolder.selection.value).isEqualTo(bankSelection)
+        assertThat(selectionHolder.getPreviousNewSelection("us_bank_account")).isEqualTo(bankSelection)
+        assertThat(selectionHolder.getPreviousNewSelection("card")).isNull()
+    }
+
+    @Test
+    fun `restoring the same state retains its remembered bank draft`() = testScenario {
+        setState(selection = PaymentSelection.GooglePay)
+        confirmationHandler.bootstrapTurbine.awaitItem()
+        contentStateHolder.dataLoadedTurbine.awaitItem()
+        selectionHolder.setSelection(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentSelection.GooglePay)
+        val state = requireNotNull(stateHelper.state)
+        assertThat(state.previousNewSelections.isEmpty).isFalse()
+
+        stateHelper.state = state
+
+        confirmationHandler.bootstrapTurbine.awaitItem()
+        contentStateHolder.dataLoadedTurbine.awaitItem()
+        assertThat(selectionHolder.getPreviousNewSelection("us_bank_account"))
+            .isEqualTo(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+    }
+
     private fun testScenario(
         rowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
