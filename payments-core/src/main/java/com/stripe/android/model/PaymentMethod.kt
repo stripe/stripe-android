@@ -599,6 +599,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        Mondu(
+            "mondu",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         NgBankTransfer(
             "ng_bank_transfer",
             isReusable = false,
