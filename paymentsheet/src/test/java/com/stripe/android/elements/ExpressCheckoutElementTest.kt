@@ -1,12 +1,18 @@
 package com.stripe.android.elements
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
 internal class ExpressCheckoutElementTest {
     @Test
     fun `configuration builds default values`() {
@@ -82,6 +88,17 @@ internal class ExpressCheckoutElementTest {
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
         )
         assertThat(state.appearance.cornerRadiusDp).isEqualTo(12f)
+    }
+
+    @Test
+    fun `appearance builds corner radius from dimension resource`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+
+        val state = ExpressCheckoutElement.Configuration.Appearance()
+            .cornerRadiusDp(context, R.dimen.stripe_paymentsheet_outer_spacing_top)
+            .build()
+
+        assertThat(state.cornerRadiusDp).isEqualTo(10f)
     }
 
     @Test
