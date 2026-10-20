@@ -56,6 +56,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             configuration = confirmationState.configuration.asCommonConfiguration(),
             linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter,
+            showSecondaryButtonForLink = false,
         ) ?: return null
 
         return ConfirmationHandler.Args(
