@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -35,10 +34,13 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.error
+import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -106,6 +108,15 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         mandate = state.mandate,
     )
+
+    state.savedPaymentMethodSelectionState.error?.let { error ->
+        ErrorMessage(
+            error = error.resolve(),
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .testTag(EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG),
+        )
+    }
 }
 
 @VisibleForTesting
@@ -172,9 +183,9 @@ internal fun PaymentMethodEmbeddedLayoutUI(
 }
 
 @Composable
-private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
+private fun OptionalEmbeddedDivider(rowStyle: RowStyle) {
     if (rowStyle.hasSeparators()) {
-        val color = Color(rowStyle.separatorColor(isSystemInDarkTheme()))
+        val color = Color(rowStyle.separatorColor(MaterialTheme.stripeThemeIsDark))
         val thickness = rowStyle.separatorThickness()
         Divider(
             color = color,
@@ -279,6 +290,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isSelected = selection?.isSaved == true,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
+                    isEnabled = isEnabled,
                     viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
                     savedPaymentMethodAction = savedPaymentMethodAction,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
@@ -295,6 +307,9 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
+
+internal const val EMBEDDED_SAVED_PAYMENT_METHOD_SELECTION_ERROR_TEST_TAG =
+    "embedded_saved_payment_method_selection_error"
 
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(

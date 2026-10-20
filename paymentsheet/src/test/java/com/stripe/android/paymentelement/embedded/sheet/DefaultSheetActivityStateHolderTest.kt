@@ -8,6 +8,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -447,6 +449,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -475,6 +478,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -509,6 +513,7 @@ internal class DefaultSheetActivityStateHolderTest {
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
                         launchMode = EmbeddedLaunchMode.Form(
@@ -655,17 +660,18 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
-            paymentMethodMetadata = paymentMethodMetadata,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 
@@ -697,7 +703,6 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     private class RecordingVerticalModeFormInteractor : VerticalModeFormInteractor {
-        override val isLiveMode: Boolean = true
         override val state: StateFlow<VerticalModeFormInteractor.State>
             get() = error("Not expected")
 
@@ -727,6 +732,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
     }
@@ -736,7 +742,6 @@ internal class DefaultSheetActivityStateHolderTest {
     ): EmbeddedNavigator.Screen.VerticalPaymentOptions {
         return EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = interactor,
-            isLiveMode = true,
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,

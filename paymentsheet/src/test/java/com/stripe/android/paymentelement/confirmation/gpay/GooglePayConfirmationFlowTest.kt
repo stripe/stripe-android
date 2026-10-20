@@ -152,7 +152,7 @@ class GooglePayConfirmationFlowTest {
                 format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
                 isPhoneNumberRequired = false,
             ),
-            existingPaymentMethodRequired = true,
+            existingPaymentMethodRequired = false,
             additionalEnabledNetworks = emptyList(),
         )
 

@@ -48,6 +48,7 @@ internal class HCaptchaTokenTest(
     fun newPaymentMethod_withPassiveCaptchaEnabled_includesHCaptchaTokenInConfirmRequest() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         integrationType = ProductIntegrationType.PaymentSheet,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -59,6 +60,7 @@ internal class HCaptchaTokenTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
             builder = {
@@ -75,6 +77,7 @@ internal class HCaptchaTokenTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -93,6 +96,7 @@ internal class HCaptchaTokenTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
         ) { testContext ->

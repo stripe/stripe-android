@@ -36,10 +36,11 @@ internal object OnrampConfigurationFactory {
                     environment = GooglePayEnvironment.Test,
                     merchantCountryCode = "US",
                     merchantName = MERCHANT_NAME,
+                    isEmailRequired = true,
                     billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
                         isRequired = true,
                         format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
-                        isPhoneNumberRequired = false
+                        isPhoneNumberRequired = true
                     ),
                     existingPaymentMethodRequired = false
                 )
@@ -47,7 +48,7 @@ internal object OnrampConfigurationFactory {
             .samsungPayConfig(
                 OnrampConfiguration.SamsungPayConfig(
                     serviceId = SAMSUNG_PAY_SERVICE_ID,
-                )
+                ).collectContactInformation(true)
             )
     }
 }

@@ -8,6 +8,7 @@ import com.stripe.android.FakeFraudDetectionDataRepository
 import com.stripe.android.FileFactory
 import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionData
@@ -532,6 +533,24 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun confirmPaymentIntent_withEmptyClientSecret_returnsFailureWithoutRequest() = runTest {
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            clientSecret = "",
+        )
+
+        val result = create().confirmPaymentIntent(params, DEFAULT_OPTIONS)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
+        verifyNoInteractions(stripeNetworkClient)
+    }
+
+    @Test
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() =
         runTest {
             // put a private key here to simulate the backend
@@ -824,6 +843,24 @@ internal class StripeApiRepositoryTest {
             assertThat(apiRequest.params)
                 .doesNotContainKey(ConfirmStripeIntentParams.PARAM_CLIENT_SECRET)
         }
+
+    @Test
+    fun confirmSetupIntent_withEmptyClientSecret_returnsFailureWithoutRequest() = runTest {
+        val params = ConfirmSetupIntentParams.create(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            clientSecret = "",
+        )
+
+        val result = create().confirmSetupIntent(params, DEFAULT_OPTIONS)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "Invalid SetupIntent client secret. " +
+                "Pass the client_secret from the SetupIntent returned by your server."
+        )
+        verifyNoInteractions(stripeNetworkClient)
+    }
 
     @Test
     fun confirmSetupIntent_withApiUserKey_sendsValidRequest() =
@@ -1240,7 +1277,8 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
             .hasSize(3)
@@ -1252,8 +1290,8 @@ internal class StripeApiRepositoryTest {
             )
 
         verifyAnalyticsRequest(
-            PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
-            null
+            event = PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+            publishableKey = API_CONFIGURATION.publishableKey,
         )
     }
 
@@ -1297,7 +1335,8 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
@@ -1891,109 +1930,6 @@ internal class StripeApiRepositoryTest {
             assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
             assertThat(invalidRequestException?.message)
                 .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
-        }
-
-    @Test
-    fun `createSavedPaymentMethodRadarSession() with FraudDetectionData should return expected value`() =
-        runTest {
-            val responseBody = """
-                {
-                    "id": "rse_123",
-                    "passive_captcha_site_key": "1234",
-                    "passive_captcha_rqdata": "123456789"
-                }
-            """.trimIndent()
-
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(
-                StripeResponse(
-                    200,
-                    responseBody,
-                    emptyMap()
-                )
-            )
-
-            val stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
-                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-                stripeNetworkClient = stripeNetworkClient,
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                    FraudDetectionData(
-                        guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
-                        muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
-                        sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf",
-                    )
-                ),
-                workContext = testDispatcher
-            )
-            val radarSession = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).getOrThrow()
-
-            assertThat(radarSession.id).isEqualTo("rse_123")
-            assertThat(radarSession.passiveCaptchaSiteKey).isEqualTo("1234")
-            assertThat(radarSession.passiveCaptchaRqdata).isEqualTo("123456789")
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val params = requireNotNull(apiRequest.params)
-
-            with(params) {
-                assertThat(this["guid"]).isEqualTo("8ae65368-76c5-4dd5-81b9-279f61efa591c80a51")
-                assertThat(this["muid"]).isEqualTo("ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c")
-                assertThat(this["sid"]).isEqualTo("02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf")
-                assertThat(this["payment_method"]).isEqualTo("pm_123")
-            }
-
-            assertThat(apiRequest.baseUrl)
-                .isEqualTo("https://api.stripe.com/v1/radar/saved_payment_method_session")
-
-            verifyAnalyticsRequest(PaymentAnalyticsEvent.RadarSessionCreate)
-        }
-
-    @Test
-    fun `createSavedPaymentMethodRadarSession() with null FraudDetectionData should throw an exception`() =
-        runTest {
-            val stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
-                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                    null
-                ),
-                workContext = testDispatcher
-            )
-
-            val invalidRequestException = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).exceptionOrNull()
-
-            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
-            assertThat(invalidRequestException?.message)
-                .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
-        }
-
-    @Test
-    fun `createSavedPaymentMethodRadarSession() with advancedFraudSignalsEnabled as false should throw exception`() =
-        runTest {
-            verifyNoInteractions(fraudDetectionDataRepository)
-            Stripe.advancedFraudSignalsEnabled = false
-
-            val stripeRepository = create()
-            val invalidRequestException = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).exceptionOrNull()
-
-            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
-            assertThat(invalidRequestException?.message)
-                .isEqualTo(
-                    "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
-                )
         }
 
     @Test
@@ -3297,7 +3233,8 @@ internal class StripeApiRepositoryTest {
     private fun verifyAnalyticsRequest(
         event: PaymentAnalyticsEvent,
         productUsage: String? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        publishableKey: String? = null,
     ) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
@@ -3308,6 +3245,9 @@ internal class StripeApiRepositoryTest {
         assertThat(analyticsParams["event"]).isEqualTo(event.toString())
         assertThat(analyticsParams["product_usage"]).isEqualTo(productUsage)
         assertThat(analyticsParams["error_message"]).isEqualTo(errorMessage)
+        publishableKey?.let {
+            assertThat(analyticsParams["publishable_key"]).isEqualTo(it)
+        }
     }
 
     @Test
@@ -3458,6 +3398,10 @@ internal class StripeApiRepositoryTest {
             CardParams("4242424242424242", 1, 2050, "123")
 
         private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
 
         private val DEFAULT_API_REQUEST_FACTORY = ApiRequest.Factory()
         private const val APP_ID = "com.app.id"

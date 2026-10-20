@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -46,17 +47,36 @@ class FinancialConnectionsSheet internal constructor(
     fun present(
         configuration: Configuration
     ) {
+        present(configuration = configuration, preCollectedConsent = null)
+    }
+
+    /**
+     * Present the [FinancialConnectionsSheet].
+     *
+     * @param configuration the [FinancialConnectionsSheet] configuration
+     * @param preCollectedConsent evidence of consent to link a bank account, collected by the
+     * merchant prior to presenting the sheet.
+     */
+    fun present(
+        configuration: Configuration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ) {
         financialConnectionsSheetLauncher.present(
-            configuration = configuration.toInternal(),
+            configuration = configuration.toInternal(preCollectedConsent),
             elementsSessionContext = null,
         )
     }
 
-    private fun Configuration.toInternal(): FinancialConnectionsSheetConfiguration {
+    private fun Configuration.toInternal(
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    ): FinancialConnectionsSheetConfiguration {
         return FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret,
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+            ),
+            preCollectedConsent = preCollectedConsent,
         )
     }
 

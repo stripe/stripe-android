@@ -6,26 +6,31 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
+import com.stripe.android.paymentsheet.state.WalletLocation
+import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.childScope
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -52,24 +57,24 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val formScreenFactory: EmbeddedFormScreenFactory,
-    private val linkAccountHolder: LinkAccountHolder,
     private val addPaymentMethodInteractorFactory: EmbeddedAddPaymentMethodInteractorFactory,
     private val continueCoordinator: SheetActivityContinueCoordinator,
+    private val onClickOverrideDelegate: OnClickOverrideDelegate,
+    private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
+    private val walletsInteractor: PaymentOptionsWalletsInteractor,
+    private val linkAccountHolder: LinkAccountHolder,
 ) {
     fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
         return when (paymentMethodMetadata.paymentMethodOrientation()) {
             PaymentMethodOrientation.Vertical -> createVerticalInitialScreens()
-            PaymentMethodOrientation.Horizontal -> listOf(createHorizontalScreen())
+            PaymentMethodOrientation.Horizontal -> createHorizontalInitialScreens()
         }
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
-        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
-        if (supportedPaymentMethodTypes.size == 1 &&
-            customerStateHolder.paymentMethods.value.isEmpty() &&
-            selectionHolder.selection.value == null
-        ) {
-            return listOf(formScreenFactory.createFormScreen(supportedPaymentMethodTypes.first()))
+        if (walletsInteractor.canShowDirectForm && selectionHolder.selection.value == null) {
+            val paymentMethodCode = paymentMethodMetadata.supportedPaymentMethodTypes().single()
+            return listOf(formScreenFactory.createFormScreen(paymentMethodCode))
         }
 
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
@@ -77,7 +82,6 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         val formHelper = createFormHelper(formHelperScope)
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper, coroutineScope),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
@@ -95,6 +99,22 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         }
     }
 
+    private fun createHorizontalInitialScreens(): List<EmbeddedNavigator.Screen> {
+        val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        if (!hasSavedPaymentMethods &&
+            (!paymentMethodMetadata.isGooglePayReady || walletsInteractor.canShowDirectForm)
+        ) {
+            return listOf(createHorizontalScreen())
+        }
+
+        return buildList {
+            add(createHorizontalSavedPaymentMethodsScreen())
+            if (selectionHolder.selection.value is PaymentSelection.New) {
+                add(createHorizontalScreen())
+            }
+        }
+    }
+
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = addPaymentMethodInteractorFactory.create(),
@@ -104,8 +124,58 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         )
     }
 
+    private fun createHorizontalSavedPaymentMethodsScreen(): EmbeddedNavigator.Screen {
+        return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
+            interactor = createSavedPaymentMethodsInteractor(),
+            sheetActivityState = sheetActivityStateHolder.state,
+            onContinueClick = ::onContinueClick,
+            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
+    }
+
+    private fun createSavedPaymentMethodsInteractor(): SelectSavedPaymentMethodsInteractor {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+        return DefaultSelectSavedPaymentMethodsInteractor(
+            paymentOptionsItems = combineAsStateFlow(
+                savedPaymentMethodMutator.paymentOptionsItems,
+                walletsInteractor.walletsState,
+            ) { items, walletsState ->
+                items.filter { item ->
+                    when (item) {
+                        is PaymentOptionsItem.GooglePay -> walletsState?.googlePay(WalletLocation.INLINE) != null
+                        is PaymentOptionsItem.Link -> walletsState?.link(WalletLocation.INLINE) != null
+                        else -> true
+                    }
+                }
+            },
+            editing = savedPaymentMethodMutator.editing,
+            canEdit = savedPaymentMethodMutator.canEdit,
+            canRemove = customerStateHolder.canRemove,
+            toggleEdit = savedPaymentMethodMutator::toggleEditing,
+            isProcessing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>(),
+            currentSelection = selectionHolder.selection,
+            mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
+            onAddCardPressed = {
+                embeddedNavigatorProvider.get().performAction(
+                    EmbeddedNavigator.Action.GoToScreen(
+                        createHorizontalScreen()
+                    )
+                )
+            },
+            onUpdatePaymentMethod = ::navigateToUpdateScreen,
+            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
+        )
+    }
+
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun onContinueClick() {
+        val onClickOverride = onClickOverrideDelegate.onClickOverride
+        if (onClickOverride != null) {
+            onClickOverride()
+            return
+        }
         continueCoordinator.onContinue()
     }
 
@@ -127,6 +197,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
+            savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
             temporarySelection = stateFlowOf(null),
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
@@ -144,24 +215,19 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canRemove = customerStateHolder.canRemove,
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
-            walletsState = stateFlowOf(walletsState()),
-            updateSelection = { updatedSelection, _ ->
+            walletsState = walletsInteractor.walletsState,
+            updateSelection = { updatedSelection ->
                 selectionHolder.setSelection(updatedSelection)
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
                 updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
                 completionAction = null,
             ),
-            isCurrentScreen = isCurrentScreen(),
+            isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = { savedPaymentMethod ->
-                val screen = EmbeddedNavigator.Screen.ManageUpdate(
-                    interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
-                        displayableSavedPaymentMethod = savedPaymentMethod
-                    )
-                )
-                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
+                navigateToUpdateScreen(savedPaymentMethod)
             },
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
                 shouldUpdateSelection(formHelper, paymentMethodCode)
@@ -186,14 +252,15 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so
     // embeddedNavigatorProvider.get() can't be called synchronously here without recursing into the @Singleton
     // mid-construction. flow { } defers the get() until first collection, by which point the navigator exists.
-    private fun isCurrentScreen(): StateFlow<Boolean> = flow {
+    // Keep the screen inactive until then so its interactor doesn't overwrite the restored selection.
+    private inline fun <reified T : EmbeddedNavigator.Screen> isCurrentScreen(): StateFlow<Boolean> = flow {
         emitAll(embeddedNavigatorProvider.get().screen)
     }.map { screen ->
-        screen is EmbeddedNavigator.Screen.VerticalPaymentOptions
+        screen is T
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = true,
+        initialValue = false,
     )
 
     private fun navigateToManageScreen() {
@@ -220,6 +287,15 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
     }
 
+    private fun navigateToUpdateScreen(savedPaymentMethod: DisplayableSavedPaymentMethod) {
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(
+            interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
+                displayableSavedPaymentMethod = savedPaymentMethod
+            )
+        )
+        embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(screen))
+    }
+
     private fun shouldUpdateSelection(formHelper: FormHelper, paymentMethodCode: String?): Boolean {
         // Don't fold a selection that requires a form into the vertical list's remembered selection.
         // The form writes its in-progress selection to the shared holder, so tracking it here would
@@ -228,25 +304,5 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         val requiresFormScreen = paymentMethodCode != null &&
             formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
         return !requiresFormScreen
-    }
-
-    private fun walletsState(): WalletsState? {
-        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
-        return WalletsState.create(
-            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
-            linkEmail = null,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
-            buttonsEnabled = true,
-            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
-            googlePayLauncherConfig = null,
-            googlePayButtonType = GooglePayButtonType.Pay,
-            onGooglePayPressed = { throw IllegalStateException("Not possible.") },
-            onLinkPressed = { throw IllegalStateException("Not possible.") },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
-            walletsAllowedInHeader = emptyList(),
-            cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
-        )
     }
 }

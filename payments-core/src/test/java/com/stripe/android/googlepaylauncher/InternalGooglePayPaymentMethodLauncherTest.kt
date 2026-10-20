@@ -150,7 +150,6 @@ class InternalGooglePayPaymentMethodLauncherTest {
             lifecycleOwner = lifecycleOwner,
             activityResultLauncher = activityResultLauncher,
             onPaymentDataChangedCallback = onPaymentDataChangedCallback,
-            context = context,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = context,
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

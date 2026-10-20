@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">银行账户 ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">银行账户 ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">请在 %s 内在您的手机银行应用中确认 Bizum 支付，完成购买。</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s内在您的银行应用中确认付款，完成购物。</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -34,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">在 Link 创建账户，加快全网结账速度</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">使用 %s 创建账户，以便在全网更快地结账</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">我们无法验证您的账户。请关闭此窗口并重试。</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">电子邮件验证码</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">更多选项</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">在向您的电子邮箱发送验证码之前，我们需要验证关于您的其他信息。请输入您尾号为 ••%s 的电话号码。</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">在向您的电子邮箱发送验证码之前，我们需要验证关于您的其他信。请输入您的 Link 账户登记的电话号码。</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">验证您的电话号码</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">%d 秒后重新发送验证码</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -66,6 +82,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">确认您的信息</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">社会保障号码 (SSN) 最后 4 位</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">条款和条件</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">服务条款</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">登录或注册</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">退出 Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">退出 %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">请在 %s 内通过 MB WAY 应用确认支付，以完成购买。</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">更多支付方式</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出错了。检查您的连接并重试。</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">出于安全考虑，必须关闭开发者选项，才能使用“轻触添加”。</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">打开设置</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">关闭开发者选项</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">银行卡已过期。请尝试使用其他银行卡。</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">拍卡</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">卡片被拒绝。请尝试使用其他卡片。</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -136,6 +168,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付信息</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">新增银行卡</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">您的地址变更不会保存。</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">放弃</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">放弃更改？</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">保存地址</string>
   <!-- Title for shipping address entry section -->
@@ -273,6 +311,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">银行卡品牌未更新，请重试。</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">请在 %s 内通过您的银行或支付应用确认付款，以完成购买。</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">使用 Pix 完成付款即可完成购买。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">设置为默认支付方式</string>
   <!-- Text for alert message when user needs to confirm payment in their payment app -->

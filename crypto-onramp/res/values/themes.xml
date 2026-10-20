@@ -25,4 +25,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="StripeOnrampKycTheme" parent="StripeOnrampTheme">
+        <item name="android:windowAnimationStyle">@style/StripeOnrampKycAnimations</item>
+    </style>
+
+    <style name="StripeOnrampKycAnimations" parent="Stripe.NoWindowAnims">
+        <item name="android:activityOpenEnterAnimation">@anim/stripe_onramp_kyc_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/stripe_onramp_kyc_exit</item>
+    </style>
+
 </resources>

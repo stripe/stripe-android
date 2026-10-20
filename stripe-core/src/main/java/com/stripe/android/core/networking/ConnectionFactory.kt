@@ -74,7 +74,7 @@ interface ConnectionFactory {
             return connectionOpener.open(originalRequest) { request ->
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = request.shouldCache
+                useCaches = false
                 requestMethod = request.method.code
 
                 request.headers.forEach { (key, value) ->

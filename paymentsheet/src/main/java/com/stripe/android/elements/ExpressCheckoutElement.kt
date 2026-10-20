@@ -3,8 +3,6 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -56,8 +54,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class LinkConfiguration {
             private var display: Display = Display.Automatic
-            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
-            private var disallowFundingSourceCreation: Set<String> = emptySet()
 
             /**
              * Display configuration for Link.
@@ -74,12 +70,6 @@ class ExpressCheckoutElement @Inject internal constructor(
                  * Link will never be displayed.
                  */
                 Never,
-
-                /**
-                 * Link remains enabled. Its button or row is shown when an existing Link user is
-                 * detected and hidden otherwise.
-                 */
-                WalletButtonHidden,
             }
 
             /** Sets the display configuration for Link. */
@@ -87,39 +77,13 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.display = display
             }
 
-            /**
-             * Sets whether Link collects missing billing details for existing payment methods.
-             */
-            @CollectMissingLinkBillingDetailsPreview
-            fun collectMissingBillingDetailsForExistingPaymentMethods(
-                collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-            ): LinkConfiguration = apply {
-                this.collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods
-            }
-
-            /**
-             * Sets the funding source types that Link must not create.
-             */
-            @LinkDisallowFundingSourceCreationPreview
-            fun disallowFundingSourceCreation(
-                disallowFundingSourceCreation: Set<String>,
-            ): LinkConfiguration = apply {
-                this.disallowFundingSourceCreation = disallowFundingSourceCreation
-            }
-
             @Parcelize
             internal data class State(
                 val display: Display,
-                val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-                val disallowFundingSourceCreation: Set<String>,
             ) : Parcelable
 
             internal fun build(): State = State(
                 display = display,
-                collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods,
-                disallowFundingSourceCreation = disallowFundingSourceCreation.toSet(),
             )
         }
 
@@ -284,11 +248,12 @@ class ExpressCheckoutElement @Inject internal constructor(
                 /**
                  * Sets the maximum number of columns the Express Checkout Element can use.
                  *
+                 * Must be between 1 and 10, inclusive, or null.
                  * Defaults to null, meaning unlimited.
                  */
                 fun maxColumns(maxColumns: Int?): ButtonLayout = apply {
-                    require(maxColumns == null || maxColumns > 0) {
-                        "maxColumns must be greater than zero or null."
+                    require(maxColumns == null || maxColumns in 1..MAX_LAYOUT_DIMENSION) {
+                        "maxColumns must be between 1 and 10 or null."
                     }
                     this.maxColumns = maxColumns
                 }
@@ -296,11 +261,12 @@ class ExpressCheckoutElement @Inject internal constructor(
                 /**
                  * Sets the maximum number of rows the Express Checkout Element can use.
                  *
+                 * Must be between 1 and 10, inclusive, or null.
                  * Defaults to null, meaning unlimited.
                  */
                 fun maxRows(maxRows: Int?): ButtonLayout = apply {
-                    require(maxRows == null || maxRows > 0) {
-                        "maxRows must be greater than zero or null."
+                    require(maxRows == null || maxRows in 1..MAX_LAYOUT_DIMENSION) {
+                        "maxRows must be between 1 and 10 or null."
                     }
                     this.maxRows = maxRows
                 }
@@ -315,6 +281,10 @@ class ExpressCheckoutElement @Inject internal constructor(
                     maxColumns = maxColumns,
                     maxRows = maxRows,
                 )
+
+                private companion object {
+                    const val MAX_LAYOUT_DIMENSION = 10
+                }
             }
 
             /** Configures how payment methods are arranged within the Express Checkout Element. */
@@ -342,7 +312,6 @@ class ExpressCheckoutElement @Inject internal constructor(
         private var linkConfiguration: LinkConfiguration = LinkConfiguration()
         private var googlePayConfiguration: GooglePayConfiguration = GooglePayConfiguration()
 
-        private var paymentMethodOrder: List<String> = emptyList()
         private var appearance: Appearance = Appearance()
 
         /** Sets the configuration for Link. */
@@ -358,21 +327,6 @@ class ExpressCheckoutElement @Inject internal constructor(
             this.googlePayConfiguration = googlePayConfiguration
         }
 
-        /**
-         * Sets the order in which express payment methods are displayed.
-         *
-         * Supported values are `"google_pay"` and `"link"`.
-         *
-         * By default, the Express Checkout Element uses dynamic ordering. Payment methods omitted
-         * from [paymentMethodOrder] are displayed after the specified payment methods. Payment
-         * methods that are unavailable or invalid are ignored.
-         */
-        fun paymentMethodOrder(
-            paymentMethodOrder: List<String>,
-        ): Configuration = apply {
-            this.paymentMethodOrder = paymentMethodOrder
-        }
-
         /** Sets the appearance of the Express Checkout Element. */
         fun appearance(appearance: Appearance): Configuration = apply {
             this.appearance = appearance
@@ -382,25 +336,12 @@ class ExpressCheckoutElement @Inject internal constructor(
         internal data class State(
             val linkConfiguration: LinkConfiguration.State,
             val googlePayConfiguration: CheckoutGooglePayConfiguration,
-            val paymentMethodOrder: List<PaymentMethodType>,
             val appearance: Appearance.State,
         ) : Parcelable
-
-        internal enum class PaymentMethodType {
-            GooglePay,
-            Link,
-        }
 
         internal fun build(): State = State(
             linkConfiguration = linkConfiguration.build(),
             googlePayConfiguration = googlePayConfiguration.build(),
-            paymentMethodOrder = paymentMethodOrder.mapNotNull { paymentMethod ->
-                when (paymentMethod) {
-                    "google_pay" -> PaymentMethodType.GooglePay
-                    "link" -> PaymentMethodType.Link
-                    else -> null
-                }
-            },
             appearance = appearance.build(),
         )
     }

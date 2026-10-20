@@ -32,6 +32,34 @@ class StateFlowsTest {
     }
 
     @Test
+    fun `'combineAsStateFlow' with eight flows emits updates from the eighth flow`() = runTest {
+        val flow1 = MutableStateFlow(1)
+        val flow2 = MutableStateFlow(2)
+        val flow3 = MutableStateFlow(3)
+        val flow4 = MutableStateFlow(4)
+        val flow5 = MutableStateFlow(5)
+        val flow6 = MutableStateFlow(6)
+        val flow7 = MutableStateFlow(7)
+        val flow8 = MutableStateFlow(8)
+
+        val combined = combineAsStateFlow(flow1, flow2, flow3, flow4, flow5, flow6, flow7, flow8) {
+                value1, value2, value3, value4, value5, value6, value7, value8 ->
+            value1 + value2 + value3 + value4 + value5 + value6 + value7 + value8
+        }
+
+        assertThat(combined.value).isEqualTo(36)
+
+        combined.test {
+            assertThat(awaitItem()).isEqualTo(36)
+
+            flow8.value = 9
+
+            assertThat(awaitItem()).isEqualTo(37)
+            assertThat(combined.value).isEqualTo(37)
+        }
+    }
+
+    @Test
     fun `'flatMapLatestAsStateFlow' should only emit latest value of initially received 'StateFlow'`() = runTest {
         val nestedFlow = MutableStateFlow(0)
 

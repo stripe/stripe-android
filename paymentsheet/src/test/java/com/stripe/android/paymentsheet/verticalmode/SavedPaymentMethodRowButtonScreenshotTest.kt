@@ -145,6 +145,30 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
+    fun testSavedVisa_withCardArtImageOnly() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArtImageOnly,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArtProgramNameOnly() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArtProgramNameOnly,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
     fun testSavedLinkPassthroughCard() {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
@@ -172,6 +196,11 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         const val SAMPLE_CARD_ART_URL =
             "https://b.stripecdn.com/cardart/assets/pfE0FkDGaiFhdoOj9to8po-ZLiJhetgfdKELIZCj3xA"
 
+        val cardArtImage = PaymentMethod.Card.CardArt.ArtImage(
+            format = "image/png",
+            url = SAMPLE_CARD_ART_URL,
+        )
+
         val savedLinkPassthroughCard = DisplayableSavedPaymentMethod.create(
             displayName = "4242".resolvableString,
             paymentMethod = PaymentMethod(
@@ -188,26 +217,43 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             ),
         )
 
-        val savedVisaWithCardArt = DisplayableSavedPaymentMethod.create(
-            displayName = "···· 4242".resolvableString,
-            paymentMethod = PaymentMethod(
-                id = "001",
-                created = null,
-                liveMode = false,
-                code = PaymentMethod.Type.Card.code,
-                type = PaymentMethod.Type.Card,
-                card = PaymentMethod.Card(
-                    brand = CardBrand.Visa,
-                    last4 = "4242",
-                    cardArt = PaymentMethod.Card.CardArt(
-                        artImage = PaymentMethod.Card.CardArt.ArtImage(
-                            format = "image/png",
-                            url = SAMPLE_CARD_ART_URL
-                        ),
-                        programName = "Test Program"
-                    )
-                )
-            ),
+        val savedVisaWithCardArt = createSavedVisaWithCardArt(
+            artImage = cardArtImage,
+            programName = "Test Program",
         )
+
+        val savedVisaWithCardArtImageOnly = createSavedVisaWithCardArt(
+            artImage = cardArtImage,
+            programName = null,
+        )
+
+        val savedVisaWithCardArtProgramNameOnly = createSavedVisaWithCardArt(
+            artImage = null,
+            programName = "Test Program",
+        )
+
+        private fun createSavedVisaWithCardArt(
+            artImage: PaymentMethod.Card.CardArt.ArtImage?,
+            programName: String?,
+        ): DisplayableSavedPaymentMethod {
+            return DisplayableSavedPaymentMethod.create(
+                displayName = "···· 4242".resolvableString,
+                paymentMethod = PaymentMethod(
+                    id = "001",
+                    created = null,
+                    liveMode = false,
+                    code = PaymentMethod.Type.Card.code,
+                    type = PaymentMethod.Type.Card,
+                    card = PaymentMethod.Card(
+                        brand = CardBrand.Visa,
+                        last4 = "4242",
+                        cardArt = PaymentMethod.Card.CardArt(
+                            artImage = artImage,
+                            programName = programName,
+                        )
+                    )
+                ),
+            )
+        }
     }
 }

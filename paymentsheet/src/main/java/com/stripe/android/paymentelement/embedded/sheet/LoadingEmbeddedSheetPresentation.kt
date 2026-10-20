@@ -45,6 +45,7 @@ internal class LoadingEmbeddedSheetPresentation(
     private fun createCancellationResult(): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = args.customerState,
+            linkAccountInfo = args.linkAccountInfo,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
     }

@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -50,7 +51,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
-                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -97,7 +97,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state contains configured button theme`() = runScenario(
+    fun `state applies configured button theme to Google Pay`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
         ),
@@ -107,10 +107,26 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                     .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
             ),
     ) {
-        assertThat(interactor.state.value.expressButtons.map { it.buttonTheme }).containsExactly(
-            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
-            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
-        )
+        val googlePayButton = interactor.state.value.expressButtons
+            .filterIsInstance<ExpressButton.GooglePay>()
+            .single()
+
+        assertThat(googlePayButton.buttonTheme)
+            .isEqualTo(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+    }
+
+    @Test
+    fun `state is disabled when updating`() = runScenario(
+        isUpdating = MutableStateFlow(true),
+    ) {
+        assertThat(interactor.state.value.enabled).isFalse()
+    }
+
+    @Test
+    fun `state is enabled when not updating`() = runScenario(
+        isUpdating = MutableStateFlow(false),
+    ) {
+        assertThat(interactor.state.value.enabled).isTrue()
     }
 
     @Test
@@ -136,31 +152,19 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
 
         interactor.state.test {
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(null),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                 ),
             )
 
             linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
 
-            assertThat(awaitItem()).isEqualTo(
-                ExpressCheckoutElementInteractor.State(
-                    expressButtons = listOf(
-                        ExpressButton.Link.create(
-                            paymentMethodMetadata = paymentMethodMetadata,
-                            linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-                            buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
-                        ),
-                    ),
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+            assertThat(awaitItem().expressButtons).containsExactly(
+                ExpressButton.Link.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
                 ),
             )
 
@@ -219,7 +223,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnWalletTapped reports wallet tapped event and starts confirmation`() = runScenario(
+    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -234,13 +238,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         val confirmedButton = confirmationPerformer.calls.awaitItem()
         assertThat(confirmedButton).isEqualTo(expressButton)
-
-        assertThat(eventReporter.calls.awaitItem())
-            .isEqualTo(
-                FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped(
-                    expressButton = expressButton,
-                ),
-            )
     }
 
     private fun runScenario(
@@ -256,6 +253,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         requiresShippingAddress: Boolean = false,
+        isUpdating: MutableStateFlow<Boolean> = MutableStateFlow(false),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeExpressCheckoutElementEventReporter()
@@ -276,6 +274,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 savedStateHandle = savedStateHandle,
                 eventReporter = eventReporter,
                 expressCheckoutElementConfirmationPerformer = confirmationPerformer,
+                isUpdating = isUpdating,
             )
         }
 

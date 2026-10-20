@@ -30,6 +30,26 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun getNextActionType_whenMbWayAwaitsAuthorization() {
+        val paymentIntent = PaymentIntent(
+            created = 500L,
+            amount = 1000L,
+            clientSecret = "secret",
+            isLiveMode = false,
+            id = "pi_mb_way",
+            currency = "eur",
+            countryCode = "PT",
+            paymentMethodTypes = listOf(PaymentMethod.Type.MbWay.code),
+            status = StripeIntent.Status.RequiresAction,
+            unactivatedPaymentMethods = emptyList(),
+            nextActionData = StripeIntent.NextActionData.MbWayAwaitAuthorization,
+        )
+
+        assertThat(paymentIntent.nextActionType)
+            .isEqualTo(StripeIntent.NextActionType.MbWayAwaitAuthorization)
+    }
+
+    @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
         val clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
@@ -198,6 +218,30 @@ class PaymentIntentTest {
             .isEquivalentAccordingToCompareTo(PaymentIntent.CancellationReason.Abandoned)
         assertThat(PaymentIntentFixtures.CANCELLED.canceledAt)
             .isEqualTo(1567091866L)
+    }
+
+    @Test
+    fun `empty client secret throws a helpful error`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
+    }
+
+    @Test
+    fun `invalid client secret error does not include the supplied value`() {
+        val error = assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("pi_example_secret_person@example.com_extra")
+        }
+
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Invalid PaymentIntent client secret. " +
+                "Pass the client_secret from the PaymentIntent returned by your server."
+        )
     }
 
     @Test

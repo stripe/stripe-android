@@ -7,6 +7,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,10 +23,11 @@ internal class AddressLauncherTest {
             activityResultLauncher = activityLauncher,
         )
 
-        launcher.present(publishableKey = "pk_test_123")
+        launcher.present(publishableKey = DEFAULT_API_CONFIG.publishableKey)
 
         val args = activityLauncher.launchCalls.awaitItem()
-        assertThat(args.publishableKey).isEqualTo("pk_test_123")
+        assertThat(args.apiConfiguration.publishableKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
+        assertThat(args.apiConfiguration.stripeAccountId).isNull()
         activityLauncher.launchCalls.ensureAllEventsConsumed()
     }
 

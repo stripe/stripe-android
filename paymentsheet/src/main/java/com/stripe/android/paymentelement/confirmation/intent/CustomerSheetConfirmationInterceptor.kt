@@ -130,7 +130,8 @@ internal class CustomerSheetIntentConfirmationInterceptorFactory @Inject constru
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
         customerMetadata: CustomerMetadata?,
-        clientAttributionMetadata: ClientAttributionMetadata
+        clientAttributionMetadata: ClientAttributionMetadata,
+        isLiveMode: Boolean,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
             is IntegrationMetadata.CustomerSheet -> {

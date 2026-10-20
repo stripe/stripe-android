@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Bankkonto ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bankkonto ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Bekreft Bizum-betalingen i mobilbank-appen din innen %s for å fullføre kjøpet.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bekreft betalingen i bankens app innen %s for å fullføre kjøpet.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -34,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Opprett en konto med Link for raskere betaling på nett</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Opprett en konto med %s for raskere betaling på nett</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Vi kan ikke bekrefte kontoen din. Lukk dette vinduet og prøv på nytt.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">E-postkode</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Flere alternativer</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Før vi kan sende en kode til e-postadressen din, må vi bekrefte tilleggsinformasjon om deg. Oppgi telefonnummeret ditt som slutter på ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Før vi kan sende en kode til e-postadressen din, må vi bekrefte tilleggsinformasjon om deg. Oppgi telefonnummeret på Link-kontoen din.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Bekreft telefonnummeret ditt</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Send kode på nytt om %d sekunder</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s -kreditt</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -66,6 +82,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bekreft opplysningene dine</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">De siste 4 sifrene i personnummeret ditt</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Vilkår</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Tjenestevilkår</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Logg inn eller registrer deg</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Logg ut av Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Logg ut av %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Bekreft betalingen i MB WAY-appen din innen %s for å fullføre kjøpet.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Flere betalingsmetoder</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Det oppstod en feil. Kontroller tilkoblingen din og prøv igjen.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Av sikkerhetshensyn må utvikleralternativer være slått av for å bruke Tapp for å legge til.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Åpne innstillinger</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Slå av utvikleralternativer</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Kortet er utløpt. Prøv et annet kort.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Tapp kort</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kortet ble avvist. Prøv et annet kort.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -136,6 +168,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Legg til betalingsinformasjon</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Kort lagt til</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Adresseendringene dine vil ikke bli lagret.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Forkast</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Forkaste endringer?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Lagre adresse</string>
   <!-- Title for shipping address entry section -->
@@ -273,6 +311,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kortmerket ble ikke oppdatert. Prøv igjen.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Bekreft betalingen i banken eller betalingsappen innen %s for å fullføre kjøpet.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Fullfør betalingen med Pix for å fullføre kjøpet.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Angi som standard betalingsmetode</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

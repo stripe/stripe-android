@@ -1,8 +1,8 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.model.Country
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import java.util.Locale
@@ -28,7 +28,8 @@ class CountryConfig(
     private val collapsedLabelMapper: (Country) -> String = { country -> country.name },
     expandedLabelMapper: (Country) -> String = { country ->
         "${countryCodeToEmoji(country.code.value)} ${country.name}"
-    }
+    },
+    override val autofillType: ContentType?,
 ) : DropdownConfig {
     override val debugLabel = "country"
 
@@ -46,13 +47,13 @@ class CountryConfig(
     override fun getSelectedItemLabel(index: Int) =
         countries.getOrNull(index)?.let(collapsedLabelMapper) ?: ""
 
-    override fun convertFromRaw(rawValue: String) =
-        CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())
-            ?.let { country ->
-                countries.indexOf(country).takeUnless { it == -1 }?.let {
-                    displayItems[it]
-                }
-            } ?: displayItems.firstOrNull() ?: ""
+    override fun convertFromRaw(rawValue: String): String {
+        val index = countries.indexOfFirst { country ->
+            country.code.value.equals(rawValue, ignoreCase = true) ||
+                country.name.equals(rawValue, ignoreCase = true)
+        }
+        return displayItems.getOrNull(index) ?: displayItems.firstOrNull() ?: ""
+    }
 
     @Suppress("MagicNumber")
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

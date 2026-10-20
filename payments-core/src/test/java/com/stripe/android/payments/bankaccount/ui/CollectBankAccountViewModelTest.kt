@@ -3,7 +3,9 @@ package com.stripe.android.payments.bankaccount.ui
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
@@ -49,8 +51,7 @@ class CollectBankAccountViewModelTest {
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession = mock()
     private val retrieveStripeIntent: RetrieveStripeIntent = mock()
 
-    private val publishableKey = "publishable_key"
-    private val stripeAccountId = "stripe_account_id"
+    private val apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG
     private val clientSecret = "client_secret"
     private val name = "name"
     private val email = "email"
@@ -77,12 +78,14 @@ class CollectBankAccountViewModelTest {
             buildViewModel(viewEffect, paymentIntentConfiguration())
 
             // Then
-            assertThat(awaitItem()).isEqualTo(
+            val effect = awaitItem() as OpenConnectionsFlow
+            assertThat(effect.apiConfiguration).isSameInstanceAs(apiConfiguration)
+            assertThat(effect).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -101,10 +104,10 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -125,10 +128,10 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -149,10 +152,109 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(awaitItem()).isEqualTo(
                 OpenConnectionsFlow(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
-                    stripeAccountId = stripeAccountId,
                     elementsSessionContext = null,
+                    preCollectedConsent = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args has preCollectedConsent, passes it through to OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+        viewEffect.test {
+            // Given
+            givenCreateAccountSessionForPaymentIntentReturns(
+                result = Result.success(financialConnectionsSession),
+                hostedSurface = null,
+            )
+
+            // When
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(
+                    preCollectedConsent = preCollectedConsent,
+                    hostedSurface = null,
+                )
+            )
+
+            // Then
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    apiConfiguration = apiConfiguration,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    elementsSessionContext = null,
+                    preCollectedConsent = preCollectedConsent,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args is hosted, omits preCollectedConsent from OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+        viewEffect.test {
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
+
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(preCollectedConsent = preCollectedConsent)
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    apiConfiguration = apiConfiguration,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    elementsSessionContext = null,
+                    preCollectedConsent = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `init - when args is Instant Debits, omits preCollectedConsent from OpenConnectionsFlow`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        val preCollectedConsent = FinancialConnectionsPreCollectedConsent(
+            consent = "fccons_123",
+            collectedAt = 1_725_000_000L,
+        )
+        val configuration = CollectBankAccountConfiguration.InstantDebits(
+            email = email,
+            elementsSessionContext = null,
+        )
+        viewEffect.test {
+            givenCreateAccountSessionForPaymentIntentReturns(
+                result = Result.success(financialConnectionsSession),
+                configuration = configuration,
+                hostedSurface = null,
+            )
+
+            buildViewModel(
+                viewEffect,
+                paymentIntentConfiguration(
+                    preCollectedConsent = preCollectedConsent,
+                    hostedSurface = null,
+                    configuration = configuration,
+                )
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                OpenConnectionsFlow(
+                    apiConfiguration = apiConfiguration,
+                    financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
+                    elementsSessionContext = null,
+                    preCollectedConsent = null,
                 )
             )
         }
@@ -177,12 +279,10 @@ class CollectBankAccountViewModelTest {
             verify(attachFinancialConnectionsSession, never()).forPaymentIntent(
                 any(),
                 any(),
-                any(),
                 any()
             )
             verify(retrieveStripeIntent).invoke(
-                publishableKey,
-                stripeAccountId,
+                apiConfiguration,
                 clientSecret,
             )
         }
@@ -207,12 +307,10 @@ class CollectBankAccountViewModelTest {
             verify(attachFinancialConnectionsSession, never()).forSetupIntent(
                 any(),
                 any(),
-                any(),
                 any()
             )
             verify(retrieveStripeIntent).invoke(
-                publishableKey,
-                stripeAccountId,
+                apiConfiguration,
                 clientSecret,
             )
         }
@@ -385,19 +483,20 @@ class CollectBankAccountViewModelTest {
     }
 
     private fun givenCreateAccountSessionForPaymentIntentReturns(
-        result: Result<FinancialConnectionsSession>
+        result: Result<FinancialConnectionsSession>,
+        configuration: CollectBankAccountConfiguration = CollectBankAccountConfiguration.USBankAccount(
+            name = name,
+            email = email,
+        ),
+        hostedSurface: String? = "payment_element",
     ) {
         createFinancialConnectionsSession.stub {
             on {
                 forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name = name,
-                        email = email
-                    ),
-                    hostedSurface = "payment_element"
+                    configuration = configuration,
+                    hostedSurface = hostedSurface,
                 )
             }.doReturn(result)
         }
@@ -409,10 +508,9 @@ class CollectBankAccountViewModelTest {
         attachFinancialConnectionsSession.stub {
             on {
                 forPaymentIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -424,10 +522,9 @@ class CollectBankAccountViewModelTest {
         attachFinancialConnectionsSession.stub {
             on {
                 forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     linkedAccountSessionId = linkedAccountSessionId,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)
         }
@@ -439,9 +536,8 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forSetupIntent(
-                    publishableKey = publishableKey,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret,
-                    stripeAccountId = stripeAccountId,
                     configuration = CollectBankAccountConfiguration.USBankAccount(
                         name = name,
                         email = email
@@ -458,8 +554,7 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
@@ -479,8 +574,7 @@ class CollectBankAccountViewModelTest {
         createFinancialConnectionsSession.stub {
             on {
                 forDeferredIntent(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     elementsSessionId = "elements_session_id",
                     customerId = "customer_id",
                     onBehalfOf = "on_behalf_of_id",
@@ -500,8 +594,7 @@ class CollectBankAccountViewModelTest {
         retrieveStripeIntent.stub {
             on {
                 this(
-                    publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId,
+                    apiConfiguration = apiConfiguration,
                     clientSecret = clientSecret
                 )
             }.doReturn(result)
@@ -513,6 +606,7 @@ class CollectBankAccountViewModelTest {
         configuration: CollectBankAccountContract.Args
     ) = CollectBankAccountViewModel(
         args = configuration,
+        apiConfiguration = apiConfiguration,
         createFinancialConnectionsSession = createFinancialConnectionsSession,
         attachFinancialConnectionsSession = attachFinancialConnectionsSession,
         retrieveStripeIntent = retrieveStripeIntent,
@@ -522,19 +616,22 @@ class CollectBankAccountViewModelTest {
     ).also { viewModelStoreRule.track(it) }
 
     private fun paymentIntentConfiguration(
-        attachToIntent: Boolean = true
+        attachToIntent: Boolean = true,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent? = null,
+        hostedSurface: String? = "payment_element",
+        configuration: CollectBankAccountConfiguration = CollectBankAccountConfiguration.USBankAccount(
+            name,
+            email,
+        ),
     ): ForPaymentIntent {
         return ForPaymentIntent(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             clientSecret = clientSecret,
-            configuration = CollectBankAccountConfiguration.USBankAccount(
-                name,
-                email
-            ),
+            configuration = configuration,
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element",
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            hostedSurface = hostedSurface,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            preCollectedConsent = preCollectedConsent
         )
     }
 
@@ -542,8 +639,7 @@ class CollectBankAccountViewModelTest {
         attachToIntent: Boolean = true
     ): ForSetupIntent {
         return ForSetupIntent(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             clientSecret = clientSecret,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
@@ -551,14 +647,14 @@ class CollectBankAccountViewModelTest {
             ),
             attachToIntent = attachToIntent,
             hostedSurface = "payment_element",
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            preCollectedConsent = null
         )
     }
 
     private fun deferredPaymentIntentConfiguration(): CollectBankAccountContract.Args.ForDeferredPaymentIntent {
         return CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
                 email
@@ -575,8 +671,7 @@ class CollectBankAccountViewModelTest {
 
     private fun deferredSetupIntentConfiguration(): CollectBankAccountContract.Args.ForDeferredSetupIntent {
         return CollectBankAccountContract.Args.ForDeferredSetupIntent(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             configuration = CollectBankAccountConfiguration.USBankAccount(
                 name,
                 email

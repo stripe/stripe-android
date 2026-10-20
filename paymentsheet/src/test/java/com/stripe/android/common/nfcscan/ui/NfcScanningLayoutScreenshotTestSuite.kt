@@ -296,6 +296,6 @@ internal class NfcScanningLayoutScreenshotTestSuite {
     }
 
     private companion object {
-        const val ERROR_TEXT = "Card expired. Try another card."
+        const val ERROR_TEXT = "Card expired. Use another card."
     }
 }

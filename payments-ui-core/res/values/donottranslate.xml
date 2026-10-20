@@ -31,6 +31,7 @@
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>
     <string name="stripe_paymentsheet_payment_method_bizum">Bizum</string>
+    <string name="stripe_paymentsheet_payment_method_mb_way">MB WAY</string>
     <string name="stripe_paymentsheet_payment_method_alipay">Alipay</string>
     <string name="stripe_paymentsheet_payment_method_oxxo">OXXO</string>
     <string name="stripe_paymentsheet_payment_method_twint">TWINT</string>
@@ -44,10 +45,21 @@
     <string name="stripe_paymentsheet_payment_method_kr_card">Korean cards</string>
     <string name="stripe_paymentsheet_payment_method_naver_pay">Naver Pay</string>
     <string name="stripe_paymentsheet_payment_method_scalapay">Scalapay</string>
+    <string name="stripe_paymentsheet_payment_method_pix">Pix</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <string name="stripe_scanned_card_masked_last4">\u2066•••• %1$s\u2069</string>
 
-    <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
-    <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
+    <string name="stripe_paymentsheet_payment_method_gopay">GoPay</string>
+    <string name="stripe_paymentsheet_payment_method_momo">MoMo</string>
+    <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
+    <string name="stripe_paymentsheet_payment_method_qris">QRIS</string>
+    <string name="stripe_paymentsheet_payment_method_mondu">Mondu</string>
+    <string name="stripe_paymentsheet_payment_method_touch_n_go">Touch \'n Go</string>
+    <string name="stripe_paymentsheet_payment_method_truemoney">TrueMoney</string>
+    <string name="stripe_paymentsheet_payment_method_ng_card">Naira card</string>
+    <string name="stripe_paymentsheet_payment_method_gcash">GCash</string>
+    <string name="stripe_paymentsheet_payment_method_ng_bank_transfer">Naira bank transfer</string>
+    <string name="stripe_paymentsheet_payment_method_ng_ussd">Naira USSD</string>
+    <string name="stripe_paymentsheet_payment_method_ng_wallet">Naira Wallet</string>
 </resources>

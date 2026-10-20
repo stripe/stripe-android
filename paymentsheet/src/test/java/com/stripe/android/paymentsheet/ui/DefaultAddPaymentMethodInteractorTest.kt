@@ -425,7 +425,6 @@ class DefaultAddPaymentMethodInteractorTest {
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
             coroutineScope = CoroutineScope(dispatcher),
             validationRequested = validationRequestedSource,
-            isLiveMode = true,
             uiContext = dispatcher,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visible, hidden ->
                 initialVisibilityTrackerTurbine.add(Pair(visible, hidden))

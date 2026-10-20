@@ -10,7 +10,6 @@ internal data class TopAppBarState(
     val forceHideStripeLogo: Boolean = false,
     val allowBackNavigation: Boolean = false,
     val theme: Theme = Theme.default,
-    val isTestMode: Boolean = false,
     val allowElevation: Boolean = true,
     val isContentScrolled: Boolean = false,
     val error: Throwable? = null,

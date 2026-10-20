@@ -75,14 +75,19 @@ internal class CustomerApiRepository @Inject constructor(
                         apiKey = ephemeralKeySecret,
                         stripeAccount = apiConfiguration.stripeAccountId,
                     ),
+                    apiConfiguration = apiConfiguration,
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
                     errorReporter.report(
                         ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
-                        StripeException.create(it)
+                        StripeException.create(it),
+                        publishableKeyOverride = apiConfiguration.publishableKey
                     )
                 }.onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+                    errorReporter.report(
+                        ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS,
+                        publishableKeyOverride = apiConfiguration.publishableKey
+                    )
                 }
             }
         }

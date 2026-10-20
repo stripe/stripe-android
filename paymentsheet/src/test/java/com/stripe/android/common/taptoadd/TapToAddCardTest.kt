@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.ui.TapToAddCard
 import com.stripe.android.common.taptoadd.ui.TapToAddTheme
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
@@ -34,7 +35,7 @@ internal class TapToAddCardTest {
     @Test
     fun `when imageRepository is null shows placeholder and last4`() = runTest {
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddCard(cardBrand = CardBrand.Visa, last4 = "4242")
             }
         }
@@ -46,7 +47,7 @@ internal class TapToAddCardTest {
     @Test
     fun `when imageRepository is null and last4 is null shows only placeholder`() = runTest {
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = null) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = null) {
                 TapToAddCard(cardBrand = CardBrand.Visa, last4 = null)
             }
         }
@@ -63,7 +64,7 @@ internal class TapToAddCardTest {
         )
 
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = repository) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = repository) {
                 TapToAddCard(cardBrand = CardBrand.Visa, last4 = "1234")
             }
         }
@@ -86,7 +87,7 @@ internal class TapToAddCardTest {
         )
 
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = repository) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = repository) {
                 TapToAddCard(cardBrand = CardBrand.MasterCard, last4 = "5678")
             }
         }
@@ -110,7 +111,7 @@ internal class TapToAddCardTest {
         )
 
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = repository) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = repository) {
                 TapToAddCard(cardBrand = CardBrand.Unknown, last4 = "9999")
             }
         }
@@ -135,7 +136,7 @@ internal class TapToAddCardTest {
         )
 
         composeTestRule.setContent {
-            TapToAddTheme(imageRepository = repository) {
+            TapToAddTheme(appearance = PaymentSheet.Appearance(), imageRepository = repository) {
                 TapToAddCard(cardBrand = CardBrand.Discover, last4 = "0000")
             }
         }

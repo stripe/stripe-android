@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Bankszámla ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bankszámla ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">A vásárlás befejezéséhez erősítse meg a Bizum fizetést a mobil banki alkalmazásában %s belül.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">A vásárlás befejezéséhez %s percen belül erősítse meg a fizetést bankja alkalmazásában.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -34,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Hozzon létre egy fiókot a Link segítségével a gyorsabb fizetéshez az interneten</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Hozzon létre egy számlát a következővel: %s a gyorsabb fizetéshez az interneten</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Nem tudtuk hitelesíteni a számláját. Kérjük, zárja be ezt az ablakot, és próbálja újra.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">E-mail-kód</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">További lehetőségek</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Ahhoz, hogy kódot küldhessünk Önnek e-mailben, további adatokat kell ellenőriznünk Önről. Adja meg ••%s végződésű telefonszámát.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Ahhoz, hogy kódot küldhessünk Önnek e-mailben, további adatokat kell ellenőriznünk Önről. Kérjük, adja meg a Link-fiókjához megadott telefonszámot.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Erősítse meg telefonszámát</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Kód újraküldése %d másodperc múlva</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$sHitel</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -66,6 +82,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Erősítse meg adatait</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Az SSN utolsó 4 számjegye</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Feltételek</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Szolgáltatási feltételek</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Bejelentkezés vagy regisztráció</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Kijelentkezés a Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Kijelentkezik a következőről: %s?</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">A vásárlás befejezéséhez erősítse meg a fizetést az MB WAY alkalmazásában %s belül.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">További fizetési módok</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Hiba történt, ellenőrizze az internetkapcsolatát és próbálja újra.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Biztonsági okokból a fejlesztői beállításokat ki kell kapcsolni az Érintéses hozzáadás használatához.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Beállítások megnyitása</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Kapcsolja ki a fejlesztői beállításokat</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">A kártya lejárt. Próbálkozzon egy másik kártyával.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Érintse oda a kártyát</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">A kártyát elutasították. Próbálkozzon egy másik kártyával.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -136,6 +168,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Fizetési adatok megadása</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Hozzáadott kártya</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">A cím módosításai nem lesznek mentve.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Elvetés</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Módosítások elvetése?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Cím mentése</string>
   <!-- Title for shipping address entry section -->
@@ -273,6 +311,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">A kártyatípus frissítése nem sikerült, próbálja újra.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">A vásárlás befejezéséhez erősítse meg a fizetést a bankjában vagy a fizetési alkalmazásban ennyi időn belül: %s.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">A vásárlás befejezéséhez teljesítse a fizetést a Pix használatával.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Legyen ez az alapértelmezett fizetési mód</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

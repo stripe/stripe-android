@@ -1,31 +1,37 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
+import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressElementEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -33,7 +39,6 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val resultStateHolder = AddressElementResultStateHolder()
-    private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -43,10 +48,12 @@ class InputAddressViewModelTest {
         primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
             AddressElementActivityContract.Result.StandaloneSucceeded(it)
         },
+        eventReporter: AddressElementEventReporter,
+        placesClient: PlacesClientProxy? = null,
         argsFactory:
             (AddressLauncher.Configuration) -> AddressElementActivityContract.Args = { currentConfig ->
                 AddressElementActivityContract.Args.Standalone(
-                    publishableKey = "pk_123",
+                    apiConfiguration = DEFAULT_API_CONFIG,
                     config = currentConfig,
                 )
             },
@@ -56,7 +63,7 @@ class InputAddressViewModelTest {
             navigator,
             resultStateHolder,
             eventReporter,
-            placesClient = null,
+            placesClient = placesClient,
             primaryButtonAction = primaryButtonAction,
         ).also { viewModelStoreRule.track(it) }
     }
@@ -68,118 +75,165 @@ class InputAddressViewModelTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `onScreenShown fires onShow with initial country`() {
-        val viewModel = createViewModel(
-            address = AddressDetails(address = PaymentSheet.Address(country = "US"))
+    fun `onScreenShown fires onShow with the form country from the initial address`() = runScenario(
+        address = AddressDetails(address = PaymentSheet.Address(country = "US")),
+    ) {
+        viewModel.onScreenShown()
+
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "US")
         )
-        viewModel.onScreenShown()
-        verify(eventReporter).onShow(eq("US"))
     }
 
     @Test
-    fun `onScreenShown fires onShow with empty string when no initial country`() {
-        val viewModel = createViewModel()
+    fun `onScreenShown fires onShow with the form default when no initial country`() = runScenario {
+        assertThat(viewModel.addressFormController.getCurrentFormValues()[FormFieldId.Country]?.value)
+            .isEqualTo("US")
+
         viewModel.onScreenShown()
-        verify(eventReporter).onShow(eq(""))
+
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "US")
+        )
     }
 
     @Test
-    fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
+    fun `onScreenShown fires onShow with the allowed form country`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("CA"))
+            .build(),
+    ) {
+        assertThat(viewModel.addressFormController.getCurrentFormValues()[FormFieldId.Country]?.value)
+            .isEqualTo("CA")
+
+        viewModel.onScreenShown()
+
+        assertThat(eventReporter.shownCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.ShownCall(country = "CA")
+        )
+    }
+
+    @Test
+    fun `no autocomplete address passed has an empty address to start`() {
         val flow = MutableStateFlow<AddressDetails?>(null)
-        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
 
-        val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(AddressDetails())
+        runScenario(
+            withPlacesClient = false,
+            beforeViewModelCreation = {
+                whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
+            },
+        ) {
+            assertThat(viewModel.collectedAddress.value).isEqualTo(AddressDetails())
+        }
     }
 
     @Test
-    fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
+    fun `autocomplete address passed is collected to start`() {
         val expectedAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
         )
-        whenever(
-            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                AddressElementNavigator.AutocompleteEvent.KEY
-            )
-        ).thenReturn(flow)
 
-        val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(
-            AddressDetails(
-                address = expectedAddress
+        runScenario(
+            withPlacesClient = false,
+            beforeViewModelCreation = {
+                whenever(
+                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                        AddressElementNavigator.AutocompleteEvent.KEY
+                    )
+                ).thenReturn(flow)
+            },
+        ) {
+            assertThat(viewModel.collectedAddress.value).isEqualTo(
+                AddressDetails(
+                    address = expectedAddress
+                )
             )
-        )
+        }
     }
 
     @Test
-    fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
+    fun `takes only fields in new address`() {
         val usAddress = PaymentSheet.Address(country = "US")
         val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
             AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
         )
-        whenever(
-            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                AddressElementNavigator.AutocompleteEvent.KEY
-            )
-        ).thenReturn(flow)
 
-        val viewModel = createViewModel()
-        assertThat(viewModel.collectedAddress.value).isEqualTo(
-            AddressDetails(
-                address = usAddress,
+        runScenario(
+            withPlacesClient = false,
+            beforeViewModelCreation = {
+                whenever(
+                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                        AddressElementNavigator.AutocompleteEvent.KEY
+                    )
+                ).thenReturn(flow)
+            },
+        ) {
+            assertThat(viewModel.collectedAddress.value).isEqualTo(
+                AddressDetails(
+                    address = usAddress,
+                )
             )
-        )
 
-        val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
-        flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
-        assertThat(viewModel.collectedAddress.value).isEqualTo(
-            AddressDetails(
-                address = expectedAddress,
+            val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+            flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
+            assertThat(viewModel.collectedAddress.value).isEqualTo(
+                AddressDetails(
+                    address = expectedAddress,
+                )
             )
-        )
+        }
     }
 
     @Test
-    fun `default address from merchant is parsed`() = runTest(UnconfinedTestDispatcher()) {
+    fun `default address from merchant is parsed`() {
         val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
 
-        val viewModel = createViewModel(expectedAddress)
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        runScenario(
+            address = expectedAddress,
+            withPlacesClient = false,
+        ) {
+            assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+        }
     }
 
     @Test
     fun `default configuration enables stripe-hosted autocomplete with hosted countries`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(config = AddressLauncher.Configuration())
-
+        runScenario(
+            config = AddressLauncher.Configuration(),
+            withPlacesClient = false,
+        ) {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries)
                 .isEqualTo(AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES)
         }
 
     @Test
-    fun `builder preserves custom autocomplete countries with stripe-hosted autocomplete`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val customCountries = setOf("US", "GB")
-            val viewModel = createViewModel(
-                config = AddressLauncher.Configuration.Builder()
-                    .autocompleteCountries(customCountries)
-                    .build()
-            )
+    fun `builder preserves custom autocomplete countries with stripe-hosted autocomplete`() {
+        val customCountries = setOf("US", "GB")
 
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .autocompleteCountries(customCountries)
+                .build(),
+            withPlacesClient = false,
+        ) {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries).isEqualTo(customCountries)
         }
+    }
 
     @Test
-    fun `clickPrimaryButton publishes a succeeded result when form is valid`() = runTest(UnconfinedTestDispatcher()) {
-        val completedFormValues = mapOf(
-            FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
-            FormFieldId.City to FormFieldEntry(value = "Seattle", isComplete = true),
-            FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
-        )
-        val expectedAddress = AddressDetails(
+    fun `completion analytics does not treat merchant default as autocomplete selection`() = runScenario(
+        address = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "99 Broadway St",
+                city = "Seattle",
+                country = "US",
+            )
+        ),
+    ) {
+        val addressDetails = AddressDetails(
             address = PaymentSheet.Address(
                 line1 = "99 Broadway St",
                 city = "Seattle",
@@ -187,60 +241,381 @@ class InputAddressViewModelTest {
             ),
             isCheckboxSelected = true,
         )
-        val viewModel = createViewModel(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = "99 Broadway St",
-                    city = "Seattle",
-                    country = "US"
-                )
-            )
-        )
+
         viewModel.clickPrimaryButton(
-            completedFormValues = completedFormValues,
+            completedFormValues = mapOf(
+                FormFieldId.Line1 to FormFieldEntry(value = "99 Broadway St", isComplete = true),
+                FormFieldId.City to FormFieldEntry(value = "Seattle", isComplete = true),
+                FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+            ),
             checkboxChecked = true,
         )
 
-        assertThat(resultStateHolder.result.value)
-            .isEqualTo(AddressElementActivityContract.Result.StandaloneSucceeded(expectedAddress))
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(
+                AddressElementActivityContract.Result.StandaloneSucceeded(
+                    addressDetails
+                )
+            )
+        )
         assertThat(viewModel.formEnabled.value).isFalse()
-        verify(eventReporter).onCompleted(
-            country = eq("US"),
-            autocompleteResultSelected = eq(true),
-            editDistance = eq(0)
+
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = addressDetails,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
+    }
+
+    @Test
+    fun `completion analytics compares against the selected autocomplete prediction`() = runScenario(
+        address = AddressDetails(
+            address = PaymentSheet.Address(
+                line1 = "88 Market Street",
+                city = "San Francisco",
+                country = "US",
+                postalCode = "94103",
+                state = "CA",
+            )
+        ),
+    ) {
+        selectAutocompletePrediction(SELECTED_AUTOCOMPLETE_ADDRESS)
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = SELECTED_AUTOCOMPLETE_FORM_VALUES,
+            checkboxChecked = false,
+        )
+
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = false,
+            ),
+            autocompleteAddressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = null,
+            ),
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
+    }
+
+    @Test
+    fun `completion analytics measures edits against the selected autocomplete prediction`() = runScenario {
+        selectAutocompletePrediction(SELECTED_AUTOCOMPLETE_ADDRESS)
+
+        viewModel.clickPrimaryButton(
+            completedFormValues = SELECTED_AUTOCOMPLETE_FORM_VALUES +
+                (FormFieldId.Line1 to FormFieldEntry("123 Main St", true)),
+            checkboxChecked = false,
+        )
+
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = selectedAutocompleteAddressDetails(
+                line1 = "123 Main St",
+                isCheckboxSelected = false,
+            ),
+            autocompleteAddressDetails = selectedAutocompleteAddressDetails(
+                line1 = SELECTED_AUTOCOMPLETE_ADDRESS.line1,
+                isCheckboxSelected = null,
+            ),
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
+    }
+
+    @Test
+    fun `cancellation analytics keeps merchant prefill out of autocomplete data`() = runScenario(
+        address = EXPECTED_ADDRESS,
+    ) {
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AddressCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = EXPECTED_ADDRESS.address,
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
         )
     }
 
     @Test
-    fun `default checkbox should emit true to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createViewModel(
-            AddressDetails(
-                isCheckboxSelected = true
+    fun `cancellation analytics captures live edits and selected autocomplete data`() = runScenario(
+        address = EXPECTED_ADDRESS,
+    ) {
+        selectAutocompletePrediction(
+            Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
             )
         )
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AddressCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend Sta",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    ),
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
+            )
+        )
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `cancellation analytics is recorded before the canceled result is published`() = runScenario {
+        eventReporter.onBeforeCanceled = {
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
+        }
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.address?.country).isEqualTo("US")
+        assertThat(cancellationCall.autocompleteAddressDetails).isNull()
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `pending cancellation is reported when the view model is created`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        beforeViewModelCreation = {
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
+        },
+    ) {
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.name).isEqualTo(EXPECTED_ADDRESS.name)
+        assertThat(cancellationCall.autocompleteAddressDetails).isNull()
+    }
+
+    @Test
+    fun `duplicate cancellation requests report only once`() = runScenario {
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.address?.country)
+            .isEqualTo("US")
+        eventReporter.canceledCalls.expectNoEvents()
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `cancellation while saving does not report cancellation analytics`() = runScenario {
+        assertThat(resultStateHolder.tryStartSaving()).isTrue()
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
+        eventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `cancellation after successful save does not report cancellation analytics`() = runScenario {
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        val expectedCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedCall)
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(
+                AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+            )
+        )
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        eventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `clickPrimaryButton accepts a second click when first submission fails`() =
+        runPrimaryButtonScenario { primaryButtonAction, expectedAddressCall ->
+            val firstError = IllegalStateException("first submission failed")
+            primaryButtonAction.result = Result.failure(firstError)
+            assertThat(viewModel.saveError.value).isNull()
+
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+                FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
+            )
+            assertThat(viewModel.formEnabled.value).isTrue()
+            assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
+            eventReporter.saveCompletedCalls.expectNoEvents()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
+
+            primaryButtonAction.result = Result.success(
+                AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+            )
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            assertThat(viewModel.formEnabled.value).isFalse()
+            assertThat(viewModel.saveError.value).isNull()
+            assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            eventReporter.saveFailedCalls.expectNoEvents()
+            assertThat(resultStateHolder.state.value).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
+            )
+        }
+
+    @Test
+    fun `clickPrimaryButton replaces save error when retry fails`() =
+        runPrimaryButtonScenario { primaryButtonAction, expectedAddressCall ->
+            val firstError = LocalStripeException("first submission failed", null)
+            val secondError = LocalStripeException("second submission failed", null)
+            primaryButtonAction.result = Result.failure(firstError)
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+                FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, firstError)
+            )
+            assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
+            assertThat(viewModel.formEnabled.value).isTrue()
+
+            primaryButtonAction.result = Result.failure(secondError)
+            viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+            assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+            assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+                FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, secondError)
+            )
+            assertThat(viewModel.saveError.value).isEqualTo(secondError.stripeErrorMessage())
+            assertThat(viewModel.formEnabled.value).isTrue()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
+            eventReporter.saveCompletedCalls.expectNoEvents()
+        }
+
+    @Test
+    fun `editing the form clears the save error`() = runPrimaryButtonScenario(
+        address = EXPECTED_ADDRESS,
+    ) { primaryButtonAction, expectedAddressCall ->
+        val error = LocalStripeException("submission failed", null)
+        primaryButtonAction.result = Result.failure(error)
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+        assertThat(eventReporter.saveFailedCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.SaveFailedCall(expectedAddressCall, error)
+        )
+        assertThat(viewModel.saveError.value).isEqualTo(error.stripeErrorMessage())
+
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to ""))
+
+        assertThat(viewModel.saveError.value).isNull()
+    }
+
+    @Test
+    fun `clickPrimaryButton ignores a second click while first submission is in flight`() =
+        runPrimaryButtonScenario { primaryButtonAction, expectedAddressCall ->
+            val allowPrimaryButtonActionToComplete = CompletableDeferred<Unit>()
+            primaryButtonAction.onBeforeInvoke = { allowPrimaryButtonActionToComplete.await() }
+
+            val controller = (
+                (viewModel.addressFormController.elements.single() as SectionElement).fields.single()
+                    as AutocompleteAddressElement
+            ).sectionFieldErrorController()
+
+            controller.validationMessage.test {
+                assertThat(awaitItem()).isNull()
+
+                viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+                assertThat(primaryButtonAction.calls.awaitItem()).isEqualTo(EXPECTED_ADDRESS)
+                assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+                assertThat(viewModel.formEnabled.value).isFalse()
+
+                viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = true)
+
+                primaryButtonAction.calls.expectNoEvents()
+                eventReporter.validate()
+                expectNoEvents()
+                assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
+
+                allowPrimaryButtonActionToComplete.complete(Unit)
+                assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedAddressCall)
+            }
+        }
+
+    @Test
+    fun `default checkbox should emit true to start if passed by merchant`() = runScenario(
+        address = AddressDetails(
+            isCheckboxSelected = true
+        ),
+        withPlacesClient = false,
+    ) {
         assertThat(viewModel.checkboxChecked.value).isTrue()
     }
 
     @Test
-    fun `default checkbox should emit false to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createViewModel(
-            AddressDetails(
-                isCheckboxSelected = false
-            )
-        )
+    fun `default checkbox should emit false to start if passed by merchant`() = runScenario(
+        address = AddressDetails(
+            isCheckboxSelected = false
+        ),
+        withPlacesClient = false,
+    ) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
     }
 
     @Test
-    fun `default checkbox should emit false to start by default`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createViewModel()
+    fun `default checkbox should emit false to start by default`() = runScenario(withPlacesClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
     }
 
     @Test
-    fun `clicking the checkbox should change the internal state`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createViewModel()
-
+    fun `clicking the checkbox should change the internal state`() = runScenario(withPlacesClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
 
         viewModel.clickCheckbox(true)
@@ -365,31 +740,30 @@ class InputAddressViewModelTest {
 
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
-    fun `'Shipping same as billing' should work as expected when only billing provided`() = runTest {
-        val viewModel = createViewModel(
-            config = AddressLauncher.Configuration.Builder()
-                .allowedCountries(setOf("US"))
-                .billingAddress(
-                    PaymentSheet.BillingDetails(
-                        name = "John Doe",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Apple Street",
-                            city = "San Francisco",
-                            country = "US",
-                            state = "CA",
-                            postalCode = "99999"
-                        ),
-                        phone = "+11234567890"
-                    )
+    fun `'Shipping same as billing' should work as expected when only billing provided`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("US"))
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
+                    phone = "+11234567890"
                 )
-                .additionalFields(
-                    AddressLauncher.AdditionalFieldsConfiguration(
-                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
-                    )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                 )
-                .build()
-        )
-
+            )
+            .build(),
+        withPlacesClient = false,
+    ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
             val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
@@ -522,42 +896,41 @@ class InputAddressViewModelTest {
 
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
-    fun `'Shipping same as billing' should work as expected with both billing & shipping`() = runTest {
-        val viewModel = createViewModel(
-            config = AddressLauncher.Configuration.Builder()
-                .allowedCountries(setOf("US"))
-                .address(
-                    AddressDetails(
-                        name = "Jane Doe",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Coffee Street",
-                            city = "San Jose",
-                            country = "US",
-                            state = "CA",
-                            postalCode = "77777"
-                        ),
-                    )
+    fun `'Shipping same as billing' should work as expected with both billing & shipping`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("US"))
+            .address(
+                AddressDetails(
+                    name = "Jane Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Coffee Street",
+                        city = "San Jose",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "77777"
+                    ),
                 )
-                .billingAddress(
-                    PaymentSheet.BillingDetails(
-                        name = "John Doe",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Apple Street",
-                            city = "San Francisco",
-                            country = "US",
-                            state = "CA",
-                            postalCode = "99999"
-                        ),
-                    )
+            )
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
                 )
-                .additionalFields(
-                    AddressLauncher.AdditionalFieldsConfiguration(
-                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
-                    )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                 )
-                .build()
-        )
-
+            )
+            .build(),
+        withPlacesClient = false,
+    ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
             val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
@@ -615,42 +988,41 @@ class InputAddressViewModelTest {
 
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
-    fun `'Shipping same as billing' should work as expected with same billing & shipping`() = runTest {
-        val viewModel = createViewModel(
-            config = AddressLauncher.Configuration.Builder()
-                .allowedCountries(setOf("US"))
-                .address(
-                    AddressDetails(
-                        name = "John Doe",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Apple Street",
-                            city = "San Francisco",
-                            country = "US",
-                            state = "CA",
-                            postalCode = "99999"
-                        ),
-                    )
+    fun `'Shipping same as billing' should work as expected with same billing & shipping`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("US"))
+            .address(
+                AddressDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
                 )
-                .billingAddress(
-                    PaymentSheet.BillingDetails(
-                        name = "John Doe",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Apple Street",
-                            city = "San Francisco",
-                            country = "US",
-                            state = "CA",
-                            postalCode = "99999"
-                        ),
-                    )
+            )
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        line1 = "123 Apple Street",
+                        city = "San Francisco",
+                        country = "US",
+                        state = "CA",
+                        postalCode = "99999"
+                    ),
                 )
-                .additionalFields(
-                    AddressLauncher.AdditionalFieldsConfiguration(
-                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
-                    )
+            )
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                 )
-                .build()
-        )
-
+            )
+            .build(),
+        withPlacesClient = false,
+    ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
             val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
@@ -688,8 +1060,8 @@ class InputAddressViewModelTest {
 
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
-    fun `'Shipping same as billing' should work as expected with same billing & shipping & empty values`() = runTest {
-        val viewModel = createViewModel(
+    fun `'Shipping same as billing' should work as expected with same billing & shipping & empty values`() =
+        runScenario(
             config = AddressLauncher.Configuration.Builder()
                 .allowedCountries(setOf("US"))
                 .address(
@@ -723,43 +1095,43 @@ class InputAddressViewModelTest {
                         phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
                     )
                 )
-                .build()
-        )
+                .build(),
+            withPlacesClient = false,
+        ) {
+            turbineScope {
+                val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
+                val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
 
-        turbineScope {
-            val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
-            val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
-
-            // Should be checked
-            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
-            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
-                mapOf(
-                    FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
-                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
-                    FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
-                    FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
-                    FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
-                    FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
-                    FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                // Should be checked
+                assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = true))
+                assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                    mapOf(
+                        FormFieldId.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                        FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                        FormFieldId.State to FormFieldEntry(value = "CA", isComplete = true),
+                        FormFieldId.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                        FormFieldId.Line2 to FormFieldEntry(value = "", isComplete = true),
+                        FormFieldId.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                        FormFieldId.PostalCode to FormFieldEntry(value = "99999", isComplete = true)
+                    )
                 )
-            )
 
-            viewModel.clickBillingSameAsShipping(newValue = false)
+                viewModel.clickBillingSameAsShipping(newValue = false)
 
-            // Should be unchecked and empty
-            assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
-            assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
-                mapOf(
-                    FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
-                    FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
-                    FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
+                // Should be unchecked and empty
+                assertThat(shippingSameAsBillingStateTurbine.awaitItem()).isEqualTo(createShowState(isChecked = false))
+                assertThat(formValuesTurbine.awaitItem()).containsExactlyEntriesIn(
+                    mapOf(
+                        FormFieldId.Name to FormFieldEntry(value = "", isComplete = false),
+                        FormFieldId.Country to FormFieldEntry(value = "US", isComplete = true),
+                        FormFieldId.Generic("address") to FormFieldEntry(value = "", isComplete = false),
+                    )
                 )
-            )
 
-            shippingSameAsBillingStateTurbine.cancel()
-            formValuesTurbine.cancel()
+                shippingSameAsBillingStateTurbine.cancel()
+                formValuesTurbine.cancel()
+            }
         }
-    }
 
     @Test
     fun `Does not use initial shipping address if not allowed`() = doesNotUseAddressTest(
@@ -853,46 +1225,45 @@ class InputAddressViewModelTest {
     @OptIn(AddressElementSameAsBillingPreview::class)
     @Test
     fun `Billing same as shipping box is checked even if initial inputs have slightly different formatting`() =
-        runTest {
-            val viewModel = createViewModel(
-                config = AddressLauncher.Configuration.Builder()
-                    .allowedCountries(setOf("US"))
-                    .address(
-                        AddressDetails(
-                            name = "John Doe",
-                            address = PaymentSheet.Address(
-                                line1 = "123 Apple Street",
-                                line2 = "",
-                                city = "San Francisco",
-                                country = "US",
-                                state = "CA",
-                                postalCode = "99999 "
-                            ),
-                            phoneNumber = "+12347682350"
-                        )
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .address(
+                    AddressDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            line2 = "",
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999 "
+                        ),
+                        phoneNumber = "+12347682350"
                     )
-                    .billingAddress(
-                        PaymentSheet.BillingDetails(
-                            name = "John Doe",
-                            address = PaymentSheet.Address(
-                                line1 = "123 Apple Street",
-                                line2 = null,
-                                city = "San Francisco",
-                                country = "US",
-                                state = "CA",
-                                postalCode = "99999"
-                            ),
-                            phone = "(234) 768-2350"
-                        )
+                )
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            country = "US",
+                            state = "CA",
+                            postalCode = "99999"
+                        ),
+                        phone = "(234) 768-2350"
                     )
-                    .additionalFields(
-                        AddressLauncher.AdditionalFieldsConfiguration(
-                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED,
-                        )
+                )
+                .additionalFields(
+                    AddressLauncher.AdditionalFieldsConfiguration(
+                        phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED,
                     )
-                    .build()
-            )
-
+                )
+                .build(),
+            withPlacesClient = false,
+        ) {
             viewModel.shippingSameAsBillingState.test {
                 // Should be checked
                 assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
@@ -901,11 +1272,10 @@ class InputAddressViewModelTest {
 
     private fun doesNotUseAddressTest(
         config: AddressLauncher.Configuration,
-    ) = runTest {
-        val viewModel = createViewModel(
-            config = config,
-        )
-
+    ) = runScenario(
+        config = config,
+        withPlacesClient = false,
+    ) {
         turbineScope {
             val shippingSameAsBillingStateTurbine = viewModel.shippingSameAsBillingState.testIn(scope = this)
             val formValuesTurbine = viewModel.addressFormController.uncompletedFormValues.testIn(scope = this)
@@ -931,15 +1301,14 @@ class InputAddressViewModelTest {
         allowedCountries: Set<String>,
         billingAddress: PaymentSheet.BillingDetails?,
         expectedShippingSameAsBillingState: InputAddressViewModel.ShippingSameAsBillingState,
-    ) = runTest {
-        val viewModel = createViewModel(
-            config = AddressLauncher.Configuration.Builder()
-                .allowedCountries(allowedCountries)
-                .address(address)
-                .billingAddress(billingAddress)
-                .build()
-        )
-
+    ) = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(allowedCountries)
+            .address(address)
+            .billingAddress(billingAddress)
+            .build(),
+        withPlacesClient = false,
+    ) {
         viewModel.shippingSameAsBillingState.test {
             assertThat(awaitItem()).isEqualTo(expectedShippingSameAsBillingState)
         }
@@ -975,60 +1344,41 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `clickPrimaryButton with null triggers validation errors without a result`() = runTest {
-        val viewModel = createViewModel()
+    fun `clickPrimaryButton with null triggers validation errors without a result`() =
+        runScenario(withPlacesClient = false) {
+            val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
+            val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
+            val controller = autocompleteElement.sectionFieldErrorController()
 
-        val sectionElement = viewModel.addressFormController.elements[0] as SectionElement
-        val autocompleteElement = sectionElement.fields[0] as AutocompleteAddressElement
-        val controller = autocompleteElement.sectionFieldErrorController()
+            assertThat(controller.validationMessage.value).isNull()
 
-        assertThat(controller.validationMessage.value).isNull()
+            viewModel.clickPrimaryButton(
+                completedFormValues = null,
+                checkboxChecked = false
+            )
 
-        viewModel.clickPrimaryButton(
-            completedFormValues = null,
-            checkboxChecked = false
-        )
-
-        assertThat(controller.validationMessage.value).isNotNull()
-        assertThat(viewModel.formEnabled.value).isTrue()
-        assertThat(resultStateHolder.result.value).isNull()
-    }
+            assertThat(controller.validationMessage.value).isNotNull()
+            assertThat(viewModel.formEnabled.value).isTrue()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
+        }
 
     @Test
-    fun `standalone save emits standalone success`() {
-        val viewModel = createViewModel()
-
+    fun `standalone save emits standalone success`() = runScenario(withPlacesClient = false) {
         viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
 
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+        val addressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(addressCall)
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS))
         )
     }
 
     @Test
-    fun `checkout shipping save emits checkout success without performing additional work`() {
-        val viewModel = createViewModel(
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                AddressElementActivityContract.Result.CheckoutShippingSucceeded(it)
-            },
-            argsFactory = { config ->
-                AddressElementActivityContract.Args.CheckoutShipping(
-                    publishableKey = "pk_123",
-                    config = config,
-                )
-            },
-        )
-
-        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
-
-        assertThat(resultStateHolder.result.value).isEqualTo(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(EXPECTED_ADDRESS)
-        )
-    }
-
-    @Test
-    fun `isInlineAutocompleteEnabled is always true`() {
-        val viewModel = createViewModel()
+    fun `isInlineAutocompleteEnabled is always true`() = runScenario(withPlacesClient = false) {
         assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
     }
 
@@ -1037,74 +1387,164 @@ class InputAddressViewModelTest {
     // is tested in InlineAutocompleteControllerTest.
 
     @Suppress("DEPRECATION")
-    private fun createInlineViewModel(
-        googlePlacesApiKey: String = "test_key",
-        autocompleteCountries: Set<String> = emptySet(),
-    ): InputAddressViewModel {
-        return InputAddressViewModel(
-            AddressElementActivityContract.Args.Standalone(
-                publishableKey = "pk_123",
-                config = AddressLauncher.Configuration.Builder()
-                    .googlePlacesApiKey(googlePlacesApiKey)
-                    .autocompleteCountries(autocompleteCountries)
-                    .build(),
-            ),
-            navigator,
-            resultStateHolder,
-            eventReporter,
-            placesClient = FakePlacesClientProxy(
-                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-                fetchPlaceResult = Result.success(Address()),
-            ),
-            primaryButtonAction = FakeAddressElementPrimaryButtonAction {
-                AddressElementActivityContract.Result.StandaloneSucceeded(it)
-            },
-        ).also { viewModelStoreRule.track(it) }
-    }
-
     @Test
-    fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() = runTest {
-        val viewModel = createInlineViewModel()
-        var emittedEvent: AutocompleteAddressInteractor.Event? = null
-        viewModel.register { emittedEvent = it }
+    fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() =
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .googlePlacesApiKey("test_key")
+                .autocompleteCountries(emptySet())
+                .build(),
+        ) {
+            var emittedEvent: AutocompleteAddressInteractor.Event? = null
+            viewModel.register { emittedEvent = it }
 
-        viewModel.onEnterManuallyFromInline()
+            viewModel.onEnterManuallyFromInline()
 
-        assertThat(emittedEvent)
-            .isEqualTo(
+            assertThat(emittedEvent)
+                .isEqualTo(
+                    AutocompleteAddressInteractor.Event.OnExpandForm(
+                        values = mapOf(FormFieldId.Country to "US")
+                    )
+                )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() =
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .googlePlacesApiKey("test_key")
+                .autocompleteCountries(emptySet())
+                .build(),
+        ) {
+            var emittedEvent: AutocompleteAddressInteractor.Event? = null
+            viewModel.register { emittedEvent = it }
+
+            val queryFlow = MutableStateFlow("")
+            val countryFlow = MutableStateFlow<String?>("US")
+            viewModel.observeQueryChanges(queryFlow, countryFlow)
+
+            queryFlow.value = "123 Main St"
+            viewModel.onEnterManuallyFromInline()
+
+            assertThat(emittedEvent).isEqualTo(
                 AutocompleteAddressInteractor.Event.OnExpandForm(
-                    values = mapOf(FormFieldId.Country to "US")
+                    values = mapOf(
+                        FormFieldId.Line1 to "123 Main St",
+                        FormFieldId.Country to "US",
+                    )
                 )
             )
-    }
-
-    @Test
-    fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = createInlineViewModel()
-        var emittedEvent: AutocompleteAddressInteractor.Event? = null
-        viewModel.register { emittedEvent = it }
-
-        val queryFlow = MutableStateFlow("")
-        val countryFlow = MutableStateFlow<String?>("US")
-        viewModel.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main St"
-        viewModel.onEnterManuallyFromInline()
-
-        assertThat(emittedEvent).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    FormFieldId.Line1 to "123 Main St",
-                    FormFieldId.Country to "US",
-                )
-            )
-        )
-    }
+        }
 
     private fun createShowState(isChecked: Boolean) =
         InputAddressViewModel.ShippingSameAsBillingState.Show(isChecked)
 
+    private fun selectedAutocompleteAddressDetails(
+        line1: String?,
+        isCheckboxSelected: Boolean?,
+    ) = AddressDetails(
+        address = PaymentSheet.Address(
+            city = SELECTED_AUTOCOMPLETE_ADDRESS.city,
+            country = SELECTED_AUTOCOMPLETE_ADDRESS.country,
+            line1 = line1,
+            postalCode = SELECTED_AUTOCOMPLETE_ADDRESS.postalCode,
+            state = SELECTED_AUTOCOMPLETE_ADDRESS.state,
+        ),
+        isCheckboxSelected = isCheckboxSelected,
+    )
+
+    private fun runPrimaryButtonScenario(
+        address: AddressDetails? = null,
+        block: suspend Scenario.(
+            RecordingPrimaryButtonAction,
+            FakeAddressElementEventReporter.AddressCall,
+        ) -> Unit,
+    ) {
+        val primaryButtonAction = RecordingPrimaryButtonAction(
+            result = Result.success(
+                AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+            )
+        )
+        val expectedAddressCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+
+        runScenario(
+            address = address,
+            primaryButtonAction = primaryButtonAction,
+        ) {
+            block(primaryButtonAction, expectedAddressCall)
+            primaryButtonAction.validate()
+        }
+    }
+
+    private fun runScenario(
+        address: AddressDetails? = null,
+        config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
+            .address(address)
+            .build(),
+        primaryButtonAction: AddressElementPrimaryButtonAction = FakeAddressElementPrimaryButtonAction {
+            AddressElementActivityContract.Result.StandaloneSucceeded(it)
+        },
+        withPlacesClient: Boolean = true,
+        beforeViewModelCreation: () -> Unit = {},
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val eventReporter = FakeAddressElementEventReporter()
+        val placesClient = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(Address()),
+        )
+        beforeViewModelCreation()
+        val viewModel = createViewModel(
+            config = config,
+            primaryButtonAction = primaryButtonAction,
+            eventReporter = eventReporter,
+            placesClient = placesClient.takeIf { withPlacesClient },
+        )
+
+        Scenario(
+            viewModel = viewModel,
+            eventReporter = eventReporter,
+            placesClient = placesClient,
+        ).apply { block() }
+
+        eventReporter.validate()
+        placesClient.ensureAllEventsConsumed()
+    }
+
+    private data class Scenario(
+        val viewModel: InputAddressViewModel,
+        val eventReporter: FakeAddressElementEventReporter,
+        val placesClient: FakePlacesClientProxy,
+    ) {
+        suspend fun selectAutocompletePrediction(address: Address) {
+            placesClient.fetchPlaceResult = Result.success(address)
+
+            viewModel.onPredictionSelected("selected-place")
+
+            assertThat(placesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("selected-place")
+            placesClient.resetSessionCalls.awaitItem()
+        }
+    }
+
     private companion object {
+        val SELECTED_AUTOCOMPLETE_ADDRESS = Address(
+            city = "San Francisco",
+            country = "US",
+            line1 = "123 Main Street",
+            postalCode = "94105",
+            state = "CA",
+        )
+        val SELECTED_AUTOCOMPLETE_FORM_VALUES = mapOf(
+            FormFieldId.City to FormFieldEntry(SELECTED_AUTOCOMPLETE_ADDRESS.city, true),
+            FormFieldId.Country to FormFieldEntry(SELECTED_AUTOCOMPLETE_ADDRESS.country, true),
+            FormFieldId.Line1 to FormFieldEntry(SELECTED_AUTOCOMPLETE_ADDRESS.line1, true),
+            FormFieldId.PostalCode to FormFieldEntry(SELECTED_AUTOCOMPLETE_ADDRESS.postalCode, true),
+            FormFieldId.State to FormFieldEntry(SELECTED_AUTOCOMPLETE_ADDRESS.state, true),
+        )
         val EXPECTED_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(
@@ -1138,5 +1578,25 @@ private class FakeAddressElementPrimaryButtonAction(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
         return Result.success(action(addressDetails))
+    }
+}
+
+private class RecordingPrimaryButtonAction(
+    var result: Result<AddressElementActivityContract.Result>,
+) : AddressElementPrimaryButtonAction {
+    private val _calls = Turbine<AddressDetails>()
+    val calls: ReceiveTurbine<AddressDetails> = _calls
+    var onBeforeInvoke: (suspend () -> Unit)? = null
+
+    override suspend fun invoke(
+        addressDetails: AddressDetails,
+    ): Result<AddressElementActivityContract.Result> {
+        _calls.add(addressDetails)
+        onBeforeInvoke?.invoke()
+        return result
+    }
+
+    fun validate() {
+        _calls.ensureAllEventsConsumed()
     }
 }

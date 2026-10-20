@@ -9,7 +9,6 @@ import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -39,17 +38,24 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
                 )
-                return@tryBeginConfirmation null
+                return@tryBeginConfirmation Result.failure(
+                    IllegalStateException("Cannot confirm checkout before it is configured.")
+                )
             }
-            getConfirmationArgs(
+            val args = getConfirmationArgs(
                 state = state,
                 expressButton = expressButton,
             ) ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
                 )
-                null
+                return@tryBeginConfirmation Result.failure(
+                    IllegalStateException(
+                        "Cannot confirm checkout because the selected payment option cannot be confirmed."
+                    )
+                )
             }
+            Result.success(args)
         } ?: return
 
         analyticsPerformer.onExpressCheckoutElementConfirmationStarted(expressButton.toSelection())
@@ -89,11 +95,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
             configuration = configuration,
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                configuration = configuration,
-                paymentMethodMetadata = paymentMethodMetadata,
-            ),
             googlePayShippingAddressParameters = shippingAddressParameters,
+            showSecondaryButtonForLink = false,
         ) ?: return null
 
         return ConfirmationHandler.Args(

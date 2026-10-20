@@ -9,6 +9,8 @@ internal data class CreatePaymentTokenRequest(
     val cryptoCustomerId: String,
     @SerialName("payment_method")
     val paymentMethod: String,
+    @SerialName("country_hint")
+    val countryHint: String?,
     @SerialName("ui_mode")
     val uiMode: String = "headless",
 )

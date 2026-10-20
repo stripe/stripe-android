@@ -1,10 +1,13 @@
 package com.stripe.android.checkout
 
 import android.os.Bundle
+import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -14,10 +17,15 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -25,6 +33,23 @@ import kotlin.test.Test
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutControllerStateHolderTest {
+    @Test
+    fun `background state reads reflect committed and cleared state`() = testScenario {
+        suspend fun readState() = withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+            stateHolder.state
+        }
+
+        assertThat(readState()).isNull()
+
+        val committed = committedState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = committed
+        assertThat(readState()).isEqualTo(committed)
+
+        stateHolder.state = null
+        assertThat(readState()).isNull()
+    }
+
     @Test
     fun `selection projects paymentSelection from the committed state`() = testScenario {
         stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
@@ -35,10 +60,11 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `session projects the paymentOption the factory builds from the committed state`() {
         val expectedOption = PaymentOptionDisplayData(
-            imageLoader = { error("not needed for this test") },
-            label = "Google Pay",
+            paymentOptionResource = ErrorPaymentOptionResource,
+            label = "Visa",
+            sublabel = "···· 4242",
             billingDetails = null,
-            paymentMethodType = "google_pay",
+            paymentMethodType = "card",
             mandateText = null,
         )
         var capturedSelection: PaymentSelection? = null
@@ -48,11 +74,28 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         testScenario(paymentOptionFactory = factory) {
-            stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+            stateHolder.state = committedState(
+                paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            )
 
             assertThat(stateHolder.session.value?.paymentOption).isSameInstanceAs(expectedOption)
-            assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(stateHolder.session.value?.paymentOption?.label).isEqualTo("Visa")
+            assertThat(stateHolder.session.value?.paymentOption?.sublabel).isEqualTo("···· 4242")
+            assertThat(capturedSelection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         }
+    }
+
+    @Test
+    fun `session has no payment option when there is no selection`() = testScenario(
+        paymentOptionFactory = { selection, _ ->
+            assertThat(selection).isNull()
+            null
+        },
+    ) {
+        stateHolder.state = committedState(paymentSelection = null)
+
+        assertThat(stateHolder.session.value).isNotNull()
+        assertThat(stateHolder.session.value?.paymentOption).isNull()
     }
 
     @Test
@@ -86,6 +129,107 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `configured default phone survives process death`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            configuration = CheckoutController.Configuration()
+                .defaults(CheckoutController.Configuration.Defaults().phone("+15555551234"))
+                .build(),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        val restoredState = requireNotNull(restoredStateHolder.state)
+        assertThat(restoredState.configuration.defaults.phone).isEqualTo("+15555551234")
+    }
+
+    @Test
+    fun `null default phone survives process death`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            configuration = CheckoutController.Configuration()
+                .defaults(CheckoutController.Configuration.Defaults().phone(null))
+                .build(),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        val restoredState = requireNotNull(restoredStateHolder.state)
+        assertThat(restoredState.configuration.defaults.phone).isNull()
+    }
+
+    @Test
+    fun `restored pending saved selection is reset to idle`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = committedState().copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
+                "pm_restored",
+            ),
+        )
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        assertThat(restoredStateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `setSelection with the current selection keeps a saved selection failure`() = testScenario {
+        val failure = SavedPaymentMethodSelectionState.Failed(
+            IllegalStateException("Selection failed").stripeErrorMessage(),
+        )
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = failure,
+        )
+
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState).isEqualTo(failure)
+    }
+
+    @Test
+    fun `setSelection with a different selection resets a saved selection failure to idle`() = testScenario {
+        stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                IllegalStateException("Selection failed").stripeErrorMessage(),
+            ),
+        )
+
+        stateHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Idle)
+    }
+
+    @Test
+    fun `failed selection error survives saved state restoration`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        val error = APIConnectionException()
+        holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
+            savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
+                error.stripeErrorMessage(),
+            ),
+        )
+
+        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+
+        assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(restored.state?.savedPaymentMethodSelectionState)
+            .isEqualTo(SavedPaymentMethodSelectionState.Failed(error.stripeErrorMessage()))
+    }
+
+    @Test
     fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 
@@ -96,6 +240,16 @@ internal class CheckoutControllerStateHolderTest {
         }
 
         assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `setSelection acknowledges the SEPA mandate`() = testScenario {
+        stateHolder.state = committedState()
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        stateHolder.setSelection(selection)
+
+        assertThat(stateHolder.state?.paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
     }
 
     @Test
@@ -213,6 +367,7 @@ internal class CheckoutControllerStateHolderTest {
         expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementPaymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
         linkEagerPresentationSuppressed = false,

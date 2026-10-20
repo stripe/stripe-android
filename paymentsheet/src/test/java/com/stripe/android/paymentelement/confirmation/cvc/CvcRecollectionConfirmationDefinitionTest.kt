@@ -165,7 +165,6 @@ class CvcRecollectionConfirmationDefinitionTest {
         assertThat(launchCall.appearance).isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.appearance)
         assertThat(launchCall.data.brand).isEqualTo(option.paymentMethod.card?.brand)
         assertThat(launchCall.data.lastFour).isEqualTo(option.paymentMethod.card?.last4)
-        assertThat(launchCall.isLiveMode).isEqualTo(CONFIRMATION_PARAMETERS.intent.isLiveMode)
     }
 
     @Test

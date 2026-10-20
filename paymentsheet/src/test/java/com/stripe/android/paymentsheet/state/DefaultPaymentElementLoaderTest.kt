@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -284,6 +285,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
             ),
@@ -377,6 +379,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -418,6 +421,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .asCommonConfiguration(),
             elementsSession = requireNotNull(checkoutSessionResponse.elementsSession),
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
@@ -450,6 +454,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -1852,6 +1857,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         ).validate()
@@ -1860,6 +1866,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
@@ -1869,12 +1876,14 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `integrationMetadata returns checkout session with id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
+                    collectedEmail = null,
                     id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSession.checkoutSessionResponse,
@@ -3163,6 +3172,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
@@ -5039,7 +5049,8 @@ internal class DefaultPaymentElementLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
@@ -5219,6 +5230,7 @@ internal class DefaultPaymentElementLoaderTest {
                 merchantId = "acct_123",
             ),
             customer = CheckoutSessionResponse.Customer(
+                email = null,
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,

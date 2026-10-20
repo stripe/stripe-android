@@ -143,7 +143,7 @@ internal fun SavedPaymentMethodTab(
         modifier = modifier
             .padding(top = SavedPaymentMethodsTopContentPadding)
             .requiredWidth(viewWidth)
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .alpha(alpha = enabledStateAlpha(isEnabled))
     )
 }
 

@@ -1,0 +1,998 @@
+package com.stripe.android.checkout
+
+import android.app.Application
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextReplacement
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
+import app.cash.turbine.Turbine
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.elements.PaymentElement
+import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedContentPage
+import com.stripe.android.paymentelement.EmbeddedFormPage
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementtestpages.BillingDetailsPage
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.ManagePage
+import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
+import com.stripe.paymentelementtestpages.VerticalModePage
+import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
+import org.json.JSONObject
+import org.junit.After
+import org.junit.Rule
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
+
+@OptIn(CheckoutSessionPreview::class)
+internal class CheckoutPaymentElementAutomaticTaxTest {
+    private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+
+    @get:Rule
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(FeatureFlagTestRule(FeatureFlags.nativeLinkEnabled, isEnabled = true))
+    }
+
+    private val editPage = EditPage(testRules.compose)
+    private val contentPage = EmbeddedContentPage(testRules.compose)
+    private val formPage = EmbeddedFormPage(testRules.compose)
+    private val billingDetailsPage = BillingDetailsPage(testRules.compose)
+    private val managePage = ManagePage(testRules.compose)
+    private val savedPaymentMethodsPage = SavedPaymentMethodsPage(testRules.compose)
+    private val verticalModePage = VerticalModePage(testRules.compose)
+
+    @After
+    fun teardown() {
+        GooglePayRepository.resetFactory()
+    }
+
+    @Test
+    fun testCancellingPaymentOptionsRebindsUpdatedSavedPaymentMethod() {
+        lateinit var controller: CheckoutController
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("billing_address_collection", "required")
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(BILLING_ADDRESS_ZIP))),
+                    )
+                    json.getJSONObject("elements_session").remove("link_settings")
+                }
+            },
+            setup = { configuredController ->
+                controller = configuredController
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) {
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(BILLING_ADDRESS_ZIP)
+
+            presentPaymentOptions()
+            verticalModePage.waitUntilVisible()
+            verticalModePage.clickEdit()
+            editPage.waitUntilVisible()
+            billingDetailsPage.zipCode.performTextReplacement(UPDATED_BILLING_ZIP)
+
+            networkRule.checkoutUpdate(
+                bodyPart("payment_method_to_update[payment_method_id]", SAVED_CARD.id),
+                bodyPart(
+                    "payment_method_to_update[billing_details][address][postal_code]",
+                    UPDATED_BILLING_ZIP,
+                ),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put(
+                        "customer",
+                        JSONObject()
+                            .put("id", "cus_123")
+                            .put("can_detach_payment_method", true)
+                            .put("payment_methods", JSONArray().put(savedCardJson(UPDATED_BILLING_ZIP))),
+                    )
+                }
+            }
+            editPage.update()
+            verticalModePage.waitUntilVisible()
+            Espresso.pressBack()
+
+            testRules.compose.waitUntil(timeoutMillis = 5_000) {
+                controller.session.value?.paymentOption?.billingDetails?.address?.postalCode == UPDATED_BILLING_ZIP
+            }
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
+                .isEqualTo(UPDATED_BILLING_ZIP)
+            markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testBillingTaxUpdateRefreshesCheckoutSession() = runAutomaticTaxTest {
+        enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+
+        contentPage.clickOnLpm("card")
+        fillOutCardAndBillingDetails()
+        formPage.clickPrimaryButton()
+
+        waitForSessionTotal(controller, UPDATED_TOTAL)
+        assertThat(controller.session.value?.tax?.status)
+            .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+        contentPage.assertHasSelectedLpm("card")
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
+        var checkoutResult: CheckoutController.Result? = null
+        val savedPaymentMethodTaxResponse = automaticTaxResponse(
+            total = UPDATED_TOTAL,
+            taxStatus = TAX_STATUS_COMPLETE,
+            billingAddressCollection = "auto",
+            hasSavedPaymentMethod = true,
+        )
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_REQUIRES_LOCATION,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
+            ),
+            setup = { controller ->
+                enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+                ).getOrThrow()
+            },
+        ) {
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+
+            enqueueSavedPaymentMethodTaxUpdate(savedPaymentMethodTaxResponse)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", SAVED_PAYMENT_METHOD_ID),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionRefreshesBillingTaxAndInvokesImmediateAction() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+            assertSavedPaymentMethodSpinnerCount(1)
+            contentPage.assertHasSelectedLpm("cashapp")
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                .isEqualTo(INITIAL_TOTAL.toDouble())
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionIgnoresDuplicateTapWhileTaxResponseIsPending() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+
+            // An accepted second tap would queue another tax update that no response is enqueued for.
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionKeepsSpinnerAcrossHostRecreation() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+
+            taxUpdateRequests.awaitItem()
+            assertSavedPaymentMethodSpinnerCount(1)
+
+            recreateHost()
+
+            assertSavedPaymentMethodSpinnerCount(1)
+            taxUpdateRequests.expectNoEvents()
+            immediateActionCalls.expectNoEvents()
+
+            releaseTaxUpdateResponse.countDown()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodSelectionFailureDoesNotInvokeImmediateActionAndCanRetry() {
+        runSavedPaymentMethodSelectionFromCashAppScenario {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            taxUpdateRequests.awaitItem()
+            contentPage.assertPaymentMethodRowsAreEnabled(false)
+            assertSavedPaymentMethodSpinnerCount(1)
+
+            releaseTaxUpdateResponse.countDown()
+
+            contentPage.assertPaymentMethodRowsAreEnabled(true)
+            assertSavedPaymentMethodSpinnerCount(0)
+            contentPage.assertHasSelectedLpm("cashapp")
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
+                .isEqualTo(INITIAL_TOTAL.toDouble())
+            immediateActionCalls.expectNoEvents()
+            contentPage.assertHasSavedPaymentMethodSelectionError(
+                applicationContext.getString(R.string.stripe_something_went_wrong)
+            )
+
+            enqueueSavedPaymentMethodTaxUpdate(
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    billingAddressCollection = "auto",
+                    hasSavedPaymentMethod = true,
+                )
+            )
+            contentPage.clickOnSavedPM(SAVED_PAYMENT_METHOD_ID)
+            contentPage.assertNoSavedPaymentMethodSelectionError()
+        }
+    }
+
+    @Test
+    fun testSavedPaymentMethodTaxUpdateFromManageSheetShowsPendingSelectionUntilResponse() {
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_COMPLETE,
+                hasSavedPaymentMethod = true,
+            ),
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = INITIAL_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
+            holdTaxUpdateResponse = true,
+        ) {
+            enqueueSavedPaymentMethodTaxUpdate { response ->
+                taxUpdateRequests.add(Unit)
+                check(releaseTaxUpdateResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the Checkout Session update response."
+                }
+                automaticTaxResponse(
+                    total = UPDATED_TOTAL,
+                    taxStatus = TAX_STATUS_COMPLETE,
+                    hasSavedPaymentMethod = true,
+                )(response)
+            }
+
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            contentPage.clickViewMore()
+            managePage.waitUntilVisible()
+
+            try {
+                managePage.selectPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+                taxUpdateRequests.awaitItem()
+
+                val firstRow = savedPaymentMethodRow(SAVED_PAYMENT_METHOD_ID)
+                val secondRow = savedPaymentMethodRow(SECOND_SAVED_PAYMENT_METHOD_ID)
+                firstRow.assertIsSelected()
+                    .assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)).not())
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)))
+                secondRow.assertIsNotEnabled()
+                    .assert(hasAnyDescendant(hasTestTag(SAVED_PAYMENT_METHOD_PENDING_TEST_TAG)))
+                    .assert(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES)).not())
+                testRules.compose.onAllNodesWithTag(
+                    SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                    useUnmergedTree = true,
+                ).assertCountEquals(1)
+            } finally {
+                releaseTaxUpdateResponse.countDown()
+            }
+
+            managePage.waitUntilNotVisible()
+            contentPage.assertHasSelectedSavedPaymentMethod(SECOND_SAVED_PAYMENT_METHOD_ID)
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            markTestSucceeded()
+        }
+    }
+
+    private fun runSavedPaymentMethodSelectionFromCashAppScenario(
+        block: suspend Scenario.() -> Unit,
+    ) {
+        lateinit var scenario: Scenario
+        runAutomaticTaxTest(
+            paymentMethodLayout = PaymentElement.Configuration.PaymentMethodLayout.Vertical,
+            checkoutInitResponse = automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_REQUIRES_LOCATION,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
+            ),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                scenario.immediateActionCalls.add(Unit)
+            },
+            configureNetworkSetup = {
+                enqueueSavedPaymentMethodTaxUpdate(
+                    automaticTaxResponse(
+                        total = UPDATED_TOTAL,
+                        taxStatus = TAX_STATUS_COMPLETE,
+                        billingAddressCollection = "auto",
+                        hasSavedPaymentMethod = true,
+                    ),
+                )
+            },
+            holdTaxUpdateResponse = true,
+        ) {
+            scenario = this
+            try {
+                assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                selectCashAppAndAwaitCallback()
+                block()
+
+                immediateActionCalls.awaitItem()
+                assertSavedPaymentMethodSession(checkNotNull(controller.session.value))
+                contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+                contentPage.assertPaymentMethodRowsAreEnabled(true)
+                assertSavedPaymentMethodSpinnerCount(0)
+                markTestSucceeded()
+            } finally {
+                releaseTaxUpdateResponse.countDown()
+            }
+        }
+    }
+
+    private suspend fun Scenario.selectCashAppAndAwaitCallback() {
+        contentPage.clickOnLpm("cashapp")
+        formPage.waitUntilVisible()
+
+        enqueueTaxUpdate(
+            automaticTaxResponse(
+                total = INITIAL_TOTAL,
+                taxStatus = TAX_STATUS_COMPLETE,
+                billingAddressCollection = "auto",
+                hasSavedPaymentMethod = true,
+            )
+        )
+        fillOutBillingDetails()
+        formPage.clickPrimaryButton()
+
+        immediateActionCalls.awaitItem()
+        val session = checkNotNull(controller.session.value)
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
+        assertThat(session.paymentOption?.billingDetails?.address?.line1)
+            .isEqualTo(BILLING_ADDRESS_LINE_ONE)
+        contentPage.assertHasSelectedLpm("cashapp")
+    }
+
+    private fun assertSavedPaymentMethodSession(session: CheckoutController.Session) {
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toDouble())
+        assertThat(session.paymentOption?.paymentMethodType).isEqualTo("card")
+        assertThat(session.paymentOption?.billingDetails?.address?.line1)
+            .isEqualTo(SAVED_BILLING_ADDRESS_LINE_ONE)
+    }
+
+    @Test
+    fun testBillingTaxUpdateFailureCanRetryFromPaymentOptions() = runAutomaticTaxTest {
+        enqueueTaxUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+        }
+
+        presentPaymentOptions()
+        verticalModePage.clickNewPaymentMethodButton("card")
+        fillOutCardAndBillingDetails()
+        formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+
+        formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
+        formPage.waitUntilVisible()
+        formPage.assertPrimaryButtonIsEnabled()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+
+        enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+        formPage.clickPrimaryButton()
+
+        waitForSessionTotal(controller, UPDATED_TOTAL)
+        assertThat(controller.session.value?.tax?.status)
+            .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+        contentPage.assertHasSelectedLpm("card")
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testBillingTaxUpdateFromVerticalPaymentOptionsRefreshesCheckoutSession() {
+        runPaymentOptionsTaxUpdateTest(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+    }
+
+    @Test
+    fun testBillingTaxUpdateFromHorizontalPaymentOptionsRefreshesCheckoutSession() {
+        runPaymentOptionsTaxUpdateTest(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
+    }
+
+    @Test
+    fun testCashAppTaxUpdateFromVerticalPaymentOptionsRefreshesCheckoutSession() {
+        runCashAppPaymentOptionsTaxUpdateTest(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
+    }
+
+    @Test
+    fun testCashAppTaxUpdateFromHorizontalPaymentOptionsRefreshesCheckoutSession() {
+        runCashAppPaymentOptionsTaxUpdateTest(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
+    }
+
+    @Test
+    fun testPrefilledCashAppTaxUpdateFromVerticalPaymentOptionsRefreshesCheckoutSession() {
+        runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical
+        )
+    }
+
+    @Test
+    fun testPrefilledCashAppTaxUpdateFromHorizontalPaymentOptionsRefreshesCheckoutSession() {
+        runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal
+        )
+    }
+
+    private fun runPaymentOptionsTaxUpdateTest(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        runAutomaticTaxTest(
+            paymentMethodLayout = paymentMethodLayout,
+            checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+        ) {
+            enqueueTaxUpdate(automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_COMPLETE))
+            contentPage.clickOnLpm("card")
+            fillOutCardAndBillingDetails()
+            formPage.clickPrimaryButton()
+            contentPage.assertHasSelectedLpm("card")
+
+            enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+
+            presentPaymentOptions()
+            preparePaymentOptionsScreen(paymentMethodLayout)
+            clickPaymentOptionsPrimaryButton()
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            assertThat(controller.session.value?.tax?.status)
+                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            contentPage.assertHasSelectedLpm("card")
+            markTestSucceeded()
+        }
+    }
+
+    private fun runCashAppPaymentOptionsTaxUpdateTest(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        runAutomaticTaxTest(
+            paymentMethodLayout = paymentMethodLayout,
+            checkoutInitResponse = automaticTaxResponseWithoutRequiredBilling(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+        ) {
+            presentPaymentOptions()
+            selectCashApp(paymentMethodLayout)
+            formPage.waitUntilVisible()
+
+            enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            fillOutBillingDetails()
+            formPage.clickPrimaryButton()
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            assertThat(controller.session.value?.tax?.status)
+                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            contentPage.assertHasSelectedLpm("cashapp")
+            markTestSucceeded()
+        }
+    }
+
+    private fun runPrefilledCashAppPaymentOptionsTaxUpdateTest(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(INITIAL_TOTAL, TAX_STATUS_COMPLETE))
+        runAutomaticTaxTest(
+            configuration = checkoutConfigurationWithDefaultBillingAddress(paymentMethodLayout),
+            checkoutInitResponse = automaticTaxResponseWithoutRequiredBilling(
+                INITIAL_TOTAL,
+                TAX_STATUS_REQUIRES_LOCATION,
+            ),
+        ) {
+            presentPaymentOptions()
+            selectCashApp(paymentMethodLayout)
+            formPage.waitUntilVisible()
+            assertBillingDetailsArePopulated()
+
+            enqueueTaxUpdate(automaticTaxResponseWithoutRequiredBilling(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            formPage.clickPrimaryButton()
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            assertThat(controller.session.value?.tax?.status)
+                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            contentPage.assertHasSelectedLpm("cashapp")
+            markTestSucceeded()
+        }
+    }
+
+    private fun selectCashApp(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> {
+                verticalModePage.clickNewPaymentMethodButton("cashapp")
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                openHorizontalPaymentMethodListFromWalletOptions()
+                val cashAppTag = TEST_TAG_LIST + "cashapp"
+                testRules.compose.onNodeWithTag(TEST_TAG_LIST, useUnmergedTree = true)
+                    .performScrollToNode(hasTestTag(cashAppTag))
+                testRules.compose.onNodeWithTag(cashAppTag).performClick()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
+                error("Expected an explicit layout.")
+            }
+        }
+    }
+
+    private fun runAutomaticTaxTest(
+        block: suspend Scenario.() -> Unit,
+    ) = runAutomaticTaxTest(
+        configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+        checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+        block = block,
+    )
+
+    private fun runAutomaticTaxTest(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+        checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
+        holdTaxUpdateResponse: Boolean = false,
+        block: suspend Scenario.() -> Unit,
+    ) = runAutomaticTaxTest(
+        configuration = checkoutConfiguration(paymentMethodLayout),
+        checkoutInitResponse = checkoutInitResponse,
+        rowSelectionBehavior = rowSelectionBehavior,
+        configureNetworkSetup = configureNetworkSetup,
+        holdTaxUpdateResponse = holdTaxUpdateResponse,
+        block = block,
+    )
+
+    private fun runAutomaticTaxTest(
+        configuration: CheckoutController.Configuration,
+        checkoutInitResponse: (MockResponse) -> Unit,
+        rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+        configureNetworkSetup: () -> Unit = {},
+        holdTaxUpdateResponse: Boolean = false,
+        block: suspend Scenario.() -> Unit,
+    ) {
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            checkoutInitResponse = checkoutInitResponse,
+            rowSelectionBehavior = rowSelectionBehavior,
+            setup = { controller ->
+                configureNetworkSetup()
+                controller.configure(
+                    clientSecret = DEFAULT_CLIENT_SECRET,
+                    configuration = configuration,
+                ).getOrThrow()
+            },
+        ) {
+            val scenario = Scenario(
+                checkoutScenario = this,
+                holdTaxUpdateResponse = holdTaxUpdateResponse,
+            )
+            scenario.block()
+            scenario.immediateActionCalls.ensureAllEventsConsumed()
+            scenario.taxUpdateRequests.ensureAllEventsConsumed()
+        }
+    }
+
+    private class Scenario(
+        private val checkoutScenario: CheckoutPaymentElementScenario,
+        holdTaxUpdateResponse: Boolean,
+    ) {
+        val controller: CheckoutController
+            get() = checkoutScenario.controller
+        val immediateActionCalls = Turbine<Unit>()
+        val taxUpdateRequests = Turbine<Unit>()
+        val releaseTaxUpdateResponse = CountDownLatch(if (holdTaxUpdateResponse) 1 else 0)
+
+        fun presentPaymentOptions() {
+            checkoutScenario.presentPaymentOptions()
+        }
+
+        fun confirm() {
+            checkoutScenario.confirm()
+        }
+
+        fun recreateHost() {
+            checkoutScenario.recreateHost()
+        }
+
+        fun markTestSucceeded() {
+            checkoutScenario.markTestSucceeded()
+        }
+    }
+
+    private fun checkoutConfiguration(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ): CheckoutController.Configuration {
+        return CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration().paymentMethodLayout(paymentMethodLayout)
+        )
+    }
+
+    private fun checkoutConfigurationWithDefaultBillingAddress(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ): CheckoutController.Configuration {
+        return checkoutConfiguration(paymentMethodLayout).defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutController.Address()
+                        .city(BILLING_ADDRESS_CITY)
+                        .country("US")
+                        .line1(BILLING_ADDRESS_LINE_ONE)
+                        .postalCode(BILLING_ADDRESS_ZIP)
+                        .state(BILLING_ADDRESS_STATE)
+                )
+            )
+        )
+    }
+
+    private fun preparePaymentOptionsScreen(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> {
+                formPage.waitUntilVisible()
+                Espresso.pressBack()
+                formPage.waitUntilMissing()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
+                formPage.waitUntilVisible()
+            }
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> {
+                error("Expected an explicit layout.")
+            }
+        }
+        waitForPaymentOptionsLayout(paymentMethodLayout)
+    }
+
+    private fun openHorizontalPaymentMethodListFromWalletOptions() {
+        // The checkout fixture enables Google Pay, and TestRules reports it as ready. Horizontal
+        // payment options therefore open on the wallet options screen rather than the payment
+        // method list. Selecting Add is an intentional step in that flow.
+        savedPaymentMethodsPage.clickNewCardButton()
+        waitForPaymentOptionsLayout(PaymentElement.Configuration.PaymentMethodLayout.Horizontal)
+    }
+
+    private fun waitForPaymentOptionsLayout(
+        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
+    ) {
+        val layoutTag = when (paymentMethodLayout) {
+            PaymentElement.Configuration.PaymentMethodLayout.Vertical -> TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+            PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> TEST_TAG_LIST
+            PaymentElement.Configuration.PaymentMethodLayout.Automatic -> error("Expected an explicit layout.")
+        }
+        testRules.compose.waitUntilWithIdle {
+            testRules.compose.onAllNodes(hasTestTag(layoutTag))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
+    private fun clickPaymentOptionsPrimaryButton() {
+        testRules.compose.waitUntilWithIdle {
+            testRules.compose.onAllNodes(
+                hasTestTag(PRIMARY_BUTTON_TEST_TAG).and(isEnabled())
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
+        testRules.compose.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+            .performScrollTo()
+            .performClick()
+    }
+
+    private fun enqueueTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", BILLING_ADDRESS_LINE_ONE),
+            bodyPart("tax_region[city]", BILLING_ADDRESS_CITY),
+            bodyPart("tax_region[state]", BILLING_ADDRESS_STATE),
+            bodyPart("tax_region[postal_code]", BILLING_ADDRESS_ZIP),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
+    private fun enqueueSavedPaymentMethodTaxUpdate(responseFactory: (MockResponse) -> Unit) {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", SAVED_BILLING_ADDRESS_LINE_ONE),
+            bodyPart("tax_region[city]", SAVED_BILLING_ADDRESS_CITY),
+            bodyPart("tax_region[state]", SAVED_BILLING_ADDRESS_STATE),
+            bodyPart("tax_region[postal_code]", SAVED_BILLING_ADDRESS_ZIP),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            responseFactory = responseFactory,
+        )
+    }
+
+    private fun fillOutCardAndBillingDetails() {
+        formPage.fillOutCardDetails()
+        fillOutBillingDetails()
+    }
+
+    private fun fillOutBillingDetails() {
+        billingDetailsPage.country.assertTextContains("United States")
+        billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
+        billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
+        billingDetailsPage.state.performScrollTo().performClick()
+        testRules.compose.onNodeWithText("California").performClick()
+        billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+    }
+
+    private fun assertBillingDetailsArePopulated() {
+        billingDetailsPage.country.performScrollTo().assertTextContains("United States")
+        billingDetailsPage.line1.performScrollTo().assertTextContains(BILLING_ADDRESS_LINE_ONE)
+        billingDetailsPage.city.performScrollTo().assertTextContains(BILLING_ADDRESS_CITY)
+        billingDetailsPage.state.performScrollTo().assertTextContains("California")
+        billingDetailsPage.zipCode.performScrollTo().assertTextContains(BILLING_ADDRESS_ZIP)
+    }
+
+    private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
+        testRules.compose.waitUntilWithIdle {
+            controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
+        }
+    }
+
+    private fun assertSavedPaymentMethodSpinnerCount(expectedCount: Int) {
+        testRules.compose.waitUntil(timeoutMillis = 5_000) {
+            testRules.compose.onAllNodesWithTag(
+                SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).size == expectedCount
+        }
+        testRules.compose.onAllNodesWithTag(
+            SAVED_PAYMENT_METHOD_PENDING_TEST_TAG,
+            useUnmergedTree = true,
+        ).assertCountEquals(expectedCount)
+    }
+
+    private fun automaticTaxResponseWithoutRequiredBilling(
+        total: Long,
+        taxStatus: String,
+    ): (MockResponse) -> Unit = automaticTaxResponse(
+        total = total,
+        taxStatus = taxStatus,
+        billingAddressCollection = "auto",
+    )
+
+    private fun automaticTaxResponse(
+        total: Long,
+        taxStatus: String,
+        billingAddressCollection: String = "required",
+        hasSavedPaymentMethod: Boolean = false,
+    ): (MockResponse) -> Unit = { response ->
+        response.testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("customer_email", "checkout@example.com")
+            json.put("billing_address_collection", billingAddressCollection)
+            json.put(
+                "tax_context",
+                JSONObject()
+                    .put("automatic_tax_enabled", true)
+                    .put("automatic_tax_address_source", "session.billing"),
+            )
+            json.put(
+                "tax_meta",
+                JSONObject()
+                    .put("computation_type", "automatic")
+                    .put("status", taxStatus),
+            )
+            json.getJSONArray("checkout_items").getJSONObject(0)
+                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .put("subtotal", INITIAL_TOTAL)
+                .put("total", total)
+                .put("tax_exclusive", total - INITIAL_TOTAL)
+            json.getJSONObject("elements_session").remove("link_settings")
+            json.getJSONObject("server_built_elements_session_params")
+                .getJSONObject("deferred_intent")
+                .put("amount", total)
+            if (hasSavedPaymentMethod) {
+                json.put("account_settings", JSONObject("""{"country":"US"}"""))
+                json.put(
+                    "customer",
+                    JSONObject(
+                        """
+                        {
+                            "id": "cus_123",
+                            "payment_methods": [{
+                                "id": "$SAVED_PAYMENT_METHOD_ID",
+                                "object": "payment_method",
+                                "type": "card",
+                                "billing_details": {
+                                    "address": {
+                                        "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                                        "city": "$SAVED_BILLING_ADDRESS_CITY",
+                                        "state": "$SAVED_BILLING_ADDRESS_STATE",
+                                        "country": "US",
+                                        "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                                    }
+                                },
+                                "card": {
+                                    "brand": "visa",
+                                    "exp_month": 12,
+                                    "exp_year": 2034,
+                                    "last4": "4242"
+                                }
+                            }, {
+                                "id": "$SECOND_SAVED_PAYMENT_METHOD_ID",
+                                "object": "payment_method",
+                                "type": "card",
+                                "billing_details": {
+                                    "address": {
+                                        "line1": "$SAVED_BILLING_ADDRESS_LINE_ONE",
+                                        "city": "$SAVED_BILLING_ADDRESS_CITY",
+                                        "state": "$SAVED_BILLING_ADDRESS_STATE",
+                                        "country": "US",
+                                        "postal_code": "$SAVED_BILLING_ADDRESS_ZIP"
+                                    }
+                                },
+                                "card": {
+                                    "brand": "visa",
+                                    "exp_month": 12,
+                                    "exp_year": 2034,
+                                    "last4": "5555"
+                                }
+                            }],
+                            "can_detach_payment_method": true
+                        }
+                        """.trimIndent()
+                    )
+                )
+            }
+        }
+    }
+
+    private fun savedPaymentMethodRow(paymentMethodId: String) = testRules.compose.onNodeWithTag(
+        "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId",
+        useUnmergedTree = true,
+    )
+
+    private fun savedCardJson(postalCode: String): JSONObject {
+        return SAVED_CARD.createJson().put(
+            "billing_details",
+            JSONObject().put(
+                "address",
+                JSONObject()
+                    .put("line1", BILLING_ADDRESS_LINE_ONE)
+                    .put("city", BILLING_ADDRESS_CITY)
+                    .put("state", BILLING_ADDRESS_STATE)
+                    .put("country", "US")
+                    .put("postal_code", postalCode),
+            ),
+        )
+    }
+
+    private companion object {
+        const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
+        const val INITIAL_TOTAL = 5_099L
+        const val UPDATED_TOTAL = 5_399L
+        const val SAVED_PAYMENT_METHOD_ID = "pm_12345"
+        const val SECOND_SAVED_PAYMENT_METHOD_ID = "pm_second"
+        const val BILLING_ADDRESS_LINE_ONE = "510 Townsend St"
+        const val BILLING_ADDRESS_CITY = "San Francisco"
+        const val BILLING_ADDRESS_STATE = "CA"
+        const val BILLING_ADDRESS_ZIP = "94103"
+        const val SAVED_BILLING_ADDRESS_LINE_ONE = "123 Main St"
+        const val SAVED_BILLING_ADDRESS_CITY = "Denver"
+        const val SAVED_BILLING_ADDRESS_STATE = "CO"
+        const val SAVED_BILLING_ADDRESS_ZIP = "80202"
+        const val TAX_STATUS_REQUIRES_LOCATION = "requires_location_inputs"
+        const val UPDATED_BILLING_ZIP = "94107"
+        val SAVED_CARD = CardPaymentMethodDetails(id = "pm_12345", last4 = "4242")
+        const val TAX_STATUS_COMPLETE = "complete"
+    }
+}

@@ -353,7 +353,6 @@ private fun PreviewUpdatePaymentMethodUI() {
     )
     UpdatePaymentMethodUI(
         interactor = DefaultUpdatePaymentMethodInteractor(
-            isLiveMode = false,
             canRemove = true,
             canUpdateCardExpiryAndBillingDetails = true,
             canChangeCbc = true,

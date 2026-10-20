@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -23,13 +23,23 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     fun confirm() {
-        val state = stateHolder.state ?: return
-        val paymentSelection = state.paymentSelection ?: return
+        lateinit var paymentSelection: PaymentSelection
         val arguments = operationCoordinator.tryBeginConfirmation {
-          confirmationArgs(
-              state = state,
-              paymentSelection = paymentSelection,
-          )
+            val state = stateHolder.state ?: return@tryBeginConfirmation Result.failure(
+                IllegalStateException("Cannot confirm checkout before it is configured.")
+            )
+            paymentSelection = state.paymentSelection ?: return@tryBeginConfirmation Result.failure(
+                IllegalStateException("Cannot confirm checkout without a selected payment option.")
+            )
+            val args = confirmationArgs(
+                state = state,
+                paymentSelection = paymentSelection,
+            ) ?: return@tryBeginConfirmation Result.failure(
+                IllegalStateException(
+                    "Cannot confirm checkout because the selected payment option cannot be confirmed."
+                )
+            )
+            Result.success(args)
         } ?: return
         analyticsPerformer.onPaymentElementConfirmationStarted(paymentSelection)
         viewModelScope.launch {
@@ -57,10 +67,9 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             configuration = configuration,
             linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
-            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                configuration = configuration,
-                paymentMethodMetadata = state.paymentMethodMetadata,
-            ),
+        )?.withSepaMandateAcknowledgement(
+            hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
+                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
         ) ?: return null
 
         return ConfirmationHandler.Args(
@@ -68,5 +77,15 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
+    }
+
+    private fun ConfirmationHandler.Option.withSepaMandateAcknowledgement(
+        hasAcknowledgedSepaMandate: Boolean,
+    ): ConfirmationHandler.Option {
+        return if (this is PaymentMethodConfirmationOption.Saved) {
+            copy(hasAcknowledgedSepaMandate = hasAcknowledgedSepaMandate)
+        } else {
+            this
+        }
     }
 }

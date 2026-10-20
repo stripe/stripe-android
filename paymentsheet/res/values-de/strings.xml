@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Bankkonto ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bankkonto ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Bestätigen Sie die Bizum-Zahlung in Ihrer Mobile-Banking-Anwendung innerhalb von %s, um den Kauf abzuschließen.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bestätigen Sie die Zahlung in Ihrer Bank-App innerhalb von %s, um den Kauf abzuschließen.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -34,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Für schnelleres Bezahlen überall im Internet ein Konto bei Link erstellen</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Erstellen Sie ein Konto bei %s für schnelleres Bezahlen überall im Netz</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Wir konnten Ihr Konto nicht verifizieren. Bitte schließen Sie dieses Fenster und versuchen Sie es erneut.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">E-Mail-Code</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Mehr Optionen</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Bevor wir einen Code an Ihre E-Mail-Adresse schicken können, müssen wir weitere Angaben zu Ihrer Person verifizieren. Bitte geben Sie Ihre Telefonnummer mit den Endziffern ••%s ein.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Bevor wir einen Code an Ihre E-Mail-Adresse senden können, müssen wir weitere Angaben zu Ihrer Person verifizieren. Bitte geben Sie die in Ihrem Link-Konto hinterlegte Telefonnummer ein.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Ihre Telefonnummer bestätigen</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Code in %d Sekunden erneut senden</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s-Kreditkarte</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -66,6 +82,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bestätigen Sie Ihre Angaben</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Letzte 4 Ziffern der IdNr.</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Konditionen</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Allgemeine Geschäftsbedingungen</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Anmelden oder registrieren</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Von Link abmelden</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Von %s abmelden</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Bestätigen Sie die Zahlung in Ihrer MB WAY-App innerhalb von %s, um den Kauf abzuschließen.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Weitere Zahlungsmethoden</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ein Fehler ist aufgetreten. Prüfen Sie Ihre Verbindung und versuchen Sie es noch einmal.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Aus Sicherheitsgründen müssen die Entwickleroptionen deaktiviert sein, um Zahlungen per Anlegen der Karte zu nutzen.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Einstellungen öffnen</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Deaktivieren Sie die Entwickleroptionen</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Die Karte ist abgelaufen. Bitte versuchen Sie es mit einer anderen Karte.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Karte anlegen</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Karte abgelehnt. Versuchen Sie es mit einer anderen Karte.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -136,6 +168,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Zahlungsinformationen hinzufügen</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Karte hinzugefügt</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Ihre Adressänderungen werden nicht gespeichert.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Verwerfen</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Änderungen verwerfen?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Adresse speichern</string>
   <!-- Title for shipping address entry section -->
@@ -273,6 +311,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Die Kartenmarke wurde nicht geändert. Bitte versuchen Sie es erneut.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Bestätigen Sie die Zahlung in Ihrer Bank- oder Zahlungs-App innerhalb von %s, um den Kauf abzuschließen.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Führen Sie die Zahlung mit Pix durch, um den Kauf abzuschließen.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Als Standard-Zahlungsmethode festlegen</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

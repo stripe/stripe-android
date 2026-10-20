@@ -7,18 +7,21 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutCollectedDetails
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
@@ -30,15 +33,19 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
 internal class ShippingAddressElementTest {
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
 
     private val configuredCheckoutConfiguration = CheckoutController.Configuration()
         .shippingAddressElement(ShippingAddressElement.Configuration())
@@ -58,7 +65,7 @@ internal class ShippingAddressElementTest {
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
         activityLauncher.launchCalls.expectNoEvents()
-        paymentConfiguration.getCalls.expectNoEvents()
+        apiConfigurationProvider.getCalls.expectNoEvents()
     }
 
     @Test
@@ -78,15 +85,22 @@ internal class ShippingAddressElementTest {
             assertThat(call.stripeException).isNull()
             assertThat(call.additionalNonPiiParams).isEmpty()
             activityLauncher.launchCalls.expectNoEvents()
-            paymentConfiguration.getCalls.expectNoEvents()
+            apiConfigurationProvider.getCalls.expectNoEvents()
         }
 
     @Test
     fun `present launches a blank address form with hosted autocomplete`() = runScenario {
-        shippingAddressElement.present()
+        val mainThread = Thread.currentThread()
+        withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(mainThread)
+            shippingAddressElement.present()
+        }
 
         val launch = activityLauncher.launchCalls.awaitItem()
-        assertThat(launch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        assertThat(launch.thread).isSameInstanceAs(mainThread)
+        assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        assertThat(launch.input.checkoutSessionResponse)
+            .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -101,7 +115,7 @@ internal class ShippingAddressElementTest {
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -118,7 +132,68 @@ internal class ShippingAddressElementTest {
         val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
         assertThat(config.allowedCountries).containsExactly("US", "CA")
         assertThat(config.address).isNull()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present prefills the form with the checkout session shipping address`() = runScenario {
+        stateHolder.state = CheckoutControllerStateFactory.create(
+            configuration = configuredCheckoutConfiguration,
+            collectedDetails = CheckoutCollectedDetails(
+                email = null,
+                shippingName = "Jenny Rosen",
+                shippingAddress = CheckoutController.Address.State(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            ),
+        )
+
+        shippingAddressElement.present()
+
+        val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+        assertThat(config.address).isEqualTo(
+            AddressDetails(
+                name = "Jenny Rosen",
+                address = PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "510 Townsend St",
+                    line2 = "Floor 2",
+                    postalCode = "94103",
+                    state = "CA",
+                ),
+            )
+        )
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `present passes full ShippingAddressElement configuration to the address form`() {
+        val appearance = configuredAppearance()
+        val configuration = CheckoutController.Configuration()
+            .shippingAddressElement(
+                ShippingAddressElement.Configuration()
+                    .title("Shipping address")
+                    .buttonTitle("Use this address")
+                    .appearance(appearance)
+            )
+            .build()
+
+        runScenario(configuration = configuration) {
+            shippingAddressElement.present()
+
+            val config = requireNotNull(activityLauncher.launchCalls.awaitItem().input.config)
+            assertThat(config.title).isEqualTo("Shipping address")
+            assertThat(config.buttonTitle).isEqualTo("Use this address")
+
+            assertAppearance(config.appearance)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
+        }
     }
 
     @Test
@@ -127,18 +202,20 @@ internal class ShippingAddressElementTest {
         shippingAddressElement.present()
 
         activityLauncher.launchCalls.awaitItem()
+        testScheduler.runCurrent()
         activityLauncher.launchCalls.expectNoEvents()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
     fun `recreated element suppresses presentation while original is active`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         val recreated = createElement()
         recreated.shippingAddressElement.present()
+        testScheduler.runCurrent()
 
         recreated.activityLauncher.launchCalls.expectNoEvents()
         assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
@@ -146,21 +223,25 @@ internal class ShippingAddressElementTest {
     }
 
     @Test
-    fun `present resolves the latest payment configuration`() = runScenario {
+    fun `present resolves the latest API configuration`() = runScenario {
         shippingAddressElement.present()
 
         val firstLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(firstLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(firstLaunch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
-        paymentConfiguration.value = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        apiConfigurationProvider.value = DEFAULT_API_CONFIG.copy(
+            publishableKey = "pk_new",
+            stripeAccountId = "acct_new",
+        )
 
         shippingAddressElement.present()
 
         val secondLaunch = activityLauncher.launchCalls.awaitItem()
-        assertThat(secondLaunch.input.publishableKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(secondLaunch.input.apiConfiguration.publishableKey).isEqualTo("pk_new")
+        assertThat(secondLaunch.input.apiConfiguration.stripeAccountId).isEqualTo("acct_new")
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -179,13 +260,15 @@ internal class ShippingAddressElementTest {
                 state = "CA",
             ),
         )
+        val updatedResponse = CheckoutSessionResponseFactory.create(amount = 2000L)
         registration.dispatch(
-            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails)
+            AddressElementActivityContract.Result.CheckoutShippingSucceeded(addressDetails, updatedResponse)
         )
 
         assertThat(commitShippingAddress.calls.awaitItem()).isEqualTo(
             FakeCommitShippingAddress.Call(
                 name = addressDetails.name,
+                checkoutSessionResponse = updatedResponse,
                 address = CheckoutController.Address.State(
                     city = "San Francisco",
                     country = "US",
@@ -200,8 +283,8 @@ internal class ShippingAddressElementTest {
 
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -213,11 +296,12 @@ internal class ShippingAddressElementTest {
         ) {
             shippingAddressElement.present()
             activityLauncher.launchCalls.awaitItem()
-            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
             registration.dispatch(
                 AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                    AddressDetails(
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    address = AddressDetails(
                         name = "Jenny Rosen",
                         address = PaymentSheet.Address(
                             city = "San Francisco",
@@ -233,6 +317,7 @@ internal class ShippingAddressElementTest {
             assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
 
             shippingAddressElement.present()
+            testScheduler.runCurrent()
             activityLauncher.launchCalls.expectNoEvents()
 
             commitResult.complete(Result.success(Unit))
@@ -240,7 +325,7 @@ internal class ShippingAddressElementTest {
 
             shippingAddressElement.present()
             activityLauncher.launchCalls.awaitItem()
-            assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
@@ -248,7 +333,7 @@ internal class ShippingAddressElementTest {
     fun `canceled result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(AddressElementActivityContract.Result.Canceled)
 
@@ -260,11 +345,12 @@ internal class ShippingAddressElementTest {
     fun `malformed successful result clears presentation without committing`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
         registration.dispatch(
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
-                AddressDetails(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                address = AddressDetails(
                     name = "Missing country",
                     address = PaymentSheet.Address(
                         line1 = "510 Townsend St",
@@ -282,14 +368,15 @@ internal class ShippingAddressElementTest {
     fun `recreated element result clears presentation after host destruction`() = runScenario {
         shippingAddressElement.present()
         activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
 
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED)
         activityLauncher.unregisterCalls.awaitItem()
         assertThat(shippingAddressElementStateHolder.isPresenting).isTrue()
 
         val recreated = createElement()
         recreated.shippingAddressElement.present()
+        testScheduler.runCurrent()
         recreated.activityLauncher.launchCalls.expectNoEvents()
 
         recreated.registration.dispatch(AddressElementActivityContract.Result.Canceled)
@@ -297,13 +384,13 @@ internal class ShippingAddressElementTest {
 
         recreated.shippingAddressElement.present()
         recreated.activityLauncher.launchCalls.awaitItem()
-        assertThat(paymentConfiguration.getCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(apiConfigurationProvider.getCalls.awaitItem()).isEqualTo(Unit)
         recreated.ensureAllEventsConsumed()
     }
 
     @Test
     fun `lifecycle destruction unregisters the launcher`() = runScenario {
-        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED)
 
         assertThat(activityLauncher.unregisterCalls.awaitItem()).isEqualTo(Unit)
     }
@@ -326,9 +413,7 @@ internal class ShippingAddressElementTest {
             )
         }
         val shippingAddressElementStateHolder = ShippingAddressElementStateHolder(savedStateHandle)
-        val paymentConfiguration = RecordingProvider(
-            PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-        )
+        val apiConfigurationProvider = RecordingProvider(DEFAULT_API_CONFIG)
         val errorReporter = FakeErrorReporter()
         val coroutineScope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
@@ -338,7 +423,7 @@ internal class ShippingAddressElementTest {
             val shippingAddressElement = ShippingAddressElement(
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
-                paymentConfiguration = paymentConfiguration,
+                apiConfigurationProvider = apiConfigurationProvider,
                 coroutineScope = coroutineScope,
                 commitShippingAddress = commitShippingAddress,
                 stateHolder = stateHolder,
@@ -365,14 +450,15 @@ internal class ShippingAddressElementTest {
             stateHolder = stateHolder,
             shippingAddressElementStateHolder = shippingAddressElementStateHolder,
             commitShippingAddress = commitShippingAddress,
-            paymentConfiguration = paymentConfiguration,
+            apiConfigurationProvider = apiConfigurationProvider,
             errorReporter = errorReporter,
             registration = element.registration,
             createElement = ::createElement,
+            testScheduler = testScheduler,
         ).block()
 
         element.ensureAllEventsConsumed()
-        paymentConfiguration.getCalls.ensureAllEventsConsumed()
+        apiConfigurationProvider.getCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
         commitShippingAddress.ensureAllEventsConsumed()
     }
@@ -406,7 +492,7 @@ internal class ShippingAddressElementTest {
             input: AddressElementActivityContract.Args.CheckoutShipping,
             options: ActivityOptionsCompat?,
         ) {
-            launchCalls.add(LaunchCall(input))
+            launchCalls.add(LaunchCall(input, Thread.currentThread()))
         }
 
         override fun unregister() {
@@ -442,6 +528,7 @@ internal class ShippingAddressElementTest {
 
     private data class LaunchCall(
         val input: AddressElementActivityContract.Args.CheckoutShipping,
+        val thread: Thread,
     )
 
     private data class ElementScenario(
@@ -465,9 +552,152 @@ internal class ShippingAddressElementTest {
         val stateHolder: CheckoutControllerStateHolder,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val commitShippingAddress: FakeCommitShippingAddress,
-        val paymentConfiguration: RecordingProvider<PaymentConfiguration>,
+        val apiConfigurationProvider: RecordingProvider<ApiConfiguration.State>,
         val errorReporter: FakeErrorReporter,
         val registration: Registration,
         val createElement: suspend () -> ElementScenario,
+        val testScheduler: TestCoroutineScheduler,
     )
+
+    private fun assertAppearance(appearance: PaymentSheet.Appearance) {
+        assertFormColors(appearance)
+        assertThat(appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+        assertPrimaryButton(appearance)
+        assertThat(appearance.formInsetValues).isEqualTo(
+            PaymentSheet.Insets(
+                startDp = 1f,
+                topDp = 2f,
+                endDp = 3f,
+                bottomDp = 4f,
+            )
+        )
+    }
+
+    private fun assertFormColors(appearance: PaymentSheet.Appearance) {
+        assertThat(appearance.colorsLight).isEqualTo(
+            PaymentSheet.Colors(
+                primary = Color.Red,
+                surface = Color.Green,
+                component = Color.Blue,
+                componentBorder = Color.Yellow,
+                componentDivider = Color.Cyan,
+                onComponent = Color.Magenta,
+                subtitle = Color.Gray,
+                placeholderText = Color.DarkGray,
+                onSurface = Color.White,
+                appBarIcon = Color.Black,
+                error = Color.LightGray,
+            )
+        )
+        assertThat(appearance.colorsDark).isEqualTo(
+            PaymentSheet.Colors(
+                primary = Color.Magenta,
+                surface = Color.Cyan,
+                component = Color.Yellow,
+                componentBorder = Color.Red,
+                componentDivider = Color.Green,
+                onComponent = Color.Blue,
+                subtitle = Color.DarkGray,
+                placeholderText = Color.Gray,
+                onSurface = Color.Black,
+                appBarIcon = Color.White,
+                error = Color.LightGray,
+            )
+        )
+    }
+
+    private fun assertPrimaryButton(appearance: PaymentSheet.Appearance) {
+        assertThat(appearance.primaryButton.colorsLight).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                Color.Green,
+                Color.White,
+                Color.Black,
+            )
+        )
+        assertThat(appearance.primaryButton.colorsDark).isEqualTo(
+            PaymentSheet.PrimaryButtonColors(
+                background = Color.Blue.toArgb(),
+                onBackground = Color.Yellow.toArgb(),
+                border = Color.Red.toArgb(),
+                successBackgroundColor = PaymentSheet.PrimaryButtonColors.defaultDark.successBackgroundColor,
+                onSuccessBackgroundColor = Color.Yellow.toArgb(),
+            )
+        )
+        assertThat(appearance.primaryButton.shape).isEqualTo(
+            PaymentSheet.PrimaryButtonShape(
+                cornerRadiusDp = 12f,
+                borderStrokeWidthDp = 2f,
+                heightDp = 48f,
+            )
+        )
+        assertThat(appearance.primaryButton.typography).isEqualTo(
+            PaymentSheet.PrimaryButtonTypography(
+                fontResId = 123,
+                fontSizeSp = 18f,
+            )
+        )
+    }
+
+    private fun configuredAppearance() = ShippingAddressElement.Configuration.Appearance()
+        .colorsLight(configuredLightColors())
+        .colorsDark(configuredDarkColors())
+        .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+        .primaryButton(configuredPrimaryButton())
+        .formInsetValues(
+            ShippingAddressElement.Configuration.Appearance.Insets(1f, 2f, 3f, 4f)
+        )
+
+    private fun configuredLightColors() =
+        ShippingAddressElement.Configuration.Appearance.Colors.light()
+            .primary(Color.Red)
+            .surface(Color.Green)
+            .component(Color.Blue)
+            .componentBorder(Color.Yellow)
+            .componentDivider(Color.Cyan)
+            .onComponent(Color.Magenta)
+            .subtitle(Color.Gray)
+            .placeholderText(Color.DarkGray)
+            .onSurface(Color.White)
+            .appBarIcon(Color.Black)
+            .error(Color.LightGray)
+
+    private fun configuredDarkColors() =
+        ShippingAddressElement.Configuration.Appearance.Colors.dark()
+            .primary(Color.Magenta)
+            .surface(Color.Cyan)
+            .component(Color.Yellow)
+            .componentBorder(Color.Red)
+            .componentDivider(Color.Green)
+            .onComponent(Color.Blue)
+            .subtitle(Color.DarkGray)
+            .placeholderText(Color.Gray)
+            .onSurface(Color.Black)
+            .appBarIcon(Color.White)
+            .error(Color.LightGray)
+
+    private fun configuredPrimaryButton() =
+        ShippingAddressElement.Configuration.Appearance.PrimaryButton()
+            .colorsLight(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.light()
+                    .background(Color.Green)
+                    .onBackground(Color.White)
+                    .border(Color.Black)
+            )
+            .colorsDark(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark()
+                    .background(Color.Blue)
+                    .onBackground(Color.Yellow)
+                    .border(Color.Red)
+            )
+            .shape(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Shape()
+                    .cornerRadiusDp(12f)
+                    .borderStrokeWidthDp(2f)
+                    .heightDp(48f)
+            )
+            .typography(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton.Typography()
+                    .fontResId(123)
+                    .fontSizeSp(18f)
+            )
 }

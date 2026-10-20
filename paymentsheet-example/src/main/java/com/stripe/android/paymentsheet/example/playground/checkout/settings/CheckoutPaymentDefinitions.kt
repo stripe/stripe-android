@@ -124,10 +124,12 @@ internal object CheckoutPaymentDefinitions {
             val lightColors = CheckoutPrimaryButtonColorsDefinitions(
                 key = "payment.appearance.primary_button.colors_light",
                 displayName = "Light colors",
+                includeSuccessColors = true,
             )
             val darkColors = CheckoutPrimaryButtonColorsDefinitions(
                 key = "payment.appearance.primary_button.colors_dark",
                 displayName = "Dark colors",
+                includeSuccessColors = true,
             )
 
             val shape = ShapeDefinitions()

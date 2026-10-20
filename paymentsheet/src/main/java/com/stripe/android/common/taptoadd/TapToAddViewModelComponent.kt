@@ -58,8 +58,8 @@ import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfir
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -85,8 +85,11 @@ import kotlinx.coroutines.SupervisorJob
 import javax.inject.Named
 import javax.inject.Singleton
 
+private const val IS_SYSTEM_DARK = "isSystemDark"
+
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         ElementsSessionClientParamsModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
@@ -94,7 +97,6 @@ import javax.inject.Singleton
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
-        PaymentConfigurationModule::class,
         ApiConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
@@ -123,6 +125,9 @@ internal interface TapToAddViewModelComponent {
             @Named(STATUS_BAR_COLOR)
             @BindsInstance
             statusBarColor: Int?,
+            @Named(IS_SYSTEM_DARK)
+            @BindsInstance
+            isSystemDark: Boolean,
         ): TapToAddViewModelComponent
     }
 }
@@ -213,8 +218,14 @@ internal interface TapToAddViewModelModule {
 
         @Provides
         @Singleton
-        fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
-            return createTapToAddUxConfiguration()
+        fun providesTapToAddUxConfiguration(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            @Named(IS_SYSTEM_DARK) isSystemDark: Boolean,
+        ): TapToPayUxConfiguration {
+            return createTapToAddUxConfiguration(
+                appearance = paymentMethodMetadata.appearance,
+                isSystemDark = isSystemDark,
+            )
         }
 
         @Provides

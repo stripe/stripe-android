@@ -92,6 +92,9 @@ internal data class ElementsSession(
     val isNfcScanningEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED] == true
 
+    val preferNfcOverCameraScan: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN] == true
+
     val isLinkInlineSignupWithSavedPaymentMethodsEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED] == true
 
@@ -248,6 +251,9 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering"),
         ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED("elements_mobile_android_tap_to_add_enabled"),
         ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED("elements_mobile_android_nfc_scanning_enabled"),
+        ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN(
+            "elements_mobile_android_prefer_nfc_over_camera_scan"
+        ),
         ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED(
             "elements_mobile_link_inline_signup_with_saved_pm_enabled"
         ),

@@ -8,7 +8,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
+import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -93,6 +93,7 @@ internal data class PaymentMethodMetadata(
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
     val isNfcScanningEnabled: Boolean,
+    val preferNfcOverCameraScan: Boolean,
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
@@ -102,9 +103,7 @@ internal data class PaymentMethodMetadata(
 ) : Parcelable {
 
     val requiresBillingAddressForAutomaticTax: Boolean
-        get() = (integrationMetadata as? IntegrationMetadata.CheckoutSession)
-            ?.checkoutSessionResponse
-            ?.collectsTaxFromBillingAddress == true
+        get() = checkoutSessionResponse?.collectsTaxFromBillingAddress == true
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
@@ -447,7 +446,8 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddAvailable,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && !disableNfcScanning.isEnabled,
+                preferNfcOverCameraScan = elementsSession.preferNfcOverCameraScan,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
@@ -519,7 +519,8 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
-                isNfcScanningEnabled = elementsSession.isNfcScanningEnabled && enableNfcScanning.isEnabled,
+                isNfcScanningEnabled = false,
+                preferNfcOverCameraScan = false,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
@@ -529,5 +530,14 @@ internal data class PaymentMethodMetadata(
                 apiConfiguration = apiConfiguration,
             )
         }
+    }
+}
+
+internal fun PaymentMethodMetadata?.defaultAnalyticsParams(): Map<String, Any> {
+    return if (this != null) {
+        analyticsMetadata.paramsMap +
+            ("payment_method_orientation" to paymentMethodOrientation().name.lowercase())
+    } else {
+        emptyMap()
     }
 }

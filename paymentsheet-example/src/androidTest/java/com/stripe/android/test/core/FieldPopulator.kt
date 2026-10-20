@@ -120,7 +120,7 @@ internal class FieldPopulator(
         val auBecsAccountNumber: String = "000123456",
         val bacsSortCode: String = "108800",
         val bacsAccountNumber: String = "00012345",
-        val boletoTaxId: String = "00000000000",
+        val brazilianTaxId: String = "00000000000",
         val addressEntryMode: AddressEntryMode = AddressEntryMode.Regular,
     )
 
@@ -299,10 +299,10 @@ internal class FieldPopulator(
             .performClick()
     }
 
-    fun populateBoletoTaxId() {
-        selectors.getBoletoTaxId().apply {
+    fun populateBrazilianTaxId() {
+        selectors.getBrazilianTaxId().apply {
             performScrollTo()
-            performTextInput(values.boletoTaxId)
+            performTextInput(values.brazilianTaxId)
         }
     }
 

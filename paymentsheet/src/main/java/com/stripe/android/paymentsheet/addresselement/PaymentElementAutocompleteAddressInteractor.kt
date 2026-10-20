@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Provider
 
 internal class PaymentElementAutocompleteAddressInteractor(
     private val launcher: AutocompleteLauncher?,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
 ) : AutocompleteAddressInteractor, AutocompleteLauncherResultHandler {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -20,6 +23,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
             launcher?.launch(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
+                apiConfiguration = apiConfigurationProvider.get(),
                 resultHandler = this,
             )
         }
@@ -44,6 +48,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
 
     class Factory(
         private val launcher: AutocompleteLauncher?,
+        private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
         private val placesClient: PlacesClientProxy?,
         private val stripeAutocompleteRepository: StripeAutocompleteRepository?,
@@ -89,6 +94,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
             activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
+                apiConfigurationProvider = apiConfigurationProvider,
                 autocompleteConfig = autocompleteConfig,
             )
         }

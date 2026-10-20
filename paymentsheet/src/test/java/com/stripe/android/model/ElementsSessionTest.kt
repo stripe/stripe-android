@@ -166,6 +166,12 @@ class ElementsSessionTest {
     }
 
     @Test
+    fun `ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN.flagValue)
+            .isEqualTo("elements_mobile_android_prefer_nfc_over_camera_scan")
+    }
+
+    @Test
     fun `isTapToAddEnabled returns true when flag is enabled`() {
         val session = createElementsSession(
             passiveCaptcha = null,

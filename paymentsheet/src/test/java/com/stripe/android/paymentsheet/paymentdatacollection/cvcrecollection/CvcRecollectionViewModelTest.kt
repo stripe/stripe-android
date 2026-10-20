@@ -23,7 +23,6 @@ class CvcRecollectionViewModelTest {
                 lastFour = "4242",
                 cardBrand = CardBrand.Visa,
                 cvc = cvc,
-                isTestMode = false
             )
         ).also { viewModelStoreRule.track(it) }
     }
@@ -39,7 +38,6 @@ class CvcRecollectionViewModelTest {
             )
         )
         assertThat(viewModel.viewState.value.lastFour).isEqualTo("4242")
-        assertThat(viewModel.viewState.value.isTestMode).isEqualTo(false)
     }
 
     @Test

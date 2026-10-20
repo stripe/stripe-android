@@ -124,6 +124,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
                 StripeIntent.NextActionType.DisplayMultibancoDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -135,6 +138,7 @@ constructor(
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.SwishRedirect,
             is StripeIntent.NextActionData.AwaitAuthorization,
+            is StripeIntent.NextActionData.MbWayAwaitAuthorization,
             is StripeIntent.NextActionData.DisplayPayNowDetails,
             is StripeIntent.NextActionData.DisplayPromptPayDetails,
             null -> {
@@ -244,15 +248,16 @@ constructor(
     }
 
     internal data class ClientSecret(internal val value: String) {
+        init {
+            require(isMatch(value)) {
+                "Invalid SetupIntent client secret. " +
+                    "Pass the client_secret from the SetupIntent returned by your server."
+            }
+        }
+
         internal val setupIntentId: String =
             value.split("_secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-
-        init {
-            require(isMatch(value)) {
-                "Invalid Setup Intent client secret: $value"
-            }
-        }
 
         internal companion object {
             private val PATTERN = Pattern.compile("^seti_[^_]+_secret_[^_]+$")

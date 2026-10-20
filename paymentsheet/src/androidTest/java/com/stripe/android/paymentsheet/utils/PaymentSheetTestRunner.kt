@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.activity.compose.setContent
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -46,6 +46,7 @@ internal class PaymentSheetTestRunnerContext(
 
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
     apiConfigurationTestType: ApiConfigurationTestType,
     isLiveMode: Boolean = false,
     integrationType: IntegrationType = IntegrationType.Compose,
@@ -100,14 +101,19 @@ internal fun runPaymentSheetTest(
             block(testContext)
         }
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        composeTestRule.waitUntil(
+            conditionDescription = "PaymentSheetResultCallback to be called",
+            timeoutMillis = TimeUnit.SECONDS.toMillis(successTimeoutSeconds),
+        ) {
+            countDownLatch.count == 0L
+        }
         networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
     }
 }
 
 internal fun runMultiplePaymentSheetInstancesTest(
     networkRule: NetworkRule,
+    composeTestRule: ComposeTestRule,
     apiConfigurationTestType: ApiConfigurationTestType,
     testType: MultipleInstancesTestType,
     createIntentCallback: CreateIntentCallback,
@@ -187,9 +193,11 @@ internal fun runMultiplePaymentSheetInstancesTest(
         )
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        composeTestRule.waitUntil(TimeUnit.SECONDS.toMillis(successTimeoutSeconds)) {
+            countDownLatch.count == 0L
+        }
         networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
+        assertThat(countDownLatch.count).isEqualTo(0L)
 
         if (testType == MultipleInstancesTestType.RunWithFirst) {
             assertThat(firstCreateIntentCallbackCalled).isTrue()

@@ -4,6 +4,6 @@ import android.content.Context
 import kotlinx.coroutines.flow.StateFlow
 
 internal interface CardScanLauncher {
-    val isAvailable: StateFlow<Boolean>
+    val loadingState: StateFlow<CardScanLoadingState>
     fun launch(context: Context)
 }

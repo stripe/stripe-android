@@ -2,6 +2,12 @@ apply from: configs.androidLibrary
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 android {
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+        }
+    }
+
     buildFeatures {
         buildConfig true
     }
@@ -18,6 +24,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation testLibs.junit
+    api testLibs.androidx.composeUi
     implementation testLibs.androidx.core
     implementation testLibs.kotlin.coroutines
     implementation testLibs.mockito.kotlin

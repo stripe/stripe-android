@@ -12,18 +12,16 @@ object FeatureFlags {
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val forceEnableNativeFinancialConnections = FeatureFlag("Force enable FC Native")
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
-    val allowNoExistingPaymentMethodForGooglePay = FeatureFlag(
-        "Allow no existing payment method required to use Google Pay"
-    )
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val forceOnelink = FeatureFlag("Link: Force Onelink brand")
     val forceOnelinkConsumer = FeatureFlag("Link: Force Onelink consumer")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
-    val enableNfcScanning = FeatureFlag("Enable NFC Scanning")
+    val disableNfcScanning = FeatureFlag("Disable NFC Scanning")
     val disableNfcScanningSecurity = FeatureFlag("Disable NFC Scanning Security")
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
+    val disableLuminanceBasedThemes = FeatureFlag("Disable Luminance Check")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -18,13 +18,14 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    private val paymentElementCallbackIdentifier: String = "FlowController",
+    private val paymentElementCallbackIdentifier: String,
     private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
         activity: ComponentActivity,
         paymentOptionResultCallback: PaymentOptionResultCallback,
-        paymentResultCallback: PaymentSheetResultCallback
+        paymentResultCallback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String,
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
@@ -32,12 +33,14 @@ internal class FlowControllerFactory(
         statusBarColor = { StatusBarCompat.color(activity) },
         paymentOptionResultCallback = paymentOptionResultCallback,
         paymentResultCallback = paymentResultCallback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
     )
 
     constructor(
         fragment: Fragment,
         paymentOptionResultCallback: PaymentOptionResultCallback,
-        paymentResultCallback: PaymentSheetResultCallback
+        paymentResultCallback: PaymentSheetResultCallback,
+        paymentElementCallbackIdentifier: String,
     ) : this(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
@@ -45,6 +48,7 @@ internal class FlowControllerFactory(
         statusBarColor = { StatusBarCompat.color(fragment.requireActivity()) },
         paymentOptionResultCallback = paymentOptionResultCallback,
         paymentResultCallback = paymentResultCallback,
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
     )
 
     fun create(): PaymentSheet.FlowController =

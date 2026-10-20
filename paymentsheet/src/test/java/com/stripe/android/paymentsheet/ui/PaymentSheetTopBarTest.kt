@@ -109,7 +109,6 @@ class PaymentSheetTopBarTest {
         onEditIconPressed: () -> Unit = { throw AssertionError("Not expected") }
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
-            showTestModeLabel = false,
             showEditMenu = showEditMenu,
             isEditing = false,
             onEditIconPressed = onEditIconPressed,

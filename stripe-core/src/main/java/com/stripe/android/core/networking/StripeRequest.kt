@@ -39,11 +39,6 @@ abstract class StripeRequest {
     open var postHeaders: Map<String, String>? = null
 
     /**
-     * Whether the response should be cached or not
-     */
-    open val shouldCache = false
-
-    /**
      * Writes the body of a POST request with [OutputStream], left empty for non-POST requests
      */
     open fun writePostBody(outputStream: OutputStream) {}

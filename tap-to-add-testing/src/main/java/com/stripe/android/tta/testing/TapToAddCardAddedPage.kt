@@ -7,6 +7,7 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY
+import com.stripe.android.testing.waitUntilWithIdle
 
 class TapToAddCardAddedPage(
     private val composeTestRule: ComposeTestRule,
@@ -69,7 +70,7 @@ class TapToAddCardAddedPage(
     private fun assertHasCardAddedText() {
         val matcher = hasText("Card added")
 
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntilWithIdle {
             composeTestRule.onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1

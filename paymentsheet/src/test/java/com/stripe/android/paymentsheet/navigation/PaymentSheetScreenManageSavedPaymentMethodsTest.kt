@@ -7,6 +7,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.testing.PaymentMethodFactory
@@ -87,6 +88,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
             isEditing = isEditing,
             canEdit = true,
             linkBrand = LinkBrand.Link,
+            selectionState = SavedPaymentMethodSelectionState.Idle,
         )
     }
 }

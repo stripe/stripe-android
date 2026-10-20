@@ -8,6 +8,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -42,13 +44,13 @@ class CollectBankAccountContract :
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class Args(
-        open val publishableKey: String,
-        open val stripeAccountId: String?,
+        open val apiConfiguration: ApiConfiguration.State,
         open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean,
         open val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-        open val hostedSurface: String?
+        open val hostedSurface: String?,
+        open val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -62,48 +64,47 @@ class CollectBankAccountContract :
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class ForPaymentIntent(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-            override val hostedSurface: String?
+            override val hostedSurface: String?,
+            override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            preCollectedConsent = preCollectedConsent
         )
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class ForSetupIntent(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
-            override val hostedSurface: String?
+            override val hostedSurface: String?,
+            override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            preCollectedConsent = preCollectedConsent
         )
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class ForDeferredPaymentIntent(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val configuration: CollectBankAccountConfiguration,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?,
@@ -113,20 +114,19 @@ class CollectBankAccountContract :
             val amount: Int?,
             val currency: String?,
         ) : Args(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
             clientSecret = null,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = false,
+            preCollectedConsent = null
         )
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class ForDeferredSetupIntent(
-            override val publishableKey: String,
-            override val stripeAccountId: String?,
+            override val apiConfiguration: ApiConfiguration.State,
             override val configuration: CollectBankAccountConfiguration,
             override val hostedSurface: String?,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
@@ -134,13 +134,13 @@ class CollectBankAccountContract :
             val customerId: String?,
             val onBehalfOf: String?,
         ) : Args(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
+            apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
             clientSecret = null,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
-            attachToIntent = false
+            attachToIntent = false,
+            preCollectedConsent = null
         )
 
         companion object {

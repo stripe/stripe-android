@@ -17,6 +17,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanLauncher
@@ -24,6 +25,7 @@ import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -40,37 +42,21 @@ internal class ScanCardButtonUITest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
     @Test
-    fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario(
-        isFetchClientSucceed = true,
-    ) {
+    fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario {
         scanButtonShownCall.awaitItem()
         composeTestRule.onNodeWithText("Scan card").performClick()
         assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
     }
 
     @Test
-    fun `ScanCardButtonUI hidden when GPCR is not available`() = runScenario(
-        isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    @Test
-    fun `ScanCardButtonUI fires button shown event when visible`() = runScenario(
-        isFetchClientSucceed = true,
-    ) {
+    fun `ScanCardButtonUI fires button shown event when visible`() = runScenario {
         composeTestRule.onNodeWithText("Scan card").assertExists()
         assertThat(scanButtonShownCall.awaitItem())
             .isEqualTo(FakeCardScanEventsReporter.ScanButtonShownCall)
-    }
-
-    @Test
-    fun `ScanCardButtonUI does not fire button shown event when hidden`() = runScenario(
-        isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-        // No event should have been fired - validate ensures no unconsumed events
     }
 
     private fun createMockPaymentCardRecognitionResultIntent(): Intent {
@@ -94,10 +80,7 @@ internal class ScanCardButtonUITest {
         val scanButtonShownCall: ReceiveTurbine<FakeCardScanEventsReporter.ScanButtonShownCall>,
     )
 
-    private fun runScenario(
-        isFetchClientSucceed: Boolean = true,
-        block: suspend Scenario.() -> Unit
-    ) = runTest {
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val cardScanCall = Turbine<String>()
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val registryOwner = object : ActivityResultRegistryOwner {
@@ -127,7 +110,7 @@ internal class ScanCardButtonUITest {
             CompositionLocalProvider(
                 LocalActivityResultRegistryOwner provides registryOwner,
                 LocalCardScanEventsReporter provides fakeEventsReporter,
-                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(isFetchClientSucceed)
+                LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(shouldSucceed = true)
             ) {
                 val context = LocalContext.current
                 val eventsReporter = LocalCardScanEventsReporter.current
@@ -138,7 +121,7 @@ internal class ScanCardButtonUITest {
 
                 ScanCardButtonUI(
                     enabled = true,
-                    cardScanLauncher = cardScanLauncher
+                    cardScanLauncher = cardScanLauncher,
                 )
             }
         }

@@ -625,7 +625,6 @@ internal class DefaultNetworkedIdentityRepositoryTest {
                 assertThat(userAgent.getString("lang")).isEqualTo("kotlin")
                 assertThat(it.postHeaders?.get("Content-Type")).startsWith("application/x-www-form-urlencoded")
                 assertThat(it.retryResponseCodes).isEmpty()
-                assertThat(it.shouldCache).isFalse()
             }
         }
     }

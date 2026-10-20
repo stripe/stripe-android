@@ -422,7 +422,7 @@ internal class Selectors(
         isToggleable().and(hasTestTag("BACS_MANDATE_CHECKBOX"))
     )
 
-    fun getBoletoTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
+    fun getBrazilianTaxId() = composeTestRule.onNodeWithTextAfterWaiting(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
@@ -436,7 +436,7 @@ internal class Selectors(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodes(
                 hasContentDescription("Expiration date", true)
-            ).fetchSemanticsNodes().isNotEmpty()
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
     }

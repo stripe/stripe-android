@@ -17,7 +17,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -95,6 +97,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 elementsSession = elementsSession,
@@ -119,6 +122,83 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
+    fun `web Link is enabled without checkout email when passthrough mode is disabled`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = false,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `web Link is disabled without checkout email when passthrough mode is enabled`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = LinkDisabledReason.CheckoutSessionsRequiresEmail,
+        )
+
+    @Test
+    fun `native Link is enabled without checkout email when passthrough mode is enabled`() =
+        testLinkEmailRequirement(
+            useNativeLink = true,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `link is enabled when native Link checkout session and configuration are missing email`() =
+        testLinkEmailRequirement(
+            useNativeLink = true,
+            passthroughModeEnabled = false,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `web Link passthrough is enabled when checkout session has customer email`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = "customer@example.com",
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `web Link passthrough is enabled when configuration has default email`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = true,
+            useCheckoutSession = true,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = "merchant@example.com",
+            expectedDisabledReason = null,
+        )
+
+    @Test
+    fun `web Link passthrough is enabled when not initialized with checkout session`() =
+        testLinkEmailRequirement(
+            useNativeLink = false,
+            passthroughModeEnabled = true,
+            useCheckoutSession = false,
+            checkoutSessionCustomerEmail = null,
+            defaultEmail = null,
+            expectedDisabledReason = null,
+        )
+
+    @Test
     fun `uses checkout session save consent to determine Link signup mode`() = runTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
@@ -129,6 +209,7 @@ internal class DefaultCreateLinkStateTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
         )
@@ -210,13 +291,89 @@ internal class DefaultCreateLinkStateTest {
             FakeCustomerRepository(),
             FakeDurationProvider(),
         ),
+        useNativeLink: Boolean = true,
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
             retrieveCustomerEmail = retrieveCustomerEmail,
             linkStore = FakeLinkStore(),
-            linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
+            linkGateFactory = FakeLinkGate.Factory(
+                FakeLinkGate().apply { setUseNativeLink(useNativeLink) }
+            ),
             cardFundingFilterFactory = cardFundingFilterFactory
+        )
+    }
+
+    private fun testLinkEmailRequirement(
+        useNativeLink: Boolean,
+        passthroughModeEnabled: Boolean,
+        useCheckoutSession: Boolean,
+        checkoutSessionCustomerEmail: String?,
+        defaultEmail: String?,
+        expectedDisabledReason: LinkDisabledReason?,
+    ) = runTest {
+        val createLinkState = createLinkStateFactory(useNativeLink = useNativeLink)
+        val elementsSession = createElementsSession().copy(
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = listOf("card"),
+                linkPassthroughModeEnabled = passthroughModeEnabled,
+                linkMode = if (passthroughModeEnabled) LinkMode.Passthrough else LinkMode.LinkPaymentMethod,
+                linkFlags = emptyMap(),
+                disableLinkSignup = false,
+                linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkSignUpOptInFeatureEnabled = false,
+                linkSignUpOptInInitialValue = false,
+                linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
+                linkBrand = LinkBrand.Link,
+            ),
+        )
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder().apply {
+            defaultEmail?.let {
+                defaultBillingDetails(PaymentSheet.BillingDetails(email = it))
+            }
+        }.build().asCommonConfiguration()
+        val initializationMode = if (useCheckoutSession) {
+            checkoutSessionInitializationMode(
+                elementsSession = elementsSession,
+                customerEmail = checkoutSessionCustomerEmail,
+            )
+        } else {
+            PAYMENT_INTENT_INIT_MODE
+        }
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
+
+        if (expectedDisabledReason == null) {
+            assertThat(result).isInstanceOf<LinkState>()
+        } else {
+            assertThat(result).isInstanceOf<LinkDisabledState>()
+            assertThat((result as LinkDisabledState).linkDisabledReasons)
+                .containsExactly(expectedDisabledReason)
+        }
+    }
+
+    private fun checkoutSessionInitializationMode(
+        elementsSession: ElementsSession,
+        customerEmail: String?,
+    ): PaymentElementLoader.InitializationMode.CheckoutSession {
+        return PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                customerEmail = customerEmail,
+            ),
         )
     }
 

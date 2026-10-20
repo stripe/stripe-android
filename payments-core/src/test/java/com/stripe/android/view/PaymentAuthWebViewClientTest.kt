@@ -2,17 +2,22 @@ package com.stripe.android.view
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.isCompletionUrl
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -273,6 +278,100 @@ class PaymentAuthWebViewClientTest {
     }
 
     @Test
+    fun `intent URI cannot specify an explicit activity component`() {
+        val url = "intent://example.com/#Intent;scheme=https;component=com.example.app/.PrivateActivity;end"
+        assertThat(Intent.parseUri(url, Intent.URI_INTENT_SCHEME).component).isNotNull()
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    fun `intent URI cannot override browsable routing through a selector`() {
+        val url = "intent://example.com/#Intent;scheme=https;" +
+            "SEL;action=android.intent.action.MAIN;category=android.intent.category.APP_BROWSER;end"
+        val parsedIntent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+        val selector = requireNotNull(parsedIntent.selector)
+        assertThat(parsedIntent.component).isNull()
+        assertThat(parsedIntent.action).isEqualTo(Intent.ACTION_VIEW)
+        assertThat(selector.component).isNull()
+        assertThat(selector.action).isEqualTo(Intent.ACTION_MAIN)
+        assertThat(selector.categories).containsExactly(Intent.CATEGORY_APP_BROWSER)
+        assertThat(selector.hasCategory(Intent.CATEGORY_BROWSABLE)).isFalse()
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            assertThat(intent.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent.dataString).isEqualTo("https://example.com/")
+            assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    fun `intent URI cannot specify an explicit activity component through a selector`() {
+        val url = "intent://example.com/#Intent;scheme=https;SEL;component=com.example.app/.PrivateActivity;end"
+        assertThat(Intent.parseUri(url, Intent.URI_INTENT_SCHEME).selector?.component).isNotNull()
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    fun `bank intent URI preserves its deep link package and token`() {
+        val url = "intent://pay/session123#Intent;scheme=bankapp;package=com.example.bank;S.token=example_token;end"
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.action).isEqualTo(Intent.ACTION_VIEW)
+            assertThat(intent.dataString).isEqualTo("bankapp://pay/session123")
+            assertThat(intent.`package`).isEqualTo("com.example.bank")
+            assertThat(intent.getStringExtra("token")).isEqualTo("example_token")
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            assertThat(intent.hasCategory(Intent.CATEGORY_BROWSABLE)).isTrue()
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.P, Build.VERSION_CODES.R])
+    fun `intent URI preserves its supported fields`() {
+        val identifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            "identifier=auth-session;"
+        } else {
+            ""
+        }
+        val url = "intent://pay/session123?token=url_token#Intent;scheme=bankapp;" +
+            "action=com.example.bank.AUTHENTICATE;type=application/vnd.example.bank;" +
+            "package=com.example.bank;category=com.example.bank.AUTH;" +
+            "launchFlags=0x10000001;sourceBounds=1%202%203%204;" +
+            identifier +
+            "S.token=extra_token;i.attempt=2;end"
+
+        runIntentUriScenario(url) { intent ->
+            assertThat(intent.action).isEqualTo("com.example.bank.AUTHENTICATE")
+            assertThat(intent.dataString).isEqualTo("bankapp://pay/session123?token=url_token")
+            assertThat(intent.type).isEqualTo("application/vnd.example.bank")
+            assertThat(intent.`package`).isEqualTo("com.example.bank")
+            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.sourceBounds).isEqualTo(Rect(1, 2, 3, 4))
+            assertThat(intent.categories).containsExactly("com.example.bank.AUTH", Intent.CATEGORY_BROWSABLE)
+            assertThat(intent.getStringExtra("token")).isEqualTo("extra_token")
+            assertThat(intent.getIntExtra("attempt", -1)).isEqualTo(2)
+            assertThat(intent.component).isNull()
+            assertThat(intent.selector).isNull()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                assertThat(intent.identifier).isEqualTo("auth-session")
+            }
+        }
+    }
+
+    @Test
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithReturnUrlParam_shouldPopulateCompletionUrl() {
         val url =
             "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_X9Y8Z7%3Fclient_secret%3Dsrc_client_secret_abc123&source=src_X9Y8Z7&usage=single_use"
@@ -373,6 +472,24 @@ class PaymentAuthWebViewClientTest {
         assertThat(
             isCompletionUrl("https://hooks.stripe.com/3d_secure_2/hosted/complete/")
         ).isTrue()
+    }
+
+    private fun runIntentUriScenario(
+        url: String,
+        block: (Intent) -> Unit,
+    ) = runTest {
+        val startedIntents = Turbine<Intent>()
+        val webViewClient = createWebViewClient(
+            clientSecret = "pi_123_secret_456",
+            activityStarter = startedIntents::add,
+        )
+
+        assertThat(webViewClient.shouldOverrideUrlLoading(webView, FakeWebResourceRequest(url))).isTrue()
+
+        block(startedIntents.awaitItem())
+        assertThat(onAuthCompletedErrors).isEmpty()
+        assertThat(activityFinished).isFalse()
+        startedIntents.ensureAllEventsConsumed()
     }
 
     private fun createWebViewClient(

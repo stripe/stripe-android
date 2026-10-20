@@ -14,6 +14,8 @@
   <string name="stripe_bank_account_plus_last_4">Bankrekening ···· %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
   <string name="stripe_bank_account_with_last_4">Bankrekening ····%s</string>
+  <!-- Instructions shown while waiting for a Bizum payment authorization -->
+  <string name="stripe_bizum_confirm_payment">Bevestig de Bizum-betaling binnen %s in je mobiele bankapp om de aankoop te voltooien.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bevestig de betaling in de app van je bank binnen %s om de aankoop af te ronden.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
@@ -34,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Maak een account aan bij Link om sneller te kunnen afrekenen op het internet.</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Maak een account bij %s, zodat ik sneller kan afrekenen op internet.</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">We hebben je account niet kunnen verifiëren. Sluit dit venster en probeer het opnieuw.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">E-mailcode</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Meer opties</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Voordat we een code naar je e-mailadres kunnen sturen, moeten we aanvullende informatie over jou verifiëren. Voer je telefoonnummer in dat eindigt op ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Voordat we een code naar je e-mail kunnen sturen, moeten we aanvullende informatie over je verifiëren. Voer het telefoonnummer van je Link-account in.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Verifieer je telefoonnummer</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Verzend code opnieuw over %d seconden</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s creditcard</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -66,6 +82,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bevestig je gegevens</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Laatste 4 cijfers van BSN</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
+  <string name="stripe_link_onramp_terms_and_conditions_screen_title">Algemene voorwaarden</string>
+  <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
+  <string name="stripe_link_onramp_terms_of_service_screen_title">Servicevoorwaarden</string>
   <!-- Title for a button that indicates a user can sign in or sign up. -->
   <string name="stripe_link_sign_in_or_sign_up">Log in of registreer je</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -98,10 +118,22 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Afmelden bij Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Afmelden bij %s</string>
+  <!-- Instructions shown while waiting for an MB WAY payment authorization -->
+  <string name="stripe_mb_way_confirm_payment">Bevestig de betaling binnen %s in je MB WAY-app om de aankoop te voltooien.</string>
+  <!-- Button that opens the complete list of available payment methods. -->
+  <string name="stripe_more_payment_methods">Meer betaalmethoden</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Er is iets misgegaan. Controleer je verbinding en probeer het opnieuw.</string>
+  <!-- Explanation shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_message">Voor de veiligheid moeten developeropties uitgeschakeld zijn om Tap toe te voegen om te gebruiken.</string>
+  <!-- Button that opens Android developer options settings. -->
+  <string name="stripe_nfc_developer_options_open_settings">Instellingen openen</string>
+  <!-- Title shown before NFC scanning when Android developer options are enabled. -->
+  <string name="stripe_nfc_developer_options_title">Developeropties uitschakelen</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">De betaalkaart is verlopen. Probeer een andere betaalkaart.</string>
+  <!-- Button label for a button that launches NFC card scanning. -->
+  <string name="stripe_nfc_scan_card_button_label">Kaart bij apparaat houden</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
   <string name="stripe_nfc_scan_error_declined_card">Kaart geweigerd. Probeer een andere betaalkaart.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
@@ -136,6 +168,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Je betaalgegevens toevoegen</string>
   <!-- Title shown above a view containing a customer's recently added card -->
   <string name="stripe_paymentsheet_added_card">Betaalkaart toegevoegd</string>
+  <!-- Message for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_body">Jouw adreswijzigingen worden niet opgeslagen.</string>
+  <!-- Destructive action for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_confirm">Verwijderen</string>
+  <!-- Title for the dialog shown when closing Address Element with unsaved changes. -->
+  <string name="stripe_paymentsheet_address_element_discard_changes_title">Wijzigingen verwijderen?</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Adres opslaan</string>
   <!-- Title for shipping address entry section -->
@@ -273,6 +311,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Het merk van de betaalkaart is niet bijgewerkt. Probeer het opnieuw.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
   <string name="stripe_paynow_confirm_payment">Bevestig de betaling binnen %s in je bank- of betaalapp om de aankoop af te ronden.</string>
+  <!-- Instructions shown while waiting for a Pix payment authorization -->
+  <string name="stripe_pix_confirm_payment">Rond de betaling af met Pix om de aankoop te voltooien.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Instellen als standaardbetaalmethode</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

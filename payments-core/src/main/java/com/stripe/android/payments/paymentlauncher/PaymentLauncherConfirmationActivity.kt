@@ -45,7 +45,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             }
         }.getOrElse {
             finishWithResult(InternalPaymentResult.Failed(it))
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                context = applicationContext,
+                apiConfigurationProvider = { error(EMPTY_ARG_ERROR) },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
                     stripeException = StripeException.create(it),
@@ -56,7 +59,12 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         args.validate().onFailure {
             finishWithResult(InternalPaymentResult.Failed(it))
 
-            ErrorReporter.createFallbackInstance(applicationContext)
+            ErrorReporter.createFallbackInstance(
+                context = applicationContext,
+                apiConfigurationProvider = {
+                    args.apiConfiguration
+                },
+            )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS,
                     stripeException = StripeException.create(it),

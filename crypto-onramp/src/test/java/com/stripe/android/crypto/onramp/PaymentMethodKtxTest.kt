@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.googlePayKycInfo
+import com.stripe.android.crypto.onramp.model.platformPayKycInfo
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
@@ -14,7 +14,7 @@ class PaymentMethodKtxTest {
     fun testGooglePayKycInfoReturnsNullWhenBillingDetailsMissing() {
         val paymentMethod = createPaymentMethod(billingDetails = null)
 
-        assertThat(paymentMethod.googlePayKycInfo()).isNull()
+        assertThat(paymentMethod.platformPayKycInfo()).isNull()
     }
 
     @Test
@@ -25,7 +25,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        val kycInfo = requireNotNull(paymentMethod.googlePayKycInfo())
+        val kycInfo = requireNotNull(paymentMethod.platformPayKycInfo())
 
         assertThat(kycInfo.firstName).isEqualTo("John")
         assertThat(kycInfo.lastName).isEqualTo("Smith")
@@ -46,7 +46,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        val kycInfo = requireNotNull(paymentMethod.googlePayKycInfo())
+        val kycInfo = requireNotNull(paymentMethod.platformPayKycInfo())
 
         assertThat(kycInfo.firstName).isNull()
         assertThat(kycInfo.lastName).isNull()
@@ -65,7 +65,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        val kycInfo = requireNotNull(paymentMethod.googlePayKycInfo())
+        val kycInfo = requireNotNull(paymentMethod.platformPayKycInfo())
 
         assertThat(kycInfo.firstName).isEqualTo("John")
         assertThat(kycInfo.lastName).isNull()
@@ -81,7 +81,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()).isNull()
+        assertThat(paymentMethod.platformPayKycInfo()).isNull()
     }
 
     @Test
@@ -100,7 +100,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()).isNull()
+        assertThat(paymentMethod.platformPayKycInfo()).isNull()
     }
 
     @Test
@@ -111,7 +111,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.city).isEqualTo("Brooklyn")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.city).isEqualTo("Brooklyn")
     }
 
     @Test
@@ -122,7 +122,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.country).isEqualTo("US")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.country).isEqualTo("US")
     }
 
     @Test
@@ -133,7 +133,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.line1).isEqualTo("123 Fake Street")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.line1).isEqualTo("123 Fake Street")
     }
 
     @Test
@@ -144,7 +144,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.line2).isEqualTo("Apt 2")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.line2).isEqualTo("Apt 2")
     }
 
     @Test
@@ -155,7 +155,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.postalCode).isEqualTo("11201")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.postalCode).isEqualTo("11201")
     }
 
     @Test
@@ -166,7 +166,7 @@ class PaymentMethodKtxTest {
             )
         )
 
-        assertThat(paymentMethod.googlePayKycInfo()?.address?.state).isEqualTo("New York")
+        assertThat(paymentMethod.platformPayKycInfo()?.address?.state).isEqualTo("New York")
     }
 
     @Test
@@ -177,10 +177,100 @@ class PaymentMethodKtxTest {
             )
         )
 
-        val kycInfo = requireNotNull(paymentMethod.googlePayKycInfo())
+        val kycInfo = requireNotNull(paymentMethod.platformPayKycInfo())
 
         assertThat(kycInfo.firstName).isEqualTo("Jane Mary")
         assertThat(kycInfo.lastName).isEqualTo("Doe")
+    }
+
+    @Test
+    fun `email alone produces contact information`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(email = "  user@example.com  ")
+        ).platformPayKycInfo()
+
+        assertThat(result?.email).isEqualTo("user@example.com")
+        assertThat(result?.firstName).isNull()
+        assertThat(result?.phone).isNull()
+    }
+
+    @Test
+    fun `international phone alone produces normalized contact information`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "+1 (212) 555-1234")
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isEqualTo("+12125551234")
+        assertThat(result?.rawPhone).isEqualTo("+1 (212) 555-1234")
+    }
+
+    @Test
+    fun `national phone uses billing country`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = " (212) 555-1234 ", address = Address(country = "US"))
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isEqualTo("+12125551234")
+        assertThat(result?.rawPhone).isEqualTo(" (212) 555-1234 ")
+    }
+
+    @Test
+    fun `UK phone strips national trunk prefix`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "020 7946 0018", address = Address(country = "gb"))
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isEqualTo("+442079460018")
+        assertThat(result?.rawPhone).isEqualTo("020 7946 0018")
+    }
+
+    @Test
+    fun `international phone is not prefixed with billing country`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "+44 20 7946 0018", address = Address(country = "US"))
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isEqualTo("+442079460018")
+    }
+
+    @Test
+    fun `national phone without country keeps only original string`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "(212) 555-1234")
+        ).platformPayKycInfo()
+
+        assertThat(result).isNotNull()
+        assertThat(result?.phone).isNull()
+        assertThat(result?.rawPhone).isEqualTo("(212) 555-1234")
+    }
+
+    @Test
+    fun `invalid phone keeps only original string`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "123", address = Address(country = "US"))
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isNull()
+        assertThat(result?.rawPhone).isEqualTo("123")
+    }
+
+    @Test
+    fun `unknown country does not guess a national phone prefix`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(phone = "2125551234", address = Address(country = "ZZ"))
+        ).platformPayKycInfo()
+
+        assertThat(result?.phone).isNull()
+        assertThat(result?.rawPhone).isEqualTo("2125551234")
+    }
+
+    @Test
+    fun `blank contact values do not produce KYC information`() {
+        val result = createPaymentMethod(
+            PaymentMethod.BillingDetails(email = "  ", phone = "  ")
+        ).platformPayKycInfo()
+
+        assertThat(result).isNull()
     }
 
     private fun createPaymentMethod(

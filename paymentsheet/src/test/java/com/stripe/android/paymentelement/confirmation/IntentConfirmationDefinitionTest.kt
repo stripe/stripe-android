@@ -167,6 +167,7 @@ class IntentConfirmationDefinitionTest {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     throw CallbackNotFoundException(
                         message = "CreateIntentCallback must be implemented",
@@ -591,6 +592,7 @@ class IntentConfirmationDefinitionTest {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor()
                 }

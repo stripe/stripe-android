@@ -150,13 +150,7 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-        val returnUrl =
-            if (isInstantApp) {
-                confirmStripeIntentParams.returnUrl
-            } else {
-                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-                    ?: defaultReturnUrl.value
-            }
+        val returnUrl = resolveReturnUrl(confirmStripeIntentParams.returnUrl)
 
         val result = when (confirmStripeIntentParams) {
             is ConfirmPaymentIntentParams -> {
@@ -200,12 +194,10 @@ constructor(
         authenticator: AlipayAuthenticator,
         requestOptions: ApiRequest.Options
     ): Result<PaymentIntentResult> {
-        val params = if (confirmPaymentIntentParams.returnUrl == null) {
-            // return_url is no longer used by is still required by the backend
-            confirmPaymentIntentParams.copy(returnUrl = "stripe://return_url")
-        } else {
-            confirmPaymentIntentParams
-        }
+        // Alipay+ redirects to return_url; use the SDK default so the app is reopened.
+        val params = confirmPaymentIntentParams.copy(
+            returnUrl = resolveReturnUrl(confirmPaymentIntentParams.returnUrl)
+        )
 
         val paymentIntentResult = confirmPaymentIntent(params, requestOptions)
 
@@ -464,6 +456,14 @@ constructor(
             stripeIntent,
             requestOptions
         )
+    }
+
+    private fun resolveReturnUrl(returnUrl: String?): String? {
+        return if (isInstantApp) {
+            returnUrl
+        } else {
+            returnUrl.takeUnless { it.isNullOrBlank() } ?: defaultReturnUrl.value
+        }
     }
 
     private fun logReturnUrl(returnUrl: String?) {

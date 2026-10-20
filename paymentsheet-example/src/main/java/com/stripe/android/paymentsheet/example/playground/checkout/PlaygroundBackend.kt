@@ -25,13 +25,25 @@ internal interface CheckoutPlaygroundBackend {
 internal class PlaygroundBackend(
     baseUrl: String,
     private val merchant: String,
+    private val customStripeApi: String?,
+    private val customSecretKey: String?,
+    private val customPublishableKey: String?,
     private val requestExecutor: PlaygroundRequestExecutor,
 ) : CheckoutPlaygroundBackend {
     private val baseUrl = normalizedPlaygroundBaseUrl(baseUrl)
 
-    constructor(baseUrl: String, merchant: String) : this(
+    constructor(
+        baseUrl: String,
+        merchant: String,
+        customStripeApi: String?,
+        customSecretKey: String?,
+        customPublishableKey: String?,
+    ) : this(
         baseUrl = baseUrl,
         merchant = merchant,
+        customStripeApi = customStripeApi,
+        customSecretKey = customSecretKey,
+        customPublishableKey = customPublishableKey,
         requestExecutor = FuelPlaygroundRequestExecutor(),
     )
 
@@ -81,6 +93,9 @@ internal class PlaygroundBackend(
     ): JsonObject {
         val body = buildJsonObject {
             put("merchant", merchant)
+            customStripeApi?.takeIf(String::isNotBlank)?.let { put("custom_stripe_api", it) }
+            customSecretKey?.takeIf(String::isNotBlank)?.let { put("custom_secret_key", it) }
+            customPublishableKey?.takeIf(String::isNotBlank)?.let { put("custom_publishable_key", it) }
             put("request_params", requestParams)
             stripeVersion?.let { put("stripe_version", it) }
             additionalFields.forEach { (key, value) -> put(key, value) }

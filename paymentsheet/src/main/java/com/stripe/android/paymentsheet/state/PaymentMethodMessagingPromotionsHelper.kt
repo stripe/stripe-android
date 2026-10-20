@@ -56,7 +56,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
     override fun fetchPromotionsAsync(intent: StripeIntent, apiConfiguration: ApiConfiguration.State) {
-        eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
+        eventReporter.onPaymentMethodMessagePromotionsFetchBegin(apiConfiguration.publishableKey)
         promotionsDeferred?.cancel()
         promotionsDeferred = null
         promotionsDeferred = viewModelScope.async(workContext) {

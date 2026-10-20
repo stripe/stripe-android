@@ -1415,6 +1415,21 @@ constructor(
 
         @JvmStatic
         @JvmOverloads
+        fun createPix(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Pix,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
         fun createPayByBank(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
@@ -1422,6 +1437,188 @@ constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        /** Creates parameters for a Naira card payment method. */
+        @JvmStatic
+        @JvmOverloads
+        fun createNgCard(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NgCard,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        /** Creates parameters for a Naira bank transfer payment method. */
+        @JvmStatic
+        @JvmOverloads
+        fun createNgBankTransfer(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NgBankTransfer,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createNgUssd(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NgUssd,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createNgWallet(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.NgWallet,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createMondu(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Mondu,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createTouchNGo(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.TouchNGo,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createTrueMoney(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.TrueMoney,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createGoPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.GoPay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createMoMo(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.MoMo,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createShopeePay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.ShopeePay,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createQris(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Qris,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createGCash(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.GCash,
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,

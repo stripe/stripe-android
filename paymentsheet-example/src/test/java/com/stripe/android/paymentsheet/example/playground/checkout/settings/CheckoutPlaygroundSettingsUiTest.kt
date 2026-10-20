@@ -44,6 +44,21 @@ class CheckoutPlaygroundSettingsUiTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `feature flags are accessible from the top level`() = runScenario {
+        page.group(CheckoutFeatureFlagDefinitions.configuration).assertIsDisplayed().performClick()
+
+        val nativeLink = CheckoutFeatureFlagDefinitions.configuration.values().single {
+            it.key == "feature_flags.nativeLinkEnabled"
+        }
+        page.value(nativeLink).performScrollTo().assertIsDisplayed()
+        val webAuth = CheckoutFeatureFlagDefinitions.configuration.values().single {
+            it.key == "feature_flags.forceLinkWebAuth"
+        }
+        page.value(webAuth).performScrollTo().assertIsDisplayed()
+        page.group(CheckoutPlaygroundDefinitions.Controller.configuration).assertDoesNotExist()
+    }
+
+    @Test
     fun `opening nested configuration shows only its direct children`() = runScenario {
         page.group(CheckoutPlaygroundDefinitions.Controller.configuration).assertIsDisplayed().performClick()
 
@@ -93,11 +108,11 @@ class CheckoutPlaygroundSettingsUiTest {
 
         page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(paymentCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Payment Element › Appearance › Primary button › Shape"
+            "Client side config › Payment Element › Appearance › Primary button › Shape"
         )
         page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(currencyCornerRadius).assertTextContains(
-            "CheckoutController.Configuration › Currency Selector Element › Appearance"
+            "Client side config › Currency Selector Element › Appearance"
         )
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
 
@@ -151,8 +166,8 @@ class CheckoutPlaygroundSettingsUiTest {
 
     @Test
     fun `search displays non-applicable text settings as disabled`() = runScenario {
-        val definition = CheckoutPlaygroundDefinitions.session.paymentMethodTypes
-        setSearchQuery("payment method types")
+        val definition = CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes
+        setSearchQuery("allowed payment method types")
 
         page.value(definition).performScrollTo().assertIsDisplayed().assertIsNotEnabled()
 
@@ -237,6 +252,30 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `custom API is always visible and custom credentials require custom merchant`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val session = CheckoutPlaygroundDefinitions.session
+        page.value(session.customStripeApi).performScrollTo().assertIsDisplayed()
+        page.value(session.customSecretKey).assertDoesNotExist()
+        page.value(session.customPublishableKey).assertDoesNotExist()
+
+        settings.update(session.merchant, com.stripe.android.paymentsheet.example.playground.settings.Merchant.Custom)
+        composeRule.waitForIdle()
+
+        page.value(session.customSecretKey)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performTextReplacement("sk_test_custom")
+        page.value(session.customPublishableKey)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performTextReplacement("pk_test_custom")
+        assertThat(settings[session.customSecretKey]).isEqualTo("sk_test_custom")
+        assertThat(settings[session.customPublishableKey]).isEqualTo("pk_test_custom")
+    }
+
+    @Test
     fun `payment method saving is displayed only for customers`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {
@@ -253,15 +292,15 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
-    fun `payment method types are only displayed for manual payment methods`() = runScenario(
+    fun `allowed payment method types are only displayed for manual payment methods`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {
-        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes).assertDoesNotExist()
+        page.value(CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes).assertDoesNotExist()
 
         settings.update(CheckoutPlaygroundDefinitions.session.automaticPaymentMethods, false)
         composeRule.waitForIdle()
 
-        page.value(CheckoutPlaygroundDefinitions.session.paymentMethodTypes)
+        page.value(CheckoutPlaygroundDefinitions.session.allowedPaymentMethodTypes)
             .performScrollTo()
             .assertIsDisplayed()
     }

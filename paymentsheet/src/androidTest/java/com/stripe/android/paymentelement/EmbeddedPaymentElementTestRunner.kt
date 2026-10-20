@@ -39,6 +39,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     ) {
         val configurationBuilder = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .configurationMutator()
+        apiConfigurationTestType.apiConfiguration?.let(configurationBuilder::apiConfiguration)
         embeddedPaymentElement.configure(
             intentConfiguration = intentConfiguration,
             configuration = configurationBuilder.build()

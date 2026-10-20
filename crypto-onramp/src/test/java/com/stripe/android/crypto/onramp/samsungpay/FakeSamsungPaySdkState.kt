@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.samsungpay
 
 import android.os.Bundle
+import app.cash.turbine.Turbine
 
 internal object FakeSamsungPaySdkState {
     var statusResult: StatusResult = StatusResult.Success(SpaySdk.SPAY_READY, Bundle())
@@ -8,7 +9,8 @@ internal object FakeSamsungPaySdkState {
     var paymentPartnerInfo: PartnerInfo? = null
     var paymentInfo: CustomSheetPaymentInfo? = null
     var paymentListener: PaymentManager.CustomSheetTransactionInfoListener? = null
-    var updatedSheet: CustomSheet? = null
+    var updatedSheets = Turbine<CustomSheet>()
+    var updateSheetError: Throwable? = null
 
     fun reset() {
         statusResult = StatusResult.Success(SpaySdk.SPAY_READY, Bundle())
@@ -16,7 +18,8 @@ internal object FakeSamsungPaySdkState {
         paymentPartnerInfo = null
         paymentInfo = null
         paymentListener = null
-        updatedSheet = null
+        updatedSheets = Turbine()
+        updateSheetError = null
     }
 
     fun deliverStatus(listener: StatusListener) {

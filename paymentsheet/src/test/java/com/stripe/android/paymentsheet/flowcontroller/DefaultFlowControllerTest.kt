@@ -15,6 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -84,14 +85,16 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
+import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
+import com.stripe.android.paymentsheet.model.FakePaymentOptionFactory
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.ui.SepaMandateContract
-import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -145,9 +148,6 @@ internal class DefaultFlowControllerTest {
     private val paymentOptionActivityLauncher =
         mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
 
-    private val sepaMandateActivityLauncher =
-        mock<ActivityResultLauncher<SepaMandateContract.Args>>()
-
     private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
     private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
 
@@ -182,13 +182,6 @@ internal class DefaultFlowControllerTest {
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
-
-        whenever(
-            activityResultCaller.registerForActivityResult(
-                any<SepaMandateContract>(),
-                any()
-            )
-        ).thenReturn(sepaMandateActivityLauncher)
 
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
     }
@@ -397,6 +390,42 @@ internal class DefaultFlowControllerTest {
     fun `getPaymentOption() when defaultPaymentMethodId is null should be null`() {
         val flowController = createFlowController()
         assertThat(flowController.getPaymentOption()).isNull()
+    }
+
+    @Test
+    fun `getPaymentOption() passes default appearance to factory when state is null`() =
+        runPaymentOptionScenario(state = null) {
+            flowController.getPaymentOption()
+
+            val call = paymentOptionFactory.createCalls.awaitItem()
+            assertThat(call.selection).isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+            assertThat(call.linkBrand).isNull()
+            assertThat(call.appearance).isEqualTo(ConfigurationDefaults.appearance)
+        }
+
+    @Test
+    fun `getPaymentOption() passes configured appearance and Link brand to factory`() {
+        val appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.Builder.light().component(Color.BLACK).build(),
+        )
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder().appearance(appearance).build()
+        val state = DefaultFlowController.State(
+            paymentSheetState = PAYMENT_SHEET_STATE_FULL.copy(
+                config = config.asCommonConfiguration(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link),
+            ),
+            config = config,
+            declinedLink2FA = false,
+        )
+
+        runPaymentOptionScenario(state = state) {
+            flowController.getPaymentOption()
+
+            val call = paymentOptionFactory.createCalls.awaitItem()
+            assertThat(call.selection).isEqualTo(NEW_CARD_PAYMENT_SELECTION)
+            assertThat(call.linkBrand).isEqualTo(LinkBrand.Link)
+            assertThat(call.appearance).isEqualTo(appearance)
+        }
     }
 
     @Test
@@ -1270,8 +1299,7 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `confirm() with default sepa saved payment method should show sepa mandate`() = confirmationTest {
-        val appearance = PaymentSheet.Appearance()
+    fun `confirm() passes default saved SEPA payment method to confirmation handler`() = confirmationTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         val flowController = createFlowController(
             paymentSelection = paymentSelection,
@@ -1284,20 +1312,10 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .allowsDelayedPaymentMethods(true)
-                .appearance(appearance)
                 .build()
         )
 
         flowController.confirm()
-
-        verify(sepaMandateActivityLauncher).launch(
-            SepaMandateContract.Args(
-                merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                appearance = appearance,
-            )
-        )
-
-        flowController.onSepaMandateResult(SepaMandateResult.Acknowledged)
 
         val arguments = startTurbine.awaitItem()
 
@@ -1308,30 +1326,6 @@ internal class DefaultFlowControllerTest {
                 optionsParams = null,
             )
         )
-    }
-
-    @Test
-    fun `confirm() with default sepa saved payment method should cancel after show sepa mandate`() = confirmationTest {
-        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-        val flowController = createFlowController(
-            paymentSelection = paymentSelection,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-                    .paymentMethodTypes.plus("sepa_debit")
-            )
-        )
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
-                .allowsDelayedPaymentMethods(true)
-                .build()
-        )
-
-        flowController.confirm()
-
-        verify(sepaMandateActivityLauncher).launch(any())
-
-        flowController.onSepaMandateResult(SepaMandateResult.Canceled)
     }
 
     @Test
@@ -1357,9 +1351,9 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        flowController.confirm()
+        assertThat(paymentSelection.hasAcknowledgedSepaMandate).isTrue()
 
-        verify(sepaMandateActivityLauncher, never()).launch(any())
+        flowController.confirm()
 
         val arguments = startTurbine.awaitItem()
 
@@ -1368,6 +1362,7 @@ internal class DefaultFlowControllerTest {
                 shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 optionsParams = null,
+                hasAcknowledgedSepaMandate = true,
             )
         )
     }
@@ -1730,6 +1725,7 @@ internal class DefaultFlowControllerTest {
                 shippingInformation = null,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
+                hasAcknowledgedSepaMandate = true,
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
@@ -2306,6 +2302,7 @@ internal class DefaultFlowControllerTest {
                     cvc = "505"
                 ),
                 originatedFromWallet = false,
+                hasAcknowledgedSepaMandate = true,
             )
         )
         assertThat(arguments.paymentMethodMetadata.shippingDetails).isEqualTo(shippingDetails)
@@ -2370,6 +2367,40 @@ internal class DefaultFlowControllerTest {
                 assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
             }
         }
+
+    private fun runPaymentOptionScenario(
+        state: DefaultFlowController.State?,
+        block: suspend PaymentOptionScenario.() -> Unit,
+    ) = runTest {
+        val paymentOptionFactory = FakePaymentOptionFactory(
+            result = PaymentOption(
+                drawableResourceId = 0,
+                label = "Payment option",
+                paymentMethodType = "card",
+                billingDetails = null,
+                _shippingDetails = null,
+                _labels = PaymentOption.Labels(label = "Payment option"),
+                paymentOptionResource = ErrorPaymentOptionResource,
+            ),
+        )
+        val viewModel = createViewModel()
+        viewModel.state = state
+        viewModel.paymentSelection = NEW_CARD_PAYMENT_SELECTION
+        val flowController = createFlowController(
+            paymentElementLoader = FakePaymentElementLoader(),
+            viewModel = viewModel,
+            paymentOptionFactory = paymentOptionFactory,
+        )
+
+        PaymentOptionScenario(flowController, paymentOptionFactory).block()
+
+        paymentOptionFactory.ensureAllEventsConsumed()
+    }
+
+    private data class PaymentOptionScenario(
+        val flowController: DefaultFlowController,
+        val paymentOptionFactory: FakePaymentOptionFactory,
+    )
 
     private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferred(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
@@ -2488,19 +2519,20 @@ internal class DefaultFlowControllerTest {
         paymentSelectionUpdater: PaymentSelectionUpdater = PaymentSelectionUpdater { _, _, newState, _, _ ->
             newState.paymentSelection
         },
+        paymentOptionFactory: PaymentOptionFactory = DefaultPaymentOptionFactory(
+            iconLoader = PaymentSelection.IconLoader(
+                resources = context.resources,
+                imageLoader = DefaultStripeImageLoader(context),
+            ),
+            cardArtDrawableLoader = { null },
+            context = context,
+        ),
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
-            paymentOptionFactory = PaymentOptionFactory(
-                iconLoader = PaymentSelection.IconLoader(
-                    resources = context.resources,
-                    imageLoader = DefaultStripeImageLoader(context),
-                ),
-                cardArtDrawableLoader = { null },
-                context = context,
-            ),
+            paymentOptionFactory = paymentOptionFactory,
             paymentOptionResultCallback = paymentOptionResultCallback,
             paymentResultCallback = paymentResultCallback,
             context = context,

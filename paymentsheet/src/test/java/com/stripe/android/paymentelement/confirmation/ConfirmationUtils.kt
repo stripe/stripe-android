@@ -77,7 +77,6 @@ internal suspend fun createIntentConfirmationInterceptor(
         intentCreateIntentWithConfirmationTokenCallback = intentCreationConfirmationTokenCallbackProvider,
         preparePaymentMethodHandlerProvider = preparePaymentMethodHandlerProvider,
         errorReporter = errorReporter,
-        requestOptionsProvider = { requestOptions },
     )
     return DefaultIntentConfirmationInterceptorFactory(
         deferredIntentCallbackRetriever = deferredIntentCallbackRetriever,
@@ -137,7 +136,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
                     handler = handler,
                     stripeRepository = stripeRepository,
-                    errorReporter = errorReporter,
                     requestOptions = requestOptions,
                 )
             }
@@ -178,6 +176,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         integrationMetadata = integrationMetadata,
         customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        isLiveMode = requestOptions.apiKeyIsLiveMode,
     )
 }
 

@@ -7,6 +7,8 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -55,23 +57,24 @@ internal object AddressElementActivityContract {
     /**
      * Arguments for launching [AddressElementActivity] to collect an address.
      *
-     * @param publishableKey the Stripe publishable key
+     * @param apiConfiguration the Stripe API credentials
      * @param config the paymentsheet configuration passed from the merchant
      */
     sealed class Args : ActivityStarter.Args {
-        internal abstract val publishableKey: String
+        internal abstract val apiConfiguration: ApiConfiguration.State
         internal abstract val config: AddressLauncher.Configuration?
 
         @Parcelize
         data class Standalone internal constructor(
-            override val publishableKey: String,
+            override val apiConfiguration: ApiConfiguration.State,
             override val config: AddressLauncher.Configuration?,
         ) : Args()
 
         @Parcelize
         data class CheckoutShipping internal constructor(
-            override val publishableKey: String,
+            override val apiConfiguration: ApiConfiguration.State,
             override val config: AddressLauncher.Configuration?,
+            val checkoutSessionResponse: CheckoutSessionResponse,
         ) : Args()
 
         internal companion object {
@@ -109,6 +112,7 @@ internal object AddressElementActivityContract {
         @Parcelize
         data class CheckoutShippingSucceeded(
             val address: AddressDetails,
+            val checkoutSessionResponse: CheckoutSessionResponse,
         ) : CheckoutShippingResult {
             override val resultCode: Int
                 get() = Activity.RESULT_OK

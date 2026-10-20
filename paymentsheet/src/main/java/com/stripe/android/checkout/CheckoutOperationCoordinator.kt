@@ -3,13 +3,17 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -22,6 +26,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val sessionRefresher: CheckoutSessionRefresher,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val admissionLock = Any()
     private var pendingMutations = 0
@@ -55,21 +60,30 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 
     fun tryBeginConfirmation(
-        arguments: () -> ConfirmationHandler.Args?,
+        arguments: () -> Result<ConfirmationHandler.Args>,
     ): ConfirmationHandler.Args? {
-        return synchronized(admissionLock) {
-            if (sheetStateHolder.sheetIsOpen || pendingMutations > 0 || confirmationInFlight) {
-                return@synchronized null
+        val result = synchronized(admissionLock) {
+            val rejectionMessage = when {
+                sheetStateHolder.sheetIsOpen -> "Cannot confirm checkout while a payment flow is presented."
+                pendingMutations > 0 -> "Cannot confirm checkout while checkout mutations are in progress."
+                confirmationInFlight -> "Cannot confirm checkout while another confirmation is in progress."
+                else -> null
             }
-            val confirmationArguments = arguments() ?: return@synchronized null
-            check(mutex.tryLock()) {
-                "Checkout operation gate should be available after confirmation admission."
+            if (rejectionMessage != null) {
+                return@synchronized Result.failure<ConfirmationHandler.Args>(IllegalStateException(rejectionMessage))
             }
-            confirmationInFlight = true
-            confirmationWasRestored = false
-            updateIsUpdating()
-            confirmationArguments
+            arguments().onSuccess {
+                check(mutex.tryLock()) {
+                    "Checkout operation gate should be available after confirmation admission."
+                }
+                confirmationInFlight = true
+                confirmationWasRestored = false
+                updateIsUpdating()
+            }
         }
+        // Integrator callbacks may re-enter checkout, so deliver rejections outside the admission lock.
+        result.onFailure { resultCallback.onResult(CheckoutController.Result.Failed(it)) }
+        return result.getOrNull()
     }
 
     suspend fun observeConfirmationResults() {
@@ -139,7 +153,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    private fun updateIsUpdating() {
+    private fun updateIsUpdating() = viewModelScope.launch(Dispatchers.Main) {
         _isUpdating.value = confirmationInFlight || pendingMutations > 0
     }
 }

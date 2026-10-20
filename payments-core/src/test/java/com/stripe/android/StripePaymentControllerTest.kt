@@ -21,6 +21,7 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -204,7 +205,7 @@ internal class StripePaymentControllerTest {
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.returnUrl)
-                .isEqualTo("stripe://return_url")
+                .isEqualTo(DefaultReturnUrl.create(context).value)
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].first.shouldUseStripeSdk()).isTrue()
             assertThat(stripeRepository.confirmPaymentIntentArgs[0].second).isSameInstanceAs(
                 REQUEST_OPTIONS

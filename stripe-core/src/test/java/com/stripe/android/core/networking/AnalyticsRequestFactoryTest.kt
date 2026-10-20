@@ -63,6 +63,26 @@ class AnalyticsRequestFactoryTest : TestCase() {
     }
 
     @Test
+    fun `when publishable key override is a user key, it is redacted`() {
+        val factory = AnalyticsRequestFactory(
+            mock(),
+            null,
+            packageName,
+            { "pk_123" },
+            { "5G" },
+        )
+
+        val params = factory.createRequest(
+            event = mockEvent,
+            additionalParams = emptyMap(),
+            publishableKeyOverride = "uk_12345"
+        ).params
+
+        assertThat(params["publishable_key"])
+            .isEqualTo("[REDACTED_LIVE_KEY]")
+    }
+
+    @Test
     fun getEventLoggingParams_withProductUsage_createsAllFields() {
         val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 

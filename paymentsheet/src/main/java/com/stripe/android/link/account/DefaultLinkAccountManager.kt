@@ -14,6 +14,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkAccountAnalytics
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
@@ -52,7 +53,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
-    private val linkEventsReporter: LinkEventsReporter,
+    @LinkAccountAnalytics private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
     private val linkLaunchMode: LinkLaunchMode?,
     private val linkAuth: LinkAuth,
@@ -72,11 +73,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val accountStatus: Flow<AccountStatus> =
         linkAccountHolder.linkAccountInfo
             .map {
-                // Don't lookup by the configured email if the user already logged out of that
-                // account *unless* the user isn't able to change emails.
                 val canLookupCustomerEmail =
-                    it.lastUpdateReason != UpdateReason.LoggedOut ||
-                        !config.allowUserEmailEdits
+                    (
+                        // Don't lookup by the configured email if the user already logged out of that
+                        // account *unless* the user isn't able to change emails.
+                        it.lastUpdateReason != UpdateReason.LoggedOut ||
+                            !config.allowUserEmailEdits
+                    ) &&
+                        // Don't look up account status if Link will not be displayed.
+                        config.shouldDisplay
                 getAccountStatus(
                     linkAccount = it.account,
                     canLookupCustomerEmail = canLookupCustomerEmail,
@@ -339,8 +344,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newLaiInfo = linkAuthIntentInfo
             ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
+        val isSameSession = consumerSession.clientSecret.isNotBlank() &&
+            currentAccount?.clientSecret == consumerSession.clientSecret
+        val newSession = if (isSameUser && isSameSession && consumerSession.linkSessionKey.isNullOrBlank()) {
+            consumerSession.copy(linkSessionKey = currentAccount?.linkSessionKey)
+        } else {
+            consumerSession
+        }
         val newAccount = LinkAccount(
-            consumerSession = consumerSession,
+            consumerSession = newSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
             linkAuthIntentInfo = newLaiInfo,
@@ -527,7 +539,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             null,
             is LinkLaunchMode.Authentication,
             is LinkLaunchMode.Confirmation,
-            LinkLaunchMode.Full,
+            is LinkLaunchMode.Full,
             is LinkLaunchMode.PaymentMethodSelection -> {
                 linkAccount
                     // If we already have an account, return it.

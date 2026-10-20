@@ -1,6 +1,9 @@
 package com.stripe.android.elements.ece
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
@@ -16,6 +19,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -25,17 +29,19 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -54,6 +60,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM)
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
+        val result = results.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(error).isInstanceOf<IllegalStateException>()
+        assertThat(error).hasMessageThat().isEqualTo("Cannot confirm checkout before it is configured.")
     }
 
     @Test
@@ -72,6 +83,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
+        val result = results.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(error).isInstanceOf<IllegalStateException>()
+        assertThat(error).hasMessageThat().isEqualTo(
+            "Cannot confirm checkout because the selected payment option cannot be confirmed."
+        )
     }
 
     @Test
@@ -189,13 +207,16 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             expressButton = ExpressButton.Link.create(
                 paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
                 linkAccountInfo = LinkAccountUpdate.Value(null),
-                buttonTheme = ButtonTheme.Automatic,
             ),
         ) {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
+            val option = args.confirmationOption as LinkConfirmationOption
+            assertThat(option.linkLaunchMode).isEqualTo(
+                LinkLaunchMode.Full(showSecondaryButton = false)
+            )
             assertThat(args.paymentMethodMetadata)
                 .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
         }
@@ -230,6 +251,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         expressButton: ExpressButton,
@@ -241,18 +263,28 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val results = Turbine<CheckoutController.Result>()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = results::add,
+            viewModelScope = backgroundScope,
         )
-        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
+        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
+        val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            eventReporter = paymentSheetEventReporter,
             savedStateHandle = savedStateHandle,
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -272,23 +304,25 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             errorReporter = errorReporter,
-            paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
+            results = results,
         ).block()
 
+        results.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
-        paymentSheetEventReporter.validate()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
-        val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
+        val results: Turbine<CheckoutController.Result>,
     )
 }

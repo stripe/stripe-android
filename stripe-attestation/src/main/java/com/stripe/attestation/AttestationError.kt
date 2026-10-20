@@ -11,6 +11,12 @@ class AttestationError(
     cause: Throwable? = null
 ) : Exception(message, cause) {
 
+    /**
+     * [isRetriable] mirrors the retry guidance in the Play Integrity error code documentation:
+     * https://developer.android.com/google/play/integrity/error-codes
+     *
+     * Product-specific retry decisions belong at a higher layer and should not change this metadata.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ErrorType(
         val isRetriable: Boolean
@@ -19,7 +25,7 @@ class AttestationError(
         API_NOT_AVAILABLE(isRetriable = false),
         APP_NOT_INSTALLED(isRetriable = false),
         APP_UID_MISMATCH(isRetriable = false),
-        CANNOT_BIND_TO_SERVICE(isRetriable = true),
+        CANNOT_BIND_TO_SERVICE(isRetriable = false),
         CLIENT_TRANSIENT_ERROR(isRetriable = true),
         CLOUD_PROJECT_NUMBER_IS_INVALID(isRetriable = false),
         GOOGLE_SERVER_UNAVAILABLE(isRetriable = true),
@@ -29,7 +35,7 @@ class AttestationError(
         NETWORK_ERROR(isRetriable = true),
         PLAY_SERVICES_NOT_FOUND(isRetriable = false),
         PLAY_SERVICES_VERSION_OUTDATED(isRetriable = false),
-        PLAY_STORE_NOT_FOUND(isRetriable = true),
+        PLAY_STORE_NOT_FOUND(isRetriable = false),
         PLAY_STORE_VERSION_OUTDATED(isRetriable = false),
         REQUEST_HASH_TOO_LONG(isRetriable = false),
         TOO_MANY_REQUESTS(isRetriable = true),
@@ -42,6 +48,7 @@ class AttestationError(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromException(exception: Throwable): AttestationError = when (exception) {
+            is AttestationError -> exception
             is StandardIntegrityException -> AttestationError(
                 errorType = errorCodeToErrorTypeMap[exception.errorCode] ?: ErrorType.UNKNOWN,
                 message = exception.message ?: "Integrity error occurred",

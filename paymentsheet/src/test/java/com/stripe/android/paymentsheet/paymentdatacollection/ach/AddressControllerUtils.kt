@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.uicore.address.CountryAddressSchema
 import com.stripe.android.uicore.address.FieldSchema
 import com.stripe.android.uicore.address.FieldType
@@ -62,7 +63,7 @@ internal fun createAddressController(
                 CountryElement(
                     identifier = FormFieldId.BillingAddress,
                     controller = DropdownFieldController(
-                        config = CountryConfig(setOf("US", "CA")),
+                        config = CountryConfig(setOf("US", "CA"), autofillType = ContentType.AddressCountry),
                         initialValue = "US"
                     )
                 ),

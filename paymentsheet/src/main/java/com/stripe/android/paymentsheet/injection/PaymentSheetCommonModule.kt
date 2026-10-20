@@ -34,7 +34,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
-import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -85,7 +84,6 @@ import javax.inject.Singleton
         LinkCommonModule::class,
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
-        PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,

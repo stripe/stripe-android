@@ -1,3 +1,11 @@
+public final class com/stripe/android/core/ApiConfiguration {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun stripeAccountId (Ljava/lang/String;)Lcom/stripe/android/core/ApiConfiguration;
+}
+
+public abstract interface annotation class com/stripe/android/core/ApiConfigurationPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/core/AppInfo : android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/core/AppInfo$Companion;
@@ -187,6 +195,7 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink : and
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
 	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static final field CryptoOnrampKycDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field CustomerSignature Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field DisputeEvidence Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field IdentityDocument Lcom/stripe/android/core/model/StripeFilePurpose;

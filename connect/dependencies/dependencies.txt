@@ -413,7 +413,8 @@
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
+|    |    \--- dev.drewhamilton.poko:poko-annotations:0.20.2 (*)
 |    +--- project :stripe-core (*)
 |    +--- project :stripe-ui-core
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
@@ -819,6 +820,7 @@
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
 |    +--- project :stripe-attestation
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
+|    |    +--- project :stripe-core (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    \--- com.google.android.play:integrity:1.4.0
 |    |         +--- com.google.android.gms:play-services-basement:18.4.0

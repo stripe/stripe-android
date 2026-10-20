@@ -248,6 +248,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -273,6 +274,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration,
 )
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
@@ -305,10 +307,7 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     userOverrideCountry = null,
     appearance = PaymentSheet.Appearance(),
     allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
-    apiConfiguration = ApiConfiguration.State(
-        publishableKey = publishableKey,
-        stripeAccountId = stripeAccountId,
-    ),
+    apiConfiguration = apiConfiguration,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

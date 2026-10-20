@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
@@ -116,6 +117,7 @@ internal class CheckoutControllerExampleViewModel(
     }
 
     private fun configure(snapshot: CheckoutPlaygroundSettings.Snapshot) {
+        snapshot.applyCustomStripeApi()
         configurationJob?.cancel()
         val generation = ++configurationGeneration
         configurationJob = viewModelScope.launch {
@@ -212,4 +214,10 @@ internal class CheckoutControllerExampleViewModel(
             }
         }
     }
+}
+
+internal fun CheckoutPlaygroundSettings.Snapshot.applyCustomStripeApi() {
+    ApiRequest.API_HOST_OVERRIDE = this[CheckoutPlaygroundDefinitions.session.customStripeApi]
+        ?.takeIf(String::isNotBlank)
+        ?.let { "https://$it" }
 }

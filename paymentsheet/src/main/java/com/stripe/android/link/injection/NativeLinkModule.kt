@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -76,7 +75,8 @@ import kotlin.coroutines.CoroutineContext
 @Module(
     includes = [
         StripeRepositoryModule::class,
-        PaymentsIntegrityModule::class
+        PaymentsIntegrityModule::class,
+        LinkAccountAnalyticsModule::class,
     ],
     subcomponents = [
         OAuthConsentViewModelComponent::class,
@@ -206,12 +206,6 @@ internal interface NativeLinkModule {
         @Named(ENABLE_LOGGING)
         @NativeLinkScope
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @NativeLinkScope
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
 
         @Provides
         fun provideApiConfiguration(

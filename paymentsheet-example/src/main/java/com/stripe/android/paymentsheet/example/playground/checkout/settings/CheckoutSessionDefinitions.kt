@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
-import com.stripe.android.paymentsheet.example.playground.applyFeatureFlags
 import com.stripe.android.paymentsheet.example.playground.checkout.normalizedPlaygroundBaseUrl
-import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.Currency as PlaygroundCurrency
 
@@ -14,7 +12,11 @@ internal object CheckoutSessionDefinitions {
             if (value.isBlank()) null else runCatching { normalizedPlaygroundBaseUrl(value) }.exceptionOrNull()?.message
         },
     )
-    val customer = choice(
+    val customStripeApi = optionalText(
+        key = "session.custom_stripe_api",
+        displayName = "Custom Stripe API",
+    )
+    val customer: CheckoutPlaygroundSettingDefinition.Value<CheckoutCustomer> = choice(
         key = "session.customer",
         displayName = "Customer",
         options = CheckoutCustomer.entries.map { it.displayName to it },
@@ -53,20 +55,52 @@ internal object CheckoutSessionDefinitions {
         },
         serialize = PlaygroundCurrency::value,
     )
-    val merchant = choice(
+    val merchant: CheckoutPlaygroundSettingDefinition.Value<Merchant> = choice(
         key = "session.merchant",
         displayName = "Merchant",
-        options = Merchant.entries.filter { it != Merchant.Custom }.map { it.name to it },
+        options = Merchant.entries.map { it.name to it },
         serialize = Merchant::value,
+        onValueChanged = { merchant ->
+            if (merchant != Merchant.Custom) {
+                update(customSecretKey, null)
+                update(customPublishableKey, null)
+            }
+        },
+    )
+    val customSecretKey: CheckoutPlaygroundSettingDefinition.Value<String?> = optionalText(
+        key = "session.custom_secret_key",
+        displayName = "Custom Secret Key",
+        isApplicable = { settings -> settings[merchant] == Merchant.Custom },
+        onValueChanged = {
+            if (this[customer] == CheckoutCustomer.Returning) {
+                update(customer, CheckoutCustomer.New)
+            }
+        },
+        validate = { value ->
+            if (value.isNullOrBlank()) "Required for custom merchant" else null
+        },
+    )
+    val customPublishableKey: CheckoutPlaygroundSettingDefinition.Value<String?> = optionalText(
+        key = "session.custom_publishable_key",
+        displayName = "Custom Publishable Key",
+        isApplicable = { settings -> settings[merchant] == Merchant.Custom },
+        onValueChanged = {
+            if (this[customer] == CheckoutCustomer.Returning) {
+                update(customer, CheckoutCustomer.New)
+            }
+        },
+        validate = { value ->
+            if (value.isNullOrBlank()) "Required for custom merchant" else null
+        },
     )
     val automaticPaymentMethods = boolean(
         key = "session.automatic_payment_methods",
         displayName = "Automatic payment methods",
         defaultValue = true,
     )
-    val paymentMethodTypes = value(
+    val allowedPaymentMethodTypes = value(
         key = "session.payment_method_types",
-        displayName = "Payment method types (comma separated)",
+        displayName = "Allowed payment method types (comma separated)",
         defaultValue = listOf("card"),
         encode = { values -> values.joinToString(", ") },
         decode = { serialized ->
@@ -107,18 +141,17 @@ internal object CheckoutSessionDefinitions {
         key = "session.billing_address_collection",
         displayName = "Collect billing address",
     )
-    val linkType = choice(
-        key = "controller.link_type",
-        displayName = "Link Type",
-        options = LinkType.entries.map { it.value to it },
-        serialize = LinkType::value,
-        applyFeatureFlags = LinkType::applyFeatureFlags,
+    val invoiceCreation = boolean(
+        key = "session.invoice_creation",
+        displayName = "Invoice creation",
+        defaultValue = false,
     )
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "session",
-        displayName = "Checkout Session",
+        displayName = "Server side config",
         children = arrayOf(
             backendUrl,
+            customStripeApi,
             customer,
             customerId,
             paymentMethodSave,
@@ -126,13 +159,15 @@ internal object CheckoutSessionDefinitions {
             customerEmail,
             currency,
             merchant,
+            customSecretKey,
+            customPublishableKey,
             automaticPaymentMethods,
-            paymentMethodTypes,
+            allowedPaymentMethodTypes,
             automaticTax,
             adaptivePricingCountry,
             shippingAddressCollection,
             billingAddressCollection,
-            linkType,
+            invoiceCreation,
         ),
     )
 }

@@ -29,6 +29,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
@@ -156,6 +157,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
                 trailingContent = {
                     SavedPaymentMethodTrailingContent(
+                        isEnabled = isEnabled,
+                        viewMoreShowChevron = true,
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -190,7 +193,8 @@ internal fun PaymentMethodVerticalLayoutUI(
 
 @Composable
 internal fun SavedPaymentMethodTrailingContent(
-    viewMoreShowChevron: Boolean = true,
+    isEnabled: Boolean,
+    viewMoreShowChevron: Boolean,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
@@ -198,27 +202,35 @@ internal fun SavedPaymentMethodTrailingContent(
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                isEnabled = isEnabled,
+                onClick = onManageOneSavedPaymentMethod,
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
+                isEnabled = isEnabled,
                 showChevron = viewMoreShowChevron,
-                onViewMorePaymentMethods = onViewMorePaymentMethods
+                onViewMorePaymentMethods = onViewMorePaymentMethods,
             )
         }
     }
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
-        color = MaterialTheme.colors.primary,
+        color = color,
         style = MaterialTheme.typography.subtitle1,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
-            .clickable(onClick = onClick)
+            .clickable(enabled = isEnabled, onClick = onClick)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     )
@@ -226,20 +238,22 @@ private fun EditButton(onClick: () -> Unit) {
 
 @Composable
 private fun ViewMoreButton(
-    showChevron: Boolean = true,
+    isEnabled: Boolean,
+    showChevron: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
+    val color = MaterialTheme.colors.primary.copy(alpha = enabledStateAlpha(isEnabled))
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
-            .clickable(onClick = onViewMorePaymentMethods)
+            .clickable(enabled = isEnabled, onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
-            color = MaterialTheme.colors.primary,
+            color = color,
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,
         )
@@ -247,7 +261,7 @@ private fun ViewMoreButton(
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = color,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }

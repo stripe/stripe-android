@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -845,7 +846,8 @@ internal class DefaultCustomerSheetLoaderTest {
                 override fun invoke(
                     environment: GooglePayEnvironment,
                     cardFundingFilter: CardFundingFilter,
-                    cardBrandFilter: CardBrandFilter
+                    cardBrandFilter: CardBrandFilter,
+                    googlePayConfig: GooglePayConfig,
                 ): GooglePayRepository {
                     return if (isGooglePayReady) {
                         readyGooglePayRepository

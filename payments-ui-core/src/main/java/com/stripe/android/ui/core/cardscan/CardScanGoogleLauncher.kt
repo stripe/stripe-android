@@ -25,21 +25,22 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
 ) : CardScanLauncher {
     private val implementation = "google_pay"
     private var _isLaunching = false
-    private val _isAvailable = MutableStateFlow(false)
-    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+    private val _loadingState = MutableStateFlow(CardScanLoadingState.Loading)
+    override val loadingState: StateFlow<CardScanLoadingState> = _loadingState.asStateFlow()
 
-    @VisibleForTesting
-    lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var deferredIntentSenderRequest: IntentSenderRequest? = null
+
+    private lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     init {
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
-                _isAvailable.value = false
+                _loadingState.value = CardScanLoadingState.Unavailable
                 eventsReporter.onCardScanApiCheckFailed(implementation, e)
             },
             onSuccess = {
-                _isAvailable.value = true
+                _loadingState.value = CardScanLoadingState.Available
                 eventsReporter.onCardScanApiCheckSucceeded(implementation)
             }
         )
@@ -55,13 +56,35 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
+                _isLaunching = false
                 eventsReporter.onCardScanFailed(implementation, e)
             },
             onSuccess = { intentSenderRequest ->
                 eventsReporter.onCardScanStarted("google_pay")
-                activityLauncher.launch(intentSenderRequest, options)
+                launchIntentSenderOrDefer(intentSenderRequest)
             }
         )
+    }
+
+    fun setLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+        activityLauncher = launcher
+
+        val pending = deferredIntentSenderRequest ?: return
+
+        try {
+            launcher.launch(pending, options)
+            deferredIntentSenderRequest = null
+        } catch (_: IllegalStateException) {
+            _isLaunching = false
+        }
+    }
+
+    private fun launchIntentSenderOrDefer(intentSenderRequest: IntentSenderRequest) {
+        try {
+            activityLauncher.launch(intentSenderRequest, options)
+        } catch (_: IllegalStateException) {
+            deferredIntentSenderRequest = intentSenderRequest
+        }
     }
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
@@ -125,7 +148,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
                 onResult(launcher.parseActivityResult(result))
             }
             return remember(activityLauncher) {
-                launcher.apply { this.activityLauncher = activityLauncher }
+                launcher.apply { setLauncher(activityLauncher) }
             }
         }
     }

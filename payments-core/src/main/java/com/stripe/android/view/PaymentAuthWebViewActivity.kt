@@ -20,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
@@ -68,7 +67,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 context = applicationContext,
-                apiConfigurationProvider = { ApiConfiguration.State("", null) },
+                apiConfigurationProvider = { error("PaymentAuthWebViewActivity was started without arguments.") },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,

@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
 import com.stripe.android.core.ApiConfiguration
@@ -30,6 +30,7 @@ import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.SupportedPaymentMethodFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -80,10 +81,7 @@ internal interface CustomerSheetTestHelper {
             SupportedPaymentMethodFixtures.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
-        paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
-            publishableKey = "pk_test_123",
-            stripeAccountId = null,
-        ),
+        apiConfiguration: ApiConfiguration.State = DEFAULT_API_CONFIG,
         configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable,
@@ -95,6 +93,7 @@ internal interface CustomerSheetTestHelper {
                     integrationMetadata: IntegrationMetadata,
                     customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
+                    isLiveMode: Boolean,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
                         enqueueCompleteStep(true)
@@ -129,7 +128,13 @@ internal interface CustomerSheetTestHelper {
             configuration = configuration,
             integrationType = integrationType,
             statusBarColor = null,
-            paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
+            apiConfigurationProvider = {
+                if (isLiveMode) {
+                    apiConfiguration.copy(publishableKey = ApiKeyFixtures.FAKE_LIVE_KEY)
+                } else {
+                    apiConfiguration
+                }
+            },
             logger = Logger.noop(),
             productUsage = emptySet(),
             confirmationHandlerFactory = confirmationHandler?.let { ConfirmationHandler.Factory { _ -> it } }

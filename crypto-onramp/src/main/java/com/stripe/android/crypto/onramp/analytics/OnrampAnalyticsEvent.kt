@@ -86,12 +86,36 @@ internal sealed class OnrampAnalyticsEvent(
         )
     )
 
+    data object KycRequirementFulfillmentStarted : OnrampAnalyticsEvent(
+        name = "fulfill_kyc_requirement_started"
+    )
+
+    data object KycRequirementFulfillmentCompleted : OnrampAnalyticsEvent(
+        name = "fulfill_kyc_requirement_completed"
+    )
+
     data object UserAttestationStarted : OnrampAnalyticsEvent(
         name = "user_attestation_started"
     )
 
     data object UserAttestationCompleted : OnrampAnalyticsEvent(
         name = "user_attestation_completed"
+    )
+
+    data object TermsAndConditionsStarted : OnrampAnalyticsEvent(
+        name = "terms_and_conditions_started"
+    )
+
+    data object TermsAndConditionsCompleted : OnrampAnalyticsEvent(
+        name = "terms_and_conditions_completed"
+    )
+
+    data object TermsOfServiceStarted : OnrampAnalyticsEvent(
+        name = "terms_of_service_started"
+    )
+
+    data object TermsOfServiceCompleted : OnrampAnalyticsEvent(
+        name = "terms_of_service_completed"
     )
 
     class WalletRegistered(
@@ -249,9 +273,13 @@ internal sealed class OnrampAnalyticsEvent(
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
+            RetrieveKycRequirements("retrieve_additional_kyc_requirements"),
+            FulfillKycRequirements("fulfill_kyc_requirements"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            PresentUserAttestation("present_user_attestation")
+            PresentUserAttestation("present_user_attestation"),
+            PresentTermsAndConditionsIfNeeded("present_terms_and_conditions_if_needed"),
+            PresentTermsOfServiceIfNeeded("present_terms_of_service_if_needed"),
         }
     }
 

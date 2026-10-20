@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -37,6 +38,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -51,6 +53,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -61,6 +64,12 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
+
+    @get:Rule
+    val disableNfcScanningFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disableNfcScanning,
+        isEnabled = false,
+    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -1108,6 +1117,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
@@ -1267,6 +1277,7 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             isNfcScanningEnabled = false,
+            preferNfcOverCameraScan = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
@@ -2053,6 +2064,53 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement enables NFC scanning when server flag is enabled`() {
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement disables NFC scanning when server flag is disabled`() {
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = false,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement prefers NFC over camera scan when server flag is enabled`() {
+        val metadata = createPaymentElementMetadata(
+            preferNfcOverCameraScanFlag = true,
+        )
+
+        assertThat(metadata.preferNfcOverCameraScan).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement disables NFC scanning when kill switch is enabled`() {
+        disableNfcScanningFeatureFlagRule.setEnabled(true)
+        val metadata = createPaymentElementMetadata(
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet disables NFC scanning when server flag is enabled`() {
+        val metadata = createCustomerSheetMetadata(
+            attestOnIntentConfirmationFlag = false,
+            nfcScanningFlag = true,
+        )
+
+        assertThat(metadata.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
     fun `createForCustomerSheet reads attestOnIntentConfirmation from elements session when true`() {
         val metadata = createCustomerSheetMetadata(attestOnIntentConfirmationFlag = true)
         assertThat(metadata.attestOnIntentConfirmation).isTrue()
@@ -2164,10 +2222,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2185,10 +2245,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2206,10 +2268,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2227,10 +2291,12 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -2256,6 +2322,8 @@ internal class PaymentMethodMetadataTest {
 
     private fun createPaymentElementMetadata(
         attestOnIntentConfirmationFlag: Boolean? = null,
+        nfcScanningFlag: Boolean? = null,
+        preferNfcOverCameraScanFlag: Boolean? = null,
         elementsSession: ElementsSession? = null,
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
@@ -2267,14 +2335,18 @@ internal class PaymentMethodMetadataTest {
                     intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 )
             ).copy(
-            flags = if (attestOnIntentConfirmationFlag != null) {
-                mapOf(
-                    ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
-                )
-            } else {
-                emptyMap()
-            }
-        )
+                flags = buildMap {
+                    attestOnIntentConfirmationFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION, it)
+                    }
+                    nfcScanningFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED, it)
+                    }
+                    preferNfcOverCameraScanFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_PREFER_NFC_OVER_CAMERA_SCAN, it)
+                    }
+                }
+            )
 
         return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
@@ -2295,13 +2367,20 @@ internal class PaymentMethodMetadataTest {
 
     private fun createCustomerSheetMetadata(
         attestOnIntentConfirmationFlag: Boolean,
+        nfcScanningFlag: Boolean? = null,
     ): PaymentMethodMetadata {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         ).copy(
-            flags = mapOf(
-                ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to attestOnIntentConfirmationFlag
-            )
+            flags = buildMap {
+                put(
+                    ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION,
+                    attestOnIntentConfirmationFlag,
+                )
+                nfcScanningFlag?.let {
+                    put(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED, it)
+                }
+            }
         )
 
         val configuration = createCustomerSheetConfiguration(
@@ -2365,6 +2444,7 @@ internal class PaymentMethodMetadataTest {
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             linkBrand = LinkBrand.Link,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            shouldDisplay = true,
         )
     }
 

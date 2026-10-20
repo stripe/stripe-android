@@ -56,6 +56,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
     fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             confirmationType.createIntentCallback?.let {
                 createIntentCallback(it)
@@ -110,6 +111,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             builder = {
                 confirmationType.createIntentCallback?.let {
                     createIntentCallback(it)
@@ -161,6 +163,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
         runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
             networkRule = networkRule,
+            composeTestRule = testRules.compose,
             builder = {
                 confirmationType.createIntentCallback?.let {
                     createIntentCallback(it)
@@ -212,6 +215,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
     fun payWithNewPM_savePM_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             confirmationType.createIntentCallback?.let {
                 createIntentCallback(it)
@@ -257,6 +261,7 @@ internal class DefaultPaymentMethodsConfirmationTest(
     fun payWithNewPM_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         builder = {
             confirmationType.createIntentCallback?.let {
                 createIntentCallback(it)

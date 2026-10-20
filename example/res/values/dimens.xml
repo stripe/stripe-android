@@ -3,4 +3,6 @@
     <dimen name="example_activity_total_margin">8dp</dimen>
     <dimen name="example_customer_view_padding">4dp</dimen>
     <dimen name="example_vertical_spacing">20dp</dimen>
+    <dimen name="card_brand_spinner_dropdown_drawable_padding">5dp</dimen>
+    <dimen name="add_card_total_margin">16dp</dimen>
 </resources>

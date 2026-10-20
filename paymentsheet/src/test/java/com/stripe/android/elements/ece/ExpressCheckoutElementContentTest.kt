@@ -3,6 +3,8 @@
 package com.stripe.android.elements.ece
 
 import android.content.Context
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -61,8 +63,28 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsEnabled()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsEnabled()
         assertThat(viewActionRecorder.viewActions)
             .containsExactly(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+    }
+
+    @Test
+    fun `disables wallet buttons when state is disabled`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create(enabled = false)
+            ),
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsNotEnabled()
+        composeRule.onNodeWithTag(LinkButtonTestTag).assertIsNotEnabled()
     }
 
     @Test
@@ -106,27 +128,6 @@ internal class ExpressCheckoutElementContentTest {
 
         assertThat(googlePayPosition.y).isEqualTo(linkPosition.y)
         assertThat(googlePayPosition.x).isNotEqualTo(linkPosition.x)
-    }
-
-    @Test
-    fun `hides second wallet button when max columns and rows are one`() {
-        val interactor = FakeExpressCheckoutElementInteractor(
-            state = stateFlowOf(
-                ExpressCheckoutElementInteractorStateFactory.create(
-                    buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout()
-                        .maxColumns(1)
-                        .maxRows(1)
-                        .build(),
-                )
-            ),
-        )
-
-        composeRule.setContent {
-            ExpressCheckoutElementContent(interactor = interactor)
-        }
-
-        composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
-        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test

@@ -64,8 +64,7 @@ internal fun <T> choice(
         encode = serialize,
         decode = { serialized ->
             options.firstOrNull { (_, option) -> serialize(option) == serialized }
-                ?.second
-                ?.let(Result.Companion::success)
+                ?.let { (_, option) -> Result.success(option) }
                 ?: invalid(message = "Unknown value: $serialized")
         },
     )
@@ -79,6 +78,7 @@ internal fun <T> value(
     options: List<Pair<String, T>> = emptyList(),
     input: CheckoutPlaygroundSettingDefinition.Value.Input = CheckoutPlaygroundSettingDefinition.Value.Input.Text,
     onValueChanged: CheckoutPlaygroundSettingUpdateScope.(T) -> Unit = {},
+    validate: CheckoutPlaygroundSettingValues.(T) -> String? = { null },
     applyFeatureFlags: (T) -> Unit = {},
     encode: (T) -> String,
     decode: (String) -> Result<T>,
@@ -95,6 +95,7 @@ internal fun <T> value(
     input = input,
     isApplicable = isApplicable,
     onValueChanged = onValueChanged,
+    validate = validate,
     applyFeatureFlags = applyFeatureFlags,
     encode = encode,
     decode = decode,

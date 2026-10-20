@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -33,6 +34,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )
@@ -50,6 +52,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )
@@ -67,6 +70,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )
@@ -84,6 +88,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )
@@ -103,6 +108,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = true,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )
@@ -136,6 +142,7 @@ internal class ManageScreenUIScreenshotTest {
                         isEditing = false,
                         canEdit = true,
                         linkBrand = LinkBrand.Link,
+                        selectionState = SavedPaymentMethodSelectionState.Idle,
                     )
                 ),
             )

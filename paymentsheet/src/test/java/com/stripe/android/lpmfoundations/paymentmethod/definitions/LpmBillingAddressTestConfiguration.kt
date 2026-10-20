@@ -87,6 +87,7 @@ internal enum class LpmBillingDetailsCollectionMode {
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             )
             IntegrationMetadata.CheckoutSession(
+                collectedEmail = null,
                 id = checkoutSessionResponse.id,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,

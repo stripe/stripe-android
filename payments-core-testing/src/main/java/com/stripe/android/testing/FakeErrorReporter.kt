@@ -14,6 +14,7 @@ class FakeErrorReporter : ErrorReporter {
         errorEvent: ErrorReporter.ErrorEvent,
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
+        publishableKeyOverride: String?
     ) {
         loggedErrors.add(errorEvent.eventName)
         calls.add(

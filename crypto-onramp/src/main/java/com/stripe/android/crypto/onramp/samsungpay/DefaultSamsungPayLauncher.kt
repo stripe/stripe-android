@@ -32,7 +32,7 @@ internal class DefaultSamsungPayLauncherFactory(
 
 internal class DefaultSamsungPayLauncher(
     private val context: Context,
-    configuration: OnrampConfiguration.SamsungPayConfig,
+    private val configuration: OnrampConfiguration.SamsungPayConfig,
     merchantDisplayName: String,
     private val trackAnalyticsEvent: (OnrampAnalyticsEvent) -> Unit,
     classProvider: SamsungPayClassProvider,
@@ -135,7 +135,6 @@ internal class DefaultSamsungPayLauncher(
             return
         }
         val active = ActivePresentation(callback).also { activePresentation = it }
-
         reflection.runOperation("presenting Samsung Pay") {
             sheetFactory.validateConfiguration()
             val paymentManager = reflection.newInstance(
@@ -155,7 +154,9 @@ internal class DefaultSamsungPayLauncher(
                 paymentManager,
                 "startInAppPayWithCustomSheet",
                 reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET_PAYMENT_INFO) to
-                    sheetFactory.buildPaymentInfo(presentation),
+                    sheetFactory.buildPaymentInfo(presentation) { sheet ->
+                        handleSheetUpdated(active, paymentManager, sheet)
+                    },
                 listenerClass to listener,
             )
             trackAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayPresented)
@@ -268,10 +269,25 @@ internal class DefaultSamsungPayLauncher(
                 reason = Reason.PresentationFailed,
                 errorCode = null,
             )
+        updateSheet(paymentManager, customSheet)
+    }
+
+    private fun handleSheetUpdated(active: ActivePresentation, paymentManager: Any, sheet: Any) {
+        runOnMain {
+            if (destroyed || activePresentation !== active) return@runOnMain
+            reflection.runOperation("updating Samsung Pay contact sheet") {
+                updateSheet(paymentManager, sheet)
+            }.onFailure { error ->
+                completePresentation(active, SamsungPayResult.Failed(error))
+            }
+        }
+    }
+
+    private fun updateSheet(paymentManager: Any, sheet: Any) {
         reflection.invoke(
             paymentManager,
             "updateSheet",
-            reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET) to customSheet,
+            reflection.loadClass(SamsungPaySdkClassNames.CUSTOM_SHEET) to sheet,
         )
     }
 
@@ -288,7 +304,15 @@ internal class DefaultSamsungPayLauncher(
             )
         }
         trackAnalyticsEvent(OnrampAnalyticsEvent.SamsungPayObtainCredentialsSuccess)
-        completePresentation(active, SamsungPayResult.Completed(credential))
+        val kycInfo = if (configuration.collectContactInformation) {
+            arguments?.getOrNull(0)?.let { paymentInfo ->
+                // Optional prefill must not discard a valid payment credential.
+                runCatching { SamsungPayContactInfo(reflection).read(paymentInfo) }.getOrNull()
+            }
+        } else {
+            null
+        }
+        completePresentation(active, SamsungPayResult.Completed(credential, kycInfo))
     }
 
     private fun handlePaymentFailure(

@@ -8,6 +8,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
@@ -345,7 +346,10 @@ class BillingAddressFormElementsBuilderTest {
             shippingValues = shippingValues,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+                context = context,
+                publishableKeySupplier = { DEFAULT_API_CONFIG.publishableKey },
+            ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,

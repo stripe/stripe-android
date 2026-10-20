@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -47,6 +48,7 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
@@ -54,6 +56,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalPaymentSelectionHand
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -69,6 +72,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         EmbeddedPaymentElementViewModelModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
         GooglePayLauncherModule::class,
@@ -282,6 +286,15 @@ internal interface EmbeddedPaymentElementViewModelModule {
             stateHolder: EmbeddedContentHelperStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.state
+        }
+
+        @Provides
+        @EmbeddedHostProcessing
+        fun provideHostProcessing(): StateFlow<Boolean> = stateFlowOf(false)
+
+        @Provides
+        fun provideSavedPaymentMethodSelectionState(): StateFlow<SavedPaymentMethodSelectionState> {
+            return stateFlowOf(SavedPaymentMethodSelectionState.Idle)
         }
 
         @Provides

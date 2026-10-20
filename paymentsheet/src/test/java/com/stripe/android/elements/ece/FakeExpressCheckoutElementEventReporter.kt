@@ -8,17 +8,11 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
         calls.add(Call.OnEceDisplayed)
     }
 
-    override fun onEceWalletTapped(expressButton: ExpressButton) {
-        calls.add(Call.OnEceWalletTapped(expressButton))
-    }
-
     fun ensureAllEventsConsumed() {
         calls.ensureAllEventsConsumed()
     }
 
     sealed interface Call {
         data object OnEceDisplayed : Call
-
-        data class OnEceWalletTapped(val expressButton: ExpressButton) : Call
     }
 }

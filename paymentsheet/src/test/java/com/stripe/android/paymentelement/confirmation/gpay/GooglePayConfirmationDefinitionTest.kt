@@ -10,7 +10,6 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
@@ -48,13 +47,11 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingInternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -66,12 +63,6 @@ import com.stripe.android.R as PaymentsCoreR
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class GooglePayConfirmationDefinitionTest {
-    @get:Rule
-    val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.allowNoExistingPaymentMethodForGooglePay,
-        isEnabled = false,
-    )
-
     @Test
     fun `'key' should be 'GooglePay`() {
         val definition = createGooglePayConfirmationDefinition()
@@ -322,17 +313,17 @@ class GooglePayConfirmationDefinitionTest {
         )
 
     @Test
-    fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
+    fun `test environment does not require an existing payment method`() =
         runExistingPaymentMethodRequiredTest(
-            allowNoExistingPaymentMethodForGooglePay = false,
-            existingPaymentMethodRequired = true,
+            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            existingPaymentMethodRequired = false,
         )
 
     @Test
-    fun `when allowNoExistingPaymentMethodForGooglePay is enabled, existingPaymentMethodRequired should be false`() =
+    fun `production environment requires an existing payment method`() =
         runExistingPaymentMethodRequiredTest(
-            allowNoExistingPaymentMethodForGooglePay = true,
-            existingPaymentMethodRequired = false,
+            environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+            existingPaymentMethodRequired = true,
         )
 
     @Test
@@ -568,6 +559,7 @@ class GooglePayConfirmationDefinitionTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        collectedEmail = null,
                         id = checkoutSessionResponse.id,
                         instancesKey = "GooglePayConfirmationDefinitionTest",
                         checkoutSessionResponse = checkoutSessionResponse,
@@ -714,16 +706,16 @@ class GooglePayConfirmationDefinitionTest {
     }
 
     private fun runExistingPaymentMethodRequiredTest(
-        allowNoExistingPaymentMethodForGooglePay: Boolean,
+        environment: PaymentSheet.GooglePayConfiguration.Environment,
         existingPaymentMethodRequired: Boolean,
     ) = runTest {
-        allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
-
         val launcher = mock<InternalGooglePayPaymentMethodLauncher>()
         val definition = createGooglePayConfirmationDefinition()
 
         definition.launch(
-            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+            confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(environment = environment),
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             arguments = EmptyConfirmationLauncherArgs,
             launcher = launcher,
@@ -732,7 +724,13 @@ class GooglePayConfirmationDefinitionTest {
         verify(launcher).present(
             currencyCode = "usd",
             amount = 1000L,
-            config = launcherConfig(existingPaymentMethodRequired = existingPaymentMethodRequired),
+            config = launcherConfig(
+                environment = when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                    PaymentSheet.GooglePayConfiguration.Environment.Test -> GooglePayEnvironment.Test
+                },
+                existingPaymentMethodRequired = existingPaymentMethodRequired,
+            ),
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter,
             clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
@@ -784,7 +782,7 @@ class GooglePayConfirmationDefinitionTest {
         merchantCountryCode: String = "US",
         merchantName: String = "Test merchant Inc.",
         isEmailRequired: Boolean = false,
-        existingPaymentMethodRequired: Boolean = true,
+        existingPaymentMethodRequired: Boolean = environment == GooglePayEnvironment.Production,
         billingAddressConfig: GooglePayPaymentMethodLauncher.BillingAddressConfig =
             GooglePayPaymentMethodLauncher.BillingAddressConfig(
                 isRequired = true,

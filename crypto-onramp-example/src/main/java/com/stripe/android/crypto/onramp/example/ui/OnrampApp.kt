@@ -41,8 +41,11 @@ internal fun OnrampApp(
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onStartVerification: () -> Unit,
     onShowUserAttestation: () -> Unit,
+    onShowTermsAndConditions: () -> Unit,
+    onShowTermsOfService: () -> Unit,
     onSubmitAddress: (PaymentSheet.Address) -> Unit,
     onVerifyKyc: () -> Unit,
+    onFulfillKycRequirement: () -> Unit,
 ) {
     val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -139,9 +142,12 @@ internal fun OnrampApp(
                     onRegisterWalletAddress = viewModel::registerWalletAddress,
                     onStartVerification = onStartVerification,
                     onShowUserAttestation = onShowUserAttestation,
+                    onShowTermsAndConditions = onShowTermsAndConditions,
+                    onShowTermsOfService = onShowTermsOfService,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = viewModel::createCryptoPaymentToken,
-                    onVerifyKyc = onVerifyKyc
+                    onVerifyKyc = onVerifyKyc,
+                    onFulfillKycRequirement = onFulfillKycRequirement,
                 )
             }
         }

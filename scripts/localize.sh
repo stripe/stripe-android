@@ -122,7 +122,8 @@ do
         mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
         mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
         mv android/$MODULE/values-id android/$MODULE/values-in
-        cp -R android/$MODULE/values-ro-rRO android/$MODULE/values-ro
+        cp -R "android/$MODULE/values-ro-rRO" "android/$MODULE/values-ro" || exit 1
+        rm -r -- "android/$MODULE/values-ro-rRO" || exit 1
     fi
 
     # This is used by the untranslated_project_keys.sh script

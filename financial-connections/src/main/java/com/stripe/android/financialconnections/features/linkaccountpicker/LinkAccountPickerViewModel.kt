@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
@@ -279,7 +278,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         )
         val nextPane = response.nextPane ?: SUCCESS
 
-        FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
+        eventTracker.emitEvent(name = Name.ACCOUNTS_SELECTED)
         navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 

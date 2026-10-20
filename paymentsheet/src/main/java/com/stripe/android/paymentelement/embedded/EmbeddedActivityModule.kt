@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -27,8 +28,10 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
-import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
+import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
@@ -52,8 +55,11 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -67,6 +73,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -157,8 +164,20 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
+        fun provideManageScreenSavedPaymentMethodSelector(
+            launchMode: EmbeddedLaunchMode,
+            selectionHolder: EmbeddedSelectionHolder,
+            manageLaunchSelector: Provider<ManageLaunchSavedPaymentMethodSelector>,
+        ): ManageScreenSavedPaymentMethodSelector = when (launchMode) {
+            is EmbeddedLaunchMode.Manage -> manageLaunchSelector.get()
+            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.Form -> ImmediateSavedPaymentMethodSelector(selectionHolder)
+        }
+
+        @Provides
+        @Singleton
         fun provideSavedPaymentMethodMutator(
-            factory: ManageSavedPaymentMethodMutatorFactory
+            factory: EmbeddedSavedPaymentMethodMutatorFactory
         ): SavedPaymentMethodMutator {
             return factory.createSavedPaymentMethodMutator()
         }
@@ -217,6 +236,7 @@ internal interface EmbeddedActivityModule {
             return PaymentElementAutocompleteAddressInteractor.Factory(
                 // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
                 launcher = null,
+                apiConfigurationProvider = { paymentMethodMetadata.apiConfiguration },
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
@@ -279,4 +299,27 @@ internal interface EmbeddedActivityModule {
             eventReporter
         )
     }
+}
+
+private class ImmediateSavedPaymentMethodSelector(
+    private val selectionHolder: EmbeddedSelectionHolder,
+) : ManageScreenSavedPaymentMethodSelector {
+    override val selectionState: StateFlow<SavedPaymentMethodSelectionState> =
+        stateFlowOf(SavedPaymentMethodSelectionState.Idle)
+
+    override val checkoutSessionResponse: CheckoutSessionResponse? = null
+
+    override suspend fun select(selection: PaymentSelection.Saved): Result<Unit> {
+        selectionHolder.setSelection(selection)
+        return Result.success(Unit)
+    }
+
+    override suspend fun syncBillingAfterEdit(
+        original: PaymentMethod,
+        updated: PaymentMethod,
+    ): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override fun clearError() = Unit
 }

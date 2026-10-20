@@ -8,8 +8,10 @@ import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)
@@ -23,6 +25,7 @@ internal data class CheckoutControllerState(
     val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
+    val savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
     val linkEagerPresentationSuppressed: Boolean,
@@ -47,4 +50,28 @@ internal data class CheckoutControllerState(
             )
         )
     }
+}
+
+/**
+ * Acknowledges the passed selection's SEPA mandate, stashes new selections, and returns the saved
+ * payment method selection state to [SavedPaymentMethodSelectionState.Idle] when the selection changes.
+ */
+@OptIn(CheckoutSessionPreview::class)
+internal fun CheckoutControllerState.commitSelection(
+    selection: PaymentSelection?,
+): CheckoutControllerState {
+    selection?.hasAcknowledgedSepaMandate = true
+    val updatedPreviousNewSelections = Bundle(previousNewSelections).apply {
+        stashNewSelection(selection)
+    }
+    return copy(
+        paymentSelection = selection,
+        // Re-applying the current selection (e.g. rebuilt embedded content) keeps a failure.
+        savedPaymentMethodSelectionState = if (selection == paymentSelection) {
+            savedPaymentMethodSelectionState
+        } else {
+            SavedPaymentMethodSelectionState.Idle
+        },
+        previousNewSelections = updatedPreviousNewSelections,
+    )
 }

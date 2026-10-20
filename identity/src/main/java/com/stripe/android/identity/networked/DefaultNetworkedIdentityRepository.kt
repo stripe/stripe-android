@@ -171,7 +171,6 @@ internal class DefaultNetworkedIdentityRepository(
                 url = "${ApiRequest.API_HOST}/v1/$path",
                 options = options,
                 params = params + ("request_surface" to "web_identity_product"),
-                shouldCache = false,
             )
         )
         val response = try {

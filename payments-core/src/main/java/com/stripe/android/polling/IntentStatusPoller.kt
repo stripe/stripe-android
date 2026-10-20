@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.time.Duration
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface IntentStatusPoller {
@@ -16,5 +17,6 @@ interface IntentStatusPoller {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Config(
         val clientSecret: String,
+        val pollingInterval: Duration,
     )
 }

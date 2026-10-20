@@ -5,10 +5,12 @@ import android.content.Context
 import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporterModule
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegateModule
 import com.stripe.android.common.nfcscan.scanner.NfcCardScannerModule
+import com.stripe.android.common.nfcscan.security.NfcSecurityModule
 import com.stripe.android.common.nfcscan.tapzone.TapZoneModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -39,7 +41,9 @@ internal interface NfcScanningViewModelComponent {
         NfcHardwareDelegateModule::class,
         NfcCardScannerModule::class,
         NfcScanningEventReporterModule::class,
+        NfcSecurityModule::class,
         TapZoneModule::class,
+        ApiConfigurationModule::class,
     ]
 )
 internal interface NfcScanningViewModelModule {

@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayConfig
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -149,7 +150,11 @@ internal class DefaultCustomerSheetLoader(
                 GooglePayEnvironment.Test
             },
             cardBrandFilter = cardBrandFilter,
-            cardFundingFilter = cardFundingFilter
+            cardFundingFilter = cardFundingFilter,
+            googlePayConfig = GooglePayConfig(
+                publishableKey = apiConfiguration.publishableKey,
+                connectedAccountId = apiConfiguration.stripeAccountId,
+            ),
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 

@@ -36,7 +36,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
@@ -225,6 +224,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isLinkAvailable = isLinkAvailable == true && paymentMethodMetadata?.shouldShowLinkButton == true,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
+            apiConfiguration = paymentMethodMetadata?.apiConfiguration,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -263,8 +263,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
-
-        eventReporter.onInit()
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
@@ -504,7 +502,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lastFour = cvcRecollectionData.lastFour ?: "",
                     cardBrand = cvcRecollectionData.brand,
                     cvc = "",
-                    isTestMode = paymentMethodMetadata.value?.stripeIntent?.isLiveMode?.not() ?: false,
                 ),
                 processing = processing,
                 coroutineScope = viewModelScope,
@@ -588,10 +585,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
                         cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                        googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
-                            configuration = config.asCommonConfiguration(),
-                            paymentMethodMetadata = paymentMethodMetadata,
-                        ),
                     )
             }
 

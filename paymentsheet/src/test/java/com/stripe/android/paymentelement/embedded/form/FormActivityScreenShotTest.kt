@@ -13,6 +13,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
@@ -25,14 +26,17 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
@@ -146,24 +150,25 @@ internal class FormActivityScreenShotTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
-            isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
                 EventReporterProvider(FakeEventReporter()) {
-                    screen.Content()
+                    screen.Content(showsWalletsHeader = false)
                 }
             }
         }
@@ -226,6 +231,7 @@ internal class FormActivityScreenShotTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
             ),
@@ -256,6 +262,22 @@ internal class FormActivityScreenShotTest {
         )
 
         stateHolder.updateMandate(usBankMandate)
+
+        TestFormActivityContent(
+            interactor = interactor,
+            stateHolder = stateHolder,
+            eventReporter = eventReporter,
+            enabled = enabled,
+        )
+    }
+
+    @Composable
+    private fun TestFormActivityContent(
+        interactor: VerticalModeFormInteractor,
+        stateHolder: SheetActivityStateHolder,
+        eventReporter: EventReporter,
+        enabled: Boolean,
+    ) {
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
@@ -263,6 +285,7 @@ internal class FormActivityScreenShotTest {
                 Column {
                     FormScreenContent(
                         interactor = interactor,
+                        showsWalletsHeader = false,
                         onClick = {},
                         onProcessingCompleted = {},
                         state = state.copy(isEnabled = enabled),

@@ -28,7 +28,8 @@ internal class GetOrFetchSync @Inject constructor(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             applicationId = applicationId,
             reFetchCondition = refetchCondition::shouldReFetch,
-            supportsAppVerification = supportsAppVerification
+            supportsAppVerification = supportsAppVerification,
+            preCollectedConsent = configuration.preCollectedConsent
         ).maybeOverrideLinkBrand()
     }
 

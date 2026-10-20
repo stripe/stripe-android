@@ -45,6 +45,7 @@ internal class PaymentSheetAddressAutocompleteTest(
     fun testUnfilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
     ) { context ->
         enqueueAutocompletePredictions()
@@ -54,15 +55,17 @@ internal class PaymentSheetAddressAutocompleteTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                    .billingDetailsCollectionConfiguration(
-                        PaymentSheet.BillingDetailsCollectionConfiguration(
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                            attachDefaultsToPaymentMethod = true,
-                        ),
-                    )
-                    .googlePlacesApiKey("gp_123")
-                    .build(),
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                        .billingDetailsCollectionConfiguration(
+                            PaymentSheet.BillingDetailsCollectionConfiguration(
+                                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                                attachDefaultsToPaymentMethod = true,
+                            ),
+                        )
+                        .googlePlacesApiKey("gp_123")
+                        .build()
+                ),
             )
         }
 
@@ -83,6 +86,7 @@ internal class PaymentSheetAddressAutocompleteTest(
     fun testPrefilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
+        composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
     ) { context ->
         enqueueAutocompletePredictions()
@@ -92,26 +96,28 @@ internal class PaymentSheetAddressAutocompleteTest(
         context.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                    .billingDetailsCollectionConfiguration(
-                        PaymentSheet.BillingDetailsCollectionConfiguration(
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                            attachDefaultsToPaymentMethod = true,
-                        ),
-                    )
-                    .defaultBillingDetails(
-                        PaymentSheet.BillingDetails(
-                            address = PaymentSheet.Address(
-                                line1 = "123 Coffee Street",
-                                city = "Chicago",
-                                state = "IL",
-                                country = "US",
-                                postalCode = "83985"
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                        .billingDetailsCollectionConfiguration(
+                            PaymentSheet.BillingDetailsCollectionConfiguration(
+                                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                                attachDefaultsToPaymentMethod = true,
+                            ),
+                        )
+                        .defaultBillingDetails(
+                            PaymentSheet.BillingDetails(
+                                address = PaymentSheet.Address(
+                                    line1 = "123 Coffee Street",
+                                    city = "Chicago",
+                                    state = "IL",
+                                    country = "US",
+                                    postalCode = "83985"
+                                )
                             )
                         )
-                    )
-                    .googlePlacesApiKey("gp_123")
-                    .build(),
+                        .googlePlacesApiKey("gp_123")
+                        .build()
+                ),
             )
         }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.elements
 
+import android.os.Looper
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,9 +14,13 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -30,6 +35,9 @@ internal class PaymentElementTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
 
     @Test
     fun `configuration builds default Google Pay values`() {
@@ -62,20 +70,24 @@ internal class PaymentElementTest {
     }
 
     @Test
-    fun `present delegates to the content helper`() = runTest {
+    fun `present from a background thread delegates to the content helper on Main`() = runTest {
         val contentHelper = FakeEmbeddedContentHelper()
-        val paymentElement = PaymentElement(contentHelper)
+        val paymentElement = PaymentElement(contentHelper, backgroundScope)
 
-        paymentElement.present()
+        withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+            paymentElement.present()
+        }
 
-        contentHelper.presentPaymentOptionsCalls.awaitItem()
+        assertThat(contentHelper.presentPaymentOptionsCalls.awaitItem())
+            .isSameInstanceAs(Looper.getMainLooper().thread)
         contentHelper.presentPaymentOptionsCalls.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `Content renders nothing when there is no embedded content`() {
+    fun `Content renders nothing when there is no embedded content`() = runTest {
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(null))
-        val paymentElement = PaymentElement(contentHelper)
+        val paymentElement = PaymentElement(contentHelper, backgroundScope)
 
         composeRule.setContent {
             paymentElement.Content()
@@ -85,7 +97,7 @@ internal class PaymentElementTest {
     }
 
     @Test
-    fun `Content renders the current embedded content`() {
+    fun `Content renders the current embedded content`() = runTest {
         val content = EmbeddedContent(
             interactor = FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -97,7 +109,7 @@ internal class PaymentElementTest {
             isImmediateAction = false,
         )
         val contentHelper = FakeEmbeddedContentHelper(embeddedContent = MutableStateFlow(content))
-        val paymentElement = PaymentElement(contentHelper)
+        val paymentElement = PaymentElement(contentHelper, backgroundScope)
 
         composeRule.setContent {
             paymentElement.Content()

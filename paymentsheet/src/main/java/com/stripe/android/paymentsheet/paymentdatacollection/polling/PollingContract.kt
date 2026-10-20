@@ -31,6 +31,7 @@ internal class PollingContract :
         @ColorInt val statusBarColor: Int?,
         val timeLimitInSeconds: Int,
         val initialDelayInSeconds: Int,
+        val pollingIntervalInSeconds: Int,
         @StringRes val ctaText: Int,
         val requestOptions: ApiRequest.Options,
         val qrCodeUrl: String?,

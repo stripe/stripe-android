@@ -51,7 +51,6 @@ internal class DefaultNetworkedIdentityActions(
                     "/networked_identity/$action",
                 options = ApiRequest.Options(apiKey = ephemeralKey, stripeAccount = null, idempotencyKey = null),
                 params = params,
-                shouldCache = false,
             )
         )
         val response = try {

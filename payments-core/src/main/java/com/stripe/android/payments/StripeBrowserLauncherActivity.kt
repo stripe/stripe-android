@@ -11,7 +11,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePaddingRelative
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -45,7 +44,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(
                 applicationContext,
-                apiConfigurationProvider = { ApiConfiguration.State("", null) },
+                apiConfigurationProvider = { error("StripeBrowserLauncherActivity was started without arguments.") },
             )
                 .report(
                     errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,

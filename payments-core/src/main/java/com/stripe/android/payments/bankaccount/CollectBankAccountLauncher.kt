@@ -10,6 +10,7 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -33,11 +34,27 @@ interface CollectBankAccountLauncher {
         configuration: CollectBankAccountConfiguration
     )
 
+    fun presentWithPaymentIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    )
+
     fun presentWithSetupIntent(
         publishableKey: String,
         stripeAccountId: String? = null,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
+    )
+
+    fun presentWithSetupIntent(
+        publishableKey: String,
+        stripeAccountId: String? = null,
+        clientSecret: String,
+        configuration: CollectBankAccountConfiguration,
+        preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

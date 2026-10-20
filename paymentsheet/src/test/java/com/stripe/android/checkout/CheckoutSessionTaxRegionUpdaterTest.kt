@@ -31,6 +31,26 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     val networkRule = NetworkRule()
 
     @Test
+    fun `requiresUpdate returns true when automatic tax address source matches`() = runScenario {
+        assertThat(
+            updater.requiresUpdate(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun `requiresUpdate returns false when automatic tax address source does not match`() = runScenario {
+        assertThat(
+            updater.requiresUpdate(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `updateServerStateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),

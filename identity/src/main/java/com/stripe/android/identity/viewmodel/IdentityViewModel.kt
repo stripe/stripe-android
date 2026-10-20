@@ -24,6 +24,7 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.identity.BuildConfig
@@ -106,6 +107,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
+import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -648,6 +650,7 @@ internal class IdentityViewModel(
     internal fun uploadManualResult(
         uri: Uri,
         isFront: Boolean,
+        isLiveMode: Boolean,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         uploadMethod: UploadMethod,
         scanType: IdentityScanState.ScanType
@@ -669,6 +672,7 @@ internal class IdentityViewModel(
                 uploadMethod = uploadMethod,
                 isHighRes = true,
                 isFront = isFront,
+                isLiveMode = isLiveMode,
                 scanType = scanType,
                 compressionQuality = docCapturePage.highResImageCompressionQuality
             )
@@ -690,6 +694,7 @@ internal class IdentityViewModel(
     internal fun uploadManualResult(
         bitmap: Bitmap,
         isFront: Boolean,
+        isLiveMode: Boolean,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         uploadMethod: UploadMethod,
         scanType: IdentityScanState.ScanType
@@ -714,6 +719,7 @@ internal class IdentityViewModel(
             uploadMethod = uploadMethod,
             isHighRes = true,
             isFront = isFront,
+            isLiveMode = isLiveMode,
             scanType = scanType,
             compressionQuality = docCapturePage.highResImageCompressionQuality
         )
@@ -802,7 +808,8 @@ internal class IdentityViewModel(
                 isHighRes = true,
                 isFront = isFront,
                 scores = scores,
-                targetScanType = targetScanType
+                targetScanType = targetScanType,
+                isLiveMode = verificationPage.livemode
             )
         }.onFailure {
             postDocumentUploadPrepError(
@@ -823,7 +830,8 @@ internal class IdentityViewModel(
                 isHighRes = false,
                 isFront = isFront,
                 scores = scores,
-                targetScanType = targetScanType
+                targetScanType = targetScanType,
+                isLiveMode = verificationPage.livemode
             )
         }.onFailure {
             postDocumentUploadPrepError(
@@ -875,7 +883,8 @@ internal class IdentityViewModel(
                     boundingBox = selfieFrame.second.boundingBox,
                     selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
                     isHighRes = uploadSpec.isHighRes,
-                    selfie = uploadSpec.selfie
+                    selfie = uploadSpec.selfie,
+                    isLiveMode = verificationPage.livemode
                 )
             }.onFailure {
                 postSelfieUploadPrepError(
@@ -934,6 +943,7 @@ internal class IdentityViewModel(
         isFront: Boolean,
         scores: List<Float>,
         targetScanType: IdentityScanState.ScanType,
+        isLiveMode: Boolean,
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap = bitmapToUpload,
@@ -969,6 +979,7 @@ internal class IdentityViewModel(
                 scores = scores,
                 isHighRes = isHighRes,
                 isFront = isFront,
+                isLiveMode = isLiveMode,
                 scanType = targetScanType,
                 compressionQuality =
                 if (isHighRes) {
@@ -997,6 +1008,7 @@ internal class IdentityViewModel(
         scores: List<Float>? = null,
         isHighRes: Boolean,
         isFront: Boolean,
+        isLiveMode: Boolean,
         scanType: IdentityScanState.ScanType,
         compressionQuality: Float
     ) {
@@ -1009,15 +1021,17 @@ internal class IdentityViewModel(
                 currentState.updateLoading(isHighRes = isHighRes)
             }
 
+            var fileToUpload = imageFile
             runCatching {
-                var uploadTime = 0L
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = imageFile,
-                    filePurpose = filePurpose,
-                    onSuccessExecutionTimeBlock = { uploadTime = it }
-                ) to uploadTime
+                fileToUpload = imageFile.fileForVerificationMode(
+                    isLiveMode = isLiveMode,
+                    testModeImage = if (isFront) {
+                        TestModeImage.DOCUMENT_FRONT
+                    } else {
+                        TestModeImage.DOCUMENT_BACK
+                    }
+                )
+                uploadPreparedImage(fileToUpload, filePurpose)
             }.fold(
                 onSuccess = { fileTimePair ->
                     identityAnalyticsRequestFactory.imageUpload(
@@ -1026,7 +1040,7 @@ internal class IdentityViewModel(
                         scanType = scanType,
                         id = fileTimePair.first.id,
                         fileName = fileTimePair.first.filename,
-                        fileSize = imageFile.length() / BYTES_IN_KB
+                        fileSize = fileToUpload.length() / BYTES_IN_KB
                     )
 
                     updateAnalyticsState { oldState ->
@@ -1058,14 +1072,14 @@ internal class IdentityViewModel(
                 onFailure = {
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
-                        overrideMessage = "Failed to upload file : ${imageFile.name}",
+                        overrideMessage = "Failed to upload file : ${fileToUpload.name}",
                         additionalMetadata = documentUploadErrorMetadata(
                             isFront = isFront,
                             isHighRes = isHighRes,
                             scanType = scanType,
                             uploadMethod = uploadMethod,
                             stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
-                            fileName = imageFile.name
+                            fileName = fileToUpload.name
                         )
                     )
                     if (isFront) {
@@ -1075,7 +1089,7 @@ internal class IdentityViewModel(
                     }.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
-                            message = "Failed to upload file : ${imageFile.name}",
+                            message = "Failed to upload file : ${fileToUpload.name}",
                             throwable = it
                         )
                     }
@@ -1128,7 +1142,8 @@ internal class IdentityViewModel(
         boundingBox: BoundingBox,
         selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
         isHighRes: Boolean,
-        selfie: FaceDetectorTransitioner.Selfie
+        selfie: FaceDetectorTransitioner.Selfie,
+        isLiveMode: Boolean
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
@@ -1179,6 +1194,7 @@ internal class IdentityViewModel(
                 ),
                 isHighRes = isHighRes,
                 selfie = selfie,
+                isLiveMode = isLiveMode,
                 compressionQuality = if (isHighRes) {
                     selfieCapturePage.highResImageCompressionQuality
                 } else {
@@ -1193,21 +1209,20 @@ internal class IdentityViewModel(
         filePurpose: StripeFilePurpose,
         isHighRes: Boolean,
         selfie: FaceDetectorTransitioner.Selfie,
+        isLiveMode: Boolean,
         compressionQuality: Float
     ) {
         _selfieUploadedState.updateStateAndSave { currentState ->
             currentState.updateLoading(isHighRes, selfie)
         }
         viewModelScope.launch {
+            var fileToUpload = imageFile
             runCatching {
-                var uploadTime = 0L
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = imageFile,
-                    filePurpose = filePurpose,
-                    onSuccessExecutionTimeBlock = { uploadTime = it }
-                ) to uploadTime
+                fileToUpload = imageFile.fileForVerificationMode(
+                    isLiveMode = isLiveMode,
+                    testModeImage = TestModeImage.SELFIE
+                )
+                uploadPreparedImage(fileToUpload, filePurpose)
             }.fold(
                 onSuccess = { fileTimePair ->
                     identityAnalyticsRequestFactory.imageUpload(
@@ -1216,7 +1231,7 @@ internal class IdentityViewModel(
                         scanType = IdentityScanState.ScanType.SELFIE,
                         id = fileTimePair.first.id,
                         fileName = fileTimePair.first.filename,
-                        fileSize = imageFile.length() / BYTES_IN_KB
+                        fileSize = fileToUpload.length() / BYTES_IN_KB
                     )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
@@ -1231,19 +1246,19 @@ internal class IdentityViewModel(
                 onFailure = {
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
-                        overrideMessage = "Failed to upload file : ${imageFile.name}",
+                        overrideMessage = "Failed to upload file : ${fileToUpload.name}",
                         additionalMetadata = selfieUploadErrorMetadata(
                             isHighRes = isHighRes,
                             selfie = selfie,
                             stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
-                            fileName = imageFile.name
+                            fileName = fileToUpload.name
                         )
                     )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
                             selfie = selfie,
-                            message = "Failed to upload file : ${imageFile.name}",
+                            message = "Failed to upload file : ${fileToUpload.name}",
                             throwable = it
                         )
                     }
@@ -1278,6 +1293,30 @@ internal class IdentityViewModel(
                 throwable = error
             )
         }
+    }
+
+    private fun File.fileForVerificationMode(
+        isLiveMode: Boolean,
+        testModeImage: TestModeImage
+    ): File = if (isLiveMode) {
+        this
+    } else {
+        identityIO.createTestModeFileToUpload(testModeImage)
+    }
+
+    private suspend fun uploadPreparedImage(
+        imageFile: File,
+        filePurpose: StripeFilePurpose
+    ): Pair<StripeFile, Long> {
+        var uploadTime = 0L
+        val stripeFile = identityRepository.uploadImage(
+            verificationId = verificationArgs.verificationSessionId,
+            ephemeralKey = verificationArgs.ephemeralKeySecret,
+            imageFile = imageFile,
+            filePurpose = filePurpose,
+            onSuccessExecutionTimeBlock = { uploadTime = it }
+        )
+        return stripeFile to uploadTime
     }
 
     /**
@@ -2450,37 +2489,45 @@ internal class IdentityViewModel(
             activityResultCaller,
             savedStateHandle,
             onFrontPhotoTaken = { uri ->
+                val page = requireNotNull(verificationPage.value?.data)
                 uploadManualResult(
                     uri = uri,
                     isFront = true,
-                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    isLiveMode = page.livemode,
+                    docCapturePage = page.documentCapture,
                     uploadMethod = UploadMethod.MANUALCAPTURE,
                     scanType = IdentityScanState.ScanType.DOC_FRONT
                 )
             },
             onBackPhotoTaken = { uri ->
+                val page = requireNotNull(verificationPage.value?.data)
                 uploadManualResult(
                     uri = uri,
                     isFront = false,
-                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    isLiveMode = page.livemode,
+                    docCapturePage = page.documentCapture,
                     uploadMethod = UploadMethod.MANUALCAPTURE,
                     scanType = IdentityScanState.ScanType.DOC_BACK
                 )
             },
             onFrontImageChosen = { uri ->
+                val page = requireNotNull(verificationPage.value?.data)
                 uploadManualResult(
                     uri = uri,
                     isFront = true,
-                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    isLiveMode = page.livemode,
+                    docCapturePage = page.documentCapture,
                     uploadMethod = UploadMethod.FILEUPLOAD,
                     scanType = IdentityScanState.ScanType.DOC_FRONT
                 )
             },
             onBackImageChosen = { uri ->
+                val page = requireNotNull(verificationPage.value?.data)
                 uploadManualResult(
                     uri = uri,
                     isFront = false,
-                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    isLiveMode = page.livemode,
+                    docCapturePage = page.documentCapture,
                     uploadMethod = UploadMethod.FILEUPLOAD,
                     scanType = IdentityScanState.ScanType.DOC_BACK
                 )

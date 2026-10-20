@@ -164,6 +164,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayPromptPayDetails -> {
                 StripeIntent.NextActionType.DisplayPromptPayDetails
             }
+            is StripeIntent.NextActionData.DisplayPixDetails -> {
+                StripeIntent.NextActionType.DisplayPixDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -178,6 +181,9 @@ constructor(
             }
             is StripeIntent.NextActionData.AwaitAuthorization -> {
                 StripeIntent.NextActionType.AwaitAuthorization
+            }
+            is StripeIntent.NextActionData.MbWayAwaitAuthorization -> {
+                StripeIntent.NextActionType.MbWayAwaitAuthorization
             }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,
@@ -408,15 +414,16 @@ constructor(
     ) : StripeModel
 
     internal data class ClientSecret(internal val value: String) {
+        init {
+            require(isMatch(value)) {
+                "Invalid PaymentIntent client secret. " +
+                    "Pass the client_secret from the PaymentIntent returned by your server."
+            }
+        }
+
         internal val paymentIntentId: String =
             value.split("_(scoped_)?secret".toRegex())
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-
-        init {
-            require(isMatch(value)) {
-                "Invalid Payment Intent client secret: $value"
-            }
-        }
 
         internal companion object {
             private val PATTERN = Pattern.compile("^pi_[^_]+_(scoped_)?secret_[^_]+$")

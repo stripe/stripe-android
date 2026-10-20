@@ -14,6 +14,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -142,11 +143,11 @@ internal class SavedPaymentMethodConfirmScreenTest {
         val eventReporter = FakeEventReporter()
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = interactor,
-            isLiveMode = true,
             sheetActivityStateHolder = stateHolder,
             confirmationHelper = confirmationHelper,
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
         )
 
@@ -156,7 +157,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
             ) {
                 EventReporterProvider(eventReporter) {
                     StripeTheme {
-                        screen.Content()
+                        screen.Content(showsWalletsHeader = false)
                     }
                 }
             }

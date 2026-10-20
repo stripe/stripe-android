@@ -16,7 +16,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have started loading.
      */
-    fun onLoadStarted(initializedViaCompose: Boolean)
+    fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have successfully loaded the information required to be
@@ -30,7 +30,7 @@ internal interface LoadingEventReporter {
     /**
      * PaymentSheet or FlowController have failed to load.
      */
-    fun onLoadFailed(error: Throwable)
+    fun onLoadFailed(error: Throwable, publishableKey: String)
 
     /**
      * PaymentSheet or FlowController have failed to load from the Elements session endpoint.
@@ -40,11 +40,6 @@ internal interface LoadingEventReporter {
 
 @Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
-
-    /**
-     * PaymentSheet has been instantiated or FlowController has finished its configuration.
-     */
-    fun onInit()
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.
@@ -267,7 +262,7 @@ internal interface EventReporter : CardScanEventsReporter {
     /**
      * Promotions fetched from PMM API.
      */
-    fun onPaymentMethodMessagePromotionsFetchBegin()
+    fun onPaymentMethodMessagePromotionsFetchBegin(publishableKey: String)
 
     /**
      * Attempted to display promotions.

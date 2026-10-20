@@ -8,11 +8,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,9 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -43,7 +38,6 @@ import com.stripe.android.financialconnections.navigation.bottomsheet.BottomShee
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.LinkBrand
@@ -54,9 +48,6 @@ import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 private val LOGO_HEIGHT = 20.dp
-private val PILL_HORIZONTAL_PADDING = 4.dp
-private val PILL_VERTICAL_PADDING = 2.dp
-private const val PILL_RADIUS = 8f
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
@@ -70,7 +61,6 @@ internal fun FinancialConnectionsTopAppBar(
 
     FinancialConnectionsTopAppBar(
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
-        testMode = state.isTestMode,
         theme = state.theme,
         linkBrand = state.linkBrand,
         elevation = elevation,
@@ -82,7 +72,6 @@ internal fun FinancialConnectionsTopAppBar(
 @Composable
 private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
-    testMode: Boolean,
     theme: Theme,
     linkBrand: LinkBrand,
     elevation: State<Dp>,
@@ -103,7 +92,6 @@ private fun FinancialConnectionsTopAppBar(
         title = {
             Title(
                 hideStripeLogo = hideStripeLogo,
-                testmode = testMode,
                 theme = theme,
                 linkBrand = linkBrand,
             )
@@ -186,7 +174,6 @@ private fun CloseButton(
 @Composable
 private fun Title(
     hideStripeLogo: Boolean,
-    testmode: Boolean,
     theme: Theme,
     linkBrand: LinkBrand,
 ) {
@@ -205,22 +192,6 @@ private fun Title(
                     null
                 },
                 contentDescription = null // decorative element
-            )
-        }
-        // show a test mode pill if in test mode
-        if (testmode) {
-            Text(
-                modifier = Modifier
-                    .drawBehind {
-                        drawRoundRect(
-                            color = Attention300,
-                            cornerRadius = CornerRadius(PILL_RADIUS)
-                        )
-                    }
-                    .padding(vertical = PILL_VERTICAL_PADDING, horizontal = PILL_HORIZONTAL_PADDING),
-                text = "Test",
-                style = FinancialConnectionsTheme.typography.labelMediumEmphasized,
-                color = Color.White,
             )
         }
     }

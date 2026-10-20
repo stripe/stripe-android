@@ -104,7 +104,7 @@ internal class VerticalModeFormUITest {
     ) {
         formPage.headerIcon.assertDoesNotExist()
         formPage.title.assertExists()
-        formPage.title.assert(hasText("Add card"))
+        formPage.title.assert(hasText("Add a card"))
     }
 
     @Test
@@ -178,7 +178,6 @@ internal class VerticalModeFormUITest {
         viewActionRecorder: ViewActionRecorder<VerticalModeFormInteractor.ViewAction>,
     ): VerticalModeFormInteractor {
         return object : VerticalModeFormInteractor {
-            override val isLiveMode: Boolean = true
             override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlow
 
             override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {

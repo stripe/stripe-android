@@ -158,7 +158,6 @@ internal class DefaultNetworkedIdentityActionsTest {
             assertThat(it.method).isEqualTo(StripeRequest.Method.POST)
             assertThat(it.mimeType).isEqualTo(StripeRequest.MimeType.Form)
             assertThat(it.retryResponseCodes).isEmpty()
-            assertThat(it.shouldCache).isFalse()
             assertThat(it.toString()).doesNotContain(SESSION_ID)
             assertThat(it.toString()).doesNotContain("vs%2Ftarget%3Fvalue%23fragment")
             assertThat(it.toString()).doesNotContain(TOKEN)

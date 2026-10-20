@@ -46,7 +46,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             testParameters = testParameters,
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()
@@ -62,7 +62,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             },
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()
@@ -78,7 +78,7 @@ internal class TestBoleto : BasePlaygroundTest() {
             },
             values = boletoValues,
             populateCustomLpmFields = {
-                populateBoletoTaxId()
+                populateBrazilianTaxId()
                 populateName()
                 populateAddress()
                 populateEmail()
