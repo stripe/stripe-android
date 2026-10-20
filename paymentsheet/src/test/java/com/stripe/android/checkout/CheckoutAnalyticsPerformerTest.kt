@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.simulateProcessDeath
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -54,6 +55,8 @@ internal class CheckoutAnalyticsPerformerTest {
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
                 params = mapOf(
                     "selected_lpm" to "google_pay",
+                    "has_card_art" to false,
+                    "payment_method_orientation" to "horizontal",
                     "duration" to 2f,
                     "intent_id" to success.intent.id,
                     "deferred_intent_confirmation_type" to "client",
@@ -71,7 +74,7 @@ internal class CheckoutAnalyticsPerformerTest {
         val selection = PaymentSelection.Link(brand = LinkBrand.Link)
         performer.onExpressCheckoutElementConfirmationStarted(selection)
 
-        val restoredPerformer = recreatePerformer()
+        val restoredPerformer = recreatePerformerAfterProcessDeath()
         startReporting(restoredPerformer)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
 
@@ -79,7 +82,11 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("selected_lpm" to "link"),
+                params = mapOf(
+                    "selected_lpm" to "link",
+                    "has_card_art" to false,
+                    "payment_method_orientation" to "horizontal",
+                ),
             ),
         )
     }
@@ -113,6 +120,7 @@ internal class CheckoutAnalyticsPerformerTest {
                 params = mapOf(
                     "selected_lpm" to "google_pay",
                     "duration" to 2f,
+                    "error_message" to "apiError",
                     "error_code" to "card_declined",
                 ),
             ),
@@ -226,7 +234,8 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val performer: CheckoutAnalyticsPerformer = createPerformer()
 
-        fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
+        fun recreatePerformerAfterProcessDeath(): CheckoutAnalyticsPerformer =
+            createPerformer(savedStateHandle.simulateProcessDeath())
 
         fun startReporting(performer: CheckoutAnalyticsPerformer = this.performer) {
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -234,7 +243,9 @@ internal class CheckoutAnalyticsPerformerTest {
             }
         }
 
-        private fun createPerformer(): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
+        private fun createPerformer(
+            savedStateHandle: SavedStateHandle = this.savedStateHandle,
+        ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             context = context,

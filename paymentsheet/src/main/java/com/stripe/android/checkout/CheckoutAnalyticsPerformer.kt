@@ -2,6 +2,8 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -41,21 +43,23 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     )
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
+        saveConfirmation(InvocationSource.Merchant, paymentSelection)
     }
 
     fun onExpressCheckoutElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(IntegrationType.ExpressCheckoutElement, paymentSelection)
+        saveConfirmation(
+            InvocationSource.ExpressCheckoutElement,
+            paymentSelection,
+        )
     }
 
     suspend fun reportConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY)
-                val paymentSelection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY)
+                val context = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
 
-                if (integrationType != null && paymentSelection != null) {
-                    reportConfirmationResult(state.result, paymentSelection)
+                if (context != null) {
+                    reportConfirmationResult(state.result, context.paymentSelection)
                 }
 
                 clearConfirmation()
@@ -112,16 +116,17 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun saveConfirmation(
-        integrationType: IntegrationType,
+        invocationSource: InvocationSource,
         paymentSelection: PaymentSelection,
     ) {
-        savedStateHandle[INTEGRATION_TYPE_KEY] = integrationType
-        savedStateHandle[PAYMENT_SELECTION_KEY] = paymentSelection
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            invocationSource = invocationSource,
+            paymentSelection = paymentSelection,
+        )
     }
 
     private fun clearConfirmation() {
-        savedStateHandle.remove<IntegrationType>(INTEGRATION_TYPE_KEY)
-        savedStateHandle.remove<PaymentSelection>(PAYMENT_SELECTION_KEY)
+        savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
     }
 
     private enum class ConfirmationEvent(override val eventName: String) : AnalyticsEvent {
@@ -129,13 +134,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         Failed("checkout_elements.confirm.failed"),
     }
 
-    private enum class IntegrationType {
-        PaymentElement,
-        ExpressCheckoutElement,
-    }
-
     private companion object {
-        const val INTEGRATION_TYPE_KEY = "CheckoutAnalyticsPerformer.integrationType"
-        const val PAYMENT_SELECTION_KEY = "CheckoutAnalyticsPerformer.paymentSelection"
+        const val CONFIRMATION_CONTEXT_KEY = "CheckoutAnalyticsPerformer.confirmationContext"
     }
 }
