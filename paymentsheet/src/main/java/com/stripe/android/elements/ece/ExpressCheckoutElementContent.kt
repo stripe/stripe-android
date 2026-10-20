@@ -106,6 +106,7 @@ internal fun ExpressCheckoutElementContent(
                                     enabled = state.enabled,
                                     interactor = interactor,
                                     buttonWidth = buttonWidth,
+                                    cornerRadius = state.cornerRadiusDp.dp,
                                     googlePayButton = googlePayButton,
                                 )
                             }
@@ -143,6 +144,7 @@ private fun ExpressButtonContent(
     enabled: Boolean,
     interactor: ExpressCheckoutElementInteractor,
     buttonWidth: Dp,
+    cornerRadius: Dp,
     googlePayButton: @Composable (ExpressButton.GooglePay, Boolean, () -> Unit) -> Unit,
 ) {
     key(button) {
@@ -161,6 +163,7 @@ private fun ExpressButtonContent(
                 linkBrand = button.linkBrand,
                 containerWidth = buttonWidth,
                 modifier = Modifier.fillMaxSize(),
+                cornerRadius = cornerRadius,
                 onClick = {
                     interactor.handleViewAction(
                         ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(

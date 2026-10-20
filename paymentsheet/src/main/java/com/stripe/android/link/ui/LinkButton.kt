@@ -71,6 +71,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
 
 private val LinkButtonTheme.textColor: Color
@@ -196,13 +197,36 @@ internal fun LinkButton(
     containerWidth: Dp?,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
 ) {
+    LinkButton(
+        state = state,
+        enabled = enabled,
+        onClick = onClick,
+        modifier = modifier,
+        linkBrand = linkBrand,
+        containerWidth = containerWidth,
+        theme = theme,
+        cornerRadius = StripeTheme.primaryButtonStyle.shape.cornerRadius.dp,
+    )
+}
+
+@Composable
+internal fun LinkButton(
+    state: LinkButtonState,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    linkBrand: LinkBrand,
+    containerWidth: Dp?,
+    theme: LinkButtonTheme,
+    cornerRadius: Dp,
+) {
     val alpha = if (enabled) {
         1f
     } else {
         ContentAlpha.disabled
     }
     val compact = containerWidth?.let { it < LinkButtonCompactWidth } == true
-    val shape = RoundedCornerShape(PrimaryButtonTheme.shape.cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
     CompositionLocalProvider(
         LocalContentAlpha provides alpha
     ) {
