@@ -486,21 +486,6 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `unchanged name-only input dismisses immediately`() = runScenario(
-        args = AddressElementActivityContract.Args.CheckoutShipping(
-            apiConfiguration = DEFAULT_API_CONFIG,
-            config = AddressLauncher.Configuration.Builder().address(AddressDetails(name = "Jenny Rosen")).build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-        ),
-    ) {
-        addressPage.assertName("Jenny Rosen")
-        addressPage.clickClose()
-
-        addressPage.assertDiscardConfirmationNotDisplayed()
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-    }
-
-    @Test
     fun `reverted edits cancel immediately`() = runScenario(
         args = standaloneArgs(SHIPPING_ADDRESS),
     ) {

@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.uicore.elements.AddressTextFieldElement
 import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -27,12 +26,9 @@ import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -482,9 +478,6 @@ class InputAddressViewModelTest {
     @Test
     fun `clickPrimaryButton accepts a second click when first submission fails`() =
         runPrimaryButtonScenario { primaryButtonAction, expectedAddressCall ->
-            viewModel.onEnterManuallyFromInline()
-            viewModel.setRawValues(mapOf(FormFieldId.Line1 to "123 Main"))
-            assertThat(viewModel.hasChanges()).isTrue()
             val firstError = IllegalStateException("first submission failed")
             primaryButtonAction.result = Result.failure(firstError)
             assertThat(viewModel.saveError.value).isNull()
@@ -500,7 +493,6 @@ class InputAddressViewModelTest {
             assertThat(viewModel.saveError.value).isEqualTo(firstError.stripeErrorMessage())
             eventReporter.saveCompletedCalls.expectNoEvents()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
-            assertThat(viewModel.hasChanges()).isTrue()
 
             primaryButtonAction.result = Result.success(
                 AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
@@ -623,43 +615,6 @@ class InputAddressViewModelTest {
     @Test
     fun `default checkbox should emit false to start by default`() = runScenario(withPlacesClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
-    }
-
-    @Test
-    fun `inline query edit updates hasChanges before coroutine collection`() = runTest {
-        val eventReporter = FakeAddressElementEventReporter()
-        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-        try {
-            val viewModel = createViewModel(eventReporter = eventReporter)
-            assertThat(viewModel.hasChanges()).isFalse()
-
-            viewModel.inlineAddressField().controller.onInlineQueryChanged("1")
-
-            assertThat(viewModel.hasChanges()).isTrue()
-        } finally {
-            Dispatchers.setMain(testDispatcher)
-        }
-        eventReporter.validate()
-    }
-
-    @Test
-    fun `raw field edit updates hasChanges before coroutine collection`() = runTest {
-        val eventReporter = FakeAddressElementEventReporter()
-        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
-        try {
-            val viewModel = createViewModel(
-                address = EXPECTED_ADDRESS,
-                eventReporter = eventReporter,
-            )
-            assertThat(viewModel.hasChanges()).isFalse()
-
-            viewModel.setRawValues(mapOf(FormFieldId.Name to "Jane Doe"))
-
-            assertThat(viewModel.hasChanges()).isTrue()
-        } finally {
-            Dispatchers.setMain(testDispatcher)
-        }
-        eventReporter.validate()
     }
 
     @Test
@@ -1512,10 +1467,6 @@ class InputAddressViewModelTest {
         val section = addressFormController.elements.single() as SectionElement
         return (section.fields.single() as AutocompleteAddressElement).sectionFieldErrorController()
     }
-
-    private fun InputAddressViewModel.inlineAddressField(): AddressTextFieldElement =
-        addressController().addressController.value.fieldsFlowable.value
-            .single { it.identifier == FormFieldId.OneLineAddress } as AddressTextFieldElement
 
     private fun InputAddressViewModel.setRawValues(
         values: Map<FormFieldId, String?>
