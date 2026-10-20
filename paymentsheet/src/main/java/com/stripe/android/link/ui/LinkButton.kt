@@ -196,29 +196,7 @@ internal fun LinkButton(
     linkBrand: LinkBrand,
     containerWidth: Dp?,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-) {
-    LinkButton(
-        state = state,
-        enabled = enabled,
-        onClick = onClick,
-        modifier = modifier,
-        linkBrand = linkBrand,
-        containerWidth = containerWidth,
-        theme = theme,
-        cornerRadius = StripeTheme.primaryButtonStyle.shape.cornerRadius.dp,
-    )
-}
-
-@Composable
-internal fun LinkButton(
-    state: LinkButtonState,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier,
-    linkBrand: LinkBrand,
-    containerWidth: Dp?,
-    theme: LinkButtonTheme,
-    cornerRadius: Dp,
+    cornerRadius: Dp = StripeTheme.primaryButtonStyle.shape.cornerRadius.dp,
 ) {
     val alpha = if (enabled) {
         1f
