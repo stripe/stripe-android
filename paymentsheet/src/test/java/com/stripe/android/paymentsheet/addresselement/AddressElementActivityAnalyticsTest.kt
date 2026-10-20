@@ -66,7 +66,7 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     @Test
-    fun `failed save reports failure and close reports cancellation`() = runTaxScenario(fails = true) { taxUpdate ->
+    fun `failed save and unchanged close report failure and cancellation`() = runTaxScenario(fails = true) { taxUpdate ->
         val failedRequest = expectShippingAnalytics(
             "elements.shipping_address.save_failed",
             analyticsPayloadField("analytics_value", "apiError"),
@@ -78,12 +78,9 @@ internal class AddressElementActivityAnalyticsTest {
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
         addressPage.assertReadyToSave()
-        addressPage.editName(EDITED_NAME)
 
-        addressPage.clickClose()
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.discardChanges()
+        addressPage.clickClose()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)

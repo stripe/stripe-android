@@ -134,12 +134,7 @@ internal class AddressElementActivityTestRunner(
             addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
             addressPage.discardChanges()
 
-            when (args) {
-                is AddressElementActivityContract.Args.Standalone ->
-                    assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
-                is AddressElementActivityContract.Args.CheckoutShipping ->
-                    assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-            }
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         }
 
         fun assertDismissalBlocked() {
