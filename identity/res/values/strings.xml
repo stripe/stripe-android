@@ -154,6 +154,74 @@
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID Number</string>
+  <!-- Button to close the error shown when saving the user's ID to Link failed -->
+  <string name="stripe_identity_link_close">Close</string>
+  <!-- Button to continue after sharing an ID saved to Link -->
+  <string name="stripe_identity_link_continue">Continue</string>
+  <!-- Button to sign in to Link to share or save an ID -->
+  <string name="stripe_identity_link_continue_with_link">Continue with Link</string>
+  <!-- Accessibility label of the button that hides the notice about an ID saved to Link -->
+  <string name="stripe_identity_link_dismiss">Dismiss</string>
+  <!-- Instructions above the list of IDs saved to the user's Link account -->
+  <string name="stripe_identity_link_documents_body">Select an ID to continue.</string>
+  <!-- Status while loading the IDs saved to the user's Link account -->
+  <string name="stripe_identity_link_documents_loading">Loading your saved IDs…</string>
+  <!-- Title of the list of IDs saved to the user's Link account -->
+  <string name="stripe_identity_link_documents_title">Choose a saved ID</string>
+  <!-- Button to finish after the user's ID was saved to Link -->
+  <string name="stripe_identity_link_done">Done</string>
+  <!-- Button to finish the verification without saving the user's ID to Link -->
+  <string name="stripe_identity_link_finish_without_saving">Finish without saving</string>
+  <!-- Button to verify identity with a new document instead of an ID saved to Link -->
+  <string name="stripe_identity_link_manual">Manually verify identity</string>
+  <!-- Button to verify identity with a new document instead of an ID saved to Link -->
+  <string name="stripe_identity_link_manual_instead">Manually verify instead</string>
+  <!-- Subtitle of the offer to save the user's ID to Link -->
+  <string name="stripe_identity_link_save_body_id">Save your ID with Link.</string>
+  <!-- Subtitle of the offer to save the user's ID and selfie to Link -->
+  <string name="stripe_identity_link_save_body_id_and_selfie">Save your ID and selfie with Link.</string>
+  <!-- Accessibility label of the button that saves the user's ID to Link -->
+  <string name="stripe_identity_link_save_button">Save with Link</string>
+  <!-- Point in the offer to save the user's ID to Link -->
+  <string name="stripe_identity_link_save_encrypted">Link encrypts your saved information for your protection.</string>
+  <!-- Body text when saving the user's ID to Link failed -->
+  <string name="stripe_identity_link_save_failed_body">Something went wrong while saving your ID to Link. Your verification isn\'t affected.</string>
+  <!-- Title when saving the user's ID to Link failed -->
+  <string name="stripe_identity_link_save_failed_title">Couldn\'t save your ID</string>
+  <!-- Point in the offer to save the user's ID to Link -->
+  <string name="stripe_identity_link_save_reuse_id">Save your ID for the next time you need to verify.</string>
+  <!-- Point in the offer to save the user's ID and selfie to Link -->
+  <string name="stripe_identity_link_save_reuse_id_and_selfie">Save your ID and selfie for the next time you need to verify.</string>
+  <!-- Title of the offer to save the user's ID to Link -->
+  <string name="stripe_identity_link_save_title">Verify faster next time</string>
+  <!-- Button title followed by the Link logo, read as 'Save with Link' -->
+  <string name="stripe_identity_link_save_with">Save with</string>
+  <!-- Body text after the user's ID was saved to Link -->
+  <string name="stripe_identity_link_saved_body_id">It\'s encrypted and ready to reuse with your Link wallet.</string>
+  <!-- Body text after the user's ID and selfie were saved to Link -->
+  <string name="stripe_identity_link_saved_body_id_and_selfie">They are encrypted and ready to reuse with your Link wallet.</string>
+  <!-- Notice that the user has an ID saved to Link, followed by their email address -->
+  <string name="stripe_identity_link_saved_id_with_email">Saved ID · %1$s</string>
+  <!-- Title after the user's ID was saved to Link -->
+  <string name="stripe_identity_link_saved_title_id">ID saved</string>
+  <!-- Title after the user's ID and selfie were saved to Link -->
+  <string name="stripe_identity_link_saved_title_id_and_selfie">ID and selfie saved</string>
+  <!-- Status while saving the user's ID to Link -->
+  <string name="stripe_identity_link_saving">Saving your ID…</string>
+  <!-- Button to share the selected ID saved to Link with this verification -->
+  <string name="stripe_identity_link_share">Share ID</string>
+  <!-- Body text after the user shared an ID saved to Link with this verification -->
+  <string name="stripe_identity_link_shared_body">This ID will be used for your verification.</string>
+  <!-- Title after the user shared an ID saved to Link with this verification -->
+  <string name="stripe_identity_link_shared_title">You shared your ID</string>
+  <!-- Status while sharing an ID saved to Link with this verification -->
+  <string name="stripe_identity_link_sharing">Sharing your ID…</string>
+  <!-- Subtitle of the Link sign-in screen when sharing an ID saved to Link -->
+  <string name="stripe_identity_link_sign_in_to_reuse">Sign in to use a saved ID.</string>
+  <!-- Subtitle of the Link sign-in screen when saving the user's ID to Link -->
+  <string name="stripe_identity_link_sign_in_to_save">Sign in or create an account to save ID.</string>
+  <!-- Status while continuing to verify identity with a new document instead of an ID saved to Link -->
+  <string name="stripe_identity_link_skipping">Continuing with manual verification…</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">I\'m ready</string>
   <!-- State when a manual identity document image has been captured -->

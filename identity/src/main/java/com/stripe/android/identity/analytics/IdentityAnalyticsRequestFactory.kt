@@ -571,6 +571,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_COUNTRY_NOT_LISTED = "country_not_listed"
         const val SCREEN_NAME_DEBUG = "debug"
         const val SCREEN_NAME_PHONE_OTP = "phone_otp"
+        const val SCREEN_NAME_NETWORKED_IDENTITY_SAVE = "networked_identity_save"
         const val SCREEN_NAME_UNKNOWN = "unknown"
         const val TYPE_SELFIE = "selfie"
         const val TYPE_DOCUMENT = "document"

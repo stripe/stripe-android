@@ -17,4 +17,7 @@
     <string name="stripe_preview_user_experience">Preview user experience</string>
     <string name="stripe_preview_user_experience_details">Proceed to preview as an end user. Information provided will not be verified.</string>
     <string name="stripe_proceed">PROCEED</string>
+
+    <string name="stripe_identity_link" translatable="false">Link</string>
+    <string name="stripe_identity_link_document_number" translatable="false">%1$s %2$s</string>
 </resources>

@@ -17,6 +17,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +26,9 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -92,6 +95,7 @@ class InitialLoadingScreenTest {
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageData
+        onBlocking { resumeNetworkedIdentity(any()) } doReturn false
     }
     private val mockNavController = mock<NavController>()
 
@@ -147,6 +151,16 @@ class InitialLoadingScreenTest {
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
+        }
+    }
+
+    @Test
+    fun testResumedNetworkedIdentityInTestModeSkipsDebugScreen() {
+        runBlocking { whenever(mockIdentityViewModel.resumeNetworkedIdentity(any())).thenReturn(true) }
+
+        setComposeTestRuleWith(verificationPageInTestMode) {
+            verifyBlocking(mockIdentityViewModel) { resumeNetworkedIdentity(mockNavController) }
+            verify(mockNavController, never()).navigate(any<String>(), any<NavOptionsBuilder.() -> Unit>())
         }
     }
 
