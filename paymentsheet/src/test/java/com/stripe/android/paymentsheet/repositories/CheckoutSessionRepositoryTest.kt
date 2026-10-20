@@ -1,14 +1,20 @@
 package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -66,6 +72,45 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `confirm reports request id from successful response header`() = runTest {
+        val requestId = "req_checkout_confirm"
+        val requestIds = Turbine<String?>()
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+            response.setHeader("Request-Id", requestId)
+        }
+
+        val result = repository.confirm(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            params = confirmParams(),
+            onRequestId = requestIds::add,
+        ).getOrThrow()
+
+        assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(requestIds.awaitItem()).isEqualTo(requestId)
+        requestIds.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `confirm request id is null when successful response has no request id header`() = runTest {
+        val requestIds = Turbine<String?>()
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+            response.removeHeader("request-id")
+        }
+
+        val result = repository.confirm(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            params = confirmParams(),
+            onRequestId = requestIds::add,
+        ).getOrThrow()
+
+        assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(requestIds.awaitItem()).isNull()
+        requestIds.ensureAllEventsConsumed()
     }
 
     @Test
@@ -153,4 +198,20 @@ class CheckoutSessionRepositoryTest {
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled.failed")
     }
+
+    private fun confirmParams() = ConfirmCheckoutSessionParams(
+        paymentMethodId = "pm_123",
+        expectedPaymentMethodType = PaymentMethod.Type.Card.code,
+        clientAttributionMetadata = ClientAttributionMetadata(
+            elementsSessionConfigId = "test_session_id",
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+            checkoutSessionId = DEFAULT_CHECKOUT_SESSION_ID,
+        ),
+        returnUrl = "stripesdk://return_url",
+        expectedAmount = 1000L,
+        savePaymentMethod = null,
+        shipping = null,
+        collectedInformation = null,
+    )
 }

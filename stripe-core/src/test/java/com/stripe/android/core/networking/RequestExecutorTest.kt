@@ -1,5 +1,6 @@
 package com.stripe.android.core.networking
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -143,6 +144,24 @@ internal class RequestExecutorTest {
     }
 
     @Test
+    fun `executeRequestWithResultParser maps parsed model with transport response`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
+        whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseMapper = { parsedModel, response ->
+                TestStripeModel("${parsedModel.data}-${response.requestId?.value}")
+            },
+        )
+
+        assertThat(result.getOrThrow()).isEqualTo(TestStripeModel("test_data-req_test"))
+    }
+
+    @Test
     fun `executeRequestWithResultParser should return failure result on error response`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
         whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
@@ -159,6 +178,26 @@ internal class RequestExecutorTest {
         assertEquals("req_error", exception.requestId)
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, exception.statusCode)
         assertEquals(testStripeError, exception.stripeError)
+    }
+
+    @Test
+    fun `executeRequestWithResultParser preserves failures when response mapper is provided`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
+        whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            responseMapper = { _, _ -> error("Response mapper should not run for an error response") },
+        )
+
+        assertThat(result.isFailure).isTrue()
+        val exception = result.exceptionOrNull() as APIException
+        assertThat(exception.requestId).isEqualTo("req_error")
+        assertThat(exception.statusCode).isEqualTo(HttpURLConnection.HTTP_BAD_REQUEST)
+        assertThat(exception.stripeError).isEqualTo(testStripeError)
     }
 
     @Test

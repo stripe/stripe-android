@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionRequestIdKey
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
@@ -81,6 +82,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
+                    requestId = result.metadata[CheckoutSessionRequestIdKey],
                 )
             )
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->

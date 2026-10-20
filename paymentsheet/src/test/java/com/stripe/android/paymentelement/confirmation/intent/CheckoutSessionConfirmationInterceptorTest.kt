@@ -255,10 +255,12 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
+        val requestId = "req_checkout_confirm"
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
                 json.put("status", "complete")
             }
+            response.setHeader("Request-Id", requestId)
         }
 
         val result = interceptNewPm()
@@ -272,6 +274,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
             .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+        assertThat(completeAction.metadata[CheckoutSessionRequestIdKey]).isEqualTo(requestId)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 

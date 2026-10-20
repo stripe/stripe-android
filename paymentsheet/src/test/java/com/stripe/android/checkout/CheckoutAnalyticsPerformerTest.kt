@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionRequestIdKey
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
@@ -111,6 +112,7 @@ internal class CheckoutAnalyticsPerformerTest {
                 ),
             ),
         )
+        assertThat(request).containsEntry("request_id", "req_failed_confirmation")
         assertThat(request.toString()).doesNotContain(privateMessage)
     }
 
@@ -280,6 +282,7 @@ internal class CheckoutAnalyticsPerformerTest {
         val resultWithResponse = successfulResult().copy(
             metadata = MutableConfirmationMetadata().apply {
                 set(CheckoutSessionResponseKey, confirmationResponse)
+                set(CheckoutSessionRequestIdKey, "req_confirmed")
             }
         )
 
@@ -294,12 +297,42 @@ internal class CheckoutAnalyticsPerformerTest {
                     "session_status" to "complete",
                     "payment_status" to "paid",
                     "checkout_config_id" to "cfg_confirmed",
+                    "request_id" to "req_confirmed",
                     "elements_session_config_id" to "cfg_elements_confirmed",
                     "currency" to "usd",
                     "automatic_tax_enabled" to true,
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `success without confirmation request metadata omits request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            successfulResult().copy(
+                metadata = MutableConfirmationMetadata().apply {
+                    set(
+                        CheckoutSessionResponseKey,
+                        CheckoutSessionResponseFactory.create(
+                            status = CheckoutSessionResponse.Status.COMPLETE,
+                            paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+                        ),
+                    )
+                }
+            )
+        )
+
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
+        assertThat(request).doesNotContainKey("request_id")
     }
 
     private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {

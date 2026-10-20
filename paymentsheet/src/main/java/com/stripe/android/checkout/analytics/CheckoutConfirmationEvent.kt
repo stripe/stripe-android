@@ -17,11 +17,13 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
         confirmationContext: CheckoutConfirmationContext,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
+        requestId: String?,
     ) : CheckoutConfirmationEvent() {
         override val eventName: String = "checkout_elements.confirm.succeeded"
         override val params: Map<String, Any> = buildMap {
             putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
+            requestId?.let { put("request_id", it) }
             putAll(duration.mapOfDurationInSeconds())
         }
     }
@@ -37,6 +39,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             val stripeException = error.cause as? StripeException
             put("error_type", stripeException?.stripeError?.type ?: error.analyticsValue)
             error.errorCode?.let { put("error_code", it) }
+            stripeException?.requestId?.let { put("request_id", it) }
             putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())

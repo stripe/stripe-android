@@ -56,12 +56,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
             ) { response ->
+                response.addHeader("Request-Id", "req_checkout_confirm")
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
+                analyticsPayloadField("request_id", "req_checkout_confirm"),
             )
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
