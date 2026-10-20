@@ -1337,7 +1337,6 @@ internal class PaymentSheetActivityTest {
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-                placesClient = null,
                 linkAccountHolder = LinkAccountHolder(savedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
