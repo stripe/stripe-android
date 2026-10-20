@@ -66,7 +66,9 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     @Test
-    fun `failed save and unchanged close report failure and cancellation`() = runTaxScenario(fails = true) { taxUpdate ->
+    fun `failed save and unchanged close report failure and cancellation`() = runTaxScenario(
+        fails = true,
+    ) { taxUpdate ->
         val failedRequest = expectShippingAnalytics(
             "elements.shipping_address.save_failed",
             analyticsPayloadField("analytics_value", "apiError"),
