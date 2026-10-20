@@ -275,26 +275,31 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun authenticate(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String?
+        email: String?,
+        phoneNumber: String?,
+        content: LinkController.AuthenticationContent?,
     ) {
-        performAuthentication(launcher, email, existingOnly = false)
+        performAuthentication(launcher, email, phoneNumber, content, existingOnly = false)
     }
 
     fun authenticateExistingConsumer(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String
     ) {
-        performAuthentication(launcher, email, existingOnly = true)
+        performAuthentication(launcher, email, phoneNumber = null, content = null, existingOnly = true)
     }
 
     private fun performAuthentication(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
+        phoneNumber: String?,
+        content: LinkController.AuthenticationContent?,
         existingOnly: Boolean
     ) {
         present(
             launcher = launcher,
             email = email,
+            phoneNumber = phoneNumber,
             onConfigurationError = { error ->
                 _authenticationResultFlow.tryEmit(
                     LinkController.AuthenticationResult.Failed(error)
@@ -306,7 +311,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
                 } else {
-                    LinkLaunchMode.Authentication(existingOnly = existingOnly)
+                    LinkLaunchMode.Authentication(existingOnly = existingOnly, content = content)
                 }
             }
         )

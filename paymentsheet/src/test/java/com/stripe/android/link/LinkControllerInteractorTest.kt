@@ -911,7 +911,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
 
         interactor.authenticationResultFlow.test {
-            interactor.authenticate(mock(), "test@example.com")
+            interactor.authenticate(mock(), "test@example.com", phoneNumber = null, content = null)
             val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
         }
@@ -923,15 +923,33 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, "test@example.com")
+        interactor.authenticate(launcher, "test@example.com", phoneNumber = null, content = null)
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = null))
 
         val state = interactor.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
+    }
+
+    @Test
+    fun `onAuthenticate() passes the phone number and authentication content to Link`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        val content = LinkController.AuthenticationContent(
+            title = "Continue with Link",
+            subtitle = "Sign in or create an account to get started.",
+            consentAction = LinkController.AuthenticationConsentAction.NetworkedIdentity,
+        )
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.authenticate(launcher, "test@example.com", phoneNumber = "+15555555555", content = content)
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.configuration.customerInfo.phone).isEqualTo("+15555555555")
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = content))
     }
 
     @Test
@@ -949,11 +967,11 @@ class LinkControllerInteractorTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, unverifiedAccount.email)
+        interactor.authenticate(launcher, unverifiedAccount.email, phoneNumber = null, content = null)
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkAccountInfo.account).isEqualTo(unverifiedAccount)
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = null))
     }
 
     @Test
@@ -963,12 +981,12 @@ class LinkControllerInteractorTest {
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, "another@email.com")
+        interactor.authenticate(launcher, "another@email.com", phoneNumber = null, content = null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = null))
     }
 
     @Test
@@ -978,12 +996,12 @@ class LinkControllerInteractorTest {
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, email)
+        interactor.authenticate(launcher, email, phoneNumber = null, content = null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.configuration.customerInfo.email).isEqualTo(email)
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = null))
     }
 
     @Test
@@ -992,7 +1010,7 @@ class LinkControllerInteractorTest {
         // Don't configure the interactor, so it will fail with MissingConfigurationException
 
         interactor.authenticationResultFlow.test {
-            interactor.authenticate(mock(), "test@example.com")
+            interactor.authenticate(mock(), "test@example.com", phoneNumber = null, content = null)
 
             val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
@@ -1005,12 +1023,12 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, null)
+        interactor.authenticate(launcher, null, phoneNumber = null, content = null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.configuration.customerInfo.email).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(content = null))
     }
 
     @Test
@@ -1020,7 +1038,7 @@ class LinkControllerInteractorTest {
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, email)
+        interactor.authenticate(launcher, email, phoneNumber = null, content = null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -1042,7 +1060,7 @@ class LinkControllerInteractorTest {
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkExpressMode).isEqualTo(LinkExpressMode.ENABLED)
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(existingOnly = true))
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(existingOnly = true, content = null))
     }
 
     @Test
@@ -1070,7 +1088,7 @@ class LinkControllerInteractorTest {
 
         // Call onAuthenticate with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, "different@email.com")
+        interactor.authenticate(launcher, "different@email.com", phoneNumber = null, content = null)
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -1097,7 +1115,7 @@ class LinkControllerInteractorTest {
 
         // Call onAuthenticate with a matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.authenticate(launcher, unverifiedAccount.email)
+        interactor.authenticate(launcher, unverifiedAccount.email, phoneNumber = null, content = null)
 
         // Verify that the account holder was NOT cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
@@ -1110,7 +1128,7 @@ class LinkControllerInteractorTest {
     @Test
     fun `onAuthenticate() on non-matching email clears saved payment data`() = runTest {
         testAuthenticationClearsSavedPaymentData { interactor, launcher, email ->
-            interactor.authenticate(launcher, email)
+            interactor.authenticate(launcher, email, phoneNumber = null, content = null)
         }
     }
 
