@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
-import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationEvent
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
@@ -41,38 +40,39 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     )
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(InvocationSource.Merchant, paymentSelection)
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            paymentSelection = paymentSelection,
+        )
     }
 
     fun onExpressCheckoutElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(
-            InvocationSource.ExpressCheckoutElement,
-            paymentSelection,
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            paymentSelection = paymentSelection,
         )
     }
 
     suspend fun reportConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                val context = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
+                val confirmationContext = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
 
-                if (context != null) {
-                    reportConfirmationResult(state.result, context)
+                if (confirmationContext != null) {
+                    reportConfirmationResult(state.result, confirmationContext)
                 }
 
-                clearConfirmation()
+                savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
             }
         }
     }
 
     private fun reportConfirmationResult(
         result: ConfirmationHandler.Result,
-        context: CheckoutConfirmationContext,
+        confirmationContext: CheckoutConfirmationContext,
     ) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
-                    context = context,
+                    confirmationContext = confirmationContext,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
                     deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     intentId = result.intent.id,
@@ -81,7 +81,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
                 reportEvent(
                     CheckoutConfirmationEvent.Failed(
-                        context = context,
+                        confirmationContext = confirmationContext,
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
                         error = error,
                     )
@@ -104,20 +104,6 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                 )
             )
         }
-    }
-
-    private fun saveConfirmation(
-        invocationSource: InvocationSource,
-        paymentSelection: PaymentSelection,
-    ) {
-        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
-            invocationSource = invocationSource,
-            paymentSelection = paymentSelection,
-        )
-    }
-
-    private fun clearConfirmation() {
-        savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
     }
 
     private companion object {

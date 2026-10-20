@@ -11,7 +11,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
     abstract val params: Map<String, Any?>
 
     class Succeeded(
-        context: CheckoutConfirmationContext,
+        confirmationContext: CheckoutConfirmationContext,
         duration: Duration?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intentId: String?,
@@ -21,14 +21,14 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             mode = EventReporter.Mode.Embedded,
             result = PaymentSheetEvent.Payment.Result.Success,
             duration = duration,
-            paymentSelection = context.paymentSelection,
+            paymentSelection = confirmationContext.paymentSelection,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
             intentId = intentId,
         ).params
     }
 
     class Failed(
-        context: CheckoutConfirmationContext,
+        confirmationContext: CheckoutConfirmationContext,
         duration: Duration?,
         error: PaymentSheetConfirmationError,
     ) : CheckoutConfirmationEvent() {
@@ -37,7 +37,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             mode = EventReporter.Mode.Embedded,
             result = PaymentSheetEvent.Payment.Result.Failure(error),
             duration = duration,
-            paymentSelection = context.paymentSelection,
+            paymentSelection = confirmationContext.paymentSelection,
             deferredIntentConfirmationType = null,
             intentId = null,
         ).params
