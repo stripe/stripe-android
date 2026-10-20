@@ -39,6 +39,7 @@ internal fun runGooglePayLauncherTest(
     result: GooglePayLauncher.Result = GooglePayLauncher.Result.Completed,
     integrationTypes: List<LauncherIntegrationType> = LauncherIntegrationType.entries,
     expectResult: Boolean = true,
+    publishableKey: String? = null,
     block: (ComponentActivity, GooglePayLauncher) -> Unit,
 ) {
     for (integrationType in integrationTypes) {
@@ -47,6 +48,7 @@ internal fun runGooglePayLauncherTest(
             isReady = isReady,
             result = result,
             verifyResult = expectResult,
+            publishableKey = publishableKey,
             block = block,
         )
     }
@@ -57,6 +59,7 @@ private fun runGooglePayLauncherTest(
     isReady: Boolean,
     result: GooglePayLauncher.Result,
     verifyResult: Boolean,
+    publishableKey: String? = null,
     block: (ComponentActivity, GooglePayLauncher) -> Unit,
 ) {
     val readyCallback = mock<GooglePayLauncher.ReadyCallback>()
@@ -102,6 +105,7 @@ private fun runGooglePayLauncherTest(
                             config = defaultConfig,
                             readyCallback = readyCallback,
                             resultCallback = resultCallback,
+                            publishableKey = publishableKey,
                         )
                     }
                 }
