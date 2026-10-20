@@ -66,17 +66,9 @@ internal data class VerificationPage(
     /* If true, the SDK will skip rendering a success page at the end of the flow */
     @SerialName("skip_success_page")
     val skipSuccessPage: Boolean = false,
-    @SerialName("networking_data")
-    val networkingData: VerificationPageNetworkingData?,
-    @SerialName("provided_details")
-    val providedDetails: VerificationPageProvidedDetails?,
-    @SerialName("merchant_publishable_key")
-    val merchantPublishableKey: String?,
     @SerialName("networked_identity")
-    val networkedIdentity: VerificationPageNetworkedIdentity?
+    val networkedIdentity: VerificationPageNetworkedIdentity? = null
 ) : Parcelable {
-    override fun toString(): String = "VerificationPage(status=$status, submitted=$submitted)"
-
     @Serializable
     internal enum class Status {
         @SerialName("canceled")

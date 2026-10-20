@@ -46,12 +46,14 @@ internal fun InitialLoadingScreen(
         LaunchedEffect(Unit) {
             if (it.isUnsupportedClient()) {
                 fallbackUrlLauncher.launchFallbackUrl(it.fallbackUrl)
+            } else if (identityViewModel.resumeNetworkedIdentity(navController)) {
+                // Resuming submits the verification and navigates from the result.
             } else if (!it.livemode) {
                 navController.navigateTo(DebugDestination)
             } else {
-                if (!identityViewModel.tryNavigateToNetworkedIdentity(it, null, navController)) {
-                    navController.navigateTo(it.requirements.missing.nextDestination(context))
-                }
+                navController.navigateTo(
+                    it.requirements.missing.nextDestination(context)
+                )
             }
         }
     }

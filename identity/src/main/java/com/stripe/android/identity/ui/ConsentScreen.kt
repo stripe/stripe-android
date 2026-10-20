@@ -1,15 +1,26 @@
 package com.stripe.android.identity.ui
 
 import android.net.Uri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -36,6 +49,8 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
+import com.stripe.android.identity.networked.NetworkedIdentityEntry
+import com.stripe.android.identity.networked.NetworkedIdentityViewModel
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
@@ -46,6 +61,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 internal const val TITLE_TAG = "Title"
 internal const val SUBTITLE_TAG = "Subtitle"
@@ -55,11 +71,16 @@ internal const val ACCEPT_BUTTON_TAG = "Accept"
 internal const val DECLINE_BUTTON_TAG = "Decline"
 internal const val LOADING_SCREEN_TAG = "Loading"
 internal const val SCROLLABLE_COLUMN_TAG = "ScrollableColumn"
+internal const val LINK_SAVED_ID_CHIP_TAG = "LinkSavedIdChip"
+internal const val LINK_CONTINUE_BUTTON_TAG = "LinkContinue"
+internal const val LINK_MANUAL_BUTTON_TAG = "LinkManual"
 
+@Suppress("LongMethod")
 @Composable
 internal fun ConsentScreen(
     navController: NavController,
-    identityViewModel: IdentityViewModel
+    identityViewModel: IdentityViewModel,
+    networkedIdentityViewModel: NetworkedIdentityViewModel?
 ) {
     val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
     val context = LocalContext.current
@@ -94,8 +115,15 @@ internal fun ConsentScreen(
             hideBrandingHeader = identityViewModel.verificationArgs.biometricConsent?.hideBrandingHeader == true,
             hideDeclineButton = identityViewModel.verificationArgs.biometricConsent?.hideDeclineButton == true,
             showStripeLogo = !verificationPage.isStripe,
+            linkEntry = networkedIdentityViewModel?.entry?.collectAsState()?.value?.takeIf { it.offersReuse },
+            onContinueWithLink = { networkedIdentityViewModel?.startReuse() },
+            onManualCapture = { networkedIdentityViewModel?.chooseManualCaptureFromIntro() },
             onConsentAgreed = {
                 coroutineScope.launch {
+                    if (networkedIdentityViewModel != null) {
+                        identityViewModel.acceptConsentAfterNetworkedIdentity(navController)
+                        return@launch
+                    }
                     identityViewModel.postVerificationPageDataAndMaybeNavigate(
                         navController,
                         CollectedDataParam(
@@ -131,6 +159,9 @@ private fun SuccessUI(
     hideBrandingHeader: Boolean,
     hideDeclineButton: Boolean,
     showStripeLogo: Boolean = true,
+    linkEntry: NetworkedIdentityEntry?,
+    onContinueWithLink: () -> Unit,
+    onManualCapture: () -> Unit,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
 ) {
@@ -171,6 +202,7 @@ private fun SuccessUI(
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
         var declineState by remember { mutableStateOf(LoadingButtonState.Idle) }
+        var linkEntryVisible by remember(linkEntry) { mutableStateOf(linkEntry != null) }
 
         var scrolledToBottom by remember { mutableStateOf(false) }
         LaunchedEffect(scrollState.value) {
@@ -179,26 +211,58 @@ private fun SuccessUI(
             }
         }
 
-        LoadingButton(
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .semantics { testTag = ACCEPT_BUTTON_TAG },
-            text =
-            if (scrolledToBottom) {
-                consentPage.acceptButtonText
-            } else {
-                consentPage.scrollToContinueButtonText
-            },
-            uppercase = true,
-            state = if (scrolledToBottom) {
-                acceptState
-            } else {
-                LoadingButtonState.Disabled
+        // Without a saved document found for this email there's no chip, only the Link button.
+        linkEntry?.savedIdEmail?.takeIf { linkEntryVisible }?.let { email ->
+            LinkSavedIdChip(email = email, onDismiss = { linkEntryVisible = false })
+        }
+        if (scrolledToBottom && linkEntry != null && linkEntryVisible) {
+            // Networked Identity "Integrated on intro": sharing a saved ID also accepts consent, and only
+            // starts from this explicit tap.
+            LoadingButton(
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .semantics { testTag = LINK_CONTINUE_BUTTON_TAG },
+                text = stringResource(R.string.stripe_identity_link_continue_with_link),
+                uppercase = true,
+                state = acceptState
+            ) {
+                onContinueWithLink()
             }
-        ) {
-            acceptState = LoadingButtonState.Loading
-            declineState = LoadingButtonState.Disabled
-            onConsentAgreed()
+
+            LoadingTextButton(
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .semantics { testTag = LINK_MANUAL_BUTTON_TAG },
+                text = stringResource(R.string.stripe_identity_link_manual_instead),
+                uppercase = true,
+                state = if (acceptState == LoadingButtonState.Loading) LoadingButtonState.Disabled else acceptState
+            ) {
+                acceptState = LoadingButtonState.Loading
+                declineState = LoadingButtonState.Disabled
+                onManualCapture()
+            }
+        } else {
+            LoadingButton(
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .semantics { testTag = ACCEPT_BUTTON_TAG },
+                text =
+                if (scrolledToBottom) {
+                    consentPage.acceptButtonText
+                } else {
+                    consentPage.scrollToContinueButtonText
+                },
+                uppercase = true,
+                state = if (scrolledToBottom) {
+                    acceptState
+                } else {
+                    LoadingButtonState.Disabled
+                }
+            ) {
+                acceptState = LoadingButtonState.Loading
+                declineState = LoadingButtonState.Disabled
+                onConsentAgreed()
+            }
         }
 
         if (!hideDeclineButton) {
@@ -251,6 +315,38 @@ private fun ConsentPrivacyPolicy(
     }
 }
 
+@Composable
+private fun LinkSavedIdChip(email: String, onDismiss: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+            .border(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+            .padding(start = 12.dp)
+            .testTag(LINK_SAVED_ID_CHIP_TAG),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(PaymentSheetR.drawable.stripe_link_logo),
+            contentDescription = stringResource(R.string.stripe_identity_link),
+            modifier = Modifier.width(40.dp).height(16.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(R.string.stripe_identity_link_saved_id_with_email, email),
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = onDismiss) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_close),
+                contentDescription = stringResource(R.string.stripe_identity_link_dismiss),
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 @ExperimentalMaterialApi
@@ -292,6 +388,9 @@ internal fun ConsentPreview() {
             hideBrandingHeader = false,
             hideDeclineButton = false,
             bottomSheets = mapOf(),
+            linkEntry = null,
+            onContinueWithLink = {},
+            onManualCapture = {},
             onConsentAgreed = {},
             onConsentDeclined = {}
         )
