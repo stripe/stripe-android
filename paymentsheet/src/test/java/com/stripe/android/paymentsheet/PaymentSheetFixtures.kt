@@ -253,6 +253,7 @@ internal object PaymentSheetFixtures {
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
+            prefillEmail = null,
             billingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(
                     line1 = "123 Main Street",

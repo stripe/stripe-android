@@ -112,7 +112,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val defaultEmail: String? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.email
-    } else if (collectingEmail || collectionConfiguration.attachDefaultsToPaymentMethod) {
+    } else if (collectingEmail) {
+        args.formArgs.prefillEmail ?: defaultBillingDetails?.email
+    } else if (collectionConfiguration.attachDefaultsToPaymentMethod) {
         defaultBillingDetails?.email
     } else {
         null

@@ -323,6 +323,7 @@ internal object TestFactory {
     val LINK_WALLET_SECONDARY_BUTTON_LABEL = resolvableString(R.string.stripe_wallet_pay_another_way)
 
     val CARD_FORM_ARGS = FormArguments(
+        prefillEmail = null,
         paymentMethodCode = PaymentMethod.Type.Card.code,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         merchantName = "Example, Inc.",

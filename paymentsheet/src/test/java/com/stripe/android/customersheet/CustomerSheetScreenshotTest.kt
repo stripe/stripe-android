@@ -160,6 +160,7 @@ internal class CustomerSheetScreenshotTest {
                 )
             ) ?: listOf(),
             formArguments = FormArguments(
+                prefillEmail = null,
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = "",

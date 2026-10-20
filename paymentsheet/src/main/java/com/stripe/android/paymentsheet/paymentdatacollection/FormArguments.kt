@@ -17,6 +17,7 @@ internal data class FormArguments(
     val merchantName: String,
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
+    val prefillEmail: String?,
     val shippingDetails: AddressDetails? = null,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior?,
     val hasIntentToSetup: Boolean,
