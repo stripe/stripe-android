@@ -60,6 +60,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
 
             validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
+            validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
@@ -85,6 +89,11 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
             validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "link"),
+                analyticsPayloadField("link_context", "wallet"),
+            )
+            validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
@@ -107,6 +116,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
             networkRule.checkoutInit()
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "google_pay"),
@@ -133,6 +146,11 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateAnalyticsRequest(
                 eventName = "link.popup.error",
                 analyticsPayloadField("error_message", "unknown"),
+            )
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "link"),
+                analyticsPayloadField("link_context", "wallet"),
             )
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
@@ -200,6 +218,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
             validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
+            validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
@@ -248,6 +270,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
             validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "google_pay"),
+            )
+            validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
@@ -282,6 +308,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.checkoutInit(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
+            )
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.started",
+                analyticsPayloadField("selected_lpm", "google_pay"),
             )
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",

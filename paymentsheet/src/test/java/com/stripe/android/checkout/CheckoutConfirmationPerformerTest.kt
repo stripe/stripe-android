@@ -59,6 +59,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<GooglePayConfirmationOption>()
+            awaitAnalyticsEvent("checkout_elements.confirm.started")
         }
 
     @Test
@@ -143,6 +144,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -155,6 +157,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -184,6 +187,7 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -240,6 +244,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(operationCoordinator.isUpdating.value).isFalse()
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
     }
 
     @Test
@@ -248,6 +253,7 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         stateHolder.state = linkState()
 
         performer.confirm()
@@ -257,7 +263,7 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
                 "event" to "checkout_elements.confirm.succeeded",
@@ -289,6 +295,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
@@ -303,6 +310,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         val args = confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
@@ -314,6 +322,7 @@ internal class CheckoutConfirmationPerformerTest {
 
         val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
             as PaymentMethodConfirmationOption.Saved
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(option.hasAcknowledgedSepaMandate).isFalse()
     }
 
@@ -325,6 +334,7 @@ internal class CheckoutConfirmationPerformerTest {
 
         val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
             as PaymentMethodConfirmationOption.Saved
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         assertThat(option.hasAcknowledgedSepaMandate).isTrue()
     }
 
@@ -334,11 +344,12 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+        awaitAnalyticsEvent("checkout_elements.confirm.started")
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
                 "event" to "checkout_elements.confirm.succeeded",
@@ -492,6 +503,12 @@ internal class CheckoutConfirmationPerformerTest {
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
         val testScheduler = testScope.testScheduler
+
+        suspend fun awaitAnalyticsEvent(expectedEvent: String): Map<String, *> {
+            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
+            assertThat(params["event"]).isEqualTo(expectedEvent)
+            return params
+        }
 
         suspend fun assertRejection(message: String) {
             testScheduler.runCurrent()
