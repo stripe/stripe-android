@@ -494,15 +494,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             logPaymentMethodMessagingExposure(pmMetadata)
         }
 
-        if (reportLoadingAnalytics) {
-            reportSuccessfulLoad(
-                elementsSession = elementsSession,
-                state = state,
-                isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                publishableKey = apiConfiguration.publishableKey,
-            )
-        }
+        reportSuccessfulLoad(
+            elementsSession = elementsSession,
+            state = state,
+            isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            publishableKey = apiConfiguration.publishableKey,
+            reportLoadingAnalytics = reportLoadingAnalytics,
+        )
 
         state
     }
@@ -902,20 +901,27 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isReloadingAfterProcessDeath: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         publishableKey: String,
+        reportLoadingAnalytics: Boolean,
     ) {
-        elementsSession.sessionsError?.let { sessionsError ->
-            eventReporter.onElementsSessionLoadFailed(sessionsError)
+        if (reportLoadingAnalytics) {
+            elementsSession.sessionsError?.let { sessionsError ->
+                eventReporter.onElementsSessionLoadFailed(sessionsError)
+            }
         }
 
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
-            eventReporter.onLoadFailed(state.validationError, publishableKey)
-        } else {
+            if (reportLoadingAnalytics) {
+                eventReporter.onLoadFailed(state.validationError, publishableKey)
+            }
+        } else if (reportLoadingAnalytics) {
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             )
+        } else {
+            durationProvider.start(DurationProvider.Key.Checkout)
         }
     }
 

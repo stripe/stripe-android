@@ -283,7 +283,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
-        val result = createPaymentElementLoader().load(
+        val durationProvider = FakeDurationProvider()
+        val result = createPaymentElementLoader(durationProvider = durationProvider).load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
@@ -308,6 +309,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         expectNoLoadingEvents()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, true))).isFalse()
     }
 
     @Test
@@ -363,7 +365,8 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `CheckoutSession Express Checkout Element load does not report loading analytics`() = runScenario {
-        val result = createPaymentElementLoader().load(
+        val durationProvider = FakeDurationProvider()
+        val result = createPaymentElementLoader(durationProvider = durationProvider).load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
@@ -378,6 +381,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.isSuccess).isTrue()
         consumeLoadingEvents()
         expectNoLoadingEvents()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, true))).isTrue()
     }
 
     @Test
