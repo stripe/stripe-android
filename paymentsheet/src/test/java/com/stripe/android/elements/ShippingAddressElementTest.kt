@@ -1,4 +1,7 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(
+    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+    com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
+)
 
 package com.stripe.android.elements
 
@@ -562,6 +565,10 @@ internal class ShippingAddressElementTest {
     private fun assertAppearance(appearance: PaymentSheet.Appearance) {
         assertFormColors(appearance)
         assertThat(appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+        assertThat(appearance.shapes.cornerRadiusDp).isEqualTo(16f)
+        assertThat(appearance.shapes.bottomSheetCornerRadiusDp).isEqualTo(24f)
+        assertThat(appearance.typography.fontResId).isEqualTo(789)
+        assertThat(appearance.typography.custom.h1?.fontFamily).isEqualTo(456)
         assertPrimaryButton(appearance)
         assertThat(appearance.formInsetValues).isEqualTo(
             PaymentSheet.Insets(
@@ -642,6 +649,20 @@ internal class ShippingAddressElementTest {
         .colorsLight(configuredLightColors())
         .colorsDark(configuredDarkColors())
         .themeMode(ShippingAddressElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+        .shapes(
+            ShippingAddressElement.Configuration.Appearance.Shapes()
+                .cornerRadiusDp(16f)
+                .bottomSheetCornerRadiusDp(24f)
+        )
+        .typography(
+            ShippingAddressElement.Configuration.Appearance.Typography()
+                .fontResId(789)
+                .custom(
+                    ShippingAddressElement.Configuration.Appearance.Typography.Custom().h1(
+                        ShippingAddressElement.Configuration.Appearance.Typography.Font().fontFamily(456)
+                    )
+                )
+        )
         .primaryButton(configuredPrimaryButton())
         .formInsetValues(
             ShippingAddressElement.Configuration.Appearance.Insets(1f, 2f, 3f, 4f)

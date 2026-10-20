@@ -28,6 +28,8 @@ internal fun ShippingAddressElement.Configuration.Appearance.State.asPaymentShee
         .colorsLight(colorsLight.asPaymentSheet())
         .colorsDark(colorsDark.asPaymentSheet())
         .themeMode(themeMode.asPaymentSheet())
+        .shapes(shapes.asPaymentSheet())
+        .typography(typography.asPaymentSheet())
         .primaryButton(primaryButton.asPaymentSheet())
         .formInsetValues(formInsetValues.asPaymentSheet())
         .build()
@@ -76,6 +78,28 @@ private fun ShippingAddressElement.Configuration.Appearance.Colors.State.asPayme
         placeholderText = placeholderText,
         appBarIcon = appBarIcon,
         error = error,
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.Shapes.State.asPaymentSheet(): PaymentSheet.Shapes =
+    PaymentSheet.Shapes(
+        cornerRadiusDp = cornerRadiusDp,
+        borderStrokeWidthDp = borderStrokeWidthDp,
+        bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp,
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.Typography.State.asPaymentSheet(): PaymentSheet.Typography =
+    PaymentSheet.Typography(
+        sizeScaleFactor = sizeScaleFactor,
+        fontResId = fontResId,
+        custom = PaymentSheet.Typography.Custom(h1 = custom.h1?.asPaymentSheet()),
+    )
+
+private fun ShippingAddressElement.Configuration.Appearance.Typography.Font.State.asPaymentSheet():
+    PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
+        fontFamily = fontFamily,
+        fontSizeSp = fontSizeSp,
+        fontWeight = fontWeight,
+        letterSpacingSp = letterSpacingSp,
     )
 
 private fun ShippingAddressElement.Configuration.Appearance.PrimaryButton.State.asPaymentSheet():
