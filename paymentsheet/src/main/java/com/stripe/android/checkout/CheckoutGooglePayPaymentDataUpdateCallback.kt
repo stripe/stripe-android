@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -24,6 +25,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
+        Log.d("xkcd", "received callback from trigger: ${paymentDataUpdate.callbackTrigger?.name}")
         val currentState = stateHolder.state ?: run {
             return notConfiguredResponse()
         }
@@ -91,6 +93,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> continue
                 is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
             }
+
+            Log.d("xkcd", "updating address: $addressSource: in ${address.city}, ${address.country}")
 
             response = taxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = response,
