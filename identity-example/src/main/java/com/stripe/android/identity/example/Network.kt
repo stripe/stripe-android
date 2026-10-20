@@ -52,9 +52,16 @@ internal data class VerificationSessionCreationRequest(
 
     @Serializable
     data class ProvidedDetails(
-        @SerialName("phone") val phone: String? = null
+        @SerialName("phone") val phone: String? = null,
+        @SerialName("email") val email: String? = null
     )
 }
+
+/** A provided email reaches Networked Identity as the VerificationPage's lookup email. */
+internal fun VerificationSessionCreationRequest.ProvidedDetails?.withEmail(
+    email: String?
+): VerificationSessionCreationRequest.ProvidedDetails? =
+    if (email == null) this else (this ?: VerificationSessionCreationRequest.ProvidedDetails()).copy(email = email)
 
 internal enum class DocumentType {
     @SerialName("driving_license")

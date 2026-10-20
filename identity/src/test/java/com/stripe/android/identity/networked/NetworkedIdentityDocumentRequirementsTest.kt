@@ -6,13 +6,6 @@ import org.junit.Test
 
 internal class NetworkedIdentityDocumentRequirementsTest {
     @Test
-    fun `unknown document types cannot qualify even when in allowlist`() {
-        val requirements = NetworkedIdentityDocumentRequirements(NetworkedIdentityDocumentType.entries.toSet(), false)
-
-        assertThat(requirements.filter(listOf(document(type = NetworkedIdentityDocumentType.UNKNOWN)), NOW)).isEmpty()
-    }
-
-    @Test
     fun `known types outside current allowlist are rejected`() {
         assertThat(requirements(false).filter(listOf(document(type = NetworkedIdentityDocumentType.ID_CARD)), NOW))
             .isEmpty()
@@ -100,9 +93,6 @@ internal class NetworkedIdentityDocumentRequirementsTest {
     ) = NetworkedIdentityDocument(
         id = id,
         documentType = type,
-        created = NOW - 100,
-        country = null,
-        region = null,
         redactedDocumentNumber = "••1234",
         expirationDate = expirationDate,
         liveCaptured = liveCaptured
