@@ -16,6 +16,7 @@ class NetworkedIdentityConfigTest {
         assertThat(config.route).isEqualTo(NetworkedIdentityRoute.Reuse)
         assertThat(config.merchantPublishableKey).isEqualTo("pk_page")
         assertThat(config.merchantEmail).isEqualTo("networked@example.com")
+        assertThat(config.seedSavedDocuments).isFalse()
         assertThat(config.saveEnabled).isTrue()
         assertThat(config.savedDocumentAvailable).isTrue()
         assertThat(config.phoneNumberAutofillHint).isEqualTo("+15555551234")
@@ -39,6 +40,7 @@ class NetworkedIdentityConfigTest {
         assertThat(config.route).isEqualTo(NetworkedIdentityRoute.Save)
         assertThat(config.merchantPublishableKey).isEqualTo("pk_override")
         assertThat(config.merchantEmail).isEqualTo("person@example.com")
+        assertThat(config.seedSavedDocuments).isTrue()
         assertThat(config.saveEnabled).isTrue()
         assertThat(config.savedDocumentAvailable).isFalse()
     }
@@ -77,6 +79,7 @@ class NetworkedIdentityConfigTest {
             debugMerchantPublishableKey = null,
             debugProvidedEmail = null,
             debugRoute = null,
+            debugSeedSavedDocuments = false,
         )
     }
 
@@ -85,5 +88,6 @@ class NetworkedIdentityConfigTest {
         debugMerchantPublishableKey = "pk_override",
         debugProvidedEmail = "person@example.com",
         debugRoute = route,
+        debugSeedSavedDocuments = true,
     )
 }

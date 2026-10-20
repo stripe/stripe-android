@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,6 +59,13 @@ private fun DebugFields(state: NetworkedIdentityExampleState, onStateChanged: St
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Switch(
+            checked = state.seedSavedDocuments,
+            onCheckedChange = { value -> onStateChanged { it.copy(seedSavedDocuments = value) } }
+        )
+        Text(text = stringResource(R.string.ni_seed_docs))
+    }
 }
 
 @Composable

@@ -98,6 +98,7 @@ internal fun niConfig(
     merchantPublishableKey = merchantPublishableKey,
     merchantEmail = merchantEmail,
     phoneNumberAutofillHint = phoneNumberAutofillHint,
+    seedSavedDocuments = false,
 )
 
 internal fun niHandoff() = IdentityVerificationSheet.Configuration.LinkSessionHandoff(

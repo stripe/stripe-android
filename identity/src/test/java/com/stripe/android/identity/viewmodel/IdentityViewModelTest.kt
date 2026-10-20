@@ -547,6 +547,7 @@ internal class IdentityViewModelTest {
         debugMerchantPublishableKey = "pk_test_merchant",
         debugProvidedEmail = null,
         debugRoute = null,
+        debugSeedSavedDocuments = false,
     )
 
     private fun resumedPage(direction: String) = SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE.copy(

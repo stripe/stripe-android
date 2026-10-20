@@ -101,8 +101,13 @@ internal class NetworkedIdentityViewModel(
             )
             val coordinator = NetworkedIdentityCoordinator(
                 linkSession = LinkControllerNetworkedIdentityLinkSession(application, linkHost),
-                repository = DefaultNetworkedIdentityRepository.create(workContext),
-                actions = actions,
+                repository = if (config.seedSavedDocuments) {
+                    SeededDocumentsNetworkedIdentityRepository(::nowSeconds)
+                } else {
+                    DefaultNetworkedIdentityRepository.create(workContext)
+                },
+                // The seeded Identity repository and these actions share the simulated session.
+                actions = (identityRepository as? SeededDocumentsIdentityRepository)?.actions(actions) ?: actions,
                 documentRequirements = NetworkedIdentityDocumentRequirements.fromVerificationPage(verificationPage),
                 config = config,
                 handoff = handoff,

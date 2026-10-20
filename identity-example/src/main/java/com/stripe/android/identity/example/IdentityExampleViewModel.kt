@@ -39,6 +39,7 @@ private const val ONRAMP_TEST_PUBLISHABLE_KEY =
  */
 internal data class NetworkedIdentityExampleState(
     val merchantPublishableKey: String = ONRAMP_TEST_PUBLISHABLE_KEY,
+    val seedSavedDocuments: Boolean = true,
     val linkEmail: String = "",
     val busy: Boolean = false,
     val status: String? = null,
@@ -126,6 +127,7 @@ internal class IdentityExampleViewModel(
             debugProvidedEmail = state.linkEmail.trim().ifEmpty { null },
             // The playground supplies eligibility until its test sessions return the v8 fields.
             debugRoute = "reuse",
+            debugSeedSavedDocuments = state.seedSavedDocuments,
         )
     }
 

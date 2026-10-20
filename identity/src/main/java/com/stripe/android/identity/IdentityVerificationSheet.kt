@@ -79,6 +79,8 @@ interface IdentityVerificationSheet {
             val debugProvidedEmail: String?,
             /** Debug-only route override: "reuse", "save", "none", or null to use the VerificationPage. */
             val debugRoute: String?,
+            /** Debug-only: sample saved documents simulate reuse and saving for the playground. */
+            val debugSeedSavedDocuments: Boolean,
         ) : Parcelable
 
         /**

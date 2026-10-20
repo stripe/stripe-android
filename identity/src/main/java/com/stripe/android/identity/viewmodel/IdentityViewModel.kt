@@ -64,6 +64,7 @@ import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networked.NetworkedIdentityEntry
 import com.stripe.android.identity.networked.NetworkedIdentityOutcome
 import com.stripe.android.identity.networked.NetworkedIdentityState
+import com.stripe.android.identity.networked.SeededDocumentsIdentityRepository
 import com.stripe.android.identity.networked.networkedIdentityConfig
 import com.stripe.android.identity.networked.toVerificationPageData
 import com.stripe.android.identity.networking.IdentityModelFetcher
@@ -2636,7 +2637,12 @@ internal class IdentityViewModel(
             return IdentityViewModel(
                 applicationSupplier(),
                 subcomponent.verificationArgs,
-                subcomponent.identityRepository,
+                // Debug-only: sample saved documents simulate reuse and saving for the playground.
+                if (subcomponent.verificationArgs.networkedIdentity?.debugSeedSavedDocuments == true) {
+                    SeededDocumentsIdentityRepository(subcomponent.identityRepository)
+                } else {
+                    subcomponent.identityRepository
+                },
                 subcomponent.identityModelFetcher,
                 subcomponent.identityIO,
                 subcomponent.identityAnalyticsRequestFactory,

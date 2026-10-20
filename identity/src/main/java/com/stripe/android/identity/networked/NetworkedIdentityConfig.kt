@@ -14,6 +14,7 @@ internal data class NetworkedIdentityConfig(
     val merchantPublishableKey: String?,
     val merchantEmail: String?,
     val phoneNumberAutofillHint: String?,
+    val seedSavedDocuments: Boolean,
 ) {
     internal companion object {
         fun from(
@@ -38,6 +39,8 @@ internal data class NetworkedIdentityConfig(
                 merchantPublishableKey = options.debugMerchantPublishableKey ?: page.merchantPublishableKey,
                 merchantEmail = options.debugProvidedEmail ?: page.networkedIdentity?.lookupEmail,
                 phoneNumberAutofillHint = page.networkedIdentity?.phoneNumberAutofillHint,
+                // #TODO - Networked Identity [NI-Contract]: test-mode Link accounts with saved documents.
+                seedSavedDocuments = options.debugSeedSavedDocuments,
             )
         }
     }
