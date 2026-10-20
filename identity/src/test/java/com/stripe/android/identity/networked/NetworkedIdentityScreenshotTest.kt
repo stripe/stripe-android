@@ -2,54 +2,48 @@ package com.stripe.android.identity.networked
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.uicore.elements.EmailConfig
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 /**
- * Android equivalents of the eight iOS NI references. Pixel 6 is the repository's supported
- * Paparazzi device; fixed viewport height exercises centered content, footer and scrolling.
+ * Pixel 6 is the repository's supported Paparazzi device; fixed viewport height exercises centered
+ * content, footer and scrolling.
  */
 internal class NetworkedIdentityScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(SystemAppearance.entries, FontSize.entries)
 
     @Test
-    fun blankEmail() = snapshot(NetworkedIdentityState.CollectEmail)
-
-    @Test
-    fun validEmail() = snapshot(NetworkedIdentityState.CollectEmail, email = "jane.diaz@example.com")
-
-    @Test
-    fun awaitingOtp() = snapshot(
-        NetworkedIdentityState.AwaitingOtp(
-            redactedPhoneNumber = "(***) *** **34",
-            invalidCode = false,
-            otpGeneration = 1,
-        )
+    fun saveFailed() = snapshot(
+        NetworkedIdentityState.SaveFailed(details = "The request could not be completed. (resource_missing)"),
+        mode = NetworkedIdentityMode.Save,
     )
 
     @Test
-    fun invalidOtp() = snapshot(
-        NetworkedIdentityState.AwaitingOtp(
-            redactedPhoneNumber = "(***) *** **34",
-            invalidCode = true,
-            otpGeneration = 1,
-        )
-    )
+    fun saveOffer() {
+        paparazziRule.snapshot {
+            val identityViewModel = mock<IdentityViewModel> {
+                on { verificationPageSubmit } doReturn MutableStateFlow(Resource.idle())
+            }
+            NetworkedIdentitySaveScreen(mock(), identityViewModel, niViewModel(includesSelfie = true))
+        }
+    }
 
     @Test
-    fun resendingOtp() = snapshot(
-        NetworkedIdentityState.OtpResendPending(
-            redactedPhoneNumber = "(***) *** **34",
-            otpGeneration = 2,
-        )
+    fun savePrepared() = snapshot(
+        NetworkedIdentityState.SavePrepared,
+        mode = NetworkedIdentityMode.Save,
+        includesSelfie = true,
     )
 
     @Test
@@ -59,9 +53,6 @@ internal class NetworkedIdentityScreenshotTest {
                 NetworkedIdentityDocument(
                     id = "license",
                     documentType = NetworkedIdentityDocumentType.DRIVING_LICENSE,
-                    created = 1,
-                    country = "US",
-                    region = "CA",
                     redactedDocumentNumber = "•••• 4242",
                     expirationDate = null,
                     liveCaptured = true,
@@ -69,9 +60,6 @@ internal class NetworkedIdentityScreenshotTest {
                 NetworkedIdentityDocument(
                     id = "passport",
                     documentType = NetworkedIdentityDocumentType.PASSPORT,
-                    created = 1,
-                    country = "US",
-                    region = null,
                     redactedDocumentNumber = "•••• 6789",
                     expirationDate = null,
                     liveCaptured = true,
@@ -81,27 +69,24 @@ internal class NetworkedIdentityScreenshotTest {
         )
     )
 
-    @Test
-    fun attachingSavedDocument() = snapshot(NetworkedIdentityState.AttachmentPending)
-
-    @Test
-    fun skippingNetworkedIdentity() = snapshot(NetworkedIdentityState.SkipPending)
-
-    private fun snapshot(state: NetworkedIdentityState, email: String = "") {
+    private fun snapshot(
+        state: NetworkedIdentityState,
+        mode: NetworkedIdentityMode = NetworkedIdentityMode.Reuse,
+        includesSelfie: Boolean = false,
+    ) {
         paparazziRule.snapshot {
-            val emailController = remember { EmailConfig.createController(initialValue = email) }
             Box(Modifier.height(800.dp)) {
-                NetworkedIdentityScreenContent(
+                NetworkedIdentityScreen(
                     state = state,
-                    emailController = emailController,
-                    supportsDocumentAttachment = true,
-                    onSubmitEmail = {},
-                    onSubmitOtp = {},
-                    onResendOtp = {},
-                    onSelectDocument = {},
-                    onContinueWithDocument = {},
-                    onManualCapture = {},
-                    onCancel = {},
+                    mode = mode,
+                    includesSelfie = includesSelfie,
+                    actions = NetworkedIdentityScreenActions(
+                        onSelectDocument = {},
+                        onShareDocument = {},
+                        onContinue = {},
+                        onManualCapture = {},
+                        onCancel = {},
+                    ),
                 )
             }
         }

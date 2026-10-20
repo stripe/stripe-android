@@ -2,127 +2,148 @@ package com.stripe.android.identity.networked
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.networking.models.NetworkedIdentityRoute
 import com.stripe.android.identity.networking.models.VerificationPageData
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun runNetworkedIdentityScenario(
-    authSessionSecrets: List<String> = emptyList(),
-    withActions: Boolean = false,
-    currentTimeSeconds: () -> Long = { 100L },
+    config: NetworkedIdentityConfig = niConfig(),
+    handoff: IdentityVerificationSheet.Configuration.LinkSessionHandoff? = null,
+    hostAcceptsUpdates: Boolean = true,
     block: suspend NetworkedIdentityTestScenario.() -> Unit
 ) = runTest {
+    val linkSession = FakeNetworkedIdentityLinkSession()
     val repository = FakeNetworkedIdentityRepository()
-    val cancellations = Turbine<Unit>()
-    val fallbacks = Turbine<NetworkedIdentityFallbackReason>()
-    val completions = Turbine<Result<VerificationPageData>>()
     val actions = FakeNetworkedIdentityActions()
-    val coordinator = NetworkedIdentityCoordinator(
-        repository = repository,
-        actions = actions.takeIf { withActions },
-        documentRequirements = NetworkedIdentityDocumentRequirements(
-            allowedDocumentTypes = setOf(NetworkedIdentityDocumentType.PASSPORT),
-            requiresLiveCapture = true
-        ),
-        locale = "en-US",
-        initialAuthSessionSecrets = authSessionSecrets,
-        currentTimeSeconds = currentTimeSeconds,
-        dispatcher = StandardTestDispatcher(testScheduler),
-        onCancel = { cancellations.add(Unit) },
-        onFallback = { fallbacks.add(it) },
-        onComplete = { completions.add(it) }
-    )
-    NetworkedIdentityTestScenario(coordinator, repository, this, cancellations, fallbacks, actions, completions).block()
+    val verificationUpdates = Turbine<VerificationPageData>()
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    val coordinator = niCoordinator(linkSession, repository, actions, config, handoff, dispatcher) {
+        verificationUpdates.add(it)
+        hostAcceptsUpdates
+    }
+    val outcomes = Turbine<NetworkedIdentityOutcome>()
+    backgroundScope.launch(dispatcher) { coordinator.outcomes.collect { outcomes.add(it) } }
+
+    NetworkedIdentityTestScenario(
+        coordinator, linkSession, repository, actions, outcomes, verificationUpdates, this
+    ).block()
+
+    linkSession.ensureAllEventsConsumed()
     repository.ensureAllEventsConsumed()
-    cancellations.ensureAllEventsConsumed()
-    fallbacks.ensureAllEventsConsumed()
     actions.ensureAllEventsConsumed()
-    completions.ensureAllEventsConsumed()
+    outcomes.ensureAllEventsConsumed()
+    verificationUpdates.ensureAllEventsConsumed()
 }
+
+@Suppress("LongParameterList")
+internal fun niCoordinator(
+    linkSession: FakeNetworkedIdentityLinkSession,
+    repository: FakeNetworkedIdentityRepository,
+    actions: FakeNetworkedIdentityActions,
+    config: NetworkedIdentityConfig,
+    handoff: IdentityVerificationSheet.Configuration.LinkSessionHandoff?,
+    dispatcher: CoroutineDispatcher,
+    onVerificationUpdate: (VerificationPageData) -> Boolean,
+) = NetworkedIdentityCoordinator(
+    linkSession = linkSession,
+    repository = repository,
+    actions = actions,
+    documentRequirements = NetworkedIdentityDocumentRequirements(
+        allowedDocumentTypes = setOf(NetworkedIdentityDocumentType.PASSPORT),
+        requiresLiveCapture = true
+    ),
+    config = config,
+    handoff = handoff,
+    merchantDisplayName = "Merchant",
+    currentTimeSeconds = { 100L },
+    onVerificationUpdate = onVerificationUpdate,
+    dispatcher = dispatcher,
+)
+
+/** A ViewModel over fakes whose calls run immediately, for screen tests. */
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun niViewModel(
+    linkSession: FakeNetworkedIdentityLinkSession = FakeNetworkedIdentityLinkSession(),
+    actions: FakeNetworkedIdentityActions = FakeNetworkedIdentityActions(),
+    config: NetworkedIdentityConfig = niConfig(),
+    handoff: IdentityVerificationSheet.Configuration.LinkSessionHandoff? = null,
+    includesSelfie: Boolean = false,
+) = NetworkedIdentityViewModel(
+    niCoordinator(
+        linkSession, FakeNetworkedIdentityRepository(), actions, config, handoff, UnconfinedTestDispatcher()
+    ) { true },
+    includesSelfie,
+)
+
+internal fun niConfig(
+    route: NetworkedIdentityRoute = NetworkedIdentityRoute.Reuse,
+    merchantPublishableKey: String? = "pk_test_merchant",
+    merchantEmail: String? = null,
+    saveEnabled: Boolean = true,
+    savedDocumentAvailable: Boolean = false,
+    phoneNumberAutofillHint: String? = null,
+) = NetworkedIdentityConfig(
+    route = route,
+    saveEnabled = saveEnabled,
+    savedDocumentAvailable = savedDocumentAvailable,
+    merchantPublishableKey = merchantPublishableKey,
+    merchantEmail = merchantEmail,
+    phoneNumberAutofillHint = phoneNumberAutofillHint,
+)
+
+internal fun niHandoff() = IdentityVerificationSheet.Configuration.LinkSessionHandoff(
+    email = "person@example.com",
+    linkSessionKey = "lsk_handoff",
+)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal data class NetworkedIdentityTestScenario(
     val coordinator: NetworkedIdentityCoordinator,
+    val linkSession: FakeNetworkedIdentityLinkSession,
     val repository: FakeNetworkedIdentityRepository,
-    val scope: TestScope,
-    val cancellations: Turbine<Unit>,
-    val fallbacks: Turbine<NetworkedIdentityFallbackReason>,
     val actions: FakeNetworkedIdentityActions,
-    val completions: Turbine<Result<VerificationPageData>>
+    val outcomes: Turbine<NetworkedIdentityOutcome>,
+    val verificationUpdates: Turbine<VerificationPageData>,
+    val scope: TestScope,
 ) {
     fun runCurrent() = scope.runCurrent()
 
-    suspend fun startEmail(
-        found: NetworkedIdentityLookup.Found = niFound()
-    ): FakeNetworkedIdentityRepository.StartCall {
-        coordinator.submitEmail("person@example.com")
+    /** Starts [mode] with a user tap and completes Link configuration. */
+    suspend fun startAndConfigure(mode: NetworkedIdentityMode = NetworkedIdentityMode.Reuse) {
+        when (mode) {
+            NetworkedIdentityMode.Reuse -> coordinator.startReuse()
+            NetworkedIdentityMode.Save -> coordinator.startSave()
+        }
         runCurrent()
-        val lookup = repository.lookupCalls.awaitItem()
-        lookup.response.complete(Result.success(found))
-        runCurrent()
-        return repository.startCalls.awaitItem()
-    }
-
-    suspend fun awaitOtp() {
-        startEmail().response.complete(Result.success(niResponse()))
+        linkSession.configureCalls.awaitItem().response.complete(Result.success(Unit))
         runCurrent()
     }
 
-    suspend fun confirmOtp(): FakeNetworkedIdentityRepository.ConfirmCall {
-        coordinator.submitOtp("123456")
+    /** While Link's own screens are shown: the user signs in as [account]. */
+    suspend fun signInWithLink(account: NetworkedIdentityLinkAccount = niAccount(isVerified = true)) {
+        linkSession.linkUICalls.awaitItem().response.complete(Result.success(account))
         runCurrent()
-        return repository.confirmCalls.awaitItem()
     }
 
-    suspend fun resendOtp(): FakeNetworkedIdentityRepository.StartCall {
-        coordinator.resendOtp()
+    suspend fun reachDocuments(documents: List<NetworkedIdentityDocument> = listOf(niDocument())) {
+        startAndConfigure()
+        signInWithLink()
+        repository.documentCalls.awaitItem().response.complete(Result.success(documents))
         runCurrent()
-        return repository.startCalls.awaitItem()
     }
 
-    suspend fun loadDocuments(): FakeNetworkedIdentityRepository.DocumentCall {
-        awaitOtp()
-        confirmOtp().response.complete(
-            Result.success(
-                niResponse(
-                    clientSecret = "session_confirmed",
-                    verificationSessions = listOf(niSms(state = NetworkedIdentityVerificationState.VERIFIED)),
-                    authSessionClientSecret = "auth_confirmed"
-                )
-            )
-        )
+    suspend fun assertFallback() {
         runCurrent()
-        return repository.documentCalls.awaitItem()
-    }
-
-    suspend fun selectDocument() {
-        loadDocuments().response.complete(Result.success(listOf(niDocument("selected"))))
-        runCurrent()
-        coordinator.selectDocument("selected")
-    }
-
-    suspend fun requestAssociationToken(): FakeNetworkedIdentityRepository.AssociationTokenCall {
-        coordinator.continueWithSelectedDocument()
-        runCurrent()
-        return repository.associationTokenCalls.awaitItem()
-    }
-
-    suspend fun beginAttachment(): FakeNetworkedIdentityActions.TokenCall {
-        selectDocument()
-        requestAssociationToken().response.complete(Result.success(NetworkedIdentityAssociationToken("reuse_token")))
-        runCurrent()
-        return actions.attachCalls.awaitItem()
-    }
-
-    suspend fun assertFallback(reason: NetworkedIdentityFallbackReason, expectLogout: Boolean = true) {
-        runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.FullCaptureFallback(reason))
-        assertThat(fallbacks.awaitItem()).isEqualTo(reason)
-        if (expectLogout) repository.logoutCalls.awaitItem()
-        cancellations.expectNoEvents()
+        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.FullCaptureFallback)
+        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.Fallback)
     }
 }
