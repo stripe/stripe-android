@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.core.exception.InvalidRequestException
@@ -242,10 +243,48 @@ internal class StripePaymentControllerTest {
                 .isEqualTo("example://return_url")
         }
 
+    @Test
+    fun `setup result uses configuration key and result account`() = runTest {
+        val setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+        val clientSecret = requireNotNull(setupIntent.clientSecret)
+        val intent = Intent().putExtras(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                stripeAccountId = ACCOUNT_ID,
+            ).toBundle()
+        )
+
+        controller.getSetupIntentResult(intent).getOrThrow()
+
+        assertThat(stripeRepository.retrieveSetupIntentArgs.awaitItem())
+            .isEqualTo(Triple(clientSecret, REQUEST_OPTIONS, listOf("payment_method")))
+        stripeRepository.retrieveSetupIntentArgs.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `source result uses configuration key and result account`() = runTest {
+        val source = SourceFixtures.SOURCE_CARD
+        val sourceId = requireNotNull(source.id)
+        val clientSecret = requireNotNull(source.clientSecret)
+        val intent = Intent().putExtras(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                sourceId = sourceId,
+                stripeAccountId = ACCOUNT_ID,
+            ).toBundle()
+        )
+
+        controller.getAuthenticateSourceResult(intent).getOrThrow()
+
+        assertThat(stripeRepository.retrieveSourceArgs.awaitItem())
+            .isEqualTo(Triple(sourceId, clientSecret, REQUEST_OPTIONS))
+        stripeRepository.retrieveSourceArgs.ensureAllEventsConsumed()
+    }
+
     private fun createController(): StripePaymentController {
         return StripePaymentController(
             context,
-            { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            ApiKeyFixtures.DEFAULT_API_CONFIG.copy(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             stripeRepository,
             false,
             workContext = testDispatcher,
@@ -261,6 +300,9 @@ internal class StripePaymentControllerTest {
         var cancelPaymentIntentResponse = PaymentIntentFixtures.CANCELLED
         var confirmPaymentIntentResponse = PaymentIntentFixtures.PI_WITH_SHIPPING
 
+        val retrieveSetupIntentArgs = Turbine<Triple<String, ApiRequest.Options, List<String>>>()
+        val retrieveSourceArgs = Turbine<Triple<String, String, ApiRequest.Options>>()
+
         val retrievePaymentIntentArgs =
             mutableListOf<Triple<String, ApiRequest.Options, List<String>>>()
         val cancelPaymentIntentArgs = mutableListOf<Triple<String, String, ApiRequest.Options>>()
@@ -272,6 +314,7 @@ internal class StripePaymentControllerTest {
             options: ApiRequest.Options,
             expandFields: List<String>
         ): Result<SetupIntent> {
+            retrieveSetupIntentArgs.add(Triple(clientSecret, options, expandFields))
             return Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
 
@@ -291,6 +334,7 @@ internal class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options
         ): Result<Source> {
+            retrieveSourceArgs.add(Triple(sourceId, clientSecret, options))
             return Result.success(SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable))
         }
 
@@ -324,7 +368,7 @@ internal class StripePaymentControllerTest {
     }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = "acct_result"
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
