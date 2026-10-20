@@ -157,6 +157,8 @@ internal interface LinkAccountManager {
      */
     suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit>
 
+    suspend fun recordConnectionsConsentAcquired(localizedConsentText: String): Result<Unit>
+
     /**
      * Fetch all saved payment methods for the signed in consumer.
      */

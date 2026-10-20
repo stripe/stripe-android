@@ -42,6 +42,7 @@ internal data class WalletUiState(
     val signupToggleEnabled: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val linkBrand: LinkBrand,
+    val linkPaymentMethodBankAccountDataConsent: String?,
     val isValidating: Boolean = false,
 ) {
 
@@ -62,6 +63,11 @@ internal data class WalletUiState(
             sellerBusinessName = sellerBusinessName,
             signupToggleEnabled = signupToggleEnabled
         )
+
+    val bankAccountDataConsent: String?
+        get() = linkPaymentMethodBankAccountDataConsent?.takeIf {
+            selectedItem is ConsumerPaymentDetails.BankAccount && it.isNotBlank()
+        }
 
     val shouldShowLoadingState: Boolean
         get() = paymentDetailsList.isEmpty()

@@ -231,6 +231,10 @@ internal class ElementsSessionJsonParser(
         val linkSupportedPaymentMethodsOnboardingEnabled = jsonArrayToList(
             jsonArray = json?.optJSONArray(FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED),
         )
+        val linkPaymentMethodBankAccountDataConsent = json
+            ?.optJSONObject(FIELD_LINK_PAYMENT_SESSION_CONTEXT)
+            ?.optString(FIELD_LINK_PAYMENT_METHOD_BANK_ACCOUNT_DATA_CONSENT)
+            ?.takeIf { it.isNotEmpty() }
 
         return ElementsSession.LinkSettings(
             linkFundingSources = jsonArrayToList(linkFundingSources),
@@ -246,6 +250,7 @@ internal class ElementsSessionJsonParser(
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
             linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
+            linkPaymentMethodBankAccountDataConsent = linkPaymentMethodBankAccountDataConsent,
             linkBrand = linkBrand,
         )
     }
@@ -564,6 +569,9 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED =
             "link_supported_payment_methods_onboarding_enabled"
+        private const val FIELD_LINK_PAYMENT_SESSION_CONTEXT = "link_payment_session_context"
+        private const val FIELD_LINK_PAYMENT_METHOD_BANK_ACCOUNT_DATA_CONSENT =
+            "link_payment_method_bank_account_data_consent"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_MERCHANT_LOGO_URL = "merchant_logo_url"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
