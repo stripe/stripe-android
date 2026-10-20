@@ -1,7 +1,9 @@
 package com.stripe.android.checkout
 
+import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -19,16 +21,21 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -58,25 +65,149 @@ internal class CheckoutConfirmationPerformerTest {
         }
 
     @Test
-    fun `confirm does nothing when state is not loaded`() = runScenario(state = null) {
+    fun `confirm fails when state is not loaded`() = runScenario(state = null) {
         performer.confirm()
+        assertRejection("Cannot confirm checkout before it is configured.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `confirm does nothing when there is no selection`() = runScenario(
+    fun `confirm fails when there is no selection`() = runScenario(
         state = CheckoutControllerStateFactory.create(paymentSelection = null),
     ) {
         performer.confirm()
+        assertRejection("Cannot confirm checkout without a selected payment option.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 
     @Test
-    fun `confirm does nothing when the selection cannot be converted to a confirmation option`() = runScenario(
+    fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
         ),
     ) {
         performer.confirm()
+        assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `presenter confirm from background thread delivers rejection on Main`() = runScenario(state = null) {
+        withContext(Dispatchers.IO) {
+            assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
+            presenter.confirm()
+        }
+
+        assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
+        assertRejection("Cannot confirm checkout before it is configured.")
+    }
+
+    @Test
+    fun `confirm checks sheet before validating unloaded state`() = runScenario(
+        state = null,
+        sheetIsOpen = true,
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout while a payment flow is presented.")
+    }
+
+    @Test
+    fun `confirm can retry after state becomes available`() = runScenario(state = null) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout before it is configured.")
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `confirm can retry after a payment option is selected`() = runScenario(
+        state = googlePayState(paymentSelection = null),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout without a selected payment option.")
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `confirm can retry after the payment option becomes confirmable`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `rejected confirmation does not record confirmation analytics`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+        sheetIsOpen = true,
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout while a payment flow is presented.")
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+        testScheduler.runCurrent()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirm checks mutations before validating selection and can retry after mutation`() = runScenario(
+        state = googlePayState(paymentSelection = null),
+    ) {
+        val releaseMutation = CompletableDeferred<Unit>()
+        val mutation = async {
+            operationCoordinator.runMutation {
+                releaseMutation.await()
+                Result.success(Unit)
+            }
+        }
+        testScheduler.runCurrent()
+
+        performer.confirm()
+        assertRejection("Cannot confirm checkout while checkout mutations are in progress.")
+        assertThat(operationCoordinator.isUpdating.value).isTrue()
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        releaseMutation.complete(Unit)
+        mutation.await()
+        testScheduler.runCurrent()
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `rejected repeat confirmation preserves the original payment selection analytics`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
+    ) {
+        performer.confirm()
+        confirmationHandler.startTurbine.awaitItem()
+        stateHolder.state = linkState()
+
+        performer.confirm()
+        assertRejection("Cannot confirm checkout while another confirmation is in progress.")
+        assertThat(operationCoordinator.isUpdating.value).isTrue()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
+        assertThat(request).containsEntry("selected_lpm", "google_pay")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     @Test
@@ -149,8 +280,11 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        assertThat(eventReporter.paymentSuccessCalls.awaitItem().paymentSelection)
-            .isEqualTo(PaymentSelection.GooglePay)
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
+        assertThat(request).containsEntry("selected_lpm", "google_pay")
+        assertThat(request).containsEntry("payment_method_orientation", "horizontal")
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     private fun googlePayState(
@@ -186,9 +320,11 @@ internal class CheckoutConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         statusBarColor: Int? = null,
+        sheetIsOpen: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -196,19 +332,32 @@ internal class CheckoutConfirmationPerformerTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
+        val results = Turbine<CheckoutController.Result>()
+        val resultThreads = Turbine<Thread>()
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
-            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            resultCallback = {},
+            resultCallback = {
+                results.add(it)
+                resultThreads.add(Thread.currentThread())
+            },
             viewModelScope = backgroundScope,
         )
-        val eventReporter = FakeEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
+        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
+        val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -224,28 +373,42 @@ internal class CheckoutConfirmationPerformerTest {
         )
 
         val performerProvider = FakeConfirmationPerformerProvider(performer)
-        val presenter = CheckoutPresenter(
-            paymentElementProvider = Lazy { error("Unexpected payment element access") },
-            currencySelectorElementProvider = Lazy { error("Unexpected currency selector access") },
-            shippingAddressElementProvider = Lazy { error("Unexpected shipping address element access") },
-            expressCheckoutElementProvider = Lazy { error("Unexpected express checkout element access") },
-            checkoutConfirmationPerformerProvider = performerProvider,
-            coroutineScope = backgroundScope,
-        )
+        val presenter = createPresenter(performerProvider, backgroundScope)
 
         Scenario(
             presenter = presenter,
             performerProvider = performerProvider,
             performer = performer,
             confirmationHandler = confirmationHandler,
-            eventReporter = eventReporter,
+            analyticsRequestExecutor = analyticsRequestExecutor,
             stateHolder = stateHolder,
+            operationCoordinator = operationCoordinator,
+            results = results,
+            resultThreads = resultThreads,
+            sessionRefresher = sessionRefresher,
+            testScope = this,
         ).block()
 
+        results.ensureAllEventsConsumed()
+        resultThreads.ensureAllEventsConsumed()
         performerProvider.getCalls.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
-        eventReporter.validate()
+    }
+
+    private fun createPresenter(
+        performerProvider: Provider<CheckoutConfirmationPerformer>,
+        coroutineScope: CoroutineScope,
+    ): CheckoutPresenter {
+        return CheckoutPresenter(
+            paymentElementProvider = Lazy { error("Unexpected payment element access") },
+            currencySelectorElementProvider = Lazy { error("Unexpected currency selector access") },
+            shippingAddressElementProvider = Lazy { error("Unexpected shipping address element access") },
+            expressCheckoutElementProvider = Lazy { error("Unexpected express checkout element access") },
+            checkoutConfirmationPerformerProvider = performerProvider,
+            coroutineScope = coroutineScope,
+        )
     }
 
     private class FakeConfirmationPerformerProvider(
@@ -264,9 +427,29 @@ internal class CheckoutConfirmationPerformerTest {
         val performerProvider: FakeConfirmationPerformerProvider,
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
-        val eventReporter: FakeEventReporter,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val stateHolder: CheckoutControllerStateHolder,
-    )
+        val operationCoordinator: CheckoutOperationCoordinator,
+        val results: Turbine<CheckoutController.Result>,
+        val resultThreads: Turbine<Thread>,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
+        private val testScope: TestScope,
+    ) : CoroutineScope by testScope {
+        val testScheduler = testScope.testScheduler
+
+        suspend fun assertRejection(message: String) {
+            testScheduler.runCurrent()
+            val result = results.awaitItem()
+            assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
+            val error = (result as CheckoutController.Result.Failed).error
+            assertThat(error).isInstanceOf<IllegalStateException>()
+            assertThat(error).hasMessageThat().isEqualTo(message)
+            assertThat(resultThreads.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
+            results.expectNoEvents()
+            confirmationHandler.startTurbine.expectNoEvents()
+            sessionRefresher.calls.expectNoEvents()
+        }
+    }
 
     private companion object {
         const val STATUS_BAR_COLOR = 0x00FF00

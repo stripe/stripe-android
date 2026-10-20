@@ -21,6 +21,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.FormUI
@@ -137,31 +138,32 @@ internal class InputAddressScreenScreenshotTest {
             )
         }
 
-        InputAddressScreen(
-            appearance = appearance,
-            primaryButtonEnabled = addressFormController.completeFormValues.value != null,
-            primaryButtonLoading = false,
-            closeButtonEnabled = true,
-            primaryButtonText = primaryButtonText,
-            title = title,
-            onPrimaryButtonClick = {},
-            onDisabledButtonClick = {},
-            onCloseClick = {},
-            topContent = {},
-            formContent = {
-                if (scrollToBottom) {
-                    ScrollToBottom()
-                }
-                FormUI(
-                    hiddenIdentifiers = emptySet(),
-                    enabled = true,
-                    elements = addressFormController.elements,
-                    lastTextFieldIdentifier = addressFormController.lastTextFieldIdentifier.value,
-                )
-            },
-            bottomContent = {},
-            saveError = null,
-        )
+        PaymentElementTheme(appearance = appearance) {
+            InputAddressScreen(
+                primaryButtonEnabled = addressFormController.completeFormValues.value != null,
+                primaryButtonLoading = false,
+                closeButtonEnabled = true,
+                primaryButtonText = primaryButtonText,
+                title = title,
+                onPrimaryButtonClick = {},
+                onDisabledButtonClick = {},
+                onCloseClick = {},
+                topContent = {},
+                formContent = {
+                    if (scrollToBottom) {
+                        ScrollToBottom()
+                    }
+                    FormUI(
+                        hiddenIdentifiers = emptySet(),
+                        enabled = true,
+                        elements = addressFormController.elements,
+                        lastTextFieldIdentifier = addressFormController.lastTextFieldIdentifier.value,
+                    )
+                },
+                bottomContent = {},
+                saveError = null,
+            )
+        }
     }
 
     @Composable
@@ -171,28 +173,29 @@ internal class InputAddressScreenScreenshotTest {
     ) {
         val completeValues by formController.completeFormValues.collectAsState()
 
-        InputAddressScreen(
-            appearance = PaymentSheet.Appearance(),
-            primaryButtonEnabled = completeValues != null,
-            primaryButtonLoading = false,
-            closeButtonEnabled = true,
-            primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
-            title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
-            onPrimaryButtonClick = {},
-            onDisabledButtonClick = {},
-            onCloseClick = {},
-            topContent = {},
-            formContent = {
-                FormUI(
-                    hiddenIdentifiers = emptySet(),
-                    enabled = true,
-                    elements = formController.elements,
-                    lastTextFieldIdentifier = formController.lastTextFieldIdentifier.value,
-                )
-            },
-            bottomContent = {},
-            saveError = saveError,
-        )
+        PaymentElementTheme(appearance = PaymentSheet.Appearance()) {
+            InputAddressScreen(
+                primaryButtonEnabled = completeValues != null,
+                primaryButtonLoading = false,
+                closeButtonEnabled = true,
+                primaryButtonText = stringResource(R.string.stripe_paymentsheet_address_element_primary_button),
+                title = stringResource(R.string.stripe_paymentsheet_address_element_shipping_address),
+                onPrimaryButtonClick = {},
+                onDisabledButtonClick = {},
+                onCloseClick = {},
+                topContent = {},
+                formContent = {
+                    FormUI(
+                        hiddenIdentifiers = emptySet(),
+                        enabled = true,
+                        elements = formController.elements,
+                        lastTextFieldIdentifier = formController.lastTextFieldIdentifier.value,
+                    )
+                },
+                bottomContent = {},
+                saveError = saveError,
+            )
+        }
     }
 
     private fun createFilledFormController() = AddressFormController(
@@ -216,33 +219,22 @@ internal class InputAddressScreenScreenshotTest {
     ) = PaymentSheet.Appearance(
         // Match Material's background colors so contentColorFor would choose onBackground
         // instead of our custom onSurface unless the screen sets contentColor explicitly.
-        colorsLight = PaymentSheet.Colors(
-            primary = Color(0xFF0057B8),
-            surface = Color.White,
-            component = Color(0xFFE0ECFF),
-            componentBorder = Color(0xFF0057B8),
-            componentDivider = Color(0xFF8AA4C5),
-            onComponent = Color(0xFF071A2F),
-            subtitle = Color(0xFF3E5A75),
-            placeholderText = Color(0xFF5F7891),
-            onSurface = Color(0xFFAD167E),
-            appBarIcon = Color(0xFF0057B8),
-            error = Color(0xFFB00020),
-        ),
-        colorsDark = PaymentSheet.Colors(
-            primary = Color(0xFF8CC8FF),
-            surface = Color(0xFF121212),
-            component = Color(0xFF203448),
-            componentBorder = Color(0xFF8CC8FF),
-            componentDivider = Color(0xFF64809B),
-            onComponent = Color.White,
-            subtitle = Color(0xFFB7C9D9),
-            placeholderText = Color(0xFF9FB3C5),
-            onSurface = Color.Cyan,
-            appBarIcon = Color(0xFF8CC8FF),
-            error = Color(0xFFFF8A80),
-        ),
+        colorsLight = configuredColorsLight(),
+        colorsDark = configuredColorsDark(),
         themeMode = themeMode,
+        shapes = PaymentSheet.Shapes(cornerRadiusDp = 16f, borderStrokeWidthDp = 3f),
+        typography = PaymentSheet.Typography(
+            sizeScaleFactor = 1.2f,
+            fontResId = R.font.cursive,
+            custom = PaymentSheet.Typography.Custom(
+                h1 = PaymentSheet.Typography.Font(
+                    fontFamily = R.font.cursive,
+                    fontSizeSp = 26f,
+                    fontWeight = 700,
+                    letterSpacingSp = 1f,
+                )
+            ),
+        ),
         primaryButton = PaymentSheet.PrimaryButton(
             colorsLight = PaymentSheet.PrimaryButtonColors(
                 background = Color(0xFF0057B8),
@@ -264,6 +256,34 @@ internal class InputAddressScreenScreenshotTest {
                 fontSizeSp = 18f,
             ),
         ),
+    )
+
+    private fun configuredColorsLight() = PaymentSheet.Colors(
+        primary = Color(0xFF0057B8),
+        surface = Color.White,
+        component = Color(0xFFE0ECFF),
+        componentBorder = Color(0xFF0057B8),
+        componentDivider = Color(0xFF8AA4C5),
+        onComponent = Color(0xFF071A2F),
+        subtitle = Color(0xFF3E5A75),
+        placeholderText = Color(0xFF5F7891),
+        onSurface = Color(0xFFAD167E),
+        appBarIcon = Color(0xFF0057B8),
+        error = Color(0xFFB00020),
+    )
+
+    private fun configuredColorsDark() = PaymentSheet.Colors(
+        primary = Color(0xFF8CC8FF),
+        surface = Color(0xFF121212),
+        component = Color(0xFF203448),
+        componentBorder = Color(0xFF8CC8FF),
+        componentDivider = Color(0xFF64809B),
+        onComponent = Color.White,
+        subtitle = Color(0xFFB7C9D9),
+        placeholderText = Color(0xFF9FB3C5),
+        onSurface = Color.Cyan,
+        appBarIcon = Color(0xFF8CC8FF),
+        error = Color(0xFFFF8A80),
     )
 
     private companion object {

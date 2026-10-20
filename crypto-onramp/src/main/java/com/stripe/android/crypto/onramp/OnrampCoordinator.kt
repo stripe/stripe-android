@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
@@ -284,6 +285,15 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun presentUserAttestation() {
             coordinator.presentUserAttestation()
+        }
+
+        /**
+         * Presents UI to collect and submit outstanding KYC requirements.
+         * The result will be delivered through the KYC callback provided in [OnrampCallbacks].
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun fulfillKycRequirements() {
+            coordinator.fulfillKycRequirements()
         }
 
         /**

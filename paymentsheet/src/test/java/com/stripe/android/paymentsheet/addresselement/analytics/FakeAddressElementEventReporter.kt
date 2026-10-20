@@ -5,6 +5,8 @@ import app.cash.turbine.Turbine
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal class FakeAddressElementEventReporter : AddressElementEventReporter {
+    var onBeforeCanceled: (() -> Unit)? = null
+
     private val _shownCalls = Turbine<ShownCall>()
     val shownCalls: ReceiveTurbine<ShownCall> = _shownCalls
 
@@ -16,6 +18,9 @@ internal class FakeAddressElementEventReporter : AddressElementEventReporter {
 
     private val _saveCompletedCalls = Turbine<AddressCall>()
     val saveCompletedCalls: ReceiveTurbine<AddressCall> = _saveCompletedCalls
+
+    private val _canceledCalls = Turbine<AddressCall>()
+    val canceledCalls: ReceiveTurbine<AddressCall> = _canceledCalls
 
     override fun onShown(country: String?) {
         _shownCalls.add(ShownCall(country))
@@ -48,11 +53,20 @@ internal class FakeAddressElementEventReporter : AddressElementEventReporter {
         _saveCompletedCalls.add(AddressCall(addressDetails, autocompleteAddressDetails))
     }
 
+    override fun onCanceled(
+        addressDetails: AddressDetails,
+        autocompleteAddressDetails: AddressDetails?,
+    ) {
+        onBeforeCanceled?.invoke()
+        _canceledCalls.add(AddressCall(addressDetails, autocompleteAddressDetails))
+    }
+
     fun validate() {
         _shownCalls.ensureAllEventsConsumed()
         _saveStartedCalls.ensureAllEventsConsumed()
         _saveFailedCalls.ensureAllEventsConsumed()
         _saveCompletedCalls.ensureAllEventsConsumed()
+        _canceledCalls.ensureAllEventsConsumed()
     }
 
     data class ShownCall(val country: String?)

@@ -326,6 +326,153 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `cancellation analytics keeps merchant prefill out of autocomplete data`() = runScenario(
+        address = EXPECTED_ADDRESS,
+    ) {
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AddressCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = EXPECTED_ADDRESS.address,
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = null,
+            )
+        )
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `cancellation analytics captures live edits and selected autocomplete data`() = runScenario(
+        address = EXPECTED_ADDRESS,
+    ) {
+        selectAutocompletePrediction(
+            Address(
+                city = "San Francisco",
+                country = "US",
+                line1 = "510 Townsend St",
+                line2 = "Floor 2",
+                postalCode = "94103",
+                state = "CA",
+            )
+        )
+        viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
+            FakeAddressElementEventReporter.AddressCall(
+                addressDetails = AddressDetails(
+                    name = EXPECTED_ADDRESS.name,
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend Sta",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    ),
+                    phoneNumber = EXPECTED_ADDRESS.phoneNumber,
+                ),
+                autocompleteAddressDetails = AddressDetails(
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "510 Townsend St",
+                        line2 = "Floor 2",
+                        postalCode = "94103",
+                        state = "CA",
+                    )
+                ),
+            )
+        )
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `cancellation analytics is recorded before the canceled result is published`() = runScenario {
+        eventReporter.onBeforeCanceled = {
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
+        }
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.address?.country).isEqualTo("US")
+        assertThat(cancellationCall.autocompleteAddressDetails).isNull()
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `pending cancellation is reported when the view model is created`() = runScenario(
+        address = EXPECTED_ADDRESS,
+        beforeViewModelCreation = {
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+            assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
+        },
+    ) {
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.name).isEqualTo(EXPECTED_ADDRESS.name)
+        assertThat(cancellationCall.autocompleteAddressDetails).isNull()
+    }
+
+    @Test
+    fun `duplicate cancellation requests report only once`() = runScenario {
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        val cancellationCall = eventReporter.canceledCalls.awaitItem()
+        assertThat(cancellationCall.addressDetails.address?.country)
+            .isEqualTo("US")
+        eventReporter.canceledCalls.expectNoEvents()
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(AddressElementActivityContract.Result.Canceled)
+        )
+    }
+
+    @Test
+    fun `cancellation while saving does not report cancellation analytics`() = runScenario {
+        assertThat(resultStateHolder.tryStartSaving()).isTrue()
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
+        eventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `cancellation after successful save does not report cancellation analytics`() = runScenario {
+        viewModel.clickPrimaryButton(COMPLETED_FORM_VALUES, checkboxChecked = true)
+
+        val expectedCall = FakeAddressElementEventReporter.AddressCall(
+            addressDetails = EXPECTED_ADDRESS,
+            autocompleteAddressDetails = null,
+        )
+        assertThat(eventReporter.saveStartedCalls.awaitItem()).isEqualTo(expectedCall)
+        assertThat(eventReporter.saveCompletedCalls.awaitItem()).isEqualTo(expectedCall)
+        assertThat(resultStateHolder.state.value).isEqualTo(
+            State.Finished(
+                AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+            )
+        )
+
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
+
+        eventReporter.canceledCalls.expectNoEvents()
+    }
+
+    @Test
     fun `clickPrimaryButton accepts a second click when first submission fails`() =
         runPrimaryButtonScenario { primaryButtonAction, expectedAddressCall ->
             val firstError = IllegalStateException("first submission failed")

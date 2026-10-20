@@ -10,20 +10,6 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class ExpressCheckoutElementContentCalculationTest {
     @Test
-    fun `calculates visible button count`(
-        @TestParameter(valuesProvider = VisibleButtonCountCaseProvider::class)
-        testCase: VisibleButtonCountCase,
-    ) {
-        val result = calculateVisibleButtonCount(
-            buttonCount = testCase.buttonCount,
-            maxColumns = testCase.maxColumns,
-            maxRows = testCase.maxRows,
-        )
-
-        assertThat(result).isEqualTo(testCase.expected)
-    }
-
-    @Test
     fun `calculates column count`(
         @TestParameter(valuesProvider = ColumnCountCaseProvider::class)
         testCase: ColumnCountCase,
@@ -35,65 +21,6 @@ internal class ExpressCheckoutElementContentCalculationTest {
 
         assertThat(result).isEqualTo(testCase.expected)
     }
-}
-
-internal object VisibleButtonCountCaseProvider : TestParameterValuesProvider() {
-    override fun provideValues(
-        context: Context?,
-    ): List<VisibleButtonCountCase> = listOf(
-        VisibleButtonCountCase(
-            name = "No buttons",
-            buttonCount = 0,
-            maxColumns = 2,
-            maxRows = 2,
-            expected = 0,
-        ),
-        VisibleButtonCountCase(
-            name = "No limits",
-            buttonCount = 5,
-            maxColumns = null,
-            maxRows = null,
-            expected = 5,
-        ),
-        VisibleButtonCountCase(
-            name = "Columns only",
-            buttonCount = 5,
-            maxColumns = 2,
-            maxRows = null,
-            expected = 5,
-        ),
-        VisibleButtonCountCase(
-            name = "Rows only",
-            buttonCount = 5,
-            maxColumns = null,
-            maxRows = 2,
-            expected = 5,
-        ),
-        VisibleButtonCountCase(
-            name = "Capacity below available buttons",
-            buttonCount = 5,
-            maxColumns = 2,
-            maxRows = 2,
-            expected = 4,
-        ),
-        VisibleButtonCountCase(
-            name = "Capacity above available buttons",
-            buttonCount = 3,
-            maxColumns = 2,
-            maxRows = 2,
-            expected = 3,
-        ),
-    )
-}
-
-internal data class VisibleButtonCountCase(
-    val name: String,
-    val buttonCount: Int,
-    val maxColumns: Int?,
-    val maxRows: Int?,
-    val expected: Int,
-) {
-    override fun toString(): String = name
 }
 
 internal object ColumnCountCaseProvider : TestParameterValuesProvider() {

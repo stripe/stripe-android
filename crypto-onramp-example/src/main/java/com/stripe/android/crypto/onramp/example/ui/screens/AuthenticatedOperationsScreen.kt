@@ -47,6 +47,7 @@ internal fun AuthenticatedOperationsScreen(
     onWalletOwnershipSignatureChange: (String) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
+    onFulfillKycRequirement: () -> Unit,
     onStartVerification: () -> Unit,
     onShowUserAttestation: () -> Unit,
     onShowTermsAndConditions: () -> Unit,
@@ -173,7 +174,8 @@ internal fun AuthenticatedOperationsScreen(
             address = uiState.kycAddress,
             onAddressChange = onKycAddressChange,
             onCollectKyc = onCollectKyc,
-            onVerifyKyc = onVerifyKyc
+            onVerifyKyc = onVerifyKyc,
+            onFulfillKycRequirement = onFulfillKycRequirement,
         )
 
         PartnerTermsSection(
