@@ -18,7 +18,7 @@ data class OnrampSessionResponse(
     val isApplePay: Boolean,
     @SerialName("kyc_details_provided")
     val kycDetailsProvided: Boolean,
-    val metadata: JsonObject,
+    val metadata: JsonObject?,
     @SerialName("payment_method")
     val paymentMethod: String,
     @SerialName("preferred_payment_method")
@@ -46,11 +46,11 @@ data class CheckoutTransactionDetails(
     val destinationExchangeAmount: String? = null,
     @SerialName("destination_network")
     val destinationNetwork: String? = null,
-    val fees: CheckoutFees,
+    val fees: CheckoutFees?,
     @SerialName("last_error")
     val lastError: String? = null,
     @SerialName("lock_wallet_address")
-    val lockWalletAddress: Boolean,
+    val lockWalletAddress: Boolean?,
     @SerialName("source_currency")
     val sourceCurrency: String? = null,
     @SerialName("source_exchange_amount")
@@ -64,15 +64,13 @@ data class CheckoutTransactionDetails(
     @SerialName("transaction_limit")
     val transactionLimit: Long,
     @SerialName("wallet_address")
-    val walletAddress: String? = null,
-    @SerialName("wallet_addresses")
-    val walletAddresses: List<String>? = null
+    val walletAddress: String? = null
 )
 
 @Serializable
 data class CheckoutFees(
     @SerialName("network_fee_amount")
-    val networkFeeAmount: String,
+    val networkFeeAmount: String?,
     @SerialName("transaction_fee_amount")
-    val transactionFeeAmount: String
+    val transactionFeeAmount: String?
 )
