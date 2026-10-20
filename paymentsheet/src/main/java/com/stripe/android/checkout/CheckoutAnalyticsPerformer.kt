@@ -2,9 +2,10 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
+import com.stripe.android.checkout.analytics.CheckoutConfirmationEvent
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -12,8 +13,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.defaultAnalyticsParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import kotlinx.coroutines.CoroutineScope
@@ -41,62 +40,58 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     )
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(IntegrationType.PaymentElement, paymentSelection)
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            paymentSelection = paymentSelection,
+        )
     }
 
     fun onExpressCheckoutElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        saveConfirmation(IntegrationType.ExpressCheckoutElement, paymentSelection)
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            paymentSelection = paymentSelection,
+        )
     }
 
     suspend fun reportConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                val integrationType = savedStateHandle.get<IntegrationType>(INTEGRATION_TYPE_KEY)
-                val paymentSelection = savedStateHandle.get<PaymentSelection>(PAYMENT_SELECTION_KEY)
+                val confirmationContext = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
 
-                if (integrationType != null && paymentSelection != null) {
-                    reportConfirmationResult(state.result, paymentSelection)
+                if (confirmationContext != null) {
+                    reportConfirmationResult(state.result, confirmationContext)
                 }
 
-                clearConfirmation()
+                savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
             }
         }
     }
 
     private fun reportConfirmationResult(
         result: ConfirmationHandler.Result,
-        paymentSelection: PaymentSelection,
+        confirmationContext: CheckoutConfirmationContext,
     ) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
-                event = ConfirmationEvent.Succeeded,
-                paymentEvent = PaymentSheetEvent.Payment(
-                    mode = EventReporter.Mode.Embedded,
-                    result = PaymentSheetEvent.Payment.Result.Success,
+                CheckoutConfirmationEvent.Succeeded(
+                    confirmationContext = confirmationContext,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
-                    paymentSelection = paymentSelection,
                     deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     intentId = result.intent.id,
-                ),
+                )
             )
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
                 reportEvent(
-                    event = ConfirmationEvent.Failed,
-                    paymentEvent = PaymentSheetEvent.Payment(
-                        mode = EventReporter.Mode.Embedded,
-                        result = PaymentSheetEvent.Payment.Result.Failure(error),
+                    CheckoutConfirmationEvent.Failed(
+                        confirmationContext = confirmationContext,
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
-                        paymentSelection = paymentSelection,
-                        deferredIntentConfirmationType = null,
-                        intentId = null,
-                    ),
+                        error = error,
+                    )
                 )
             }
             is ConfirmationHandler.Result.Canceled -> Unit
         }
     }
 
-    private fun reportEvent(event: ConfirmationEvent, paymentEvent: PaymentSheetEvent.Payment) {
+    private fun reportEvent(event: CheckoutConfirmationEvent) {
         val metadata = paymentMethodMetadataProvider.get()
         val publishableKey = metadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
@@ -104,38 +99,14 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = metadata.defaultAnalyticsParams() + paymentEvent.params,
+                    additionalParams = metadata.defaultAnalyticsParams() + event.params,
                     publishableKeyOverride = publishableKey,
                 )
             )
         }
     }
 
-    private fun saveConfirmation(
-        integrationType: IntegrationType,
-        paymentSelection: PaymentSelection,
-    ) {
-        savedStateHandle[INTEGRATION_TYPE_KEY] = integrationType
-        savedStateHandle[PAYMENT_SELECTION_KEY] = paymentSelection
-    }
-
-    private fun clearConfirmation() {
-        savedStateHandle.remove<IntegrationType>(INTEGRATION_TYPE_KEY)
-        savedStateHandle.remove<PaymentSelection>(PAYMENT_SELECTION_KEY)
-    }
-
-    private enum class ConfirmationEvent(override val eventName: String) : AnalyticsEvent {
-        Succeeded("checkout_elements.confirm.succeeded"),
-        Failed("checkout_elements.confirm.failed"),
-    }
-
-    private enum class IntegrationType {
-        PaymentElement,
-        ExpressCheckoutElement,
-    }
-
     private companion object {
-        const val INTEGRATION_TYPE_KEY = "CheckoutAnalyticsPerformer.integrationType"
-        const val PAYMENT_SELECTION_KEY = "CheckoutAnalyticsPerformer.paymentSelection"
+        const val CONFIRMATION_CONTEXT_KEY = "CheckoutAnalyticsPerformer.confirmationContext"
     }
 }
