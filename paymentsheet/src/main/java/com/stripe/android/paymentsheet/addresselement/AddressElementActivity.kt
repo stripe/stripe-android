@@ -47,6 +47,15 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
+    private val inputAddressViewModel: InputAddressViewModel by lazy {
+        val navController = requireNotNull(viewModel.navigator.navigationController)
+        val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
+        ViewModelProvider(
+            inputEntry,
+            InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider),
+        )[InputAddressViewModel::class.java]
+    }
+
     private val starterArgs by lazy {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
@@ -160,17 +169,8 @@ internal class AddressElementActivity : ComponentActivity() {
     }
 
     private fun dismiss() {
-        if (viewModel.resultStateHolder.state.value != State.Idle) return
-
-        val navController = requireNotNull(viewModel.navigator.navigationController)
-        val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
-        val inputViewModel = ViewModelProvider(
-            inputEntry,
-            InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider),
-        )[InputAddressViewModel::class.java]
-
         viewModel.resultStateHolder.onUserCancel(
-            shouldConfirmCancellation = inputViewModel.hasChanges(),
+            shouldConfirmCancellation = inputAddressViewModel.hasChanges(),
         )
     }
 

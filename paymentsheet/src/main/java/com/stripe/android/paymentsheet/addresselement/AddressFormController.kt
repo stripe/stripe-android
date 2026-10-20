@@ -56,7 +56,7 @@ internal class AddressFormController(
 
     private fun getCurrentInputValues(): Map<FormFieldId, String> {
         val addressElement = autocompleteAddressElement.sectionFieldErrorController().addressElementFlow.value
-        val formValues = addressElement.getFormFieldValueFlow().value.toMap()
+        val formValues = uncompletedFormValues.value
         val values = formValues
             .filterKeys { it != FormFieldId.OneLineAddress }
             .mapValues { it.value.value.orEmpty() }
