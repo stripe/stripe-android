@@ -412,7 +412,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = false),
+            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = false, content = null),
             linkConfiguration = linkConfiguration
         )
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
@@ -433,7 +433,7 @@ internal class LinkActivityViewModelTest {
 
             val vm = createViewModel(
                 linkAccountManager = linkAccountManager,
-                linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true)
+                linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true, content = null)
             )
             linkAccountManager.setAccountStatus(
                 AccountStatus.Verified(
@@ -460,7 +460,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = existingOnly),
+            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = existingOnly, content = null),
             linkConfiguration = linkConfiguration
         )
         linkAccountManager.setAccountStatus(accountStatus)
