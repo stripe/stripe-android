@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
+import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -340,6 +341,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         extraMessage: String? = null,
     ) : FinancialConnectionsAnalyticsEvent(
         name = when (exception) {
+            is AppInitializationError,
             is FinancialConnectionsError,
             is WebAuthFlowFailedException,
             is OTPError -> "error.expected"
