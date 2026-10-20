@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CheckoutSessionResponse(
     val id: String,
+    val configId: String?,
     val currency: String,
     val paymentStatus: PaymentStatus,
     val status: Status,
@@ -145,7 +146,10 @@ internal data class CheckoutSessionResponse(
         val integrationAmount: Long,
         val integrationCurrency: String,
         val localCurrencyOptions: List<LocalCurrencyOption>,
-    ) : StripeModel
+    ) : StripeModel {
+        val isActive: Boolean
+            get() = !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
+    }
 
     @Parcelize
     data class LocalCurrencyOption(
@@ -163,4 +167,17 @@ internal fun CheckoutSessionResponse.validateShippingCountry(country: String): R
     } else {
         Result.failure(IllegalArgumentException("Country code '$country' is not in allowedShippingCountries"))
     }
+}
+
+internal fun CheckoutSessionResponse.checkoutAnalyticsParams(): Map<String, Any> = buildMap<String, Any> {
+    put("checkout_session_id", id)
+    configId?.let { put("checkout_config_id", it) }
+    put("currency", currency)
+    put("session_status", status.name.lowercase())
+    put("payment_status", paymentStatus.name.lowercase())
+    elementsSession?.elementsSessionConfigId
+        ?.takeIf { it.isNotEmpty() }
+        ?.let { put("elements_session_config_id", it) }
+    put("adaptive_pricing_active", adaptivePricingInfo?.isActive == true)
+    put("automatic_tax_enabled", automaticTaxEnabled)
 }

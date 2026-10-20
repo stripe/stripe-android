@@ -1,9 +1,7 @@
 package com.stripe.android.checkout
 
-import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -27,7 +25,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -205,9 +202,14 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        assertThat(request).containsAtLeastEntriesIn(
+            mapOf(
+                "event" to "checkout_elements.confirm.succeeded",
+                "selected_lpm" to "google_pay",
+                "invocation_source" to "merchant",
+                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+            )
+        )
     }
 
     @Test
@@ -281,10 +283,14 @@ internal class CheckoutConfirmationPerformerTest {
         )
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        assertThat(request).containsEntry("payment_method_orientation", "horizontal")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        assertThat(request).containsAtLeastEntriesIn(
+            mapOf(
+                "event" to "checkout_elements.confirm.succeeded",
+                "selected_lpm" to "google_pay",
+                "invocation_source" to "merchant",
+                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+            )
+        )
     }
 
     private fun googlePayState(
@@ -346,17 +352,11 @@ internal class CheckoutConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
-        val apiConfigurationProvider = Provider { apiConfiguration }
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
+        val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            context = ApplicationProvider.getApplicationContext<Context>(),
+            stateHolder = stateHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
-            apiConfigurationProvider = apiConfigurationProvider,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -447,6 +447,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(resultThreads.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             results.expectNoEvents()
             confirmationHandler.startTurbine.expectNoEvents()
+            analyticsRequestExecutor.requestTurbine.expectNoEvents()
             sessionRefresher.calls.expectNoEvents()
         }
     }

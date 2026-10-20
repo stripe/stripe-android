@@ -33,8 +33,10 @@ internal object CheckoutSessionResponseFactory {
         requiresBillingAddress: Boolean = false,
         merchantCountry: String? = "US",
         businessName: String? = "Example, Inc.",
+        configId: String? = null,
     ) = CheckoutSessionResponse(
         id = id,
+        configId = configId,
         currency = currency,
         paymentStatus = paymentStatus,
         status = status,
