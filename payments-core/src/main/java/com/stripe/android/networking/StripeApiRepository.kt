@@ -23,7 +23,6 @@ import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionData
-import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.StripeFile
@@ -50,7 +49,6 @@ import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
@@ -125,7 +123,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
-    private val productUsageTokens: Set<String> = emptySet(),
+    productUsageTokens: Set<String> = emptySet(),
     private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(
         workContext = workContext,
         logger = logger
@@ -158,7 +156,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
-    private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
+    private val confirmationParamsFactory: ConfirmationParamsFactory = ConfirmationParamsFactory(
+        productUsageTokens = productUsageTokens,
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
+    ),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
@@ -173,7 +174,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
-        logger: Logger
+        logger: Logger,
+        fraudDetectionDataRepository: FraudDetectionDataRepository,
+        confirmationParamsFactory: ConfirmationParamsFactory,
     ) : this(
         context = appContext,
         publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
@@ -181,11 +184,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
-            context = appContext,
-            apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
-        ),
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = appContext,
             productUsageTokens = productUsageTokens,
@@ -194,7 +193,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        confirmationParamsFactory = confirmationParamsFactory,
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -205,10 +205,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     private val fraudDetectionData: FraudDetectionData?
         get() = fraudDetectionDataRepository.getCached()
-
-    init {
-        fireFraudDetectionDataRequest()
-    }
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -256,7 +252,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val params = maybeAddPaymentUserAgentAndFraudDetectionData(
+        val params = confirmationParamsFactory.addPaymentUserAgentAndFraudDetectionData(
             confirmPaymentIntentParams.toParamMap()
                 // Omit client_secret with user key auth.
                 .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
@@ -462,7 +458,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                maybeAddPaymentUserAgentAndFraudDetectionData(
+                confirmationParamsFactory.addPaymentUserAgentAndFraudDetectionData(
                     confirmSetupIntentParams.toParamMap()
                         // Omit client_secret with user key auth.
                         .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
@@ -733,7 +729,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                prepareConfirmationParams(
+                confirmationParamsFactory.create(
                     confirmationTokenParams.toParamMap(),
                     confirmationTokenParams.paymentMethodData
                 )
@@ -1919,54 +1915,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
         PAYMENT_USER_AGENT to buildPaymentUserAgent(attribution)
 
-    private fun prepareConfirmationParams(
-        params: Map<String, Any>,
-        paymentMethodCreateParams: PaymentMethodCreateParams?
-    ): Map<String, *> {
-        // ID-based confirmations have no new payment method data to attach fraud signals to.
-        if (paymentMethodCreateParams != null) {
-            fireFraudDetectionDataRequest()
-        }
-
-        return maybeAddPaymentUserAgentAndFraudDetectionData(
-            params,
-            paymentMethodCreateParams,
-            sourceParams = null
-        )
-    }
-
     override fun buildPaymentUserAgent(attribution: Set<String>): String {
-        return setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
-            .plus(productUsageTokens)
-            .plus(attribution)
-            .joinToString(";")
-    }
-
-    /**
-     *  Add payment_user_agent and fraud data if the map contains Payment Method data,
-     *  including attribution from [paymentMethodCreateParams] or [sourceParams].
-     */
-    private fun maybeAddPaymentUserAgentAndFraudDetectionData(
-        params: Map<String, Any>,
-        paymentMethodCreateParams: PaymentMethodCreateParams?,
-        sourceParams: SourceParams?
-    ): Map<String, *> {
-        // Add payment_user_agent if the Payment Method or Source is being created on this call.
-        val attributedParams = (params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] as? Map<*, *>)?.let {
-            params.plus(
-                ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA to it.plus(
-                    buildPaymentUserAgentPair(paymentMethodCreateParams?.attribution ?: emptySet())
-                )
-            )
-        } ?: (params[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA] as? Map<*, *>)?.let {
-            params.plus(
-                ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to it.plus(
-                    buildPaymentUserAgentPair(sourceParams?.attribution ?: emptySet())
-                )
-            )
-        } ?: params
-
-        return fraudDetectionDataParamsUtils.addFraudDetectionData(attributedParams, fraudDetectionData)
+        return confirmationParamsFactory.buildPaymentUserAgent(attribution)
     }
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(

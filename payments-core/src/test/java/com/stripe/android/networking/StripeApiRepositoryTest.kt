@@ -12,7 +12,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionData
-import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -3399,8 +3398,7 @@ internal class StripeApiRepositoryTest {
             productUsageTokens = productUsage,
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = fraudDetectionDataRepository,
-            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
+            fraudDetectionDataRepository = fraudDetectionDataRepository
         )
     }
 
