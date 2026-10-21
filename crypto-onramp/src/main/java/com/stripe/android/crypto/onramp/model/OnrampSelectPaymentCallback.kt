@@ -58,13 +58,6 @@ class PaymentMethodDisplayData internal constructor(
     /** Card funding, when available. Null for non-card selections; missing funding is [CardFunding.Unknown]. */
     val cardFunding: CardFunding?
 ) {
-    internal constructor(
-        imageLoader: suspend () -> Drawable,
-        label: String,
-        sublabel: String?,
-        type: Type
-    ) : this(imageLoader, label, sublabel, type, cardFunding = null)
-
     @ExperimentalCryptoOnramp
     enum class Type {
         Card,

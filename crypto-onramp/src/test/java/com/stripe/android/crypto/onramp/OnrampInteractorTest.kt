@@ -2616,7 +2616,8 @@ class OnrampInteractorTest {
             },
             label = "Visa",
             sublabel = "•••• 4242",
-            type = LinkController.PaymentMethodType.Card
+            type = LinkController.PaymentMethodType.Card,
+            cardFunding = null,
         )
 
     private fun mockLinkAccount(
