@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -49,7 +50,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
-import com.stripe.android.utils.TestConfirmationParamsFactory
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -935,7 +936,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         block: suspend Scenario.() -> Unit,
     ) {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            confirmationParamsFactory = TestConfirmationParamsFactory.create(),
+            confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
+import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -37,7 +38,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.TestConfirmationParamsFactory
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -396,7 +397,8 @@ class AddressElementViewModelModuleTest {
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
-                confirmationParamsFactory = TestConfirmationParamsFactory.create(),
+                confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+                fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

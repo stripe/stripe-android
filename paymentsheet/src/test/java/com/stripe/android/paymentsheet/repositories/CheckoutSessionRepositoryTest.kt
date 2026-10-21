@@ -9,12 +9,13 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.utils.TestConfirmationParamsFactory
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -35,7 +36,8 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
-        confirmationParamsFactory = TestConfirmationParamsFactory.create(),
+        confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+        fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

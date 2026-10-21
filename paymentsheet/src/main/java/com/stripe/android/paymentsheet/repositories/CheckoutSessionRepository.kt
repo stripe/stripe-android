@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -23,6 +24,7 @@ import javax.inject.Provider
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val confirmationParamsFactory: ConfirmationParamsFactory,
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
@@ -74,9 +76,16 @@ internal class CheckoutSessionRepository @Inject constructor(
         id: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
+        // ID-based confirmations have no new payment method data to attach fraud signals to.
+        if (params.paymentMethodData != null) {
+            fraudDetectionDataRepository.refresh()
+        }
+
         val requestParams = confirmationParamsFactory.create(
             params.toParamMap(),
             params.paymentMethodData,
+            sourceParams = null,
+            fraudDetectionData = fraudDetectionDataRepository.getCached(),
         )
         return executePost(
             url = confirmUrl(id),

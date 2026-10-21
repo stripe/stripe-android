@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -51,8 +52,8 @@ import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import com.stripe.android.utils.RecordingLinkStore
-import com.stripe.android.utils.TestConfirmationParamsFactory
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Provider
 
@@ -148,7 +149,8 @@ internal suspend fun createIntentConfirmationInterceptor(
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
                 val checkoutSessionRepository = CheckoutSessionRepository(
-                    confirmationParamsFactory = TestConfirmationParamsFactory.create(),
+                    confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+                    fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                     stripeNetworkClient = DefaultStripeNetworkClient(),
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
