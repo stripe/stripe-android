@@ -129,7 +129,31 @@ internal class PaymentSheetAddressAutocompleteTest(
             path("/v1/elements/address/autocomplete"),
             bodyPart("search_text", query),
         ) { response ->
-            response.setBody(AUTOCOMPLETE_RESPONSE)
+            response.setBody(
+                """
+                {
+                  "source": "google",
+                  "suggestions": [
+                    {
+                      "address": null,
+                      "display_data": {
+                        "subtitle": "$SELECTING_ADDRESS_SECONDARY_TEXT",
+                        "title": "123 Main Street"
+                      },
+                      "place_id": "$PLACE_ID"
+                    },
+                    {
+                      "address": null,
+                      "display_data": {
+                        "subtitle": "456 Main Street, Unit #123, New York, New York, US 52523",
+                        "title": "123 Main Street"
+                      },
+                      "place_id": "2"
+                    }
+                  ]
+                }
+                """.trimIndent()
+            )
         }
     }
 
@@ -139,7 +163,20 @@ internal class PaymentSheetAddressAutocompleteTest(
             path("/v1/elements/address/details"),
             bodyPart("place_id", PLACE_ID),
         ) { response ->
-            response.setBody(PLACE_DETAILS_RESPONSE)
+            response.setBody(
+                """
+                {
+                  "address": {
+                    "line1": "123 Main Street",
+                    "line2": "Unit #123",
+                    "city": "South San Francisco",
+                    "state": "CA",
+                    "postal_code": "94111",
+                    "country": "US"
+                  }
+                }
+                """.trimIndent()
+            )
         }
     }
 
@@ -195,42 +232,5 @@ internal class PaymentSheetAddressAutocompleteTest(
         const val PREFILLED_AUTOCOMPLETE_QUERY = "123 Coffee Street"
         const val PLACE_ID = "1"
         const val SELECTING_ADDRESS_SECONDARY_TEXT = "123 Main Street, Unit #123, South San Francisco, CA, US 94111"
-
-        val AUTOCOMPLETE_RESPONSE = """
-            {
-              "source": "google",
-              "suggestions": [
-                {
-                  "address": null,
-                  "display_data": {
-                    "subtitle": "$SELECTING_ADDRESS_SECONDARY_TEXT",
-                    "title": "123 Main Street"
-                  },
-                  "place_id": "$PLACE_ID"
-                },
-                {
-                  "address": null,
-                  "display_data": {
-                    "subtitle": "456 Main Street, Unit #123, New York, New York, US 52523",
-                    "title": "123 Main Street"
-                  },
-                  "place_id": "2"
-                }
-              ]
-            }
-        """.trimIndent()
-
-        val PLACE_DETAILS_RESPONSE = """
-            {
-              "address": {
-                "line1": "123 Main Street",
-                "line2": "Unit #123",
-                "city": "South San Francisco",
-                "state": "CA",
-                "postal_code": "94111",
-                "country": "US"
-              }
-            }
-        """.trimIndent()
     }
 }

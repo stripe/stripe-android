@@ -110,7 +110,23 @@ internal class AddressElementAnalyticsTest {
                 path("/v1/elements/address/autocomplete"),
                 bodyPart("search_text", AUTOCOMPLETE_QUERY),
             ) { response ->
-                response.setBody(AUTOCOMPLETE_RESPONSE)
+                response.setBody(
+                    """
+                    {
+                      "source": "google",
+                      "suggestions": [
+                        {
+                          "address": null,
+                          "display_data": {
+                            "subtitle": "$PICKED_SECONDARY_TEXT",
+                            "title": "$PICKED_LINE1"
+                          },
+                          "place_id": "$PICKED_PLACE_ID"
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                )
             }
             page.enterAutocompleteQuery(AUTOCOMPLETE_QUERY)
 
@@ -123,7 +139,19 @@ internal class AddressElementAnalyticsTest {
                 path("/v1/elements/address/details"),
                 bodyPart("place_id", PICKED_PLACE_ID),
             ) { response ->
-                response.setBody(PLACE_DETAILS_RESPONSE)
+                response.setBody(
+                    """
+                    {
+                      "address": {
+                        "line1": "$PICKED_LINE1",
+                        "city": "$PICKED_CITY",
+                        "state": "$PICKED_STATE",
+                        "postal_code": "$PICKED_POSTAL_CODE",
+                        "country": "US"
+                      }
+                    }
+                    """.trimIndent()
+                )
             }
             page.selectAutocompletePrediction(PICKED_LINE1)
             page.clickSave()
@@ -146,32 +174,6 @@ internal class AddressElementAnalyticsTest {
         const val PICKED_CITY = "San Francisco"
         const val PICKED_STATE = "CA"
         const val PICKED_POSTAL_CODE = "94103"
-        val AUTOCOMPLETE_RESPONSE = """
-            {
-              "source": "google",
-              "suggestions": [
-                {
-                  "address": null,
-                  "display_data": {
-                    "subtitle": "$PICKED_SECONDARY_TEXT",
-                    "title": "$PICKED_LINE1"
-                  },
-                  "place_id": "$PICKED_PLACE_ID"
-                }
-              ]
-            }
-        """.trimIndent()
-        val PLACE_DETAILS_RESPONSE = """
-            {
-              "address": {
-                "line1": "$PICKED_LINE1",
-                "city": "$PICKED_CITY",
-                "state": "$PICKED_STATE",
-                "postal_code": "$PICKED_POSTAL_CODE",
-                "country": "US"
-              }
-            }
-        """.trimIndent()
         val merchantAddress = AddressDetails(
             name = "Real Name",
             address = PaymentSheet.Address(

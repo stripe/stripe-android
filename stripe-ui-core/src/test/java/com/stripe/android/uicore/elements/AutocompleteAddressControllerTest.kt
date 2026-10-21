@@ -172,7 +172,7 @@ class AutocompleteAddressControllerTest {
     )
 
     @Test
-    fun `Element does not use inline autocomplete when Stripe-hosted autocomplete is disabled`() = noAutocompleteTest(
+    fun `Element uses manual fields when Stripe-hosted autocomplete is disabled with Google key`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
             autocompleteCountries = setOf("US"),
