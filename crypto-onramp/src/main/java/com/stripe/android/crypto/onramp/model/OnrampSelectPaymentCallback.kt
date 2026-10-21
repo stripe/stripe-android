@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
+import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
@@ -19,22 +20,13 @@ fun interface OnrampCollectPaymentMethodCallback {
 @ExperimentalCryptoOnramp
 sealed class OnrampCollectPaymentMethodResult {
     /**
-     * The user has selected a payment option. Details are a snapshot of this selection, not a
-     * token-bound attestation. Use the latest successful collection in the same checkout attempt
-     * and discard cached policy state on logout or when the selection is cleared.
+     * The user has selected a payment option.
      */
     @ExperimentalCryptoOnramp
     class Completed internal constructor(
         val displayData: PaymentMethodDisplayData,
-        val kycInfo: KycInfo?,
-        /** Selected instrument metadata, or null when unavailable or unsupported. */
-        val instrumentDetails: OnrampInstrumentDetails?
-    ) : OnrampCollectPaymentMethodResult() {
-        internal constructor(
-            displayData: PaymentMethodDisplayData,
-            kycInfo: KycInfo?
-        ) : this(displayData, kycInfo, instrumentDetails = null)
-    }
+        val kycInfo: KycInfo?
+    ) : OnrampCollectPaymentMethodResult()
 
     /**
      * The user declined to select a payment option.
@@ -62,8 +54,17 @@ class PaymentMethodDisplayData internal constructor(
     /**
      * The type of payment being displayed.
      */
-    val type: Type
+    val type: Type,
+    /** Card funding, when available. Null for non-card selections; missing funding is [CardFunding.Unknown]. */
+    val cardFunding: CardFunding?
 ) {
+    internal constructor(
+        imageLoader: suspend () -> Drawable,
+        label: String,
+        sublabel: String?,
+        type: Type
+    ) : this(imageLoader, label, sublabel, type, cardFunding = null)
+
     @ExperimentalCryptoOnramp
     enum class Type {
         Card,

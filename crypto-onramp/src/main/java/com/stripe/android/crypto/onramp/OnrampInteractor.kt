@@ -47,7 +47,6 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
-import com.stripe.android.crypto.onramp.model.OnrampInstrumentDetails
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -81,7 +80,6 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
@@ -890,28 +888,20 @@ internal class OnrampInteractor @Inject constructor(
                     paymentMethodType = _state.value.collectingPaymentMethodType
                 )
             )
-            linkController.getPaymentMethodPreviewForOnramp(context)?.let { selection ->
-                val preview = selection.preview
+            linkController.state(context).value.selectedPaymentMethodPreview?.let {
                 _state.update { state ->
                     state.copy(selectedPaymentSource = SelectedPaymentSource.Link)
                 }
+
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
-                        imageLoader = preview.imageLoader,
-                        label = preview.label,
-                        sublabel = preview.sublabel,
-                        type = preview.type.toDisplayType()
+                        imageLoader = it.imageLoader,
+                        label = it.label,
+                        sublabel = it.sublabel,
+                        type = it.type.toDisplayType(),
+                        cardFunding = it.cardFunding,
                     ),
                     kycInfo = null,
-                    instrumentDetails = when (val details = selection.instrumentDetails) {
-                        is PaymentMethodPreviewDetails.Card -> OnrampInstrumentDetails.Card(
-                            funding = CardFunding.fromCode(details.funding),
-                            brand = details.brand,
-                            last4 = details.last4,
-                        )
-                        is PaymentMethodPreviewDetails.BankAccount -> OnrampInstrumentDetails.BankAccount(details.last4)
-                        null -> null
-                    },
                 )
             } ?: run {
                 collectPaymentMethodFailure(MissingPaymentMethodException())
@@ -937,21 +927,12 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampCollectPaymentMethodResult.Completed(
                         displayData = displayData,
                         kycInfo = kycInfo,
-                        instrumentDetails = result.paymentMethod.onrampCardDetails(),
                     )
                 }
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
             is GooglePayPaymentMethodLauncher.Result.Canceled -> OnrampCollectPaymentMethodResult.Cancelled()
         }
-    }
-
-    private fun PaymentMethod.onrampCardDetails(): OnrampInstrumentDetails.Card? = card?.let {
-        OnrampInstrumentDetails.Card(
-            funding = CardFunding.fromCode(it.funding),
-            brand = it.brand,
-            last4 = it.last4,
-        )
     }
 
     internal fun collectPaymentMethodFailure(error: Throwable): OnrampCollectPaymentMethodResult.Failed {
@@ -982,7 +963,6 @@ internal class OnrampInteractor @Inject constructor(
                             OnrampCollectPaymentMethodResult.Completed(
                                 displayData = displayData,
                                 kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo(),
-                                instrumentDetails = paymentMethod.onrampCardDetails(),
                             )
                         }
                     },
@@ -1159,7 +1139,8 @@ internal class OnrampInteractor @Inject constructor(
             },
             label = "Google Pay",
             sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
-            type = PaymentMethodDisplayData.Type.GooglePay
+            type = PaymentMethodDisplayData.Type.GooglePay,
+            cardFunding = paymentMethod.card?.let { CardFunding.fromCode(it.funding) },
         )
     }
 
@@ -1174,6 +1155,7 @@ internal class OnrampInteractor @Inject constructor(
             label = "Samsung Pay",
             sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.SamsungPay,
+            cardFunding = paymentMethod.card?.let { CardFunding.fromCode(it.funding) },
         )
     }
 

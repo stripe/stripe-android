@@ -12,7 +12,6 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 * [Getting started](#Getting-started)
    * [Integration](#Integration)
    * [Platform Pay before Link authentication](#Platform-Pay-before-Link-authentication)
-   * [Instrument details before token creation](#Instrument-details-before-token-creation)
    * [Samsung Pay](#Samsung-Pay)
    * [Example](#Example)
 
@@ -116,65 +115,6 @@ unsupported country hints retain their backend error code.
 For manual validation, exercise new and returning users, wallet cancellation, contact fields omitted,
 a non-US country hint, an unsupported hint, and a hint that disagrees with the user's persisted KYC
 region. Also exercise the existing authentication-first flow for card, bank account, and both wallets.
-
-### Instrument details before token creation
-
-Every successful collection returns a snapshot in `OnrampCollectPaymentMethodResult.Completed.instrumentDetails`.
-The sealed `OnrampInstrumentDetails` type is either `Card` or `BankAccount`, never both; `null`
-means metadata is unavailable or the instrument is unsupported.
-
-| Selection | Structured result |
-| --- | --- |
-| Saved or newly entered Link debit/credit card | `Card`: funding, brand, last4 |
-| Link bank account (ACH) | `BankAccount`: last4 |
-| Google Pay | `Card` from the returned card PaymentMethod, when available |
-| Samsung Pay | `Card` from the existing credential exchange, when available |
-
-For example, present **one** of these options in response to the user's choice:
-
-```kotlin
-presenter.collectPaymentMethod(PaymentMethodSelection.Card()) // Link debit or credit
-presenter.collectPaymentMethod(PaymentMethodSelection.BankAccount()) // Link ACH
-presenter.collectPaymentMethod(PaymentMethodSelection.GooglePay(currencyCode = "USD", amount = 1_099))
-presenter.collectPaymentMethod(
-    PaymentMethodSelection.SamsungPay(currencyCode = "USD", amount = 1_099, orderNumber = "order-123")
-)
-```
-
-Inspect the result in your existing collection callback, before starting the unchanged token/session
-flow. The rendering and policy functions below are application-defined:
-
-```kotlin
-when (result) {
-    is OnrampCollectPaymentMethodResult.Completed -> {
-        renderSelection(result.displayData, result.instrumentDetails)
-        val subsidize = when (val details = result.instrumentDetails) {
-            is OnrampInstrumentDetails.Card -> details.funding == CardFunding.Debit
-            is OnrampInstrumentDetails.BankAccount -> merchantSubsidizesBankAccounts
-            null -> false
-        }
-        replaceCheckoutPolicy(subsidize)
-        // Once required authentication/KYC has completed:
-        scope.launch {
-            val tokenResult = coordinator.createCryptoPaymentToken()
-            // Handle tokenResult, then use its token ID with your backend to create the session
-            // and display the final server-calculated quote.
-        }
-    }
-    is OnrampCollectPaymentMethodResult.Cancelled -> { /* No newly committed selection. */ }
-    is OnrampCollectPaymentMethodResult.Failed -> { /* Handle the existing collection error. */ }
-}
-```
-
-A strict debit subsidy checks **explicitly** for `CardFunding.Debit`: credit, prepaid, unknown,
-and absent metadata are not debit. Bank-account subsidy is a separate policy, not a card funding
-value. Known cards with missing/unrecognized funding report `CardFunding.Unknown`; unsupported
-instruments or unavailable card data return `instrumentDetails = null`. Do not parse display labels for policy.
-
-Wallet last4 may identify a tokenized number rather than the physical card's printed last4.
-These summaries contain no full card/account/routing numbers, CVC, fingerprints, raw wallet
-credentials, or billing data. Reading them adds no metadata request or PaymentMethod creation/share
-operation. Do not send these summaries to analytics.
 
 ### Samsung Pay
 

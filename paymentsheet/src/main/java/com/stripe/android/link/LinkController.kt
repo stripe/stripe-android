@@ -14,6 +14,7 @@ import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -175,11 +176,6 @@ class LinkController @Inject internal constructor(
     }
 
     // Crypto Onramp specific methods
-
-    /** Returns display and instrument details from the same committed Link selection. */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun getPaymentMethodPreviewForOnramp(context: Context): OnrampPaymentMethodPreview? =
-        interactor.getPaymentMethodPreviewForOnramp(context)
 
     /**
      * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
@@ -903,8 +899,17 @@ class LinkController @Inject internal constructor(
         val label: String,
         val sublabel: String?,
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val type: PaymentMethodType
+        val type: PaymentMethodType,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cardFunding: CardFunding?
     ) {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            imageLoader: suspend () -> Drawable,
+            label: String,
+            sublabel: String?,
+            type: PaymentMethodType
+        ) : this(imageLoader, label, sublabel, type, cardFunding = null)
 
         /**
          * An image representing a payment method; e.g. the VISA logo.
