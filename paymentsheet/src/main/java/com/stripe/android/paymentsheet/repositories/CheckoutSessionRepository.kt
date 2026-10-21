@@ -11,8 +11,8 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.prepareConfirmationParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -83,7 +83,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             fraudDetectionDataRepository.refresh()
         }
 
-        val requestParams = prepareConfirmationParams(
+        val requestParams = ConfirmationParamsUtils.prepareConfirmationParams(
             params.toParamMap(),
             params.paymentMethodData,
             sourceParams = null,

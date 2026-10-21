@@ -170,7 +170,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
-        logger: Logger
+        logger: Logger,
+        fraudDetectionDataRepository: FraudDetectionDataRepository,
     ) : this(
         context = appContext,
         publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
@@ -178,11 +179,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
-            context = appContext,
-            apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
-        ),
+        fraudDetectionDataRepository = fraudDetectionDataRepository,
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = appContext,
             productUsageTokens = productUsageTokens,
@@ -191,7 +188,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor
+        analyticsRequestExecutor = analyticsRequestExecutor,
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
