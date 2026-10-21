@@ -70,11 +70,64 @@ internal class PaymentSheetAddressAutocompleteTest(
         paymentSheetPage.clickPrimaryButton()
     }
 
-    private fun enqueueAutocompletePredictions() {
+    @Suppress("DEPRECATION")
+    @Test
+    fun testPrefilled() = runPaymentSheetTest(
+        apiConfigurationTestType = apiConfigurationTestType,
+        networkRule = networkRule,
+        composeTestRule = testRules.compose,
+        resultCallback = ::assertCompleted,
+    ) { context ->
+        enqueueElementsSession()
+
+        context.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_123_secret_123",
+                configuration = apiConfigurationTestType.applyTo(
+                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                        .billingDetailsCollectionConfiguration(
+                            PaymentSheet.BillingDetailsCollectionConfiguration(
+                                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                                attachDefaultsToPaymentMethod = true,
+                            ),
+                        )
+                        .defaultBillingDetails(
+                            PaymentSheet.BillingDetails(
+                                address = PaymentSheet.Address(
+                                    line1 = PREFILLED_AUTOCOMPLETE_QUERY,
+                                    city = "Chicago",
+                                    state = "IL",
+                                    country = "US",
+                                    postalCode = "83985"
+                                )
+                            )
+                        )
+                        .googlePlacesApiKey("gp_123")
+                        .build()
+                ),
+            )
+        }
+
+        clickAndFillOutCard()
+
+        paymentSheetPage.waitForContentDescription(description = "Search")
+        enqueueAutocompletePredictions(query = PREFILLED_AUTOCOMPLETE_QUERY)
+        paymentSheetPage.clickViewWithContentDescription(description = "Search")
+
+        paymentSheetPage.waitForText(SELECTING_ADDRESS_SECONDARY_TEXT)
+        enqueuePlaceFetch()
+        paymentSheetPage.clickViewWithText(SELECTING_ADDRESS_SECONDARY_TEXT)
+
+        enqueueConfirm()
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    private fun enqueueAutocompletePredictions(query: String) {
         networkRule.enqueue(
             method("POST"),
             path("/v1/elements/address/autocomplete"),
-            bodyPart("search_text", AUTOCOMPLETE_QUERY),
+            bodyPart("search_text", query),
         ) { response ->
             response.setBody(AUTOCOMPLETE_RESPONSE)
         }
@@ -129,7 +182,7 @@ internal class PaymentSheetAddressAutocompleteTest(
     }
 
     private fun fillOutAutocompletePage() {
-        enqueueAutocompletePredictions()
+        enqueueAutocompletePredictions(query = AUTOCOMPLETE_QUERY)
         paymentSheetPage.clickAndFillField(label = "Address", text = AUTOCOMPLETE_QUERY)
 
         paymentSheetPage.waitForText(SELECTING_ADDRESS_SECONDARY_TEXT)
@@ -139,6 +192,7 @@ internal class PaymentSheetAddressAutocompleteTest(
 
     private companion object {
         const val AUTOCOMPLETE_QUERY = "Main Street"
+        const val PREFILLED_AUTOCOMPLETE_QUERY = "123 Coffee Street"
         const val PLACE_ID = "1"
         const val SELECTING_ADDRESS_SECONDARY_TEXT = "123 Main Street, Unit #123, South San Francisco, CA, US 94111"
 
