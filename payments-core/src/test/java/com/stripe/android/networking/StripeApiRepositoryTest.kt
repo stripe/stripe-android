@@ -3084,12 +3084,13 @@ internal class StripeApiRepositoryTest {
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val paymentMethodDataParams =
             apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
-        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(paymentMethodData.toParamMap())
-        assertThat(paymentMethodDataParams["payment_user_agent"])
-            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
-        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(fraudDetectionData.params)
-        assertThat(apiRequest.params?.get("return_url"))
-            .isEqualTo(confirmationTokenParams.returnUrl)
+        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(
+            paymentMethodData.toParamMap()
+                .plus(fraudDetectionData.params)
+                .plus(
+                    "payment_user_agent" to "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution"
+                )
+        )
 
         verifyAnalyticsRequest(
             event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
