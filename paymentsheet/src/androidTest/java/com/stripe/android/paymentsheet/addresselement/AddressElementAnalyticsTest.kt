@@ -1,21 +1,20 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
-import com.stripe.android.model.Address
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
-import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
@@ -25,15 +24,12 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(AndroidJUnit4::class)
 internal class AddressElementAnalyticsTest {
     private val networkRule = NetworkRule(
-        hostsToTrack = listOf(AnalyticsRequest.HOST),
+        hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds,
     )
-    private val placesClientProxyTestRule = PlacesClientProxyTestRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        around(placesClientProxyTestRule)
-    }
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())
 
@@ -89,31 +85,6 @@ internal class AddressElementAnalyticsTest {
                 "0",
             ),
         )
-        placesClientProxyTestRule.enqueueFindAutocompletePredictionsResponse(
-            Result.success(
-                FindAutocompletePredictionsResponse(
-                    autocompletePredictions = listOf(
-                        AutocompletePrediction(
-                            primaryText = SpannableString(PICKED_LINE1),
-                            secondaryText = SpannableString(PICKED_SECONDARY_TEXT),
-                            placeId = PICKED_PLACE_ID,
-                        )
-                    )
-                )
-            )
-        )
-        placesClientProxyTestRule.enqueueFetchPlaceResponse(
-            Result.success(
-                Address(
-                    line1 = PICKED_LINE1,
-                    city = PICKED_CITY,
-                    state = PICKED_STATE,
-                    country = "US",
-                    postalCode = PICKED_POSTAL_CODE,
-                )
-            )
-        )
-
         runAddressElementTest(page) {
             present(
                 AddressLauncher.Configuration(
@@ -123,12 +94,37 @@ internal class AddressElementAnalyticsTest {
                     ),
                     allowedCountries = setOf("US"),
                     autocompleteCountries = setOf("US"),
-                    googlePlacesApiKey = GOOGLE_PLACES_API_KEY,
                     billingAddress = null,
-                    useStripeHostedAutocomplete = false,
                 )
             )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_address_autocomplete_start",
+                productUsage = productUsage,
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_address_autocomplete_suggestions",
+                productUsage = productUsage,
+            )
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/elements/address/autocomplete"),
+                bodyPart("search_text", AUTOCOMPLETE_QUERY),
+            ) { response ->
+                response.setBody(AUTOCOMPLETE_RESPONSE)
+            }
             page.enterAutocompleteQuery(AUTOCOMPLETE_QUERY)
+
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_address_autocomplete_selected",
+                productUsage = productUsage,
+            )
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/elements/address/details"),
+                bodyPart("place_id", PICKED_PLACE_ID),
+            ) { response ->
+                response.setBody(PLACE_DETAILS_RESPONSE)
+            }
             page.selectAutocompletePrediction(PICKED_LINE1)
             page.clickSave()
 
@@ -143,7 +139,6 @@ internal class AddressElementAnalyticsTest {
     private companion object {
         val productUsage = setOf("PaymentSheet.AddressController")
         const val MERCHANT_LINE1 = "1234 Main St"
-        const val GOOGLE_PLACES_API_KEY = "gp_123"
         const val AUTOCOMPLETE_QUERY = "123 Market"
         const val PICKED_PLACE_ID = "picked-place-id"
         const val PICKED_LINE1 = "123 Market Street"
@@ -151,6 +146,32 @@ internal class AddressElementAnalyticsTest {
         const val PICKED_CITY = "San Francisco"
         const val PICKED_STATE = "CA"
         const val PICKED_POSTAL_CODE = "94103"
+        val AUTOCOMPLETE_RESPONSE = """
+            {
+              "source": "google",
+              "suggestions": [
+                {
+                  "address": null,
+                  "display_data": {
+                    "subtitle": "$PICKED_SECONDARY_TEXT",
+                    "title": "$PICKED_LINE1"
+                  },
+                  "place_id": "$PICKED_PLACE_ID"
+                }
+              ]
+            }
+        """.trimIndent()
+        val PLACE_DETAILS_RESPONSE = """
+            {
+              "address": {
+                "line1": "$PICKED_LINE1",
+                "city": "$PICKED_CITY",
+                "state": "$PICKED_STATE",
+                "postal_code": "$PICKED_POSTAL_CODE",
+                "country": "US"
+              }
+            }
+        """.trimIndent()
         val merchantAddress = AddressDetails(
             name = "Real Name",
             address = PaymentSheet.Address(

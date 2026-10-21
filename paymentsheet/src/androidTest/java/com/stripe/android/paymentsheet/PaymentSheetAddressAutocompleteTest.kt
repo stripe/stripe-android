@@ -1,23 +1,18 @@
 package com.stripe.android.paymentsheet
 
-import android.text.SpannableString
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
-import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AddressAutocompletePreview
-import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
+import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
-import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,12 +23,8 @@ internal class PaymentSheetAddressAutocompleteTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val placesClientProxyTestRule = PlacesClientProxyTestRule()
-
     @get:Rule
-    val testRules: TestRules = TestRules.create {
-        around(placesClientProxyTestRule)
-    }
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
@@ -48,8 +39,6 @@ internal class PaymentSheetAddressAutocompleteTest(
         composeTestRule = testRules.compose,
         resultCallback = ::assertCompleted,
     ) { context ->
-        enqueueAutocompletePredictions()
-        enqueuePlaceFetch()
         enqueueElementsSession()
 
         context.presentPaymentSheet {
@@ -81,99 +70,32 @@ internal class PaymentSheetAddressAutocompleteTest(
         paymentSheetPage.clickPrimaryButton()
     }
 
-    @Suppress("DEPRECATION")
-    @Test
-    fun testPrefilled() = runPaymentSheetTest(
-        apiConfigurationTestType = apiConfigurationTestType,
-        networkRule = networkRule,
-        composeTestRule = testRules.compose,
-        resultCallback = ::assertCompleted,
-    ) { context ->
-        enqueueAutocompletePredictions()
-        enqueuePlaceFetch()
-        enqueueElementsSession()
-
-        context.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_123_secret_123",
-                configuration = apiConfigurationTestType.applyTo(
-                    PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
-                        .billingDetailsCollectionConfiguration(
-                            PaymentSheet.BillingDetailsCollectionConfiguration(
-                                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                                attachDefaultsToPaymentMethod = true,
-                            ),
-                        )
-                        .defaultBillingDetails(
-                            PaymentSheet.BillingDetails(
-                                address = PaymentSheet.Address(
-                                    line1 = "123 Coffee Street",
-                                    city = "Chicago",
-                                    state = "IL",
-                                    country = "US",
-                                    postalCode = "83985"
-                                )
-                            )
-                        )
-                        .googlePlacesApiKey("gp_123")
-                        .build()
-                ),
-            )
-        }
-
-        clickAndFillOutCard()
-
-        paymentSheetPage.waitForContentDescription(description = "Search")
-        paymentSheetPage.clickViewWithContentDescription(description = "Search")
-
-        fillOutAutocompletePage()
-
-        enqueueConfirm()
-
-        paymentSheetPage.clickPrimaryButton()
-    }
-
     private fun enqueueAutocompletePredictions() {
-        placesClientProxyTestRule.enqueueFindAutocompletePredictionsResponse(
-            Result.success(
-                FindAutocompletePredictionsResponse(
-                    autocompletePredictions = listOf(
-                        AutocompletePrediction(
-                            primaryText = SpannableString("123 Main Street"),
-                            secondaryText = SpannableString(SELECTING_ADDRESS_SECONDARY_TEXT),
-                            placeId = "1"
-                        ),
-                        AutocompletePrediction(
-                            primaryText = SpannableString("123 Main Street"),
-                            secondaryText = SpannableString(
-                                "456 Main Street, Unit #123, New York, New York, US 52523"
-                            ),
-                            placeId = "2"
-                        )
-                    )
-                )
-            )
-        )
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/elements/address/autocomplete"),
+            bodyPart("search_text", AUTOCOMPLETE_QUERY),
+        ) { response ->
+            response.setBody(AUTOCOMPLETE_RESPONSE)
+        }
     }
 
     private fun enqueuePlaceFetch() {
-        placesClientProxyTestRule.enqueueFetchPlaceResponse(
-            Result.success(
-                Address(
-                    line1 = "123 Main Street",
-                    line2 = "Unit #123",
-                    city = "South San Francisco",
-                    state = "CA",
-                    country = "US",
-                    postalCode = "94111",
-                )
-            )
-        )
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/elements/address/details"),
+            bodyPart("place_id", PLACE_ID),
+        ) { response ->
+            response.setBody(PLACE_DETAILS_RESPONSE)
+        }
     }
 
     private fun enqueueElementsSession() {
         networkRule.elementsSession { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json") { json ->
+                json.getJSONObject("flags")
+                    .put("ocs_mobile_should_use_autocomplete_proxy_endpoints", true)
+            }
         }
     }
 
@@ -207,13 +129,54 @@ internal class PaymentSheetAddressAutocompleteTest(
     }
 
     private fun fillOutAutocompletePage() {
-        paymentSheetPage.clickAndFillField(label = "Address", text = "Main Street")
+        enqueueAutocompletePredictions()
+        paymentSheetPage.clickAndFillField(label = "Address", text = AUTOCOMPLETE_QUERY)
 
         paymentSheetPage.waitForText(SELECTING_ADDRESS_SECONDARY_TEXT)
+        enqueuePlaceFetch()
         paymentSheetPage.clickViewWithText(SELECTING_ADDRESS_SECONDARY_TEXT)
     }
 
     private companion object {
+        const val AUTOCOMPLETE_QUERY = "Main Street"
+        const val PLACE_ID = "1"
         const val SELECTING_ADDRESS_SECONDARY_TEXT = "123 Main Street, Unit #123, South San Francisco, CA, US 94111"
+
+        val AUTOCOMPLETE_RESPONSE = """
+            {
+              "source": "google",
+              "suggestions": [
+                {
+                  "address": null,
+                  "display_data": {
+                    "subtitle": "$SELECTING_ADDRESS_SECONDARY_TEXT",
+                    "title": "123 Main Street"
+                  },
+                  "place_id": "$PLACE_ID"
+                },
+                {
+                  "address": null,
+                  "display_data": {
+                    "subtitle": "456 Main Street, Unit #123, New York, New York, US 52523",
+                    "title": "123 Main Street"
+                  },
+                  "place_id": "2"
+                }
+              ]
+            }
+        """.trimIndent()
+
+        val PLACE_DETAILS_RESPONSE = """
+            {
+              "address": {
+                "line1": "123 Main Street",
+                "line2": "Unit #123",
+                "city": "South San Francisco",
+                "state": "CA",
+                "postal_code": "94111",
+                "country": "US"
+              }
+            }
+        """.trimIndent()
     }
 }
