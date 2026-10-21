@@ -12,6 +12,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 * [Getting started](#Getting-started)
    * [Integration](#Integration)
    * [Platform Pay before Link authentication](#Platform-Pay-before-Link-authentication)
+   * [Instrument details before token creation](#Instrument-details-before-token-creation)
    * [Samsung Pay](#Samsung-Pay)
    * [Example](#Example)
 
@@ -115,6 +116,67 @@ unsupported country hints retain their backend error code.
 For manual validation, exercise new and returning users, wallet cancellation, contact fields omitted,
 a non-US country hint, an unsupported hint, and a hint that disagrees with the user's persisted KYC
 region. Also exercise the existing authentication-first flow for card, bank account, and both wallets.
+
+### Instrument details before token creation
+
+Every successful collection returns a snapshot in `OnrampCollectPaymentMethodResult.Completed`:
+
+| Selection | Structured result |
+| --- | --- |
+| Saved or newly entered Link debit/credit card | `cardDetails`: funding, brand, last4 |
+| Link bank account (ACH) | `bankAccountDetails`: last4; no card details |
+| Google Pay | `cardDetails` from the returned card PaymentMethod, when available |
+| Samsung Pay | `cardDetails` from the existing credential exchange, when available |
+
+For example, present **one** of these options in response to the user's choice:
+
+```kotlin
+presenter.collectPaymentMethod(PaymentMethodSelection.Card()) // Link debit or credit
+presenter.collectPaymentMethod(PaymentMethodSelection.BankAccount()) // Link ACH
+presenter.collectPaymentMethod(PaymentMethodSelection.GooglePay(currencyCode = "USD", amount = 1_099))
+presenter.collectPaymentMethod(
+    PaymentMethodSelection.SamsungPay(currencyCode = "USD", amount = 1_099, orderNumber = "order-123")
+)
+```
+
+Inspect the result in your existing collection callback, before starting the unchanged token/session
+flow. The rendering and policy functions below are application-defined:
+
+```kotlin
+when (result) {
+    is OnrampCollectPaymentMethodResult.Completed -> {
+        renderSelection(result.displayData, result.cardDetails, result.bankAccountDetails)
+        val subsidizeDebit = result.cardDetails?.funding == CardFunding.Debit
+        val subsidizeBank = result.bankAccountDetails != null && merchantSubsidizesBankAccounts
+        replaceCheckoutPolicy(subsidizeDebit, subsidizeBank)
+        // Once required authentication/KYC has completed:
+        scope.launch {
+            val tokenResult = coordinator.createCryptoPaymentToken()
+            // Handle tokenResult, then use its token ID with your backend to create the session
+            // and display the final server-calculated quote.
+        }
+    }
+    is OnrampCollectPaymentMethodResult.Cancelled -> { /* No newly committed selection. */ }
+    is OnrampCollectPaymentMethodResult.Failed -> { /* Handle the existing collection error. */ }
+}
+```
+
+A strict debit subsidy checks **explicitly** for `CardFunding.Debit`: credit, prepaid, unknown,
+and absent metadata are not debit. Bank-account subsidy is a separate policy, not a card funding
+value. Known cards with missing/unrecognized funding report `CardFunding.Unknown`; unsupported
+instruments or unavailable card data may have neither summary. Do not parse display labels for policy.
+
+Always replace your stored result and recompute policy after a new successful collection in the
+same checkout attempt. Previously returned results remain snapshots, not token-bound attestations.
+Discard cached policy state on logout or a cleared selection; cancellation/failure does not provide
+a new successful snapshot. Token-time customer, account, and KYC routing checks still run and may
+require recollection. Collection metadata proves neither ownership, mandate validity, payment
+success, nor final fees: the session quote is authoritative.
+
+Wallet last4 may identify a tokenized number rather than the physical card's printed last4.
+These summaries contain no full card/account/routing numbers, CVC, fingerprints, raw wallet
+credentials, or billing data. Reading them adds no metadata request or PaymentMethod creation/share
+operation. Do not send these summaries to analytics.
 
 ### Samsung Pay
 

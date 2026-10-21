@@ -150,7 +150,7 @@ internal class LinkControllerInteractor @Inject constructor(
             val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(
                 isSystemDarkTheme = application.isSystemDarkTheme()
             )
-            state.selectedPaymentMethod?.details?.toPreview(
+            state.selectedPaymentMethod?.toPreview(
                 context = application,
                 iconLoader = cachedIconLoader,
                 reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
@@ -165,7 +165,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 elementsSessionId = state.linkConfiguration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkConfiguration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details
+                selectedPaymentMethodPreview = state.selectedPaymentMethod
                     ?.toPreview(
                         context = context,
                         iconLoader = cachedIconLoader,
@@ -854,7 +854,8 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type
+        type = type,
+        instrumentDetails = this,
     )
 }
 

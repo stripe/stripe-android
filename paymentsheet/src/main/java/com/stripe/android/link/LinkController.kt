@@ -898,8 +898,17 @@ class LinkController @Inject internal constructor(
         val label: String,
         val sublabel: String?,
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val type: PaymentMethodType
+        val type: PaymentMethodType,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val instrumentDetails: PaymentMethodPreviewDetails?
     ) {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            imageLoader: suspend () -> Drawable,
+            label: String,
+            sublabel: String?,
+            type: PaymentMethodType
+        ) : this(imageLoader, label, sublabel, type, instrumentDetails = null)
 
         /**
          * An image representing a payment method; e.g. the VISA logo.
