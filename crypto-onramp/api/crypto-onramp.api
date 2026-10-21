@@ -668,6 +668,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampVerifyKycInfoRes
 public final class com/stripe/android/crypto/onramp/model/PaymentMethodDisplayData {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCardFunding ()Lcom/stripe/android/model/CardFunding;
 	public final fun getIcon ()Landroid/graphics/drawable/Drawable;
 	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 	public final fun getImageLoader ()Lkotlin/jvm/functions/Function1;
