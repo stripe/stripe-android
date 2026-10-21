@@ -10,9 +10,9 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.InitialLoadingDestination
-import com.stripe.android.identity.navigation.NetworkedIdentityDestination
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.routeToScreenName
+import com.stripe.android.identity.networked.isInProgress
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -33,28 +33,56 @@ internal class IdentityOnBackPressedHandler(
     }
 
     override fun handleOnBackPressed() {
-        if (destination?.route == NetworkedIdentityDestination.ROUTE.route) {
-            identityViewModel.networkedIdentityViewModel?.cancel()
-            return
-        }
         // Don't navigate if there is a outstanding API request.
         if (identityViewModel.isSubmitting()) {
             return
         }
-        if (shouldCloseWithCancel()) {
+        // The top bar's back skips the Link sheet's own back handling; leaving would orphan the attempt.
+        if (identityViewModel.networkedIdentityState?.value?.isInProgress == true) {
+            return
+        }
+        // Networked Identity can submit from the first screen, by resuming or through one of its actions.
+        if (destination?.route == ConfirmationDestination.ROUTE.route ||
+            identityViewModel.isVerificationPageSubmitted
+        ) {
+            identityViewModel.sendSucceededAnalyticsRequestForNative()
+            verificationFlowFinishable.finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Completed)
+            return
+        }
+        if (navController.previousBackStackEntry?.destination?.route == InitialLoadingDestination.ROUTE.route ||
+            navController.previousBackStackEntry?.destination?.route == DebugDestination.ROUTE.route ||
+            destination?.route == ConsentDestination.ROUTE.route
+        ) {
             finishWithCancelResult(
+                identityViewModel,
+                verificationFlowFinishable,
                 destination?.route?.routeToScreenName()
                     ?: IdentityAnalyticsRequestFactory.SCREEN_NAME_UNKNOWN
             )
         } else {
             when (destination?.route) {
-                ConfirmationDestination.ROUTE.route -> {
-                    identityViewModel.sendSucceededAnalyticsRequestForNative()
-                    verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationFlowResult.Completed
-                    )
+                ErrorDestination.ROUTE.route -> {
+                    if (args?.getBoolean(ErrorDestination.ARG_SHOULD_FAIL, false) == true) {
+                        val failedReason = requireNotNull(
+                            identityViewModel.errorCause.value
+                        ) {
+                            "Failed to get failedReason"
+                        }
+
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie =
+                            identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            throwable = failedReason,
+                            lastScreenName = identityViewModel.analyticsLastScreenName
+                        )
+                        verificationFlowFinishable.finishWithResult(
+                            IdentityVerificationSheet.VerificationFlowResult.Failed(failedReason)
+                        )
+                    } else {
+                        navController.clearDataAndNavigateUp(identityViewModel)
+                    }
                 }
-                ErrorDestination.ROUTE.route -> handleErrorScreenBack()
                 else -> {
                     navController.clearDataAndNavigateUp(identityViewModel)
                 }
@@ -62,38 +90,14 @@ internal class IdentityOnBackPressedHandler(
         }
     }
 
-    private fun shouldCloseWithCancel(): Boolean {
-        val previousRoute = navController.previousBackStackEntry?.destination?.route
-        val networkedRoot = identityViewModel.hasEnteredNetworkedIdentity && previousRoute == null &&
-            destination?.route !in setOf(ConfirmationDestination.ROUTE.route, ErrorDestination.ROUTE.route)
-        return previousRoute == InitialLoadingDestination.ROUTE.route ||
-            previousRoute == DebugDestination.ROUTE.route ||
-            destination?.route == ConsentDestination.ROUTE.route || networkedRoot
-    }
-
-    private fun handleErrorScreenBack() {
-        if (args?.getBoolean(ErrorDestination.ARG_SHOULD_FAIL, false) == true) {
-            val failedReason = requireNotNull(identityViewModel.errorCause.value) { "Failed to get failedReason" }
-            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                isFromFallbackUrl = false,
-                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                throwable = failedReason,
-                lastScreenName = identityViewModel.analyticsLastScreenName
-            )
-            verificationFlowFinishable.finishWithResult(
-                IdentityVerificationSheet.VerificationFlowResult.Failed(failedReason)
-            )
-        } else if (identityViewModel.hasEnteredNetworkedIdentity && navController.previousBackStackEntry == null) {
-            finishWithCancelResult(IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR)
-        } else {
-            navController.clearDataAndNavigateUp(identityViewModel)
-        }
-    }
-
-    private fun finishWithCancelResult(lastScreenName: String) {
+    private fun finishWithCancelResult(
+        identityViewModel: IdentityViewModel,
+        verificationFlowFinishable: VerificationFlowFinishable,
+        lastScreeName: String
+    ) {
         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
             isFromFallbackUrl = false,
-            lastScreenName = identityViewModel.analyticsLastScreenName ?: lastScreenName,
+            lastScreenName = identityViewModel.analyticsLastScreenName ?: lastScreeName,
             requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
         )
         verificationFlowFinishable.finishWithResult(
