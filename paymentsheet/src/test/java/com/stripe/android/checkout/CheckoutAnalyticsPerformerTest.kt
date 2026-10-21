@@ -256,7 +256,9 @@ internal class CheckoutAnalyticsPerformerTest {
         stateHolder.state = stateHolder.state!!.copy(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
-                linkConfiguration = PaymentSheet.LinkConfiguration(display = PaymentSheet.LinkConfiguration.Display.Never),
+                linkConfiguration = PaymentSheet.LinkConfiguration(
+                    display = PaymentSheet.LinkConfiguration.Display.Never,
+                ),
                 linkState = LinkDisabledState(listOf(LinkDisabledReason.LinkConfiguration)),
             ),
             expressCheckoutElementPaymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
