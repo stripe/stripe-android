@@ -60,7 +60,6 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                                 ),
                                 reduceLinkBranding = true,
                                 isDarkTheme = context.isSystemDarkTheme(),
-                                cardFunding = null,
                             )
                         )
                     }

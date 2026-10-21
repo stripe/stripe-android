@@ -17,7 +17,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.CardFunding
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -724,96 +724,127 @@ class LinkControllerInteractorTest {
         }
 
         interactor.state(application).test {
-            assertThat(awaitItem().selectedPaymentMethodPreview?.sublabel)
-                .isEqualTo("Visa Credit \u2066•••• 4242\u2069")
+            val preview = awaitItem().selectedPaymentMethodPreview
+            assertThat(preview?.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
         }
-    }
-
-    @Test
-    fun `Link debit card exposes funding in both previews`() = runTest {
-        assertPreviewFunding(
-            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Debit),
-            CardFunding.Debit,
-        )
-    }
-
-    @Test
-    fun `Link credit card exposes funding in both previews`() = runTest {
-        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD, CardFunding.Credit)
-    }
-
-    @Test
-    fun `Link unknown card funding remains unknown`() = runTest {
-        assertPreviewFunding(
-            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Unknown),
-            CardFunding.Unknown,
-        )
-    }
-
-    @Test
-    fun `Link bank account has no card funding`() = runTest {
-        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT, null)
-    }
-
-    @Test
-    fun `Link passthrough without funding remains unknown`() = runTest {
-        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH, CardFunding.Unknown)
-    }
-
-    private suspend fun assertPreviewFunding(details: ConsumerPaymentDetails.PaymentDetails, expected: CardFunding?) {
-        assertPreviewFunding(
-            LinkPaymentMethod.ConsumerPaymentDetails(details, collectedCvc = null, billingPhone = null), expected
-        )
-    }
-
-    private suspend fun assertPreviewFunding(selection: LinkPaymentMethod, expected: CardFunding?) {
-        val interactor = createInteractor()
-        configure(interactor)
-        interactor.updateState { it.copy(selectedPaymentMethod = selection) }
-        assertThat(interactor.selectedPaymentMethodPreview.value?.cardFunding).isEqualTo(expected)
-        assertThat(interactor.state(application).value.selectedPaymentMethodPreview?.cardFunding).isEqualTo(expected)
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
+        assertThat(selection.preview.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
         linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
     @Test
-    fun `Link passthrough debit card uses retained funding`() = runTest {
-        assertPassthroughFunding(PaymentMethod.Card(funding = "debit"), CardFunding.Debit)
-    }
-
-    @Test
-    fun `Link passthrough credit card uses retained funding`() = runTest {
-        assertPassthroughFunding(PaymentMethod.Card(funding = "credit"), CardFunding.Credit)
-    }
-
-    @Test
-    fun `Link passthrough unrecognized funding remains unknown`() = runTest {
-        assertPassthroughFunding(PaymentMethod.Card(funding = "future"), CardFunding.Unknown)
-    }
-
-    @Test
-    fun `Link passthrough missing funding remains unknown`() = runTest {
-        assertPassthroughFunding(PaymentMethod.Card(funding = null), CardFunding.Unknown)
-    }
-
-    @Test
-    fun `Link passthrough missing retained card remains unknown`() = runTest {
-        assertPassthroughFunding(null, CardFunding.Unknown)
-    }
-
-    private suspend fun assertPassthroughFunding(card: PaymentMethod.Card?, expected: CardFunding) {
-        val paymentMethod = PaymentMethod.Builder().setId("pm_passthrough").setCard(card).build()
-        assertPreviewFunding(
-            LinkPaymentMethod.LinkPaymentDetails(
-                linkPaymentDetails = LinkPaymentDetails.Passthrough(
-                    paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-                    paymentMethod = paymentMethod,
-                    createdFromNewPaymentMethod = true,
-                ),
-                collectedCvc = null,
-                billingPhone = null,
-            ),
-            expected,
+    fun `canceled selection preserves the committed instrument snapshot`() = runTest {
+        assertUncommittedSelection(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.None,
+            )
         )
+    }
+
+    @Test
+    fun `failed selection preserves the committed instrument snapshot`() = runTest {
+        assertUncommittedSelection(
+            LinkActivityResult.Failed(
+                error = IllegalStateException("failed"),
+                linkAccountUpdate = LinkAccountUpdate.None,
+            )
+        )
+    }
+
+    private suspend fun assertUncommittedSelection(result: LinkActivityResult) {
+        val interactor = createInteractor()
+        configure(interactor)
+        interactor.updateState { it.copy(selectedPaymentMethod = createTestPaymentMethod()) }
+        val snapshot = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
+
+        interactor.presentPaymentMethodsResultFlow.test {
+            interactor.onLinkActivityResult(result)
+            assertThat(awaitItem()).isNotInstanceOf(LinkController.PresentPaymentMethodsResult.Success::class.java)
+        }
+        val current = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(current.instrumentDetails).isEqualTo(snapshot.instrumentDetails)
+        assertThat(current.preview.sublabel).isEqualTo(snapshot.preview.sublabel)
+        assertThat(snapshot.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onramp preview is absent before selecting an instrument`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        assertThat(interactor.getPaymentMethodPreviewForOnramp(application)).isNull()
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onramp preview retains passthrough card metadata before creation`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        val paymentMethod = PaymentMethod.Builder()
+            .setId("pm_card")
+            .setType(PaymentMethod.Type.Card)
+            .setCard(PaymentMethod.Card(brand = CardBrand.MasterCard, funding = "debit", last4 = "4444"))
+            .build()
+        interactor.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.LinkPaymentDetails(
+                    linkPaymentDetails = LinkPaymentDetails.Passthrough(
+                        paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+                        paymentMethod = paymentMethod,
+                        createdFromNewPaymentMethod = true,
+                    ),
+                    collectedCvc = null,
+                    billingPhone = null,
+                )
+            )
+        }
+        val expected = PaymentMethodPreviewDetails.Card(CardBrand.MasterCard, "debit", "4444")
+
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails).isEqualTo(expected)
+        interactor.state(application).test {
+            val state = awaitItem()
+            assertThat(selection.preview.sublabel).isEqualTo(state.selectedPaymentMethodPreview?.sublabel)
+            assertThat(state.createdPaymentMethod).isNull()
+        }
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onramp preview replaces snapshots when switching card to bank`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        interactor.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        funding = ConsumerPaymentDetails.Card.Funding.Debit
+                    ),
+                    collectedCvc = null,
+                    billingPhone = null,
+                )
+            )
+        }
+
+        val cardSelection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        interactor.selectedPaymentMethodPreview.test {
+            assertThat(awaitItem()?.type).isEqualTo(LinkController.PaymentMethodType.Card)
+            selectBankPaymentMethod(interactor)
+            assertThat(awaitItem()?.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
+        }
+        val bankSelection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(bankSelection.instrumentDetails).isInstanceOf(PaymentMethodPreviewDetails.BankAccount::class.java)
+        assertThat(bankSelection.preview.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
+        assertThat(cardSelection.preview.type).isEqualTo(LinkController.PaymentMethodType.Card)
+        assertThat(cardSelection.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "debit", "4242"))
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
     @Test
@@ -833,7 +864,9 @@ class LinkControllerInteractorTest {
         val preview = interactor.selectedPaymentMethodPreview.first()
 
         assertThat(preview?.sublabel).isEqualTo("Crypto 0x••••22Dd")
-        assertThat(preview?.cardFunding).isNull()
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails).isNull()
+        assertThat(selection.preview.sublabel).isEqualTo(preview?.sublabel)
     }
 
     @Test
@@ -1439,11 +1472,19 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
         signIn()
+        interactor.updateState { it.copy(selectedPaymentMethod = createTestPaymentMethod()) }
+        val snapshot = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(snapshot.instrumentDetails).isInstanceOf(PaymentMethodPreviewDetails.Card::class.java)
 
         val result = interactor.logOut()
 
         assertThat(result).isInstanceOf(LinkController.LogOutResult.Success::class.java)
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+        assertThat(interactor.selectedPaymentMethodPreview.value).isNull()
+        assertThat(interactor.state(application).value.selectedPaymentMethodPreview).isNull()
+        assertThat(interactor.getPaymentMethodPreviewForOnramp(application)).isNull()
+        assertThat(snapshot.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
     }
 
     @Test
