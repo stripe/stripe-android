@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
@@ -698,9 +699,7 @@ internal class CryptoApiRepository @Inject constructor(
     )
 
     internal companion object {
-        // Use a preview API version for networks and parameters behind preview API features.
-        // Bump this when new onramp features require a newer API version.
-        internal const val CRYPTO_ONRAMP_API_VERSION = "2026-03-25.preview"
+        internal const val CRYPTO_ONRAMP_API_VERSION = ApiVersion.API_VERSION_CODE
 
         private const val FIELD_ERROR = "error"
         private const val FIELD_REASON = "reason"

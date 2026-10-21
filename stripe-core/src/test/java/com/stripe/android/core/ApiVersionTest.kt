@@ -7,7 +7,14 @@ import org.junit.Test
 class ApiVersionTest {
     @Test
     fun `instance should instantiate correctly`() {
-        assertThat(ApiVersion.get().code).isEqualTo(API_VERSION_CODE)
+        assertThat(ApiVersion.get().code).isEqualTo("2026-08-26.dahlia")
+    }
+
+    @Test
+    fun `multiple beta headers preserve their suffixes`() {
+        assertThat(
+            ApiVersion(setOf("financial_connections_client_api_beta=v1", "another_beta=v2")).code
+        ).isEqualTo("2026-08-26.dahlia;financial_connections_client_api_beta=v1;another_beta=v2")
     }
 
     @Test

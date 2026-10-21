@@ -12,6 +12,7 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
+import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -717,6 +718,9 @@ class DefaultIdentityRepositoryTest {
             )
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
 
+            assertThat(request.headers[HEADER_STRIPE_VERSION])
+                .isEqualTo("2026-08-26.dahlia;identity_client_api=v8")
+
             verificationPageBlock(verificationPage)
         }
     }
@@ -787,6 +791,8 @@ class DefaultIdentityRepositoryTest {
             assertThat(request.url).isEqualTo(targetPath)
 
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+            assertThat(request.headers[HEADER_STRIPE_VERSION])
+                .isEqualTo("2026-08-26.dahlia;identity_client_api=v8")
             additionalChecks(request)
         }
     }
