@@ -47,13 +47,8 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
-    private val inputAddressViewModel: InputAddressViewModel by lazy {
-        val navController = requireNotNull(viewModel.navigator.navigationController)
-        val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
-        ViewModelProvider(
-            inputEntry,
-            InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider),
-        )[InputAddressViewModel::class.java]
+    private val inputAddressViewModel: InputAddressViewModel by viewModels {
+        InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
     }
 
     private val starterArgs by lazy {
@@ -120,8 +115,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
                             InputAddressScreen(
-                                inputAddressViewModelSubcomponentFactoryProvider =
-                                    viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                viewModel = inputAddressViewModel,
                                 onCloseClick = ::dismiss,
                             )
                         }
