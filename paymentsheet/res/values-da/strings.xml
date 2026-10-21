@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Opret en konto med Link for gøre betaling hurtigere på hele internettet</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Opret en konto med %s, så du kan betale hurtigere på internettet</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Vi kunne ikke verificere din konto. Luk dette vindue, og prøv igen.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">E-mailkode</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Flere muligheder</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Før vi kan sende en kode til din e-mail, er vi nødt til at verificere yderligere oplysninger om dig. Indtast dit telefonnummer, der slutter på ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Før vi kan sende en kode til din e-mail, er vi nødt til at verificere yderligere oplysninger om dig. Indtast telefonnummeret på din Link-konto.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Verificer dit telefonnummer</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Send kode igen om %d sekunder</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

@@ -722,8 +722,27 @@ class LinkControllerInteractorTest {
 
         interactor.state(application).test {
             assertThat(awaitItem().selectedPaymentMethodPreview?.sublabel)
-                .isEqualTo("Visa Credit •••• 4242")
+                .isEqualTo("Visa Credit \u2066•••• 4242\u2069")
         }
+    }
+
+    @Test
+    fun `selectedPaymentMethodPreview uses display label and sublabel for generic payment details`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        interactor.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
+                    collectedCvc = null,
+                    billingPhone = null,
+                )
+            )
+        }
+
+        val preview = interactor.selectedPaymentMethodPreview.first()
+
+        assertThat(preview?.sublabel).isEqualTo("Crypto 0x••••22Dd")
     }
 
     @Test

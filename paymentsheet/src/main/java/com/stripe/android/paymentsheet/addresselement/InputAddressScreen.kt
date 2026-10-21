@@ -16,12 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.ui.core.FormUI
@@ -31,7 +30,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
-import javax.inject.Provider
 
 @Composable
 internal fun InputAddressScreen(
@@ -111,13 +109,9 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    viewModel: InputAddressViewModel,
+    onCloseClick: () -> Unit,
 ) {
-    val viewModel: InputAddressViewModel = viewModel(
-        factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentFactoryProvider
-        )
-    )
     LaunchedEffect(Unit) {
         viewModel.onScreenShown()
     }
@@ -132,13 +126,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val resultState by viewModel.resultStateHolder.state.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
         primaryButtonEnabled = completeValues != null && formEnabled,
-        primaryButtonLoading = !formEnabled,
+        primaryButtonLoading = resultState == State.Saving,
         closeButtonEnabled = formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
@@ -154,7 +149,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = viewModel.resultStateHolder::onUserCancel,
+        onCloseClick = onCloseClick,
         topContent = {
             val currentState = billingSameAsShippingState
 

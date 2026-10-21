@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Créez un compte avec Link pour un paiement plus rapide sur le Web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Créer un compte avec %s pour un paiement plus rapide sur le web</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">Nous n’avons pas pu vérifier votre compte. Fermez cette fenêtre et réessayez.</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">Code de courriel</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">Plus d’options</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">Avant de pouvoir envoyer un code à votre adresse courriel, nous devons vérifier des informations supplémentaires vous concernant. Veuillez saisir votre numéro de téléphone se terminant par ••%s.</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">Avant de pouvoir envoyer un code à votre courriel, nous devons vérifier des renseignements supplémentaires à votre sujet. Saisissez le numéro de téléphone associé à votre compte Link.</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">Confirmer votre numéro de téléphone</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">Renvoyer le code dans %d secondes</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Carte de crédit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

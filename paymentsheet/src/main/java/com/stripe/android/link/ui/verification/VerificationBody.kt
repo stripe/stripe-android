@@ -2,8 +2,10 @@ package com.stripe.android.link.ui.verification
 
 import android.content.Context
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +17,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -58,8 +70,10 @@ import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.delay
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 /**
  * Common verification body content used in [VerificationScreen] and [VerificationDialog].
@@ -69,18 +83,24 @@ import kotlinx.coroutines.delay
 internal fun VerificationBody(
     state: VerificationViewState,
     otpElement: OTPElement,
+    phoneNumberController: PhoneNumberController,
     onBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onFocusRequested: () -> Unit,
     didShowCodeSentNotification: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit,
+    onEmailCodeClick: () -> Unit,
+    onPhoneNumberSubmitted: () -> Unit,
     onConsentShown: () -> Unit,
 ) {
     if (state.isProcessingWebAuth) {
         VerificationBodyContainer(
             isDialog = state.isDialog,
             linkBrand = state.linkBrand,
-            onBackClicked = onBack
+            canGoBack = false,
+            onBackClicked = onBack,
+            onNavigateBackClicked = onNavigateBack,
         ) {
             LinkLoadingScreen()
         }
@@ -105,74 +125,44 @@ internal fun VerificationBody(
     VerificationBodyContainer(
         isDialog = state.isDialog,
         linkBrand = state.linkBrand,
+        canGoBack = state.authFlow?.canGoBack == true,
         onBackClicked = {
             focusManager.clearFocus()
             onBack()
-        }
+        },
+        onNavigateBackClicked = {
+            focusManager.clearFocus()
+            onNavigateBack()
+        },
     ) {
-        Title(
-            isDialog = state.isDialog
-        )
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        Text(
-            text = stringResource(R.string.stripe_link_verification_message_short, state.redactedPhoneNumber),
-            modifier = Modifier
-                .testTag(VERIFICATION_SUBTITLE_TAG)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Companion.Center,
-            style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary
-        )
-
-        Spacer(modifier = Modifier.size(24.dp))
-
-        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
-            OTPElementUI(
-                enabled = !state.isProcessing,
-                element = otpElement,
-                middleSpacing = 8.dp,
-                boxSpacing = 8.dp,
-                otpInputPlaceholder = " ",
-                boxShape = LinkTheme.shapes.default,
-                modifier = Modifier
-                    // 48dp per OTP box plus 8dp per space
-                    .width(328.dp)
-                    .testTag(VERIFICATION_OTP_TAG),
-                colors = OTPElementColors(
-                    selectedBorder = LinkTheme.colors.borderSelected,
-                    placeholder = LinkTheme.colors.textPrimary,
-                    selectedBackground = LinkTheme.colors.surfacePrimary,
-                    background = LinkTheme.colors.surfaceSecondary,
-                    unselectedBorder = LinkTheme.colors.surfaceSecondary
-                ),
-                focusRequester = focusRequester,
-                selectedStrokeWidth = 1.5.dp,
-            )
-        }
-
-        AnimatedVisibility(visible = state.errorMessage != null) {
-            ErrorText(
-                text = state.errorMessage?.resolve(LocalContext.current).orEmpty(),
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .testTag(VERIFICATION_ERROR_TAG)
-                    .fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.size(24.dp))
-        ResendCodeButton(
-            isProcessing = state.isProcessing,
-            isSendingNewCode = state.isSendingNewCode,
-            onClick = onResendCodeClick,
-        )
-
-        state.consentSection?.let { consentSection ->
-            ConsentSection(consentSection)
-            LaunchedEffect(consentSection) {
-                onConsentShown()
+        when (state.authFlow?.screen) {
+            LinkAuthFlowState.Screen.PhoneMatch -> {
+                PhoneMatchContent(
+                    phoneNumberLastTwoDigits = state.authFlow.phoneNumberLastTwoDigits,
+                    phoneNumberController = phoneNumberController,
+                    isProcessing = state.isProcessing,
+                    errorMessage = state.errorMessage,
+                    onContinueClick = {
+                        focusManager.clearFocus()
+                        onPhoneNumberSubmitted()
+                    },
+                )
+            }
+            LinkAuthFlowState.Screen.Loading -> {
+                StatusContent(isDialog = state.isDialog, message = null)
+            }
+            LinkAuthFlowState.Screen.Blocked -> {
+                StatusContent(isDialog = state.isDialog, message = state.errorMessage)
+            }
+            LinkAuthFlowState.Screen.Otp, null -> {
+                OtpContent(
+                    state = state,
+                    otpElement = otpElement,
+                    focusRequester = focusRequester,
+                    onResendCodeClick = onResendCodeClick,
+                    onEmailCodeClick = onEmailCodeClick,
+                    onConsentShown = onConsentShown,
+                )
             }
         }
 
@@ -186,6 +176,261 @@ internal fun VerificationBody(
         }
 
         Spacer(modifier = Modifier.size(12.dp))
+    }
+}
+
+@Composable
+private fun ColumnScope.OtpContent(
+    state: VerificationViewState,
+    otpElement: OTPElement,
+    focusRequester: FocusRequester,
+    onResendCodeClick: () -> Unit,
+    onEmailCodeClick: () -> Unit,
+    onConsentShown: () -> Unit,
+) {
+    Title(
+        isDialog = state.isDialog
+    )
+
+    Spacer(modifier = Modifier.size(8.dp))
+
+    Text(
+        text = stringResource(
+            R.string.stripe_link_verification_message_short,
+            state.authFlow?.recipient ?: state.redactedPhoneNumber,
+        ),
+        modifier = Modifier
+            .testTag(VERIFICATION_SUBTITLE_TAG)
+            .fillMaxWidth(),
+        textAlign = TextAlign.Companion.Center,
+        style = LinkTheme.typography.body,
+        color = LinkTheme.colors.textTertiary
+    )
+
+    Spacer(modifier = Modifier.size(24.dp))
+
+    OtpCodeInput(
+        enabled = !state.isProcessing && state.authFlow?.codeEntryEnabled != false,
+        otpElement = otpElement,
+        focusRequester = focusRequester,
+    )
+
+    AnimatedVisibility(visible = state.errorMessage != null) {
+        ErrorText(
+            text = state.errorMessage?.resolve(LocalContext.current).orEmpty(),
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .testTag(VERIFICATION_ERROR_TAG)
+                .fillMaxWidth()
+        )
+    }
+
+    Spacer(modifier = Modifier.size(24.dp))
+    if (state.authFlow != null) {
+        AuthFlowActions(
+            authFlow = state.authFlow,
+            isProcessing = state.isProcessing,
+            isSendingNewCode = state.isSendingNewCode,
+            onResendCodeClick = onResendCodeClick,
+            onEmailCodeClick = onEmailCodeClick,
+        )
+    } else {
+        ResendCodeButton(
+            isProcessing = state.isProcessing,
+            isSendingNewCode = state.isSendingNewCode,
+            onClick = onResendCodeClick,
+        )
+    }
+
+    state.consentSection?.let { consentSection ->
+        ConsentSection(consentSection)
+        LaunchedEffect(consentSection) {
+            onConsentShown()
+        }
+    }
+}
+
+@Composable
+private fun AuthFlowActions(
+    authFlow: VerificationViewState.AuthFlowViewState,
+    isProcessing: Boolean,
+    isSendingNewCode: Boolean,
+    onResendCodeClick: () -> Unit,
+    onEmailCodeClick: () -> Unit,
+) {
+    val resendLabel = if (authFlow.resendSecondsRemaining > 0) {
+        stringResource(R.string.stripe_link_auth_resend_countdown, authFlow.resendSecondsRemaining)
+    } else {
+        stringResource(R.string.stripe_verification_resend)
+    }
+
+    if (!authFlow.canSendToEmail) {
+        if (authFlow.resendSecondsRemaining > 0) {
+            Text(
+                text = resendLabel,
+                modifier = Modifier.testTag(VERIFICATION_RESEND_COUNTDOWN_TAG),
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textTertiary,
+            )
+        } else {
+            ResendCodeButton(
+                isProcessing = isProcessing || (!authFlow.canResend && !isSendingNewCode),
+                isSendingNewCode = isSendingNewCode,
+                onClick = onResendCodeClick,
+            )
+        }
+        return
+    }
+
+    MoreOptionsMenu(
+        authFlow = authFlow,
+        isProcessing = isProcessing,
+        isSendingNewCode = isSendingNewCode,
+        resendLabel = resendLabel,
+        onResendCodeClick = onResendCodeClick,
+        onEmailCodeClick = onEmailCodeClick,
+    )
+}
+
+@Composable
+private fun OtpCodeInput(
+    enabled: Boolean,
+    otpElement: OTPElement,
+    focusRequester: FocusRequester,
+) {
+    StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
+        OTPElementUI(
+            enabled = enabled,
+            element = otpElement,
+            middleSpacing = 8.dp,
+            boxSpacing = 8.dp,
+            otpInputPlaceholder = " ",
+            boxShape = LinkTheme.shapes.default,
+            modifier = Modifier
+                // 48dp per OTP box plus 8dp per space
+                .width(328.dp)
+                .testTag(VERIFICATION_OTP_TAG),
+            colors = OTPElementColors(
+                selectedBorder = LinkTheme.colors.borderSelected,
+                placeholder = LinkTheme.colors.textPrimary,
+                selectedBackground = LinkTheme.colors.surfacePrimary,
+                background = LinkTheme.colors.surfaceSecondary,
+                unselectedBorder = LinkTheme.colors.surfaceSecondary
+            ),
+            focusRequester = focusRequester,
+            selectedStrokeWidth = 1.5.dp,
+        )
+    }
+}
+
+@Composable
+private fun MoreOptionsMenu(
+    authFlow: VerificationViewState.AuthFlowViewState,
+    isProcessing: Boolean,
+    isSendingNewCode: Boolean,
+    resendLabel: String,
+    onResendCodeClick: () -> Unit,
+    onEmailCodeClick: () -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        TextButtonWithSpinner(
+            text = stringResource(R.string.stripe_link_auth_more_options),
+            isProcessing = isProcessing,
+            isLoading = isSendingNewCode,
+            onClick = { expanded = true },
+            modifier = Modifier.testTag(VERIFICATION_MORE_OPTIONS_TAG),
+        )
+
+        // The M2 menu has no shape parameter; its surface uses the theme's medium shape.
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(medium = LinkTheme.shapes.default)) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(LinkTheme.colors.surfacePrimary),
+            ) {
+                DropdownMenuItem(
+                    modifier = Modifier.testTag(VERIFICATION_MENU_RESEND_TAG),
+                    enabled = authFlow.canResend,
+                    onClick = {
+                        expanded = false
+                        onResendCodeClick()
+                    },
+                ) {
+                    MoreOptionsMenuItemContent(
+                        iconRes = R.drawable.stripe_link_refresh,
+                        text = resendLabel,
+                        enabled = authFlow.canResend,
+                    )
+                }
+                DropdownMenuItem(
+                    modifier = Modifier.testTag(VERIFICATION_MENU_EMAIL_CODE_TAG),
+                    enabled = !isProcessing,
+                    onClick = {
+                        expanded = false
+                        onEmailCodeClick()
+                    },
+                ) {
+                    MoreOptionsMenuItemContent(
+                        iconRes = R.drawable.stripe_link_email,
+                        text = stringResource(R.string.stripe_link_auth_email_code),
+                        enabled = true,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoreOptionsMenuItemContent(
+    @DrawableRes iconRes: Int,
+    text: String,
+    enabled: Boolean,
+) {
+    val alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    Icon(
+        painter = painterResource(iconRes),
+        contentDescription = null,
+        tint = LinkTheme.colors.iconPrimary,
+        modifier = Modifier
+            .size(16.dp)
+            .alpha(alpha),
+    )
+    Spacer(modifier = Modifier.width(12.dp))
+    Text(
+        text = text,
+        style = LinkTheme.typography.body,
+        color = LinkTheme.colors.textPrimary,
+        modifier = Modifier.alpha(alpha),
+    )
+}
+
+@Composable
+private fun StatusContent(
+    isDialog: Boolean,
+    message: ResolvableString?,
+) {
+    Title(isDialog = isDialog)
+    Spacer(modifier = Modifier.size(24.dp))
+    if (message != null) {
+        Text(
+            text = message.resolve(LocalContext.current),
+            modifier = Modifier
+                .testTag(VERIFICATION_STATUS_TAG)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textTertiary,
+        )
+    } else {
+        LinkSpinner(
+            filledColor = LinkTheme.colors.textPrimary,
+            strokeWidth = 3.dp,
+            modifier = Modifier
+                .testTag(VERIFICATION_STATUS_TAG)
+                .size(24.dp)
+        )
     }
 }
 
@@ -206,8 +451,9 @@ private fun LaunchedEffects(
         }
     }
 
-    LaunchedEffect(state.requestFocus) {
-        if (state.requestFocus) {
+    val showsOtp = state.authFlow == null || state.authFlow.screen == LinkAuthFlowState.Screen.Otp
+    LaunchedEffect(state.requestFocus, showsOtp) {
+        if (state.requestFocus && showsOtp) {
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             focusRequester.requestFocus()
             keyboardController?.show()
@@ -233,23 +479,34 @@ private fun LaunchedEffects(
 private fun VerificationBodyContainer(
     isDialog: Boolean,
     linkBrand: LinkBrand,
+    canGoBack: Boolean,
     onBackClicked: () -> Unit,
+    onNavigateBackClicked: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (isDialog) {
-        Column {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Image(
-                    modifier = Modifier
-                        .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-                    painter = painterResource(linkBrand.logoRes(LinkLogoStyle.Primary)),
-                    contentDescription = linkBrand.brandName(),
-                )
+                if (canGoBack) {
+                    AppBarIcon(
+                        icon = R.drawable.stripe_link_back,
+                        contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
+                        onPressed = onNavigateBackClicked,
+                        modifier = Modifier.testTag(VERIFICATION_HEADER_BACK_BUTTON_TAG),
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier
+                            .testTag(VERIFICATION_HEADER_IMAGE_TAG),
+                        painter = painterResource(linkBrand.logoRes(LinkLogoStyle.Primary)),
+                        contentDescription = linkBrand.brandName(),
+                    )
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -342,25 +599,41 @@ internal fun ResendCodeButton(
     isSendingNewCode: Boolean,
     onClick: () -> Unit,
 ) {
+    TextButtonWithSpinner(
+        text = stringResource(id = R.string.stripe_verification_resend),
+        isProcessing = isProcessing,
+        isLoading = isSendingNewCode,
+        onClick = onClick,
+        modifier = Modifier.testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG),
+    )
+}
+
+@Composable
+private fun TextButtonWithSpinner(
+    text: String,
+    isProcessing: Boolean,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
     Box(
-        modifier = Modifier
-            .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
+        modifier = modifier
             .clickable(
-                enabled = !isProcessing && !isSendingNewCode,
+                enabled = !isProcessing && !isLoading,
                 onClick = onClick,
             ),
         contentAlignment = Alignment.Companion.Center
     ) {
         val textAlpha = if (isProcessing) {
             ContentAlpha.disabled
-        } else if (isSendingNewCode) {
+        } else if (isLoading) {
             0f
         } else {
             ContentAlpha.high
         }
 
         Text(
-            text = stringResource(id = R.string.stripe_verification_resend),
+            text = text,
             style = LinkTheme.typography.bodyEmphasized,
             color = LinkTheme.colors.textBrand,
             modifier = Modifier
@@ -368,7 +641,7 @@ internal fun ResendCodeButton(
         )
 
         AnimatedVisibility(
-            visible = isSendingNewCode
+            visible = isLoading
         ) {
             LinkSpinner(
                 filledColor = LinkTheme.colors.textPrimary,
@@ -405,6 +678,7 @@ private fun Preview() {
             ) {
                 VerificationBody(
                     state = VerificationViewState(
+                        authFlow = null,
                         isProcessing = false,
                         requestFocus = false,
                         errorMessage = null,
@@ -424,11 +698,15 @@ private fun Preview() {
                         identifier = FormFieldId.Generic("otp"),
                         controller = OTPController(),
                     ),
+                    phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                     onBack = {},
+                    onNavigateBack = {},
                     onFocusRequested = {},
                     didShowCodeSentNotification = {},
                     onChangeEmailClick = {},
                     onResendCodeClick = {},
+                    onEmailCodeClick = {},
+                    onPhoneNumberSubmitted = {},
                     onConsentShown = {}
                 )
             }
@@ -445,3 +723,9 @@ internal const val VERIFICATION_RESEND_LOADER_TAG = "verification_resend_loader_
 internal const val VERIFICATION_RESEND_CODE_BUTTON_TAG = "verification_resend_code_button_tag"
 internal const val VERIFICATION_HEADER_IMAGE_TAG = "verification_header_image_tag"
 internal const val VERIFICATION_HEADER_BUTTON_TAG = "verification_header_button_tag"
+internal const val VERIFICATION_HEADER_BACK_BUTTON_TAG = "verification_header_back_button_tag"
+internal const val VERIFICATION_RESEND_COUNTDOWN_TAG = "verification_resend_countdown_tag"
+internal const val VERIFICATION_MORE_OPTIONS_TAG = "verification_more_options_tag"
+internal const val VERIFICATION_MENU_RESEND_TAG = "verification_menu_resend_tag"
+internal const val VERIFICATION_MENU_EMAIL_CODE_TAG = "verification_menu_email_code_tag"
+internal const val VERIFICATION_STATUS_TAG = "verification_status_tag"

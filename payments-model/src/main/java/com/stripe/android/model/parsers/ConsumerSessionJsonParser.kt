@@ -42,6 +42,18 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
                 ?.let { array -> (0 until array.length()).map { array.getString(it) } }
                 ?: emptyList()
 
+        val availableVerificationFactors =
+            consumerSessionJson.optJSONArray(FIELD_AVAILABLE_VERIFICATION_FACTORS)
+                ?.let { array ->
+                    (0 until array.length())
+                        .mapNotNull { index -> array.optJSONObject(index) }
+                        .map { parseVerificationFactor(it) }
+                }
+
+        val emailOtpRequiresAdditionalInfo = json.optJSONObject(FIELD_SETTINGS)
+            ?.takeIf { it.has(FIELD_EMAIL_OTP_REQUIRES_ADDITIONAL_INFO) }
+            ?.optBoolean(FIELD_EMAIL_OTP_REQUIRES_ADDITIONAL_INFO)
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             linkSessionKey = optString(consumerSessionJson, FIELD_LINK_SESSION_KEY),
@@ -56,8 +68,20 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             minimumAuthenticationLevel = minimumAuthenticationLevel,
             linkBrand = linkBrand,
             supportedPaymentDetailsTypes = supportedPaymentDetailsTypes,
+            availableVerificationFactors = availableVerificationFactors,
+            emailOtpRequiresAdditionalInfo = emailOtpRequiresAdditionalInfo,
         )
     }
+
+    private fun parseVerificationFactor(json: JSONObject): ConsumerSession.VerificationFactor =
+        ConsumerSession.VerificationFactor(
+            type = ConsumerSession.VerificationFactor.FactorType.fromValue(
+                optString(json, FIELD_VERIFICATION_FACTOR_TYPE).orEmpty()
+            ),
+            id = optString(json, FIELD_VERIFICATION_FACTOR_ID),
+            providesFurtherVerification = json.optBoolean(FIELD_PROVIDES_FURTHER_VERIFICATION, false),
+            temporarilyDisabled = json.optBoolean(FIELD_TEMPORARILY_DISABLED, false),
+        )
 
     private fun parseVerificationSession(json: JSONObject): ConsumerSession.VerificationSession =
         ConsumerSession.VerificationSession(
@@ -91,6 +115,15 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS = "mobile_fallback_webview_params"
         private const val FIELD_CURRENT_AUTHENTICATION_LEVEL = "current_authentication_level"
         private const val FIELD_MINIMUM_AUTHENTICATION_LEVEL = "minimum_authentication_level"
+
+        private const val FIELD_AVAILABLE_VERIFICATION_FACTORS = "available_verification_factors"
+        private const val FIELD_VERIFICATION_FACTOR_TYPE = "type"
+        private const val FIELD_VERIFICATION_FACTOR_ID = "id"
+        private const val FIELD_PROVIDES_FURTHER_VERIFICATION = "provides_further_verification"
+        private const val FIELD_TEMPORARILY_DISABLED = "temporarily_disabled"
+
+        private const val FIELD_SETTINGS = "settings"
+        private const val FIELD_EMAIL_OTP_REQUIRES_ADDITIONAL_INFO = "email_otp_requires_additional_info"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"

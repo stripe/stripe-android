@@ -28,11 +28,13 @@ internal object ExpressCheckoutElementInteractorStateFactory {
             ),
         ),
         buttonLayout: Appearance.ButtonLayout.State = Appearance.ButtonLayout().build(),
+        cornerRadiusDp: Float = Appearance().build().cornerRadiusDp,
         enabled: Boolean = true,
     ): ExpressCheckoutElementInteractor.State {
         return ExpressCheckoutElementInteractor.State(
             expressButtons = expressButtons,
             buttonLayout = buttonLayout,
+            cornerRadiusDp = cornerRadiusDp,
             enabled = enabled,
         )
     }

@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -18,6 +19,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -28,6 +30,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_DISMISS_BUTTON
+import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import androidx.compose.ui.R as ComposeUiR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -42,6 +47,10 @@ class AddressElementPage(
         context.getString(R.string.stripe_paymentsheet_close)
     )
     private val scrim = composeTestRule.onNodeWithContentDescription(context.getString(ComposeUiR.string.close_sheet))
+    private val discardDialogTitle = context.getString(
+        R.string.stripe_paymentsheet_address_element_discard_changes_title
+    )
+    private val discardDialogBody = context.getString(R.string.stripe_paymentsheet_address_element_discard_changes_body)
 
     fun waitUntilVisible() {
         waitForNode(hasText("Shipping Address"))
@@ -87,6 +96,29 @@ class AddressElementPage(
 
     fun clickClose() {
         closeButton.performClick()
+    }
+
+    fun assertDiscardConfirmation(loadingIndicatorTestTag: String) {
+        primaryButton.assertIsNotEnabled()
+        closeButton.assertIsNotEnabled()
+        val dialog = composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG)
+        dialog.assertIsDisplayed()
+        dialog.onChildren().assertAny(hasText(discardDialogTitle))
+        dialog.onChildren().assertAny(hasText(discardDialogBody))
+        composeTestRule.onNodeWithTag(loadingIndicatorTestTag, useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
+    fun assertDiscardConfirmationNotDisplayed() {
+        composeTestRule.onNodeWithTag(TEST_TAG_SIMPLE_DIALOG).assertDoesNotExist()
+    }
+
+    fun keepEditing() {
+        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_DISMISS_BUTTON).performClick()
+    }
+
+    fun discardChanges() {
+        composeTestRule.onNodeWithTag(TEST_TAG_DIALOG_CONFIRM_BUTTON).performClick()
     }
 
     fun dismissViaScrimAccessibilityAction() {
@@ -157,6 +189,10 @@ class AddressElementPage(
 
     fun editName(name: String) {
         replaceText("Full name", name)
+    }
+
+    fun assertName(name: String) {
+        assertTextFieldContains("Full name", name)
     }
 
     private fun replaceText(label: String, text: String) {
