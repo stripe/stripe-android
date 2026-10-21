@@ -94,7 +94,6 @@ internal abstract class BaseSheetViewModel(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = config.googlePlacesApiKey,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-            isPlacesAvailable = false,
             isInlineAutocompleteEnabled = true,
         ),
         placesClient = placesClient,

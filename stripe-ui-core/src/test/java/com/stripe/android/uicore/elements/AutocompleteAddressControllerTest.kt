@@ -172,12 +172,13 @@ class AutocompleteAddressControllerTest {
     )
 
     @Test
-    fun `Element does not use inline autocomplete if Places is not available`() = noAutocompleteTest(
+    fun `Element does not use inline autocomplete when Stripe-hosted autocomplete is disabled`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = false,
+            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = false,
         ),
     )
 
