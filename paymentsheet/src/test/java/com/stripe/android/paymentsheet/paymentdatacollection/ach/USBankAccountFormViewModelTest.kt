@@ -6,6 +6,8 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -56,10 +58,10 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
@@ -130,6 +132,31 @@ class USBankAccountFormViewModelTest {
 
             assertThat(viewModel.requiredFields.value).isTrue()
         }
+
+    @Test
+    fun `required name controls bank form continuation`(
+        @TestParameter(valuesProvider = BankFormNameCaseProvider::class)
+        testCase: BankFormNameCase,
+    ) = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                instantDebits = testCase.instantDebits,
+                formArgs = defaultArgs.formArgs.copy(
+                    billingDetails = PaymentSheet.BillingDetails(email = CUSTOMER_EMAIL),
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = testCase.nameCollectionMode,
+                    ),
+                ),
+            ),
+        )
+
+        testCase.nameInput?.let(viewModel.nameController::onRawValueChange)
+
+        assertThat(viewModel.email.value).isEqualTo(CUSTOMER_EMAIL)
+        assertThat(viewModel.nameController.formFieldValue.value.isComplete)
+            .isEqualTo(testCase.nameIsValid)
+        assertThat(viewModel.requiredFields.value).isEqualTo(testCase.canContinue)
+    }
 
     @Test
     fun `when email and name is invalid then required fields are not filled`() =
@@ -2205,4 +2232,29 @@ class USBankAccountFormViewModelTest {
             country = "US",
         )
     }
+}
+
+internal object BankFormNameCaseProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<BankFormNameCase> = listOf(
+        BankFormNameCase("IBP Always empty", true, CollectionMode.Always, null, false, false),
+        BankFormNameCase("IBP Always whitespace", true, CollectionMode.Always, "   ", false, false),
+        BankFormNameCase("IBP Always valid", true, CollectionMode.Always, "Jenny Rose", true, true),
+        BankFormNameCase("IBP Automatic empty", true, CollectionMode.Automatic, null, false, true),
+        BankFormNameCase("IBP Automatic whitespace", true, CollectionMode.Automatic, "   ", false, true),
+        BankFormNameCase("IBP Never empty", true, CollectionMode.Never, null, false, true),
+        BankFormNameCase("ACH Automatic empty", false, CollectionMode.Automatic, null, false, false),
+        BankFormNameCase("ACH Automatic whitespace", false, CollectionMode.Automatic, "   ", false, false),
+        BankFormNameCase("ACH Automatic valid", false, CollectionMode.Automatic, "Jenny Rose", true, true),
+    )
+}
+
+data class BankFormNameCase(
+    val name: String,
+    val instantDebits: Boolean,
+    val nameCollectionMode: CollectionMode,
+    val nameInput: String?,
+    val nameIsValid: Boolean,
+    val canContinue: Boolean,
+) {
+    override fun toString(): String = name
 }

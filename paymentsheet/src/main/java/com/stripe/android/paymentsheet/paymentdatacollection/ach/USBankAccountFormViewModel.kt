@@ -281,7 +281,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             formFieldValues.all { it.second.isComplete }
         }
     ) { validName, validEmail, validPhone, validAddress ->
-        val validBaseInfo = if (args.instantDebits) {
+        val validBaseInfo = if (args.instantDebits && !collectingName) {
             validEmail
         } else {
             validName && validEmail
