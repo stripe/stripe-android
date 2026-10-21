@@ -240,7 +240,6 @@ internal interface EmbeddedActivityModule {
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                    isPlacesAvailable = false,
                     isInlineAutocompleteEnabled = true,
                 ),
                 placesClient = null,
