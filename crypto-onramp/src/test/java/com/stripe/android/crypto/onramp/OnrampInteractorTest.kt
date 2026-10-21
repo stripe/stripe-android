@@ -1660,7 +1660,7 @@ class OnrampInteractorTest {
 
     @Test
     fun `wallet token contains the selected card summary`(
-        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+        @TestParameter(value = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
         @TestParameter cardCase: WalletCardCase,
     ) = runWalletTokenScenario {
         val paymentMethod = walletPaymentMethod(card = cardCase.card)
@@ -1745,7 +1745,7 @@ class OnrampInteractorTest {
 
     @Test
     fun `wallet cancellation preserves previous selection and summary`(
-        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+        @TestParameter(value = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
     ) = runWalletTokenScenario {
         collectWallet(wallet, walletPaymentMethod())
         val previous = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
@@ -1768,7 +1768,7 @@ class OnrampInteractorTest {
 
     @Test
     fun `wallet collection failure preserves previous selection and summary`(
-        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+        @TestParameter(value = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
     ) = runWalletTokenScenario {
         collectWallet(wallet, walletPaymentMethod())
         val previous = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
