@@ -745,6 +745,7 @@ class InlineAutocompleteControllerTest {
         )
         fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
         queryFlow.value = "123 Main"
 
         delegate.onPredictionSelected("place-id-abc")

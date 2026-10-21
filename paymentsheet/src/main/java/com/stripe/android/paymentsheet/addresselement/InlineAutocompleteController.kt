@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -60,6 +61,11 @@ internal class InlineAutocompleteController(
         predictionsPaused = false
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
+                .onEach { queryAndCountry ->
+                    if (predictionWork?.query != queryAndCountry) {
+                        cancelPredictionWork()
+                    }
+                }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
                 .collect { (q, c) -> onQueryChanged(q, c) }
         }
