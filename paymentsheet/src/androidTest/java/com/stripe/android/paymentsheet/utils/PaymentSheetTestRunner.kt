@@ -69,45 +69,52 @@ internal fun runPaymentSheetTest(
         builder()
     }
 
-    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
-        scenario.onActivity {
-            effectiveApiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
+    withProfiledActivityScenario(MainActivity::class.java) { scenario ->
+        val testContext = TestTimingProfile.measure(TestTimingPhase.ActivitySetup) {
+            scenario.moveToState(Lifecycle.State.CREATED)
+            scenario.onActivity {
+                effectiveApiConfigurationTestType.initializePaymentConfiguration(it)
+                DefaultLinkStore(it.applicationContext).clear()
+            }
+
+            lateinit var paymentSheet: PaymentSheet
+
+            scenario.onActivity { activity ->
+                when (integrationType) {
+                    IntegrationType.Compose -> activity.setContent {
+                        paymentSheet = paymentSheetBuilder.build()
+                    }
+                    IntegrationType.Activity -> {
+                        paymentSheet = paymentSheetBuilder.build(activity)
+                    }
+                }
+            }
+
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            PaymentSheetTestRunnerContext(
+                scenario,
+                paymentSheet,
+                countDownLatch,
+                effectiveApiConfigurationTestType,
+            )
         }
 
-        lateinit var paymentSheet: PaymentSheet
-
-        scenario.onActivity { activity ->
-            when (integrationType) {
-                IntegrationType.Compose -> activity.setContent {
-                    paymentSheet = paymentSheetBuilder.build()
-                }
-                IntegrationType.Activity -> {
-                    paymentSheet = paymentSheetBuilder.build(activity)
-                }
+        TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
+            runTest {
+                block(testContext)
             }
         }
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
-
-        val testContext = PaymentSheetTestRunnerContext(
-            scenario,
-            paymentSheet,
-            countDownLatch,
-            effectiveApiConfigurationTestType,
-        )
-        runTest {
-            block(testContext)
+        TestTimingProfile.measure(TestTimingPhase.Completion) {
+            composeTestRule.waitUntil(
+                conditionDescription = "PaymentSheetResultCallback to be called",
+                timeoutMillis = TimeUnit.SECONDS.toMillis(successTimeoutSeconds),
+            ) {
+                countDownLatch.count == 0L
+            }
+            networkRule.validate()
         }
-
-        composeTestRule.waitUntil(
-            conditionDescription = "PaymentSheetResultCallback to be called",
-            timeoutMillis = TimeUnit.SECONDS.toMillis(successTimeoutSeconds),
-        ) {
-            countDownLatch.count == 0L
-        }
-        networkRule.validate()
     }
 }
 
@@ -160,51 +167,58 @@ internal fun runMultiplePaymentSheetInstancesTest(
         }
     }
 
-    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
-        scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
-            DefaultLinkStore(it.applicationContext).clear()
-        }
-
-        lateinit var firstPaymentSheet: PaymentSheet
-        lateinit var secondPaymentSheet: PaymentSheet
-
-        scenario.onActivity { activity ->
-            activity.setContent {
-                firstPaymentSheet = firstPaymentSheetBuilder.build()
-                secondPaymentSheet = secondPaymentSheetBuilder.build()
+    withProfiledActivityScenario(MainActivity::class.java) { scenario ->
+        val testContext = TestTimingProfile.measure(TestTimingPhase.ActivitySetup) {
+            scenario.moveToState(Lifecycle.State.CREATED)
+            scenario.onActivity {
+                apiConfigurationTestType.initializePaymentConfiguration(it)
+                DefaultLinkStore(it.applicationContext).clear()
             }
+
+            lateinit var firstPaymentSheet: PaymentSheet
+            lateinit var secondPaymentSheet: PaymentSheet
+
+            scenario.onActivity { activity ->
+                activity.setContent {
+                    firstPaymentSheet = firstPaymentSheetBuilder.build()
+                    secondPaymentSheet = secondPaymentSheetBuilder.build()
+                }
+            }
+
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            val paymentSheet = if (testType == MultipleInstancesTestType.RunWithFirst) {
+                firstPaymentSheet
+            } else {
+                secondPaymentSheet
+            }
+
+            PaymentSheetTestRunnerContext(
+                scenario,
+                paymentSheet,
+                countDownLatch,
+                apiConfigurationTestType,
+            )
         }
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
-
-        val paymentSheet = if (testType == MultipleInstancesTestType.RunWithFirst) {
-            firstPaymentSheet
-        } else {
-            secondPaymentSheet
+        TestTimingProfile.measure(TestTimingPhase.ScenarioBody) {
+            block(testContext)
         }
 
-        val testContext = PaymentSheetTestRunnerContext(
-            scenario,
-            paymentSheet,
-            countDownLatch,
-            apiConfigurationTestType,
-        )
-        block(testContext)
+        TestTimingProfile.measure(TestTimingPhase.Completion) {
+            composeTestRule.waitUntil(TimeUnit.SECONDS.toMillis(successTimeoutSeconds)) {
+                countDownLatch.count == 0L
+            }
+            networkRule.validate()
+            assertThat(countDownLatch.count).isEqualTo(0L)
 
-        composeTestRule.waitUntil(TimeUnit.SECONDS.toMillis(successTimeoutSeconds)) {
-            countDownLatch.count == 0L
-        }
-        networkRule.validate()
-        assertThat(countDownLatch.count).isEqualTo(0L)
-
-        if (testType == MultipleInstancesTestType.RunWithFirst) {
-            assertThat(firstCreateIntentCallbackCalled).isTrue()
-            assertThat(secondCreateIntentCallbackCalled).isFalse()
-        } else {
-            assertThat(firstCreateIntentCallbackCalled).isFalse()
-            assertThat(secondCreateIntentCallbackCalled).isTrue()
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
+                assertThat(firstCreateIntentCallbackCalled).isTrue()
+                assertThat(secondCreateIntentCallbackCalled).isFalse()
+            } else {
+                assertThat(firstCreateIntentCallbackCalled).isFalse()
+                assertThat(secondCreateIntentCallbackCalled).isTrue()
+            }
         }
     }
 }

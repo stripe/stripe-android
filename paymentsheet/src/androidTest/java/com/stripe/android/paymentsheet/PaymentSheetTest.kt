@@ -47,7 +47,7 @@ internal class PaymentSheetTest(
     private val networkRule = NetworkRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+    val testRules: TestRules = TestRules.create(networkRule = networkRule, profile = true) {
         around(IntentsRule())
     }
 
