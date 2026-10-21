@@ -168,7 +168,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-                    requestOptions = requestOptions,
                 )
             }
         },

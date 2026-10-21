@@ -472,6 +472,10 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+    override fun buildPaymentMethodData(paymentMethodCreateParams: PaymentMethodCreateParams): Map<String, Any> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun listPaymentDetails(
         clientSecret: String,
         paymentMethodTypes: Set<String>,

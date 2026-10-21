@@ -34,6 +34,21 @@ class ConfirmCheckoutSessionParamsTest {
     }
 
     @Test
+    fun `serializes new payment method data`() {
+        val paymentMethodData = mapOf(
+            "type" to "card",
+            "card" to mapOf("token" to "tok_card"),
+            "payment_user_agent" to "stripe-android;Checkout",
+        )
+        val params = createParams().copy(
+            paymentMethodId = null,
+            paymentMethodData = paymentMethodData,
+        ).toParamMap()
+
+        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodData)
+    }
+
+    @Test
     fun `serializes Link payment method type`() {
         val params = createParams().copy(expectedPaymentMethodType = PaymentMethod.Type.Link.code).toParamMap()
 
@@ -117,6 +132,7 @@ class ConfirmCheckoutSessionParamsTest {
         return ConfirmCheckoutSessionParams(
             collectedInformation = collectedInformation,
             paymentMethodId = "pm_test_123",
+            paymentMethodData = null,
             expectedPaymentMethodType = PaymentMethod.Type.Card.code,
             clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
             returnUrl = "stripesdk://return_url",

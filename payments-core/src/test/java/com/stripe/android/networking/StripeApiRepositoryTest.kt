@@ -51,6 +51,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.BILLING_DETAIL
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -1728,6 +1729,25 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         assertThat(apiRequest.params?.get("payment_method")).isEqualTo("")
+    }
+
+    @Test
+    fun `buildPaymentMethodData preserves payment details and adds attribution and fraud signals`() {
+        val fraudDetectionData = requireNotNull(fraudDetectionDataRepository.getCached())
+        val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+            productUsage = setOf("CardInputView"),
+            radarOptions = RadarOptions(
+                hCaptchaToken = "hcaptcha_token",
+                androidVerificationObject = null,
+            ),
+        )
+
+        val params = create(setOf("Checkout")).buildPaymentMethodData(createParams)
+
+        assertThat(params).containsAtLeastEntriesIn(createParams.toParamMap())
+        assertThat(params["payment_user_agent"])
+            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};Checkout;CardInputView")
+        assertThat(params).containsAtLeastEntriesIn(fraudDetectionData.params)
     }
 
     @Test
