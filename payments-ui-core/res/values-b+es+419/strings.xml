@@ -91,6 +91,8 @@
   <string name="stripe_payment_method_bank">Banco</string>
   <!-- Label shown in the payment type picker describing a card payment -->
   <string name="stripe_payment_method_debit_or_credit_card">Tarjeta de débito o crédito</string>
+  <!-- Title shown above a card entry form when the customer has no saved cards. -->
+  <string name="stripe_paymentsheet_add_a_card">Agrega una tarjeta</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Agregar tarjeta</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
@@ -26,6 +27,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +41,7 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val resultStateHolder = AddressElementResultStateHolder()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -72,7 +75,7 @@ class InputAddressViewModelTest {
     val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `onScreenShown fires onShow with the form country from the initial address`() = runScenario(
@@ -329,7 +332,7 @@ class InputAddressViewModelTest {
     fun `cancellation analytics keeps merchant prefill out of autocomplete data`() = runScenario(
         address = EXPECTED_ADDRESS,
     ) {
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
             FakeAddressElementEventReporter.AddressCall(
@@ -362,7 +365,7 @@ class InputAddressViewModelTest {
         )
         viewModel.setRawValues(mapOf(FormFieldId.Line1 to "510 Townsend Sta"))
 
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         assertThat(eventReporter.canceledCalls.awaitItem()).isEqualTo(
             FakeAddressElementEventReporter.AddressCall(
@@ -401,7 +404,7 @@ class InputAddressViewModelTest {
             assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
         }
 
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
 
         val cancellationCall = eventReporter.canceledCalls.awaitItem()
         assertThat(cancellationCall.addressDetails.address?.country).isEqualTo("US")
@@ -415,7 +418,7 @@ class InputAddressViewModelTest {
     fun `pending cancellation is reported when the view model is created`() = runScenario(
         address = EXPECTED_ADDRESS,
         beforeViewModelCreation = {
-            assertThat(resultStateHolder.onUserCancel()).isTrue()
+            assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
             assertThat(resultStateHolder.state.value).isEqualTo(State.Canceling)
         },
     ) {
@@ -429,8 +432,8 @@ class InputAddressViewModelTest {
 
     @Test
     fun `duplicate cancellation requests report only once`() = runScenario {
-        assertThat(resultStateHolder.onUserCancel()).isTrue()
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isTrue()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         val cancellationCall = eventReporter.canceledCalls.awaitItem()
         assertThat(cancellationCall.addressDetails.address?.country)
@@ -445,7 +448,7 @@ class InputAddressViewModelTest {
     fun `cancellation while saving does not report cancellation analytics`() = runScenario {
         assertThat(resultStateHolder.tryStartSaving()).isTrue()
 
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         assertThat(resultStateHolder.state.value).isEqualTo(State.Saving)
         eventReporter.canceledCalls.expectNoEvents()
@@ -467,7 +470,7 @@ class InputAddressViewModelTest {
             )
         )
 
-        assertThat(resultStateHolder.onUserCancel()).isFalse()
+        assertThat(resultStateHolder.onUserCancel(shouldConfirmCancellation = false)).isFalse()
 
         eventReporter.canceledCalls.expectNoEvents()
     }
@@ -612,6 +615,152 @@ class InputAddressViewModelTest {
     @Test
     fun `default checkbox should emit false to start by default`() = runScenario(withPlacesClient = false) {
         assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `validation without input edits keeps the form clean`() = runScenario {
+        val controller = viewModel.addressController()
+        assertThat(controller.validationMessage.value).isNull()
+
+        viewModel.clickPrimaryButton(completedFormValues = null, checkboxChecked = false)
+
+        assertThat(controller.validationMessage.value).isNotNull()
+        assertThat(viewModel.hasChanges()).isFalse()
+        assertThat(viewModel.formEnabled.value).isTrue()
+        assertThat(resultStateHolder.state.value).isEqualTo(State.Idle)
+    }
+
+    @Test
+    fun `changing an invisible checkbox keeps the form clean`() = runScenario {
+        viewModel.clickCheckbox(true)
+
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+        assertThat(viewModel.hasChanges()).isFalse()
+    }
+
+    @Test
+    fun `selecting an inline autocomplete prediction makes the form dirty`() = runScenario {
+        assertThat(viewModel.hasChanges()).isFalse()
+
+        selectAutocompletePrediction(SELECTED_AUTOCOMPLETE_ADDRESS)
+
+        assertThat(viewModel.addressFormController.uncompletedFormValues.value[FormFieldId.Line1]?.value)
+            .isEqualTo(SELECTED_AUTOCOMPLETE_ADDRESS.line1)
+        assertThat(viewModel.hasChanges()).isTrue()
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `same as billing form starts clean`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .allowedCountries(setOf("US"))
+            .billingAddress(
+                PaymentSheet.BillingDetails(
+                    name = "John Doe",
+                    address = PaymentSheet.Address(
+                        city = "San Francisco",
+                        country = "US",
+                        line1 = "123 Apple Street",
+                        postalCode = "94107",
+                        state = "CA",
+                    ),
+                )
+            )
+            .build()
+    ) {
+        assertThat(viewModel.hasChanges()).isFalse()
+    }
+
+    @OptIn(AddressElementSameAsBillingPreview::class)
+    @Test
+    fun `same as billing edit makes form dirty and reverting clears it`() =
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .billingAddress(
+                    PaymentSheet.BillingDetails(
+                        name = "John Doe",
+                        address = PaymentSheet.Address(
+                            city = "San Francisco",
+                            country = "US",
+                            line1 = "123 Apple Street",
+                            postalCode = "94107",
+                            state = "CA",
+                        ),
+                    )
+                )
+                .build()
+        ) {
+            viewModel.clickBillingSameAsShipping(newValue = false)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertThat(
+                viewModel.addressFormController.uncompletedFormValues.value[FormFieldId.Line1]?.value
+            ).isNotEqualTo("123 Apple Street")
+            assertThat(viewModel.hasChanges()).isTrue()
+
+            viewModel.clickBillingSameAsShipping(newValue = true)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertThat(placesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Apple Street")
+            assertThat(viewModel.hasChanges()).isFalse()
+        }
+
+    @Test
+    fun `autocomplete edit makes form dirty`() {
+        val autocompleteEvents = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(null)
+
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .allowedCountries(setOf("US"))
+                .build(),
+            beforeViewModelCreation = {
+                whenever(
+                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                        AddressElementNavigator.AutocompleteEvent.KEY
+                    )
+                ).thenReturn(autocompleteEvents)
+            },
+        ) {
+            autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
+                PaymentSheet.Address(
+                    city = "San Francisco",
+                    country = "US",
+                    line1 = "123 Apple Street",
+                    postalCode = "94107",
+                    state = "CA",
+                )
+            )
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertThat(placesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Apple Street")
+
+            assertThat(
+                viewModel.addressFormController.uncompletedFormValues.value[FormFieldId.Line1]?.value
+            ).isEqualTo("123 Apple Street")
+            assertThat(viewModel.hasChanges()).isTrue()
+
+            autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
+                PaymentSheet.Address(country = "US")
+            )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(viewModel.hasChanges()).isFalse()
+        }
+    }
+
+    @Test
+    fun `additional checkbox edit makes form dirty and reverting clears it`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .additionalFields(
+                AddressLauncher.AdditionalFieldsConfiguration(
+                    checkboxLabel = "Use this address",
+                )
+            )
+            .build()
+    ) {
+        viewModel.clickCheckbox(true)
+        assertThat(viewModel.hasChanges()).isTrue()
+
+        viewModel.clickCheckbox(false)
+        assertThat(viewModel.hasChanges()).isFalse()
     }
 
     @Test
@@ -1312,6 +1461,11 @@ class InputAddressViewModelTest {
         viewModel.shippingSameAsBillingState.test {
             assertThat(awaitItem()).isEqualTo(expectedShippingSameAsBillingState)
         }
+    }
+
+    private fun InputAddressViewModel.addressController(): AutocompleteAddressController {
+        val section = addressFormController.elements.single() as SectionElement
+        return (section.fields.single() as AutocompleteAddressElement).sectionFieldErrorController()
     }
 
     private fun InputAddressViewModel.setRawValues(

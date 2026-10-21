@@ -29,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KrCardDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MbWayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MoMoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MonduDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NaverPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.NgBankTransferDefinition
@@ -53,6 +54,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.TouchNGoDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.TrueMoneyDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
@@ -91,6 +94,7 @@ internal object PaymentMethodRegistry {
         MbWayDefinition,
         MoMoDefinition,
         MobilePayDefinition,
+        MonduDefinition,
         MultibancoDefinition,
         NaverPayDefinition,
         NgBankTransferDefinition,
@@ -115,6 +119,8 @@ internal object PaymentMethodRegistry {
         ShopeePayDefinition,
         SunbitDefinition,
         SwishDefinition,
+        TouchNGoDefinition,
+        TrueMoneyDefinition,
         TwintDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,

@@ -18,6 +18,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -143,14 +144,30 @@ internal interface LinkAccountManager {
     suspend fun createLinkAccountSession(): Result<LinkAccountSession>
 
     /**
-     * Triggers sending a verification code to the user.
+     * Triggers sending a verification code of the given [type] to the user.
+     *
+     * @param accountPhoneNumber The E.164 phone number confirmed by the user before an email OTP.
+     * @param isResend Whether this is a user-initiated resend of the code.
      */
-    suspend fun startVerification(isResendSmsCode: Boolean = false): Result<LinkAccount>
+    suspend fun startVerification(
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        isResend: Boolean,
+    ): Result<LinkAccount>
 
     /**
-     * Confirms a verification code sent to the user.
+     * Confirms a verification code of the given [type] sent to the user.
      */
-    suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount>
+    suspend fun confirmVerification(
+        code: String,
+        type: VerificationType,
+        consentGranted: Boolean?,
+    ): Result<LinkAccount>
+
+    /**
+     * Recovers expired or invalid session credentials by repeating the original email lookup.
+     */
+    suspend fun recoverSession(): Result<LinkAccount>
 
     /**
      * Update consent status for the current Link account.

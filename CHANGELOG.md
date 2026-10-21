@@ -3,6 +3,15 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
+* [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
+
+### AddressElement
+* [Changed] Address Element asks for confirmation before discarding unsaved address changes.
+
+## 23.24.0 - 2026-10-19
+
 ### Crypto Onramp
 * [Changed] Google Pay and Samsung Pay card sublabels now include the funding type (Credit, Debit, or Prepaid), falling back to Card when unavailable, matching Link's formatting.
 
@@ -10,10 +19,12 @@ NEXT_VERSION_BUMP: MINOR
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
 ### PaymentSheet
+* [ADDED] Added native support for email OTP and multi-factor authentication (MFA) accounts to the Link authentication flow.
 * [CHANGED][15002](https://github.com/stripe/stripe-android/pull/15002) Moved `ApiConfigurationPreview` from the `paymentsheet` module to `stripe-core`. Update preview opt-in imports to `com.stripe.android.core.ApiConfigurationPreview`.
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14831](https://github.com/stripe/stripe-android/pull/14831) Added Naira Wallet API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14832](https://github.com/stripe/stripe-android/pull/14832) Added Mondu API bindings and PaymentSheet support for PaymentIntents.
 
 ### Identity
 * [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.

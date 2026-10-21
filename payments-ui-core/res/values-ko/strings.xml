@@ -91,6 +91,8 @@
   <string name="stripe_payment_method_bank">은행</string>
   <!-- Label shown in the payment type picker describing a card payment -->
   <string name="stripe_payment_method_debit_or_credit_card">직불 또는 신용 카드</string>
+  <!-- Title shown above a card entry form when the customer has no saved cards. -->
+  <string name="stripe_paymentsheet_add_a_card">카드 추가</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">카드 추가</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

@@ -144,8 +144,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
-                productUsage = setOf("Checkout"),
+                eventName = "checkout_elements.confirm.failed",
+                productUsage = setOf("checkout_elements"),
                 analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),

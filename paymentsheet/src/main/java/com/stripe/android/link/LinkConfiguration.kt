@@ -62,6 +62,13 @@ internal data class LinkConfiguration(
     val enableLinkPaymentSelectionHint: Boolean
         get() = flags["link_show_prefer_debit_card_hint"] == true
 
+    /**
+     * Whether native verification supports email OTP, phone-number confirmation and multi-factor auth, rather than
+     * SMS OTP only.
+     */
+    val enableMfaAuthFlow: Boolean
+        get() = flags["link_mobile_enable_mfa_auth_flow"] == true
+
     val supportsInstantDebitsOnboarding: Boolean
         get() = linkSupportedPaymentMethodsOnboardingEnabled.contains("INSTANT_DEBITS")
 

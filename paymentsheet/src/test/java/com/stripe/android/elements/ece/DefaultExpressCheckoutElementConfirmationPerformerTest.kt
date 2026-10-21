@@ -1,6 +1,8 @@
 package com.stripe.android.elements.ece
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
@@ -27,17 +29,19 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -247,6 +251,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         )
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         state: CheckoutControllerState?,
         expressButton: ExpressButton,
@@ -267,11 +272,19 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             resultCallback = results::add,
             viewModelScope = backgroundScope,
         )
-        val paymentSheetEventReporter = FakeEventReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
+        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
+        val apiConfigurationProvider = Provider { apiConfiguration }
         val analyticsPerformer = CheckoutAnalyticsPerformer(
             confirmationHandler = confirmationHandler,
-            eventReporter = paymentSheetEventReporter,
             savedStateHandle = savedStateHandle,
+            context = ApplicationProvider.getApplicationContext<Context>(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = FakeDurationProvider(),
+            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             analyticsPerformer.reportConfirmationResults()
@@ -291,7 +304,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             errorReporter = errorReporter,
-            paymentSheetEventReporter = paymentSheetEventReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
             results = results,
@@ -299,16 +311,16 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         results.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        analyticsRequestExecutor.validate()
         sessionRefresher.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
-        paymentSheetEventReporter.validate()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
-        val paymentSheetEventReporter: FakeEventReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
         val results: Turbine<CheckoutController.Result>,

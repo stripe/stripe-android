@@ -114,6 +114,29 @@ internal class AddressElementActivityTestRunner(
             awaitAnalytics(startedRequest)
         }
 
+        fun assertDirtyDismissal(
+            editedName: String,
+            requestDismissal: () -> Unit,
+        ) {
+            addressPage.assertReadyToSave()
+            addressPage.editName(editedName)
+            requestDismissal()
+
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
+
+            addressPage.keepEditing()
+            addressPage.assertDiscardConfirmationNotDisplayed()
+            addressPage.assertName(editedName)
+            addressPage.assertReadyToSave()
+
+            requestDismissal()
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            addressPage.discardChanges()
+
+            assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+        }
+
         fun assertDismissalBlocked() {
             assertSaving()
             addressPage.assertCloseDisabled()
