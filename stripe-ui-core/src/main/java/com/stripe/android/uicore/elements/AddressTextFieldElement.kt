@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 class AddressTextFieldElement(
     override val identifier: FormFieldId,
     label: ResolvableString,
-    addressInputMode: AddressInputMode,
     inlineAutocompleteHandler: InlineAutocompleteHandler?,
     reportsFormValue: Boolean,
     initialQuery: String,
@@ -21,7 +20,6 @@ class AddressTextFieldElement(
     override val controller: AddressTextFieldController =
         AddressTextFieldController(
             label = label,
-            addressInputMode = addressInputMode,
             inlineAutocompleteHandler = inlineAutocompleteHandler,
             reportsFormValue = reportsFormValue,
             initialQuery = initialQuery,

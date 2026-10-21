@@ -27,7 +27,9 @@ class AddressFormControllerTest {
     fun `Ensure expected set of elements`() = fieldsTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = "123456",
+            googlePlacesApiKey = null,
+            isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = true,
         ),
         launcherConfig = AddressLauncher.Configuration(
             address = AddressDetails(
@@ -112,7 +114,9 @@ class AddressFormControllerTest {
     fun `Complete form values are set when element flows are complete`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = "123",
+            googlePlacesApiKey = null,
+            isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = true,
         )
     ) {
         val addressFormController = createAddressFormController()
@@ -197,7 +201,9 @@ class AddressFormControllerTest {
     fun `Complete form values is empty when element flows are not complete`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = "123",
+            googlePlacesApiKey = null,
+            isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = true,
         ),
     ) {
         val addressFormController = createAddressFormController()
@@ -227,7 +233,9 @@ class AddressFormControllerTest {
     fun `Last text field identifier points to last element`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = "123",
+            googlePlacesApiKey = null,
+            isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = true,
         ),
     ) {
         val addressFormController = createAddressFormController()
@@ -356,7 +364,7 @@ class AddressFormControllerTest {
     private fun test(
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = "123",
+            googlePlacesApiKey = null,
         ),
         block: suspend TestAutocompleteAddressInteractor.Scenario.() -> Unit
     ) = runTest {
