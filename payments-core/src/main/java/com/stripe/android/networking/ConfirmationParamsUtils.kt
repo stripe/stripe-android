@@ -11,8 +11,6 @@ import com.stripe.android.model.SourceParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ConfirmationParamsUtils {
-    private val fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
-
     fun prepareConfirmationParams(
         params: Map<String, Any>,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
@@ -41,7 +39,7 @@ object ConfirmationParamsUtils {
             )
         } ?: params
 
-        return fraudDetectionDataParamsUtils.addFraudDetectionData(
+        return FraudDetectionDataParamsUtils.addFraudDetectionData(
             attributedParams,
             fraudDetectionData,
         )

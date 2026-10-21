@@ -3,10 +3,10 @@ package com.stripe.android.core.frauddetection
 import androidx.annotation.RestrictTo
 
 /**
- * Utility class for adding fraud detection data to API params
+ * Utility for adding fraud detection data to API params
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FraudDetectionDataParamsUtils {
+object FraudDetectionDataParamsUtils {
     fun addFraudDetectionData(
         params: Map<String, *>,
         fraudDetectionData: FraudDetectionData?
