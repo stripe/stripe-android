@@ -1613,28 +1613,13 @@ class OnrampInteractorTest {
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
         interactor.onCollectPaymentMethod(PaymentMethodType.SamsungPay)
 
-        val platformSettings = mock<GetPlatformSettingsResponse>()
-        doReturn("pk_platform_123").whenever(platformSettings).publishableKey
-        whenever(
-            cryptoApiRepository.getPlatformSettings(
-                cryptoCustomerId = eq("cpt_123"),
-                countryHint = anyOrNull(),
-            ),
-        ).thenReturn(Result.success(platformSettings))
+        whenever(cryptoApiRepository.getPlatformSettings("cpt_123", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_platform_123")))
         val paymentMethod = createCardPaymentMethod()
-        whenever(
-            cryptoApiRepository.createSamsungPayPaymentMethod(
-                paymentCredential = "{\"method\":\"3DS\"}",
-                platformPublishableKey = "pk_platform_123",
-            ),
-        ).thenReturn(Result.success(paymentMethod))
-        whenever(
-            cryptoApiRepository.createPaymentToken(
-                cryptoCustomerId = "cpt_123",
-                paymentMethod = paymentMethod.id,
-                countryHint = null,
-            ),
-        ).thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
+        whenever(cryptoApiRepository.createSamsungPayPaymentMethod("{\"method\":\"3DS\"}", "pk_platform_123"))
+            .thenReturn(Result.success(paymentMethod))
+        whenever(cryptoApiRepository.createPaymentToken("cpt_123", paymentMethod.id, null))
+            .thenReturn(Result.success(CreatePaymentTokenResponse(id = "crypto_token_123")))
 
         val platformPublishableKey = interactor.getOrFetchPlatformKey().getOrThrow()
         val collectionResult = interactor.handleSamsungPayPaymentResult(
@@ -1888,7 +1873,9 @@ class OnrampInteractorTest {
         AbsentCard(null, null);
 
         val card: PaymentMethod.Card?
-            get() = if (this == AbsentCard) null else {
+            get() = if (this == AbsentCard) {
+                null
+            } else {
                 PaymentMethod.Card(funding = funding, brand = CardBrand.Visa, last4 = "4242")
             }
     }
