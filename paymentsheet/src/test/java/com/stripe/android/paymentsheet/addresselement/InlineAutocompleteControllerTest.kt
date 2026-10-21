@@ -26,13 +26,24 @@ import org.robolectric.RobolectricTestRunner
 class InlineAutocompleteControllerTest {
 
     @Test
-    fun `initial state is Idle`() = runScenario {
+    fun `predictions start when typing in a focused field`() = runScenario {
+        queryFlow.value = "123 Main"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+
+        delegate.onFocusGained()
+        queryFlow.value = "123 Main St"
+        advanceTimeBy(500)
+
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main St")
     }
 
     @Test
     fun `query shorter than minimum chars stays Idle`() = runScenario {
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "ab"
         advanceTimeBy(500)
@@ -61,6 +72,7 @@ class InlineAutocompleteControllerTest {
     ) {
         countryFlow.value = "CA"
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
@@ -361,6 +373,7 @@ class InlineAutocompleteControllerTest {
                 Address(line1 = "123 Main Street", country = "US")
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.onPredictionSelected("place_1")
             advanceTimeBy(100)
@@ -442,6 +455,7 @@ class InlineAutocompleteControllerTest {
             FindAutocompletePredictionsResponse(emptyList())
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         // Focus lost before the debounce fires — cancels observeJob
@@ -1048,6 +1062,7 @@ class InlineAutocompleteControllerTest {
                 FindAutocompletePredictionsResponse(emptyList())
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.expandFormFromInline()
             eventCalls.awaitItem()
