@@ -16,7 +16,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
@@ -139,7 +138,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+            productUsageTokens = emptySet(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

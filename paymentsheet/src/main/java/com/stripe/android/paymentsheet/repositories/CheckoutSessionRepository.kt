@@ -11,19 +11,21 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.prepareConfirmationParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    private val confirmationParamsFactory: ConfirmationParamsFactory,
+    @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -81,11 +83,12 @@ internal class CheckoutSessionRepository @Inject constructor(
             fraudDetectionDataRepository.refresh()
         }
 
-        val requestParams = confirmationParamsFactory.create(
+        val requestParams = prepareConfirmationParams(
             params.toParamMap(),
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
+            productUsageTokens = productUsageTokens,
         )
         return executePost(
             url = confirmUrl(id),

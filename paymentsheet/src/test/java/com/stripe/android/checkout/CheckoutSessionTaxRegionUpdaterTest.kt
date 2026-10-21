@@ -8,7 +8,6 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -118,7 +117,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+            productUsageTokens = emptySet(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

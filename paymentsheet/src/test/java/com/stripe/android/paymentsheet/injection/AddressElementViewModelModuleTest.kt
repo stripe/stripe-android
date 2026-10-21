@@ -11,7 +11,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
-import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -397,7 +396,7 @@ class AddressElementViewModelModuleTest {
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
-                confirmationParamsFactory = ConfirmationParamsFactory(productUsageTokens = emptySet()),
+                productUsageTokens = emptySet(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
