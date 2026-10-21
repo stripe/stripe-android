@@ -1,8 +1,12 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.onrampCardDetails
 import com.stripe.android.crypto.onramp.model.platformPayKycInfo
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -272,6 +276,80 @@ class PaymentMethodKtxTest {
 
         assertThat(result).isNull()
     }
+
+    @Test
+    fun `debit card summary includes brand and last four`() {
+        val details = cardPaymentMethod(funding = "debit").onrampCardDetails()
+
+        assertThat(details?.funding).isEqualTo(CardFunding.Debit)
+        assertThat(details?.brand).isEqualTo(CardBrand.Visa)
+        assertThat(details?.last4).isEqualTo("4242")
+    }
+
+    @Test
+    fun `credit card summary maps funding`() {
+        assertThat(cardPaymentMethod(funding = "credit").onrampCardDetails()?.funding)
+            .isEqualTo(CardFunding.Credit)
+    }
+
+    @Test
+    fun `prepaid card summary maps funding`() {
+        assertThat(cardPaymentMethod(funding = "prepaid").onrampCardDetails()?.funding)
+            .isEqualTo(CardFunding.Prepaid)
+    }
+
+    @Test
+    fun `missing funding maps to unknown`() {
+        assertThat(cardPaymentMethod(funding = null).onrampCardDetails()?.funding)
+            .isEqualTo(CardFunding.Unknown)
+    }
+
+    @Test
+    fun `unrecognized funding maps to unknown`() {
+        assertThat(cardPaymentMethod(funding = "unrecognized").onrampCardDetails()?.funding)
+            .isEqualTo(CardFunding.Unknown)
+    }
+
+    @Test
+    fun `funding mapping is case insensitive`() {
+        assertThat(cardPaymentMethod(funding = "DEBIT").onrampCardDetails()?.funding)
+            .isEqualTo(CardFunding.Debit)
+    }
+
+    @Test
+    fun `missing card produces no summary`() {
+        assertThat(PaymentMethod.Builder().setId("test-payment-method").build().onrampCardDetails()).isNull()
+    }
+
+    @Test
+    fun `missing last four and unknown brand are preserved`() {
+        val paymentMethod = PaymentMethod.Builder()
+            .setId("test-payment-method")
+            .setCard(PaymentMethod.Card())
+            .build()
+
+        val details = requireNotNull(paymentMethod.onrampCardDetails())
+
+        assertThat(details.funding).isEqualTo(CardFunding.Unknown)
+        assertThat(details.brand).isEqualTo(CardBrand.Unknown)
+        assertThat(details.last4).isNull()
+    }
+
+    @Test
+    fun `token-only result constructor remains available`() {
+        val result = OnrampCreateCryptoPaymentTokenResult.Completed("test-token")
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.cardDetails).isNull()
+        val constructor = OnrampCreateCryptoPaymentTokenResult.Completed::class.java
+            .getConstructor(String::class.java)
+        assertThat(constructor.newInstance("test-token").cryptoPaymentToken).isEqualTo("test-token")
+    }
+
+    private fun cardPaymentMethod(funding: String?): PaymentMethod = PaymentMethod.Builder()
+        .setId("test-payment-method")
+        .setCard(PaymentMethod.Card(funding = funding, brand = CardBrand.Visa, last4 = "4242"))
+        .build()
 
     private fun createPaymentMethod(
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethod.BillingDetails(),

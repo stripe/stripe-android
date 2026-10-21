@@ -39,6 +39,7 @@ import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCardDetails
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -70,6 +71,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.onrampCardDetails
 import com.stripe.android.crypto.onramp.model.platformPayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
@@ -784,7 +786,10 @@ internal class OnrampInteractor @Inject constructor(
                             paymentMethodType = _state.value.collectingPaymentMethodType
                         )
                     )
-                    OnrampCreateCryptoPaymentTokenResult.Completed(cryptoPaymentToken.id)
+                    OnrampCreateCryptoPaymentTokenResult.Completed(
+                        cryptoPaymentToken = cryptoPaymentToken.id,
+                        cardDetails = (state.selectedPaymentSource as? SelectedPaymentSource.Wallet)?.cardDetails,
+                    )
                 },
                 onFailure = { error ->
                     val mappedError = mapError(Operation.CreateCryptoPaymentToken, error)
@@ -1093,6 +1098,7 @@ internal class OnrampInteractor @Inject constructor(
                 selectedPaymentSource = SelectedPaymentSource.GooglePay(
                     paymentMethodId = paymentMethod.id,
                     platformPublishableKey = platformPublishableKey,
+                    cardDetails = paymentMethod.onrampCardDetails(),
                 )
             )
         }
@@ -1116,6 +1122,7 @@ internal class OnrampInteractor @Inject constructor(
                 selectedPaymentSource = SelectedPaymentSource.SamsungPay(
                     paymentMethodId = paymentMethod.id,
                     platformPublishableKey = platformPublishableKey,
+                    cardDetails = paymentMethod.onrampCardDetails(),
                 ),
             )
         }
@@ -1638,11 +1645,13 @@ internal sealed interface SelectedPaymentSource {
     sealed interface Wallet : SelectedPaymentSource {
         val paymentMethodId: String
         val platformPublishableKey: String?
+        val cardDetails: OnrampCardDetails?
     }
 
     data class GooglePay(
         override val paymentMethodId: String,
         override val platformPublishableKey: String?,
+        override val cardDetails: OnrampCardDetails?,
     ) : Wallet {
         override val analyticsValue: String = "google_pay"
     }
@@ -1650,6 +1659,7 @@ internal sealed interface SelectedPaymentSource {
     data class SamsungPay(
         override val paymentMethodId: String,
         override val platformPublishableKey: String,
+        override val cardDetails: OnrampCardDetails?,
     ) : Wallet {
         override val analyticsValue: String = "samsung_pay"
     }

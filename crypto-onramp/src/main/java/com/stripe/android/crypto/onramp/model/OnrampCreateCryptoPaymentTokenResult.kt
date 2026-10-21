@@ -11,11 +11,16 @@ sealed interface OnrampCreateCryptoPaymentTokenResult {
     /**
      * Creating the token was completed.
      * @param cryptoPaymentToken The token that was created.
+     * @param cardDetails Card summary for the same selected wallet payment method as the token.
+     * Available for Google Pay and Samsung Pay when card data is present; null for Link.
      */
     @ExperimentalCryptoOnramp
     class Completed internal constructor(
-        val cryptoPaymentToken: String
-    ) : OnrampCreateCryptoPaymentTokenResult
+        val cryptoPaymentToken: String,
+        val cardDetails: OnrampCardDetails?,
+    ) : OnrampCreateCryptoPaymentTokenResult {
+        internal constructor(cryptoPaymentToken: String) : this(cryptoPaymentToken, null)
+    }
 
     /**
      * Creating the token failed.

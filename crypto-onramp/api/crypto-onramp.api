@@ -347,6 +347,13 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public final fun verifyKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 }
 
+public final class com/stripe/android/crypto/onramp/model/OnrampCardDetails {
+	public static final field $stable I
+	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public final fun getFunding ()Lcom/stripe/android/model/CardFunding;
+	public final fun getLast4 ()Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutCallback {
 	public abstract fun onResult (Lcom/stripe/android/crypto/onramp/model/OnrampCheckoutResult;)V
 }
@@ -430,6 +437,7 @@ public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCre
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
 	public static final field $stable I
+	public final fun getCardDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampCardDetails;
 	public final fun getCryptoPaymentToken ()Ljava/lang/String;
 }
 

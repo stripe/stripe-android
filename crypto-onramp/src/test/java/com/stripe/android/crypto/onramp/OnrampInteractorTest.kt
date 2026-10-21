@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -94,6 +95,8 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -103,6 +106,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -116,11 +120,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.RuntimeEnvironment
 import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 @Suppress("LargeClass")
 class OnrampInteractorTest {
     private val linkController: LinkController = mock()
@@ -348,8 +352,10 @@ class OnrampInteractorTest {
         whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         interactor.configure(createConfigurationState(cryptoCustomerId = "crc_customer"))
         whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_us"))
-            .thenReturn(Result.success(createCardPaymentMethod()))
+            .thenReturn(Result.success(walletPaymentMethod()))
         interactor.handleSamsungPayPaymentResult(SamsungPayResult.Completed("credential", kycInfo = null), "pk_us")
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
+        assertThat(selected.cardDetails?.funding).isEqualTo(CardFunding.Debit)
         whenever(cryptoApiRepository.getPlatformSettings("crc_customer", null))
             .thenReturn(Result.success(GetPlatformSettingsResponse("pk_gb")))
 
@@ -1501,6 +1507,10 @@ class OnrampInteractorTest {
 
     @Test
     fun testCreateCryptoPaymentTokenIsSuccessful() = runTest {
+        interactor.onGooglePayPresented("pk_test_wallet")
+        interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(walletPaymentMethod()))
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
+        assertThat(selected.cardDetails?.funding).isEqualTo(CardFunding.Debit)
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
         interactor.onLinkControllerState(mockLinkStateWithSelectedPaymentPreview())
 
@@ -1538,6 +1548,9 @@ class OnrampInteractorTest {
         val result = interactor.createCryptoPaymentToken()
         assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
 
+        assertThat((result as OnrampCreateCryptoPaymentTokenResult.Completed).cryptoPaymentToken)
+            .isEqualTo("crypto_token_123")
+        assertThat(result.cardDetails).isNull()
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
     }
 
@@ -1635,9 +1648,14 @@ class OnrampInteractorTest {
             .isEqualTo(PaymentMethodDisplayData.Type.SamsungPay)
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
         assertThat(collectionResult.displayData.sublabel).isEqualTo("Visa Card \u2066•••• 4242\u2069")
-        assertThat(interactor.state.value.selectedPaymentSource)
-            .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.SamsungPay
+        assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
+        assertThat(selected.platformPublishableKey).isEqualTo("pk_platform_123")
+        assertThat(selected.cardDetails?.brand).isEqualTo(CardBrand.Visa)
+        assertThat(selected.cardDetails?.last4).isEqualTo("4242")
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+        assertThat((tokenResult as OnrampCreateCryptoPaymentTokenResult.Completed).cardDetails)
+            .isSameInstanceAs(selected.cardDetails)
         verify(cryptoApiRepository).createSamsungPayPaymentMethod(
             paymentCredential = "{\"method\":\"3DS\"}",
             platformPublishableKey = "pk_platform_123",
@@ -1653,6 +1671,226 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.CryptoPaymentTokenCreated(PaymentMethodType.SamsungPay),
         )
+    }
+
+    @Test
+    fun `wallet token contains the selected card summary`(
+        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+        @TestParameter cardCase: WalletCardCase,
+    ) = runWalletTokenScenario {
+        val paymentMethod = walletPaymentMethod(card = cardCase.card)
+        collectWallet(wallet, paymentMethod)
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        if (cardCase.card == null) {
+            assertThat(result.cardDetails).isNull()
+        } else {
+            val details = requireNotNull(result.cardDetails)
+            assertThat(details.funding).isEqualTo(cardCase.expectedFunding)
+            assertThat(details.brand).isEqualTo(CardBrand.Visa)
+            assertThat(details.last4).isEqualTo("4242")
+        }
+        verify(cryptoApiRepository).createPaymentToken("test-customer", paymentMethod.id, null)
+        verify(linkController, never()).createPaymentMethodForOnramp(any())
+    }
+
+    @Test
+    fun `replacing debit with credit returns the new token and summary`() = runWalletTokenScenario {
+        collectWallet(PaymentMethodType.SamsungPay, walletPaymentMethod())
+        val first = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(first.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        val credit = walletPaymentMethod(
+            id = "test-credit-payment-method",
+            card = PaymentMethod.Card(funding = "credit", brand = CardBrand.MasterCard, last4 = "4444"),
+        )
+        collectWallet(PaymentMethodType.GooglePay, credit)
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", credit.id, null))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("test-credit-token")))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-credit-token")
+        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Credit)
+        assertThat(result.cardDetails?.brand).isEqualTo(CardBrand.MasterCard)
+        assertThat(result.cardDetails?.last4).isEqualTo("4444")
+        verify(cryptoApiRepository).createPaymentToken("test-customer", credit.id, null)
+    }
+
+    @Test
+    fun `selection changes during requests keep token paired with original card`(
+        @TestParameter waitForSettings: Boolean,
+    ) = runWalletTokenScenario {
+        val debit = walletPaymentMethod()
+        collectWallet(PaymentMethodType.SamsungPay, debit)
+        val settings = CompletableDeferred<Result<GetPlatformSettingsResponse>>()
+        val response = CompletableDeferred<Result<CreatePaymentTokenResponse>>()
+        whenever(cryptoApiRepository.getPlatformSettings("test-customer", null))
+            .doSuspendableAnswer { settings.await() }
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", debit.id, null))
+            .doSuspendableAnswer { response.await() }
+        if (!waitForSettings) {
+            settings.complete(Result.success(GetPlatformSettingsResponse("pk_test_wallet")))
+        }
+        val token = async(start = CoroutineStart.UNDISPATCHED) { interactor.createCryptoPaymentToken() }
+        assertThat(token.isCompleted).isFalse()
+        verify(cryptoApiRepository).getPlatformSettings("test-customer", null)
+        if (waitForSettings) {
+            verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+        } else {
+            verify(cryptoApiRepository).createPaymentToken("test-customer", debit.id, null)
+        }
+        val credit = walletPaymentMethod(
+            id = "test-credit-payment-method",
+            card = PaymentMethod.Card(funding = "credit", brand = CardBrand.MasterCard, last4 = "4444"),
+        )
+        collectWallet(PaymentMethodType.GooglePay, credit)
+        settings.complete(Result.success(GetPlatformSettingsResponse("pk_test_wallet")))
+        response.complete(Result.success(CreatePaymentTokenResponse("test-debit-token")))
+
+        val result = token.await() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-debit-token")
+        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        assertThat(result.cardDetails?.brand).isEqualTo(CardBrand.Visa)
+        assertThat(result.cardDetails?.last4).isEqualTo("4242")
+        verify(cryptoApiRepository, never()).createPaymentToken("test-customer", credit.id, null)
+    }
+
+    @Test
+    fun `wallet cancellation preserves previous selection and summary`(
+        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+    ) = runWalletTokenScenario {
+        collectWallet(wallet, walletPaymentMethod())
+        val previous = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
+        assertThat(previous.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        interactor.onCollectPaymentMethod(wallet)
+
+        val result = if (wallet == PaymentMethodType.SamsungPay) {
+            interactor.handleSamsungPayPaymentResult(SamsungPayResult.Canceled, "pk_test_wallet")
+        } else {
+            interactor.onGooglePayPresented("pk_test_wallet")
+            interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+        }
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        assertThat(interactor.state.value.selectedPaymentSource).isSameInstanceAs(previous)
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+        val token = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(token.cardDetails).isSameInstanceAs(previous.cardDetails)
+    }
+
+    @Test
+    fun `wallet collection failure preserves previous selection and summary`(
+        @TestParameter(values = ["GooglePay", "SamsungPay"]) wallet: PaymentMethodType,
+    ) = runWalletTokenScenario {
+        collectWallet(wallet, walletPaymentMethod())
+        val previous = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
+        assertThat(previous.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        interactor.onCollectPaymentMethod(wallet)
+        val error = IllegalStateException("test failure")
+
+        val result = if (wallet == PaymentMethodType.SamsungPay) {
+            interactor.handleSamsungPayPaymentResult(SamsungPayResult.Failed(error), "pk_test_wallet")
+        } else {
+            interactor.onGooglePayPresented("pk_test_wallet")
+            interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Failed(error, 1))
+        }
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        assertThat(interactor.state.value.selectedPaymentSource).isSameInstanceAs(previous)
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `token creation failure does not return card details`() = runWalletTokenScenario {
+        val paymentMethod = walletPaymentMethod()
+        collectWallet(PaymentMethodType.SamsungPay, paymentMethod)
+        val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.Wallet
+        assertThat(selected.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", paymentMethod.id, null))
+            .thenReturn(Result.failure(IllegalStateException("test failure")))
+
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+    }
+
+    @Test
+    fun `replacing wallet with absent card data clears previous summary`() = runWalletTokenScenario {
+        collectWallet(PaymentMethodType.SamsungPay, walletPaymentMethod())
+        val first = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(first.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        collectWallet(PaymentMethodType.GooglePay, walletPaymentMethod(card = null))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.cardDetails).isNull()
+    }
+
+    @Test
+    fun `logout clears wallet summary and requires a new selection`() = runWalletTokenScenario {
+        collectWallet(PaymentMethodType.SamsungPay, walletPaymentMethod())
+        val first = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(first.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+
+        interactor.logOut()
+        interactor.configure(createConfigurationState(cryptoCustomerId = "test-customer"))
+
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+        collectWallet(PaymentMethodType.GooglePay, walletPaymentMethod(card = null))
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(result.cardDetails).isNull()
+    }
+
+    private fun runWalletTokenScenario(block: suspend TestScope.() -> Unit) = runTest {
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "test-customer"))
+        whenever(cryptoApiRepository.getPlatformSettings("test-customer", null))
+            .thenReturn(Result.success(GetPlatformSettingsResponse("pk_test_wallet")))
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", "test-payment-method", null))
+            .thenReturn(Result.success(CreatePaymentTokenResponse("test-token")))
+        block()
+    }
+
+    private suspend fun collectWallet(wallet: PaymentMethodType, paymentMethod: PaymentMethod) {
+        interactor.onCollectPaymentMethod(wallet)
+        val result = if (wallet == PaymentMethodType.SamsungPay) {
+            whenever(cryptoApiRepository.createSamsungPayPaymentMethod("test-credential", "pk_test_wallet"))
+                .thenReturn(Result.success(paymentMethod))
+            interactor.handleSamsungPayPaymentResult(
+                SamsungPayResult.Completed("test-credential", kycInfo = null),
+                "pk_test_wallet",
+            )
+        } else {
+            interactor.onGooglePayPresented("pk_test_wallet")
+            interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        }
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+    }
+
+    private fun walletPaymentMethod(
+        id: String = "test-payment-method",
+        card: PaymentMethod.Card? = WalletCardCase.Debit.card,
+    ): PaymentMethod = PaymentMethod.Builder().setId(id).setCard(card).build()
+
+    enum class WalletCardCase(val funding: String?, val expectedFunding: CardFunding?) {
+        Debit("debit", CardFunding.Debit),
+        Credit("credit", CardFunding.Credit),
+        Prepaid("prepaid", CardFunding.Prepaid),
+        Unknown("unknown", CardFunding.Unknown),
+        MissingFunding(null, CardFunding.Unknown),
+        UnrecognizedFunding("unrecognized", CardFunding.Unknown),
+        AbsentCard(null, null);
+
+        val card: PaymentMethod.Card?
+            get() = if (this == AbsentCard) null else {
+                PaymentMethod.Card(funding = funding, brand = CardBrand.Visa, last4 = "4242")
+            }
     }
 
     @Test

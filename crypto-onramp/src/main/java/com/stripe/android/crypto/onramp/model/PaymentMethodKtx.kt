@@ -1,7 +1,16 @@
 package com.stripe.android.crypto.onramp.model
 
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+
+internal fun PaymentMethod.onrampCardDetails(): OnrampCardDetails? = card?.let {
+    OnrampCardDetails(
+        funding = CardFunding.fromCode(it.funding),
+        brand = it.brand,
+        last4 = it.last4,
+    )
+}
 
 internal fun PaymentMethod.platformPayKycInfo(): KycInfo? = billingDetails?.platformPayKycInfo()
 

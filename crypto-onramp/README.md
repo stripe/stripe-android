@@ -171,6 +171,30 @@ The resulting Samsung payment credential is exchanged for a Stripe token and the
 PaymentMethod using the onramp platform publishable key. An absent SDK or payment failure is
 delivered through the existing `OnrampCollectPaymentMethodResult.Failed` callback.
 
+After successful collection, `createCryptoPaymentToken()` returns a `Completed` result containing
+both `cryptoPaymentToken` and optional `cardDetails` for the same selected payment method. Samsung
+Pay and Google Pay expose `funding` (`CardFunding`), `brand` (`CardBrand`), and nullable `last4` from
+card data already received by the SDK, without an additional network request. Link-backed selections
+return null card details. Missing or unrecognized funding maps to `CardFunding.Unknown`; a missing
+card object produces null card details and does not prevent token creation.
+
+To make a fee-subsidy decision before creating a session:
+
+1. Collect the Samsung Pay card and complete any required authentication and KYC steps.
+2. Call `createCryptoPaymentToken()` and send the successful token and its `cardDetails` together
+   to your backend. If account routing changed, recollect the wallet as described above.
+3. Your backend may choose merchant-paid fees through `fee_responsibility` for explicit
+   `CardFunding.Debit`. Do not assume debit eligibility for `Credit`, `Prepaid`, `Unknown`, or
+   absent card details.
+4. Create the onramp session, display its final quote, and ask for confirmation before checkout.
+
+The SDK reports metadata; it does not apply Samsung-specific pricing or automatically subsidize
+transactions. The session's server-calculated quote remains authoritative for amounts and fees.
+Client-supplied card metadata is suitable for a voluntary subsidy decision, not a Stripe-enforced
+eligibility or security rule. Independently enforced eligibility requires separate backend work.
+Funding is a classification, not proof of ownership or identity. Wallet `last4` may refer to the
+tokenized card number rather than the physical card number and is not an ownership identifier.
+
 ### Example
 
 [CryptoOnramp Example](../crypto-onramp-example) – This example demonstrates an end-to-end headless onramp flow (Link authentication, KYC and identity verification, wallet selection, payment method collection, and checkout) using a demo backend.
