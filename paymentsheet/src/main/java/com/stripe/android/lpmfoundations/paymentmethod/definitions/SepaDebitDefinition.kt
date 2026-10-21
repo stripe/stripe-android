@@ -80,16 +80,13 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 }
 
                 elements.forEach(::footer)
-
-                if (SepaDebitDefinition.requiresMandate(metadata)) {
-                    footer(
-                        MandateTextElement(
-                            stringResId = R.string.stripe_sepa_mandate,
-                            args = listOf(arguments.merchantName)
-                        )
-                    )
-                }
             }
+            .addMandateIfAllowed(
+                formElement = MandateTextElement(
+                    stringResId = R.string.stripe_sepa_mandate,
+                    args = listOf(arguments.merchantName)
+                )
+            )
     }
 
     override fun createSupportedPaymentMethod(

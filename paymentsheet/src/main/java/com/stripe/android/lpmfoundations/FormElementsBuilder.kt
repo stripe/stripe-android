@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.FormElement
 
+@Suppress("TooManyFunctions") // Keep the form-building operations together in the builder API.
 internal class FormElementsBuilder(
     private val arguments: UiDefinitionFactory.Arguments,
     private val supportsAutomaticTaxBillingAddress: Boolean,
@@ -97,6 +98,14 @@ internal class FormElementsBuilder(
             allowedCountryCodes = allowedCountryCodes,
             initialValue = initialValue,
         )
+    }
+
+    fun addMandateIfAllowed(
+        formElement: FormElement,
+    ): FormElementsBuilder = apply {
+        if (arguments.requiresMandate) {
+            footer(formElement)
+        }
     }
 
     fun footer(formElement: FormElement): FormElementsBuilder = apply {

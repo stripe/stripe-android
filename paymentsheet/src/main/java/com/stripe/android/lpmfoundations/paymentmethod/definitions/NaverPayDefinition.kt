@@ -65,14 +65,12 @@ private object NaverPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
             ),
         )
 
-        if (NaverPayDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_kr_card_mandate,
-                    args = listOf(arguments.merchantName),
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_kr_card_mandate,
+                args = listOf(arguments.merchantName),
+            ),
+        )
     }
 
     private val fundingItems = listOf(

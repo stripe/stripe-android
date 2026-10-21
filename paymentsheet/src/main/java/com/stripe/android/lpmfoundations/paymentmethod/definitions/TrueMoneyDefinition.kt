@@ -19,7 +19,9 @@ internal object TrueMoneyDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = emptySet()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -39,13 +41,11 @@ private object TrueMoneyUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (TrueMoneyDefinition.requiresMandate(metadata) && metadata.mandateAllowed(PaymentMethod.Type.TrueMoney)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_truemoney_mandate,
-                    args = listOf(arguments.merchantName),
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_truemoney_mandate,
+                args = listOf(arguments.merchantName),
+            ),
+        )
     }
 }

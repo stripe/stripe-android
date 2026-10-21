@@ -41,13 +41,11 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (SatispayDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_satispay_mandate,
-                    args = listOf(arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_satispay_mandate,
+                args = listOf(arguments.merchantName)
+            ),
+        )
     }
 }

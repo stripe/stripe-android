@@ -41,13 +41,11 @@ private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (TwintDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_twint_mandate,
-                    args = listOf(arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_twint_mandate,
+                args = listOf(arguments.merchantName)
+            ),
+        )
     }
 }

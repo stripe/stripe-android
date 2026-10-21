@@ -65,16 +65,12 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
                 initialValue = arguments.initialValues[FormFieldId.Country],
             )
-            .apply {
-                if (KlarnaDefinition.requiresMandate(metadata)) {
-                    builder.footer(
-                        formElement = MandateTextElement(
-                            stringResId = R.string.stripe_klarna_mandate,
-                            args = listOf(arguments.merchantName, arguments.merchantName)
-                        )
-                    )
-                }
-            }
+            .addMandateIfAllowed(
+                formElement = MandateTextElement(
+                    stringResId = R.string.stripe_klarna_mandate,
+                    args = listOf(arguments.merchantName, arguments.merchantName)
+                ),
+            )
     }
 
     private fun getKlarnaHeader(
@@ -131,13 +127,11 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
                 )
         }
 
-        if (KlarnaDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                formElement = MandateTextElement(
-                    stringResId = R.string.stripe_klarna_mandate,
-                    args = listOf(arguments.merchantName, arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_klarna_mandate,
+                args = listOf(arguments.merchantName, arguments.merchantName)
+            ),
+        )
     }
 }

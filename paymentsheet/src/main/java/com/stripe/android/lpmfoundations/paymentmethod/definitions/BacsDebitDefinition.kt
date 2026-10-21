@@ -30,7 +30,7 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.mandateAllowed(type)
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -88,22 +88,19 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 if (!arguments.requiresBillingAddressForAutomaticTax) {
                     requireBillingAddressIfAllowed()
                 }
-
-                if (metadata.mandateAllowed(BacsDebitDefinition.type)) {
-                    footer(
-                        CheckboxFieldElement(
-                            identifier = FormFieldId.BacsDebitConfirmed,
-                            controller = CheckboxFieldController(
-                                labelResource = CheckboxFieldController.LabelResource(
-                                    R.string.stripe_bacs_confirm_mandate_label,
-                                    arguments.merchantName,
-                                ),
-                                debugTag = "BACS_MANDATE_CHECKBOX",
-                                initialValue = arguments.initialValues[FormFieldId.BacsDebitConfirmed].toBoolean(),
-                            ),
-                        )
-                    )
-                }
             }
+            .addMandateIfAllowed(
+                formElement = CheckboxFieldElement(
+                    identifier = FormFieldId.BacsDebitConfirmed,
+                    controller = CheckboxFieldController(
+                        labelResource = CheckboxFieldController.LabelResource(
+                            R.string.stripe_bacs_confirm_mandate_label,
+                            arguments.merchantName,
+                        ),
+                        debugTag = "BACS_MANDATE_CHECKBOX",
+                        initialValue = arguments.initialValues[FormFieldId.BacsDebitConfirmed].toBoolean(),
+                    ),
+                )
+            )
     }
 }
