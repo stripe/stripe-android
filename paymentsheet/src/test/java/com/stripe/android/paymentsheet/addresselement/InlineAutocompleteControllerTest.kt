@@ -745,6 +745,7 @@ class InlineAutocompleteControllerTest {
         )
         fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
         queryFlow.value = "123 Main"
 
         delegate.onPredictionSelected("place-id-abc")
@@ -752,6 +753,8 @@ class InlineAutocompleteControllerTest {
 
         // User keeps editing the field while fetchPlace is still in flight.
         queryFlow.value = "456 Oak Ave"
+        advanceTimeBy(500)
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("456 Oak Ave")
 
         // Release the gate — the fallback expansion must use the edited query, not the stale one.
         fetchGate.complete(Unit)
