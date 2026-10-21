@@ -55,7 +55,10 @@ class PaymentMethodDisplayData internal constructor(
      * The type of payment being displayed.
      */
     val type: Type,
-    /** Card funding, when available. Null for non-card selections; missing funding is [CardFunding.Unknown]. */
+    /**
+     * Card funding, when available. Null when card funding is unavailable or not applicable.
+     * An available card object with missing or unrecognized funding maps to Unknown.
+     */
     val cardFunding: CardFunding?
 ) {
     @ExperimentalCryptoOnramp
