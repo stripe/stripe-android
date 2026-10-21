@@ -730,10 +730,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
-        // ID-based confirmations have no new payment method data to attach fraud signals to.
-        if (confirmationTokenParams.paymentMethodData != null) {
-            fireFraudDetectionDataRequest()
-        }
+        fireFraudDetectionDataRequest()
 
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
