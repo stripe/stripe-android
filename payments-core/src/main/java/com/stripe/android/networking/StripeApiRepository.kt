@@ -1923,6 +1923,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         params: Map<String, Any>,
         paymentMethodCreateParams: PaymentMethodCreateParams?
     ): Map<String, *> {
+        // ID-based confirmations have no new payment method data to attach fraud signals to.
         if (paymentMethodCreateParams != null) {
             fireFraudDetectionDataRequest()
         }
@@ -1950,6 +1951,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams?,
         sourceParams: SourceParams?
     ): Map<String, *> {
+        // Add payment_user_agent if the Payment Method or Source is being created on this call.
         val attributedParams = (params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] as? Map<*, *>)?.let {
             params.plus(
                 ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA to it.plus(
