@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentMethodCreateParams
 
 /**
  * Parameters for confirming a checkout session via the confirm API
@@ -13,7 +14,7 @@ import com.stripe.android.model.ClientAttributionMetadata
  */
 internal data class ConfirmCheckoutSessionParams(
     private val paymentMethodId: String?,
-    private val paymentMethodData: Map<String, Any>?,
+    val paymentMethodData: PaymentMethodCreateParams?,
     private val expectedPaymentMethodType: String?,
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,
@@ -28,7 +29,7 @@ internal data class ConfirmCheckoutSessionParams(
                 put("payment_method", paymentMethodId)
             }
             if (paymentMethodData != null) {
-                put("payment_method_data", paymentMethodData)
+                put("payment_method_data", paymentMethodData.toParamMap())
             }
             if (expectedPaymentMethodType != null) {
                 put("expected_payment_method_type", expectedPaymentMethodType)

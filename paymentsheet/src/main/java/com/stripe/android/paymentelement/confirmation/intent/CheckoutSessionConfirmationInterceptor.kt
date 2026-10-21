@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -39,7 +38,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
-    private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) : IntentConfirmationInterceptor {
@@ -127,8 +125,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
         paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
-        paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams
-            ?.let(stripeRepository::buildPaymentMethodData),
+        paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
         expectedPaymentMethodType = when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 PaymentMethod.Type.fromCode(confirmationOption.createParams.typeCode)?.code

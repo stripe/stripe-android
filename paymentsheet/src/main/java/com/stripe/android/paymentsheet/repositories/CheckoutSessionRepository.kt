@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
@@ -21,6 +22,7 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
+    private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
@@ -71,10 +73,16 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = confirmUrl(id),
-        params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
-    )
+    ): Result<CheckoutSessionResponse> {
+        val requestParams = stripeRepository.prepareConfirmationParams(
+            params.toParamMap(),
+            params.paymentMethodData,
+        )
+        return executePost(
+            url = confirmUrl(id),
+            params = requestParams.plus("elements_session_client[is_aggregation_expected]" to "true"),
+        )
+    }
 
     suspend fun detachPaymentMethod(
         sessionId: String,

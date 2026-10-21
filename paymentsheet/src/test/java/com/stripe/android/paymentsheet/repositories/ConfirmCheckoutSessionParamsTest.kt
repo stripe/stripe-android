@@ -5,6 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import kotlin.test.Test
 
@@ -35,17 +36,13 @@ class ConfirmCheckoutSessionParamsTest {
 
     @Test
     fun `serializes new payment method data`() {
-        val paymentMethodData = mapOf(
-            "type" to "card",
-            "card" to mapOf("token" to "tok_card"),
-            "payment_user_agent" to "stripe-android;Checkout",
-        )
+        val paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
         val params = createParams().copy(
             paymentMethodId = null,
             paymentMethodData = paymentMethodData,
         ).toParamMap()
 
-        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodData)
+        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodData.toParamMap())
     }
 
     @Test

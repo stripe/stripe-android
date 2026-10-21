@@ -476,7 +476,10 @@ interface StripeRepository {
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun buildPaymentMethodData(paymentMethodCreateParams: PaymentMethodCreateParams): Map<String, Any>
+    fun prepareConfirmationParams(
+        params: Map<String, Any>,
+        paymentMethodCreateParams: PaymentMethodCreateParams?
+    ): Map<String, *>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

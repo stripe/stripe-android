@@ -97,23 +97,27 @@ class CheckoutSessionConfirmationInterceptorTest {
             else -> error("Unexpected test type: $type")
         }
 
-        val paymentMethodMatcher = if (saved) {
-            bodyPart("payment_method", paymentMethod.id)
+        val paymentMethodMatchers = if (saved) {
+            listOf(bodyPart("payment_method", paymentMethod.id))
         } else {
-            when (type) {
-                PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
-                PaymentMethod.Type.Link -> bodyPart(
-                    "payment_method_data[link][payment_details_id]",
-                    "payment_details_123",
-                )
-                PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
-                else -> error("Unexpected test type: $type")
-            }
+            listOf(
+                when (type) {
+                    PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
+                    PaymentMethod.Type.Link -> bodyPart(
+                        "payment_method_data[link][payment_details_id]",
+                        "payment_details_123",
+                    )
+                    PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
+                    else -> error("Unexpected test type: $type")
+                },
+                bodyPart("payment_method_data[payment_user_agent]", "test_user_agent"),
+                bodyPart("payment_method_data[guid]", "test_guid"),
+            )
         }
 
         runScenario {
             networkRule.checkoutConfirm(
-                paymentMethodMatcher,
+                *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
             ) { response ->
                 response.testBodyFromFile(
@@ -923,6 +927,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val stripeRepository = FakeStripeRepository()
 
         val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = stripeRepository,
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -952,7 +957,6 @@ class CheckoutSessionConfirmationInterceptorTest {
                 checkoutSessionId = null,
             ),
             context = applicationContext,
-            stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
         )
@@ -994,8 +998,21 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun buildPaymentMethodData(paymentMethodCreateParams: PaymentMethodCreateParams): Map<String, Any> =
-            paymentMethodCreateParams.toParamMap()
+        override fun prepareConfirmationParams(
+            params: Map<String, Any>,
+            paymentMethodCreateParams: PaymentMethodCreateParams?
+        ): Map<String, *> {
+            if (paymentMethodCreateParams == null) return params
+
+            return params.plus(
+                "payment_method_data" to paymentMethodCreateParams.toParamMap().plus(
+                    mapOf(
+                        "payment_user_agent" to "test_user_agent",
+                        "guid" to "test_guid",
+                    )
+                )
+            )
+        }
     }
 
     private companion object {

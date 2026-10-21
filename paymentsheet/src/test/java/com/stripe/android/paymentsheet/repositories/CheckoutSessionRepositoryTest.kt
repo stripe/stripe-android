@@ -13,6 +13,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -34,6 +35,7 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
+        stripeRepository = object : AbsFakeStripeRepository() {},
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
