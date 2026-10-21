@@ -119,14 +119,16 @@ region. Also exercise the existing authentication-first flow for card, bank acco
 
 ### Instrument details before token creation
 
-Every successful collection returns a snapshot in `OnrampCollectPaymentMethodResult.Completed`:
+Every successful collection returns a snapshot in `OnrampCollectPaymentMethodResult.Completed.instrumentDetails`.
+The sealed `OnrampInstrumentDetails` type is either `Card` or `BankAccount`, never both; `null`
+means metadata is unavailable or the instrument is unsupported.
 
 | Selection | Structured result |
 | --- | --- |
-| Saved or newly entered Link debit/credit card | `cardDetails`: funding, brand, last4 |
-| Link bank account (ACH) | `bankAccountDetails`: last4; no card details |
-| Google Pay | `cardDetails` from the returned card PaymentMethod, when available |
-| Samsung Pay | `cardDetails` from the existing credential exchange, when available |
+| Saved or newly entered Link debit/credit card | `Card`: funding, brand, last4 |
+| Link bank account (ACH) | `BankAccount`: last4 |
+| Google Pay | `Card` from the returned card PaymentMethod, when available |
+| Samsung Pay | `Card` from the existing credential exchange, when available |
 
 For example, present **one** of these options in response to the user's choice:
 
@@ -145,10 +147,13 @@ flow. The rendering and policy functions below are application-defined:
 ```kotlin
 when (result) {
     is OnrampCollectPaymentMethodResult.Completed -> {
-        renderSelection(result.displayData, result.cardDetails, result.bankAccountDetails)
-        val subsidizeDebit = result.cardDetails?.funding == CardFunding.Debit
-        val subsidizeBank = result.bankAccountDetails != null && merchantSubsidizesBankAccounts
-        replaceCheckoutPolicy(subsidizeDebit, subsidizeBank)
+        renderSelection(result.displayData, result.instrumentDetails)
+        val subsidize = when (val details = result.instrumentDetails) {
+            is OnrampInstrumentDetails.Card -> details.funding == CardFunding.Debit
+            is OnrampInstrumentDetails.BankAccount -> merchantSubsidizesBankAccounts
+            null -> false
+        }
+        replaceCheckoutPolicy(subsidize)
         // Once required authentication/KYC has completed:
         scope.launch {
             val tokenResult = coordinator.createCryptoPaymentToken()
@@ -164,7 +169,7 @@ when (result) {
 A strict debit subsidy checks **explicitly** for `CardFunding.Debit`: credit, prepaid, unknown,
 and absent metadata are not debit. Bank-account subsidy is a separate policy, not a card funding
 value. Known cards with missing/unrecognized funding report `CardFunding.Unknown`; unsupported
-instruments or unavailable card data may have neither summary. Do not parse display labels for policy.
+instruments or unavailable card data return `instrumentDetails = null`. Do not parse display labels for policy.
 
 Always replace your stored result and recompute policy after a new successful collection in the
 same checkout attempt. Previously returned results remain snapshots, not token-bound attestations.

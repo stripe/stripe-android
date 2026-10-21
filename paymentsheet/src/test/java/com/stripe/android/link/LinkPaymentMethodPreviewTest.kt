@@ -108,6 +108,28 @@ class LinkPaymentMethodPreviewTest {
     }
 
     @Test
+    fun `direct bank preview includes structured metadata`() {
+        val preview = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.preview()
+
+        assertThat(preview.instrumentDetails).isEqualTo(
+            PaymentMethodPreviewDetails.BankAccount(null, "Stripe Test Bank Account", "4242")
+        )
+    }
+
+    @Test
+    fun `direct passthrough preview retains last4 with unknown brand and funding`() {
+        val preview = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.preview()
+
+        assertThat(preview.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Unknown, "unknown", "4242"))
+    }
+
+    @Test
+    fun `direct generic preview remains unclassified`() {
+        assertThat(TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.preview().instrumentDetails).isNull()
+    }
+
+    @Test
     fun `card factory preserves its structured source`() {
         val details = PaymentMethodPreviewDetails.Card(CardBrand.Unknown, "future", "1234")
 
@@ -148,13 +170,14 @@ class LinkPaymentMethodPreviewTest {
     private fun assertSavedCard(funding: ConsumerPaymentDetails.Card.Funding) {
         val details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = funding)
         val preview = consumerSelection(details).preview()
-        val legacyPreview = details.toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+        val directPreview = details.preview()
+        val expected = PaymentMethodPreviewDetails.Card(details.brand, funding.cardFunding.code, details.last4)
 
-        assertThat(preview.instrumentDetails)
-            .isEqualTo(PaymentMethodPreviewDetails.Card(details.brand, funding.cardFunding.code, details.last4))
-        assertThat(preview.label).isEqualTo(legacyPreview.label)
-        assertThat(preview.sublabel).isEqualTo(legacyPreview.sublabel)
-        assertThat(preview.type).isEqualTo(legacyPreview.type)
+        assertThat(preview.instrumentDetails).isEqualTo(expected)
+        assertThat(directPreview.instrumentDetails).isEqualTo(expected)
+        assertThat(preview.label).isEqualTo(directPreview.label)
+        assertThat(preview.sublabel).isEqualTo(directPreview.sublabel)
+        assertThat(preview.type).isEqualTo(directPreview.type)
     }
 
     private fun assertPassthroughCard(funding: String, expectedFunding: String) {
@@ -183,5 +206,8 @@ class LinkPaymentMethodPreviewTest {
         LinkPaymentMethod.LinkPaymentDetails(details, collectedCvc = null, billingPhone = null)
 
     private fun LinkPaymentMethod.preview() =
+        toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+
+    private fun ConsumerPaymentDetails.PaymentDetails.preview() =
         toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
 }

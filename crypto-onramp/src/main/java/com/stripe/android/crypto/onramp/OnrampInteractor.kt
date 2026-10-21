@@ -39,8 +39,6 @@ import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
-import com.stripe.android.crypto.onramp.model.OnrampBankAccountDetails
-import com.stripe.android.crypto.onramp.model.OnrampCardDetails
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -49,6 +47,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampInstrumentDetails
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -895,9 +894,6 @@ internal class OnrampInteractor @Inject constructor(
                 _state.update { state ->
                     state.copy(selectedPaymentSource = SelectedPaymentSource.Link)
                 }
-                val card = preview.instrumentDetails as? PaymentMethodPreviewDetails.Card
-                val bankAccount = preview.instrumentDetails as? PaymentMethodPreviewDetails.BankAccount
-
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
                         imageLoader = preview.imageLoader,
@@ -906,10 +902,15 @@ internal class OnrampInteractor @Inject constructor(
                         type = preview.type.toDisplayType()
                     ),
                     kycInfo = null,
-                    cardDetails = card?.let {
-                        OnrampCardDetails(CardFunding.fromCode(it.funding), it.brand, it.last4)
+                    instrumentDetails = when (val details = preview.instrumentDetails) {
+                        is PaymentMethodPreviewDetails.Card -> OnrampInstrumentDetails.Card(
+                            funding = CardFunding.fromCode(details.funding),
+                            brand = details.brand,
+                            last4 = details.last4,
+                        )
+                        is PaymentMethodPreviewDetails.BankAccount -> OnrampInstrumentDetails.BankAccount(details.last4)
+                        null -> null
                     },
-                    bankAccountDetails = bankAccount?.let { OnrampBankAccountDetails(it.last4) },
                 )
             } ?: run {
                 collectPaymentMethodFailure(MissingPaymentMethodException())
@@ -935,8 +936,7 @@ internal class OnrampInteractor @Inject constructor(
                     OnrampCollectPaymentMethodResult.Completed(
                         displayData = displayData,
                         kycInfo = kycInfo,
-                        cardDetails = result.paymentMethod.onrampCardDetails(),
-                        bankAccountDetails = null,
+                        instrumentDetails = result.paymentMethod.onrampCardDetails(),
                     )
                 }
             }
@@ -945,8 +945,8 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    private fun PaymentMethod.onrampCardDetails(): OnrampCardDetails? = card?.let {
-        OnrampCardDetails(
+    private fun PaymentMethod.onrampCardDetails(): OnrampInstrumentDetails.Card? = card?.let {
+        OnrampInstrumentDetails.Card(
             funding = CardFunding.fromCode(it.funding),
             brand = it.brand,
             last4 = it.last4,
@@ -981,8 +981,7 @@ internal class OnrampInteractor @Inject constructor(
                             OnrampCollectPaymentMethodResult.Completed(
                                 displayData = displayData,
                                 kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo(),
-                                cardDetails = paymentMethod.onrampCardDetails(),
-                                bankAccountDetails = null,
+                                instrumentDetails = paymentMethod.onrampCardDetails(),
                             )
                         }
                     },

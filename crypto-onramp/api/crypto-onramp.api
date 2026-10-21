@@ -331,11 +331,6 @@ public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$
 	public final fun getError ()Ljava/lang/Throwable;
 }
 
-public final class com/stripe/android/crypto/onramp/model/OnrampBankAccountDetails {
-	public static final field $stable I
-	public final fun getLast4 ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public static final field $stable I
 	public fun <init> ()V
@@ -350,13 +345,6 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public final fun userAttestationCallback (Lcom/stripe/android/crypto/onramp/model/OnrampUserAttestationCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyIdentityCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyIdentityCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
-}
-
-public final class com/stripe/android/crypto/onramp/model/OnrampCardDetails {
-	public static final field $stable I
-	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
-	public final fun getFunding ()Lcom/stripe/android/model/CardFunding;
-	public final fun getLast4 ()Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCheckoutCallback {
@@ -393,9 +381,8 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMe
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
 	public static final field $stable I
-	public final fun getBankAccountDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampBankAccountDetails;
-	public final fun getCardDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampCardDetails;
 	public final fun getDisplayData ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData;
+	public final fun getInstrumentDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampInstrumentDetails;
 	public final fun getKycInfo ()Lcom/stripe/android/crypto/onramp/model/KycInfo;
 }
 
@@ -488,6 +475,21 @@ public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountRe
 public final class com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult$Failed : com/stripe/android/crypto/onramp/model/OnrampHasLinkAccountResult {
 	public static final field $stable I
 	public final fun getError ()Ljava/lang/Throwable;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/model/OnrampInstrumentDetails {
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampInstrumentDetails$BankAccount : com/stripe/android/crypto/onramp/model/OnrampInstrumentDetails {
+	public static final field $stable I
+	public final fun getLast4 ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampInstrumentDetails$Card : com/stripe/android/crypto/onramp/model/OnrampInstrumentDetails {
+	public static final field $stable I
+	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public final fun getFunding ()Lcom/stripe/android/model/CardFunding;
+	public final fun getLast4 ()Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampLogOutResult {

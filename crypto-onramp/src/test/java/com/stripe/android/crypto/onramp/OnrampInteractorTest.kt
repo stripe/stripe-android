@@ -52,6 +52,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResu
 import com.stripe.android.crypto.onramp.model.OnrampDeleteWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
+import com.stripe.android.crypto.onramp.model.OnrampInstrumentDetails
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -1851,8 +1852,8 @@ class OnrampInteractorTest {
     fun `Link bank collection exposes only bank last4`() = runTest {
         val result = collectLinkPreview(PaymentMethodPreviewDetails.BankAccount(null, "Bank", "6789"))
 
-        assertThat(result.cardDetails).isNull()
-        assertThat(result.bankAccountDetails?.last4).isEqualTo("6789")
+        val details = result.instrumentDetails as OnrampInstrumentDetails.BankAccount
+        assertThat(details.last4).isEqualTo("6789")
         assertThat(result.kycInfo).isNull()
         assertNoCollectionMetadataRequests()
     }
@@ -1874,8 +1875,7 @@ class OnrampInteractorTest {
             LinkController.PresentPaymentMethodsResult.Success, context
         ) as OnrampCollectPaymentMethodResult.Completed
 
-        assertThat(result.cardDetails).isNull()
-        assertThat(result.bankAccountDetails).isNull()
+        assertThat(result.instrumentDetails).isNull()
         assertNoCollectionMetadataRequests()
     }
 
@@ -1959,17 +1959,17 @@ class OnrampInteractorTest {
             samsungPay = false,
         )
 
-        assertThat(debit.cardDetails?.funding).isEqualTo(CardFunding.Debit)
-        assertThat(debit.cardDetails?.last4).isEqualTo("1111")
-        assertThat(debit.bankAccountDetails).isNull()
-        assertThat(credit.cardDetails?.funding).isEqualTo(CardFunding.Credit)
-        assertThat(credit.cardDetails?.last4).isEqualTo("2222")
-        assertThat(credit.bankAccountDetails).isNull()
-        assertThat(bank.cardDetails).isNull()
-        assertThat(bank.bankAccountDetails?.last4).isEqualTo("3333")
-        assertThat(wallet.cardDetails?.funding).isEqualTo(CardFunding.Prepaid)
-        assertThat(wallet.cardDetails?.last4).isEqualTo("4444")
-        assertThat(wallet.bankAccountDetails).isNull()
+        val debitDetails = debit.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(debitDetails.funding).isEqualTo(CardFunding.Debit)
+        assertThat(debitDetails.last4).isEqualTo("1111")
+        val creditDetails = credit.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(creditDetails.funding).isEqualTo(CardFunding.Credit)
+        assertThat(creditDetails.last4).isEqualTo("2222")
+        val bankDetails = bank.instrumentDetails as OnrampInstrumentDetails.BankAccount
+        assertThat(bankDetails.last4).isEqualTo("3333")
+        val walletDetails = wallet.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(walletDetails.funding).isEqualTo(CardFunding.Prepaid)
+        assertThat(walletDetails.last4).isEqualTo("4444")
         assertNoCollectionMetadataRequests()
     }
 
@@ -1984,8 +1984,9 @@ class OnrampInteractorTest {
         ).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
         assertThat(interactor.collectPaymentMethodFailure(IllegalStateException("failed")))
             .isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
-        assertThat(selected.cardDetails?.last4).isEqualTo("1111")
-        assertThat(selected.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        val details = selected.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(details.last4).isEqualTo("1111")
+        assertThat(details.funding).isEqualTo(CardFunding.Debit)
         assertThat(interactor.state.value.selectedPaymentSource).isEqualTo(source)
         assertNoCollectionMetadataRequests()
     }
@@ -1997,9 +1998,37 @@ class OnrampInteractorTest {
 
         assertThat(interactor.logOut()).isInstanceOf(OnrampLogOutResult.Completed::class.java)
         assertThat(interactor.state.value.selectedPaymentSource).isNull()
-        assertThat(selected.cardDetails?.funding).isEqualTo(CardFunding.Debit)
-        assertThat(selected.cardDetails?.last4).isEqualTo("1111")
+        val details = selected.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(details.funding).isEqualTo(CardFunding.Debit)
+        assertThat(details.last4).isEqualTo("1111")
         assertNoCollectionMetadataRequests()
+    }
+
+    @Test
+    fun `sealed instrument details support exhaustive card matching`() = runTest {
+        val result = collectLinkPreview(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "debit", "4242"))
+
+        assertThat(instrumentKind(result.instrumentDetails)).isEqualTo("card")
+    }
+
+    @Test
+    fun `sealed instrument details support exhaustive bank matching`() = runTest {
+        val result = collectLinkPreview(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+
+        assertThat(instrumentKind(result.instrumentDetails)).isEqualTo("bank_account")
+    }
+
+    @Test
+    fun `sealed instrument details support exhaustive unavailable matching`() = runTest {
+        val result = collectWallet(createCardPaymentMethod().copy(card = null), samsungPay = false)
+
+        assertThat(instrumentKind(result.instrumentDetails)).isEqualTo("unavailable")
+    }
+
+    private fun instrumentKind(details: OnrampInstrumentDetails?): String = when (details) {
+        is OnrampInstrumentDetails.Card -> "card"
+        is OnrampInstrumentDetails.BankAccount -> "bank_account"
+        null -> "unavailable"
     }
 
     @Test
@@ -2016,8 +2045,7 @@ class OnrampInteractorTest {
         }
         callback.onResult(result)
 
-        assertThat(result.cardDetails).isNull()
-        assertThat(result.bankAccountDetails).isNull()
+        assertThat(result.instrumentDetails).isNull()
         assertThat(
             OnrampCollectPaymentMethodResult.Completed::class.java.getConstructor(
                 PaymentMethodDisplayData::class.java, KycInfo::class.java
@@ -2028,10 +2056,10 @@ class OnrampInteractorTest {
     private suspend fun assertLinkCard(funding: String, expected: CardFunding, brand: CardBrand = CardBrand.Visa) {
         val result = collectLinkPreview(PaymentMethodPreviewDetails.Card(brand, funding, "4242"))
 
-        assertThat(result.cardDetails?.funding).isEqualTo(expected)
-        assertThat(result.cardDetails?.brand).isEqualTo(brand)
-        assertThat(result.cardDetails?.last4).isEqualTo("4242")
-        assertThat(result.bankAccountDetails).isNull()
+        val details = result.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(details.funding).isEqualTo(expected)
+        assertThat(details.brand).isEqualTo(brand)
+        assertThat(details.last4).isEqualTo("4242")
         assertThat(result.kycInfo).isNull()
         assertNoCollectionMetadataRequests()
     }
@@ -2053,29 +2081,27 @@ class OnrampInteractorTest {
         )
         val result = collectWallet(paymentMethod, samsungPay)
 
-        assertThat(result.cardDetails?.funding).isEqualTo(expected)
-        assertThat(result.cardDetails?.brand).isEqualTo(CardBrand.Visa)
-        assertThat(result.cardDetails?.last4).isEqualTo("1234")
-        assertThat(result.bankAccountDetails).isNull()
+        val details = result.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(details.funding).isEqualTo(expected)
+        assertThat(details.brand).isEqualTo(CardBrand.Visa)
+        assertThat(details.last4).isEqualTo("1234")
         assertNoCollectionMetadataRequests()
     }
 
     private suspend fun assertMissingWalletCardFields(samsungPay: Boolean) {
         val result = collectWallet(createCardPaymentMethod().copy(card = PaymentMethod.Card()), samsungPay)
 
-        assertThat(result.cardDetails).isNotNull()
-        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Unknown)
-        assertThat(result.cardDetails?.brand).isEqualTo(CardBrand.Unknown)
-        assertThat(result.cardDetails?.last4).isNull()
-        assertThat(result.bankAccountDetails).isNull()
+        val details = result.instrumentDetails as OnrampInstrumentDetails.Card
+        assertThat(details.funding).isEqualTo(CardFunding.Unknown)
+        assertThat(details.brand).isEqualTo(CardBrand.Unknown)
+        assertThat(details.last4).isNull()
         assertNoCollectionMetadataRequests()
     }
 
     private suspend fun assertMissingWalletCard(samsungPay: Boolean) {
         val result = collectWallet(createCardPaymentMethod().copy(card = null), samsungPay)
 
-        assertThat(result.cardDetails).isNull()
-        assertThat(result.bankAccountDetails).isNull()
+        assertThat(result.instrumentDetails).isNull()
         assertNoCollectionMetadataRequests()
     }
 
@@ -2126,8 +2152,7 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
         val completed = result as OnrampCollectPaymentMethodResult.Completed
         // The legacy display-only preview must not imply a funding instrument.
-        assertThat(completed.cardDetails).isNull()
-        assertThat(completed.bankAccountDetails).isNull()
+        assertThat(completed.instrumentDetails).isNull()
         assertThat(completed.kycInfo).isNull()
         assertThat(completed.displayData.label).isEqualTo(paymentMethodPreview.label)
 

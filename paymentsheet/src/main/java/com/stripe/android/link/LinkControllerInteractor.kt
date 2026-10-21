@@ -864,6 +864,20 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     iconLoader: PaymentSelection.IconLoader,
     reduceLinkBranding: Boolean,
     isDarkTheme: Boolean,
+): LinkController.PaymentMethodPreview = toPreview(
+    context = context,
+    iconLoader = iconLoader,
+    reduceLinkBranding = reduceLinkBranding,
+    isDarkTheme = isDarkTheme,
+    passthroughCard = null,
+)
+
+internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
+    context: Context,
+    iconLoader: PaymentSelection.IconLoader,
+    reduceLinkBranding: Boolean,
+    isDarkTheme: Boolean,
+    passthroughCard: PaymentMethod.Card?,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = paymentOptionLabel.resolve(context)
@@ -897,7 +911,8 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type
+        type = type,
+        instrumentDetails = instrumentDetails(passthroughCard),
     )
 }
 

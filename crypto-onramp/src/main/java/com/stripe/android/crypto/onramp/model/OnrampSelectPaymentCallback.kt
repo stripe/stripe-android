@@ -27,15 +27,13 @@ sealed class OnrampCollectPaymentMethodResult {
     class Completed internal constructor(
         val displayData: PaymentMethodDisplayData,
         val kycInfo: KycInfo?,
-        /** Selected card metadata, when available. Mutually exclusive with [bankAccountDetails]. */
-        val cardDetails: OnrampCardDetails?,
-        /** Selected bank account metadata, when available. Mutually exclusive with [cardDetails]. */
-        val bankAccountDetails: OnrampBankAccountDetails?
+        /** Selected instrument metadata, or null when unavailable or unsupported. */
+        val instrumentDetails: OnrampInstrumentDetails?
     ) : OnrampCollectPaymentMethodResult() {
         internal constructor(
             displayData: PaymentMethodDisplayData,
             kycInfo: KycInfo?
-        ) : this(displayData, kycInfo, cardDetails = null, bankAccountDetails = null)
+        ) : this(displayData, kycInfo, instrumentDetails = null)
     }
 
     /**
