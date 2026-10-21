@@ -177,6 +177,16 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
+    fun getPaymentMethodPreviewForOnramp(context: Context): OnrampPaymentMethodPreview? {
+        val state = _state.value
+        return state.selectedPaymentMethod?.toOnrampPreview(
+            context = context,
+            iconLoader = cachedIconLoader,
+            reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+            isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(context.isSystemDarkTheme()),
+        )
+    }
+
     suspend fun configure(configuration: LinkController.Configuration): Result<Unit> {
         val config = configuration.build()
         this.configuration = config

@@ -176,6 +176,11 @@ class LinkController @Inject internal constructor(
 
     // Crypto Onramp specific methods
 
+    /** Returns display and instrument details from the same committed Link selection. */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getPaymentMethodPreviewForOnramp(context: Context): OnrampPaymentMethodPreview? =
+        interactor.getPaymentMethodPreviewForOnramp(context)
+
     /**
      * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
      *

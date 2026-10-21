@@ -19,13 +19,22 @@ fun interface OnrampCollectPaymentMethodCallback {
 @ExperimentalCryptoOnramp
 sealed class OnrampCollectPaymentMethodResult {
     /**
-     * The user has selected a payment option.
+     * The user has selected a payment option. Details are a snapshot of this selection, not a
+     * token-bound attestation. Use the latest successful collection in the same checkout attempt
+     * and discard cached policy state on logout or when the selection is cleared.
      */
     @ExperimentalCryptoOnramp
     class Completed internal constructor(
         val displayData: PaymentMethodDisplayData,
-        val kycInfo: KycInfo?
-    ) : OnrampCollectPaymentMethodResult()
+        val kycInfo: KycInfo?,
+        /** Selected instrument metadata, or null when unavailable or unsupported. */
+        val instrumentDetails: OnrampInstrumentDetails?
+    ) : OnrampCollectPaymentMethodResult() {
+        internal constructor(
+            displayData: PaymentMethodDisplayData,
+            kycInfo: KycInfo?
+        ) : this(displayData, kycInfo, instrumentDetails = null)
+    }
 
     /**
      * The user declined to select a payment option.
